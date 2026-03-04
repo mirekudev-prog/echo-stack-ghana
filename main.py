@@ -1,25 +1,35 @@
-from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
-from database import engine, get_db, Base
-import models
+from fastapi import FastAPI
+import os
 
-# Create tables automatically
-Base.metadata.create_all(bind=engine)
+print("🚀 Starting EchoStack...")
 
 app = FastAPI(title="EchoStack API")
 
+@app.on_event("startup")
+async def startup():
+    """Test database connection on startup"""
+    db_url = os.getenv("DATABASE_URL")
+    
+    if not db_url:
+        print("❌ ERROR: DATABASE_URL not found in environment variables!")
+        return
+    
+    print(f"✅ DATABASE_URL found: {db_url[:50]}...")
+    
+    try:
+        from sqlalchemy import create_engine, inspect
+        engine = create_engine(db_url)
+        inspector = inspect(engine)
+        tables = inspector.get_table_names()
+        print(f"✅ Connected to database! Tables: {tables}")
+        
+    except Exception as e:
+        print(f"❌ Database connection failed: {str(e)}")
+
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to EchoStack - Ghana's Heritage Archive"}
+    return {"message": "EchoStack Backend Running!", "status": "success"}
 
-@app.get("/api/regions")
-def get_regions(db: Session = Depends(get_db)):
-    return db.query(models.Region).all()
-
-@app.post("/api/regions")
-def create_region(name: str, overview: str, source: str, db: Session = Depends(get_db)):
-    new_region = models.Region(name=name, overview=overview, source=source)
-    db.add(new_region)
-    db.commit()
-    db.refresh(new_region)
-    return new_region
+@app.get("/test")
+def test_endpoint():
+    return {"test": "passed"}
