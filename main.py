@@ -1,26 +1,25 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from database import engine, get_db, Base
+import models
+
+# Create tables automatically
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="EchoStack API")
-
-# Allow CORS (so frontend can talk to backend)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.get("/")
 def read_root():
     return {"message": "Welcome to EchoStack - Ghana's Heritage Archive"}
 
 @app.get("/api/regions")
-def get_regions():
-    return [
-        {"id": 1, "name": "Ashanti", "description": "The heart of the Ashanti Kingdom..."},
-        {"id": 2, "name": "Eastern", "description": "Sixth largest region by area..."},
-        {"id": 3, "name": "Savannah", "description": "Ghana's largest region by land..."},
-        {"id": 4, "name": "North East", "description": "Northern Ghana with diverse landscapes..."},
-    ]
+def get_regions(db: Session = Depends(get_db)):
+    return db.query(models.Region).all()
+
+@app.post("/api/regions")
+def create_region(name: str, overview: str, source: str, db: Session = Depends(get_db)):
+    new_region = models.Region(name=name, overview=overview, source=source)
+    db.add(new_region)
+    db.commit()
+    db.refresh(new_region)
+    return new_region
