@@ -72,7 +72,11 @@ async def admin_page(request: Request):
 @app.post("/api/auth/login")
 async def login(answer: str = Form(...)):
     """Check security answer"""
-    if CORRECT_ANSWER.lower() in answer.lower().replace(" ", ""):
+    # Normalize input for comparison
+    cleaned_answer = CORRECT_ANSWER.lower().replace(" ", "")
+    input_answer = answer.strip().lower().replace(" ", "")
+    
+    if cleaned_answer == input_answer:
         response = JSONResponse(content={"success": True, "token": "ADMIN_AUTHORIZED"})
         response.set_cookie(key="admin_session", value="ADMIN_AUTHORIZED", max_age=86400, path="/")
         return response
@@ -474,6 +478,7 @@ def get_stats(db: Session = Depends(get_db)):
 def import_json(data: dict, db: Session = Depends(get_db)):
     """Import regions from JSON"""
     try:
+        # Fix: Ensure data is properly handled as list
         if not isinstance(data, list):
             data = [data]
         
