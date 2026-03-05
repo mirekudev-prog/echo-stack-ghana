@@ -73,6 +73,7 @@
             width: 50px;
             height: 50px;
             object-fit: contain;
+            border-radius: 8px;
         }
         
         .logo-text {
@@ -409,15 +410,15 @@
 
     <!-- SERVICE WORKER REGISTRATION -->
     <script>
-        // Register Service Worker (if available)
+        // Register Service Worker (CORRECT PATH - /sw.js not /js/sw.js)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/js/sw.js')
+                navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
                         console.log('✅ SW registered:', registration.scope);
                     })
                     .catch(error => {
-                        console.log('❌ SW registration failed:', error);
+                        console.log('⚠️ SW registration failed:', error);
                     });
             });
         }
