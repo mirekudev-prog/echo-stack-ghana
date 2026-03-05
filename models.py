@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
-from database import Base  # Import from our local database.py
+from database import Base
 
 class Region(Base):
     __tablename__ = "regions"
