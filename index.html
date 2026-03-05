@@ -4,11 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EchoStack - Ghana's Heritage Archive</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0077b6">
+    <meta name="description" content="Ghana's Living Heritage Archive">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <header class="main-header">
-        <h1>🇬🇭 EchoStack</h1>
+        <h1>GH EchoStack</h1>
         <p class="tagline">Ghana's Living Heritage Archive</p>
     </header>
 
@@ -28,5 +35,19 @@
     </footer>
 
     <script src="/js/app.js"></script>
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/js/sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
