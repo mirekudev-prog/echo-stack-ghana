@@ -5,16 +5,13 @@ from sqlalchemy.orm import Session
 import os
 import json
 
-# Database imports
 from database import engine, get_db, Base
 import models
 
-# Create database tables automatically
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="EchoStack API")
 
-# Mount static folders (CSS/JS)
 try:
     app.mount("/css", StaticFiles(directory="css"), name="css")
     app.mount("/js", StaticFiles(directory="js"), name="js")
@@ -23,14 +20,12 @@ except:
 
 @app.get("/")
 def read_root():
-    """Serve the homepage HTML"""
     if os.path.exists("index.html"):
         return FileResponse("index.html")
     return {"message": "Welcome to EchoStack"}
 
 @app.get("/manifest.json")
 def serve_manifest():
-    """Serve PWA manifest file"""
     if os.path.exists("manifest.json"):
         with open("manifest.json", "r") as f:
             content = json.load(f)
