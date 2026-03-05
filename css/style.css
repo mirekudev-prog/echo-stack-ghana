@@ -96,29 +96,65 @@ body {
     height: auto;
     margin: 0 auto;
     position: relative;
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .map-image {
     width: 100%;
     height: auto;
     display: block;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 4px;
 }
+
+/* ============================================ */
+/*  REGION HOTSPOTS (VISIBLE & CLICKABLE)      */
+/* ============================================ */
 
 .region-hotspot {
     position: absolute;
     cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    background: rgba(0, 119, 182, 0.3);  /* Light blue overlay */
+    border: 2px solid #0077b6;
+    border-radius: 8px;
+    z-index: 10;
+    transition: all 0.3s ease;
 }
 
+/* Individual Hotspot Sizes (adjust based on image) */
+.region-hotspot:nth-child(1)  { width: 12%; height: 12%; }   /* Upper West */
+.region-hotspot:nth-child(2)  { width: 10%; height: 10%; }   /* Upper East */
+.region-hotspot:nth-child(3)  { width: 10%; height: 10%; }   /* North East */
+.region-hotspot:nth-child(4)  { width: 15%; height: 15%; }   /* Northern */
+.region-hotspot:nth-child(5)  { width: 18%; height: 15%; }   /* Savannah */
+.region-hotspot:nth-child(6)  { width: 12%; height: 12%; }   /* Bono */
+.region-hotspot:nth-child(7)  { width: 14%; height: 12%; }   /* Bono East */
+.region-hotspot:nth-child(8)  { width: 8%; height: 8%; }     /* Ahafo */
+.region-hotspot:nth-child(9)  { width: 16%; height: 14%; }   /* Ashanti */
+.region-hotspot:nth-child(10) { width: 12%; height: 10%; }   /* Central */
+.region-hotspot:nth-child(11) { width: 14%; height: 14%; }   /* Western */
+.region-hotspot:nth-child(12) { width: 8%; height: 8%; }     /* Western North */
+.region-hotspot:nth-child(13) { width: 15%; height: 14%; }   /* Eastern */
+.region-hotspot:nth-child(14) { width: 12%; height: 20%; }   /* Volta */
+.region-hotspot:nth-child(15) { width: 6%; height: 6%; }     /* Greater Accra */
+.region-hotspot:nth-child(16) { width: 10%; height: 10%; }   /* Oti */
+
+/* Hover Effect */
 .region-hotspot:hover {
-    opacity: 1;
-    background: rgba(0, 119, 182, 0.1);
-    border-radius: 50%;
+    background: rgba(0, 119, 182, 0.7);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0, 119, 182, 0.5);
 }
 
+/* Selected State */
+.region-hotspot.selected {
+    background: rgba(0, 119, 182, 0.9);
+    box-shadow: 0 0 20px rgba(0, 119, 182, 0.8);
+}
+
+/* Label Tooltip */
 .hotspot-label {
     position: absolute;
     background: #0077b6;
@@ -127,9 +163,15 @@ body {
     border-radius: 6px;
     font-size: 0.9rem;
     font-weight: bold;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -150%);
     pointer-events: none;
     white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.region-hotspot:hover .hotspot-label {
+    opacity: 1;
 }
 
 /* ============================================ */
@@ -140,6 +182,7 @@ body {
     max-width: 1200px;
     margin: 3rem auto;
     padding: 0 1rem;
+    display: none;  /* Hidden by default until search/click */
 }
 
 .regions-grid-section h2 {
@@ -147,6 +190,13 @@ body {
     margin-bottom: 2.5rem;
     color: #1a1e29;
     font-size: 2rem;
+}
+
+.no-results {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-style: italic;
 }
 
 .regions-grid {
@@ -302,7 +352,7 @@ body {
 
     .ghana-map {
         max-width: 100%;
-        padding: 1rem;
+        padding: 0.5rem;
     }
 
     #install-prompt {
@@ -314,6 +364,13 @@ body {
     .map-section h2 {
         font-size: 1.5rem;
     }
+
+    /* Smaller hotspots on mobile */
+    .region-hotspot:nth-child(1)  { width: 10%; height: 10%; }
+    .region-hotspot:nth-child(2)  { width: 8%; height: 8%; }
+    .region-hotspot:nth-child(3)  { width: 8%; height: 8%; }
+    .region-hotspot:nth-child(4)  { width: 12%; height: 12%; }
+    .region-hotspot:nth-child(5)  { width: 15%; height: 12%; }
 }
 
 @media (max-width: 480px) {
