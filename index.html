@@ -100,14 +100,6 @@
             font-weight: 600;
         }
         
-        .btn-auth {
-            background-color: var(--brand-blue) !important;
-            color: white !important;
-            padding: 0.5rem 1rem !important;
-            border-radius: 6px !important;
-            font-weight: bold !important;
-        }
-        
         /* MAIN CONTENT */
         .main {
             max-width: 1200px;
@@ -312,11 +304,29 @@
             margin-top: 4rem;
         }
         
+        .footer p {
+            font-size: 0.875rem;
+            color: var(--brand-dark);
+            margin-bottom: 1rem;
+        }
+        
         .footer-links {
             display: flex;
             justify-content: center;
             gap: 2rem;
             margin-top: 1rem;
+        }
+        
+        .footer-links a {
+            text-decoration: none;
+            color: var(--brand-dark);
+            font-size: 0.875rem;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--brand-blue);
+            font-weight: 600;
         }
         
         .loading {
@@ -329,7 +339,7 @@
 </head>
 <body>
     
-    <!-- HEADER -->
+    <!-- HEADER (NO ADMIN BUTTON!) -->
     <header class="header">
         <div class="header-content">
             <div class="logo-container">
@@ -340,7 +350,7 @@
                 <a href="/">Home</a>
                 <a href="#explore">Explore</a>
                 <a href="#about">About</a>
-                <a href="/admin" class="btn-auth">🔐 Admin Login</a>
+                <!-- ⚠️ ADMIN BUTTON REMOVED FROM PUBLIC NAVIGATION ⚠️ -->
             </nav>
         </div>
     </header>
@@ -392,9 +402,9 @@
     <footer class="footer">
         <p>&copy; 2026 EchoStack. Preserving Ghana's Stories.</p>
         <div class="footer-links">
-            <a href="#" style="color: inherit;">About</a>
-            <a href="#" style="color: inherit;">Contact</a>
-            <a href="#" style="color: inherit;">Privacy</a>
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+            <a href="#">Privacy</a>
         </div>
     </footer>
 
@@ -402,9 +412,9 @@
     <script>
         const API_URL = '/api';
         let allRegions = [];
-        let mapPaths = {}; // Store SVG path definitions
+        let mapPaths = {};
         
-        // Define map SVG paths (same as before)
+        // Define map SVG paths
         const svgPaths = {
             'upper-west': 'M60,40 L160,50 L165,130 L100,140 L50,110 Z',
             'upper-east': 'M160,50 L280,25 L290,100 L165,130 Z',
@@ -499,7 +509,6 @@
         }
         
         function renderMapHighlight() {
-            // Highlight regions that exist in database
             allRegions.forEach(region => {
                 const regionKey = region.name.toLowerCase().replace(/ /g, '-').replace(' region', '');
                 const path = document.getElementById(regionKey);
@@ -516,7 +525,6 @@
         }
         
         async function showRegionDetail(key) {
-            // Find matching region by key/name
             const regionName = key.charAt(0).toUpperCase() + key.slice(1).replace('-', ' ');
             let region = allRegions.find(r => {
                 return r.name.toLowerCase().includes(regionName.toLowerCase()) || 
@@ -524,7 +532,6 @@
             });
             
             if (!region && allRegions.length > 0) {
-                // If exact match not found, use first region for demo
                 region = allRegions[0];
             }
             
@@ -603,14 +610,12 @@
             document.getElementById('detail-panel').classList.remove('show');
         }
         
-        // Close panel when clicking outside
         document.getElementById('detail-panel').addEventListener('click', (e) => {
             if (e.target.id === 'detail-panel') {
                 closeDetail();
             }
         });
         
-        // Keyboard shortcut to close
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeDetail();
