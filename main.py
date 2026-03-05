@@ -283,3 +283,8 @@ def get_categories():
         {"id": 4, "name": "Tourism", "slug": "tourism"},
         {"id": 5, "name": "Food", "slug": "food"}
     ]
+
+@app.on_event("startup")
+async def migrate_database():
+    """Auto-migrate database on startup"""
+    models.Base.metadata.create_all(bind=engine)
