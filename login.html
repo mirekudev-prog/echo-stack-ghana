@@ -9,29 +9,9 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <!-- Page Title -->
     <title>EchoStack Admin Login</title>
     
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#1a1e29">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="EchoStack">
-    
-    <!-- Favicon & Icons (Try BOTH extensions) -->
-    <link rel="icon" type="image/png" href="/echostack-logo.png">
-    <link rel="apple-touch-icon" href="/echostack-logo.png">
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Styles -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
-        
         :root {
             --brand-dark: #1a1e29;
             --brand-blue: #0077b6;
@@ -44,52 +24,32 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0;
+            padding: 1rem;
         }
         
         .login-card {
             background: white;
-            padding: 3rem;
+            padding: 2.5rem;
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(26, 30, 41, 0.1);
             max-width: 500px;
             width: 100%;
-            margin: 2rem;
             text-align: center;
         }
         
-        /* Logo Styling */
-        .logo-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-        }
-        
-        .logo-icon {
-            width: 120px;
-            height: auto;
-            margin-bottom: 1rem;
-            object-fit: contain;
-            max-width: 100%;
-        }
-        
-        .logo-text {
-            font-size: 2rem;
-            font-weight: bold;
-            letter-spacing: 1px;
+        h1 {
             color: var(--brand-dark) !important;
-            text-transform: none;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
         }
         
         .subtitle {
             color: #666;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
+            margin-bottom: 2rem;
         }
         
-        .security-question {
+        .security-box {
             background: rgba(0, 119, 182, 0.05);
             border-left: 4px solid var(--brand-blue);
             padding: 1rem;
@@ -99,114 +59,106 @@
         }
         
         input {
-            border-color: #d0d0d0 !important;
-            color: var(--brand-dark) !important;
-            background: white !important;
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #d0d0d0 !important;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 1rem;
         }
         
         input:focus {
             outline: none !important;
             border-color: var(--brand-blue) !important;
-            box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.1) !important;
         }
         
-        button[type="submit"] {
+        button {
+            width: 100%;
+            padding: 1rem;
             background-color: var(--brand-blue) !important;
             color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: bold !important;
+            font-size: 1rem !important;
+            cursor: pointer !important;
         }
         
-        button[type="submit"]:hover { opacity: 0.9 !important; }
-    </style>
-    
-    <!-- SERVICE WORKER REGISTRATION -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => console.log('✅ SW registered'))
-                    .catch(error => console.log('❌ SW error:', error));
-            });
+        button:hover {
+            opacity: 0.9 !important;
         }
-    </script>
+        
+        .error-message {
+            background-color: #fef2f2 !important;
+            color: #dc2626 !important;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        a {
+            color: var(--brand-blue) !important;
+            text-decoration: none !important;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body class="antialiased">
     
     <div class="login-card">
-        <!-- Logo Section -->
-        <div class="logo-container">
-            <!-- Logo tries PNG first, falls back to text if broken -->
-            <img src="/echostack-logo.png" alt="" class="logo-icon mb-2 onerror-this.style.display='none'" onerror="this.style.display='none'">
-            <h1 class="logo-text">EchoStack</h1>
-            <p class="subtitle">Admin Management Portal</p>
+        <h1>EchoStack</h1>
+        <p class="subtitle">Admin Management Portal</p>
+        
+        <div class="security-box">
+            <p>To protect our heritage archive, please confirm your identity.</p>
         </div>
         
-        <!-- Security Question -->
-        <div class="security-question">
-            <p class="text-gray-700 text-sm">To protect our heritage archive, please confirm your identity.</p>
-        </div>
+        <p style="text-align: left; margin-bottom: 0.5rem;">Who are you? 😊</p>
+        <input type="password" id="answer" placeholder="Enter secret key...">
         
-        <!-- Login Form -->
-        <form id="login-form" class="space-y-4 text-left">
-            <div>
-                <label class="block text-sm font-medium mb-2" style="color: #1a1e29 !important;">
-                    Who are you? 😊
-                </label>
-                <!-- EMPTY INPUT - NO PRE-FILLED TEXT -->
-                <input type="text" id="answer" 
-                       class="w-full p-3 border rounded-lg focus:outline-none"
-                       required
-                       autocomplete="off">
-            </div>
-            
-            <button type="submit" class="w-full py-3 rounded-lg font-bold transition">
-                🔒 Verify & Access Admin Panel
-            </button>
-        </form>
+        <button onclick="verifyLogin()">🔒 Verify & Access Admin Panel</button>
         
-        <!-- Error Message -->
-        <div id="error-message" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm text-center">
-            ❌ Incorrect answer. Please try again.
-        </div>
+        <div id="error-message" class="error-message">❌ Incorrect answer. Please try again.</div>
         
-        <!-- Footer -->
-        <div class="mt-6 pt-6 border-t text-center">
-            <a href="/" class="text-sm text-gray-600 hover:text-[#0077b6]">← Back to Main Site</a>
-        </div>
+        <a href="/">← Back to Main Site</a>
     </div>
 
     <script>
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
+        function verifyLogin() {
             const answer = document.getElementById('answer').value.trim();
-            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const btn = document.querySelector('button');
             const errorMsg = document.getElementById('error-message');
             
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Verifying...';
-            errorMsg.classList.add('hidden');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Verifying...';
+            errorMsg.style.display = 'none';
             
-            try {
-                const formData = new FormData();
-                formData.append('answer', answer);
-                
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    body: formData
-                });
-                
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'answer=' + encodeURIComponent(answer)
+            })
+            .then(response => {
                 if (response.ok) {
-                    window.location.href = '/admin';
+                    return response.json().then(data => {
+                        document.cookie = "admin_session=" + data.token + "; path=/; max-age=86400";
+                        window.location.href = '/admin';
+                    });
                 } else {
                     throw new Error('Incorrect answer');
                 }
-            } catch (error) {
-                errorMsg.classList.remove('hidden');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '🔒 Verify & Access Admin Panel';
+            })
+            .catch(error => {
+                errorMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '🔒 Verify & Access Admin Panel';
                 document.getElementById('answer').value = '';
-            }
-        });
+            });
+        }
     </script>
 </body>
 </html>
