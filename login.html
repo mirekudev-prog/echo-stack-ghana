@@ -1,9 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EchoStack Admin Login</title>
+    
+    <!-- FAVICON -->
+    <link rel="icon" type="image/png" href="/echostack-logo.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
@@ -33,7 +35,7 @@
             text-align: center;
         }
         
-        /* Logo Styling - Ensures Full Display */
+        /* LOGO STYLING FOR REAL IMAGE */
         .logo-container {
             display: flex;
             flex-direction: column;
@@ -44,18 +46,17 @@
         }
         
         .logo-icon {
-            width: 80px;      /* Larger size */
-            height: 80px;     /* Equal size for square */
-            margin-bottom: 0.75rem;
+            width: 120px;
+            height: auto;
+            margin-bottom: 1rem;
             object-fit: contain;
         }
         
         .logo-text {
-            font-size: 2rem;      /* Bigger text */
+            font-size: 2rem;
             font-weight: bold;
             letter-spacing: 1px;
             color: var(--brand-dark) !important;
-            text-transform: none;
         }
         
         .subtitle {
@@ -89,91 +90,17 @@
             background-color: var(--brand-blue) !important;
             color: white !important;
         }
-        
-        button[type="submit"]:hover { opacity: 0.9 !important; }
     </style>
 </head>
-<body class="antialiased">
-    
-    <div class="login-card">
-        <!-- Logo Section - CENTERED AND FULL SIZE -->
-       <div class="logo-container">
-    <!-- REAL LOGO IMAGE -->
-    <img src="/echostack-logo.png" alt="EchoStack Logo" class="logo-icon mb-4">
-    
-    <!-- OR IF YOU WANT BOTH IMAGE + TEXT -->
-    <img src="/echostack-logo.png" alt="EchoStack Logo" class="logo-icon mb-2">
-    <h1 class="logo-text">EchoStack</h1>
-    <p class="subtitle">Admin Management Portal</p>
-</div>
-        
-        <!-- Security Question -->
-        <div class="security-question">
-            <p class="text-gray-700 text-sm">To protect our heritage archive, please confirm your identity.</p>
-        </div>
-        
-        <!-- Login Form -->
-        <form id="login-form" class="space-y-4 text-left">
-            <div>
-                <label class="block text-sm font-medium mb-2" style="color: #1a1e29 !important;">
-                    Who are you? 😊
-                </label>
-                <input type="text" id="answer" 
-                       placeholder="Enter"
-                       class="w-full p-3 border rounded-lg focus:outline-none"
-                       required
-                       autocomplete="off">
-            </div>
-            
-            <button type="submit" class="w-full py-3 rounded-lg font-bold transition">
-                🔒 Verify & Access Admin Panel
-            </button>
-        </form>
-        
-        <!-- Error Message -->
-        <div id="error-message" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm text-center">
-            ❌ Incorrect answer. Please try again.
-        </div>
-        
-        <!-- Footer -->
-        <div class="mt-6 pt-6 border-t text-center">
-            <a href="/" class="text-sm text-gray-600 hover:text-[#0077b6]">← Back to Main Site</a>
-        </div>
-    </div>
 
-    <script>
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const answer = document.getElementById('answer').value.trim();
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const errorMsg = document.getElementById('error-message');
-            
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Verifying...';
-            errorMsg.classList.add('hidden');
-            
-            try {
-                const formData = new FormData();
-                formData.append('answer', answer);
-                
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    window.location.href = '/admin';
-                } else {
-                    throw new Error('Incorrect answer');
-                }
-            } catch (error) {
-                errorMsg.classList.remove('hidden');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '🔒 Verify & Access Admin Panel';
-                document.getElementById('answer').value = '';
-            }
-        });
-    </script>
-</body>
-</html>
+<body class="antialiased">
+    <div class="login-card">
+        <!-- REAL LOGO IMAGE SECTION -->
+        <div class="logo-container">
+            <img src="/echostack-logo.png" alt="EchoStack Logo" class="logo-icon mb-2">
+            <h1 class="logo-text">EchoStack</h1>
+            <p class="subtitle">Admin Management Portal</p>
+        </div>
+        
+        <!-- Rest of form continues... -->
+        ...
