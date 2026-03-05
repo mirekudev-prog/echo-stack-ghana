@@ -15,6 +15,7 @@
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1a1e29">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="EchoStack">
     
     <!-- Favicon & Icons -->
@@ -63,16 +64,17 @@
             outline: none !important;
             border-color: var(--brand-blue) !important;
         }
-        /* Loading Animation */
+        /* Loading Overlay */
         .loading-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.95);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 9999;
         }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="antialiased">
@@ -81,21 +83,20 @@
     <header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <!-- LOGO WITH FALLBACK IF MISSING -->
                 <img id="header-logo" src="/echostack-logo.png" alt="" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.style.display='none'">
                 <h1 class="text-2xl font-bold" style="color: #1a1e29 !important;">EchoStack Admin</h1>
             </div>
             <nav class="flex gap-3 items-center">
                 <a href="/" target="_blank" class="px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">🌍 View Site ↗</a>
-                <button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 text-sm font-medium" id="btn-dashboard">📊 Dashboard</button>
-                <button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm" id="btn-new-region">➕ New Region</button>
-                <button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 text-sm font-medium" id="btn-logout">🚪 Logout</button>
+                <button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 text-sm font-medium">📊 Dashboard</button>
+                <button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
+                <button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 text-sm font-medium">🚪 Logout</button>
             </nav>
         </div>
     </header>
 
-    <!-- LOADING OVERLAY -->
-    <div id="loading" class="loading-overlay">
+    <!-- LOADING OVERLAY - HIDDEN BY DEFAULT -->
+    <div id="loading" class="loading-overlay hidden">
         <div class="text-center">
             <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-[#0077b6] mx-auto mb-4"></div>
             <p class="text-lg font-semibold">Loading Dashboard...</p>
@@ -111,19 +112,19 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Total Regions</p>
-                    <p class="text-3xl font-bold" id="stat-total">Loading...</p>
+                    <p class="text-3xl font-bold" id="stat-total">0</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">With Audio</p>
-                    <p class="text-3xl font-bold" id="stat-audio">Loading...</p>
+                    <p class="text-3xl font-bold" id="stat-audio">0</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">With Images</p>
-                    <p class="text-3xl font-bold" id="stat-images">Loading...</p>
+                    <p class="text-3xl font-bold" id="stat-images">0</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Database Size</p>
-                    <p class="text-2xl font-bold" id="stat-size">Loading...</p>
+                    <p class="text-2xl font-bold" id="stat-size">— MB</p>
                 </div>
             </div>
 
@@ -157,7 +158,7 @@
                             </tr>
                         </thead>
                         <tbody id="regions-table-body" class="divide-y divide-gray-200">
-                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Loading regions...</td></tr>
+                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -279,420 +280,350 @@
     <!-- NOTIFICATION -->
     <div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50"></div>
 
-    <script> 
-    <!-- COMPLETE JAVASCRIPT -->
-// ===============================
-// COMPLETE JAVASCRIPT - DEBUG VERSION
-// ===============================
+    <!-- JAVASCRIPT -->
+    <script>
+        console.log('✅ Script Loaded');
+        
+        const API_URL = '/api';
+        let allRegions = [];
 
-console.log('✅ Admin Dashboard Loaded');
+        // Hide loading immediately when script loads
+        setTimeout(() => {
+            const loader = document.getElementById('loading');
+            if (loader) loader.classList.add('hidden');
+        }, 100);
 
-const API_URL = '/api';
-let allRegions = [];
-
-// ===============================
-// INITIALIZATION
-// ===============================
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM Ready - Loading data...');
-    loadStats();
-    loadRegions();
-    
-    // Attach form submit handler
-    const form = document.getElementById('region-form');
-    if (form) {
-        form.addEventListener('submit', handleSave);
-        console.log('✅ Form event listener attached');
-    } else {
-        console.error('❌ Form not found!');
-    }
-});
-
-// ===============================
-// NAVIGATION
-// ===============================
-function showSection(sectionId) {
-    console.log('Switching to:', sectionId);
-    
-    document.getElementById('dashboard-section').classList.toggle('hidden', sectionId !== 'dashboard');
-    document.getElementById('create-section').classList.toggle('hidden', sectionId !== 'create');
-    
-    if (sectionId === 'dashboard') {
-        loadRegions();
-        loadStats();
-    } else if (sectionId === 'create') {
-        resetForm();
-    }
-}
-
-// ===============================
-// LOAD DATA FROM BACKEND
-// ===============================
-async function loadStats() {
-    try {
-        const response = await fetch(`${API_URL}/stats`);
-        const stats = await response.json();
-        
-        document.getElementById('stat-total').innerText = stats.total_regions || 0;
-        document.getElementById('stat-audio').innerText = stats.with_audio || 0;
-        document.getElementById('stat-images').innerText = stats.with_images || 0;
-        document.getElementById('stat-size').innerText = `${stats.database_size_mb || 0} MB`;
-    } catch (error) {
-        console.error('Stats error:', error);
-    }
-}
-
-async function loadRegions() {
-    try {
-        console.log('Fetching regions from API...');
-        const response = await fetch(`${API_URL}/regions`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        allRegions = await response.json();
-        console.log('✅ Loaded', allRegions.length, 'regions:', allRegions);
-        
-        renderTable(allRegions);
-    } catch (error) {
-        console.error('❌ Load error:', error);
-        showNotification('Failed to load regions: ' + error.message, 'error');
-    }
-}
-
-// ===============================
-// RENDER TABLE
-// ===============================
-function renderTable(regions) {
-    const tbody = document.getElementById('regions-table-body');
-    tbody.innerHTML = '';
-    
-    if (regions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet. Click "New Region" to create one!</td></tr>';
-        return;
-    }
-    
-    regions.forEach((region, index) => {
-        console.log('Rendering region:', region.id, region.name);
-        
-        const hasAudio = region.audio_files && region.audio_files.split(',').filter(x => x.trim()).length > 0;
-        const hasImages = region.gallery_images && region.gallery_images.split(',').filter(x => x.trim()).length > 0;
-        
-        const row = document.createElement('tr');
-        row.className = 'hover:bg-gray-50 transition cursor-pointer';
-        row.onclick = (e) => {
-            if (!e.target.closest('button')) {
-                console.log('Row clicked, editing region ID:', region.id);
-                editRegion(region.id);
-            }
-        };
-        
-        row.innerHTML = `
-            <td class="px-4 py-4 text-sm text-gray-600">${index + 1}</td>
-            <td class="px-4 py-4"><span class="font-semibold">${region.name}</span></td>
-            <td class="px-4 py-4 text-sm text-gray-600">${region.capital || '—'}</td>
-            <td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">${region.category || 'Uncategorized'}</span></td>
-            <td class="px-4 py-4 text-sm">${hasImages ? '🖼️ ' : ''}${hasAudio ? '🎵' : ''}</td>
-            <td class="px-4 py-4 whitespace-nowrap">
-                <button onclick="editRegion(${region.id})" class="mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button>
-                <button onclick="deleteRegion(${region.id}, '${region.name}') " class="text-red-600 hover:underline text-sm">🗑️ Delete</button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-document.getElementById('search-regions')?.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
-    const filtered = allRegions.filter(r => 
-        r.name.toLowerCase().includes(term) ||
-        (r.capital && r.capital.toLowerCase().includes(term)) ||
-        (r.category && r.category.toLowerCase().includes(term))
-    );
-    renderTable(filtered);
-});
-
-// ===============================
-// FORM HANDLING
-// ===============================
-function resetForm() {
-    console.log('Resetting form...');
-    document.getElementById('region-form').reset();
-    document.getElementById('region-id').value = '';
-    document.getElementById('form-title').innerText = 'Add New Region';
-    document.getElementById('save-btn').innerText = '💾 Save Region';
-    document.getElementById('hero-preview').classList.add('hidden');
-    document.getElementById('gallery-list').innerHTML = '';
-    document.getElementById('audio-list').innerHTML = '';
-}
-
-// 🔴 THE CRITICAL FIX - EDIT FUNCTION
-function editRegion(id) {
-    console.log('=== EDIT REGION CALLED ===');
-    console.log('Looking for ID:', id);
-    console.log('All regions:', allRegions);
-    
-    const region = allRegions.find(r => r.id === id);
-    
-    console.log('Found region:', region);
-    
-    if (!region) {
-        console.error('❌ Region NOT FOUND! ID:', id);
-        alert('Error: Region not found in database. Please refresh the page.');
-        return;
-    }
-    
-    console.log('✅ Populating form with data...');
-    
-    // Update UI
-    document.getElementById('form-title').innerText = `Edit: ${region.name}`;
-    document.getElementById('save-btn').innerText = '💾 Update Region';
-    
-    // Populate all fields
-    document.getElementById('region-id').value = region.id || '';
-    document.getElementById('reg-name').value = region.name || '';
-    document.getElementById('reg-capital').value = region.capital || '';
-    document.getElementById('reg-population').value = region.population || '';
-    document.getElementById('reg-terrain').value = region.terrain || '';
-    document.getElementById('reg-description').value = region.description || '';
-    document.getElementById('reg-category').value = region.category || '';
-    document.getElementById('reg-tags').value = region.tags || '';
-    document.getElementById('reg-source').value = region.source || '';
-    document.getElementById('reg-overview').value = region.overview || '';
-    document.getElementById('reg-hero-image').value = region.hero_image || '';
-    
-    // Handle comma-separated lists
-    if (region.gallery_images) {
-        const images = typeof region.gallery_images === 'string' 
-            ? region.gallery_images.split(',').map(s => s.trim()).filter(s => s)
-            : region.gallery_images;
-        document.getElementById('reg-gallery-images').value = images.join(', ');
-    } else {
-        document.getElementById('reg-gallery-images').value = '';
-    }
-    
-    if (region.audio_files) {
-        const audios = typeof region.audio_files === 'string'
-            ? region.audio_files.split(',').map(s => s.trim()).filter(s => s)
-            : region.audio_files;
-        document.getElementById('reg-audio-files').value = audios.join(', ');
-    } else {
-        document.getElementById('reg-audio-files').value = '';
-    }
-    
-    // Show hero preview if exists
-    if (region.hero_image) {
-        showHeroPreview(region.hero_image);
-    } else {
-        hideHeroPreview();
-    }
-    
-    console.log('✅ Form populated successfully!');
-    showSection('create');
-}
-
-// ===============================
-// SAVE REGION
-// ===============================
-async function handleSave(e) {
-    e.preventDefault();
-    
-    console.log('=== SAVING REGION ===');
-    
-    const regionId = document.getElementById('region-id').value;
-    const submitBtn = document.getElementById('save-btn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '⏳ Saving...';
-    
-    const formData = new FormData();
-    formData.append('name', document.getElementById('reg-name').value);
-    formData.append('capital', document.getElementById('reg-capital').value);
-    formData.append('population', document.getElementById('reg-population').value);
-    formData.append('terrain', document.getElementById('reg-terrain').value);
-    formData.append('description', document.getElementById('reg-description').value);
-    formData.append('category', document.getElementById('reg-category').value);
-    formData.append('tags', document.getElementById('reg-tags').value);
-    formData.append('hero_image', document.getElementById('reg-hero-image').value);
-    formData.append('gallery_images', document.getElementById('reg-gallery-images').value);
-    formData.append('audio_files', document.getElementById('reg-audio-files').value);
-    formData.append('source', document.getElementById('reg-source').value);
-    formData.append('overview', document.getElementById('reg-overview').value);
-    
-    console.log('Sending data:', Object.fromEntries(formData));
-    
-    try {
-        const method = regionId ? 'PUT' : 'POST';
-        const url = regionId ? `${API_URL}/regions/${regionId}` : `${API_URL}/regions`;
-        
-        console.log('Request:', method, url);
-        
-        const response = await fetch(url, {
-            method: method,
-            body: formData
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Response error:', errorText);
-            throw new Error(`Server error: ${response.status} - ${errorText}`);
-        }
-        
-        const data = await response.json();
-        console.log('Response:', data);
-        
-        if (data.success) {
-            showNotification(data.message || 'Saved successfully!', 'success');
-            loadRegions();
-            loadStats();
-            showSection('dashboard');
-        } else {
-            throw new Error(data.detail || 'Save failed');
-        }
-    } catch (error) {
-        console.error('❌ Save error:', error);
-        showNotification(`❌ ${error.message}`, 'error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = regionId ? '💾 Update Region' : '💾 Save Region';
-    }
-}
-
-// ===============================
-// DELETE REGION
-// ===============================
-async function deleteRegion(id, name) {
-    if (!confirm(`Delete "${name}"? This CANNOT be undone.`)) return;
-    
-    try {
-        const response = await fetch(`${API_URL}/regions/${id}`, { method: 'DELETE' });
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-            showNotification('✅ Deleted successfully!', 'success');
-            loadRegions();
-            loadStats();
-        } else {
-            throw new Error('Delete failed');
-        }
-    } catch (error) {
-        showNotification('❌ Delete failed', 'error');
-    }
-}
-
-// ===============================
-// FILE UPLOADS
-// ===============================
-async function uploadFile(type) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = type === 'hero' ? 'image/*' : 'audio/*';
-    
-    input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('filename', file.name);
-        
-        try {
-            const endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/audio';
-            const response = await fetch(endpoint, { method: 'POST', body: formData });
-            const data = await response.json();
+        // ===============================
+        // INITIALIZATION
+        // ===============================
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Ready');
             
-            if (data.success) {
-                if (type === 'hero') {
-                    document.getElementById('reg-hero-image').value = data.url;
-                    showHeroPreview(data.url);
-                } else {
-                    const currentValue = document.getElementById('reg-audio-files').value;
-                    const newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
-                    document.getElementById('reg-audio-files').value = newValue;
-                }
-                showNotification('✅ Uploaded!', 'success');
-            }
-        } catch (error) {
-            showNotification('❌ Upload failed', 'error');
-        }
-    };
-    
-    input.click();
-}
-
-function showHeroPreview(url) {
-    document.getElementById('preview-img').src = url;
-    document.getElementById('hero-preview').classList.remove('hidden');
-}
-
-function hideHeroPreview() {
-    document.getElementById('reg-hero-image').value = '';
-    document.getElementById('hero-preview').classList.add('hidden');
-}
-
-// ===============================
-// EXPORT/IMPORT
-// ===============================
-async function exportData() {
-    try {
-        const response = await fetch(`${API_URL}/regions`);
-        const data = await response.json();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `echostack-backup-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showNotification('✅ Exported!', 'success');
-    } catch (error) {
-        showNotification('❌ Export failed', 'error');
-    }
-}
-
-async function importData(input) {
-    const file = input.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        try {
-            const data = JSON.parse(e.target.result);
-            const response = await fetch('/api/import/json', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            showNotification('✅ Imported!', 'success');
+            // Hide loading overlay FIRST
+            const loader = document.getElementById('loading');
+            if (loader) loader.classList.add('hidden');
+            
+            // Then load data
+            loadStats();
             loadRegions();
-        } catch (error) {
-            showNotification('❌ Invalid file', 'error');
+            
+            // Attach form submit handler
+            const form = document.getElementById('region-form');
+            if (form) {
+                form.addEventListener('submit', handleSave);
+            }
+        });
+
+        // ===============================
+        // NAVIGATION
+        // ===============================
+        function showSection(sectionId) {
+            document.getElementById('dashboard-section').classList.toggle('hidden', sectionId !== 'dashboard');
+            document.getElementById('create-section').classList.toggle('hidden', sectionId !== 'create');
+            
+            if (sectionId === 'dashboard') {
+                loadRegions();
+                loadStats();
+            } else {
+                resetForm();
+            }
         }
-    };
-    reader.readAsText(file);
-    input.value = '';
-}
 
-// ===============================
-// AUTHENTICATION
-// ===============================
-function logout() {
-    if (confirm('Logout now?')) {
-        fetch('/api/auth/logout', {method: 'POST'});
-        document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
-        window.location.href = '/admin';
-    }
-}
+        // ===============================
+        // LOAD DATA
+        // ===============================
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/stats`);
+                const stats = await response.json();
+                document.getElementById('stat-total').innerText = stats.total_regions || 0;
+                document.getElementById('stat-audio').innerText = stats.with_audio || 0;
+                document.getElementById('stat-images').innerText = stats.with_images || 0;
+                document.getElementById('stat-size').innerText = `${stats.database_size_mb || 0} MB`;
+            } catch (error) {
+                console.error('Stats error:', error);
+            }
+        }
 
-// ===============================
-// NOTIFICATIONS
-// ===============================
-function showNotification(message, type = 'success') {
-    const notification = document.getElementById('notification');
-    notification.className = `fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
-    notification.innerText = message;
-    notification.classList.remove('hidden');
-    setTimeout(() => notification.classList.add('hidden'), 3000);
-}
-</script>
+        async function loadRegions() {
+            try {
+                const response = await fetch(`${API_URL}/regions`);
+                allRegions = await response.json();
+                renderTable(allRegions);
+            } catch (error) {
+                console.error('Load error:', error);
+                showNotification('Failed to load regions', 'error');
+            }
+        }
+
+        function renderTable(regions) {
+            const tbody = document.getElementById('regions-table-body');
+            tbody.innerHTML = '';
+            
+            if (regions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet. Click "New Region" to create one!</td></tr>';
+                return;
+            }
+            
+            regions.forEach((region, index) => {
+                const hasAudio = region.audio_files && region.audio_files.split(',').filter(x => x.trim()).length > 0;
+                const hasImages = region.gallery_images && region.gallery_images.split(',').filter(x => x.trim()).length > 0;
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition cursor-pointer';
+                row.onclick = (e) => {
+                    if (!e.target.closest('button')) editRegion(region.id);
+                };
+                
+                row.innerHTML = `
+                    <td class="px-4 py-4 text-sm text-gray-600">${index + 1}</td>
+                    <td class="px-4 py-4"><span class="font-semibold">${region.name}</span></td>
+                    <td class="px-4 py-4 text-sm text-gray-600">${region.capital || '—'}</td>
+                    <td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">${region.category || 'Uncategorized'}</span></td>
+                    <td class="px-4 py-4 text-sm">${hasImages ? '🖼️ ' : ''}${hasAudio ? '🎵' : ''}</td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <button onclick="editRegion(${region.id})" class="mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button>
+                        <button onclick="deleteRegion(${region.id}, '${region.name}') " class="text-red-600 hover:underline text-sm">🗑️ Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        document.getElementById('search-regions')?.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allRegions.filter(r => 
+                r.name.toLowerCase().includes(term) ||
+                (r.capital && r.capital.toLowerCase().includes(term)) ||
+                (r.category && r.category.toLowerCase().includes(term))
+            );
+            renderTable(filtered);
+        });
+
+        // ===============================
+        // FORM HANDLING
+        // ===============================
+        function resetForm() {
+            document.getElementById('region-form').reset();
+            document.getElementById('region-id').value = '';
+            document.getElementById('form-title').innerText = 'Add New Region';
+            document.getElementById('save-btn').innerText = '💾 Save Region';
+            document.getElementById('hero-preview').classList.add('hidden');
+        }
+
+        function editRegion(id) {
+            console.log('Editing region ID:', id);
+            const region = allRegions.find(r => r.id === id);
+            if (!region) {
+                alert('Error: Region not found');
+                return;
+            }
+            
+            document.getElementById('form-title').innerText = `Edit: ${region.name}`;
+            document.getElementById('save-btn').innerText = '💾 Update Region';
+            document.getElementById('region-id').value = region.id;
+            document.getElementById('reg-name').value = region.name;
+            document.getElementById('reg-capital').value = region.capital || '';
+            document.getElementById('reg-population').value = region.population || '';
+            document.getElementById('reg-terrain').value = region.terrain || '';
+            document.getElementById('reg-description').value = region.description || '';
+            document.getElementById('reg-category').value = region.category || '';
+            document.getElementById('reg-tags').value = region.tags || '';
+            document.getElementById('reg-source').value = region.source || '';
+            document.getElementById('reg-overview').value = region.overview || '';
+            document.getElementById('reg-hero-image').value = region.hero_image || '';
+            
+            if (region.gallery_images) {
+                document.getElementById('reg-gallery-images').value = typeof region.gallery_images === 'string' 
+                    ? region.gallery_images : region.gallery_images.join(', ');
+            }
+            if (region.audio_files) {
+                document.getElementById('reg-audio-files').value = typeof region.audio_files === 'string'
+                    ? region.audio_files : region.audio_files.join(', ');
+            }
+            
+            if (region.hero_image) showHeroPreview(region.hero_image);
+            showSection('create');
+        }
+
+        async function handleSave(e) {
+            e.preventDefault();
+            
+            const regionId = document.getElementById('region-id').value;
+            const submitBtn = document.getElementById('save-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Saving...';
+            
+            const formData = new FormData();
+            formData.append('name', document.getElementById('reg-name').value);
+            formData.append('capital', document.getElementById('reg-capital').value);
+            formData.append('population', document.getElementById('reg-population').value);
+            formData.append('terrain', document.getElementById('reg-terrain').value);
+            formData.append('description', document.getElementById('reg-description').value);
+            formData.append('category', document.getElementById('reg-category').value);
+            formData.append('tags', document.getElementById('reg-tags').value);
+            formData.append('hero_image', document.getElementById('reg-hero-image').value);
+            formData.append('gallery_images', document.getElementById('reg-gallery-images').value);
+            formData.append('audio_files', document.getElementById('reg-audio-files').value);
+            formData.append('source', document.getElementById('reg-source').value);
+            formData.append('overview', document.getElementById('reg-overview').value);
+            
+            try {
+                const method = regionId ? 'PUT' : 'POST';
+                const url = regionId ? `${API_URL}/regions/${regionId}` : `${API_URL}/regions`;
+                
+                const response = await fetch(url, { method: method, body: formData });
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showNotification('Saved successfully!', 'success');
+                    loadRegions();
+                    loadStats();
+                    showSection('dashboard');
+                } else {
+                    throw new Error(data.detail || 'Save failed');
+                }
+            } catch (error) {
+                showNotification(`❌ ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = regionId ? '💾 Update Region' : '💾 Save Region';
+            }
+        }
+
+        async function deleteRegion(id, name) {
+            if (!confirm(`Delete "${name}"? This CANNOT be undone.`)) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/regions/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showNotification('Deleted successfully!', 'success');
+                    loadRegions();
+                    loadStats();
+                } else {
+                    throw new Error('Delete failed');
+                }
+            } catch (error) {
+                showNotification('❌ Delete failed', 'error');
+            }
+        }
+
+        // ===============================
+        // FILE UPLOADS
+        // ===============================
+        async function uploadFile(type) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = type === 'hero' ? 'image/*' : 'audio/*';
+            
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('filename', file.name);
+                
+                try {
+                    const endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/audio';
+                    const response = await fetch(endpoint, { method: 'POST', body: formData });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        if (type === 'hero') {
+                            document.getElementById('reg-hero-image').value = data.url;
+                            showHeroPreview(data.url);
+                        } else {
+                            const currentValue = document.getElementById('reg-audio-files').value;
+                            const newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
+                            document.getElementById('reg-audio-files').value = newValue;
+                        }
+                        showNotification('Uploaded!', 'success');
+                    }
+                } catch (error) {
+                    showNotification('❌ Upload failed', 'error');
+                }
+            };
+            
+            input.click();
+        }
+
+        function showHeroPreview(url) {
+            document.getElementById('preview-img').src = url;
+            document.getElementById('hero-preview').classList.remove('hidden');
+        }
+
+        function removeHeroImage() {
+            document.getElementById('reg-hero-image').value = '';
+            document.getElementById('hero-preview').classList.add('hidden');
+        }
+
+        // ===============================
+        // EXPORT/IMPORT
+        // ===============================
+        async function exportData() {
+            try {
+                const response = await fetch(`${API_URL}/regions`);
+                const data = await response.json();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `echostack-backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showNotification('Exported!', 'success');
+            } catch (error) {
+                showNotification('❌ Export failed', 'error');
+            }
+        }
+
+        async function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const response = await fetch('/api/import/json', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                    showNotification('Imported!', 'success');
+                    loadRegions();
+                } catch (error) {
+                    showNotification('❌ Invalid file', 'error');
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        // ===============================
+        // AUTHENTICATION
+        // ===============================
+        function logout() {
+            if (confirm('Logout now?')) {
+                fetch('/api/auth/logout', {method: 'POST'});
+                document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+                window.location.href = '/admin';
+            }
+        }
+
+        // ===============================
+        // NOTIFICATIONS
+        // ===============================
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.className = `fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+            notification.innerText = message;
+            notification.classList.remove('hidden');
+            setTimeout(() => notification.classList.add('hidden'), 3000);
+        }
+    </script>
+</body>
 </html>
