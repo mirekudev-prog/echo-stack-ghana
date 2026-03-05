@@ -27,6 +27,26 @@ except Exception as e:
     print(f"Warning: Could not mount uploads folder")
 
 # ============================================
+# SERVE ROOT STATIC FILES (logo, sw.js, etc.)
+# ✅ FIX: This serves echostack-logo.png, sw.js, and any other
+#         static files placed in the root directory of the project.
+# ============================================
+@app.get("/echostack-logo.png")
+def serve_logo():
+    """Serve the EchoStack logo for PWA, favicon, and header"""
+    if os.path.exists("echostack-logo.png"):
+        return FileResponse("echostack-logo.png", media_type="image/png")
+    raise HTTPException(status_code=404, detail="Logo not found. Place echostack-logo.png in the root directory.")
+
+@app.get("/sw.js")
+def serve_sw():
+    """Serve the Service Worker script for PWA"""
+    if os.path.exists("sw.js"):
+        return FileResponse("sw.js", media_type="application/javascript",
+                            headers={"Service-Worker-Allowed": "/"})
+    raise HTTPException(status_code=404, detail="sw.js not found")
+
+# ============================================
 # SECURITY SETTINGS
 # ============================================
 CORRECT_ANSWER = "THE ADMIN"
@@ -72,7 +92,6 @@ async def admin_page(request: Request):
 @app.post("/api/auth/login")
 async def login(answer: str = Form(...)):
     """Check security answer"""
-    # Normalize input for comparison
     cleaned_answer = CORRECT_ANSWER.lower().replace(" ", "")
     input_answer = answer.strip().lower().replace(" ", "")
     
@@ -239,7 +258,7 @@ def delete_region(region_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# UNIVERSAL FILE UPLOAD (ANY FILE TYPE!) 🔴 NEW!
+# UNIVERSAL FILE UPLOAD
 # ============================================
 ALLOWED_EXTENSIONS = {
     'video': ['.mp4', '.mov', '.avi', '.wmv', '.flv', '.webm'],
@@ -253,31 +272,26 @@ ALLOWED_EXTENSIONS = {
 async def upload_generic_file(
     file: UploadFile = File(...),
     filename: str = Form(...),
-    category: str = Form("general"),  # video, audio, image, document, other
+    category: str = Form("general"),
     description: str = Form(""),
-    region_id: str = Form(""),  # Optional: Link to region
-    is_public: str = Form("1"),  # 1 = public, 0 = private
+    region_id: str = Form(""),
+    is_public: str = Form("1"),
     db: Session = Depends(get_db)
 ):
-    """Upload ANY file type (MP4, PDF, DOCX, JPG, MP3, etc.)"""
     try:
-        # Get file extension
         ext = os.path.splitext(filename)[1].lower()
         safe_ext = ext if ext else ".bin"
         
-        # Generate unique filename
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         safe_name = f"{timestamp}{safe_ext}"
         file_path = os.path.join(UPLOAD_DIR, safe_name)
         
-        # Read and save file
         content = await file.read()
         file_size = len(content)
         
         with open(file_path, "wb") as buffer:
             buffer.write(content)
         
-        # Save to database
         uploaded_file = models.UploadedFile(
             filename=safe_name,
             original_name=filename,
@@ -316,18 +330,13 @@ async def upload_generic_file(
 
 @app.get("/api/files")
 def get_files(category: str = "", region_id: str = "", db: Session = Depends(get_db)):
-    """Get all uploaded files (optionally filtered by category or region)"""
     try:
         query = db.query(models.UploadedFile)
-        
         if category:
             query = query.filter(models.UploadedFile.category == category)
-        
         if region_id:
             query = query.filter(models.UploadedFile.region_id == int(region_id))
-        
         files = query.order_by(models.UploadedFile.created_at.desc()).all()
-        
         result = []
         for f in files:
             result.append({
@@ -343,7 +352,6 @@ def get_files(category: str = "", region_id: str = "", db: Session = Depends(get
                 "description": f.description,
                 "created_at": str(f.created_at)
             })
-        
         return result
     except Exception as e:
         print(f"❌ Error fetching files: {e}")
@@ -351,20 +359,14 @@ def get_files(category: str = "", region_id: str = "", db: Session = Depends(get
 
 @app.delete("/api/files/{file_id}")
 def delete_file(file_id: int, db: Session = Depends(get_db)):
-    """Delete a file from database and filesystem"""
     try:
         uploaded_file = db.query(models.UploadedFile).filter(models.UploadedFile.id == file_id).first()
         if not uploaded_file:
             raise HTTPException(status_code=404, detail="File not found")
-        
-        # Delete file from disk
         if os.path.exists(uploaded_file.file_path):
             os.remove(uploaded_file.file_path)
-        
-        # Delete from database
         db.delete(uploaded_file)
         db.commit()
-        
         print(f"🗑️ Deleted file ID: {file_id}")
         return {"success": True, "message": "File deleted successfully"}
     except HTTPException:
@@ -375,7 +377,7 @@ def delete_file(file_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# DYNAMIC SECTIONS/CATEGORIES MANAGER 🔴 NEW!
+# DYNAMIC SECTIONS/CATEGORIES MANAGER
 # ============================================
 @app.post("/api/sections")
 def create_section(
@@ -384,26 +386,20 @@ def create_section(
     display_order: int = Form(0),
     db: Session = Depends(get_db)
 ):
-    """Create new section/category"""
     try:
         slug = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
-        
-        # Check if already exists
         existing = db.query(models.Section).filter(models.Section.slug == slug).first()
         if existing:
             raise HTTPException(status_code=400, detail="Section name already exists")
-        
         new_section = models.Section(
             name=name,
             slug=slug,
             description=description,
             display_order=display_order
         )
-        
         db.add(new_section)
         db.commit()
         db.refresh(new_section)
-        
         return {"success": True, "section_id": new_section.id}
     except HTTPException:
         raise
@@ -413,13 +409,11 @@ def create_section(
 
 @app.get("/api/sections")
 def get_sections(active_only: int = 1, db: Session = Depends(get_db)):
-    """Get all sections"""
     try:
         if active_only:
             sections = db.query(models.Section).filter(models.Section.is_active == 1).order_by(models.Section.display_order).all()
         else:
             sections = db.query(models.Section).all()
-        
         return [{"id": s.id, "name": s.name, "slug": s.slug, "description": s.description} for s in sections]
     except Exception as e:
         print(f"Error fetching sections: {e}")
@@ -427,15 +421,12 @@ def get_sections(active_only: int = 1, db: Session = Depends(get_db)):
 
 @app.delete("/api/sections/{section_id}")
 def delete_section(section_id: int, db: Session = Depends(get_db)):
-    """Deactivate section (soft delete)"""
     try:
         section = db.query(models.Section).filter(models.Section.id == section_id).first()
         if not section:
             raise HTTPException(status_code=404, detail="Not found")
-        
         section.is_active = 0
         db.commit()
-        
         return {"success": True, "message": "Section deactivated"}
     except HTTPException:
         raise
@@ -448,20 +439,14 @@ def delete_section(section_id: int, db: Session = Depends(get_db)):
 # ============================================
 @app.get("/api/stats")
 def get_stats(db: Session = Depends(get_db)):
-    """Get statistics"""
     try:
         total_regions = db.query(models.Region).count()
-        
-        # Get file stats
         total_files = db.query(models.UploadedFile).count()
         total_video = db.query(models.UploadedFile).filter(models.UploadedFile.category == "video").count()
         total_audio = db.query(models.UploadedFile).filter(models.UploadedFile.category == "audio").count()
         total_images = db.query(models.UploadedFile).filter(models.UploadedFile.category == "image").count()
-        
-        # Database size
         db_path = "echostack.db"
         size_mb = round(os.path.getsize(db_path) / 1024 / 1024, 2) if os.path.exists(db_path) else 0
-        
         return {
             "total_regions": total_regions,
             "total_files": total_files,
@@ -476,12 +461,9 @@ def get_stats(db: Session = Depends(get_db)):
 
 @app.post("/api/import/json")
 def import_json(data: dict, db: Session = Depends(get_db)):
-    """Import regions from JSON"""
     try:
-        # Fix: Ensure data is properly handled as list
         if not isinstance(data, list):
             data = [data]
-        
         imported = 0
         for region_data in data:
             try:
@@ -491,7 +473,6 @@ def import_json(data: dict, db: Session = Depends(get_db)):
             except Exception as e:
                 print(f"Failed to import region: {e}")
                 continue
-        
         db.commit()
         return {"success": True, "imported": imported}
     except Exception as e:
