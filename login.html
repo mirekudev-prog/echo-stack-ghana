@@ -30,9 +30,39 @@
             max-width: 500px;
             width: 100%;
             margin: 2rem;
+            text-align: center;
         }
         
-        .logo-text { color: var(--brand-dark); margin-bottom: 1rem; }
+        /* Logo Styling - Ensures Full Display */
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+        }
+        
+        .logo-icon {
+            width: 80px;      /* Larger size */
+            height: 80px;     /* Equal size for square */
+            margin-bottom: 0.75rem;
+            object-fit: contain;
+        }
+        
+        .logo-text {
+            font-size: 2rem;      /* Bigger text */
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: var(--brand-dark) !important;
+            text-transform: none;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
         
         .security-question {
             background: rgba(0, 119, 182, 0.05);
@@ -40,6 +70,7 @@
             padding: 1rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
+            text-align: left;
         }
         
         input {
@@ -65,14 +96,18 @@
 <body class="antialiased">
     
     <div class="login-card">
-        <!-- Logo -->
-        <div class="text-center mb-8">
-            <svg width="48" height="48" viewBox="0 0 60 40" fill="none" style="margin-bottom: 1rem;">
-                <path d="M5 20C5 12 10 5 25 5H35V15H25C20 15 15 17 15 20C15 23 20 25 25 25H35C45 25 55 30 55 40H45C45 35 40 35 35 35H25C10 35 5 28 5 20Z" fill="#1a1e29"/>
-                <path d="M25 25C30 25 35 23 35 20V30C35 30 25 30 25 25Z" fill="#0077b6"/>
+        <!-- Logo Section - CENTERED AND FULL SIZE -->
+        <div class="logo-container">
+            <svg class="logo-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Top Dark Gray Part of S -->
+                <path d="M20 40C20 25 30 15 45 15H55V35H45C40 35 35 38 35 40C35 43 40 45 45 45H55C65 45 75 50 75 60H65C65 55 60 55 55 55H45C30 55 20 50 20 40Z" 
+                      fill="#1a1e29"/>
+                <!-- Bottom Blue Part of S -->
+                <path d="M45 45C50 45 55 43 55 40V55C55 55 45 55 45 45Z" 
+                      fill="#0077b6"/>
             </svg>
-            <h1 class="logo-text text-2xl font-bold">EchoStack Admin</h1>
-            <p class="text-gray-600 text-sm">Ghana's Heritage Archive Management</p>
+            <h1 class="logo-text">EchoStack</h1>
+            <p class="subtitle">Admin Management Portal</p>
         </div>
         
         <!-- Security Question -->
@@ -81,7 +116,7 @@
         </div>
         
         <!-- Login Form -->
-        <form id="login-form" class="space-y-4">
+        <form id="login-form" class="space-y-4 text-left">
             <div>
                 <label class="block text-sm font-medium mb-2" style="color: #1a1e29 !important;">
                     Who are you? 😊
@@ -131,7 +166,6 @@
                 });
                 
                 if (response.ok) {
-                    // Backend sets cookie, redirect
                     window.location.href = '/admin';
                 } else {
                     throw new Error('Incorrect answer');
