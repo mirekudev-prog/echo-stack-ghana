@@ -5,7 +5,6 @@ from database import Base
 
 class Region(Base):
     __tablename__ = "regions"
-    
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     capital = Column(String(100))
@@ -22,16 +21,11 @@ class Region(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-# Optional: Add Podcast model for future expansion
-class Podcast(Base):
-    __tablename__ = "podcasts"
-    
+# NEW: For dynamic sections
+class Section(Base):
+    __tablename__ = "sections"
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(200), nullable=False)
-    episode = Column(String(50))
+    name = Column(String(100), nullable=False, unique=True)
+    slug = Column(String(100), unique=True)
     description = Column(Text)
-    audio_url = Column(String(500))
-    category = Column(String(50))
-    region_id = Column(Integer)
-    duration = Column(String(50))
-    published_date = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
