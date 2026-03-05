@@ -6,7 +6,7 @@ const ASSETS_TO_CACHE = [
     '/js/app.js'
 ];
 
-// Install service worker
+// Install Service Worker
 self.addEventListener('install', (event) => {
     console.log('🔧 Installing Service Worker...');
     event.waitUntil(
@@ -17,7 +17,7 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// Activate service worker
+// Activate Service Worker
 self.addEventListener('activate', (event) => {
     console.log('✅ Activating Service Worker...');
     event.waitUntil(
@@ -34,7 +34,7 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch from cache first, then network
+// Fetch from Cache First, Then Network
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request).then((response) => {
