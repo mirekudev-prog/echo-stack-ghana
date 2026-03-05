@@ -116,8 +116,19 @@
                     <button onclick="showSection('create')" class="btn-primary px-6 py-3 rounded-lg font-semibold">➕ Create New Region</button>
                     <button onclick="exportData()" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📤 Export Data</button>
                     <button onclick="document.getElementById('import-file').click()" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📥 Import Data</button>
+                    <button onclick="showSection('files-manager')" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📁 File Manager</button>
                     <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
                 </div>
+            </div>
+
+            <!-- Sections/Categories Manager -->
+            <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <h2 class="text-xl font-bold mb-4">🏷️ Manage Categories/Sections</h2>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="new-section-name" placeholder="New section name..." class="flex-1 p-3 border rounded-lg">
+                    <button onclick="createSection()" class="btn-primary px-6 py-3 rounded-lg font-semibold">➕ Add Section</button>
+                </div>
+                <div id="sections-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
             </div>
 
             <!-- Regions Table -->
@@ -235,6 +246,54 @@
                         </div>
                     </div>
 
+                    <!-- ⭐ NEW: UNIVERSAL FILE UPLOAD SECTION ⭐ -->
+                    <div class="border-t pt-6 mt-6">
+                        <h3 class="text-lg font-bold mb-4">📦 Universal File Upload (Videos, Documents, Any Type!) 🆕</h3>
+                        
+                        <!-- Drag & Drop Zone -->
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#0077b6] transition"
+                             onclick="document.getElementById('universal-file-upload').click()">
+                            <p class="text-gray-600 text-sm">Click to select OR drag & drop files here</p>
+                            <p class="text-xs text-gray-500 mt-1">Videos, Audio, Images, Documents, PDFs - ANY Format!</p>
+                            <p class="text-xs text-blue-600 mt-2">Max size: 50MB per file</p>
+                            <input type="file" id="universal-file-upload" multiple class="hidden" onchange="uploadUniversalFiles(this)">
+                        </div>
+                        
+                        <!-- File Upload Options -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">File Category</label>
+                                <select id="file-category" class="w-full p-3 border rounded-lg">
+                                    <option value="general">General</option>
+                                    <option value="video">Video</option>
+                                    <option value="audio">Audio</option>
+                                    <option value="image">Image</option>
+                                    <option value="document">Document</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Link to Current Region</label>
+                                <select id="file-region-link" class="w-full p-3 border rounded-lg">
+                                    <option value="no">No Link (Global)</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-2">Description</label>
+                                <input type="text" id="file-description" class="w-full p-3 border rounded-lg" placeholder="Describe this file">
+                            </div>
+                            <div class="md:col-span-2 flex items-center">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="file-is-public" checked class="mr-2">
+                                    <span class="text-sm">Public (Visible to All Users)</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Uploaded Files List for This Session -->
+                        <div id="session-uploads-list" class="mt-4 space-y-2"></div>
+                    </div>
+
                     <!-- Additional Info -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -256,17 +315,43 @@
             </div>
         </section>
 
+        <!-- FILES MANAGER SECTION (NEW) -->
+        <section id="files-manager-section" class="hidden">
+            <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-6xl mx-auto">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-2xl font-bold">📁 All Uploaded Files Manager</h2>
+                    <button onclick="loadAllFiles()" class="btn-secondary px-4 py-2 rounded-lg">🔄 Refresh</button>
+                </div>
+                
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="file-search" placeholder="Search files..." class="flex-1 p-3 border rounded-lg" onkeyup="filterFiles()">
+                    <select id="file-filter-category" class="p-3 border rounded-lg" onchange="filterFiles()">
+                        <option value="">All Types</option>
+                        <option value="video">Videos</option>
+                        <option value="audio">Audio</option>
+                        <option value="image">Images</option>
+                        <option value="document">Documents</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div id="all-files-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto"></div>
+            </div>
+        </section>
+
     </main>
 
     <!-- NOTIFICATION -->
     <div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50"></div>
 
-    <!-- COMPLETE JAVASCRIPT (DEBUGGED VERSION) -->
+    <!-- COMPLETE JAVASCRIPT -->
     <script>
         console.log('✅ Script Loaded');
         
         const API_URL = '/api';
         let allRegions = [];
+        let allFiles = [];
+        let allSections = [];
 
         // ===============================
         // INITIALIZATION
@@ -276,6 +361,8 @@
             
             loadStats();
             loadRegions();
+            loadAllSections();
+            populateRegionDropdown();
             
             const form = document.getElementById('region-form');
             if (form) {
@@ -301,16 +388,24 @@
         function showSection(sectionId) {
             var dashboard = document.getElementById('dashboard-section');
             var create = document.getElementById('create-section');
+            var files = document.getElementById('files-manager-section');
             
             if (sectionId === 'dashboard') {
                 dashboard.classList.remove('hidden');
                 create.classList.add('hidden');
+                files.classList.add('hidden');
                 loadRegions();
                 loadStats();
-            } else {
+            } else if (sectionId === 'create') {
                 create.classList.remove('hidden');
                 dashboard.classList.add('hidden');
+                files.classList.add('hidden');
                 resetForm();
+            } else if (sectionId === 'files-manager') {
+                files.classList.remove('hidden');
+                dashboard.classList.add('hidden');
+                create.classList.add('hidden');
+                loadAllFiles();
             }
         }
 
@@ -343,6 +438,7 @@
                 console.log('Loaded', allRegions.length, 'regions');
                 
                 renderTable(allRegions);
+                populateRegionDropdown();
             } catch (error) {
                 console.error('Load error:', error);
                 document.getElementById('regions-table-body').innerHTML = 
@@ -424,6 +520,7 @@
             document.getElementById('form-title').textContent = 'Add New Region';
             document.getElementById('save-btn').textContent = '💾 Save Region';
             document.getElementById('hero-preview').classList.add('hidden');
+            document.getElementById('session-uploads-list').innerHTML = '';
         }
 
         function editRegion(id) {
@@ -468,6 +565,10 @@
             } else {
                 hideHeroPreview();
             }
+            
+            // Populate link dropdown
+            var currentRegionId = region.id;
+            populateRegionDropdown(currentRegionId);
             
             showSection('create');
         }
@@ -590,6 +691,154 @@
             input.click();
         }
 
+        // ⭐ NEW: UNIVERSAL FILE UPLOAD ⭐
+        async function uploadUniversalFiles(input) {
+            const files = input.files;
+            if (!files || files.length === 0) return;
+            
+            let uploadedCount = 0;
+            let failedCount = 0;
+            
+            for (const file of files) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('filename', file.name);
+                    formData.append('category', document.getElementById('file-category').value);
+                    
+                    // Get description
+                    var description = document.getElementById('file-description').value;
+                    if (description) {
+                        formData.append('description', description);
+                    }
+                    
+                    // Get public/private setting
+                    var isPublic = document.getElementById('file-is-public').checked ? '1' : '0';
+                    formData.append('is_public', isPublic);
+                    
+                    console.log(`Uploading: ${file.name} (${Math.round(file.size / 1024)} KB)`);
+                    
+                    const response = await fetch('/api/upload/file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        uploadedCount++;
+                        showNotification(`✅ ${file.name} uploaded!`, 'success');
+                        
+                        // Auto-add to appropriate field based on category
+                        const category = document.getElementById('file-category').value;
+                        if (category === 'audio') {
+                            var currentValue = document.getElementById('reg-audio-files').value;
+                            var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
+                            document.getElementById('reg-audio-files').value = newValue;
+                        } else if (category === 'image') {
+                            var currentValue = document.getElementById('reg-gallery-images').value;
+                            var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
+                            document.getElementById('reg-gallery-images').value = newValue;
+                        }
+                        
+                        // Add to session uploads list
+                        addToSessionUploadList(data);
+                    } else {
+                        throw new Error(data.detail || 'Upload failed');
+                    }
+                } catch (error) {
+                    failedCount++;
+                    console.error('Upload error:', error);
+                    showNotification(`❌ Failed: ${file.name}`, 'error');
+                }
+            }
+            
+            showNotification(`📁 Uploaded ${uploadedCount}/${files.length} files`, 'success');
+            document.getElementById('universal-file-upload').value = '';
+        }
+
+        function addToSessionUploadList(fileData) {
+            var container = document.getElementById('session-uploads-list');
+            var item = document.createElement('div');
+            item.className = 'bg-blue-50 p-3 rounded border border-blue-200 text-sm';
+            item.innerHTML = 
+                '✅ ' + fileData.original_name + 
+                ' (' + fileData.file_size_mb + ' MB) • ' + fileData.category.toUpperCase() + 
+                ' <a href="' + fileData.url + '" target="_blank" class="text-[#0077b6] ml-2">🔗 View</a>';
+            container.appendChild(item);
+        }
+
+        // ===============================
+        // FILE MANAGER
+        // ===============================
+        async function loadAllFiles() {
+            try {
+                const response = await fetch('/api/files');
+                allFiles = await response.json();
+                
+                renderFilesGrid(allFiles);
+            } catch (error) {
+                console.error('Load files error:', error);
+                showNotification('Failed to load files', 'error');
+            }
+        }
+
+        function renderFilesGrid(files) {
+            var container = document.getElementById('all-files-grid');
+            
+            if (!files || files.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4 col-span-3">No files uploaded yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = files.map(function(file) {
+                return '<div class="bg-white p-4 rounded border hover:shadow-md transition">' +
+                    '<div class="flex justify-between items-start mb-2">' +
+                        '<span class="font-semibold text-sm truncate">' + file.original_name + '</span>' +
+                        '<button onclick="deleteFile(' + file.id + ')" class="text-red-600 hover:text-red-800 text-xs">🗑️</button>' +
+                    '</div>' +
+                    '<p class="text-xs text-gray-600">' + file.category.toUpperCase() + ' • ' + file.file_size_mb + ' MB</p>' +
+                    (file.description ? '<p class="text-xs text-gray-500 mt-1">' + file.description + '</p>' : '') +
+                    '<div class="mt-2">' +
+                        '<a href="' + file.file_url + '" target="_blank" class="text-[#0077b6] text-xs">🔗 Open File</a>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        function filterFiles() {
+            var search = document.getElementById('file-search').value.toLowerCase();
+            var categoryFilter = document.getElementById('file-filter-category').value;
+            
+            var filtered = allFiles.filter(function(file) {
+                var matchesSearch = file.original_name.toLowerCase().indexOf(search) !== -1 ||
+                    (file.description && file.description.toLowerCase().indexOf(search) !== -1);
+                var matchesCategory = !categoryFilter || file.category === categoryFilter;
+                
+                return matchesSearch && matchesCategory;
+            });
+            
+            renderFilesGrid(filtered);
+        }
+
+        async function deleteFile(fileId) {
+            if (!confirm('Delete this file permanently?')) return;
+            
+            try {
+                const response = await fetch('/api/files/' + fileId, { method: 'DELETE' });
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showNotification('File deleted!', 'success');
+                    loadAllFiles();
+                } else {
+                    throw new Error('Delete failed');
+                }
+            } catch (error) {
+                showNotification('❌ Delete failed', 'error');
+            }
+        }
+
         function showHeroPreview(url) {
             document.getElementById('preview-img').src = url;
             document.getElementById('hero-preview').classList.remove('hidden');
@@ -598,6 +847,74 @@
         function hideHeroPreview() {
             document.getElementById('reg-hero-image').value = '';
             document.getElementById('hero-preview').classList.add('hidden');
+        }
+
+        // ===============================
+        // SECTIONS/MANAGEMENT
+        // ===============================
+        async function loadAllSections() {
+            try {
+                const response = await fetch('/api/sections');
+                allSections = await response.json();
+                
+                var container = document.getElementById('sections-list');
+                container.innerHTML = allSections.map(function(section) {
+                    return '<div class="flex justify-between items-center p-3 bg-gray-50 rounded">' +
+                        '<span class="font-semibold">' + section.name + '</span>' +
+                        '<button onclick="deleteSection(' + section.id + ')" class="text-red-600 text-xs">✖️</button>' +
+                    '</div>';
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load sections:', error);
+            }
+        }
+
+        async function createSection() {
+            var name = document.getElementById('new-section-name').value.trim();
+            if (!name) {
+                alert('Please enter a section name');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('name', name);
+                
+                const response = await fetch('/api/sections', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showNotification('Section created!', 'success');
+                    document.getElementById('new-section-name').value = '';
+                    loadAllSections();
+                } else {
+                    throw new Error(data.detail || 'Failed to create section');
+                }
+            } catch (error) {
+                showNotification('❌ ' + error.message, 'error');
+            }
+        }
+
+        async function deleteSection(sectionId) {
+            if (!confirm('Delete this section?')) return;
+            
+            try {
+                const response = await fetch('/api/sections/' + sectionId, { method: 'DELETE' });
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showNotification('Section deleted!', 'success');
+                    loadAllSections();
+                } else {
+                    throw new Error('Delete failed');
+                }
+            } catch (error) {
+                showNotification('❌ Delete failed', 'error');
+            }
         }
 
         // ===============================
@@ -666,6 +983,24 @@
             setTimeout(function() {
                 notification.classList.add('hidden');
             }, 3000);
+        }
+
+        // ===============================
+        // HELPERS
+        // ===============================
+        function populateRegionDropdown(selectedId) {
+            var select = document.getElementById('file-region-link');
+            select.innerHTML = '<option value="no">No Link (Global)</option>';
+            
+            allRegions.forEach(function(region) {
+                var option = document.createElement('option');
+                option.value = region.id;
+                option.textContent = region.name;
+                if (selectedId && selectedId == region.id) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
         }
     </script>
 </body>
