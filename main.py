@@ -12,19 +12,9 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="EchoStack API")
 
-# Mount all static folders (CSS, JS, AND IMAGES!)
-try:
-    app.mount("/css", StaticFiles(directory="css"), name="css")
-    app.mount("/js", StaticFiles(directory="js"), name="js")
-    app.mount("/images", StaticFiles(directory="images"), name="images")  # ← THIS IS THE FIX!
-except:
-    pass
-
 @app.get("/")
 def read_root():
-    if os.path.exists("index.html"):
-        return FileResponse("index.html")
-    return {"message": "Welcome to EchoStack"}
+    return FileResponse("index.html")
 
 @app.get("/manifest.json")
 def serve_manifest():
@@ -34,22 +24,15 @@ def serve_manifest():
         return JSONResponse(content=content, media_type="application/json")
     raise HTTPException(status_code=404, detail="Manifest not found")
 
-@app.get("/regions/{region_name}")
-def region_page(region_name: str):
-    file_path = f"regions/{region_name}.html"
-    if os.path.exists(file_path):
-        return FileResponse(file_path)
-    raise HTTPException(status_code=404, detail="Region page not found")
-
 @app.get("/api/regions")
 def get_regions(db: Session = Depends(get_db)):
     regions = db.query(models.Region).all()
     if not regions:
         return [
             {"id": 1, "name": "Ashanti", "overview": "Heart of the Ashanti Kingdom"},
-            {"id": 2, "name": "Eastern", "overview": "Sixth largest region by area"},
-            {"id": 3, "name": "Savannah", "overview": "Ghana's largest region by land"},
-            {"id": 4, "name": "North East", "overview": "Northern Ghana landscapes"},
+            {"id": 2, "name": "Eastern", "overview": "Mountainous terrain and dams"},
+            {"id": 3, "name": "Volta", "overview": "Lake Volta and mountains"},
+            {"id": 4, "name": "Greater Accra", "overview": "Capital region"},
         ]
     return [{"id": r.id, "name": r.name, "overview": r.overview} for r in regions]
 
@@ -63,4 +46,4 @@ def create_region(name: str, overview: str, source: str = "", db: Session = Depe
 
 @app.get("/test")
 def test_endpoint():
-    return {"test": "passed", "message": "Database connection successful"}
+    return {"test": "passed"}
