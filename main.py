@@ -12,9 +12,11 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="EchoStack API")
 
+# Mount all static folders (CSS, JS, AND IMAGES!)
 try:
     app.mount("/css", StaticFiles(directory="css"), name="css")
     app.mount("/js", StaticFiles(directory="js"), name="js")
+    app.mount("/images", StaticFiles(directory="images"), name="images")  # ← THIS IS THE FIX!
 except:
     pass
 
