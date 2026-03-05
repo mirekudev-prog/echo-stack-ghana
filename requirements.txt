@@ -1,4 +1,4 @@
 fastapi==0.95.0
 uvicorn==0.22.0
-sqlalchemy==2.0.7
+sqlalchemy==1.4.48
 python-multipart==0.0.6
