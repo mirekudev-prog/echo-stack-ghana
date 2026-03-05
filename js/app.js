@@ -1,6 +1,6 @@
 const API_URL = 'https://echo-stack-ghana.onrender.com/api/regions';
 
-// All 16 Official Regions
+// All 16 Official Regions with CENTER POINT positions
 const ghanaRegions = [
     "Upper West", "Upper East", "North East", "Northern", 
     "Savannah", "Bono", "Bono East", "Ahafo",
@@ -27,48 +27,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function createHotspots() {
     return ghanaRegions.map((region, index) => {
-        // REFINED positions based on visual map layout
+        // Circle center positions (X%, Y%) based on your map image
         const positions = [
-            {x: 8, y: 10, w: 15, h: 12},   // Upper West      ← Top-left area
-            {x: 48, y: 8, w: 12, h: 10},   // Upper East      ← Top-center
-            {x: 60, y: 12, w: 12, h: 10},  // North East      ← Top-right
-            {x: 45, y: 22, w: 20, h: 15},  // Northern        ← Large central-top
-            {x: 25, y: 30, w: 25, h: 18},  // Savannah        ← Left-center
-            {x: 15, y: 45, w: 15, h: 14},  // Bono            ← Mid-left
-            {x: 40, y: 48, w: 18, h: 14},  // Bono East       ← Center
-            {x: 30, y: 56, w: 10, h: 10},  // Ahafo           ← Small, near Bono
-            {x: 35, y: 65, w: 20, h: 14},  // Ashanti         ← Center-bottom
-            {x: 48, y: 78, w: 15, h: 10},  // Central         ← South-center
-            {x: 5, y: 65, w: 12, h: 18},   // Western         ← Bottom-left
-            {x: 12, y: 60, w: 8, h: 10},   // Western North   ← Above Western
-            {x: 65, y: 65, w: 18, h: 16},  // Eastern         ← Right side
-            {x: 82, y: 55, w: 12, h: 30},  // Volta           ← Long eastern strip
-            {x: 68, y: 82, w: 8, h: 8},    // Greater Accra   ← Small coastal
-            {x: 55, y: 42, w: 10, h: 10}   // Oti             ← Between Eastern/Northern
+            {x: 18, y: 25},   // Upper West      ← Top-left corner
+            {x: 52, y: 15},   // Upper East      ← Top-center
+            {x: 65, y: 18},   // North East      ← Top-right
+            {x: 55, y: 30},   // Northern        ← Center-top (large region)
+            {x: 35, y: 40},   // Savannah        ← Left-center
+            {x: 22, y: 55},   // Bono            ← Mid-left
+            {x: 45, y: 55},   // Bono East       ← Center
+            {x: 32, y: 62},   // Ahafo           ← Small, near Bono
+            {x: 42, y: 72},   // Ashanti         ← Center-bottom
+            {x: 52, y: 85},   // Central         ← South-center
+            {x: 12, y: 75},   // Western         ← Bottom-left
+            {x: 18, y: 68},   // Western North   ← Above Western
+            {x: 72, y: 72},   // Eastern         ← Right side
+            {x: 88, y: 65},   // Volta           ← Long eastern strip
+            {x: 70, y: 90},   // Greater Accra   ← Small coastal city
+            {x: 58, y: 50}    // Oti             ← Between Eastern/Northern
         ];
         
-        return `<div class="region-hotspot" data-region="${region}" 
-                    style="left:${positions[index].x}%;top:${positions[index].y}%;width:${positions[index].w}%;height:${positions[index].h}%;"
-                    title="Click ${region}"></div>`;
+        return `<div class="region-circle" data-region="${region}" 
+                    style="left:${positions[index].x}%;top:${positions[index].y}%;"
+                    title="Click ${region}">
+                    <span class="circle-label">${region}</span>
+                </div>`;
     }).join('');
 }
 
 function addMapInteractions() {
-    document.querySelectorAll('.region-hotspot').forEach(hotspot => {
-        hotspot.addEventListener('click', async (e) => {
-            const regionName = e.target.getAttribute('data-region');
+    document.querySelectorAll('.region-circle').forEach(circle => {
+        circle.addEventListener('click', async (e) => {
+            const regionName = e.currentTarget.getAttribute('data-region');
             
             console.log('✅ Clicked:', regionName);
             
             // Clear all highlights
-            document.querySelectorAll('.region-hotspot').forEach(h => {
-                h.classList.remove('selected');
-                h.style.opacity = '0.3';
+            document.querySelectorAll('.region-circle').forEach(c => {
+                c.classList.remove('selected');
+                c.style.transform = 'scale(1)';
             });
             
             // Highlight selected
-            e.target.classList.add('selected');
-            e.target.style.opacity = '1';
+            e.currentTarget.classList.add('selected');
+            e.currentTarget.style.transform = 'scale(1.5)';
             
             // Search for this region
             await filterRegions(regionName);
@@ -78,13 +80,15 @@ function addMapInteractions() {
         });
         
         // Hover effects
-        hotspot.addEventListener('mouseenter', () => {
-            hotspot.style.opacity = '0.7';
+        circle.addEventListener('mouseenter', () => {
+            circle.style.transform = 'scale(1.2)';
+            circle.querySelector('.circle-label').style.opacity = '1';
         });
         
-        hotspot.addEventListener('mouseleave', () => {
-            if (!hotspot.classList.contains('selected')) {
-                hotspot.style.opacity = '0.3';
+        circle.addEventListener('mouseleave', () => {
+            if (!circle.classList.contains('selected')) {
+                circle.style.transform = 'scale(1)';
+                circle.querySelector('.circle-label').style.opacity = '0';
             }
         });
     });
@@ -151,4 +155,4 @@ document.getElementById('search-bar')?.addEventListener('input', async (e) => {
     }
 });
 
-console.log('✅ Interactive map loaded!');
+console.log('✅ Interactive circular hotspot map loaded!');
