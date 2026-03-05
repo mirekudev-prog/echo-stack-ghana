@@ -72,16 +72,22 @@ async def admin_page(request: Request):
 
 @app.post("/api/auth/login")
 async def login(request: Request):
-    """Check security answer from form data"""
-    from fastapi import Form
-    answer = await request.form()
-    answer_value = answer.get('answer', '')
+    """Check security answer"""
+    # SECURITY ANSWER - TYPE EXACTLY THIS: THE ADMIN
+    CORRECT_ANSWER = "THE ADMIN"
     
-    if CORRECT_ANSWER.lower() in answer_value.lower().replace(" ", ""):
+    form_data = await request.form()
+    answer = form_data.get('answer', '').strip().upper()
+    
+    print(f"Login attempt: Answer = '{answer}'")  # Debug log
+    
+    if answer == CORRECT_ANSWER:
         response = JSONResponse(content={"success": True, "token": "ADMIN_AUTHORIZED"})
         response.set_cookie(key="admin_session", value="ADMIN_AUTHORIZED", max_age=86400, path="/")
+        print("✅ Login SUCCESS!")
         return response
     
+    print("❌ Login FAILED!")
     raise HTTPException(status_code=403, detail="Incorrect answer")
 
 @app.post("/api/auth/logout")
