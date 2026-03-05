@@ -22,7 +22,7 @@ class Region(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-# NEW: Track all uploaded files
+# NEW: Track uploaded files
 class UploadedFile(Base):
     __tablename__ = "uploaded_files"
     
@@ -30,17 +30,17 @@ class UploadedFile(Base):
     filename = Column(String(255), nullable=False)
     original_name = Column(String(255))
     file_path = Column(String(500), nullable=False)
-    file_size = Column(Integer)  # in bytes
+    file_size = Column(Integer)
     mime_type = Column(String(100))
-    category = Column(String(50))  # video, audio, image, document, other
-    region_id = Column(Integer, ForeignKey('regions.id'), nullable=True)  # Optional link to region
+    category = Column(String(50))
+    region_id = Column(Integer, ForeignKey('regions.id'), nullable=True)
     description = Column(Text)
     uploaded_by = Column(String(100))
-    is_public = Column(Integer, default=1)  # 1 = public, 0 = private
+    is_public = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-# NEW: For dynamic sections/categories
+# NEW: Dynamic sections
 class Section(Base):
     __tablename__ = "sections"
     
