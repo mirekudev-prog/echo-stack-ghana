@@ -4,7 +4,6 @@ const urlsToCache = [
     '/index.html',
     '/manifest.json',
     '/echostack-logo.png'
-    // NOTE: /admin is intentionally excluded — it requires auth and will fail caching
 ];
 
 self.addEventListener('install', event => {
@@ -13,7 +12,6 @@ self.addEventListener('install', event => {
             .then(cache => cache.addAll(urlsToCache))
             .catch(err => console.warn('Cache install error (non-fatal):', err))
     );
-    // Force the new SW to activate immediately
     self.skipWaiting();
 });
 
@@ -21,15 +19,12 @@ self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
+                cacheNames.map(name => {
+                    if (name !== CACHE_NAME) return caches.delete(name);
                 })
             );
         })
     );
-    // Take control of all open clients immediately
     self.clients.claim();
 });
 
@@ -39,3 +34,11 @@ self.addEventListener('fetch', event => {
             .then(response => response || fetch(event.request))
     );
 });
+```
+
+---
+
+### 📄 File 3: `admin_dashboard.html`
+Find the line near the top that says:
+```
+<!-- ✅ FIX: Google Fonts loaded as <link> tags...
