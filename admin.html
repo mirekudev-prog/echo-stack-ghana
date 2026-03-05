@@ -8,36 +8,55 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
         
-        /* ECHOSTACK BRAND COLORS */
+        /* ECHOSTACK BRAND COLORS (LOCKED!) */
         :root {
-            --brand-dark: #1a1e29;
-            --brand-blue: #0077b6;
-            --brand-light-gray: #f5f5f5;
-            --brand-white: #ffffff;
+            --brand-dark: #1a1e29 !important;
+            --brand-blue: #0077b6 !important;
+            --brand-light-gray: #f5f5f5 !important;
+            --brand-white: #ffffff !important;
         }
         
         body {
-            font-family: 'Georgia', serif;
-            background-color: var(--brand-white);
-            color: var(--brand-dark);
+            font-family: 'Georgia', serif !important;
+            background-color: var(--brand-white) !important;
+            color: var(--brand-dark) !important;
         }
         
-        .serif { font-family: 'Georgia', serif; }
-        .sans-serif { font-family: 'Inter', sans-serif; }
+        .serif { font-family: 'Georgia', serif !important; }
+        .sans-serif { font-family: 'Inter', sans-serif !important; }
+        
+        /* FORCE LINKS TO USE BRAND COLOR ON HOVER */
+        a {
+            color: var(--brand-dark) !important;
+            transition: color 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--brand-blue) !important;
+        }
+        
+        /* BUTTONS */
+        button {
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body class="antialiased">
     
     <!-- HEADER -->
-    <header class="border-b border-gray-200 py-6 bg-white" style="border-color: #e0e0e0;">
+    <header class="border-b border-gray-200 py-6 bg-white" style="border-color: #e0e0e0 !important;">
         <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
-            <h1 class="text-3xl font-bold tracking-tight" style="color: var(--brand-dark);">
+            <h1 class="text-3xl font-bold tracking-tight" style="color: #1a1e29 !important;">
                 EchoStack 
-                <span class="text-gray-400 text-lg font-normal">| Admin</span>
+                <span style="color: #a0a0a0 !important; font-size: 1rem; font-weight: normal;">| Admin</span>
             </h1>
             <nav class="flex gap-6 text-sm">
-                <a href="/" class="hover:text-[var(--brand-blue)]" style="color: var(--brand-dark);">← View Site</a>
-                <a href="/admin" class="font-bold" style="color: var(--brand-blue);">Admin Panel</a>
+                <a href="/" class="hover:text-[#0077b6] !important" style="color: #1a1e29 !important;">← View Site</a>
+                <a href="/admin" class="font-bold hover:text-[#0077b6] !important" style="color: #0077b6 !important;">Admin Panel</a>
             </nav>
         </div>
     </header>
@@ -47,26 +66,26 @@
         
         <!-- DASHBOARD OVERVIEW -->
         <section class="mb-12">
-            <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm" style="border-color: #e0e0e0;">
-                <h2 class="text-2xl font-bold mb-2" style="color: var(--brand-dark);">Content Dashboard</h2>
+            <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm" style="border-color: #e0e0e0 !important;">
+                <h2 class="text-2xl font-bold mb-2" style="color: #1a1e29 !important;">Content Dashboard</h2>
                 <p class="text-gray-600 mb-6">Manage all 16 regions of Ghana's heritage archive.</p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0;">
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0 !important;">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Total Regions</p>
-                        <p class="text-3xl font-bold" style="color: var(--brand-dark);" id="total-regions">16</p>
+                        <p class="text-3xl font-bold" style="color: #1a1e29 !important;" id="total-regions">16</p>
                     </div>
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0;">
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0 !important;">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Completed</p>
-                        <p class="text-3xl font-bold" style="color: var(--brand-dark);" id="completed-count">0</p>
+                        <p class="text-3xl font-bold" style="color: #1a1e29 !important;" id="completed-count">0</p>
                     </div>
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0;">
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0 !important;">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Pending Images</p>
-                        <p class="text-3xl font-bold" style="color: var(--brand-dark);" id="pending-images">16</p>
+                        <p class="text-3xl font-bold" style="color: #1a1e29 !important;" id="pending-images">16</p>
                     </div>
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0;">
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0 !important;">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Last Updated</p>
-                        <p class="text-lg font-bold" style="color: var(--brand-dark);" id="last-updated">—</p>
+                        <p class="text-lg font-bold" style="color: #1a1e29 !important;" id="last-updated">—</p>
                     </div>
                 </div>
             </div>
@@ -77,23 +96,21 @@
             
             <!-- LEFT: REGION LIST -->
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden" style="border-color: #e0e0e0;">
-                    <div class="p-4 border-b border-gray-200 bg-gray-50" style="border-color: #e0e0e0;">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden" style="border-color: #e0e0e0 !important;">
+                    <div class="p-4 border-b border-gray-200 bg-gray-50" style="border-color: #e0e0e0 !important;">
                         <input type="text" id="search-regions" placeholder="Search regions..." 
-                               class="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-black"
-                               style="border-color: #d0d0d0; color: var(--brand-dark);">
+                               class="w-full p-2 border rounded text-sm focus:outline-none focus:border-[#0077b6]"
+                               style="border-color: #d0d0d0 !important; color: #1a1e29 !important; caret-color: #0077b6 !important;">
                     </div>
-                    <div id="region-list" class="divide-y divide-gray-200 max-h-[500px] overflow-y-auto" style="border-top-color: #e0e0e0;">
-                        <!-- Will be filled by JavaScript -->
-                    </div>
+                    <div id="region-list" class="divide-y divide-gray-200 max-h-[500px] overflow-y-auto" style="border-top-color: #e0e0e0 !important;"></div>
                 </div>
             </div>
 
             <!-- RIGHT: EDIT FORM -->
             <div class="lg:col-span-2">
-                <div id="edit-form" class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm hidden" style="border-color: #e0e0e0;">
+                <div id="edit-form" class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm hidden" style="border-color: #e0e0e0 !important;">
                     <div class="flex justify-between items-start mb-6">
-                        <h2 class="text-2xl font-bold" style="color: var(--brand-dark);">Edit Region</h2>
+                        <h2 class="text-2xl font-bold" style="color: #1a1e29 !important;">Edit Region</h2>
                         <button onclick="closeEditor()" class="text-gray-500 hover:text-black">×</button>
                     </div>
                     
@@ -106,38 +123,38 @@
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Region Name *</label>
-                                    <input type="text" id="name" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none" 
-                                           style="border-color: #d0d0d0; color: var(--brand-dark);">
+                                    <label class="block text-sm font-medium mb-1" style="color: #1a1e29 !important;">Region Name *</label>
+                                    <input type="text" id="name" class="w-full p-3 border rounded-lg focus:outline-none focus:border-[#0077b6]" 
+                                           style="border-color: #d0d0d0 !important; color: #1a1e29 !important;">
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Capital City *</label>
-                                    <input type="text" id="capital" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
-                                           style="border-color: #d0d0d0; color: var(--brand-dark);">
+                                    <label class="block text-sm font-medium mb-1" style="color: #1a1e29 !important;">Capital City *</label>
+                                    <input type="text" id="capital" class="w-full p-3 border rounded-lg focus:outline-none focus:border-[#0077b6]"
+                                           style="border-color: #d0d0d0 !important; color: #1a1e29 !important;">
                                 </div>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Population</label>
-                                    <input type="text" id="population" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
-                                           style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="e.g., 5,440,463">
+                                    <label class="block text-sm font-medium mb-1" style="color: #1a1e29 !important;">Population</label>
+                                    <input type="text" id="population" class="w-full p-3 border rounded-lg focus:outline-none focus:border-[#0077b6]"
+                                           style="border-color: #d0d0d0 !important; color: #1a1e29 !important;" placeholder="e.g., 5,440,463">
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Terrain/Elevation</label>
-                                    <input type="text" id="terrain" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
-                                           style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="e.g., Highland (200-600m)">
+                                    <label class="block text-sm font-medium mb-1" style="color: #1a1e29 !important;">Terrain/Elevation</label>
+                                    <input type="text" id="terrain" class="w-full p-3 border rounded-lg focus:outline-none focus:border-[#0077b6]"
+                                           style="border-color: #d0d0d0 !important; color: #1a1e29 !important;" placeholder="e.g., Highland (200-600m)">
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Description -->
                         <div>
-                            <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Heritage Description *</label>
-                            <textarea id="description" rows="5" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
-                                      style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="Write about this region's cultural significance, history, landmarks..."></textarea>
+                            <label class="block text-sm font-medium mb-1" style="color: #1a1e29 !important;">Heritage Description *</label>
+                            <textarea id="description" rows="5" class="w-full p-3 border rounded-lg focus:outline-none focus:border-[#0077b6]"
+                                      style="border-color: #d0d0d0 !important; color: #1a1e29 !important;" placeholder="Write about this region's cultural significance, history, landmarks..."></textarea>
                         </div>
                         
                         <!-- Images -->
@@ -146,20 +163,20 @@
                             
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Hero Image URL</label>
-                                    <input type="text" id="hero-image" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
-                                           style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="/images/region-hero.jpg">
+                                    <label class="block text-sm font-medium mb-1" style="color: #1a1e29 !important;">Hero Image URL</label>
+                                    <input type="text" id="hero-image" class="w-full p-3 border rounded-lg focus:outline-none focus:border-[#0077b6]"
+                                           style="border-color: #d0d0d0 !important; color: #1a1e29 !important;" placeholder="/images/region-hero.jpg">
                                     <p class="text-xs text-gray-500 mt-1">Place image in /images folder first</p>
                                 </div>
                                 
                                 <div id="image-preview" class="hidden">
-                                    <img id="preview-img" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg border border-gray-200" style="border-color: #e0e0e0;">
+                                    <img id="preview-img" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg border" style="border-color: #e0e0e0 !important;">
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Gallery Images (comma-separated URLs)</label>
-                                    <textarea id="gallery-images" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
-                                              style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="/images/img1.jpg, /images/img2.jpg"></textarea>
+                                    <label class="block text-sm font-medium mb-1" style="color: #1a1e29 !important;">Gallery Images (comma-separated URLs)</label>
+                                    <textarea id="gallery-images" rows="2" class="w-full p-3 border rounded-lg focus:outline-none focus:border-[#0077b6]"
+                                              style="border-color: #d0d0d0 !important; color: #1a1e29 !important;" placeholder="/images/img1.jpg, /images/img2.jpg"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -169,58 +186,58 @@
                             <h3 class="text-sm font-semibold uppercase text-gray-500 mb-4">SEO & Meta</h3>
                             
                             <div>
-                                <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Meta Description</label>
-                                <textarea id="meta-description" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
-                                          style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="Brief description for search engines..."></textarea>
+                                <label class="block text-sm font-medium mb-1" style="color: #1a1e29 !important;">Meta Description</label>
+                                <textarea id="meta-description" rows="2" class="w-full p-3 border rounded-lg focus:outline-none focus:border-[#0077b6]"
+                                          style="border-color: #d0d0d0 !important; color: #1a1e29 !important;" placeholder="Brief description for search engines..."></textarea>
                             </div>
                             
                             <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Featured Story (Optional)</label>
-                                <input type="text" id="featured-story" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
-                                       style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="Title of featured article">
+                                <label class="block text-sm font-medium mb-1" style="color: #1a1e29 !important;">Featured Story (Optional)</label>
+                                <input type="text" id="featured-story" class="w-full p-3 border rounded-lg focus:outline-none focus:border-[#0077b6]"
+                                       style="border-color: #d0d0d0 !important; color: #1a1e29 !important;" placeholder="Title of featured article">
                             </div>
                         </div>
                         
                         <!-- Status Toggle -->
-                        <div class="flex items-center gap-3 pt-4 border-t border-gray-200" style="border-color: #e0e0e0;">
-                            <input type="checkbox" id="is-active" checked class="w-4 h-4 text-[var(--brand-blue)]" style="accent-color: var(--brand-blue);">
-                            <label for="is-active" class="text-sm font-medium" style="color: var(--brand-dark);">Active (Show on website)</label>
+                        <div class="flex items-center gap-3 pt-4 border-t border-gray-200" style="border-color: #e0e0e0 !important;">
+                            <input type="checkbox" id="is-active" checked class="w-4 h-4 accent-[#0077b6]" style="accent-color: #0077b6 !important;">
+                            <label for="is-active" class="text-sm font-medium" style="color: #1a1e29 !important;">Active (Show on website)</label>
                         </div>
                     </div>
                     
                     <!-- ACTION BUTTONS -->
-                    <div class="flex gap-4 mt-8 pt-6 border-t border-gray-200" style="border-color: #e0e0e0;">
-                        <button onclick="saveRegion()" class="flex-1 py-3 rounded-lg font-bold transition"
-                                style="background-color: var(--brand-dark); color: white;">
+                    <div class="flex gap-4 mt-8 pt-6 border-t border-gray-200" style="border-color: #e0e0e0 !important;">
+                        <button onclick="saveRegion()" class="flex-1 py-3 rounded-lg font-bold transition hover:opacity-80"
+                                style="background-color: #1a1e29 !important; color: white !important;">
                             💾 Save Changes
                         </button>
-                        <button onclick="publishChanges()" class="py-3 px-6 rounded-lg font-bold transition border"
-                                style="border-color: var(--brand-dark); color: var(--brand-dark);">
+                        <button onclick="publishChanges()" class="py-3 px-6 rounded-lg font-bold transition hover:bg-gray-50 border"
+                                style="border-color: #1a1e29 !important; color: #1a1e29 !important;">
                             ✨ Publish
                         </button>
                     </div>
                 </div>
                 
                 <!-- EMPTY STATE -->
-                <div id="empty-state" class="bg-white p-16 rounded-lg border border-gray-200 shadow-sm text-center" style="border-color: #e0e0e0;">
+                <div id="empty-state" class="bg-white p-16 rounded-lg border border-gray-200 shadow-sm text-center" style="border-color: #e0e0e0 !important;">
                     <div class="mb-6 text-6xl">🗺️</div>
-                    <h3 class="text-xl font-bold mb-2" style="color: var(--brand-dark);">Select A Region</h3>
+                    <h3 class="text-xl font-bold mb-2" style="color: #1a1e29 !important;">Select A Region</h3>
                     <p class="text-gray-600">Click on any region from the list to edit its details, upload images, and manage content.</p>
                 </div>
             </div>
         </section>
         
         <!-- EXPORT SECTION -->
-        <section class="mt-12 bg-white p-8 rounded-lg border border-gray-200 shadow-sm" style="border-color: #e0e0e0;">
-            <h2 class="text-xl font-bold mb-4" style="color: var(--brand-dark);">Export Data</h2>
+        <section class="mt-12 bg-white p-8 rounded-lg border border-gray-200 shadow-sm" style="border-color: #e0e0e0 !important;">
+            <h2 class="text-xl font-bold mb-4" style="color: #1a1e29 !important;">Export Data</h2>
             <p class="text-gray-600 mb-4">Download all region data as JSON or CSV for backup.</p>
             <div class="flex gap-4">
-                <button onclick="exportJSON()" class="px-6 py-3 rounded-lg font-semibold border" 
-                        style="border-color: var(--brand-dark); color: var(--brand-dark);">
+                <button onclick="exportJSON()" class="px-6 py-3 rounded-lg font-semibold border hover:bg-gray-50" 
+                        style="border-color: #1a1e29 !important; color: #1a1e29 !important;">
                     📥 Export JSON
                 </button>
-                <button onclick="exportCSV()" class="px-6 py-3 rounded-lg font-semibold border"
-                        style="border-color: var(--brand-dark); color: var(--brand-dark);">
+                <button onclick="exportCSV()" class="px-6 py-3 rounded-lg font-semibold border hover:bg-gray-50"
+                        style="border-color: #1a1e29 !important; color: #1a1e29 !important;">
                     📄 Export CSV
                 </button>
             </div>
@@ -229,15 +246,20 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="border-t border-gray-200 py-8 mt-12" style="border-color: #e0e0e0; background-color: var(--brand-light-gray);">
+    <footer class="border-t border-gray-200 py-8 mt-12" style="border-color: #e0e0e0 !important; background-color: #f5f5f5 !important;">
         <div class="max-w-6xl mx-auto px-4 text-center">
-            <p class="text-sm" style="color: var(--brand-dark);">&copy; 2026 EchoStack Admin. All rights reserved.</p>
+            <p class="text-sm" style="color: #1a1e29 !important;">&copy; 2026 EchoStack Admin. All rights reserved.</p>
+            <div class="flex justify-center gap-4 mt-4 text-sm">
+                <a href="#" class="hover:text-[#0077b6]" style="color: #1a1e29 !important;">About</a>
+                <a href="#" class="hover:text-[#0077b6]" style="color: #1a1e29 !important;">Contact</a>
+                <a href="#" class="hover:text-[#0077b6]" style="color: #1a1e29 !important;">Privacy</a>
+            </div>
         </div>
     </footer>
 
-    <!-- JAVASCRIPT (SAME AS BEFORE - NO COLOR CHANGES NEEDED) -->
+    <!-- JAVASCRIPT -->
     <script>
-        const API_URL = 'https://echo-stack-ghana.onrender.com/api/regions';
+        const API_URL = 'https://echo-stack-ghana.onrender.com/api/regions';  // FIXED: Removed trailing spaces!
         let allRegions = [];
 
         async function loadRegions() {
@@ -264,15 +286,14 @@
             
             regions.forEach((region, index) => {
                 const item = document.createElement('div');
-                item.className = 'p-4 hover:bg-gray-50 cursor-pointer transition border-l-4'
-                                  .replace(/border-l-\d+/, 'border-l-[--brand-blue]');
-                item.style.borderLeftColor = '#0077b6'; // Brand blue
+                item.className = 'p-4 hover:bg-gray-50 cursor-pointer transition border-l-4';
+                item.style.borderLeftColor = '#0077b6';  // Brand Blue
                 item.onclick = () => openEditor(region);
                 
                 item.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="font-bold text-sm" style="color: var(--brand-dark);">${region.name}</p>
+                            <p class="font-bold text-sm" style="color: #1a1e29 !important;">${region.name}</p>
                             <p class="text-xs text-gray-500 truncate max-w-[150px]">${region.description || region.overview || 'No description'}</p>
                         </div>
                         <span class="text-xs bg-gray-100 px-2 py-1 rounded">#${index + 1}</span>
