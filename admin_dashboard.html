@@ -11,7 +11,8 @@
 <title>EchoStack Admin Dashboard</title>
 <!-- PWA Meta Tags -->
 <meta name="theme-color" content="#1a1e29">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- ✅ FIX: replaced deprecated apple-mobile-web-app-capable with mobile-web-app-capable -->
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EchoStack">
 <!-- Favicon & Icons -->
@@ -19,11 +20,16 @@
 <link rel="apple-touch-icon" href="/echostack-logo.png">
 <!-- PWA Manifest -->
 <link rel="manifest" href="/manifest.json">
+<!-- ✅ FIX: Google Fonts loaded as <link> tags instead of @import inside <style>
+     @import inside <style> is blocked by Render's Content Security Policy (CSP),
+     causing the 403 Forbidden error. Using <link> tags works correctly. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Styles -->
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
 :root {
 --brand-dark: #1a1e29;
 --brand-blue: #0077b6;
@@ -220,10 +226,9 @@ border-color: var(--brand-blue) !important;
 <button type="button" onclick="uploadFile('audio')" class="btn-secondary px-4 py-2 rounded-lg mt-2">📁 Upload Audio</button>
 </div>
 </div>
-<!-- ⭐ NEW: UNIVERSAL FILE UPLOAD SECTION ⭐ -->
+<!-- UNIVERSAL FILE UPLOAD SECTION -->
 <div class="border-t pt-6 mt-6">
-<h3 class="text-lg font-bold mb-4">📦 Universal File Upload (Videos, Documents, Any Type!) 🆕</h3>
-<!-- Drag & Drop Zone -->
+<h3 class="text-lg font-bold mb-4">📦 Universal File Upload (Videos, Documents, Any Type!)</h3>
 <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#0077b6] transition"
 onclick="document.getElementById('universal-file-upload').click()">
 <p class="text-gray-600 text-sm">Click to select OR drag & drop files here</p>
@@ -231,7 +236,6 @@ onclick="document.getElementById('universal-file-upload').click()">
 <p class="text-xs text-blue-600 mt-2">Max size: 50MB per file</p>
 <input type="file" id="universal-file-upload" multiple class="hidden" onchange="uploadUniversalFiles(this)">
 </div>
-<!-- File Upload Options -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 <div>
 <label class="block text-sm font-medium mb-2">File Category</label>
@@ -261,7 +265,6 @@ onclick="document.getElementById('universal-file-upload').click()">
 </label>
 </div>
 </div>
-<!-- Uploaded Files List for This Session -->
 <div id="session-uploads-list" class="mt-4 space-y-2"></div>
 </div>
 <!-- Additional Info -->
@@ -283,7 +286,7 @@ onclick="document.getElementById('universal-file-upload').click()">
 </form>
 </div>
 </section>
-<!-- FILES MANAGER SECTION (NEW) -->
+<!-- FILES MANAGER SECTION -->
 <section id="files-manager-section" class="hidden">
 <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-6xl mx-auto">
 <div class="flex justify-between items-start mb-6">
@@ -314,9 +317,6 @@ const API_URL = '/api';
 let allRegions = [];
 let allFiles = [];
 let allSections = [];
-// ===============================
-// INITIALIZATION
-// ===============================
 document.addEventListener('DOMContentLoaded', function() {
 console.log('DOM Ready');
 loadStats();
@@ -328,9 +328,6 @@ if (form) {
 form.addEventListener('submit', handleSave);
 }
 });
-// ===============================
-// HELPER FUNCTION - SAFE TYPE HANDLING
-// ===============================
 function safeSplit(value) {
 if (!value) return [];
 if (Array.isArray(value)) return value.filter(x => x && String(x).trim());
@@ -339,9 +336,6 @@ return value.split(',').map(function(s) { return s.trim(); }).filter(function(s)
 }
 return [];
 }
-// ===============================
-// NAVIGATION
-// ===============================
 function showSection(sectionId) {
 var dashboard = document.getElementById('dashboard-section');
 var create = document.getElementById('create-section');
@@ -364,9 +358,6 @@ create.classList.add('hidden');
 loadAllFiles();
 }
 }
-// ===============================
-// LOAD DATA
-// ===============================
 async function loadStats() {
 try {
 const response = await fetch(API_URL + '/stats');
@@ -383,9 +374,7 @@ async function loadRegions() {
 try {
 console.log('Fetching regions...');
 const response = await fetch(API_URL + '/regions');
-if (!response.ok) {
-throw new Error('HTTP ' + response.status);
-}
+if (!response.ok) throw new Error('HTTP ' + response.status);
 allRegions = await response.json();
 console.log('Loaded', allRegions.length, 'regions');
 renderTable(allRegions);
@@ -421,26 +410,15 @@ row.innerHTML =
 '<button class="edit-btn mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button>' +
 '<button class="delete-btn text-red-600 hover:underline text-sm">🗑️ Delete</button>' +
 '</td>';
-row.querySelector('.edit-btn').onclick = function(e) {
-e.stopPropagation();
-editRegion(region.id);
-};
-row.querySelector('.delete-btn').onclick = function(e) {
-e.stopPropagation();
-deleteRegion(region.id, region.name);
-};
-row.onclick = function(e) {
-if (!e.target.closest('button')) {
-editRegion(region.id);
-}
-};
+row.querySelector('.edit-btn').onclick = function(e) { e.stopPropagation(); editRegion(region.id); };
+row.querySelector('.delete-btn').onclick = function(e) { e.stopPropagation(); deleteRegion(region.id, region.name); };
+row.onclick = function(e) { if (!e.target.closest('button')) editRegion(region.id); };
 tbody.appendChild(row);
 } catch (err) {
 console.error('Error rendering region:', err);
 }
 });
 }
-// Search functionality
 document.getElementById('search-regions').addEventListener('input', function(e) {
 var term = e.target.value.toLowerCase();
 var filtered = allRegions.filter(function(r) {
@@ -450,9 +428,6 @@ return r.name.toLowerCase().indexOf(term) !== -1 ||
 });
 renderTable(filtered);
 });
-// ===============================
-// FORM HANDLING
-// ===============================
 function resetForm() {
 document.getElementById('region-form').reset();
 document.getElementById('region-id').value = '';
@@ -462,18 +437,8 @@ document.getElementById('hero-preview').classList.add('hidden');
 document.getElementById('session-uploads-list').innerHTML = '';
 }
 function editRegion(id) {
-console.log('Editing ID:', id);
-var region = null;
-for (var i = 0; i < allRegions.length; i++) {
-if (allRegions[i].id === id) {
-region = allRegions[i];
-break;
-}
-}
-if (!region) {
-alert('Region not found!');
-return;
-}
+var region = allRegions.find(function(r) { return r.id === id; });
+if (!region) { alert('Region not found!'); return; }
 document.getElementById('form-title').textContent = 'Edit: ' + region.name;
 document.getElementById('save-btn').textContent = '💾 Update Region';
 document.getElementById('region-id').value = region.id || '';
@@ -487,18 +452,11 @@ document.getElementById('reg-tags').value = region.tags || '';
 document.getElementById('reg-source').value = region.source || '';
 document.getElementById('reg-overview').value = region.overview || '';
 document.getElementById('reg-hero-image').value = region.hero_image || '';
-var galleryArr = safeSplit(region.gallery_images);
-var audioArr = safeSplit(region.audio_files);
-document.getElementById('reg-gallery-images').value = galleryArr.join(', ');
-document.getElementById('reg-audio-files').value = audioArr.join(', ');
-if (region.hero_image) {
-showHeroPreview(region.hero_image);
-} else {
-hideHeroPreview();
-}
-// Populate link dropdown
-var currentRegionId = region.id;
-populateRegionDropdown(currentRegionId);
+document.getElementById('reg-gallery-images').value = safeSplit(region.gallery_images).join(', ');
+document.getElementById('reg-audio-files').value = safeSplit(region.audio_files).join(', ');
+if (region.hero_image) showHeroPreview(region.hero_image);
+else hideHeroPreview();
+populateRegionDropdown(region.id);
 showSection('create');
 }
 async function handleSave(e) {
@@ -523,18 +481,11 @@ formData.append('overview', document.getElementById('reg-overview').value);
 try {
 var method = regionId ? 'PUT' : 'POST';
 var url = regionId ? API_URL + '/regions/' + regionId : API_URL + '/regions';
-console.log('Saving with:', method, url);
-const response = await fetch(url, {
-method: method,
-body: formData
-});
-if (!response.ok) {
-throw new Error('Server returned ' + response.status);
-}
+const response = await fetch(url, { method: method, body: formData });
+if (!response.ok) throw new Error('Server returned ' + response.status);
 var data = await response.json();
 if (data.success) {
 showNotification('Saved successfully!', 'success');
-// Reload immediately
 await loadRegions();
 await loadStats();
 showSection('dashboard');
@@ -542,7 +493,6 @@ showSection('dashboard');
 throw new Error(data.detail || 'Save failed');
 }
 } catch (error) {
-console.error('Save error:', error);
 showNotification('❌ ' + error.message, 'error');
 } finally {
 submitBtn.disabled = false;
@@ -558,16 +508,11 @@ if (response.ok && data.success) {
 showNotification('Deleted!', 'success');
 loadRegions();
 loadStats();
-} else {
-throw new Error('Delete failed');
-}
+} else throw new Error('Delete failed');
 } catch (error) {
 showNotification('❌ Delete failed', 'error');
 }
 }
-// ===============================
-// FILE UPLOADS
-// ===============================
 async function uploadFile(type) {
 var input = document.createElement('input');
 input.type = 'file';
@@ -587,9 +532,8 @@ if (type === 'hero') {
 document.getElementById('reg-hero-image').value = data.url;
 showHeroPreview(data.url);
 } else {
-var currentValue = document.getElementById('reg-audio-files').value;
-var newValue = currentValue ? currentValue + ', ' + data.url : data.url;
-document.getElementById('reg-audio-files').value = newValue;
+var cur = document.getElementById('reg-audio-files').value;
+document.getElementById('reg-audio-files').value = cur ? cur + ', ' + data.url : data.url;
 }
 showNotification('Uploaded!', 'success');
 }
@@ -599,80 +543,54 @@ showNotification('❌ Upload failed', 'error');
 };
 input.click();
 }
-// ⭐ NEW: UNIVERSAL FILE UPLOAD ⭐
 async function uploadUniversalFiles(input) {
 const files = input.files;
 if (!files || files.length === 0) return;
 let uploadedCount = 0;
-let failedCount = 0;
 for (const file of files) {
 try {
 const formData = new FormData();
 formData.append('file', file);
 formData.append('filename', file.name);
 formData.append('category', document.getElementById('file-category').value);
-// Get description
 var description = document.getElementById('file-description').value;
-if (description) {
-formData.append('description', description);
-}
-// Get public/private setting
-var isPublic = document.getElementById('file-is-public').checked ? '1' : '0';
-formData.append('is_public', isPublic);
-console.log(`Uploading: ${file.name} (${Math.round(file.size / 1024)} KB)`);
-const response = await fetch('/api/upload/file', {
-method: 'POST',
-body: formData
-});
+if (description) formData.append('description', description);
+formData.append('is_public', document.getElementById('file-is-public').checked ? '1' : '0');
+const response = await fetch('/api/upload/file', { method: 'POST', body: formData });
 const data = await response.json();
 if (response.ok && data.success) {
 uploadedCount++;
-showNotification(`✅ ${file.name} uploaded!`, 'success');
-// Auto-add to appropriate field based on category
 const category = document.getElementById('file-category').value;
 if (category === 'audio') {
-var currentValue = document.getElementById('reg-audio-files').value;
-var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
-document.getElementById('reg-audio-files').value = newValue;
+var cur = document.getElementById('reg-audio-files').value;
+document.getElementById('reg-audio-files').value = cur ? cur + ', ' + data.url : data.url;
 } else if (category === 'image') {
-var currentValue = document.getElementById('reg-gallery-images').value;
-var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
-document.getElementById('reg-gallery-images').value = newValue;
+var cur = document.getElementById('reg-gallery-images').value;
+document.getElementById('reg-gallery-images').value = cur ? cur + ', ' + data.url : data.url;
 }
-// Add to session uploads list
 addToSessionUploadList(data);
-} else {
-throw new Error(data.detail || 'Upload failed');
-}
+} else throw new Error(data.detail || 'Upload failed');
 } catch (error) {
-failedCount++;
-console.error('Upload error:', error);
-showNotification(`❌ Failed: ${file.name}`, 'error');
+showNotification('❌ Failed: ' + file.name, 'error');
 }
 }
-showNotification(`📁 Uploaded ${uploadedCount}/${files.length} files`, 'success');
+showNotification('📁 Uploaded ' + uploadedCount + '/' + files.length + ' files', 'success');
 document.getElementById('universal-file-upload').value = '';
 }
 function addToSessionUploadList(fileData) {
 var container = document.getElementById('session-uploads-list');
 var item = document.createElement('div');
 item.className = 'bg-blue-50 p-3 rounded border border-blue-200 text-sm';
-item.innerHTML =
-'✅ ' + fileData.original_name +
-' (' + fileData.file_size_mb + ' MB) • ' + fileData.category.toUpperCase() +
-' <a href="' + fileData.url + '" target="_blank" class="text-[#0077b6] ml-2">🔗 View</a>';
+item.innerHTML = '✅ ' + fileData.original_name + ' (' + fileData.file_size_mb + ' MB) • ' +
+fileData.category.toUpperCase() + ' <a href="' + fileData.url + '" target="_blank" class="text-[#0077b6] ml-2">🔗 View</a>';
 container.appendChild(item);
 }
-// ===============================
-// FILE MANAGER
-// ===============================
 async function loadAllFiles() {
 try {
 const response = await fetch('/api/files');
 allFiles = await response.json();
 renderFilesGrid(allFiles);
 } catch (error) {
-console.error('Load files error:', error);
 showNotification('Failed to load files', 'error');
 }
 }
@@ -690,9 +608,7 @@ return '<div class="bg-white p-4 rounded border hover:shadow-md transition">' +
 '</div>' +
 '<p class="text-xs text-gray-600">' + file.category.toUpperCase() + ' • ' + file.file_size_mb + ' MB</p>' +
 (file.description ? '<p class="text-xs text-gray-500 mt-1">' + file.description + '</p>' : '') +
-'<div class="mt-2">' +
-'<a href="' + file.file_url + '" target="_blank" class="text-[#0077b6] text-xs">🔗 Open File</a>' +
-'</div>' +
+'<div class="mt-2"><a href="' + file.file_url + '" target="_blank" class="text-[#0077b6] text-xs">🔗 Open File</a></div>' +
 '</div>';
 }).join('');
 }
@@ -700,10 +616,9 @@ function filterFiles() {
 var search = document.getElementById('file-search').value.toLowerCase();
 var categoryFilter = document.getElementById('file-filter-category').value;
 var filtered = allFiles.filter(function(file) {
-var matchesSearch = file.original_name.toLowerCase().indexOf(search) !== -1 ||
-(file.description && file.description.toLowerCase().indexOf(search) !== -1);
-var matchesCategory = !categoryFilter || file.category === categoryFilter;
-return matchesSearch && matchesCategory;
+return (file.original_name.toLowerCase().indexOf(search) !== -1 ||
+(file.description && file.description.toLowerCase().indexOf(search) !== -1)) &&
+(!categoryFilter || file.category === categoryFilter);
 });
 renderFilesGrid(filtered);
 }
@@ -712,12 +627,8 @@ if (!confirm('Delete this file permanently?')) return;
 try {
 const response = await fetch('/api/files/' + fileId, { method: 'DELETE' });
 const data = await response.json();
-if (response.ok && data.success) {
-showNotification('File deleted!', 'success');
-loadAllFiles();
-} else {
-throw new Error('Delete failed');
-}
+if (response.ok && data.success) { showNotification('File deleted!', 'success'); loadAllFiles(); }
+else throw new Error('Delete failed');
 } catch (error) {
 showNotification('❌ Delete failed', 'error');
 }
@@ -730,9 +641,6 @@ function hideHeroPreview() {
 document.getElementById('reg-hero-image').value = '';
 document.getElementById('hero-preview').classList.add('hidden');
 }
-// ===============================
-// SECTIONS/MANAGEMENT
-// ===============================
 async function loadAllSections() {
 try {
 const response = await fetch('/api/sections');
@@ -750,25 +658,17 @@ console.error('Failed to load sections:', error);
 }
 async function createSection() {
 var name = document.getElementById('new-section-name').value.trim();
-if (!name) {
-alert('Please enter a section name');
-return;
-}
+if (!name) { alert('Please enter a section name'); return; }
 try {
 const formData = new FormData();
 formData.append('name', name);
-const response = await fetch('/api/sections', {
-method: 'POST',
-body: formData
-});
+const response = await fetch('/api/sections', { method: 'POST', body: formData });
 const data = await response.json();
 if (response.ok && data.success) {
 showNotification('Section created!', 'success');
 document.getElementById('new-section-name').value = '';
 loadAllSections();
-} else {
-throw new Error(data.detail || 'Failed to create section');
-}
+} else throw new Error(data.detail || 'Failed to create section');
 } catch (error) {
 showNotification('❌ ' + error.message, 'error');
 }
@@ -778,19 +678,12 @@ if (!confirm('Delete this section?')) return;
 try {
 const response = await fetch('/api/sections/' + sectionId, { method: 'DELETE' });
 const data = await response.json();
-if (response.ok && data.success) {
-showNotification('Section deleted!', 'success');
-loadAllSections();
-} else {
-throw new Error('Delete failed');
-}
+if (response.ok && data.success) { showNotification('Section deleted!', 'success'); loadAllSections(); }
+else throw new Error('Delete failed');
 } catch (error) {
 showNotification('❌ Delete failed', 'error');
 }
 }
-// ===============================
-// EXPORT/IMPORT
-// ===============================
 async function exportData() {
 try {
 const response = await fetch(API_URL + '/regions');
@@ -814,7 +707,7 @@ var reader = new FileReader();
 reader.onload = async function(e) {
 try {
 var data = JSON.parse(e.target.result);
-const response = await fetch('/api/import/json', {
+await fetch('/api/import/json', {
 method: 'POST',
 headers: {'Content-Type': 'application/json'},
 body: JSON.stringify(data)
@@ -828,9 +721,6 @@ showNotification('❌ Invalid file', 'error');
 reader.readAsText(file);
 input.value = '';
 }
-// ===============================
-// AUTHENTICATION
-// ===============================
 function logout() {
 if (confirm('Logout now?')) {
 fetch('/api/auth/logout', {method: 'POST'});
@@ -838,22 +728,14 @@ document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC
 window.location.href = '/admin';
 }
 }
-// ===============================
-// NOTIFICATIONS
-// ===============================
 function showNotification(message, type) {
 var notification = document.getElementById('notification');
 notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ' +
 (type === 'success' ? 'bg-green-600' : 'bg-red-600');
 notification.textContent = message;
 notification.classList.remove('hidden');
-setTimeout(function() {
-notification.classList.add('hidden');
-}, 3000);
+setTimeout(function() { notification.classList.add('hidden'); }, 3000);
 }
-// ===============================
-// HELPERS
-// ===============================
 function populateRegionDropdown(selectedId) {
 var select = document.getElementById('file-region-link');
 select.innerHTML = '<option value="no">No Link (Global)</option>';
@@ -861,9 +743,7 @@ allRegions.forEach(function(region) {
 var option = document.createElement('option');
 option.value = region.id;
 option.textContent = region.name;
-if (selectedId && selectedId == region.id) {
-option.selected = true;
-}
+if (selectedId && selectedId == region.id) option.selected = true;
 select.appendChild(option);
 });
 }
