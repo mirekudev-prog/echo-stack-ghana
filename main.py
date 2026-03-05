@@ -84,37 +84,32 @@ def logout():
     return response
 
 # ============================================
-# REGION CRUD OPERATIONS - CRITICAL FIX HERE
+# REGION CRUD OPERATIONS
 # ============================================
 @app.get("/api/regions")
 def get_regions(db: Session = Depends(get_db)):
-    """GET all regions - FIXED FORMAT"""
+    """GET all regions"""
     try:
         regions = db.query(models.Region).all()
         
-        # Convert to proper list of dicts
         result = []
         for r in regions:
-            try:
-                item = {
-                    "id": int(r.id),
-                    "name": str(r.name) if r.name else "",
-                    "capital": str(r.capital) if r.capital else "",
-                    "population": str(r.population) if r.population else "",
-                    "terrain": str(r.terrain) if r.terrain else "",
-                    "description": str(r.description) if r.description else "",
-                    "overview": str(r.overview) if r.overview else "",
-                    "category": str(r.category) if r.category else "",
-                    "tags": str(r.tags) if r.tags else "",
-                    "hero_image": str(r.hero_image) if r.hero_image else "",
-                    "gallery_images": str(r.gallery_images) if r.gallery_images else "",
-                    "audio_files": str(r.audio_files) if r.audio_files else "",
-                    "source": str(r.source) if r.source else ""
-                }
-                result.append(item)
-            except Exception as e:
-                print(f"Error processing region {r.id}: {e}")
-                continue
+            item = {
+                "id": int(r.id),
+                "name": str(r.name) if r.name else "",
+                "capital": str(r.capital) if r.capital else "",
+                "population": str(r.population) if r.population else "",
+                "terrain": str(r.terrain) if r.terrain else "",
+                "description": str(r.description) if r.description else "",
+                "overview": str(r.overview) if r.overview else "",
+                "category": str(r.category) if r.category else "",
+                "tags": str(r.tags) if r.tags else "",
+                "hero_image": str(r.hero_image) if r.hero_image else "",
+                "gallery_images": str(r.gallery_images) if r.gallery_images else "",
+                "audio_files": str(r.audio_files) if r.audio_files else "",
+                "source": str(r.source) if r.source else ""
+            }
+            result.append(item)
         
         print(f"✅ Returning {len(result)} regions")
         return result
@@ -320,20 +315,27 @@ def get_stats(db: Session = Depends(get_db)):
         print(f"Stats error: {e}")
         return {"total_regions": 0, "database_size_mb": 0}
 
+# ⚠️⚠️⚠️ THIS IS THE BROKEN FUNCTION - NOW FIXED! ⚠️⚠️⚠️
 @app.post("/api/import/json")
 def import_json(data: dict, db: Session = Depends(get_db)):
     """Import regions from JSON"""
-    if not isinstance(data, list):
-        data = [data]
-    
-    imported = 0
-    for region_data in 
-        try:
-            new_region = models.Region(**region_data)
-            db.add(new_region)
-            imported += 1
-        except:
-            continue
-    
-    db.commit()
-    return {"success": True, "imported": imported}
+    try:
+        # If single object, make it a list
+        if not isinstance(data, list):
+            data = [data]
+        
+        imported = 0
+        for region_data in data:  # ⚠️ FIXED: was missing 'data:'
+            try:
+                new_region = models.Region(**region_data)
+                db.add(new_region)
+                imported += 1
+            except Exception as e:
+                print(f"Failed to import region: {e}")
+                continue
+        
+        db.commit()
+        return {"success": True, "imported": imported}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
