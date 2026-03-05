@@ -1,159 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EchoStack Admin Login</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
-        
-        :root {
-            --brand-dark: #1a1e29 !important;
-            --brand-blue: #0077b6 !important;
-        }
-        
-        body {
-            font-family: 'Georgia', serif !important;
-            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .login-card {
-            background: white;
-            padding: 3rem;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(26, 30, 41, 0.1);
-            max-width: 500px;
-            width: 100%;
-        }
-        
-        .logo-text { color: var(--brand-dark); margin-bottom: 1rem; }
-        
-        .security-question {
-            background: rgba(0, 119, 182, 0.05);
-            border-left: 4px solid var(--brand-blue);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-        
-        .question-text {
-            color: var(--brand-dark);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        
-        input {
-            border-color: #d0d0d0 !important;
-            color: var(--brand-dark) !important;
-        }
-        
-        input:focus {
-            outline: none !important;
-            border-color: var(--brand-blue) !important;
-            box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.1) !important;
-        }
-        
-        button {
-            background-color: var(--brand-blue) !important;
-            color: white !important;
-        }
-        
-        button:hover { opacity: 0.9 !important; }
-    </style>
-</head>
-<body class="antialiased">
-    
-    <div class="login-card">
-        <!-- Logo -->
-        <div class="text-center mb-8">
-            <svg width="48" height="48" viewBox="0 0 60 40" fill="none" style="margin-bottom: 1rem;">
-                <path d="M5 20C5 12 10 5 25 5H35V15H25C20 15 15 17 15 20C15 23 20 25 25 25H35C45 25 55 30 55 40H45C45 35 40 35 35 35H25C10 35 5 28 5 20Z" fill="#1a1e29"/>
-                <path d="M25 25C30 25 35 23 35 20V30C35 30 25 30 25 25Z" fill="#0077b6"/>
-            </svg>
-            <h1 class="logo-text text-2xl font-bold">EchoStack Admin</h1>
-            <p class="text-gray-600 text-sm">Ghana's Heritage Archive Management</p>
-        </div>
-        
-        <!-- Security Question -->
-        <div class="security-question">
-            <p class="question-text">🔐 Security Verification</p>
-            <p class="text-gray-600 text-sm">To protect our heritage archive, please confirm your identity.</p>
-        </div>
-        
-        <!-- Login Form -->
-        <form id="login-form" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium mb-2" style="color: #1a1e29 !important;">
-                    Who are you? 😊
-                </label>
-                <input type="text" id="answer" 
-                       placeholder="Enter your designation"
-                       class="w-full p-3 border rounded-lg focus:outline-none"
-                       required
-                       autocomplete="off">
-            </div>
-            
-            <button type="submit" class="w-full py-3 rounded-lg font-bold transition">
-                🔒 Verify & Access Admin Panel
-            </button>
-        </form>
-        
-        <!-- Error Message (only shows after wrong attempt) -->
-        <div id="error-message" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm text-center">
-            ❌ Incorrect answer. Please try again.
-        </div>
-        
-        <!-- Footer -->
-        <div class="mt-6 pt-6 border-t text-center">
-            <a href="/" class="text-sm text-gray-600 hover:text-[#0077b6]">← Back to Main Site</a>
-        </div>
+<!-- In login.html, the form should be like this -->
+<form id="login-form" class="space-y-4">
+    <div>
+        <label class="block text-sm font-medium mb-2">Who are you? 😊</label>
+        <input type="text" id="answer" 
+               placeholder="Enter designation"
+               class="w-full p-3 border rounded-lg focus:outline-none"
+               required
+               autocomplete="off">
     </div>
+    
+    <button type="submit" class="w-full py-3 rounded-lg font-bold transition">
+        🔒 Verify & Access Admin Panel
+    </button>
+</form>
 
-    <script>
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const answer = document.getElementById('answer').value.trim();
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const errorMsg = document.getElementById('error-message');
-            
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Verifying...';
-            errorMsg.classList.add('hidden');
-            
-            try {
-                const formData = new FormData();
-                formData.append('answer', answer);
-                
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    // Set session token in cookie
-                    document.cookie = `admin_session=${data.token}; path=/; max-age=86400`;
-                    
-                    // Redirect to admin panel
-                    window.location.href = '/admin';
-                } else {
-                    throw new Error('Incorrect answer');
-                }
-            } catch (error) {
-                errorMsg.classList.remove('hidden');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '🔒 Verify & Access Admin Panel';
-                document.getElementById('answer').value = '';
-            }
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const answer = document.getElementById('answer').value.trim();
+    
+    const formData = new FormData();
+    formData.append('answer', answer);
+    
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            body: formData
         });
-    </script>
-</body>
-</html>
+        
+        if (response.ok) {
+            // Set cookie automatically via backend
+            window.location.href = '/admin';
+        } else {
+            alert('❌ Incorrect answer. Try again.');
+        }
+    } catch (error) {
+        alert('❌ Error connecting to server');
+    }
+});
+</script>
