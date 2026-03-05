@@ -6,7 +6,7 @@
     <title>EchoStack - Ghana's Heritage Archive</title>
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#1a1e29">
     <link rel="manifest" href="/manifest.json">
     
     <!-- Tailwind CSS -->
@@ -16,45 +16,50 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
         
-        /* Substack-inspired Typography */
-        .serif { font-family: 'Georgia', serif; }
-        .sans-serif { font-family: 'Inter', sans-serif; }
+        /* ECHOSTACK BRAND COLORS FROM LOGO */
+        :root {
+            --brand-dark: #1a1e29;     /* Dark Gray from logo */
+            --brand-blue: #0077b6;      /* Blue accent from logo */
+            --brand-light-gray: #f5f5f5;
+            --brand-white: #ffffff;
+        }
         
         body {
             font-family: 'Georgia', serif;
-            background-color: #ffffff;
-            color: #1a1a1a;
+            background-color: var(--brand-white);
+            color: var(--brand-dark);
         }
-
+        
+        .serif { font-family: 'Georgia', serif; }
+        .sans-serif { font-family: 'Inter', sans-serif; }
+        
         /* Map SVG Styling */
         .region-path {
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             cursor: pointer;
-            stroke: #e0e0e0;
-            stroke-width: 0.5;
+            stroke: var(--brand-light-gray);
+            stroke-width: 1;
         }
 
         .region-path:hover {
-            stroke: #000000;
-            stroke-width: 1.5;
-            filter: brightness(0.9);
+            stroke: var(--brand-blue);
+            stroke-width: 2;
         }
 
         .region-active {
-            stroke: #000000;
-            stroke-width: 2;
-            fill-opacity: 0.8;
+            stroke: var(--brand-blue);
+            stroke-width: 2.5;
         }
 
         /* Map Labels */
         .map-label {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 700;
             font-family: 'Inter', sans-serif;
             pointer-events: none;
-            fill: #333333;
+            fill: var(--brand-dark);
             paint-order: stroke;
-            stroke: #ffffff;
+            stroke: var(--brand-white);
             stroke-width: 2px;
             stroke-linecap: round;
             stroke-linejoin: round;
@@ -63,14 +68,23 @@
 </head>
 <body class="antialiased">
     
-    <!-- HEADER (Substack Style) -->
-    <header class="border-b border-gray-200 py-6">
+    <!-- HEADER WITH ECHOSTACK LOGO -->
+    <header class="border-b border-gray-200 py-6 bg-white" style="border-color: #e0e0e0;">
         <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
-            <h1 class="text-3xl font-bold tracking-tight">EchoStack</h1>
+            <div class="flex items-center gap-3">
+                <!-- EchoStack Logo Icon (Dark Gray + Blue S Shape) -->
+                <svg width="40" height="40" viewBox="0 0 60 40" fill="none">
+                    <path d="M5 20C5 12 10 5 25 5H35V15H25C20 15 15 17 15 20C15 23 20 25 25 25H35C45 25 55 30 55 40H45C45 35 40 35 35 35H25C10 35 5 28 5 20Z" 
+                          fill="var(--brand-dark)" style="fill: #1a1e29;"/>
+                    <path d="M25 25C30 25 35 23 35 20V30C35 30 25 30 25 25Z" 
+                          fill="var(--brand-blue)" style="fill: #0077b6;"/>
+                </svg>
+                <h1 class="text-3xl font-bold tracking-tight" style="color: var(--brand-dark);">EchoStack</h1>
+            </div>
             <nav class="flex gap-6 text-sm">
-                <a href="/" class="hover:text-black">Home</a>
-                <a href="#" class="hover:text-black">Explore</a>
-                <a href="#" class="hover:text-black">About</a>
+                <a href="/" class="hover:text-[var(--brand-blue)]" style="color: var(--brand-dark);">Home</a>
+                <a href="#" class="hover:text-[var(--brand-blue)]" style="color: var(--brand-dark);">Explore</a>
+                <a href="#" class="hover:text-[var(--brand-blue)]" style="color: var(--brand-dark);">About</a>
             </nav>
         </div>
     </header>
@@ -80,18 +94,18 @@
         
         <!-- INTRO -->
         <section class="mb-12 text-center">
-            <h2 class="text-4xl font-bold mb-4">Ghana's Living Heritage Archive</h2>
+            <h2 class="text-4xl font-bold mb-4" style="color: var(--brand-dark);">Ghana's Living Heritage Archive</h2>
             <p class="text-gray-600 max-w-2xl mx-auto">Explore the cultural stories, landscapes, and history of Ghana's 16 regions through an interactive map experience.</p>
         </section>
 
-        <!-- MAP SECTION -->
+        <!-- MAP SECTION (SVG EMBEDDED - NO EXTERNAL IMAGE!) -->
         <section class="mb-16">
-            <h3 class="text-xl font-semibold mb-6 border-b pb-2">Select A Region</h3>
+            <h3 class="text-xl font-semibold mb-6 border-b pb-2" style="border-color: #e0e0e0;" style="color: var(--brand-dark);">Select A Region</h3>
             
-            <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm">
+            <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm" style="border-color: #e0e0e0;">
                 <svg id="ghana-svg" viewBox="0 0 400 620" class="w-full h-auto max-h-[500px]">
                     <!-- UPPER WEST -->
-                    <path id="upper-west" d="M60,40 L160,50 L165,130 L100,140 L50,110 Z" fill="#f5f5f5" class="region-path" />
+                    <path id="upper-west" d="M60,40 L160,50 L165,130 L100,140 L50,110 Z" fill="#f8f8f8" class="region-path" />
                     <text x="105" y="100" class="map-label">Upper West</text>
                     
                     <!-- UPPER EAST -->
@@ -123,8 +137,8 @@
                     <text x="105" y="455" class="map-label">Ahafo</text>
 
                     <!-- ASHANTI -->
-                    <path id="ashanti" d="M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z" fill="#e0e0e0" class="region-path" />
-                    <text x="240" y="475" class="map-label" style="fill: #000;">Ashanti</text>
+                    <path id="ashanti" d="M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z" fill="#d8d8d8" class="region-path" />
+                    <text x="240" y="475" class="map-label" style="fill: var(--brand-dark);">Ashanti</text>
 
                     <!-- OTI -->
                     <path id="oti" d="M320,320 L370,300 L380,450 L340,450 L330,410 Z" fill="#f0f0f0" class="region-path" />
@@ -136,40 +150,40 @@
 
                     <!-- EASTERN -->
                     <path id="eastern" d="M310,510 L330,410 L340,450 L340,510 L360,570 L300,580 L280,510 Z" fill="#e5e5e5" class="region-path" />
-                    <text x="320" y="555" class="map-label" style="fill: #000;">Eastern</text>
+                    <text x="320" y="555" class="map-label" style="fill: var(--brand-dark);">Eastern</text>
 
                     <!-- WESTERN NORTH -->
                     <path id="western-north" d="M60,470 L140,470 L130,530 L50,530 Z" fill="#f0f0f0" class="region-path" />
                     <text x="90" y="505" class="map-label" style="font-size: 8px;">Western North</text>
 
                     <!-- WESTERN -->
-                    <path id="western" d="M50,530 L130,530 L110,610 L40,590 Z" fill="#d5d5d5" class="region-path" />
-                    <text x="80" y="580" class="map-label" style="fill: #fff;">Western</text>
+                    <path id="western" d="M50,530 L130,530 L110,610 L40,590 Z" fill="#c8c8c8" class="region-path" />
+                    <text x="80" y="580" class="map-label" style="fill: var(--brand-white);">Western</text>
 
                     <!-- CENTRAL -->
                     <path id="central" d="M130,530 L180,510 L280,510 L250,600 L110,610 Z" fill="#e8e8e8" class="region-path" />
-                    <text x="200" y="570" class="map-label" style="fill: #000;">Central</text>
+                    <text x="200" y="570" class="map-label" style="fill: var(--brand-dark);">Central</text>
 
                     <!-- GREATER ACCRA -->
-                    <path id="greater-accra" d="M300,580 L360,570 L375,600 L290,610 Z" fill="#1a1a1a" class="region-path" />
-                    <text x="315" y="602" class="map-label" style="font-size: 7px; fill: #fff;">Greater Accra</text>
+                    <path id="greater-accra" d="M300,580 L360,570 L375,600 L290,610 Z" fill="var(--brand-dark)" class="region-path" style="fill: #1a1e29;"/>
+                    <text x="315" y="602" class="map-label" style="font-size: 7px; fill: var(--brand-white);">Greater Accra</text>
                 </svg>
             </div>
         </section>
 
-        <!-- INFO PANEL (Below Map - Substack Card Style) -->
-        <section id="info-panel" class="mb-12 bg-white p-8 rounded-lg border border-gray-200 shadow-sm hidden">
+        <!-- INFO PANEL -->
+        <section id="info-panel" class="mb-12 bg-white p-8 rounded-lg border border-gray-200 shadow-sm hidden" style="border-color: #e0e0e0;">
             <div class="max-w-2xl">
-                <span id="reg-id" class="text-xs font-semibold bg-gray-100 px-3 py-1 rounded-full text-gray-600 uppercase tracking-wider">GH-XX</span>
-                <h2 id="reg-name" class="text-3xl font-bold mt-4 mb-2">Region Name</h2>
+                <span id="reg-id" class="text-xs font-semibold bg-gray-100 px-3 py-1 rounded-full text-gray-600 uppercase tracking-wider">#GH-XX</span>
+                <h2 id="reg-name" class="text-3xl font-bold mt-4 mb-2" style="color: var(--brand-dark);">Region Name</h2>
                 <p id="reg-cap" class="text-gray-600 italic mb-6">Capital: City Name</p>
                 
                 <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="p-4 bg-gray-50 rounded border border-gray-200">
+                    <div class="p-4 bg-gray-50 rounded border border-gray-200" style="border-color: #e0e0e0;">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Population</p>
-                        <p id="reg-pop" class="text-xl font-bold">Loading...</p>
+                        <p id="reg-pop" class="text-xl font-bold" style="color: var(--brand-dark);">Loading...</p>
                     </div>
-                    <div class="p-4 bg-gray-50 rounded border border-gray-200">
+                    <div class="p-4 bg-gray-50 rounded border border-gray-200" style="border-color: #e0e0e0;">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Terrain</p>
                         <p id="reg-alt" class="text-base font-medium">Loading...</p>
                     </div>
@@ -177,55 +191,23 @@
                 
                 <p id="reg-desc" class="text-gray-700 leading-relaxed mb-6">Region description loading...</p>
                 
-                <button onclick="resetPanel()" class="px-6 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm font-semibold">
+                <button onclick="resetPanel()" class="px-6 py-2 rounded font-bold transition border" 
+                        style="border-color: var(--brand-dark); color: var(--brand-dark);">
                     ← Back to Map
                 </button>
             </div>
         </section>
 
-        <!-- RECENT STORIES SECTION (Substack Articles Style) -->
-        <section class="mb-12">
-            <h3 class="text-xl font-semibold mb-6 border-b pb-2">Featured Stories</h3>
-            <div class="space-y-6">
-                <!-- Story Card 1 -->
-                <article class="flex gap-4">
-                    <div class="flex-1">
-                        <h4 class="font-bold text-lg mb-2">The Golden Stool: Ashanti Kingdom Legacy</h4>
-                        <p class="text-gray-600 text-sm mb-3">Exploring the sacred symbol of unity in Ghana's largest ethnic group.</p>
-                        <span class="text-xs text-gray-500">3 min read • Feb 2026</span>
-                    </div>
-                </article>
-                
-                <!-- Story Card 2 -->
-                <article class="flex gap-4">
-                    <div class="flex-1">
-                        <h4 class="font-bold text-lg mb-2">Coastal Forts: Cape Coast & Elmina</h4>
-                        <p class="text-gray-600 text-sm mb-3">UNESCO World Heritage sites that shaped Atlantic history.</p>
-                        <span class="text-xs text-gray-500">4 min read • Jan 2026</span>
-                    </div>
-                </article>
-                
-                <!-- Story Card 3 -->
-                <article class="flex gap-4">
-                    <div class="flex-1">
-                        <h4 class="font-bold text-lg mb-2">Mole National Park: Savannah Wildlife</h4>
-                        <p class="text-gray-600 text-sm mb-3">Ghana's largest wildlife refuge in the Northern region.</p>
-                        <span class="text-xs text-gray-500">5 min read • Dec 2025</span>
-                    </div>
-                </article>
-            </div>
-        </section>
-
     </main>
 
-    <!-- FOOTER (Minimal Substack Style) -->
-    <footer class="border-t border-gray-200 py-8 mt-12">
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-200 py-8 mt-12" style="border-color: #e0e0e0; background-color: var(--brand-light-gray);">
         <div class="max-w-4xl mx-auto px-4 text-center">
-            <p class="text-sm text-gray-500">&copy; 2026 EchoStack. Preserving Ghana's Stories.</p>
+            <p class="text-sm" style="color: var(--brand-dark);">&copy; 2026 EchoStack. Preserving Ghana's Stories.</p>
             <div class="flex justify-center gap-4 mt-4 text-sm">
-                <a href="#" class="hover:text-black">About</a>
-                <a href="#" class="hover:text-black">Contact</a>
-                <a href="#" class="hover:text-black">Privacy</a>
+                <a href="#" class="hover:text-[var(--brand-blue)]" style="color: var(--brand-dark);">About</a>
+                <a href="#" class="hover:text-[var(--brand-blue)]" style="color: var(--brand-dark);">Contact</a>
+                <a href="#" class="hover:text-[var(--brand-blue)]" style="color: var(--brand-dark);">Privacy</a>
             </div>
         </div>
     </footer>
