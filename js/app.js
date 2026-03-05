@@ -1,6 +1,6 @@
 const API_URL = 'https://echo-stack-ghana.onrender.com/api/regions';
 
-// All 16 Official Regions with CENTER POINT positions
+// All 16 Official Regions with PINPOINT CENTER positions
 const ghanaRegions = [
     "Upper West", "Upper East", "North East", "Northern", 
     "Savannah", "Bono", "Bono East", "Ahafo",
@@ -27,24 +27,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function createHotspots() {
     return ghanaRegions.map((region, index) => {
-        // Circle center positions (X%, Y%) based on your map image
+        // REFINED PINPOINT positions - each circle in CENTER of region
         const positions = [
-            {x: 18, y: 25},   // Upper West      ← Top-left corner
-            {x: 52, y: 15},   // Upper East      ← Top-center
-            {x: 65, y: 18},   // North East      ← Top-right
-            {x: 55, y: 30},   // Northern        ← Center-top (large region)
-            {x: 35, y: 40},   // Savannah        ← Left-center
-            {x: 22, y: 55},   // Bono            ← Mid-left
-            {x: 45, y: 55},   // Bono East       ← Center
-            {x: 32, y: 62},   // Ahafo           ← Small, near Bono
-            {x: 42, y: 72},   // Ashanti         ← Center-bottom
-            {x: 52, y: 85},   // Central         ← South-center
-            {x: 12, y: 75},   // Western         ← Bottom-left
-            {x: 18, y: 68},   // Western North   ← Above Western
-            {x: 72, y: 72},   // Eastern         ← Right side
-            {x: 88, y: 65},   // Volta           ← Long eastern strip
-            {x: 70, y: 90},   // Greater Accra   ← Small coastal city
-            {x: 58, y: 50}    // Oti             ← Between Eastern/Northern
+            {x: 20, y: 30},   // Upper West      ← Top-left green region
+            {x: 55, y: 18},   // Upper East      ← Top-right grey region  
+            {x: 68, y: 22},   // North East      ← Purple top-right corner
+            {x: 62, y: 35},   // Northern        ← Brown large center-top
+            {x: 38, y: 45},   // Savannah        ← Pink left-center
+            {x: 25, y: 60},   // Bono            ← Orange mid-left
+            {x: 50, y: 58},   // Bono East       ← Green center
+            {x: 38, y: 68},   // Ahafo           ← Dark blue small area
+            {x: 48, y: 78},   // Ashanti         ← Light blue bottom-center
+            {x: 58, y: 92},   // Central         ← Light green south
+            {x: 15, y: 85},   // Western         ← Blue bottom-left corner
+            {x: 22, y: 75},   // Western North   ← Light blue above Western
+            {x: 72, y: 80},   // Eastern         ← Red right-bottom area
+            {x: 90, y: 70},   // Volta           ← Yellow-green far right
+            {x: 75, y: 95},   // Greater Accra   ← Purple tiny coastal spot
+            {x: 62, y: 55}    // Oti             ← Pink between Eastern/Northern
         ];
         
         return `<div class="region-circle" data-region="${region}" 
@@ -65,12 +65,12 @@ function addMapInteractions() {
             // Clear all highlights
             document.querySelectorAll('.region-circle').forEach(c => {
                 c.classList.remove('selected');
-                c.style.transform = 'scale(1)';
+                c.style.transform = 'translate(-50%, -50%) scale(1)';
             });
             
             // Highlight selected
             e.currentTarget.classList.add('selected');
-            e.currentTarget.style.transform = 'scale(1.5)';
+            e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.3)';
             
             // Search for this region
             await filterRegions(regionName);
@@ -81,13 +81,13 @@ function addMapInteractions() {
         
         // Hover effects
         circle.addEventListener('mouseenter', () => {
-            circle.style.transform = 'scale(1.2)';
+            circle.style.transform = 'translate(-50%, -50%) scale(1.2)';
             circle.querySelector('.circle-label').style.opacity = '1';
         });
         
         circle.addEventListener('mouseleave', () => {
             if (!circle.classList.contains('selected')) {
-                circle.style.transform = 'scale(1)';
+                circle.style.transform = 'translate(-50%, -50%) scale(1)';
                 circle.querySelector('.circle-label').style.opacity = '0';
             }
         });
@@ -133,7 +133,7 @@ function renderRegions(regions) {
     regions.forEach(region => {
         const card = document.createElement('div');
         card.className = 'region-card';
-        card.onclick = () => alert('Coming soon: ' + region.name + ' details page');
+        card.onclick = () => window.location.href = `/regions/${region.name.replace(/\s+/g, '-').toLowerCase()}.html`;
         
         card.innerHTML = `
             <h3>${region.name}</h3>
@@ -155,4 +155,4 @@ document.getElementById('search-bar')?.addEventListener('input', async (e) => {
     }
 });
 
-console.log('✅ Interactive circular hotspot map loaded!');
+console.log('✅ Interactive pin-point map loaded!');
