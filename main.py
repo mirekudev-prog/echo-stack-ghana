@@ -55,15 +55,17 @@ def manifest_route():
 # ============================================
 @app.get("/admin")
 async def admin_page(request: Request):
-    """Serve admin login page or dashboard based on session"""
-    # Check for session cookie
+    """Serve admin dashboard"""
     token = request.cookies.get("admin_session")
     
     if not token or token != "ADMIN_AUTHORIZED":
-        # Not logged in - show login page
         if os.path.exists("login.html"):
             return FileResponse("login.html")
-        raise HTTPException(status_code=404, detail="Login page not found")
+        raise HTTPException(status_code=404)
+    
+    if os.path.exists("admin_dashboard.html"):
+        return FileResponse("admin_dashboard.html")
+    raise HTTPException(status_code=404)
     
     # Logged in - show dashboard
     if os.path.exists("admin_dashboard.html"):
