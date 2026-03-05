@@ -3,14 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Cache Control -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <!-- Page Title -->
     <title>EchoStack Admin Dashboard</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1a1e29">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EchoStack">
+    
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="/echostack-logo.png">
+    <link rel="apple-touch-icon" href="/echostack-logo.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Styles -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
         
         :root {
-            --brand-dark: #1a1e29 !important;
-            --brand-blue: #0077b6 !important;
+            --brand-dark: #1a1e29;
+            --brand-blue: #0077b6;
         }
         
         body {
@@ -39,31 +63,39 @@
             border-color: var(--brand-blue) !important;
         }
     </style>
+    
+    <!-- SERVICE WORKER REGISTRATION (PWA ENABLES INSTALLATION) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('✅ SW registered:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('❌ SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </head>
 <body class="antialiased">
     
     <!-- NAVIGATION -->
-   <header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <!-- Logo - Larger Size for Dashboard -->
-            <svg width="50" height="50" viewBox="0 0 80 80" fill="none">
-                <path d="M20 40C20 25 30 15 45 15H55V35H45C40 35 35 38 35 40C35 43 40 45 45 45H55C65 45 75 50 75 60H65C65 55 60 55 55 55H45C30 55 20 50 20 40Z" 
-                      fill="#1a1e29"/>
-                <path d="M45 45C50 45 55 43 55 40V55C55 55 45 55 45 45Z" 
-                      fill="#0077b6"/>
-            </svg>
-            <h1 class="text-2xl font-bold" style="color: #1a1e29 !important;">EchoStack Admin</h1>
+    <header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="/echostack-logo.png" alt="EchoStack Logo" style="width: 50px; height: 50px; object-fit: contain;">
+                <h1 class="text-2xl font-bold" style="color: #1a1e29 !important;">EchoStack Admin</h1>
+            </div>
+            <nav class="flex gap-3 items-center">
+                <a href="/" target="_blank" class="px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">🌍 View Site ↗</a>
+                <button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 text-sm font-medium">📊 Dashboard</button>
+                <button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
+                <button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 text-sm font-medium">🚪 Logout</button>
+            </nav>
         </div>
-        
-        <nav class="flex gap-3 items-center">
-            <a href="/" target="_blank" class="px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">🌍 View Site ↗</a>
-            <button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 text-sm font-medium">📊 Dashboard</button>
-            <button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
-            <button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 text-sm font-medium">🚪 Logout</button>
-        </nav>
-    </div>
-</header>
+    </header>
 
     <!-- MAIN CONTENT -->
     <main class="max-w-7xl mx-auto px-4 py-8">
@@ -536,6 +568,7 @@
                 }
             };
             reader.readAsText(file);
+            input.value = '';
         }
 
         // ===============================
