@@ -18,7 +18,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="EchoStack">
     
-    <!-- Favicon & Icons -->
+    <!-- Favicon & Icons (Try BOTH extensions) -->
     <link rel="icon" type="image/png" href="/echostack-logo.png">
     <link rel="apple-touch-icon" href="/echostack-logo.png">
     
@@ -72,6 +72,7 @@
             height: auto;
             margin-bottom: 1rem;
             object-fit: contain;
+            max-width: 100%;
         }
         
         .logo-text {
@@ -117,17 +118,13 @@
         button[type="submit"]:hover { opacity: 0.9 !important; }
     </style>
     
-    <!-- SERVICE WORKER REGISTRATION (PWA ENABLES INSTALLATION) -->
+    <!-- SERVICE WORKER REGISTRATION -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('✅ SW registered:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('❌ SW registration failed:', error);
-                    });
+                    .then(registration => console.log('✅ SW registered'))
+                    .catch(error => console.log('❌ SW error:', error));
             });
         }
     </script>
@@ -137,7 +134,8 @@
     <div class="login-card">
         <!-- Logo Section -->
         <div class="logo-container">
-            <img src="/echostack-logo.png" alt="EchoStack Logo" class="logo-icon mb-2">
+            <!-- Logo tries PNG first, falls back to text if broken -->
+            <img src="/echostack-logo.png" alt="" class="logo-icon mb-2 onerror-this.style.display='none'" onerror="this.style.display='none'">
             <h1 class="logo-text">EchoStack</h1>
             <p class="subtitle">Admin Management Portal</p>
         </div>
@@ -153,8 +151,8 @@
                 <label class="block text-sm font-medium mb-2" style="color: #1a1e29 !important;">
                     Who are you? 😊
                 </label>
+                <!-- EMPTY INPUT - NO PRE-FILLED TEXT -->
                 <input type="text" id="answer" 
-                       placeholder="THE ADMIN"
                        class="w-full p-3 border rounded-lg focus:outline-none"
                        required
                        autocomplete="off">
