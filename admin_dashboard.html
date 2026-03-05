@@ -15,7 +15,6 @@
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1a1e29">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="EchoStack">
     
     <!-- Favicon & Icons -->
@@ -64,17 +63,6 @@
             outline: none !important;
             border-color: var(--brand-blue) !important;
         }
-        /* Loading Overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.95);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body class="antialiased">
@@ -95,14 +83,6 @@
         </div>
     </header>
 
-    <!-- LOADING OVERLAY - HIDDEN BY DEFAULT -->
-    <div id="loading" class="loading-overlay hidden">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-[#0077b6] mx-auto mb-4"></div>
-            <p class="text-lg font-semibold">Loading Dashboard...</p>
-        </div>
-    </div>
-
     <!-- MAIN CONTENT -->
     <main class="max-w-7xl mx-auto px-4 py-8">
         
@@ -112,19 +92,19 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Total Regions</p>
-                    <p class="text-3xl font-bold" id="stat-total">0</p>
+                    <p class="text-3xl font-bold" id="stat-total">Loading...</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">With Audio</p>
-                    <p class="text-3xl font-bold" id="stat-audio">0</p>
+                    <p class="text-3xl font-bold" id="stat-audio">Loading...</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">With Images</p>
-                    <p class="text-3xl font-bold" id="stat-images">0</p>
+                    <p class="text-3xl font-bold" id="stat-images">Loading...</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Database Size</p>
-                    <p class="text-2xl font-bold" id="stat-size">— MB</p>
+                    <p class="text-2xl font-bold" id="stat-size">Loading...</p>
                 </div>
             </div>
 
@@ -158,7 +138,7 @@
                             </tr>
                         </thead>
                         <tbody id="regions-table-body" class="divide-y divide-gray-200">
-                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet.</td></tr>
+                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Loading regions...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -280,30 +260,20 @@
     <!-- NOTIFICATION -->
     <div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50"></div>
 
-    <!-- JAVASCRIPT -->
+    <!-- COMPLETE JAVASCRIPT (FIXED) -->
     <script>
-        console.log('✅ Script Loaded');
+        console.log('✅ Admin Dashboard Script Loaded');
         
         const API_URL = '/api';
         let allRegions = [];
-
-        // Hide loading immediately when script loads
-        setTimeout(() => {
-            const loader = document.getElementById('loading');
-            if (loader) loader.classList.add('hidden');
-        }, 100);
 
         // ===============================
         // INITIALIZATION
         // ===============================
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM Ready');
+            console.log('DOM Ready - Loading data...');
             
-            // Hide loading overlay FIRST
-            const loader = document.getElementById('loading');
-            if (loader) loader.classList.add('hidden');
-            
-            // Then load data
+            // Initial data load
             loadStats();
             loadRegions();
             
@@ -347,12 +317,21 @@
 
         async function loadRegions() {
             try {
+                console.log('Fetching regions from API...');
                 const response = await fetch(`${API_URL}/regions`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
                 allRegions = await response.json();
+                console.log(`✅ Loaded ${allRegions.length} regions`);
+                
                 renderTable(allRegions);
             } catch (error) {
-                console.error('Load error:', error);
-                showNotification('Failed to load regions', 'error');
+                console.error('❌ Load error:', error);
+                document.getElementById('regions-table-body').innerHTML = 
+                    '<tr><td colspan="6" class="px-4 py-8 text-center text-red-600">Error loading regions. Please refresh.</td></tr>';
             }
         }
 
@@ -360,24 +339,28 @@
             const tbody = document.getElementById('regions-table-body');
             tbody.innerHTML = '';
             
-            if (regions.length === 0) {
+            if (!regions || regions.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet. Click "New Region" to create one!</td></tr>';
                 return;
             }
             
             regions.forEach((region, index) => {
+                // Ensure we have valid data
                 const hasAudio = region.audio_files && region.audio_files.split(',').filter(x => x.trim()).length > 0;
                 const hasImages = region.gallery_images && region.gallery_images.split(',').filter(x => x.trim()).length > 0;
                 
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50 transition cursor-pointer';
                 row.onclick = (e) => {
-                    if (!e.target.closest('button')) editRegion(region.id);
+                    if (!e.target.closest('button')) {
+                        console.log('Editing region:', region.id);
+                        editRegion(region.id);
+                    }
                 };
                 
                 row.innerHTML = `
                     <td class="px-4 py-4 text-sm text-gray-600">${index + 1}</td>
-                    <td class="px-4 py-4"><span class="font-semibold">${region.name}</span></td>
+                    <td class="px-4 py-4"><span class="font-semibold">${region.name || 'Unknown'}</span></td>
                     <td class="px-4 py-4 text-sm text-gray-600">${region.capital || '—'}</td>
                     <td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">${region.category || 'Uncategorized'}</span></td>
                     <td class="px-4 py-4 text-sm">${hasImages ? '🖼️ ' : ''}${hasAudio ? '🎵' : ''}</td>
@@ -412,17 +395,24 @@
         }
 
         function editRegion(id) {
-            console.log('Editing region ID:', id);
+            console.log('Edit clicked for ID:', id);
+            console.log('All regions:', allRegions);
+            
             const region = allRegions.find(r => r.id === id);
+            
             if (!region) {
-                alert('Error: Region not found');
+                alert('Error: Region not found! Try refreshing the page.');
+                console.error('Region not found:', id);
                 return;
             }
             
+            // Update UI
             document.getElementById('form-title').innerText = `Edit: ${region.name}`;
             document.getElementById('save-btn').innerText = '💾 Update Region';
-            document.getElementById('region-id').value = region.id;
-            document.getElementById('reg-name').value = region.name;
+            
+            // Populate all fields
+            document.getElementById('region-id').value = region.id || '';
+            document.getElementById('reg-name').value = region.name || '';
             document.getElementById('reg-capital').value = region.capital || '';
             document.getElementById('reg-population').value = region.population || '';
             document.getElementById('reg-terrain').value = region.terrain || '';
@@ -433,19 +423,39 @@
             document.getElementById('reg-overview').value = region.overview || '';
             document.getElementById('reg-hero-image').value = region.hero_image || '';
             
+            // Handle arrays (gallery & audio)
             if (region.gallery_images) {
-                document.getElementById('reg-gallery-images').value = typeof region.gallery_images === 'string' 
-                    ? region.gallery_images : region.gallery_images.join(', ');
-            }
-            if (region.audio_files) {
-                document.getElementById('reg-audio-files').value = typeof region.audio_files === 'string'
-                    ? region.audio_files : region.audio_files.join(', ');
+                const images = typeof region.gallery_images === 'string' 
+                    ? region.gallery_images.split(',').map(s => s.trim()).filter(s => s)
+                    : region.gallery_images;
+                document.getElementById('reg-gallery-images').value = images.join(', ');
+            } else {
+                document.getElementById('reg-gallery-images').value = '';
             }
             
-            if (region.hero_image) showHeroPreview(region.hero_image);
+            if (region.audio_files) {
+                const audios = typeof region.audio_files === 'string'
+                    ? region.audio_files.split(',').map(s => s.trim()).filter(s => s)
+                    : region.audio_files;
+                document.getElementById('reg-audio-files').value = audios.join(', ');
+            } else {
+                document.getElementById('reg-audio-files').value = '';
+            }
+            
+            // Show preview
+            if (region.hero_image) {
+                showHeroPreview(region.hero_image);
+            } else {
+                hideHeroPreview();
+            }
+            
+            console.log('✅ Form populated with:', region.name);
             showSection('create');
         }
 
+        // ===============================
+        // SAVE REGION - CRITICAL FIX HERE!
+        // ===============================
         async function handleSave(e) {
             e.preventDefault();
             
@@ -454,6 +464,7 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '⏳ Saving...';
             
+            // Build FormData
             const formData = new FormData();
             formData.append('name', document.getElementById('reg-name').value);
             formData.append('capital', document.getElementById('reg-capital').value);
@@ -472,18 +483,41 @@
                 const method = regionId ? 'PUT' : 'POST';
                 const url = regionId ? `${API_URL}/regions/${regionId}` : `${API_URL}/regions`;
                 
-                const response = await fetch(url, { method: method, body: formData });
-                const data = await response.json();
+                console.log(`Saving with ${method}:`, url);
                 
-                if (response.ok && data.success) {
-                    showNotification('Saved successfully!', 'success');
-                    loadRegions();
-                    loadStats();
+                const response = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server error:', errorText);
+                    throw new Error(`Server returned ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                // Success!
+                if (data.success) {
+                    showNotification(data.message || 'Saved successfully!', 'success');
+                    
+                    // IMPORTANT: Reload everything immediately
+                    await loadRegions();  // Refresh the table
+                    await loadStats();    // Refresh the stats
+                    
+                    // Go back to dashboard
                     showSection('dashboard');
+                    
+                    console.log('✅ Save complete! Regions reloaded.');
                 } else {
                     throw new Error(data.detail || 'Save failed');
                 }
             } catch (error) {
+                console.error('❌ Save error:', error);
                 showNotification(`❌ ${error.message}`, 'error');
             } finally {
                 submitBtn.disabled = false;
@@ -491,6 +525,9 @@
             }
         }
 
+        // ===============================
+        // DELETE REGION
+        // ===============================
         async function deleteRegion(id, name) {
             if (!confirm(`Delete "${name}"? This CANNOT be undone.`)) return;
             
@@ -555,7 +592,7 @@
             document.getElementById('hero-preview').classList.remove('hidden');
         }
 
-        function removeHeroImage() {
+        function hideHeroPreview() {
             document.getElementById('reg-hero-image').value = '';
             document.getElementById('hero-preview').classList.add('hidden');
         }
