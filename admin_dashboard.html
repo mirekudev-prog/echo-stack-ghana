@@ -1,1007 +1,872 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Cache Control -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
-    <!-- Page Title -->
-    <title>EchoStack Admin Dashboard</title>
-    
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#1a1e29">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="EchoStack">
-    
-    <!-- Favicon & Icons -->
-    <link rel="icon" type="image/png" href="/echostack-logo.png">
-    <link rel="apple-touch-icon" href="/echostack-logo.png">
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Styles -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
-        
-        :root {
-            --brand-dark: #1a1e29;
-            --brand-blue: #0077b6;
-        }
-        
-        body {
-            font-family: 'Georgia', serif !important;
-            background-color: #ffffff !important;
-            color: var(--brand-dark) !important;
-        }
-        
-        .btn-primary { 
-            background-color: var(--brand-blue) !important; 
-            color: white !important; 
-            border: none !important;
-            cursor: pointer !important;
-        }
-        .btn-secondary { 
-            border: 2px solid var(--brand-dark) !important;
-            color: var(--brand-dark) !important; 
-            background: transparent !important;
-            cursor: pointer !important;
-        }
-        input, textarea, select {
-            border-color: #d0d0d0 !important;
-            color: var(--brand-dark) !important;
-            background: white !important;
-        }
-        input:focus, textarea:focus, select:focus {
-            outline: none !important;
-            border-color: var(--brand-blue) !important;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Cache Control -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- Page Title -->
+<title>EchoStack Admin Dashboard</title>
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#1a1e29">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EchoStack">
+<!-- Favicon & Icons -->
+<link rel="icon" type="image/png" href="/echostack-logo.png">
+<link rel="apple-touch-icon" href="/echostack-logo.png">
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.json">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Styles -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
+:root {
+--brand-dark: #1a1e29;
+--brand-blue: #0077b6;
+}
+body {
+font-family: 'Georgia', serif !important;
+background-color: #ffffff !important;
+color: var(--brand-dark) !important;
+}
+.btn-primary {
+background-color: var(--brand-blue) !important;
+color: white !important;
+border: none !important;
+cursor: pointer !important;
+}
+.btn-secondary {
+border: 2px solid var(--brand-dark) !important;
+color: var(--brand-dark) !important;
+background: transparent !important;
+cursor: pointer !important;
+}
+input, textarea, select {
+border-color: #d0d0d0 !important;
+color: var(--brand-dark) !important;
+background: white !important;
+}
+input:focus, textarea:focus, select:focus {
+outline: none !important;
+border-color: var(--brand-blue) !important;
+}
+</style>
 </head>
 <body class="antialiased">
-    
-    <!-- NAVIGATION -->
-    <header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img id="header-logo" src="/echostack-logo.png" alt="" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.style.display='none'">
-                <h1 class="text-2xl font-bold" style="color: #1a1e29 !important;">EchoStack Admin</h1>
-            </div>
-            <nav class="flex gap-3 items-center">
-                <a href="/" target="_blank" class="px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">🌍 View Site ↗</a>
-                <button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 text-sm font-medium">📊 Dashboard</button>
-                <button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
-                <button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 text-sm font-medium">🚪 Logout</button>
-            </nav>
-        </div>
-    </header>
-
-    <!-- MAIN CONTENT -->
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        
-        <!-- DASHBOARD SECTION -->
-        <section id="dashboard-section" class="space-y-8">
-            <!-- Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Total Regions</p>
-                    <p class="text-3xl font-bold" id="stat-total">Loading...</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2">With Audio</p>
-                    <p class="text-3xl font-bold" id="stat-audio">Loading...</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2">With Images</p>
-                    <p class="text-3xl font-bold" id="stat-images">Loading...</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Database Size</p>
-                    <p class="text-2xl font-bold" id="stat-size">Loading...</p>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                <h2 class="text-xl font-bold mb-4">⚡ Quick Actions</h2>
-                <div class="flex flex-wrap gap-4">
-                    <button onclick="showSection('create')" class="btn-primary px-6 py-3 rounded-lg font-semibold">➕ Create New Region</button>
-                    <button onclick="exportData()" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📤 Export Data</button>
-                    <button onclick="document.getElementById('import-file').click()" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📥 Import Data</button>
-                    <button onclick="showSection('files-manager')" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📁 File Manager</button>
-                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
-                </div>
-            </div>
-
-            <!-- Sections/Categories Manager -->
-            <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                <h2 class="text-xl font-bold mb-4">🏷️ Manage Categories/Sections</h2>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="new-section-name" placeholder="New section name..." class="flex-1 p-3 border rounded-lg">
-                    <button onclick="createSection()" class="btn-primary px-6 py-3 rounded-lg font-semibold">➕ Add Section</button>
-                </div>
-                <div id="sections-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
-            </div>
-
-            <!-- Regions Table -->
-            <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-                    <h2 class="text-xl font-bold">📍 All Regions</h2>
-                    <input type="text" id="search-regions" placeholder="Search..." class="p-2 border rounded-lg text-sm w-64">
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">#</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Capital</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Media</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="regions-table-body" class="divide-y divide-gray-200">
-                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Loading regions...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- CREATE/EDIT FORM SECTION -->
-        <section id="create-section" class="hidden">
-            <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-4xl mx-auto">
-                <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-2xl font-bold" id="form-title">Add New Region</h2>
-                    <button onclick="showSection('dashboard')" class="text-gray-500 hover:text-black text-2xl">×</button>
-                </div>
-                
-                <input type="hidden" id="region-id">
-                
-                <form id="region-form" class="space-y-6">
-                    <!-- Basic Info -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Region Name *</label>
-                            <input type="text" id="reg-name" required class="w-full p-3 border rounded-lg" placeholder="e.g., Ashanti">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Capital City *</label>
-                            <input type="text" id="reg-capital" required class="w-full p-3 border rounded-lg" placeholder="e.g., Kumasi">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Population</label>
-                            <input type="text" id="reg-population" class="w-full p-3 border rounded-lg" placeholder="e.g., 5,440,463">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Terrain</label>
-                            <input type="text" id="reg-terrain" class="w-full p-3 border rounded-lg" placeholder="e.g., Highland">
-                        </div>
-                    </div>
-
-                    <!-- Description -->
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Heritage Description *</label>
-                        <textarea id="reg-description" rows="5" required class="w-full p-3 border rounded-lg" placeholder="Write about this region..."></textarea>
-                    </div>
-
-                    <!-- Category & Tags -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Category</label>
-                            <select id="reg-category" class="w-full p-3 border rounded-lg">
-                                <option value="">Select...</option>
-                                <option value="Culture">Culture</option>
-                                <option value="History">History</option>
-                                <option value="Nature">Nature</option>
-                                <option value="Tourism">Tourism</option>
-                                <option value="Food">Food</option>
-                                <option value="Music">Music</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Tags (comma-separated)</label>
-                            <input type="text" id="reg-tags" class="w-full p-3 border rounded-lg" placeholder="festivals, kings, gold">
-                        </div>
-                    </div>
-
-                    <!-- Media Uploads -->
-                    <div class="border-t pt-6">
-                        <h3 class="text-lg font-bold mb-4">📸 Images & Audio</h3>
-                        
-                        <!-- Hero Image -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">Hero Image URL</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="reg-hero-image" class="flex-1 p-3 border rounded-lg" placeholder="/uploads/image.jpg">
-                                <button type="button" onclick="uploadFile('hero')" class="btn-secondary px-4 py-3 rounded-lg">📁 Upload</button>
-                            </div>
-                            <div id="hero-preview" class="hidden mt-2">
-                                <img id="preview-img" src="" class="w-full h-48 object-cover rounded border">
-                                <button type="button" onclick="removeHeroImage()" class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-xs">Remove</button>
-                            </div>
-                        </div>
-
-                        <!-- Gallery Images -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">Gallery Images (URLs)</label>
-                            <textarea id="reg-gallery-images" rows="2" class="w-full p-3 border rounded-lg" placeholder="/uploads/img1.jpg, /uploads/img2.jpg"></textarea>
-                        </div>
-
-                        <!-- Audio Files -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">🎵 Audio Recordings (URLs)</label>
-                            <textarea id="reg-audio-files" rows="2" class="w-full p-3 border rounded-lg" placeholder="/uploads/story1.mp3, /uploads/song2.wav"></textarea>
-                            <p class="text-xs text-gray-500 mt-1">Upload audio files via button below</p>
-                            <button type="button" onclick="uploadFile('audio')" class="btn-secondary px-4 py-2 rounded-lg mt-2">📁 Upload Audio</button>
-                        </div>
-                    </div>
-
-                    <!-- ⭐ NEW: UNIVERSAL FILE UPLOAD SECTION ⭐ -->
-                    <div class="border-t pt-6 mt-6">
-                        <h3 class="text-lg font-bold mb-4">📦 Universal File Upload (Videos, Documents, Any Type!) 🆕</h3>
-                        
-                        <!-- Drag & Drop Zone -->
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#0077b6] transition"
-                             onclick="document.getElementById('universal-file-upload').click()">
-                            <p class="text-gray-600 text-sm">Click to select OR drag & drop files here</p>
-                            <p class="text-xs text-gray-500 mt-1">Videos, Audio, Images, Documents, PDFs - ANY Format!</p>
-                            <p class="text-xs text-blue-600 mt-2">Max size: 50MB per file</p>
-                            <input type="file" id="universal-file-upload" multiple class="hidden" onchange="uploadUniversalFiles(this)">
-                        </div>
-                        
-                        <!-- File Upload Options -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">File Category</label>
-                                <select id="file-category" class="w-full p-3 border rounded-lg">
-                                    <option value="general">General</option>
-                                    <option value="video">Video</option>
-                                    <option value="audio">Audio</option>
-                                    <option value="image">Image</option>
-                                    <option value="document">Document</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Link to Current Region</label>
-                                <select id="file-region-link" class="w-full p-3 border rounded-lg">
-                                    <option value="no">No Link (Global)</option>
-                                </select>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium mb-2">Description</label>
-                                <input type="text" id="file-description" class="w-full p-3 border rounded-lg" placeholder="Describe this file">
-                            </div>
-                            <div class="md:col-span-2 flex items-center">
-                                <label class="flex items-center">
-                                    <input type="checkbox" id="file-is-public" checked class="mr-2">
-                                    <span class="text-sm">Public (Visible to All Users)</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- Uploaded Files List for This Session -->
-                        <div id="session-uploads-list" class="mt-4 space-y-2"></div>
-                    </div>
-
-                    <!-- Additional Info -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Source Reference</label>
-                            <input type="text" id="reg-source" class="w-full p-3 border rounded-lg" placeholder="Where did you find this info?">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Brief Overview</label>
-                            <input type="text" id="reg-overview" class="w-full p-3 border rounded-lg" placeholder="Short summary">
-                        </div>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <div class="flex gap-4 pt-6 border-t">
-                        <button type="submit" class="btn-primary flex-1 py-3 rounded-lg font-bold" id="save-btn">💾 Save Region</button>
-                        <button type="button" onclick="showSection('dashboard')" class="btn-secondary flex-1 py-3 rounded-lg font-bold">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </section>
-
-        <!-- FILES MANAGER SECTION (NEW) -->
-        <section id="files-manager-section" class="hidden">
-            <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-6xl mx-auto">
-                <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-2xl font-bold">📁 All Uploaded Files Manager</h2>
-                    <button onclick="loadAllFiles()" class="btn-secondary px-4 py-2 rounded-lg">🔄 Refresh</button>
-                </div>
-                
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="file-search" placeholder="Search files..." class="flex-1 p-3 border rounded-lg" onkeyup="filterFiles()">
-                    <select id="file-filter-category" class="p-3 border rounded-lg" onchange="filterFiles()">
-                        <option value="">All Types</option>
-                        <option value="video">Videos</option>
-                        <option value="audio">Audio</option>
-                        <option value="image">Images</option>
-                        <option value="document">Documents</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                
-                <div id="all-files-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto"></div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- NOTIFICATION -->
-    <div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50"></div>
-
-    <!-- COMPLETE JAVASCRIPT -->
-    <script>
-        console.log('✅ Script Loaded');
-        
-        const API_URL = '/api';
-        let allRegions = [];
-        let allFiles = [];
-        let allSections = [];
-
-        // ===============================
-        // INITIALIZATION
-        // ===============================
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Ready');
-            
-            loadStats();
-            loadRegions();
-            loadAllSections();
-            populateRegionDropdown();
-            
-            const form = document.getElementById('region-form');
-            if (form) {
-                form.addEventListener('submit', handleSave);
-            }
-        });
-
-        // ===============================
-        // HELPER FUNCTION - SAFE TYPE HANDLING
-        // ===============================
-        function safeSplit(value) {
-            if (!value) return [];
-            if (Array.isArray(value)) return value.filter(x => x && String(x).trim());
-            if (typeof value === 'string') {
-                return value.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
-            }
-            return [];
-        }
-
-        // ===============================
-        // NAVIGATION
-        // ===============================
-        function showSection(sectionId) {
-            var dashboard = document.getElementById('dashboard-section');
-            var create = document.getElementById('create-section');
-            var files = document.getElementById('files-manager-section');
-            
-            if (sectionId === 'dashboard') {
-                dashboard.classList.remove('hidden');
-                create.classList.add('hidden');
-                files.classList.add('hidden');
-                loadRegions();
-                loadStats();
-            } else if (sectionId === 'create') {
-                create.classList.remove('hidden');
-                dashboard.classList.add('hidden');
-                files.classList.add('hidden');
-                resetForm();
-            } else if (sectionId === 'files-manager') {
-                files.classList.remove('hidden');
-                dashboard.classList.add('hidden');
-                create.classList.add('hidden');
-                loadAllFiles();
-            }
-        }
-
-        // ===============================
-        // LOAD DATA
-        // ===============================
-        async function loadStats() {
-            try {
-                const response = await fetch(API_URL + '/stats');
-                const stats = await response.json();
-                document.getElementById('stat-total').textContent = stats.total_regions || 0;
-                document.getElementById('stat-audio').textContent = stats.with_audio || 0;
-                document.getElementById('stat-images').textContent = stats.with_images || 0;
-                document.getElementById('stat-size').textContent = (stats.database_size_mb || 0) + ' MB';
-            } catch (error) {
-                console.error('Stats error:', error);
-            }
-        }
-
-        async function loadRegions() {
-            try {
-                console.log('Fetching regions...');
-                const response = await fetch(API_URL + '/regions');
-                
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status);
-                }
-                
-                allRegions = await response.json();
-                console.log('Loaded', allRegions.length, 'regions');
-                
-                renderTable(allRegions);
-                populateRegionDropdown();
-            } catch (error) {
-                console.error('Load error:', error);
-                document.getElementById('regions-table-body').innerHTML = 
-                    '<tr><td colspan="6" class="px-4 py-8 text-center text-red-600">Error: ' + error.message + '</td></tr>';
-            }
-        }
-
-        function renderTable(regions) {
-            const tbody = document.getElementById('regions-table-body');
-            tbody.innerHTML = '';
-            
-            if (!regions || regions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet.</td></tr>';
-                return;
-            }
-            
-            regions.forEach(function(region, index) {
-                try {
-                    var galleryArr = safeSplit(region.gallery_images);
-                    var audioArr = safeSplit(region.audio_files);
-                    
-                    var hasAudio = audioArr.length > 0;
-                    var hasImages = galleryArr.length > 0;
-                    
-                    var row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50 transition cursor-pointer';
-                    
-                    row.innerHTML = 
-                        '<td class="px-4 py-4 text-sm">' + (index + 1) + '</td>' +
-                        '<td class="px-4 py-4"><span class="font-semibold">' + (region.name || 'Unknown') + '</span></td>' +
-                        '<td class="px-4 py-4 text-sm">' + (region.capital || '—') + '</td>' +
-                        '<td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs">' + (region.category || 'Uncategorized') + '</span></td>' +
-                        '<td class="px-4 py-4 text-sm">' + (hasImages ? '🖼️ ' : '') + (hasAudio ? '🎵' : '') + '</td>' +
-                        '<td class="px-4 py-4 whitespace-nowrap">' +
-                            '<button class="edit-btn mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button>' +
-                            '<button class="delete-btn text-red-600 hover:underline text-sm">🗑️ Delete</button>' +
-                        '</td>';
-                    
-                    row.querySelector('.edit-btn').onclick = function(e) {
-                        e.stopPropagation();
-                        editRegion(region.id);
-                    };
-                    
-                    row.querySelector('.delete-btn').onclick = function(e) {
-                        e.stopPropagation();
-                        deleteRegion(region.id, region.name);
-                    };
-                    
-                    row.onclick = function(e) {
-                        if (!e.target.closest('button')) {
-                            editRegion(region.id);
-                        }
-                    };
-                    
-                    tbody.appendChild(row);
-                } catch (err) {
-                    console.error('Error rendering region:', err);
-                }
-            });
-        }
-
-        // Search functionality
-        document.getElementById('search-regions').addEventListener('input', function(e) {
-            var term = e.target.value.toLowerCase();
-            var filtered = allRegions.filter(function(r) {
-                return r.name.toLowerCase().indexOf(term) !== -1 ||
-                    (r.capital && r.capital.toLowerCase().indexOf(term) !== -1) ||
-                    (r.category && r.category.toLowerCase().indexOf(term) !== -1);
-            });
-            renderTable(filtered);
-        });
-
-        // ===============================
-        // FORM HANDLING
-        // ===============================
-        function resetForm() {
-            document.getElementById('region-form').reset();
-            document.getElementById('region-id').value = '';
-            document.getElementById('form-title').textContent = 'Add New Region';
-            document.getElementById('save-btn').textContent = '💾 Save Region';
-            document.getElementById('hero-preview').classList.add('hidden');
-            document.getElementById('session-uploads-list').innerHTML = '';
-        }
-
-        function editRegion(id) {
-            console.log('Editing ID:', id);
-            
-            var region = null;
-            for (var i = 0; i < allRegions.length; i++) {
-                if (allRegions[i].id === id) {
-                    region = allRegions[i];
-                    break;
-                }
-            }
-            
-            if (!region) {
-                alert('Region not found!');
-                return;
-            }
-            
-            document.getElementById('form-title').textContent = 'Edit: ' + region.name;
-            document.getElementById('save-btn').textContent = '💾 Update Region';
-            
-            document.getElementById('region-id').value = region.id || '';
-            document.getElementById('reg-name').value = region.name || '';
-            document.getElementById('reg-capital').value = region.capital || '';
-            document.getElementById('reg-population').value = region.population || '';
-            document.getElementById('reg-terrain').value = region.terrain || '';
-            document.getElementById('reg-description').value = region.description || '';
-            document.getElementById('reg-category').value = region.category || '';
-            document.getElementById('reg-tags').value = region.tags || '';
-            document.getElementById('reg-source').value = region.source || '';
-            document.getElementById('reg-overview').value = region.overview || '';
-            document.getElementById('reg-hero-image').value = region.hero_image || '';
-            
-            var galleryArr = safeSplit(region.gallery_images);
-            var audioArr = safeSplit(region.audio_files);
-            
-            document.getElementById('reg-gallery-images').value = galleryArr.join(', ');
-            document.getElementById('reg-audio-files').value = audioArr.join(', ');
-            
-            if (region.hero_image) {
-                showHeroPreview(region.hero_image);
-            } else {
-                hideHeroPreview();
-            }
-            
-            // Populate link dropdown
-            var currentRegionId = region.id;
-            populateRegionDropdown(currentRegionId);
-            
-            showSection('create');
-        }
-
-        async function handleSave(e) {
-            e.preventDefault();
-            
-            var regionId = document.getElementById('region-id').value;
-            var submitBtn = document.getElementById('save-btn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Saving...';
-            
-            var formData = new FormData();
-            formData.append('name', document.getElementById('reg-name').value);
-            formData.append('capital', document.getElementById('reg-capital').value);
-            formData.append('population', document.getElementById('reg-population').value);
-            formData.append('terrain', document.getElementById('reg-terrain').value);
-            formData.append('description', document.getElementById('reg-description').value);
-            formData.append('category', document.getElementById('reg-category').value);
-            formData.append('tags', document.getElementById('reg-tags').value);
-            formData.append('hero_image', document.getElementById('reg-hero-image').value);
-            formData.append('gallery_images', document.getElementById('reg-gallery-images').value);
-            formData.append('audio_files', document.getElementById('reg-audio-files').value);
-            formData.append('source', document.getElementById('reg-source').value);
-            formData.append('overview', document.getElementById('reg-overview').value);
-            
-            try {
-                var method = regionId ? 'PUT' : 'POST';
-                var url = regionId ? API_URL + '/regions/' + regionId : API_URL + '/regions';
-                
-                console.log('Saving with:', method, url);
-                
-                const response = await fetch(url, {
-                    method: method,
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Server returned ' + response.status);
-                }
-                
-                var data = await response.json();
-                
-                if (data.success) {
-                    showNotification('Saved successfully!', 'success');
-                    
-                    // Reload immediately
-                    await loadRegions();
-                    await loadStats();
-                    
-                    showSection('dashboard');
-                } else {
-                    throw new Error(data.detail || 'Save failed');
-                }
-            } catch (error) {
-                console.error('Save error:', error);
-                showNotification('❌ ' + error.message, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = regionId ? '💾 Update Region' : '💾 Save Region';
-            }
-        }
-
-        async function deleteRegion(id, name) {
-            if (!confirm('Delete "' + name + '"? This CANNOT be undone.')) return;
-            
-            try {
-                const response = await fetch(API_URL + '/regions/' + id, { method: 'DELETE' });
-                var data = await response.json();
-                
-                if (response.ok && data.success) {
-                    showNotification('Deleted!', 'success');
-                    loadRegions();
-                    loadStats();
-                } else {
-                    throw new Error('Delete failed');
-                }
-            } catch (error) {
-                showNotification('❌ Delete failed', 'error');
-            }
-        }
-
-        // ===============================
-        // FILE UPLOADS
-        // ===============================
-        async function uploadFile(type) {
-            var input = document.createElement('input');
-            input.type = 'file';
-            input.accept = type === 'hero' ? 'image/*' : 'audio/*';
-            
-            input.onchange = async function(e) {
-                var file = e.target.files[0];
-                if (!file) return;
-                
-                var formData = new FormData();
-                formData.append('file', file);
-                formData.append('filename', file.name);
-                
-                try {
-                    var endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/audio';
-                    const response = await fetch(endpoint, { method: 'POST', body: formData });
-                    var data = await response.json();
-                    
-                    if (data.success) {
-                        if (type === 'hero') {
-                            document.getElementById('reg-hero-image').value = data.url;
-                            showHeroPreview(data.url);
-                        } else {
-                            var currentValue = document.getElementById('reg-audio-files').value;
-                            var newValue = currentValue ? currentValue + ', ' + data.url : data.url;
-                            document.getElementById('reg-audio-files').value = newValue;
-                        }
-                        showNotification('Uploaded!', 'success');
-                    }
-                } catch (error) {
-                    showNotification('❌ Upload failed', 'error');
-                }
-            };
-            
-            input.click();
-        }
-
-        // ⭐ NEW: UNIVERSAL FILE UPLOAD ⭐
-        async function uploadUniversalFiles(input) {
-            const files = input.files;
-            if (!files || files.length === 0) return;
-            
-            let uploadedCount = 0;
-            let failedCount = 0;
-            
-            for (const file of files) {
-                try {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('filename', file.name);
-                    formData.append('category', document.getElementById('file-category').value);
-                    
-                    // Get description
-                    var description = document.getElementById('file-description').value;
-                    if (description) {
-                        formData.append('description', description);
-                    }
-                    
-                    // Get public/private setting
-                    var isPublic = document.getElementById('file-is-public').checked ? '1' : '0';
-                    formData.append('is_public', isPublic);
-                    
-                    console.log(`Uploading: ${file.name} (${Math.round(file.size / 1024)} KB)`);
-                    
-                    const response = await fetch('/api/upload/file', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok && data.success) {
-                        uploadedCount++;
-                        showNotification(`✅ ${file.name} uploaded!`, 'success');
-                        
-                        // Auto-add to appropriate field based on category
-                        const category = document.getElementById('file-category').value;
-                        if (category === 'audio') {
-                            var currentValue = document.getElementById('reg-audio-files').value;
-                            var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
-                            document.getElementById('reg-audio-files').value = newValue;
-                        } else if (category === 'image') {
-                            var currentValue = document.getElementById('reg-gallery-images').value;
-                            var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
-                            document.getElementById('reg-gallery-images').value = newValue;
-                        }
-                        
-                        // Add to session uploads list
-                        addToSessionUploadList(data);
-                    } else {
-                        throw new Error(data.detail || 'Upload failed');
-                    }
-                } catch (error) {
-                    failedCount++;
-                    console.error('Upload error:', error);
-                    showNotification(`❌ Failed: ${file.name}`, 'error');
-                }
-            }
-            
-            showNotification(`📁 Uploaded ${uploadedCount}/${files.length} files`, 'success');
-            document.getElementById('universal-file-upload').value = '';
-        }
-
-        function addToSessionUploadList(fileData) {
-            var container = document.getElementById('session-uploads-list');
-            var item = document.createElement('div');
-            item.className = 'bg-blue-50 p-3 rounded border border-blue-200 text-sm';
-            item.innerHTML = 
-                '✅ ' + fileData.original_name + 
-                ' (' + fileData.file_size_mb + ' MB) • ' + fileData.category.toUpperCase() + 
-                ' <a href="' + fileData.url + '" target="_blank" class="text-[#0077b6] ml-2">🔗 View</a>';
-            container.appendChild(item);
-        }
-
-        // ===============================
-        // FILE MANAGER
-        // ===============================
-        async function loadAllFiles() {
-            try {
-                const response = await fetch('/api/files');
-                allFiles = await response.json();
-                
-                renderFilesGrid(allFiles);
-            } catch (error) {
-                console.error('Load files error:', error);
-                showNotification('Failed to load files', 'error');
-            }
-        }
-
-        function renderFilesGrid(files) {
-            var container = document.getElementById('all-files-grid');
-            
-            if (!files || files.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center py-4 col-span-3">No files uploaded yet.</p>';
-                return;
-            }
-            
-            container.innerHTML = files.map(function(file) {
-                return '<div class="bg-white p-4 rounded border hover:shadow-md transition">' +
-                    '<div class="flex justify-between items-start mb-2">' +
-                        '<span class="font-semibold text-sm truncate">' + file.original_name + '</span>' +
-                        '<button onclick="deleteFile(' + file.id + ')" class="text-red-600 hover:text-red-800 text-xs">🗑️</button>' +
-                    '</div>' +
-                    '<p class="text-xs text-gray-600">' + file.category.toUpperCase() + ' • ' + file.file_size_mb + ' MB</p>' +
-                    (file.description ? '<p class="text-xs text-gray-500 mt-1">' + file.description + '</p>' : '') +
-                    '<div class="mt-2">' +
-                        '<a href="' + file.file_url + '" target="_blank" class="text-[#0077b6] text-xs">🔗 Open File</a>' +
-                    '</div>' +
-                '</div>';
-            }).join('');
-        }
-
-        function filterFiles() {
-            var search = document.getElementById('file-search').value.toLowerCase();
-            var categoryFilter = document.getElementById('file-filter-category').value;
-            
-            var filtered = allFiles.filter(function(file) {
-                var matchesSearch = file.original_name.toLowerCase().indexOf(search) !== -1 ||
-                    (file.description && file.description.toLowerCase().indexOf(search) !== -1);
-                var matchesCategory = !categoryFilter || file.category === categoryFilter;
-                
-                return matchesSearch && matchesCategory;
-            });
-            
-            renderFilesGrid(filtered);
-        }
-
-        async function deleteFile(fileId) {
-            if (!confirm('Delete this file permanently?')) return;
-            
-            try {
-                const response = await fetch('/api/files/' + fileId, { method: 'DELETE' });
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    showNotification('File deleted!', 'success');
-                    loadAllFiles();
-                } else {
-                    throw new Error('Delete failed');
-                }
-            } catch (error) {
-                showNotification('❌ Delete failed', 'error');
-            }
-        }
-
-        function showHeroPreview(url) {
-            document.getElementById('preview-img').src = url;
-            document.getElementById('hero-preview').classList.remove('hidden');
-        }
-
-        function hideHeroPreview() {
-            document.getElementById('reg-hero-image').value = '';
-            document.getElementById('hero-preview').classList.add('hidden');
-        }
-
-        // ===============================
-        // SECTIONS/MANAGEMENT
-        // ===============================
-        async function loadAllSections() {
-            try {
-                const response = await fetch('/api/sections');
-                allSections = await response.json();
-                
-                var container = document.getElementById('sections-list');
-                container.innerHTML = allSections.map(function(section) {
-                    return '<div class="flex justify-between items-center p-3 bg-gray-50 rounded">' +
-                        '<span class="font-semibold">' + section.name + '</span>' +
-                        '<button onclick="deleteSection(' + section.id + ')" class="text-red-600 text-xs">✖️</button>' +
-                    '</div>';
-                }).join('');
-            } catch (error) {
-                console.error('Failed to load sections:', error);
-            }
-        }
-
-        async function createSection() {
-            var name = document.getElementById('new-section-name').value.trim();
-            if (!name) {
-                alert('Please enter a section name');
-                return;
-            }
-            
-            try {
-                const formData = new FormData();
-                formData.append('name', name);
-                
-                const response = await fetch('/api/sections', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    showNotification('Section created!', 'success');
-                    document.getElementById('new-section-name').value = '';
-                    loadAllSections();
-                } else {
-                    throw new Error(data.detail || 'Failed to create section');
-                }
-            } catch (error) {
-                showNotification('❌ ' + error.message, 'error');
-            }
-        }
-
-        async function deleteSection(sectionId) {
-            if (!confirm('Delete this section?')) return;
-            
-            try {
-                const response = await fetch('/api/sections/' + sectionId, { method: 'DELETE' });
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    showNotification('Section deleted!', 'success');
-                    loadAllSections();
-                } else {
-                    throw new Error('Delete failed');
-                }
-            } catch (error) {
-                showNotification('❌ Delete failed', 'error');
-            }
-        }
-
-        // ===============================
-        // EXPORT/IMPORT
-        // ===============================
-        async function exportData() {
-            try {
-                const response = await fetch(API_URL + '/regions');
-                var data = await response.json();
-                var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                var url = URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = 'echostack-backup-' + new Date().toISOString().split('T')[0] + '.json';
-                a.click();
-                URL.revokeObjectURL(url);
-                showNotification('Exported!', 'success');
-            } catch (error) {
-                showNotification('❌ Export failed', 'error');
-            }
-        }
-
-        async function importData(input) {
-            var file = input.files[0];
-            if (!file) return;
-            
-            var reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    var data = JSON.parse(e.target.result);
-                    const response = await fetch('/api/import/json', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(data)
-                    });
-                    showNotification('Imported!', 'success');
-                    loadRegions();
-                } catch (error) {
-                    showNotification('❌ Invalid file', 'error');
-                }
-            };
-            reader.readAsText(file);
-            input.value = '';
-        }
-
-        // ===============================
-        // AUTHENTICATION
-        // ===============================
-        function logout() {
-            if (confirm('Logout now?')) {
-                fetch('/api/auth/logout', {method: 'POST'});
-                document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
-                window.location.href = '/admin';
-            }
-        }
-
-        // ===============================
-        // NOTIFICATIONS
-        // ===============================
-        function showNotification(message, type) {
-            var notification = document.getElementById('notification');
-            notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ' + 
-                (type === 'success' ? 'bg-green-600' : 'bg-red-600');
-            notification.textContent = message;
-            notification.classList.remove('hidden');
-            setTimeout(function() {
-                notification.classList.add('hidden');
-            }, 3000);
-        }
-
-        // ===============================
-        // HELPERS
-        // ===============================
-        function populateRegionDropdown(selectedId) {
-            var select = document.getElementById('file-region-link');
-            select.innerHTML = '<option value="no">No Link (Global)</option>';
-            
-            allRegions.forEach(function(region) {
-                var option = document.createElement('option');
-                option.value = region.id;
-                option.textContent = region.name;
-                if (selectedId && selectedId == region.id) {
-                    option.selected = true;
-                }
-                select.appendChild(option);
-            });
-        }
-    </script>
+<!-- NAVIGATION -->
+<header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<img id="header-logo" src="/echostack-logo.png" alt="" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.style.display='none'">
+<h1 class="text-2xl font-bold" style="color: #1a1e29 !important;">EchoStack Admin</h1>
+</div>
+<nav class="flex gap-3 items-center">
+<a href="/" target="_blank" class="px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">🌍 View Site ↗</a>
+<button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 text-sm font-medium">📊 Dashboard</button>
+<button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
+<button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 text-sm font-medium">🚪 Logout</button>
+</nav>
+</div>
+</header>
+<!-- MAIN CONTENT -->
+<main class="max-w-7xl mx-auto px-4 py-8">
+<!-- DASHBOARD SECTION -->
+<section id="dashboard-section" class="space-y-8">
+<!-- Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+<p class="text-xs font-semibold text-gray-500 uppercase mb-2">Total Regions</p>
+<p class="text-3xl font-bold" id="stat-total">Loading...</p>
+</div>
+<div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+<p class="text-xs font-semibold text-gray-500 uppercase mb-2">With Audio</p>
+<p class="text-3xl font-bold" id="stat-audio">Loading...</p>
+</div>
+<div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+<p class="text-xs font-semibold text-gray-500 uppercase mb-2">With Images</p>
+<p class="text-3xl font-bold" id="stat-images">Loading...</p>
+</div>
+<div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+<p class="text-xs font-semibold text-gray-500 uppercase mb-2">Database Size</p>
+<p class="text-2xl font-bold" id="stat-size">Loading...</p>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+<h2 class="text-xl font-bold mb-4">⚡ Quick Actions</h2>
+<div class="flex flex-wrap gap-4">
+<button onclick="showSection('create')" class="btn-primary px-6 py-3 rounded-lg font-semibold">➕ Create New Region</button>
+<button onclick="exportData()" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📤 Export Data</button>
+<button onclick="document.getElementById('import-file').click()" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📥 Import Data</button>
+<button onclick="showSection('files-manager')" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📁 File Manager</button>
+<input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
+</div>
+</div>
+<!-- Sections/Categories Manager -->
+<div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+<h2 class="text-xl font-bold mb-4">🏷️ Manage Categories/Sections</h2>
+<div class="flex gap-2 mb-4">
+<input type="text" id="new-section-name" placeholder="New section name..." class="flex-1 p-3 border rounded-lg">
+<button onclick="createSection()" class="btn-primary px-6 py-3 rounded-lg font-semibold">➕ Add Section</button>
+</div>
+<div id="sections-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
+</div>
+<!-- Regions Table -->
+<div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+<div class="p-4 border-b border-gray-200 flex justify-between items-center">
+<h2 class="text-xl font-bold">📍 All Regions</h2>
+<input type="text" id="search-regions" placeholder="Search..." class="p-2 border rounded-lg text-sm w-64">
+</div>
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead class="bg-gray-50">
+<tr>
+<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">#</th>
+<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
+<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Capital</th>
+<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
+<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Media</th>
+<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+</tr>
+</thead>
+<tbody id="regions-table-body" class="divide-y divide-gray-200">
+<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Loading regions...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- CREATE/EDIT FORM SECTION -->
+<section id="create-section" class="hidden">
+<div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-4xl mx-auto">
+<div class="flex justify-between items-start mb-6">
+<h2 class="text-2xl font-bold" id="form-title">Add New Region</h2>
+<button onclick="showSection('dashboard')" class="text-gray-500 hover:text-black text-2xl">×</button>
+</div>
+<input type="hidden" id="region-id">
+<form id="region-form" class="space-y-6">
+<!-- Basic Info -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block text-sm font-medium mb-2">Region Name *</label>
+<input type="text" id="reg-name" required class="w-full p-3 border rounded-lg" placeholder="e.g., Ashanti">
+</div>
+<div>
+<label class="block text-sm font-medium mb-2">Capital City *</label>
+<input type="text" id="reg-capital" required class="w-full p-3 border rounded-lg" placeholder="e.g., Kumasi">
+</div>
+<div>
+<label class="block text-sm font-medium mb-2">Population</label>
+<input type="text" id="reg-population" class="w-full p-3 border rounded-lg" placeholder="e.g., 5,440,463">
+</div>
+<div>
+<label class="block text-sm font-medium mb-2">Terrain</label>
+<input type="text" id="reg-terrain" class="w-full p-3 border rounded-lg" placeholder="e.g., Highland">
+</div>
+</div>
+<!-- Description -->
+<div>
+<label class="block text-sm font-medium mb-2">Heritage Description *</label>
+<textarea id="reg-description" rows="5" required class="w-full p-3 border rounded-lg" placeholder="Write about this region..."></textarea>
+</div>
+<!-- Category & Tags -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block text-sm font-medium mb-2">Category</label>
+<select id="reg-category" class="w-full p-3 border rounded-lg">
+<option value="">Select...</option>
+<option value="Culture">Culture</option>
+<option value="History">History</option>
+<option value="Nature">Nature</option>
+<option value="Tourism">Tourism</option>
+<option value="Food">Food</option>
+<option value="Music">Music</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium mb-2">Tags (comma-separated)</label>
+<input type="text" id="reg-tags" class="w-full p-3 border rounded-lg" placeholder="festivals, kings, gold">
+</div>
+</div>
+<!-- Media Uploads -->
+<div class="border-t pt-6">
+<h3 class="text-lg font-bold mb-4">📸 Images & Audio</h3>
+<!-- Hero Image -->
+<div class="mb-4">
+<label class="block text-sm font-medium mb-2">Hero Image URL</label>
+<div class="flex gap-2">
+<input type="text" id="reg-hero-image" class="flex-1 p-3 border rounded-lg" placeholder="/uploads/image.jpg">
+<button type="button" onclick="uploadFile('hero')" class="btn-secondary px-4 py-3 rounded-lg">📁 Upload</button>
+</div>
+<div id="hero-preview" class="hidden mt-2">
+<img id="preview-img" src="" class="w-full h-48 object-cover rounded border">
+<button type="button" onclick="removeHeroImage()" class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-xs">Remove</button>
+</div>
+</div>
+<!-- Gallery Images -->
+<div class="mb-4">
+<label class="block text-sm font-medium mb-2">Gallery Images (URLs)</label>
+<textarea id="reg-gallery-images" rows="2" class="w-full p-3 border rounded-lg" placeholder="/uploads/img1.jpg, /uploads/img2.jpg"></textarea>
+</div>
+<!-- Audio Files -->
+<div class="mb-4">
+<label class="block text-sm font-medium mb-2">🎵 Audio Recordings (URLs)</label>
+<textarea id="reg-audio-files" rows="2" class="w-full p-3 border rounded-lg" placeholder="/uploads/story1.mp3, /uploads/song2.wav"></textarea>
+<p class="text-xs text-gray-500 mt-1">Upload audio files via button below</p>
+<button type="button" onclick="uploadFile('audio')" class="btn-secondary px-4 py-2 rounded-lg mt-2">📁 Upload Audio</button>
+</div>
+</div>
+<!-- ⭐ NEW: UNIVERSAL FILE UPLOAD SECTION ⭐ -->
+<div class="border-t pt-6 mt-6">
+<h3 class="text-lg font-bold mb-4">📦 Universal File Upload (Videos, Documents, Any Type!) 🆕</h3>
+<!-- Drag & Drop Zone -->
+<div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#0077b6] transition"
+onclick="document.getElementById('universal-file-upload').click()">
+<p class="text-gray-600 text-sm">Click to select OR drag & drop files here</p>
+<p class="text-xs text-gray-500 mt-1">Videos, Audio, Images, Documents, PDFs - ANY Format!</p>
+<p class="text-xs text-blue-600 mt-2">Max size: 50MB per file</p>
+<input type="file" id="universal-file-upload" multiple class="hidden" onchange="uploadUniversalFiles(this)">
+</div>
+<!-- File Upload Options -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+<div>
+<label class="block text-sm font-medium mb-2">File Category</label>
+<select id="file-category" class="w-full p-3 border rounded-lg">
+<option value="general">General</option>
+<option value="video">Video</option>
+<option value="audio">Audio</option>
+<option value="image">Image</option>
+<option value="document">Document</option>
+<option value="other">Other</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium mb-2">Link to Current Region</label>
+<select id="file-region-link" class="w-full p-3 border rounded-lg">
+<option value="no">No Link (Global)</option>
+</select>
+</div>
+<div class="md:col-span-2">
+<label class="block text-sm font-medium mb-2">Description</label>
+<input type="text" id="file-description" class="w-full p-3 border rounded-lg" placeholder="Describe this file">
+</div>
+<div class="md:col-span-2 flex items-center">
+<label class="flex items-center">
+<input type="checkbox" id="file-is-public" checked class="mr-2">
+<span class="text-sm">Public (Visible to All Users)</span>
+</label>
+</div>
+</div>
+<!-- Uploaded Files List for This Session -->
+<div id="session-uploads-list" class="mt-4 space-y-2"></div>
+</div>
+<!-- Additional Info -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block text-sm font-medium mb-2">Source Reference</label>
+<input type="text" id="reg-source" class="w-full p-3 border rounded-lg" placeholder="Where did you find this info?">
+</div>
+<div>
+<label class="block text-sm font-medium mb-2">Brief Overview</label>
+<input type="text" id="reg-overview" class="w-full p-3 border rounded-lg" placeholder="Short summary">
+</div>
+</div>
+<!-- Submit Button -->
+<div class="flex gap-4 pt-6 border-t">
+<button type="submit" class="btn-primary flex-1 py-3 rounded-lg font-bold" id="save-btn">💾 Save Region</button>
+<button type="button" onclick="showSection('dashboard')" class="btn-secondary flex-1 py-3 rounded-lg font-bold">Cancel</button>
+</div>
+</form>
+</div>
+</section>
+<!-- FILES MANAGER SECTION (NEW) -->
+<section id="files-manager-section" class="hidden">
+<div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-6xl mx-auto">
+<div class="flex justify-between items-start mb-6">
+<h2 class="text-2xl font-bold">📁 All Uploaded Files Manager</h2>
+<button onclick="loadAllFiles()" class="btn-secondary px-4 py-2 rounded-lg">🔄 Refresh</button>
+</div>
+<div class="flex gap-2 mb-4">
+<input type="text" id="file-search" placeholder="Search files..." class="flex-1 p-3 border rounded-lg" onkeyup="filterFiles()">
+<select id="file-filter-category" class="p-3 border rounded-lg" onchange="filterFiles()">
+<option value="">All Types</option>
+<option value="video">Videos</option>
+<option value="audio">Audio</option>
+<option value="image">Images</option>
+<option value="document">Documents</option>
+<option value="other">Other</option>
+</select>
+</div>
+<div id="all-files-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto"></div>
+</div>
+</section>
+</main>
+<!-- NOTIFICATION -->
+<div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50"></div>
+<!-- COMPLETE JAVASCRIPT -->
+<script>
+console.log('✅ Script Loaded');
+const API_URL = '/api';
+let allRegions = [];
+let allFiles = [];
+let allSections = [];
+// ===============================
+// INITIALIZATION
+// ===============================
+document.addEventListener('DOMContentLoaded', function() {
+console.log('DOM Ready');
+loadStats();
+loadRegions();
+loadAllSections();
+populateRegionDropdown();
+const form = document.getElementById('region-form');
+if (form) {
+form.addEventListener('submit', handleSave);
+}
+});
+// ===============================
+// HELPER FUNCTION - SAFE TYPE HANDLING
+// ===============================
+function safeSplit(value) {
+if (!value) return [];
+if (Array.isArray(value)) return value.filter(x => x && String(x).trim());
+if (typeof value === 'string') {
+return value.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+}
+return [];
+}
+// ===============================
+// NAVIGATION
+// ===============================
+function showSection(sectionId) {
+var dashboard = document.getElementById('dashboard-section');
+var create = document.getElementById('create-section');
+var files = document.getElementById('files-manager-section');
+if (sectionId === 'dashboard') {
+dashboard.classList.remove('hidden');
+create.classList.add('hidden');
+files.classList.add('hidden');
+loadRegions();
+loadStats();
+} else if (sectionId === 'create') {
+create.classList.remove('hidden');
+dashboard.classList.add('hidden');
+files.classList.add('hidden');
+resetForm();
+} else if (sectionId === 'files-manager') {
+files.classList.remove('hidden');
+dashboard.classList.add('hidden');
+create.classList.add('hidden');
+loadAllFiles();
+}
+}
+// ===============================
+// LOAD DATA
+// ===============================
+async function loadStats() {
+try {
+const response = await fetch(API_URL + '/stats');
+const stats = await response.json();
+document.getElementById('stat-total').textContent = stats.total_regions || 0;
+document.getElementById('stat-audio').textContent = stats.with_audio || 0;
+document.getElementById('stat-images').textContent = stats.with_images || 0;
+document.getElementById('stat-size').textContent = (stats.database_size_mb || 0) + ' MB';
+} catch (error) {
+console.error('Stats error:', error);
+}
+}
+async function loadRegions() {
+try {
+console.log('Fetching regions...');
+const response = await fetch(API_URL + '/regions');
+if (!response.ok) {
+throw new Error('HTTP ' + response.status);
+}
+allRegions = await response.json();
+console.log('Loaded', allRegions.length, 'regions');
+renderTable(allRegions);
+populateRegionDropdown();
+} catch (error) {
+console.error('Load error:', error);
+document.getElementById('regions-table-body').innerHTML =
+'<tr><td colspan="6" class="px-4 py-8 text-center text-red-600">Error: ' + error.message + '</td></tr>';
+}
+}
+function renderTable(regions) {
+const tbody = document.getElementById('regions-table-body');
+tbody.innerHTML = '';
+if (!regions || regions.length === 0) {
+tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet.</td></tr>';
+return;
+}
+regions.forEach(function(region, index) {
+try {
+var galleryArr = safeSplit(region.gallery_images);
+var audioArr = safeSplit(region.audio_files);
+var hasAudio = audioArr.length > 0;
+var hasImages = galleryArr.length > 0;
+var row = document.createElement('tr');
+row.className = 'hover:bg-gray-50 transition cursor-pointer';
+row.innerHTML =
+'<td class="px-4 py-4 text-sm">' + (index + 1) + '</td>' +
+'<td class="px-4 py-4"><span class="font-semibold">' + (region.name || 'Unknown') + '</span></td>' +
+'<td class="px-4 py-4 text-sm">' + (region.capital || '—') + '</td>' +
+'<td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs">' + (region.category || 'Uncategorized') + '</span></td>' +
+'<td class="px-4 py-4 text-sm">' + (hasImages ? '🖼️ ' : '') + (hasAudio ? '🎵' : '') + '</td>' +
+'<td class="px-4 py-4 whitespace-nowrap">' +
+'<button class="edit-btn mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button>' +
+'<button class="delete-btn text-red-600 hover:underline text-sm">🗑️ Delete</button>' +
+'</td>';
+row.querySelector('.edit-btn').onclick = function(e) {
+e.stopPropagation();
+editRegion(region.id);
+};
+row.querySelector('.delete-btn').onclick = function(e) {
+e.stopPropagation();
+deleteRegion(region.id, region.name);
+};
+row.onclick = function(e) {
+if (!e.target.closest('button')) {
+editRegion(region.id);
+}
+};
+tbody.appendChild(row);
+} catch (err) {
+console.error('Error rendering region:', err);
+}
+});
+}
+// Search functionality
+document.getElementById('search-regions').addEventListener('input', function(e) {
+var term = e.target.value.toLowerCase();
+var filtered = allRegions.filter(function(r) {
+return r.name.toLowerCase().indexOf(term) !== -1 ||
+(r.capital && r.capital.toLowerCase().indexOf(term) !== -1) ||
+(r.category && r.category.toLowerCase().indexOf(term) !== -1);
+});
+renderTable(filtered);
+});
+// ===============================
+// FORM HANDLING
+// ===============================
+function resetForm() {
+document.getElementById('region-form').reset();
+document.getElementById('region-id').value = '';
+document.getElementById('form-title').textContent = 'Add New Region';
+document.getElementById('save-btn').textContent = '💾 Save Region';
+document.getElementById('hero-preview').classList.add('hidden');
+document.getElementById('session-uploads-list').innerHTML = '';
+}
+function editRegion(id) {
+console.log('Editing ID:', id);
+var region = null;
+for (var i = 0; i < allRegions.length; i++) {
+if (allRegions[i].id === id) {
+region = allRegions[i];
+break;
+}
+}
+if (!region) {
+alert('Region not found!');
+return;
+}
+document.getElementById('form-title').textContent = 'Edit: ' + region.name;
+document.getElementById('save-btn').textContent = '💾 Update Region';
+document.getElementById('region-id').value = region.id || '';
+document.getElementById('reg-name').value = region.name || '';
+document.getElementById('reg-capital').value = region.capital || '';
+document.getElementById('reg-population').value = region.population || '';
+document.getElementById('reg-terrain').value = region.terrain || '';
+document.getElementById('reg-description').value = region.description || '';
+document.getElementById('reg-category').value = region.category || '';
+document.getElementById('reg-tags').value = region.tags || '';
+document.getElementById('reg-source').value = region.source || '';
+document.getElementById('reg-overview').value = region.overview || '';
+document.getElementById('reg-hero-image').value = region.hero_image || '';
+var galleryArr = safeSplit(region.gallery_images);
+var audioArr = safeSplit(region.audio_files);
+document.getElementById('reg-gallery-images').value = galleryArr.join(', ');
+document.getElementById('reg-audio-files').value = audioArr.join(', ');
+if (region.hero_image) {
+showHeroPreview(region.hero_image);
+} else {
+hideHeroPreview();
+}
+// Populate link dropdown
+var currentRegionId = region.id;
+populateRegionDropdown(currentRegionId);
+showSection('create');
+}
+async function handleSave(e) {
+e.preventDefault();
+var regionId = document.getElementById('region-id').value;
+var submitBtn = document.getElementById('save-btn');
+submitBtn.disabled = true;
+submitBtn.textContent = '⏳ Saving...';
+var formData = new FormData();
+formData.append('name', document.getElementById('reg-name').value);
+formData.append('capital', document.getElementById('reg-capital').value);
+formData.append('population', document.getElementById('reg-population').value);
+formData.append('terrain', document.getElementById('reg-terrain').value);
+formData.append('description', document.getElementById('reg-description').value);
+formData.append('category', document.getElementById('reg-category').value);
+formData.append('tags', document.getElementById('reg-tags').value);
+formData.append('hero_image', document.getElementById('reg-hero-image').value);
+formData.append('gallery_images', document.getElementById('reg-gallery-images').value);
+formData.append('audio_files', document.getElementById('reg-audio-files').value);
+formData.append('source', document.getElementById('reg-source').value);
+formData.append('overview', document.getElementById('reg-overview').value);
+try {
+var method = regionId ? 'PUT' : 'POST';
+var url = regionId ? API_URL + '/regions/' + regionId : API_URL + '/regions';
+console.log('Saving with:', method, url);
+const response = await fetch(url, {
+method: method,
+body: formData
+});
+if (!response.ok) {
+throw new Error('Server returned ' + response.status);
+}
+var data = await response.json();
+if (data.success) {
+showNotification('Saved successfully!', 'success');
+// Reload immediately
+await loadRegions();
+await loadStats();
+showSection('dashboard');
+} else {
+throw new Error(data.detail || 'Save failed');
+}
+} catch (error) {
+console.error('Save error:', error);
+showNotification('❌ ' + error.message, 'error');
+} finally {
+submitBtn.disabled = false;
+submitBtn.textContent = regionId ? '💾 Update Region' : '💾 Save Region';
+}
+}
+async function deleteRegion(id, name) {
+if (!confirm('Delete "' + name + '"? This CANNOT be undone.')) return;
+try {
+const response = await fetch(API_URL + '/regions/' + id, { method: 'DELETE' });
+var data = await response.json();
+if (response.ok && data.success) {
+showNotification('Deleted!', 'success');
+loadRegions();
+loadStats();
+} else {
+throw new Error('Delete failed');
+}
+} catch (error) {
+showNotification('❌ Delete failed', 'error');
+}
+}
+// ===============================
+// FILE UPLOADS
+// ===============================
+async function uploadFile(type) {
+var input = document.createElement('input');
+input.type = 'file';
+input.accept = type === 'hero' ? 'image/*' : 'audio/*';
+input.onchange = async function(e) {
+var file = e.target.files[0];
+if (!file) return;
+var formData = new FormData();
+formData.append('file', file);
+formData.append('filename', file.name);
+try {
+var endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/audio';
+const response = await fetch(endpoint, { method: 'POST', body: formData });
+var data = await response.json();
+if (data.success) {
+if (type === 'hero') {
+document.getElementById('reg-hero-image').value = data.url;
+showHeroPreview(data.url);
+} else {
+var currentValue = document.getElementById('reg-audio-files').value;
+var newValue = currentValue ? currentValue + ', ' + data.url : data.url;
+document.getElementById('reg-audio-files').value = newValue;
+}
+showNotification('Uploaded!', 'success');
+}
+} catch (error) {
+showNotification('❌ Upload failed', 'error');
+}
+};
+input.click();
+}
+// ⭐ NEW: UNIVERSAL FILE UPLOAD ⭐
+async function uploadUniversalFiles(input) {
+const files = input.files;
+if (!files || files.length === 0) return;
+let uploadedCount = 0;
+let failedCount = 0;
+for (const file of files) {
+try {
+const formData = new FormData();
+formData.append('file', file);
+formData.append('filename', file.name);
+formData.append('category', document.getElementById('file-category').value);
+// Get description
+var description = document.getElementById('file-description').value;
+if (description) {
+formData.append('description', description);
+}
+// Get public/private setting
+var isPublic = document.getElementById('file-is-public').checked ? '1' : '0';
+formData.append('is_public', isPublic);
+console.log(`Uploading: ${file.name} (${Math.round(file.size / 1024)} KB)`);
+const response = await fetch('/api/upload/file', {
+method: 'POST',
+body: formData
+});
+const data = await response.json();
+if (response.ok && data.success) {
+uploadedCount++;
+showNotification(`✅ ${file.name} uploaded!`, 'success');
+// Auto-add to appropriate field based on category
+const category = document.getElementById('file-category').value;
+if (category === 'audio') {
+var currentValue = document.getElementById('reg-audio-files').value;
+var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
+document.getElementById('reg-audio-files').value = newValue;
+} else if (category === 'image') {
+var currentValue = document.getElementById('reg-gallery-images').value;
+var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
+document.getElementById('reg-gallery-images').value = newValue;
+}
+// Add to session uploads list
+addToSessionUploadList(data);
+} else {
+throw new Error(data.detail || 'Upload failed');
+}
+} catch (error) {
+failedCount++;
+console.error('Upload error:', error);
+showNotification(`❌ Failed: ${file.name}`, 'error');
+}
+}
+showNotification(`📁 Uploaded ${uploadedCount}/${files.length} files`, 'success');
+document.getElementById('universal-file-upload').value = '';
+}
+function addToSessionUploadList(fileData) {
+var container = document.getElementById('session-uploads-list');
+var item = document.createElement('div');
+item.className = 'bg-blue-50 p-3 rounded border border-blue-200 text-sm';
+item.innerHTML =
+'✅ ' + fileData.original_name +
+' (' + fileData.file_size_mb + ' MB) • ' + fileData.category.toUpperCase() +
+' <a href="' + fileData.url + '" target="_blank" class="text-[#0077b6] ml-2">🔗 View</a>';
+container.appendChild(item);
+}
+// ===============================
+// FILE MANAGER
+// ===============================
+async function loadAllFiles() {
+try {
+const response = await fetch('/api/files');
+allFiles = await response.json();
+renderFilesGrid(allFiles);
+} catch (error) {
+console.error('Load files error:', error);
+showNotification('Failed to load files', 'error');
+}
+}
+function renderFilesGrid(files) {
+var container = document.getElementById('all-files-grid');
+if (!files || files.length === 0) {
+container.innerHTML = '<p class="text-gray-500 text-center py-4 col-span-3">No files uploaded yet.</p>';
+return;
+}
+container.innerHTML = files.map(function(file) {
+return '<div class="bg-white p-4 rounded border hover:shadow-md transition">' +
+'<div class="flex justify-between items-start mb-2">' +
+'<span class="font-semibold text-sm truncate">' + file.original_name + '</span>' +
+'<button onclick="deleteFile(' + file.id + ')" class="text-red-600 hover:text-red-800 text-xs">🗑️</button>' +
+'</div>' +
+'<p class="text-xs text-gray-600">' + file.category.toUpperCase() + ' • ' + file.file_size_mb + ' MB</p>' +
+(file.description ? '<p class="text-xs text-gray-500 mt-1">' + file.description + '</p>' : '') +
+'<div class="mt-2">' +
+'<a href="' + file.file_url + '" target="_blank" class="text-[#0077b6] text-xs">🔗 Open File</a>' +
+'</div>' +
+'</div>';
+}).join('');
+}
+function filterFiles() {
+var search = document.getElementById('file-search').value.toLowerCase();
+var categoryFilter = document.getElementById('file-filter-category').value;
+var filtered = allFiles.filter(function(file) {
+var matchesSearch = file.original_name.toLowerCase().indexOf(search) !== -1 ||
+(file.description && file.description.toLowerCase().indexOf(search) !== -1);
+var matchesCategory = !categoryFilter || file.category === categoryFilter;
+return matchesSearch && matchesCategory;
+});
+renderFilesGrid(filtered);
+}
+async function deleteFile(fileId) {
+if (!confirm('Delete this file permanently?')) return;
+try {
+const response = await fetch('/api/files/' + fileId, { method: 'DELETE' });
+const data = await response.json();
+if (response.ok && data.success) {
+showNotification('File deleted!', 'success');
+loadAllFiles();
+} else {
+throw new Error('Delete failed');
+}
+} catch (error) {
+showNotification('❌ Delete failed', 'error');
+}
+}
+function showHeroPreview(url) {
+document.getElementById('preview-img').src = url;
+document.getElementById('hero-preview').classList.remove('hidden');
+}
+function hideHeroPreview() {
+document.getElementById('reg-hero-image').value = '';
+document.getElementById('hero-preview').classList.add('hidden');
+}
+// ===============================
+// SECTIONS/MANAGEMENT
+// ===============================
+async function loadAllSections() {
+try {
+const response = await fetch('/api/sections');
+allSections = await response.json();
+var container = document.getElementById('sections-list');
+container.innerHTML = allSections.map(function(section) {
+return '<div class="flex justify-between items-center p-3 bg-gray-50 rounded">' +
+'<span class="font-semibold">' + section.name + '</span>' +
+'<button onclick="deleteSection(' + section.id + ')" class="text-red-600 text-xs">✖️</button>' +
+'</div>';
+}).join('');
+} catch (error) {
+console.error('Failed to load sections:', error);
+}
+}
+async function createSection() {
+var name = document.getElementById('new-section-name').value.trim();
+if (!name) {
+alert('Please enter a section name');
+return;
+}
+try {
+const formData = new FormData();
+formData.append('name', name);
+const response = await fetch('/api/sections', {
+method: 'POST',
+body: formData
+});
+const data = await response.json();
+if (response.ok && data.success) {
+showNotification('Section created!', 'success');
+document.getElementById('new-section-name').value = '';
+loadAllSections();
+} else {
+throw new Error(data.detail || 'Failed to create section');
+}
+} catch (error) {
+showNotification('❌ ' + error.message, 'error');
+}
+}
+async function deleteSection(sectionId) {
+if (!confirm('Delete this section?')) return;
+try {
+const response = await fetch('/api/sections/' + sectionId, { method: 'DELETE' });
+const data = await response.json();
+if (response.ok && data.success) {
+showNotification('Section deleted!', 'success');
+loadAllSections();
+} else {
+throw new Error('Delete failed');
+}
+} catch (error) {
+showNotification('❌ Delete failed', 'error');
+}
+}
+// ===============================
+// EXPORT/IMPORT
+// ===============================
+async function exportData() {
+try {
+const response = await fetch(API_URL + '/regions');
+var data = await response.json();
+var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+var url = URL.createObjectURL(blob);
+var a = document.createElement('a');
+a.href = url;
+a.download = 'echostack-backup-' + new Date().toISOString().split('T')[0] + '.json';
+a.click();
+URL.revokeObjectURL(url);
+showNotification('Exported!', 'success');
+} catch (error) {
+showNotification('❌ Export failed', 'error');
+}
+}
+async function importData(input) {
+var file = input.files[0];
+if (!file) return;
+var reader = new FileReader();
+reader.onload = async function(e) {
+try {
+var data = JSON.parse(e.target.result);
+const response = await fetch('/api/import/json', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify(data)
+});
+showNotification('Imported!', 'success');
+loadRegions();
+} catch (error) {
+showNotification('❌ Invalid file', 'error');
+}
+};
+reader.readAsText(file);
+input.value = '';
+}
+// ===============================
+// AUTHENTICATION
+// ===============================
+function logout() {
+if (confirm('Logout now?')) {
+fetch('/api/auth/logout', {method: 'POST'});
+document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+window.location.href = '/admin';
+}
+}
+// ===============================
+// NOTIFICATIONS
+// ===============================
+function showNotification(message, type) {
+var notification = document.getElementById('notification');
+notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ' +
+(type === 'success' ? 'bg-green-600' : 'bg-red-600');
+notification.textContent = message;
+notification.classList.remove('hidden');
+setTimeout(function() {
+notification.classList.add('hidden');
+}, 3000);
+}
+// ===============================
+// HELPERS
+// ===============================
+function populateRegionDropdown(selectedId) {
+var select = document.getElementById('file-region-link');
+select.innerHTML = '<option value="no">No Link (Global)</option>';
+allRegions.forEach(function(region) {
+var option = document.createElement('option');
+option.value = region.id;
+option.textContent = region.name;
+if (selectedId && selectedId == region.id) {
+option.selected = true;
+}
+select.appendChild(option);
+});
+}
+</script>
 </body>
 </html>
