@@ -31,10 +31,7 @@
             width: 100%;
         }
         
-        .logo-text {
-            color: var(--brand-dark);
-            margin-bottom: 1rem;
-        }
+        .logo-text { color: var(--brand-dark); margin-bottom: 1rem; }
         
         .security-question {
             background: rgba(0, 119, 182, 0.05);
@@ -48,11 +45,6 @@
             color: var(--brand-dark);
             font-weight: 600;
             margin-bottom: 0.5rem;
-        }
-        
-        .question-hint {
-            color: #666;
-            font-size: 0.875rem;
         }
         
         input {
@@ -71,9 +63,7 @@
             color: white !important;
         }
         
-        button:hover {
-            opacity: 0.9 !important;
-        }
+        button:hover { opacity: 0.9 !important; }
     </style>
 </head>
 <body class="antialiased">
@@ -92,20 +82,20 @@
         <!-- Security Question -->
         <div class="security-question">
             <p class="question-text">🔐 Security Verification</p>
-            <p class="question-hint">To protect our heritage archive, please confirm you have access authority.</p>
+            <p class="text-gray-600 text-sm">To protect our heritage archive, please confirm your identity.</p>
         </div>
         
         <!-- Login Form -->
         <form id="login-form" class="space-y-4">
             <div>
                 <label class="block text-sm font-medium mb-2" style="color: #1a1e29 !important;">
-                    What is the name of your school or university?
+                    Who are you? 😊
                 </label>
                 <input type="text" id="answer" 
-                       placeholder="Enter institution name"
+                       placeholder="Enter your designation"
                        class="w-full p-3 border rounded-lg focus:outline-none"
-                       required>
-                <p class="text-xs text-gray-500 mt-1">Hint: Think of University of Education, Winneba</p>
+                       required
+                       autocomplete="off">
             </div>
             
             <button type="submit" class="w-full py-3 rounded-lg font-bold transition">
@@ -113,7 +103,7 @@
             </button>
         </form>
         
-        <!-- Error Message -->
+        <!-- Error Message (only shows after wrong attempt) -->
         <div id="error-message" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm text-center">
             ❌ Incorrect answer. Please try again.
         </div>
@@ -130,10 +120,12 @@
             
             const answer = document.getElementById('answer').value.trim();
             const submitBtn = e.target.querySelector('button[type="submit"]');
+            const errorMsg = document.getElementById('error-message');
             
             // Show loading state
             submitBtn.disabled = true;
             submitBtn.innerHTML = '⏳ Verifying...';
+            errorMsg.classList.add('hidden');
             
             try {
                 const formData = new FormData();
@@ -156,7 +148,7 @@
                     throw new Error('Incorrect answer');
                 }
             } catch (error) {
-                document.getElementById('error-message').classList.remove('hidden');
+                errorMsg.classList.remove('hidden');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '🔒 Verify & Access Admin Panel';
                 document.getElementById('answer').value = '';
