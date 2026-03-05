@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime
 from database import Base
 
 class Region(Base):
@@ -19,5 +18,3 @@ class Region(Base):
     audio_files = Column(String)
     category = Column(String(50))
     tags = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
