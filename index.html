@@ -3,38 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    
-    <!-- Page Title -->
     <title>EchoStack - Ghana's Heritage Archive</title>
-    
-    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1a1e29">
-    <!-- ✅ FIX: replaced deprecated apple-mobile-web-app-capable -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="EchoStack">
-    
-    <!-- Favicon & Icons -->
     <link rel="icon" type="image/png" href="/echostack-logo.png">
     <link rel="apple-touch-icon" href="/echostack-logo.png">
-    
-    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
-
-    <!-- ✅ FIX: Google Fonts as <link> tags instead of @import (avoids Render CSP 403 block) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Styles -->
     <style>
         :root {
             --brand-dark: #1a1e29;
@@ -43,308 +23,51 @@
             --brand-white: #ffffff;
             --brand-gradient: linear-gradient(135deg, #e8f4f8 0%, #ffffff 100%);
         }
-        
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Georgia', serif;
-            background-color: var(--brand-white);
-            color: var(--brand-dark);
-        }
-        
-        /* HEADER */
-        .header {
-            background: var(--brand-gradient);
-            border-bottom: 3px solid var(--brand-blue);
-            padding: 2rem 1rem;
-        }
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .logo-img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            border-radius: 8px;
-        }
-        
-        .logo-text {
-            font-size: 1.75rem;
-            font-weight: bold;
-            letter-spacing: -0.5px;
-            color: var(--brand-dark);
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-        
-        .nav-links a {
-            text-decoration: none;
-            color: var(--brand-dark);
-            font-size: 0.875rem;
-            transition: color 0.3s ease;
-        }
-        
-        .nav-links a:hover {
-            color: var(--brand-blue);
-            font-weight: 600;
-        }
-        
-        /* MAIN CONTENT */
-        .main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-        }
-        
-        .intro {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem 1rem;
-            background: linear-gradient(180deg, rgba(0, 119, 182, 0.05) 0%, transparent 100%);
-            border-radius: 8px;
-        }
-        
-        .intro h2 {
-            font-size: 2.5rem;
-            color: var(--brand-dark);
-            margin-bottom: 1rem;
-        }
-        
-        .intro p {
-            color: #555;
-            line-height: 1.7;
-            max-width: 600px;
-            margin: 1.5rem auto 0;
-            font-size: 1.1rem;
-        }
-        
-        /* MAP SECTION */
-        .map-section {
-            margin-bottom: 4rem;
-        }
-        
-        .map-section h3 {
-            font-size: 1.35rem;
-            color: var(--brand-dark);
-            margin-bottom: 1.5rem;
-            border-left: 4px solid var(--brand-blue);
-            padding-left: 1rem;
-        }
-        
-        .map-wrapper {
-            background-color: var(--brand-white);
-            border: 2px solid #d0d0d0;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-        
-        svg {
-            width: 100%;
-            height: auto;
-            max-height: 600px;
-        }
-        
-        .region-path {
-            transition: all 0.3s ease;
-            cursor: pointer;
-            stroke: #c0c0c0;
-            stroke-width: 1.5;
-            fill: #f0f0f0;
-        }
-        
-        .region-path:hover {
-            fill: var(--brand-blue);
-            stroke: var(--brand-dark);
-            stroke-width: 2;
-            opacity: 0.9;
-        }
-        
-        .region-active {
-            fill: var(--brand-blue) !important;
-            stroke: var(--brand-dark) !important;
-            stroke-width: 2.5 !important;
-            opacity: 1 !important;
-            filter: drop-shadow(0 2px 6px rgba(0, 119, 182, 0.4));
-        }
-        
-        .map-label {
-            font-size: 9px;
-            font-weight: bold;
-            font-family: 'Inter', sans-serif;
-            pointer-events: none;
-            fill: var(--brand-dark);
-            paint-order: stroke;
-            stroke: var(--brand-white);
-            stroke-width: 2.5px;
-        }
-        
-        /* REGION LIST BELOW MAP */
-        .regions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .region-card {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        .region-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0, 119, 182, 0.15);
-            border-color: var(--brand-blue);
-        }
-        
-        .region-card h4 {
-            font-size: 1.25rem;
-            color: var(--brand-dark);
-            margin-bottom: 0.5rem;
-        }
-        
-        .region-card p {
-            font-size: 0.875rem;
-            color: #666;
-            line-height: 1.5;
-        }
-        
-        /* REGION DETAIL MODAL/PAGE */
-        .detail-panel {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 100%;
-            max-width: 600px;
-            height: 100vh;
-            background: white;
-            box-shadow: -4px 0 24px rgba(0,0,0,0.1);
-            transition: right 0.4s ease;
-            z-index: 1000;
-            overflow-y: auto;
-            padding: 2rem;
-        }
-        
-        .detail-panel.show {
-            right: 0;
-        }
-        
-        .detail-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 2rem;
-            cursor: pointer;
-            color: #666;
-        }
-        
-        .section-title {
-            font-size: 1.25rem;
-            color: var(--brand-dark);
-            margin: 2rem 0 1rem;
-            padding-left: 0.75rem;
-            border-left: 3px solid var(--brand-blue);
-        }
-        
-        .media-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-        
-        .media-item {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .media-item img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-        }
-        
-        .audio-player {
-            width: 100%;
-            margin: 0.5rem 0;
-        }
-        
-        /* FOOTER */
-        .footer {
-            border-top: 1px solid #e0e0e0;
-            padding: 2rem 1rem;
-            background-color: var(--brand-light-gray);
-            text-align: center;
-            margin-top: 4rem;
-        }
-        
-        .footer p {
-            font-size: 0.875rem;
-            color: var(--brand-dark);
-            margin-bottom: 1rem;
-        }
-        
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 1rem;
-        }
-        
-        .footer-links a {
-            text-decoration: none;
-            color: var(--brand-dark);
-            font-size: 0.875rem;
-            transition: color 0.3s ease;
-        }
-        
-        .footer-links a:hover {
-            color: var(--brand-blue);
-            font-weight: 600;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 3rem;
-            font-size: 1.25rem;
-            color: #666;
-        }
+        body { font-family: Georgia, 'Times New Roman', Times, serif; background-color: var(--brand-white); color: var(--brand-dark); }
+        .header { background: var(--brand-gradient); border-bottom: 3px solid var(--brand-blue); padding: 2rem 1rem; }
+        .header-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo-container { display: flex; align-items: center; gap: 0.75rem; }
+        .logo-img { width: 50px; height: 50px; object-fit: contain; border-radius: 8px; }
+        .logo-text { font-size: 1.75rem; font-weight: bold; letter-spacing: -0.5px; color: var(--brand-dark); }
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--brand-dark); font-size: 0.875rem; transition: color 0.3s ease; }
+        .nav-links a:hover { color: var(--brand-blue); font-weight: 600; }
+        .main { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+        .intro { text-align: center; margin-bottom: 3rem; padding: 2rem 1rem; background: linear-gradient(180deg, rgba(0,119,182,0.05) 0%, transparent 100%); border-radius: 8px; }
+        .intro h2 { font-size: 2.5rem; color: var(--brand-dark); margin-bottom: 1rem; }
+        .intro p { color: #555; line-height: 1.7; max-width: 600px; margin: 1.5rem auto 0; font-size: 1.1rem; }
+        .map-section { margin-bottom: 4rem; }
+        .map-section h3 { font-size: 1.35rem; color: var(--brand-dark); margin-bottom: 1.5rem; border-left: 4px solid var(--brand-blue); padding-left: 1rem; }
+        .map-wrapper { background-color: var(--brand-white); border: 2px solid #d0d0d0; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        svg { width: 100%; height: auto; max-height: 600px; }
+        .region-path { transition: all 0.3s ease; cursor: pointer; stroke: #c0c0c0; stroke-width: 1.5; fill: #f0f0f0; }
+        .region-path:hover { fill: var(--brand-blue); stroke: var(--brand-dark); stroke-width: 2; opacity: 0.9; }
+        .region-active { fill: var(--brand-blue) !important; stroke: var(--brand-dark) !important; stroke-width: 2.5 !important; opacity: 1 !important; filter: drop-shadow(0 2px 6px rgba(0,119,182,0.4)); }
+        .map-label { font-size: 9px; font-weight: bold; font-family: Arial, Helvetica, sans-serif; pointer-events: none; fill: var(--brand-dark); paint-order: stroke; stroke: var(--brand-white); stroke-width: 2.5px; }
+        .regions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .region-card { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .region-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,119,182,0.15); border-color: var(--brand-blue); }
+        .region-card h4 { font-size: 1.25rem; color: var(--brand-dark); margin-bottom: 0.5rem; }
+        .region-card p { font-size: 0.875rem; color: #666; line-height: 1.5; }
+        .detail-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 600px; height: 100vh; background: white; box-shadow: -4px 0 24px rgba(0,0,0,0.1); transition: right 0.4s ease; z-index: 1000; overflow-y: auto; padding: 2rem; }
+        .detail-panel.show { right: 0; }
+        .detail-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #e0e0e0; }
+        .close-btn { background: none; border: none; font-size: 2rem; cursor: pointer; color: #666; }
+        .section-title { font-size: 1.25rem; color: var(--brand-dark); margin: 2rem 0 1rem; padding-left: 0.75rem; border-left: 3px solid var(--brand-blue); }
+        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .media-item { border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .media-item img { width: 100%; height: 120px; object-fit: cover; }
+        .audio-player { width: 100%; margin: 0.5rem 0; }
+        .footer { border-top: 1px solid #e0e0e0; padding: 2rem 1rem; background-color: var(--brand-light-gray); text-align: center; margin-top: 4rem; }
+        .footer p { font-size: 0.875rem; color: var(--brand-dark); margin-bottom: 1rem; }
+        .footer-links { display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; }
+        .footer-links a { text-decoration: none; color: var(--brand-dark); font-size: 0.875rem; transition: color 0.3s ease; }
+        .footer-links a:hover { color: var(--brand-blue); font-weight: 600; }
+        .loading { text-align: center; padding: 3rem; font-size: 1.25rem; color: #666; }
     </style>
 </head>
 <body>
-    
-    <!-- HEADER -->
     <header class="header">
         <div class="header-content">
             <div class="logo-container">
@@ -358,35 +81,21 @@
             </nav>
         </div>
     </header>
-
-    <!-- MAIN CONTENT -->
     <main class="main">
-        
-        <!-- INTRO -->
         <section class="intro">
             <h2>Ghana's Living Heritage Archive</h2>
             <p>Discover the rich cultural stories, landscapes, and history of Ghana's 16 regions through our interactive archive.</p>
         </section>
-
-        <!-- MAP SECTION -->
         <section class="map-section" id="explore">
             <h3>🗺️ Interactive Map</h3>
-            
             <div class="map-wrapper">
-                <svg viewBox="0 0 400 620" id="ghana-map">
-                    <!-- SVG paths will be populated by JavaScript -->
-                </svg>
+                <svg viewBox="0 0 400 620" id="ghana-map"></svg>
             </div>
-            
-            <!-- ALTERNATE REGION CARDS -->
             <div class="regions-grid" id="regions-list">
                 <div class="loading">Loading regions...</div>
             </div>
         </section>
-
     </main>
-
-    <!-- REGION DETAIL PANEL -->
     <div id="detail-panel" class="detail-panel">
         <div class="detail-header">
             <div>
@@ -396,13 +105,8 @@
             </div>
             <button onclick="closeDetail()" class="close-btn">×</button>
         </div>
-        
-        <div id="detail-content">
-            <!-- Dynamic content loaded here -->
-        </div>
+        <div id="detail-content"></div>
     </div>
-
-    <!-- FOOTER -->
     <footer class="footer">
         <p>&copy; 2026 EchoStack. Preserving Ghana's Stories.</p>
         <div class="footer-links">
@@ -411,28 +115,19 @@
             <a href="#">Privacy</a>
         </div>
     </footer>
-
-    <!-- SERVICE WORKER REGISTRATION -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('✅ SW registered:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('⚠️ SW registration failed:', error);
-                    });
+                    .then(r => console.log('✅ SW registered:', r.scope))
+                    .catch(e => console.log('⚠️ SW failed:', e));
             });
         }
     </script>
-
-    <!-- COMPLETE JAVASCRIPT -->
     <script>
         const API_URL = '/api';
         let allRegions = [];
         let mapPaths = {};
-        
         const svgPaths = {
             'upper-west': 'M60,40 L160,50 L165,130 L100,140 L50,110 Z',
             'upper-east': 'M160,50 L280,25 L290,100 L165,130 Z',
@@ -451,188 +146,89 @@
             'central': 'M130,530 L180,510 L280,510 L250,600 L110,610 Z',
             'greater-accra': 'M300,580 L360,570 L375,600 L290,610 Z'
         };
-        
         const regionLabels = {
-            'upper-west': { x: 105, y: 100 },
-            'upper-east': { x: 210, y: 80 },
-            'north-east': { x: 255, y: 155 },
-            'savannah': { x: 120, y: 240 },
-            'northern': { x: 265, y: 255 },
-            'bono': { x: 120, y: 390 },
-            'bono-east': { x: 245, y: 360 },
-            'ahafo': { x: 105, y: 455 },
-            'ashanti': { x: 240, y: 475 },
-            'oti': { x: 355, y: 385 },
-            'volta': { x: 370, y: 525 },
-            'eastern': { x: 320, y: 555 },
-            'western-north': { x: 90, y: 505 },
-            'western': { x: 80, y: 580 },
-            'central': { x: 200, y: 570 },
-            'greater-accra': { x: 315, y: 602 }
+            'upper-west': {x:105,y:100}, 'upper-east': {x:210,y:80}, 'north-east': {x:255,y:155},
+            'savannah': {x:120,y:240}, 'northern': {x:265,y:255}, 'bono': {x:120,y:390},
+            'bono-east': {x:245,y:360}, 'ahafo': {x:105,y:455}, 'ashanti': {x:240,y:475},
+            'oti': {x:355,y:385}, 'volta': {x:370,y:525}, 'eastern': {x:320,y:555},
+            'western-north': {x:90,y:505}, 'western': {x:80,y:580}, 'central': {x:200,y:570},
+            'greater-accra': {x:315,y:602}
         };
-        
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initMap();
-            await loadRegions();
-        });
-        
+        document.addEventListener('DOMContentLoaded', async () => { await initMap(); await loadRegions(); });
         async function initMap() {
             const svg = document.getElementById('ghana-map');
-            let svgContent = '';
-            
+            let s = '';
             for (const [key, path] of Object.entries(svgPaths)) {
                 mapPaths[key] = path;
-                svgContent += `
-                    <path id="${key}" d="${path}" class="region-path" 
-                          onclick="showRegionDetail('${key}')" />
-                    <text x="${regionLabels[key].x}" y="${regionLabels[key].y}" 
-                          class="map-label">${key.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</text>
-                `;
+                s += `<path id="${key}" d="${path}" class="region-path" onclick="showRegionDetail('${key}')"/>
+                      <text x="${regionLabels[key].x}" y="${regionLabels[key].y}" class="map-label">${key.replace('-',' ').replace(/\b\w/g,l=>l.toUpperCase())}</text>`;
             }
-            
-            svg.innerHTML = svgContent;
+            svg.innerHTML = s;
         }
-        
         async function loadRegions() {
             try {
-                const response = await fetch(`${API_URL}/regions`);
-                allRegions = await response.json();
+                const res = await fetch(`${API_URL}/regions`);
+                allRegions = await res.json();
                 console.log('Loaded regions:', allRegions.length);
                 renderRegionsList();
                 renderMapHighlight();
-            } catch (error) {
-                console.error('Failed to load regions:', error);
-                document.getElementById('regions-list').innerHTML = 
-                    '<div class="loading">Failed to load regions. Please refresh.</div>';
+            } catch(e) {
+                console.error('Failed to load regions:', e);
+                document.getElementById('regions-list').innerHTML = '<div class="loading">Failed to load regions. Please refresh.</div>';
             }
         }
-        
         function renderRegionsList() {
-            const container = document.getElementById('regions-list');
-            
-            if (allRegions.length === 0) {
-                container.innerHTML = '<div class="loading">No regions available yet.</div>';
-                return;
-            }
-            
-            container.innerHTML = allRegions.map((region, index) => `
-                <div class="region-card" onclick="showRegionDetailById(${region.id})">
-                    <h4>${region.name}</h4>
-                    <p><strong>Capital:</strong> ${region.capital || 'N/A'}</p>
-                    <p><strong>Category:</strong> ${region.category || 'Uncategorized'}</p>
-                </div>
-            `).join('');
+            const c = document.getElementById('regions-list');
+            if (allRegions.length === 0) { c.innerHTML = '<div class="loading">No regions available yet.</div>'; return; }
+            c.innerHTML = allRegions.map(r => `<div class="region-card" onclick="showRegionDetailById(${r.id})"><h4>${r.name}</h4><p><strong>Capital:</strong> ${r.capital||'N/A'}</p><p><strong>Category:</strong> ${r.category||'Uncategorized'}</p></div>`).join('');
         }
-        
         function renderMapHighlight() {
-            allRegions.forEach(region => {
-                const regionKey = region.name.toLowerCase().replace(/ /g, '-').replace(' region', '');
-                const path = document.getElementById(regionKey);
-                if (path) {
-                    path.setAttribute('data-region-id', region.id);
-                }
+            allRegions.forEach(r => {
+                const k = r.name.toLowerCase().replace(/ /g,'-').replace(' region','');
+                const p = document.getElementById(k);
+                if (p) p.setAttribute('data-region-id', r.id);
             });
         }
-        
         async function showRegionDetailById(id) {
-            const region = allRegions.find(r => r.id === id);
-            if (!region) return;
-            await showRegionDetailFromData(region);
+            const r = allRegions.find(r => r.id === id);
+            if (r) await showRegionDetailFromData(r);
         }
-        
         async function showRegionDetail(key) {
-            const regionName = key.charAt(0).toUpperCase() + key.slice(1).replace('-', ' ');
-            let region = allRegions.find(r => {
-                return r.name.toLowerCase().includes(regionName.toLowerCase()) || 
-                       r.name.toLowerCase() === key.replace('-', ' ');
-            });
-            
-            if (!region && allRegions.length > 0) {
-                region = allRegions[0];
-            }
-            
-            if (region) {
-                await showRegionDetailFromData(region);
-            } else {
-                alert('Region details loading... Check back soon!');
-            }
+            const name = key.charAt(0).toUpperCase() + key.slice(1).replace('-',' ');
+            let r = allRegions.find(r => r.name.toLowerCase().includes(name.toLowerCase()) || r.name.toLowerCase() === key.replace('-',' '));
+            if (!r && allRegions.length > 0) r = allRegions[0];
+            if (r) await showRegionDetailFromData(r);
+            else alert('Region details loading... Check back soon!');
         }
-        
         async function showRegionDetailFromData(region) {
-            document.getElementById('detail-code').innerText = `GH-${String(region.id).padStart(2, '0')}`;
+            document.getElementById('detail-code').innerText = `GH-${String(region.id).padStart(2,'0')}`;
             document.getElementById('detail-title').innerText = region.name;
-            document.getElementById('detail-capital').innerText = `Capital: ${region.capital || 'Not specified'}`;
-            
-            const galleryImages = Array.isArray(region.gallery_images) ? region.gallery_images : 
-                                  (region.gallery_images ? region.gallery_images.split(',') : []);
-            const audioFiles = Array.isArray(region.audio_files) ? region.audio_files :
-                               (region.audio_files ? region.audio_files.split(',') : []);
-            
-            let content = `
+            document.getElementById('detail-capital').innerText = `Capital: ${region.capital||'Not specified'}`;
+            const imgs = Array.isArray(region.gallery_images) ? region.gallery_images : (region.gallery_images ? region.gallery_images.split(',') : []);
+            const auds = Array.isArray(region.audio_files) ? region.audio_files : (region.audio_files ? region.audio_files.split(',') : []);
+            document.getElementById('detail-content').innerHTML = `
                 <div class="section-title">📖 Heritage Description</div>
-                <p style="line-height: 1.8; margin-bottom: 2rem;">${region.description || 'No description available.'}</p>
-                
+                <p style="line-height:1.8;margin-bottom:2rem">${region.description||'No description available.'}</p>
                 <div class="section-title">📊 Quick Facts</div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
-                    <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px;">
-                        <p style="font-size: 0.875rem; color: #666;">Population</p>
-                        <p style="font-size: 1.25rem; font-weight: bold;">${region.population || 'N/A'}</p>
-                    </div>
-                    <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px;">
-                        <p style="font-size: 0.875rem; color: #666;">Terrain</p>
-                        <p style="font-size: 1.25rem; font-weight: bold;">${region.terrain || 'N/A'}</p>
-                    </div>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:2rem">
+                    <div style="background:#f0f9ff;padding:1rem;border-radius:8px"><p style="font-size:0.875rem;color:#666">Population</p><p style="font-size:1.25rem;font-weight:bold">${region.population||'N/A'}</p></div>
+                    <div style="background:#f0f9ff;padding:1rem;border-radius:8px"><p style="font-size:0.875rem;color:#666">Terrain</p><p style="font-size:1.25rem;font-weight:bold">${region.terrain||'N/A'}</p></div>
                 </div>
-                
                 <div class="section-title">🏞️ Gallery</div>
-                ${galleryImages.length > 0 ? `
-                    <div class="media-grid">
-                        ${galleryImages.map(img => `
-                            <div class="media-item">
-                                <img src="${img.trim()}" alt="Gallery image" onerror="this.src='https://via.placeholder.com/150?text=Image'">
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : '<p>No images uploaded yet.</p>'}
-                
+                ${imgs.length>0?`<div class="media-grid">${imgs.map(i=>`<div class="media-item"><img src="${i.trim()}" alt="Gallery" onerror="this.src='https://via.placeholder.com/150?text=Image'"></div>`).join('')}</div>`:'<p>No images uploaded yet.</p>'}
                 <div class="section-title">🎵 Audio Archives</div>
-                ${audioFiles.length > 0 ? `
-                    <div style="margin-bottom: 2rem;">
-                        ${audioFiles.map(audio => `
-                            <div style="margin: 1rem 0; padding: 1rem; background: #f8f8f8; border-radius: 8px;">
-                                <audio controls class="audio-player">
-                                    <source src="${audio.trim()}" type="audio/mpeg">
-                                    Your browser does not support the audio element.
-                                </audio>
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : '<p>No audio recordings available yet.</p>'}
-                
+                ${auds.length>0?`<div style="margin-bottom:2rem">${auds.map(a=>`<div style="margin:1rem 0;padding:1rem;background:#f8f8f8;border-radius:8px"><audio controls class="audio-player"><source src="${a.trim()}" type="audio/mpeg"></audio></div>`).join('')}</div>`:'<p>No audio recordings available yet.</p>'}
                 <div class="section-title">🎬 Documentaries (Coming Soon)</div>
-                <p style="color: #666; margin-bottom: 2rem;">Video documentaries about this region will be available soon.</p>
-                
+                <p style="color:#666;margin-bottom:2rem">Video documentaries about this region will be available soon.</p>
                 <div class="section-title">📝 Metadata</div>
-                <p><strong>Category:</strong> ${region.category || 'Uncategorized'}</p>
-                <p><strong>Tags:</strong> ${Array.isArray(region.tags) ? region.tags.join(', ') : (region.tags || 'None')}</p>
-                ${region.source ? `<p><strong>Source:</strong> ${region.source}</p>` : ''}
-            `;
-            
-            document.getElementById('detail-content').innerHTML = content;
+                <p><strong>Category:</strong> ${region.category||'Uncategorized'}</p>
+                <p><strong>Tags:</strong> ${Array.isArray(region.tags)?region.tags.join(', '):(region.tags||'None')}</p>
+                ${region.source?`<p><strong>Source:</strong> ${region.source}</p>`:''}`;
             document.getElementById('detail-panel').classList.add('show');
         }
-        
-        function closeDetail() {
-            document.getElementById('detail-panel').classList.remove('show');
-        }
-        
-        document.getElementById('detail-panel').addEventListener('click', (e) => {
-            if (e.target.id === 'detail-panel') closeDetail();
-        });
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeDetail();
-        });
+        function closeDetail() { document.getElementById('detail-panel').classList.remove('show'); }
+        document.getElementById('detail-panel').addEventListener('click', e => { if (e.target.id==='detail-panel') closeDetail(); });
+        document.addEventListener('keydown', e => { if (e.key==='Escape') closeDetail(); });
     </script>
 </body>
 </html>
