@@ -1,3 +1,8 @@
+/* ============================================ */
+/*  ECHOSTACK - BRAND STYLING                   */
+/*  Logo Colors: Dark Gray + Blue               */
+/* ============================================ */
+
 * {
     margin: 0;
     padding: 0;
@@ -8,41 +13,57 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f5f5f5;
     color: #333;
+    line-height: 1.6;
 }
 
+/* HEADER SECTION */
 .main-header {
-    background: linear-gradient(135deg, #006B3F 0%, #CE1126 100%);
+    background: linear-gradient(135deg, #1a1e29 0%, #0077b6 100%);
     color: white;
     text-align: center;
-    padding: 3rem 1rem;
+    padding: 4rem 1rem;
 }
 
 .main-header h1 {
-    font-size: 3rem;
+    font-size: 3.5rem;
     margin-bottom: 0.5rem;
+    letter-spacing: 2px;
 }
 
 .tagline {
-    font-size: 1.2rem;
-    opacity: 0.9;
+    font-size: 1.3rem;
+    opacity: 0.95;
+    font-weight: 300;
 }
 
+/* SEARCH BAR SECTION */
 .region-nav {
     background: white;
-    padding: 1.5rem;
+    padding: 2rem 1rem;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 #search-bar {
     width: 100%;
     max-width: 600px;
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     border: 2px solid #ddd;
-    border-radius: 8px;
+    border-radius: 50px;
     font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
+#search-bar:focus {
+    outline: none;
+    border-color: #0077b6;
+    box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.2);
+}
+
+/* MAP & SECTIONS */
 .map-section {
     max-width: 1200px;
     margin: 3rem auto;
@@ -51,44 +72,112 @@ body {
 
 .map-section h2 {
     text-align: center;
-    margin-bottom: 2rem;
-    color: #006B3F;
+    margin-bottom: 2.5rem;
+    color: #1a1e29;
+    font-size: 2rem;
 }
 
 .regions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    gap: 2rem;
 }
 
+/* REGION CARDS */
 .region-card {
     background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: all 0.4s ease;
     cursor: pointer;
+    border-top: 4px solid #0077b6;
 }
 
 .region-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
 }
 
 .region-card h3 {
-    color: #CE1126;
-    margin-bottom: 0.5rem;
+    color: #1a1e29;
+    font-size: 1.5rem;
+    margin-bottom: 0.8rem;
 }
 
 .region-card p {
     color: #666;
-    line-height: 1.6;
+    line-height: 1.7;
+    font-size: 1rem;
 }
 
+/* MAP INTERACTIVE ELEMENTS (For Future SVG Map) */
+.interactive-map {
+    width: 100%;
+    max-width: 600px;
+    height: 500px;
+    margin: 0 auto;
+}
+
+.region-hotspot {
+    fill: #0077b6;
+    stroke: #fff;
+    stroke-width: 2;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.region-hotspot:hover {
+    fill: #00b4d8;
+    r: 15;
+}
+
+/* FOOTER */
 .main-footer {
-    background: #333;
+    background: #1a1e29;
     color: white;
     text-align: center;
-    padding: 1.5rem;
-    margin-top: 3rem;
+    padding: 2rem 1rem;
+    margin-top: 4rem;
+}
+
+.main-footer p {
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+    .main-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .tagline {
+        font-size: 1.1rem;
+    }
+
+    .regions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .region-card {
+        padding: 1.5rem;
+    }
+}
+
+/* LOADING STATES */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+/* ERROR STATE */
+.error-message {
+    background: #fee;
+    color: #c00;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem;
+    text-align: center;
 }
