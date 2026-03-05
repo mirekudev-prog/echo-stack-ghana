@@ -181,3 +181,34 @@ body {
     margin: 1rem;
     text-align: center;
 }
+
+/* ============================================ */
+/*  GHANA MAP STYLING                          */
+/* ============================================ */
+
+.ghana-map {
+    width: 100%;
+    max-width: 500px;
+    height: 500px;
+    margin: 0 auto;
+}
+
+.region-path {
+    fill: #e0e0e0;
+    stroke: #0077b6;
+    stroke-width: 2;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.regions-grid-section {
+    max-width: 1200px;
+    margin: 3rem auto;
+    padding: 0 1rem;
+}
+
+@media (max-width: 768px) {
+    .ghana-map {
+        height: 400px;
+    }
+}
