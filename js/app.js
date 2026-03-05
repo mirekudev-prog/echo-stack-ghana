@@ -1,3 +1,7 @@
+// ============================================
+// ECHOSTACK - GHANA MAP INTERACTIVE APP
+// ============================================
+
 const API_URL = 'https://echo-stack-ghana.onrender.com/api/regions';
 
 // All 16 Official Regions
@@ -56,17 +60,38 @@ function addMapInteractions() {
         hotspot.addEventListener('click', () => {
             const regionName = hotspot.getAttribute('data-region');
             
-            // Highlight hotspot
-            document.querySelectorAll('.region-hotspot').forEach(h => h.style.opacity = '0');
-            hotspot.style.opacity = '1';
+            console.log('✅ Region clicked:', regionName);
             
-            // Search for region
+            // Highlight selected hotspot
+            document.querySelectorAll('.region-hotspot').forEach(h => h.style.opacity = '0.1');
+            hotspot.style.opacity = '0.8';
+            
+            // Scroll to search results
             filterRegions(regionName);
+            
+            // Scroll page to grid section
+            setTimeout(() => {
+                document.getElementById('regions-grid-section').scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+            }, 100);
+        });
+        
+        // Hover effects
+        hotspot.addEventListener('mouseenter', () => {
+            hotspot.style.opacity = '0.8';
+        });
+        
+        hotspot.addEventListener('mouseleave', () => {
+            // Don't reset if selected
+            if (!hotspot.classList.contains('selected')) {
+                hotspot.style.opacity = '0.1';
+            }
         });
     });
 }
 
-// Load Regions Data
+// Load Regions Data from API
 async function loadRegions(showAll = false) {
     try {
         const response = await fetch(API_URL);
@@ -90,7 +115,7 @@ function renderRegions(regions) {
     grid.innerHTML = '';
     
     if (!regions || regions.length === 0) {
-        grid.innerHTML = '<p>No regions found.</p>';
+        grid.innerHTML = '<p class="no-results">No regions found matching your search.</p>';
         return;
     }
     
@@ -101,34 +126,61 @@ function renderRegions(regions) {
         
         card.innerHTML = `
             <h3>${region.name}</h3>
-            <p>${region.overview || 'Click to explore...'}</p>
+            <p>${region.overview || 'Click to explore more about this region...'}</p>
         `;
         
         grid.appendChild(card);
     });
+    
+    // Mark all hotspots as deselected since we're searching manually
+    document.querySelectorAll('.region-hotspot').forEach(h => {
+        h.classList.remove('selected');
+        h.style.opacity = '0.1';
+    });
 }
 
-// Search Functionality
-document.getElementById('search-bar').addEventListener('input', async function(e) {
-    const searchTerm = e.target.value.trim();
+// Search Bar Functionality
+const searchBar = document.getElementById('search-bar');
+if (searchBar) {
+    searchBar.addEventListener('input', async function(e) {
+        const searchTerm = e.target.value.trim();
+        
+        if (searchTerm.length >= 2) {
+            await filterRegions(searchTerm);
+        } else {
+            document.getElementById('regions-grid-section').style.display = 'none';
+        }
+    });
     
-    if (searchTerm.length >= 2) {
-        await filterRegions(searchTerm);
-    } else {
-        document.getElementById('regions-grid-section').style.display = 'none';
-    }
-});
+    // Clear button
+    searchBar.addEventListener('keypress', async function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            await filterRegions(this.value);
+        }
+    });
+}
 
+// Filter Regions by Search Term or Click
 async function filterRegions(term) {
     try {
         const response = await fetch(API_URL);
         const allRegions = await response.json();
-        const filtered = allRegions.filter(r => 
-            r.name.toLowerCase().includes(term.toLowerCase()) ||
-            (r.overview && r.overview.toLowerCase().includes(term.toLowerCase()))
-        );
+        
+        const filtered = allRegions.filter(r => {
+            const nameMatch = r.name.toLowerCase().includes(term.toLowerCase());
+            const overviewMatch = r.overview && r.overview.toLowerCase().includes(term.toLowerCase());
+            return nameMatch || overviewMatch;
+        });
+        
+        console.log(`🔍 Searching for "${term}" - Found ${filtered.length} matches`, filtered);
+        
         renderRegions(filtered);
     } catch (error) {
         console.error('Filter error:', error);
+        alert('Unable to load regions. Please refresh and try again.');
     }
 }
+
+// Debug: Show current URL being called
+console.log('📡 API URL:', API_URL);
