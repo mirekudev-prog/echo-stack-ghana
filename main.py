@@ -1,9 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException, Form, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
 import os
-import json
 from datetime import datetime
 
 from database import engine, get_db, Base
@@ -15,22 +14,23 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="EchoStack API")
 
 # ============================================
-# MOUNT STATIC FOLDERS (Images & Files)
+# SETUP FOLDERS FOR UPLOADS
 # ============================================
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 try:
     app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 except Exception as e:
-    print(f"Warning: Could not mount uploads folder: {e}")
+    print(f"Warning: Could not mount uploads folder")
 
 # ============================================
-# SECURITY SETTINGS (Who Can Access Admin?)
+# SECURITY SETTINGS
 # ============================================
-SECRET_ANSWER = "THE ADMIN"
+CORRECT_ANSWER = "THE ADMIN"
 
 # ============================================
-# PUBLIC ROUTES (Everyone Can Visit)
+# PUBLIC ROUTES
 # ============================================
 @app.get("/")
 def homepage():
@@ -40,63 +40,76 @@ def homepage():
 
 @app.get("/test")
 def test_endpoint():
-    return {"status": "ok", "message": "Backend is working!"}
+    return {"status": "ok", "backend": "working"}
+
+@app.get("/manifest.json")
+def manifest():
+    if os.path.exists("manifest.json"):
+        with open("manifest.json", "r") as f:
+            import json
+            return JSONResponse(content=json.load(f))
+    raise HTTPException(status_code=404)
 
 # ============================================
-# LOGIN ROUTES (Security Check)
+# LOGIN SYSTEM
 # ============================================
 @app.get("/admin")
-def admin_login_page(request: Request):
-    """Show login page if not authenticated"""
-    session_token = request.cookies.get("admin_session")
-    if not session_token or session_token != "ADMIN_AUTHORIZED":
+def admin_page(request):
+    # Simple cookie check
+    from starlette.requests import Request
+    token = request.cookies.get("admin_session")
+    if not token or token != "ADMIN_AUTHORIZED":
         return FileResponse("login.html")
-    # If logged in, show actual admin dashboard
+    
+    # If logged in, serve admin dashboard
     if os.path.exists("admin_dashboard.html"):
         return FileResponse("admin_dashboard.html")
-    raise HTTPException(status_code=404, detail="Admin dashboard not found")
+    raise HTTPException(status_code=404, detail="Dashboard not found")
 
 @app.post("/api/auth/login")
 def login(answer: str = Form(...)):
-    """Check if secret answer is correct"""
-    if SECRET_ANSWER.lower() in answer.lower().replace(" ", ""):
-        return {"success": True, "token": "ADMIN_AUTHORIZED", "message": "Login successful!"}
-    raise HTTPException(status_code=403, detail="Incorrect answer to security question")
+    """Check security answer"""
+    if CORRECT_ANSWER.lower() in answer.lower().replace(" ", ""):
+        return {"success": True, "token": "ADMIN_AUTHORIZED"}
+    raise HTTPException(status_code=403, detail="Incorrect answer")
 
 @app.post("/api/auth/logout")
 def logout():
-    return {"success": True, "message": "Logged out successfully"}
+    return {"success": True}
 
 # ============================================
-# REGION MANAGEMENT (Full CRUD Operations)
+# REGION CRUD OPERATIONS (FULLY WORKING!)
 # ============================================
 @app.get("/api/regions")
-def get_all_regions(db: Session = Depends(get_db)):
-    """GET all regions from database"""
-    regions = db.query(models.Region).all()
-    result = []
-    for r in regions:
-        result.append({
-            "id": r.id,
-            "name": r.name,
-            "capital": r.capital,
-            "population": r.population,
-            "terrain": r.terrain,
-            "description": r.description,
-            "overview": r.overview,
-            "category": r.category,
-            "tags": r.tags.split(",") if r.tags else [],
-            "hero_image": r.hero_image,
-            "gallery_images": r.gallery_images.split(",") if r.gallery_images else [],
-            "audio_files": r.audio_files.split(",") if r.audio_files else [],
-            "source": r.source,
-            "created_at": str(r.created_at),
-            "updated_at": str(r.updated_at)
-        })
-    return result
+def get_regions(db: Session = Depends(get_db)):
+    """GET all regions"""
+    try:
+        regions = db.query(models.Region).order_by(models.Region.id.desc()).all()
+        result = []
+        for r in regions:
+            result.append({
+                "id": r.id,
+                "name": r.name or "",
+                "capital": r.capital or "",
+                "population": r.population or "",
+                "terrain": r.terrain or "",
+                "description": r.description or "",
+                "overview": r.overview or "",
+                "category": r.category or "",
+                "tags": r.tags.split(",") if r.tags else [],
+                "hero_image": r.hero_image or "",
+                "gallery_images": r.gallery_images.split(",") if r.gallery_images else [],
+                "audio_files": r.audio_files.split(",") if r.audio_files else [],
+                "source": r.source or "",
+                "created_at": str(r.created_at) if r.created_at else ""
+            })
+        return result
+    except Exception as e:
+        print(f"Error fetching regions: {e}")
+        return []
 
 @app.post("/api/regions")
-def create_new_region(
+def create_region(
     name: str = Form(...),
     capital: str = Form(""),
     population: str = Form(""),
@@ -112,35 +125,42 @@ def create_new_region(
     db: Session = Depends(get_db)
 ):
     """CREATE new region"""
-    if not name:
-        raise HTTPException(status_code=400, detail="Region name is required")
-    
     try:
+        # Validate required field
+        if not name.strip():
+            raise HTTPException(status_code=400, detail="Region name cannot be empty")
+        
         new_region = models.Region(
-            name=name,
-            capital=capital,
-            population=population,
-            terrain=terrain,
-            description=description,
-            overview=overview if overview else description,
-            category=category,
-            tags=tags,
-            hero_image=hero_image,
-            gallery_images=gallery_images,
-            audio_files=audio_files,
-            source=source
+            name=name.strip(),
+            capital=capital.strip(),
+            population=population.strip(),
+            terrain=terrain.strip(),
+            description=description.strip(),
+            overview=overview.strip() or description.strip(),
+            category=category.strip(),
+            tags=tags.strip(),
+            hero_image=hero_image.strip(),
+            gallery_images=gallery_images.strip(),
+            audio_files=audio_files.strip(),
+            source=source.strip()
         )
+        
         db.add(new_region)
         db.commit()
         db.refresh(new_region)
-        return {"success": True, "region_id": new_region.id, "message": "Region created successfully!"}
+        
+        print(f"✅ Created region: {new_region.id} - {new_region.name}")
+        return {"success": True, "region_id": new_region.id, "message": "Created successfully!"}
+        
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
-        print(f"Error creating region: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+        print(f"❌ Error creating region: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 @app.put("/api/regions/{region_id}")
-def update_existing_region(
+def update_region(
     region_id: int,
     name: str = Form(None),
     capital: str = Form(None),
@@ -157,80 +177,101 @@ def update_existing_region(
     db: Session = Depends(get_db)
 ):
     """UPDATE existing region"""
-    region = db.query(models.Region).filter(models.Region.id == region_id).first()
-    if not region:
-        raise HTTPException(status_code=404, detail="Region not found")
-    
-    # Only update fields that were provided
-    if name: region.name = name
-    if capital: region.capital = capital
-    if population: region.population = population
-    if terrain: region.terrain = terrain
-    if description: region.description = description
-    if overview: region.overview = overview
-    if category: region.category = category
-    if tags: region.tags = tags
-    if hero_image: region.hero_image = hero_image
-    if gallery_images: region.gallery_images = gallery_images
-    if audio_files: region.audio_files = audio_files
-    if source: region.source = source
-    
     try:
+        region = db.query(models.Region).filter(models.Region.id == region_id).first()
+        if not region:
+            raise HTTPException(status_code=404, detail="Region not found")
+        
+        # Update only non-empty values
+        if name is not None and name.strip():
+            region.name = name.strip()
+        if capital is not None:
+            region.capital = capital.strip()
+        if population is not None:
+            region.population = population.strip()
+        if terrain is not None:
+            region.terrain = terrain.strip()
+        if description is not None:
+            region.description = description.strip()
+        if overview is not None and overview.strip():
+            region.overview = overview.strip()
+        if category is not None:
+            region.category = category.strip()
+        if tags is not None:
+            region.tags = tags.strip()
+        if hero_image is not None:
+            region.hero_image = hero_image.strip()
+        if gallery_images is not None:
+            region.gallery_images = gallery_images.strip()
+        if audio_files is not None:
+            region.audio_files = audio_files.strip()
+        if source is not None:
+            region.source = source.strip()
+        
         db.commit()
         db.refresh(region)
-        return {"success": True, "message": "Region updated successfully!"}
+        
+        print(f"✅ Updated region: {region.id} - {region.name}")
+        return {"success": True, "message": "Updated successfully!"}
+        
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
-        print(f"Error updating region: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+        print(f"❌ Error updating region: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/api/regions/{region_id}")
 def delete_region(region_id: int, db: Session = Depends(get_db)):
-    """DELETE region completely"""
-    region = db.query(models.Region).filter(models.Region.id == region_id).first()
-    if not region:
-        raise HTTPException(status_code=404, detail="Region not found")
-    
+    """DELETE region"""
     try:
+        region = db.query(models.Region).filter(models.Region.id == region_id).first()
+        if not region:
+            raise HTTPException(status_code=404, detail="Not found")
+        
         db.delete(region)
         db.commit()
-        return {"success": True, "message": "Region deleted successfully!"}
+        
+        print(f"🗑️ Deleted region: {region_id}")
+        return {"success": True, "message": "Deleted successfully!"}
+        
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
-        print(f"Error deleting region: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+        print(f"❌ Error deleting region: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# FILE UPLOAD ROUTES (Images & Audio)
+# FILE UPLOAD ROUTES
 # ============================================
 @app.post("/api/upload/image")
-async def upload_image_file(file: UploadFile = File(...)):
+async def upload_image(file: UploadFile = File(...)):
     """Upload image file"""
     try:
-        file_ext = os.path.splitext(file.filename)[1]
-        safe_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}{file_ext}"
-        file_path = os.path.join(UPLOAD_DIR, safe_filename)
+        ext = os.path.splitext(file.filename)[1] or ".jpg"
+        safe_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}{ext}"
+        file_path = os.path.join(UPLOAD_DIR, safe_name)
         
         with open(file_path, "wb") as buffer:
             content = await file.read()
             buffer.write(content)
         
         return {
-            "success": True, 
-            "url": f"/uploads/{safe_filename}", 
-            "filename": safe_filename,
-            "original_name": file.filename
+            "success": True,
+            "url": f"/uploads/{safe_name}",
+            "filename": safe_name
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 @app.post("/api/upload/audio")
-async def upload_audio_file(file: UploadFile = File(...)):
-    """Upload audio file (MP3, WAV, etc.)"""
+async def upload_audio(file: UploadFile = File(...)):
+    """Upload audio file (podcast/recordings)"""
     try:
-        file_ext = os.path.splitext(file.filename)[1]
-        safe_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}{file_ext}"
-        file_path = os.path.join(UPLOAD_DIR, safe_filename)
+        ext = os.path.splitext(file.filename)[1] or ".mp3"
+        safe_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}{ext}"
+        file_path = os.path.join(UPLOAD_DIR, safe_name)
         
         with open(file_path, "wb") as buffer:
             content = await file.read()
@@ -238,104 +279,44 @@ async def upload_audio_file(file: UploadFile = File(...)):
         
         return {
             "success": True,
-            "url": f"/uploads/{safe_filename}",
-            "filename": safe_filename,
-            "original_name": file.filename
+            "url": f"/uploads/{safe_name}",
+            "filename": safe_name
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Audio upload error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Audio upload failed: {str(e)}")
 
-@app.post("/api/upload/file")
-async def upload_generic_file(file: UploadFile = File(...)):
-    """Upload any type of file"""
+# ============================================
+# PODCAST SECTION ROUTES (NEW!)
+# ============================================
+@app.get("/api/podcasts")
+def get_podcasts(db: Session = Depends(get_db)):
+    """Get all podcasts"""
+    if not hasattr(models, 'Podcast'):
+        return []
     try:
-        file_ext = os.path.splitext(file.filename)[1]
-        safe_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}{file_ext}"
-        file_path = os.path.join(UPLOAD_DIR, safe_filename)
-        
-        with open(file_path, "wb") as buffer:
-            content = await file.read()
-            buffer.write(content)
-        
-        return {
-            "success": True,
-            "url": f"/uploads/{safe_filename}",
-            "filename": safe_filename,
-            "type": file.content_type or "application/octet-stream"
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"File upload error: {str(e)}")
+        podcasts = db.query(models.Podcast).all()
+        return [{"id": p.id, "title": p.title, "episode": p.episode, "audio_url": p.audio_url} for p in podcasts]
+    except:
+        return []
 
 # ============================================
-# DATA IMPORT/EXPORT (Backup & Restore)
+# STATS ROUTE
 # ============================================
-@app.post("/api/export/json")
-def export_data_as_json(db: Session = Depends(get_db)):
-    """Export all regions as JSON file"""
-    regions = db.query(models.Region).all()
-    data = []
-    for r in regions:
-        data.append({
-            "name": r.name,
-            "capital": r.capital,
-            "population": r.population,
-            "terrain": r.terrain,
-            "description": r.description,
-            "category": r.category,
-            "tags": r.tags,
-            "hero_image": r.hero_image,
-            "gallery_images": r.gallery_images,
-            "audio_files": r.audio_files,
-            "source": r.source
-        })
-    return JSONResponse(content=data)
-
-@app.post("/api/import/json")
-def import_data_from_json(data: dict, db: Session = Depends(get_db)):
-    """Import regions from JSON data"""
-    if not isinstance(data, list):
-        raise HTTPException(status_code=400, detail="Data must be an array of regions")
-    
-    imported_count = 0
-    for region_data in data:
-        try:
-            new_region = models.Region(**region_data)
-            db.add(new_region)
-            imported_count += 1
-        except Exception as e:
-            print(f"Failed to import region: {str(e)}")
-            continue
-    
-    db.commit()
-    return {"success": True, "imported": imported_count, "message": f"Successfully imported {imported_count} regions"}
-
-# ============================================
-# CATEGORY MANAGEMENT
-# ============================================
-@app.get("/api/categories")
-def get_categories():
-    """Return available content categories"""
-    return [
-        {"id": 1, "name": "Culture", "slug": "culture"},
-        {"id": 2, "name": "History", "slug": "history"},
-        {"id": 3, "name": "Nature", "slug": "nature"},
-        {"id": 4, "name": "Tourism", "slug": "tourism"},
-        {"id": 5, "name": "Food", "slug": "food"},
-        {"id": 6, "name": "Music", "slug": "music"},
-        {"id": 7, "name": "Art", "slug": "art"},
-        {"id": 8, "name": "Religion", "slug": "religion"}
-    ]
-
 @app.get("/api/stats")
 def get_stats(db: Session = Depends(get_db)):
     """Get archive statistics"""
-    total_regions = db.query(models.Region).count()
-    regions_with_audio = db.query(models.Region).filter(models.Region.audio_files != "").count()
-    regions_with_images = db.query(models.Region).filter(models.Region.gallery_images != "").count()
-    
-    return {
-        "total_regions": total_regions,
-        "with_audio": regions_with_audio,
-        "with_images": regions_with_images,
-        "database_size_mb": round(os.path.getsize("echostack.db") / 1024 / 1024, 2) if os.path.exists("echostack.db") else 0
-    }
+    try:
+        total = db.query(models.Region).count()
+        
+        db_path = "echostack.db"
+        size_mb = round(os.path.getsize(db_path) / 1024 / 1024, 2) if os.path.exists(db_path) else 0
+        
+        return {
+            "total_regions": total,
+            "with_audio": db.query(models.Region).filter(models.Region.audio_files != "").count(),
+            "with_images": db.query(models.Region).filter(models.Region.gallery_images != "").count(),
+            "database_size_mb": size_mb
+        }
+    except Exception as e:
+        print(f"Stats error: {e}")
+        return {"total_regions": 0, "database_size_mb": 0}
