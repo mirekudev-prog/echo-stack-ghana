@@ -9,16 +9,28 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
+    <!-- Page Title -->
     <title>EchoStack - Ghana's Heritage Archive</title>
     
+    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1a1e29">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EchoStack">
+    
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="/echostack-logo.png">
+    <link rel="apple-touch-icon" href="/echostack-logo.png">
+    
+    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     
+    <!-- Styles -->
     <style>
         /* BRAND COLORS */
         :root {
-            --brand-dark: #1a1e29;      /* Dark Gray from logo */
-            --brand-blue: #0077b6;       /* Blue accent from logo */
+            --brand-dark: #1a1e29;
+            --brand-blue: #0077b6;
             --brand-light-gray: #f5f5f5;
             --brand-white: #ffffff;
             --brand-gradient: linear-gradient(135deg, #e8f4f8 0%, #ffffff 100%);
@@ -324,6 +336,21 @@
             font-weight: 600;
         }
     </style>
+    
+    <!-- SERVICE WORKER REGISTRATION (PWA ENABLES INSTALLATION) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('✅ SW registered:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('❌ SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </head>
 <body>
     
