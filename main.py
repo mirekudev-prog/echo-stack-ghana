@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 import os
 from datetime import datetime
 import json
+import re
 
 from database import engine, get_db, Base
 import models
@@ -88,10 +89,8 @@ def logout():
 # ============================================
 @app.get("/api/regions")
 def get_regions(db: Session = Depends(get_db)):
-    """GET all regions"""
     try:
         regions = db.query(models.Region).all()
-        
         result = []
         for r in regions:
             item = {
@@ -134,7 +133,6 @@ def create_region(
     overview: str = Form(""),
     db: Session = Depends(get_db)
 ):
-    """CREATE new region"""
     try:
         if not name.strip():
             raise HTTPException(status_code=400, detail="Region name required")
@@ -185,36 +183,23 @@ def update_region(
     overview: str = Form(None),
     db: Session = Depends(get_db)
 ):
-    """UPDATE existing region"""
     try:
         region = db.query(models.Region).filter(models.Region.id == region_id).first()
         if not region:
             raise HTTPException(status_code=404, detail="Not found")
         
-        if name is not None and name.strip():
-            region.name = name.strip()
-        if capital is not None:
-            region.capital = capital.strip()
-        if population is not None:
-            region.population = population.strip()
-        if terrain is not None:
-            region.terrain = terrain.strip()
-        if description is not None:
-            region.description = description.strip()
-        if overview is not None and overview.strip():
-            region.overview = overview.strip()
-        if category is not None:
-            region.category = category.strip()
-        if tags is not None:
-            region.tags = tags.strip()
-        if hero_image is not None:
-            region.hero_image = hero_image.strip()
-        if gallery_images is not None:
-            region.gallery_images = gallery_images.strip()
-        if audio_files is not None:
-            region.audio_files = audio_files.strip()
-        if source is not None:
-            region.source = source.strip()
+        if name is not None and name.strip(): region.name = name.strip()
+        if capital is not None: region.capital = capital.strip()
+        if population is not None: region.population = population.strip()
+        if terrain is not None: region.terrain = terrain.strip()
+        if description is not None: region.description = description.strip()
+        if overview is not None and overview.strip(): region.overview = overview.strip()
+        if category is not None: region.category = category.strip()
+        if tags is not None: region.tags = tags.strip()
+        if hero_image is not None: region.hero_image = hero_image.strip()
+        if gallery_images is not None: region.gallery_images = gallery_images.strip()
+        if audio_files is not None: region.audio_files = audio_files.strip()
+        if source is not None: region.source = source.strip()
         
         db.commit()
         db.refresh(region)
@@ -231,7 +216,6 @@ def update_region(
 
 @app.delete("/api/regions/{region_id}")
 def delete_region(region_id: int, db: Session = Depends(get_db)):
-    """DELETE region"""
     try:
         region = db.query(models.Region).filter(models.Region.id == region_id).first()
         if not region:
@@ -251,47 +235,209 @@ def delete_region(region_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# FILE UPLOAD ROUTES
+# UNIVERSAL FILE UPLOAD (ANY FILE TYPE!) 🔴 NEW!
 # ============================================
-@app.post("/api/upload/image")
-async def upload_image(file: UploadFile = File(...), filename: str = Form(...)):
-    """Upload image file"""
+ALLOWED_EXTENSIONS = {
+    'video': ['.mp4', '.mov', '.avi', '.wmv', '.flv', '.webm'],
+    'audio': ['.mp3', '.wav', '.ogg', '.aac', '.flac'],
+    'image': ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp'],
+    'document': ['.pdf', '.docx', '.doc', '.txt', '.pptx', '.xlsx'],
+    'other': ['.zip', '.rar', '.7z']
+}
+
+@app.post("/api/upload/file")
+async def upload_generic_file(
+    file: UploadFile = File(...),
+    filename: str = Form(...),
+    category: str = Form("general"),  # video, audio, image, document, other
+    description: str = Form(""),
+    region_id: str = Form(""),  # Optional: Link to region
+    is_public: str = Form("1"),  # 1 = public, 0 = private
+    db: Session = Depends(get_db)
+):
+    """Upload ANY file type (MP4, PDF, DOCX, JPG, MP3, etc.)"""
     try:
-        ext = os.path.splitext(filename)[1] or ".jpg"
-        safe_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}{ext}"
+        # Get file extension
+        ext = os.path.splitext(filename)[1].lower()
+        safe_ext = ext if ext else ".bin"
+        
+        # Generate unique filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        safe_name = f"{timestamp}{safe_ext}"
         file_path = os.path.join(UPLOAD_DIR, safe_name)
         
+        # Read and save file
         content = await file.read()
+        file_size = len(content)
+        
         with open(file_path, "wb") as buffer:
             buffer.write(content)
         
+        # Save to database
+        uploaded_file = models.UploadedFile(
+            filename=safe_name,
+            original_name=filename,
+            file_path=file_path,
+            file_size=file_size,
+            mime_type=file.content_type or "application/octet-stream",
+            category=category,
+            region_id=int(region_id) if region_id and region_id.isdigit() else None,
+            description=description,
+            uploaded_by="admin",
+            is_public=int(is_public) if is_public else 1
+        )
+        
+        db.add(uploaded_file)
+        db.commit()
+        db.refresh(uploaded_file)
+        
+        print(f"✅ Uploaded file: {safe_name} ({file_size} bytes)")
+        
         return {
             "success": True,
+            "file_id": uploaded_file.id,
             "url": f"/uploads/{safe_name}",
-            "filename": safe_name
+            "filename": safe_name,
+            "original_name": filename,
+            "category": category,
+            "size_bytes": file_size,
+            "size_mb": round(file_size / (1024 * 1024), 2),
+            "mime_type": file.content_type or "application/octet-stream",
+            "description": description,
+            "is_public": bool(int(is_public) if is_public else 1)
         }
     except Exception as e:
+        print(f"❌ Upload error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
-@app.post("/api/upload/audio")
-async def upload_audio(file: UploadFile = File(...), filename: str = Form(...)):
-    """Upload audio file"""
+@app.get("/api/files")
+def get_files(category: str = "", region_id: str = "", db: Session = Depends(get_db)):
+    """Get all uploaded files (optionally filtered by category or region)"""
     try:
-        ext = os.path.splitext(filename)[1] or ".mp3"
-        safe_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}{ext}"
-        file_path = os.path.join(UPLOAD_DIR, safe_name)
+        query = db.query(models.UploadedFile)
         
-        content = await file.read()
-        with open(file_path, "wb") as buffer:
-            buffer.write(content)
+        if category:
+            query = query.filter(models.UploadedFile.category == category)
         
-        return {
-            "success": True,
-            "url": f"/uploads/{safe_name}",
-            "filename": safe_name
-        }
+        if region_id:
+            query = query.filter(models.UploadedFile.region_id == int(region_id))
+        
+        files = query.order_by(models.UploadedFile.created_at.desc()).all()
+        
+        result = []
+        for f in files:
+            result.append({
+                "id": f.id,
+                "filename": f.filename,
+                "original_name": f.original_name,
+                "file_url": f"/uploads/{f.filename}",
+                "file_size": f.file_size,
+                "file_size_mb": round(f.file_size / (1024 * 1024), 2),
+                "mime_type": f.mime_type,
+                "category": f.category,
+                "region_id": f.region_id,
+                "description": f.description,
+                "created_at": str(f.created_at)
+            })
+        
+        return result
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+        print(f"❌ Error fetching files: {e}")
+        return []
+
+@app.delete("/api/files/{file_id}")
+def delete_file(file_id: int, db: Session = Depends(get_db)):
+    """Delete a file from database and filesystem"""
+    try:
+        uploaded_file = db.query(models.UploadedFile).filter(models.UploadedFile.id == file_id).first()
+        if not uploaded_file:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        # Delete file from disk
+        if os.path.exists(uploaded_file.file_path):
+            os.remove(uploaded_file.file_path)
+        
+        # Delete from database
+        db.delete(uploaded_file)
+        db.commit()
+        
+        print(f"🗑️ Deleted file ID: {file_id}")
+        return {"success": True, "message": "File deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        print(f"❌ Error deleting file: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================
+# DYNAMIC SECTIONS/CATEGORIES MANAGER 🔴 NEW!
+# ============================================
+@app.post("/api/sections")
+def create_section(
+    name: str = Form(...),
+    description: str = Form(""),
+    display_order: int = Form(0),
+    db: Session = Depends(get_db)
+):
+    """Create new section/category"""
+    try:
+        slug = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
+        
+        # Check if already exists
+        existing = db.query(models.Section).filter(models.Section.slug == slug).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Section name already exists")
+        
+        new_section = models.Section(
+            name=name,
+            slug=slug,
+            description=description,
+            display_order=display_order
+        )
+        
+        db.add(new_section)
+        db.commit()
+        db.refresh(new_section)
+        
+        return {"success": True, "section_id": new_section.id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/sections")
+def get_sections(active_only: int = 1, db: Session = Depends(get_db)):
+    """Get all sections"""
+    try:
+        if active_only:
+            sections = db.query(models.Section).filter(models.Section.is_active == 1).order_by(models.Section.display_order).all()
+        else:
+            sections = db.query(models.Section).all()
+        
+        return [{"id": s.id, "name": s.name, "slug": s.slug, "description": s.description} for s in sections]
+    except Exception as e:
+        print(f"Error fetching sections: {e}")
+        return []
+
+@app.delete("/api/sections/{section_id}")
+def delete_section(section_id: int, db: Session = Depends(get_db)):
+    """Deactivate section (soft delete)"""
+    try:
+        section = db.query(models.Section).filter(models.Section.id == section_id).first()
+        if not section:
+            raise HTTPException(status_code=404, detail="Not found")
+        
+        section.is_active = 0
+        db.commit()
+        
+        return {"success": True, "message": "Section deactivated"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
 # STATS & IMPORT/EXPORT
@@ -300,32 +446,39 @@ async def upload_audio(file: UploadFile = File(...), filename: str = Form(...)):
 def get_stats(db: Session = Depends(get_db)):
     """Get statistics"""
     try:
-        total = db.query(models.Region).count()
+        total_regions = db.query(models.Region).count()
         
+        # Get file stats
+        total_files = db.query(models.UploadedFile).count()
+        total_video = db.query(models.UploadedFile).filter(models.UploadedFile.category == "video").count()
+        total_audio = db.query(models.UploadedFile).filter(models.UploadedFile.category == "audio").count()
+        total_images = db.query(models.UploadedFile).filter(models.UploadedFile.category == "image").count()
+        
+        # Database size
         db_path = "echostack.db"
         size_mb = round(os.path.getsize(db_path) / 1024 / 1024, 2) if os.path.exists(db_path) else 0
         
         return {
-            "total_regions": total,
-            "with_audio": db.query(models.Region).filter(models.Region.audio_files != "").count(),
-            "with_images": db.query(models.Region).filter(models.Region.gallery_images != "").count(),
+            "total_regions": total_regions,
+            "total_files": total_files,
+            "with_video": total_video,
+            "with_audio": total_audio,
+            "with_images": total_images,
             "database_size_mb": size_mb
         }
     except Exception as e:
         print(f"Stats error: {e}")
         return {"total_regions": 0, "database_size_mb": 0}
 
-# ⚠️⚠️⚠️ THIS IS THE BROKEN FUNCTION - NOW FIXED! ⚠️⚠️⚠️
 @app.post("/api/import/json")
 def import_json(data: dict, db: Session = Depends(get_db)):
     """Import regions from JSON"""
     try:
-        # If single object, make it a list
         if not isinstance(data, list):
             data = [data]
         
         imported = 0
-        for region_data in data:  # ⚠️ FIXED: was missing 'data:'
+        for region_data in data:
             try:
                 new_region = models.Region(**region_data)
                 db.add(new_region)
@@ -339,72 +492,3 @@ def import_json(data: dict, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-
-# ============================================
-# UNIVERSAL FILE UPLOAD (Any File Type!)
-# ============================================
-@app.post("/api/upload/file")
-async def upload_file(
-    file: UploadFile = File(...),
-    filename: str = Form(...),
-    category: str = Form("general"),  # video, audio, image, document, other
-    description: str = Form(""),
-    db: Session = Depends(get_db)
-):
-    """Upload ANY file type (MP4, PDF, DOCX, JPG, MP3, etc.)"""
-    try:
-        ext = os.path.splitext(filename)[1] or ".bin"
-        safe_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}{ext}"
-        file_path = os.path.join(UPLOAD_DIR, safe_name)
-        
-        content = await file.read()
-        with open(file_path, "wb") as buffer:
-            buffer.write(content)
-        
-        return {
-            "success": True,
-            "url": f"/uploads/{safe_name}",
-            "filename": safe_name,
-            "category": category,
-            "size_bytes": len(content),
-            "mime_type": file.content_type or "application/octet-stream",
-            "description": description
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
-
-# ============================================
-# DYNAMIC SECTIONS/CATEGORIES MANAGER
-# ============================================
-class Section(Base):
-    __tablename__ = "sections"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False, unique=True)
-    slug = Column(String(100), unique=True)
-    description = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-@app.post("/api/sections")
-def create_section(name: str = Form(...), description: str = Form(""), db: Session = Depends(get_db)):
-    import re
-    slug = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
-    
-    new_section = Section(name=name, slug=slug, description=description)
-    db.add(new_section)
-    db.commit()
-    db.refresh(new_section)
-    return {"success": True, "section_id": new_section.id}
-
-@app.get("/api/sections")
-def get_sections(db: Session = Depends(get_db)):
-    sections = db.query(Section).all()
-    return [{"id": s.id, "name": s.name, "slug": s.slug, "description": s.description} for s in sections]
-
-@app.delete("/api/sections/{section_id}")
-def delete_section(section_id: int, db: Session = Depends(get_db)):
-    section = db.query(Section).filter(Section.id == section_id).first()
-    if not section:
-        raise HTTPException(status_code=404, detail="Not found")
-    db.delete(section)
-    db.commit()
-    return {"success": True}
