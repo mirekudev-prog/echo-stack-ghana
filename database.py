@@ -3,7 +3,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-# SQLite works on Render free tier
 SQLALCHEMY_DATABASE_URL = "sqlite:///./echostack.db"
 
 engine = create_engine(
