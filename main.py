@@ -339,3 +339,72 @@ def import_json(data: dict, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================
+# UNIVERSAL FILE UPLOAD (Any File Type!)
+# ============================================
+@app.post("/api/upload/file")
+async def upload_file(
+    file: UploadFile = File(...),
+    filename: str = Form(...),
+    category: str = Form("general"),  # video, audio, image, document, other
+    description: str = Form(""),
+    db: Session = Depends(get_db)
+):
+    """Upload ANY file type (MP4, PDF, DOCX, JPG, MP3, etc.)"""
+    try:
+        ext = os.path.splitext(filename)[1] or ".bin"
+        safe_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}{ext}"
+        file_path = os.path.join(UPLOAD_DIR, safe_name)
+        
+        content = await file.read()
+        with open(file_path, "wb") as buffer:
+            buffer.write(content)
+        
+        return {
+            "success": True,
+            "url": f"/uploads/{safe_name}",
+            "filename": safe_name,
+            "category": category,
+            "size_bytes": len(content),
+            "mime_type": file.content_type or "application/octet-stream",
+            "description": description
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+# ============================================
+# DYNAMIC SECTIONS/CATEGORIES MANAGER
+# ============================================
+class Section(Base):
+    __tablename__ = "sections"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False, unique=True)
+    slug = Column(String(100), unique=True)
+    description = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+@app.post("/api/sections")
+def create_section(name: str = Form(...), description: str = Form(""), db: Session = Depends(get_db)):
+    import re
+    slug = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
+    
+    new_section = Section(name=name, slug=slug, description=description)
+    db.add(new_section)
+    db.commit()
+    db.refresh(new_section)
+    return {"success": True, "section_id": new_section.id}
+
+@app.get("/api/sections")
+def get_sections(db: Session = Depends(get_db)):
+    sections = db.query(Section).all()
+    return [{"id": s.id, "name": s.name, "slug": s.slug, "description": s.description} for s in sections]
+
+@app.delete("/api/sections/{section_id}")
+def delete_section(section_id: int, db: Session = Depends(get_db)):
+    section = db.query(Section).filter(Section.id == section_id).first()
+    if not section:
+        raise HTTPException(status_code=404, detail="Not found")
+    db.delete(section)
+    db.commit()
+    return {"success": True}
