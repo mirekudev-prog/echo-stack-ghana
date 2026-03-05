@@ -1,7 +1,3 @@
-// ============================================
-// ECHOSTACK - GHANA MAP INTERACTIVE APP
-// ============================================
-
 const API_URL = 'https://echo-stack-ghana.onrender.com/api/regions';
 
 // All 16 Official Regions
@@ -11,6 +7,18 @@ const ghanaRegions = [
     "Ashanti", "Central", "Western", "Western North",
     "Eastern", "Volta", "Greater Accra", "Oti"
 ];
+
+// DEBUG: Test API Connection First
+console.log('🧪 Testing API...');
+fetch(API_URL)
+    .then(response => response.json())
+    .then(data => {
+        console.log('✅ API Connected! Got', data.length, 'regions:', data);
+    })
+    .catch(error => {
+        console.error('❌ API Error:', error);
+        alert('API Connection Failed! Check your database.');
+    });
 
 // Initialize Map On Page Load
 document.addEventListener('DOMContentLoaded', () => {
@@ -24,86 +32,81 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         
         addMapInteractions();
+    } else {
+        console.error('❌ mapContainer element not found!');
     }
 });
 
 function createHotspots() {
     return ghanaRegions.map((region, index) => {
-        // Approximate positions (adjust based on your image size)
+        // Position percentages (will adjust after seeing real results)
         const positions = [
-            {x: 15, y: 15},   // Upper West
-            {x: 35, y: 12},   // Upper East
-            {x: 55, y: 15},   // North East
-            {x: 40, y: 25},   // Northern
-            {x: 25, y: 32},   // Savannah
-            {x: 22, y: 48},   // Bono
-            {x: 45, y: 48},   // Bono East
-            {x: 30, y: 55},   // Ahafo
-            {x: 42, y: 65},   // Ashanti
-            {x: 45, y: 75},   // Central
-            {x: 18, y: 68},   // Western
-            {x: 22, y: 62},   // Western North
-            {x: 65, y: 65},   // Eastern
+            {x: 10, y: 12},   // Upper West
+            {x: 45, y: 8},    // Upper East
+            {x: 58, y: 12},   // North East
+            {x: 45, y: 25},   // Northern
+            {x: 28, y: 30},   // Savannah
+            {x: 20, y: 48},   // Bono
+            {x: 50, y: 48},   // Bono East
+            {x: 32, y: 58},   // Ahafo
+            {x: 42, y: 68},   // Ashanti
+            {x: 48, y: 80},   // Central
+            {x: 15, y: 70},   // Western
+            {x: 22, y: 65},   // Western North
+            {x: 68, y: 68},   // Eastern
             {x: 85, y: 60},   // Volta
-            {x: 68, y: 80},   // Greater Accra
-            {x: 72, y: 48}    // Oti
+            {x: 68, y: 85},   // Greater Accra
+            {x: 75, y: 48}    // Oti
         ];
         
         return `<div class="region-hotspot" data-region="${region}" 
                     style="left:${positions[index].x}%;top:${positions[index].y}%;"
-                    title="${region}"></div>`;
+                    title="Click ${region}"></div>`;
     }).join('');
 }
 
 function addMapInteractions() {
-    document.querySelectorAll('.region-hotspot').forEach(hotspot => {
-        hotspot.addEventListener('click', () => {
-            const regionName = hotspot.getAttribute('data-region');
+    console.log('🎯 Adding interactions to', document.querySelectorAll('.region-hotspot').length, 'hotspots');
+    
+    document.querySelectorAll('.region-hotspot').forEach((hotspot, i) => {
+        hotspot.addEventListener('click', async (e) => {
+            const regionName = e.target.getAttribute('data-region');
             
-            console.log('✅ Region clicked:', regionName);
+            console.log('✅ Clicked:', regionName);
             
-            // Highlight selected hotspot
-            document.querySelectorAll('.region-hotspot').forEach(h => h.style.opacity = '0.1');
-            hotspot.style.opacity = '0.8';
+            // Highlight selected
+            document.querySelectorAll('.region-hotspot').forEach(h => h.style.opacity = '0.3');
+            e.target.style.opacity = '1';
+            e.target.style.boxShadow = '0 0 10px #0077b6';
             
-            // Scroll to search results
-            filterRegions(regionName);
+            // Search for this region
+            await filterRegions(regionName);
             
-            // Scroll page to grid section
-            setTimeout(() => {
-                document.getElementById('regions-grid-section').scrollIntoView({ 
-                    behavior: 'smooth' 
-                });
-            }, 100);
-        });
-        
-        // Hover effects
-        hotspot.addEventListener('mouseenter', () => {
-            hotspot.style.opacity = '0.8';
-        });
-        
-        hotspot.addEventListener('mouseleave', () => {
-            // Don't reset if selected
-            if (!hotspot.classList.contains('selected')) {
-                hotspot.style.opacity = '0.1';
-            }
+            // Scroll to results
+            document.getElementById('regions-grid-section')?.scrollIntoView({ behavior: 'smooth' });
         });
     });
 }
 
-// Load Regions Data from API
-async function loadRegions(showAll = false) {
+async function filterRegions(term) {
     try {
-        const response = await fetch(API_URL);
-        const regions = await response.json();
+        console.log('🔍 Searching for:', term);
         
-        if (showAll && regions.length > 0) {
-            renderRegions(regions);
-        } else {
-            document.getElementById('regions-grid-section').style.display = 'none';
-        }
+        const response = await fetch(API_URL);
+        const allRegions = await response.json();
+        console.log('📦 Total regions in DB:', allRegions.length);
+        
+        const filtered = allRegions.filter(r => 
+            r.name.toLowerCase().includes(term.toLowerCase()) ||
+            (r.overview && r.overview.toLowerCase().includes(term.toLowerCase()))
+        );
+        
+        console.log('📋 Filtered results:', filtered.length);
+        
+        renderRegions(filtered);
     } catch (error) {
-        console.error('Error loading regions:', error);
+        console.error('❌ Filter Error:', error);
+        alert('Error loading regions: ' + error.message);
     }
 }
 
@@ -111,76 +114,47 @@ function renderRegions(regions) {
     const section = document.getElementById('regions-grid-section');
     const grid = document.getElementById('regions-grid');
     
+    if (!section || !grid) {
+        console.error('❌ Grid elements not found!');
+        return;
+    }
+    
     section.style.display = 'block';
     grid.innerHTML = '';
     
     if (!regions || regions.length === 0) {
-        grid.innerHTML = '<p class="no-results">No regions found matching your search.</p>';
+        grid.innerHTML = '<p>No matching regions found.</p>';
         return;
     }
+    
+    console.log('📱 Creating', regions.length, 'region cards');
     
     regions.forEach(region => {
         const card = document.createElement('div');
         card.className = 'region-card';
-        card.onclick = () => window.location.href = `/regions/${region.name.toLowerCase().replace(/\s+/g, '-')}.html`;
+        card.onclick = () => {
+            alert('Coming soon: /regions/' + region.name.replace(/\s+/g, '-').toLowerCase() + '.html');
+            // window.location.href = `/regions/${region.name.toLowerCase().replace(/\s+/g, '-')}.html`;
+        };
         
         card.innerHTML = `
             <h3>${region.name}</h3>
-            <p>${region.overview || 'Click to explore more about this region...'}</p>
+            <p>${region.overview || 'Click for more details...'}</p>
         `;
         
         grid.appendChild(card);
     });
-    
-    // Mark all hotspots as deselected since we're searching manually
-    document.querySelectorAll('.region-hotspot').forEach(h => {
-        h.classList.remove('selected');
-        h.style.opacity = '0.1';
-    });
 }
 
-// Search Bar Functionality
-const searchBar = document.getElementById('search-bar');
-if (searchBar) {
-    searchBar.addEventListener('input', async function(e) {
-        const searchTerm = e.target.value.trim();
-        
-        if (searchTerm.length >= 2) {
-            await filterRegions(searchTerm);
-        } else {
-            document.getElementById('regions-grid-section').style.display = 'none';
-        }
-    });
+// Search Bar
+document.getElementById('search-bar')?.addEventListener('input', async (e) => {
+    const searchTerm = e.target.value.trim();
     
-    // Clear button
-    searchBar.addEventListener('keypress', async function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            await filterRegions(this.value);
-        }
-    });
-}
-
-// Filter Regions by Search Term or Click
-async function filterRegions(term) {
-    try {
-        const response = await fetch(API_URL);
-        const allRegions = await response.json();
-        
-        const filtered = allRegions.filter(r => {
-            const nameMatch = r.name.toLowerCase().includes(term.toLowerCase());
-            const overviewMatch = r.overview && r.overview.toLowerCase().includes(term.toLowerCase());
-            return nameMatch || overviewMatch;
-        });
-        
-        console.log(`🔍 Searching for "${term}" - Found ${filtered.length} matches`, filtered);
-        
-        renderRegions(filtered);
-    } catch (error) {
-        console.error('Filter error:', error);
-        alert('Unable to load regions. Please refresh and try again.');
+    if (searchTerm.length >= 2) {
+        await filterRegions(searchTerm);
+    } else {
+        document.getElementById('regions-grid-section').style.display = 'none';
     }
-}
+});
 
-// Debug: Show current URL being called
-console.log('📡 API URL:', API_URL);
+console.log('✅ Script loaded successfully!');
