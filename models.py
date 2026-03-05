@@ -16,9 +16,9 @@ class Region(Base):
     overview = Column(Text)
     source = Column(String(500))
     hero_image = Column(String(500))
-    gallery_images = Column(String)  # Comma-separated URLs
-    audio_files = Column(String)     # Comma-separated URLs
+    gallery_images = Column(String)
+    audio_files = Column(String)
     category = Column(String(50))
-    tags = Column(String)           # Comma-separated tags
+    tags = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
