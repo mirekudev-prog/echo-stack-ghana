@@ -8,10 +8,18 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
         
+        /* ECHOSTACK BRAND COLORS */
+        :root {
+            --brand-dark: #1a1e29;
+            --brand-blue: #0077b6;
+            --brand-light-gray: #f5f5f5;
+            --brand-white: #ffffff;
+        }
+        
         body {
             font-family: 'Georgia', serif;
-            background-color: #ffffff;
-            color: #1a1a1a;
+            background-color: var(--brand-white);
+            color: var(--brand-dark);
         }
         
         .serif { font-family: 'Georgia', serif; }
@@ -21,12 +29,15 @@
 <body class="antialiased">
     
     <!-- HEADER -->
-    <header class="border-b border-gray-200 py-6 bg-white">
+    <header class="border-b border-gray-200 py-6 bg-white" style="border-color: #e0e0e0;">
         <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
-            <h1 class="text-3xl font-bold tracking-tight">EchoStack <span class="text-gray-400 text-lg font-normal">| Admin</span></h1>
+            <h1 class="text-3xl font-bold tracking-tight" style="color: var(--brand-dark);">
+                EchoStack 
+                <span class="text-gray-400 text-lg font-normal">| Admin</span>
+            </h1>
             <nav class="flex gap-6 text-sm">
-                <a href="/" class="hover:text-black">← View Site</a>
-                <a href="/admin" class="font-bold">Admin Panel</a>
+                <a href="/" class="hover:text-[var(--brand-blue)]" style="color: var(--brand-dark);">← View Site</a>
+                <a href="/admin" class="font-bold" style="color: var(--brand-blue);">Admin Panel</a>
             </nav>
         </div>
     </header>
@@ -36,26 +47,26 @@
         
         <!-- DASHBOARD OVERVIEW -->
         <section class="mb-12">
-            <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm">
-                <h2 class="text-2xl font-bold mb-2">Content Dashboard</h2>
+            <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm" style="border-color: #e0e0e0;">
+                <h2 class="text-2xl font-bold mb-2" style="color: var(--brand-dark);">Content Dashboard</h2>
                 <p class="text-gray-600 mb-6">Manage all 16 regions of Ghana's heritage archive.</p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0;">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Total Regions</p>
-                        <p class="text-3xl font-bold" id="total-regions">16</p>
+                        <p class="text-3xl font-bold" style="color: var(--brand-dark);" id="total-regions">16</p>
                     </div>
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0;">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Completed</p>
-                        <p class="text-3xl font-bold" id="completed-count">0</p>
+                        <p class="text-3xl font-bold" style="color: var(--brand-dark);" id="completed-count">0</p>
                     </div>
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0;">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Pending Images</p>
-                        <p class="text-3xl font-bold" id="pending-images">16</p>
+                        <p class="text-3xl font-bold" style="color: var(--brand-dark);" id="pending-images">16</p>
                     </div>
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200" style="border-color: #e0e0e0;">
                         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Last Updated</p>
-                        <p class="text-lg font-bold" id="last-updated">—</p>
+                        <p class="text-lg font-bold" style="color: var(--brand-dark);" id="last-updated">—</p>
                     </div>
                 </div>
             </div>
@@ -66,12 +77,13 @@
             
             <!-- LEFT: REGION LIST -->
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="p-4 border-b border-gray-200 bg-gray-50">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden" style="border-color: #e0e0e0;">
+                    <div class="p-4 border-b border-gray-200 bg-gray-50" style="border-color: #e0e0e0;">
                         <input type="text" id="search-regions" placeholder="Search regions..." 
-                               class="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-black">
+                               class="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-black"
+                               style="border-color: #d0d0d0; color: var(--brand-dark);">
                     </div>
-                    <div id="region-list" class="divide-y divide-gray-200 max-h-[500px] overflow-y-auto">
+                    <div id="region-list" class="divide-y divide-gray-200 max-h-[500px] overflow-y-auto" style="border-top-color: #e0e0e0;">
                         <!-- Will be filled by JavaScript -->
                     </div>
                 </div>
@@ -79,9 +91,9 @@
 
             <!-- RIGHT: EDIT FORM -->
             <div class="lg:col-span-2">
-                <div id="edit-form" class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm hidden">
+                <div id="edit-form" class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm hidden" style="border-color: #e0e0e0;">
                     <div class="flex justify-between items-start mb-6">
-                        <h2 class="text-2xl font-bold">Edit Region</h2>
+                        <h2 class="text-2xl font-bold" style="color: var(--brand-dark);">Edit Region</h2>
                         <button onclick="closeEditor()" class="text-gray-500 hover:text-black">×</button>
                     </div>
                     
@@ -94,33 +106,38 @@
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Region Name *</label>
-                                    <input type="text" id="name" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black" required>
+                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Region Name *</label>
+                                    <input type="text" id="name" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none" 
+                                           style="border-color: #d0d0d0; color: var(--brand-dark);">
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Capital City *</label>
-                                    <input type="text" id="capital" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black" required>
+                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Capital City *</label>
+                                    <input type="text" id="capital" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
+                                           style="border-color: #d0d0d0; color: var(--brand-dark);">
                                 </div>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Population</label>
-                                    <input type="text" id="population" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black" placeholder="e.g., 5,440,463">
+                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Population</label>
+                                    <input type="text" id="population" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
+                                           style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="e.g., 5,440,463">
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Terrain/Elevation</label>
-                                    <input type="text" id="terrain" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black" placeholder="e.g., Highland (200-600m)">
+                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Terrain/Elevation</label>
+                                    <input type="text" id="terrain" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
+                                           style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="e.g., Highland (200-600m)">
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Description -->
                         <div>
-                            <label class="block text-sm font-medium mb-1">Heritage Description *</label>
-                            <textarea id="description" rows="5" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black" placeholder="Write about this region's cultural significance, history, landmarks..."></textarea>
+                            <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Heritage Description *</label>
+                            <textarea id="description" rows="5" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
+                                      style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="Write about this region's cultural significance, history, landmarks..."></textarea>
                         </div>
                         
                         <!-- Images -->
@@ -129,18 +146,20 @@
                             
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Hero Image URL</label>
-                                    <input type="text" id="hero-image" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black" placeholder="/images/region-hero.jpg">
+                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Hero Image URL</label>
+                                    <input type="text" id="hero-image" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
+                                           style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="/images/region-hero.jpg">
                                     <p class="text-xs text-gray-500 mt-1">Place image in /images folder first</p>
                                 </div>
                                 
                                 <div id="image-preview" class="hidden">
-                                    <img id="preview-img" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg border border-gray-200">
+                                    <img id="preview-img" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg border border-gray-200" style="border-color: #e0e0e0;">
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Gallery Images (comma-separated URLs)</label>
-                                    <textarea id="gallery-images" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black" placeholder="/images/img1.jpg, /images/img2.jpg"></textarea>
+                                    <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Gallery Images (comma-separated URLs)</label>
+                                    <textarea id="gallery-images" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
+                                              style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="/images/img1.jpg, /images/img2.jpg"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -150,52 +169,58 @@
                             <h3 class="text-sm font-semibold uppercase text-gray-500 mb-4">SEO & Meta</h3>
                             
                             <div>
-                                <label class="block text-sm font-medium mb-1">Meta Description</label>
-                                <textarea id="meta-description" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black" placeholder="Brief description for search engines..."></textarea>
+                                <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Meta Description</label>
+                                <textarea id="meta-description" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
+                                          style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="Brief description for search engines..."></textarea>
                             </div>
                             
                             <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Featured Story (Optional)</label>
-                                <input type="text" id="featured-story" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black" placeholder="Title of featured article">
+                                <label class="block text-sm font-medium mb-1" style="color: var(--brand-dark);">Featured Story (Optional)</label>
+                                <input type="text" id="featured-story" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
+                                       style="border-color: #d0d0d0; color: var(--brand-dark);" placeholder="Title of featured article">
                             </div>
                         </div>
                         
                         <!-- Status Toggle -->
-                        <div class="flex items-center gap-3 pt-4 border-t border-gray-200">
-                            <input type="checkbox" id="is-active" checked class="w-4 h-4 text-blue-600">
-                            <label for="is-active" class="text-sm font-medium">Active (Show on website)</label>
+                        <div class="flex items-center gap-3 pt-4 border-t border-gray-200" style="border-color: #e0e0e0;">
+                            <input type="checkbox" id="is-active" checked class="w-4 h-4 text-[var(--brand-blue)]" style="accent-color: var(--brand-blue);">
+                            <label for="is-active" class="text-sm font-medium" style="color: var(--brand-dark);">Active (Show on website)</label>
                         </div>
                     </div>
                     
                     <!-- ACTION BUTTONS -->
-                    <div class="flex gap-4 mt-8 pt-6 border-t border-gray-200">
-                        <button onclick="saveRegion()" class="flex-1 py-3 bg-black hover:bg-gray-800 text-white rounded-lg font-bold transition">
+                    <div class="flex gap-4 mt-8 pt-6 border-t border-gray-200" style="border-color: #e0e0e0;">
+                        <button onclick="saveRegion()" class="flex-1 py-3 rounded-lg font-bold transition"
+                                style="background-color: var(--brand-dark); color: white;">
                             💾 Save Changes
                         </button>
-                        <button onclick="publishChanges()" class="py-3 px-6 border border-black hover:bg-gray-50 rounded-lg font-bold transition">
+                        <button onclick="publishChanges()" class="py-3 px-6 rounded-lg font-bold transition border"
+                                style="border-color: var(--brand-dark); color: var(--brand-dark);">
                             ✨ Publish
                         </button>
                     </div>
                 </div>
                 
                 <!-- EMPTY STATE -->
-                <div id="empty-state" class="bg-white p-16 rounded-lg border border-gray-200 shadow-sm text-center">
+                <div id="empty-state" class="bg-white p-16 rounded-lg border border-gray-200 shadow-sm text-center" style="border-color: #e0e0e0;">
                     <div class="mb-6 text-6xl">🗺️</div>
-                    <h3 class="text-xl font-bold mb-2">Select A Region</h3>
+                    <h3 class="text-xl font-bold mb-2" style="color: var(--brand-dark);">Select A Region</h3>
                     <p class="text-gray-600">Click on any region from the list to edit its details, upload images, and manage content.</p>
                 </div>
             </div>
         </section>
         
         <!-- EXPORT SECTION -->
-        <section class="mt-12 bg-white p-8 rounded-lg border border-gray-200 shadow-sm">
-            <h2 class="text-xl font-bold mb-4">Export Data</h2>
+        <section class="mt-12 bg-white p-8 rounded-lg border border-gray-200 shadow-sm" style="border-color: #e0e0e0;">
+            <h2 class="text-xl font-bold mb-4" style="color: var(--brand-dark);">Export Data</h2>
             <p class="text-gray-600 mb-4">Download all region data as JSON or CSV for backup.</p>
             <div class="flex gap-4">
-                <button onclick="exportJSON()" class="px-6 py-3 border border-gray-300 hover:bg-gray-50 rounded-lg font-semibold">
+                <button onclick="exportJSON()" class="px-6 py-3 rounded-lg font-semibold border" 
+                        style="border-color: var(--brand-dark); color: var(--brand-dark);">
                     📥 Export JSON
                 </button>
-                <button onclick="exportCSV()" class="px-6 py-3 border border-gray-300 hover:bg-gray-50 rounded-lg font-semibold">
+                <button onclick="exportCSV()" class="px-6 py-3 rounded-lg font-semibold border"
+                        style="border-color: var(--brand-dark); color: var(--brand-dark);">
                     📄 Export CSV
                 </button>
             </div>
@@ -204,18 +229,17 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="border-t border-gray-200 py-8 mt-12">
+    <footer class="border-t border-gray-200 py-8 mt-12" style="border-color: #e0e0e0; background-color: var(--brand-light-gray);">
         <div class="max-w-6xl mx-auto px-4 text-center">
-            <p class="text-sm text-gray-500">&copy; 2026 EchoStack Admin. All rights reserved.</p>
+            <p class="text-sm" style="color: var(--brand-dark);">&copy; 2026 EchoStack Admin. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- JAVASCRIPT -->
+    <!-- JAVASCRIPT (SAME AS BEFORE - NO COLOR CHANGES NEEDED) -->
     <script>
         const API_URL = 'https://echo-stack-ghana.onrender.com/api/regions';
         let allRegions = [];
 
-        // Load all regions on page load
         async function loadRegions() {
             try {
                 const response = await fetch(API_URL);
@@ -229,7 +253,6 @@
             }
         }
 
-        // Render region list sidebar
         function renderRegionList(regions) {
             const list = document.getElementById('region-list');
             list.innerHTML = '';
@@ -241,16 +264,18 @@
             
             regions.forEach((region, index) => {
                 const item = document.createElement('div');
-                item.className = 'p-4 hover:bg-gray-50 cursor-pointer transition';
+                item.className = 'p-4 hover:bg-gray-50 cursor-pointer transition border-l-4'
+                                  .replace(/border-l-\d+/, 'border-l-[--brand-blue]');
+                item.style.borderLeftColor = '#0077b6'; // Brand blue
                 item.onclick = () => openEditor(region);
                 
                 item.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="font-bold text-sm">${region.name}</p>
-                            <p class="text-xs text-gray-500 truncate max-w-[150px]">${region.overview || 'No description'}</p>
+                            <p class="font-bold text-sm" style="color: var(--brand-dark);">${region.name}</p>
+                            <p class="text-xs text-gray-500 truncate max-w-[150px]">${region.description || region.overview || 'No description'}</p>
                         </div>
-                        <span class="text-xs bg-gray-100 px-2 py-1 rounded">${index + 1}</span>
+                        <span class="text-xs bg-gray-100 px-2 py-1 rounded">#${index + 1}</span>
                     </div>
                 `;
                 
@@ -258,7 +283,6 @@
             });
         }
 
-        // Open editor for selected region
         function openEditor(region) {
             document.getElementById('empty-state').classList.add('hidden');
             document.getElementById('edit-form').classList.remove('hidden');
@@ -275,41 +299,31 @@
             document.getElementById('featured-story').value = region.featured_story || '';
             document.getElementById('is-active').checked = region.isActive !== false;
             
-            // Show preview if image exists
             const heroUrl = document.getElementById('hero-image').value;
-            if (heroUrl) {
-                showImagePreview(heroUrl);
-            } else {
-                hideImagePreview();
-            }
+            if (heroUrl) showImagePreview(heroUrl);
+            else hideImagePreview();
             
-            // Scroll to form
             document.getElementById('edit-form').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Close editor
         function closeEditor() {
             document.getElementById('edit-form').classList.add('hidden');
             document.getElementById('empty-state').classList.remove('hidden');
             
-            // Clear all fields
             document.querySelectorAll('#edit-form input, #edit-form textarea').forEach(el => el.value = '');
             document.getElementById('region-id').value = '';
             hideImagePreview();
         }
 
-        // Show image preview
         function showImagePreview(url) {
             document.getElementById('preview-img').src = url;
             document.getElementById('image-preview').classList.remove('hidden');
         }
 
-        // Hide image preview
         function hideImagePreview() {
             document.getElementById('image-preview').classList.add('hidden');
         }
 
-        // Save region to database
         async function saveRegion() {
             const regionId = document.getElementById('region-id').value;
             
@@ -319,7 +333,7 @@
                 population: document.getElementById('population').value,
                 terrain: document.getElementById('terrain').value,
                 description: document.getElementById('description').value,
-                overview: document.getElementById('description').value, // For API compatibility
+                overview: document.getElementById('description').value,
                 imageUrl: document.getElementById('hero-image').value,
                 gallery_images: document.getElementById('gallery-images').value,
                 meta_description: document.getElementById('meta-description').value,
@@ -327,7 +341,6 @@
                 isActive: document.getElementById('is-active').checked
             };
             
-            // Validate required fields
             if (!data.name || !data.capital || !data.description) {
                 alert('Please fill in all required fields (*)');
                 return;
@@ -345,13 +358,9 @@
                 
                 if (!response.ok) throw new Error('Failed to save');
                 
-                const savedRegion = await response.json();
                 alert('✅ Region saved successfully!');
-                
-                // Reload list
                 loadRegions();
-                
-                // Update last updated timestamp
+                localStorage.setItem('last-admin-update', new Date().toISOString());
                 document.getElementById('last-updated').innerText = new Date().toLocaleDateString();
                 
             } catch (error) {
@@ -360,13 +369,10 @@
             }
         }
 
-        // Publish changes (refresh frontend cache)
         function publishChanges() {
             alert('🚀 Changes published! Frontend will update within 2 minutes.');
-            // In production: trigger cache invalidation webhook
         }
 
-        // Update dashboard stats
         function updateDashboard() {
             document.getElementById('total-regions').innerText = allRegions.length;
             
@@ -381,24 +387,22 @@
                 new Date(lastUpdate).toLocaleDateString() : '—';
         }
 
-        // Search/filter regions
         document.getElementById('search-regions')?.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = allRegions.filter(r => 
                 r.name.toLowerCase().includes(term) ||
+                (r.description && r.description.toLowerCase().includes(term)) ||
                 (r.overview && r.overview.toLowerCase().includes(term))
             );
             renderRegionList(filtered);
         });
 
-        // Image URL listener for preview
         document.getElementById('hero-image')?.addEventListener('input', (e) => {
             const url = e.target.value;
             if (url) showImagePreview(url);
             else hideImagePreview();
         });
 
-        // Export functions
         function exportJSON() {
             const dataStr = JSON.stringify(allRegions, null, 2);
             const blob = new Blob([dataStr], {type: 'application/json'});
@@ -426,7 +430,6 @@
             URL.revokeObjectURL(url);
         }
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadRegions();
         });
