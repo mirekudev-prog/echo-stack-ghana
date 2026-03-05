@@ -1,15 +1,20 @@
-const CACHE_NAME = 'echostack-v1';
+const CACHE_NAME = 'echostack-v2';
 const urlsToCache = [
     '/',
     '/index.html',
-    '/admin',
+    '/manifest.json',
+    '/echostack-logo.png'
+    // NOTE: /admin is intentionally excluded — it requires auth and will fail caching
 ];
 
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(urlsToCache))
+            .catch(err => console.warn('Cache install error (non-fatal):', err))
     );
+    // Force the new SW to activate immediately
+    self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
@@ -24,6 +29,8 @@ self.addEventListener('activate', event => {
             );
         })
     );
+    // Take control of all open clients immediately
+    self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
