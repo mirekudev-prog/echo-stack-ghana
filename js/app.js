@@ -1,12 +1,14 @@
 const API_URL = 'https://echo-stack-ghana.onrender.com/api/regions';
 
-// All 16 Official Regions with PINPOINT CENTER positions
+// Only include regions that fit ON the map (removed off-boundary points)
 const ghanaRegions = [
     "Upper West", "Upper East", "North East", "Northern", 
     "Savannah", "Bono", "Bono East", "Ahafo",
     "Ashanti", "Central", "Western", "Western North",
-    "Eastern", "Volta", "Greater Accra", "Oti"
+    "Eastern", "Volta", "Oti"
 ];
+
+// NOTE: Greater Accra removed - too small/tiny for clear circle placement
 
 // Initialize Map On Page Load
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,8 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mapContainer) {
         // Display Real Ghana Map Image
         mapContainer.innerHTML = `
-            <img src="/images/ghana-map.png" alt="Ghana Map" class="map-image">
-            ${createHotspots()}
+            <div class="map-wrapper">
+                <img src="/images/ghana-map.png" alt="Ghana Map" class="map-image">
+                ${createHotspots()}
+            </div>
         `;
         
         addMapInteractions();
@@ -27,28 +31,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function createHotspots() {
     return ghanaRegions.map((region, index) => {
-        // REFINED PINPOINT positions - each circle in CENTER of region
+        // Constrained positions - ALL within map boundary (no X > 85, no Y > 90)
         const positions = [
-            {x: 20, y: 30},   // Upper West      ← Top-left green region
-            {x: 55, y: 18},   // Upper East      ← Top-right grey region  
-            {x: 68, y: 22},   // North East      ← Purple top-right corner
-            {x: 62, y: 35},   // Northern        ← Brown large center-top
-            {x: 38, y: 45},   // Savannah        ← Pink left-center
-            {x: 25, y: 60},   // Bono            ← Orange mid-left
-            {x: 50, y: 58},   // Bono East       ← Green center
-            {x: 38, y: 68},   // Ahafo           ← Dark blue small area
-            {x: 48, y: 78},   // Ashanti         ← Light blue bottom-center
-            {x: 58, y: 92},   // Central         ← Light green south
-            {x: 15, y: 85},   // Western         ← Blue bottom-left corner
-            {x: 22, y: 75},   // Western North   ← Light blue above Western
-            {x: 72, y: 80},   // Eastern         ← Red right-bottom area
-            {x: 90, y: 70},   // Volta           ← Yellow-green far right
-            {x: 75, y: 95},   // Greater Accra   ← Purple tiny coastal spot
-            {x: 62, y: 55}    // Oti             ← Pink between Eastern/Northern
+            {x: 22, y: 28},   // Upper West
+            {x: 52, y: 16},   // Upper East  
+            {x: 65, y: 20},   // North East
+            {x: 58, y: 32},   // Northern
+            {x: 38, y: 42},   // Savannah
+            {x: 25, y: 58},   // Bono
+            {x: 48, y: 56},   // Bono East
+            {x: 35, y: 66},   // Ahafo
+            {x: 45, y: 75},   // Ashanti
+            {x: 55, y: 88},   // Central
+            {x: 18, y: 82},   // Western
+            {x: 25, y: 72},   // Western North
+            {x: 68, y: 78},   // Eastern
+            {x: 82, y: 65},   // Volta (kept at edge but safe)
+            {x: 60, y: 52}    // Oti
         ];
         
         return `<div class="region-circle" data-region="${region}" 
-                    style="left:${positions[index].x}%;top:${positions[index].y}%;"
+                    style="--pos-x: ${positions[index].x}; --pos-y: ${positions[index].y};"
                     title="Click ${region}">
                     <span class="circle-label">${region}</span>
                 </div>`;
@@ -70,7 +73,7 @@ function addMapInteractions() {
             
             // Highlight selected
             e.currentTarget.classList.add('selected');
-            e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.3)';
+            e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.2)';
             
             // Search for this region
             await filterRegions(regionName);
@@ -81,7 +84,7 @@ function addMapInteractions() {
         
         // Hover effects
         circle.addEventListener('mouseenter', () => {
-            circle.style.transform = 'translate(-50%, -50%) scale(1.2)';
+            circle.style.transform = 'translate(-50%, -50%) scale(1.1)';
             circle.querySelector('.circle-label').style.opacity = '1';
         });
         
@@ -155,4 +158,4 @@ document.getElementById('search-bar')?.addEventListener('input', async (e) => {
     }
 });
 
-console.log('✅ Interactive pin-point map loaded!');
+console.log('✅ Interactive map loaded!');
