@@ -1,90 +1,72 @@
 const API_URL = 'https://echo-stack-ghana.onrender.com/api/regions';
 
-// ==========================================
-// GHANA SVG MAP WITH INTERACTIVE REGIONS
-// ==========================================
-const ghanaMapSVG = `
-<svg viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
-    <!-- Northern Region -->
-    <path class="region-path" data-region="Northern" 
-          d="M180,40 L280,45 L300,100 L280,150 L220,160 L150,140 L140,90 Z"/>
-    
-    <!-- Savanna Region -->
-    <path class="region-path" data-region="Savannah" 
-          d="M140,90 L220,160 L180,200 L120,180 L100,130 Z"/>
-    
-    <!-- North East Region -->
-    <path class="region-path" data-region="North East" 
-          d="M280,150 L340,160 L350,220 L280,200 L220,160 Z"/>
-    
-    <!-- Bono Region -->
-    <path class="region-path" data-region="Bono" 
-          d="M120,180 L180,200 L170,260 L110,250 L100,200 Z"/>
-    
-    <!-- Bono East Region -->
-    <path class="region-path" data-region="Bono East" 
-          d="M180,200 L220,220 L210,270 L170,260 Z"/>
-    
-    <!-- Ahafo Region -->
-    <path class="region-path" data-region="Ahafo" 
-          d="M110,250 L170,260 L160,300 L100,290 Z"/>
-    
-    <!-- Ashanti Region -->
-    <path class="region-path" data-region="Ashanti" 
-          d="M170,260 L210,270 L220,330 L160,350 L160,300 Z"/>
-    
-    <!-- Eastern Region -->
-    <path class="region-path" data-region="Eastern" 
-          d="M210,270 L280,280 L300,350 L220,330 Z"/>
-    
-    <!-- Western Region -->
-    <path class="region-path" data-region="Western" 
-          d="M60,300 L100,290 L160,300 L140,380 L80,360 Z"/>
-    
-    <!-- Western North Region -->
-    <path class="region-path" data-region="Western North" 
-          d="M160,300 L200,310 L190,360 L160,350 Z"/>
-    
-    <!-- Greater Accra Region -->
-    <path class="region-path" data-region="Greater Accra" 
-          d="M280,280 L320,290 L330,310 L280,310 Z"/>
-    
-    <!-- Volta Region -->
-    <path class="region-path" data-region="Volta" 
-          d="M220,330 L280,310 L330,310 L320,420 L220,400 Z"/>
-    
-    <!-- Oti Region -->
-    <path class="region-path" data-region="Oti" 
-          d="M280,280 L340,290 L320,400 L280,310 Z"/>
-    
-    <!-- Upper West Region -->
-    <path class="region-path" data-region="Upper West" 
-          d="M40,40 L140,40 L140,140 L100,180 L40,140 Z"/>
-    
-    <!-- Upper East Region -->
-    <path class="region-path" data-region="Upper East" 
-          d="M280,45 L380,50 L370,120 L340,160 L280,150 Z"/>
-    
-    <!-- Labels -->
-    <text x="220" y="100" font-size="12" fill="#1a1e29" text-anchor="middle">Northern</text>
-    <text x="150" y="230" font-size="11" fill="#1a1e29" text-anchor="middle">Ashanti</text>
-    <text x="280" y="350" font-size="10" fill="#1a1e29" text-anchor="middle">Volta</text>
-    <text x="300" y="300" font-size="9" fill="#1a1e29" text-anchor="middle">Accra</text>
-</svg>
-`;
+// All 16 Official Regions
+const ghanaRegions = [
+    "Upper West", "Upper East", "North East", "Northern", 
+    "Savannah", "Bono", "Bono East", "Ahafo",
+    "Ashanti", "Central", "Western", "Western North",
+    "Eastern", "Volta", "Greater Accra", "Oti"
+];
 
-// Render Map On Page Load
+// Initialize Map On Page Load
 document.addEventListener('DOMContentLoaded', () => {
     const mapContainer = document.getElementById('ghana-map-container');
+    
     if (mapContainer) {
-        mapContainer.innerHTML = ghanaMapSVG;
+        // Display Real Ghana Map Image
+        mapContainer.innerHTML = `
+            <img src="/images/ghana-map.png" alt="Ghana Map" class="map-image">
+            ${createHotspots()}
+        `;
+        
         addMapInteractions();
     }
 });
 
-// ==========================================
-// REGION DATA LOADING
-// ==========================================
+function createHotspots() {
+    return ghanaRegions.map((region, index) => {
+        // Approximate positions (adjust based on your image size)
+        const positions = [
+            {x: 15, y: 15},   // Upper West
+            {x: 35, y: 12},   // Upper East
+            {x: 55, y: 15},   // North East
+            {x: 40, y: 25},   // Northern
+            {x: 25, y: 32},   // Savannah
+            {x: 22, y: 48},   // Bono
+            {x: 45, y: 48},   // Bono East
+            {x: 30, y: 55},   // Ahafo
+            {x: 42, y: 65},   // Ashanti
+            {x: 45, y: 75},   // Central
+            {x: 18, y: 68},   // Western
+            {x: 22, y: 62},   // Western North
+            {x: 65, y: 65},   // Eastern
+            {x: 85, y: 60},   // Volta
+            {x: 68, y: 80},   // Greater Accra
+            {x: 72, y: 48}    // Oti
+        ];
+        
+        return `<div class="region-hotspot" data-region="${region}" 
+                    style="left:${positions[index].x}%;top:${positions[index].y}%;"
+                    title="${region}"></div>`;
+    }).join('');
+}
+
+function addMapInteractions() {
+    document.querySelectorAll('.region-hotspot').forEach(hotspot => {
+        hotspot.addEventListener('click', () => {
+            const regionName = hotspot.getAttribute('data-region');
+            
+            // Highlight hotspot
+            document.querySelectorAll('.region-hotspot').forEach(h => h.style.opacity = '0');
+            hotspot.style.opacity = '1';
+            
+            // Search for region
+            filterRegions(regionName);
+        });
+    });
+}
+
+// Load Regions Data
 async function loadRegions(showAll = false) {
     try {
         const response = await fetch(API_URL);
@@ -108,7 +90,7 @@ function renderRegions(regions) {
     grid.innerHTML = '';
     
     if (!regions || regions.length === 0) {
-        grid.innerHTML = '<p>No regions found. Please try another search.</p>';
+        grid.innerHTML = '<p>No regions found.</p>';
         return;
     }
     
@@ -126,38 +108,7 @@ function renderRegions(regions) {
     });
 }
 
-// ==========================================
-// MAP INTERACTION HANDLERS
-// ==========================================
-function addMapInteractions() {
-    document.querySelectorAll('.region-path').forEach(path => {
-        path.addEventListener('click', () => {
-            // Highlight selected region
-            document.querySelectorAll('.region-path').forEach(p => p.style.fill = '#e0e0e0');
-            path.style.fill = '#0077b6';
-            
-            // Search for this region
-            const regionName = path.getAttribute('data-region');
-            filterRegions(regionName);
-        });
-        
-        // Add hover effect
-        path.addEventListener('mouseenter', () => {
-            path.style.fill = '#00b4d8';
-        });
-        
-        path.addEventListener('mouseleave', () => {
-            // Only reset if not selected
-            if (path.style.fill !== 'rgb(0, 119, 182)') {
-                path.style.fill = '#e0e0e0';
-            }
-        });
-    });
-}
-
-// ==========================================
-// SEARCH FUNCTIONALITY
-// ==========================================
+// Search Functionality
 document.getElementById('search-bar').addEventListener('input', async function(e) {
     const searchTerm = e.target.value.trim();
     
