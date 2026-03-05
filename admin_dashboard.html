@@ -261,9 +261,9 @@
     <!-- NOTIFICATION -->
     <div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50"></div>
 
-    <!-- COMPLETE JAVASCRIPT (FIXED TYPE CHECKING) -->
+    <!-- COMPLETE JAVASCRIPT (DEBUGGED VERSION) -->
     <script>
-        console.log('✅ Admin Dashboard Script Loaded');
+        console.log('✅ Script Loaded');
         
         const API_URL = '/api';
         let allRegions = [];
@@ -271,8 +271,8 @@
         // ===============================
         // INITIALIZATION
         // ===============================
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM Ready - Loading data...');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Ready');
             
             loadStats();
             loadRegions();
@@ -284,14 +284,13 @@
         });
 
         // ===============================
-        // HELPER FUNCTION - SAFE SPLIT
+        // HELPER FUNCTION - SAFE TYPE HANDLING
         // ===============================
         function safeSplit(value) {
-            // Safely handle string, array, null, undefined
             if (!value) return [];
-            if (Array.isArray(value)) return value.filter(x => x && x.trim());
+            if (Array.isArray(value)) return value.filter(x => x && String(x).trim());
             if (typeof value === 'string') {
-                return value.split(',').map(s => s.trim()).filter(s => s);
+                return value.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
             }
             return [];
         }
@@ -300,13 +299,17 @@
         // NAVIGATION
         // ===============================
         function showSection(sectionId) {
-            document.getElementById('dashboard-section').classList.toggle('hidden', sectionId !== 'dashboard');
-            document.getElementById('create-section').classList.toggle('hidden', sectionId !== 'create');
+            var dashboard = document.getElementById('dashboard-section');
+            var create = document.getElementById('create-section');
             
             if (sectionId === 'dashboard') {
+                dashboard.classList.remove('hidden');
+                create.classList.add('hidden');
                 loadRegions();
                 loadStats();
             } else {
+                create.classList.remove('hidden');
+                dashboard.classList.add('hidden');
                 resetForm();
             }
         }
@@ -316,12 +319,12 @@
         // ===============================
         async function loadStats() {
             try {
-                const response = await fetch(`${API_URL}/stats`);
+                const response = await fetch(API_URL + '/stats');
                 const stats = await response.json();
-                document.getElementById('stat-total').innerText = stats.total_regions || 0;
-                document.getElementById('stat-audio').innerText = stats.with_audio || 0;
-                document.getElementById('stat-images').innerText = stats.with_images || 0;
-                document.getElementById('stat-size').innerText = `${stats.database_size_mb || 0} MB`;
+                document.getElementById('stat-total').textContent = stats.total_regions || 0;
+                document.getElementById('stat-audio').textContent = stats.with_audio || 0;
+                document.getElementById('stat-images').textContent = stats.with_images || 0;
+                document.getElementById('stat-size').textContent = (stats.database_size_mb || 0) + ' MB';
             } catch (error) {
                 console.error('Stats error:', error);
             }
@@ -329,21 +332,21 @@
 
         async function loadRegions() {
             try {
-                console.log('Fetching regions from API...');
-                const response = await fetch(`${API_URL}/regions`);
+                console.log('Fetching regions...');
+                const response = await fetch(API_URL + '/regions');
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    throw new Error('HTTP ' + response.status);
                 }
                 
                 allRegions = await response.json();
-                console.log(`✅ Loaded ${allRegions.length} regions`, allRegions);
+                console.log('Loaded', allRegions.length, 'regions');
                 
                 renderTable(allRegions);
             } catch (error) {
-                console.error('❌ Load error:', error);
+                console.error('Load error:', error);
                 document.getElementById('regions-table-body').innerHTML = 
-                    '<tr><td colspan="6" class="px-4 py-8 text-center text-red-600">Error loading regions. Please refresh.</td></tr>';
+                    '<tr><td colspan="6" class="px-4 py-8 text-center text-red-600">Error: ' + error.message + '</td></tr>';
             }
         }
 
@@ -352,49 +355,63 @@
             tbody.innerHTML = '';
             
             if (!regions || regions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet. Click "New Region" to create one!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet.</td></tr>';
                 return;
             }
             
-            regions.forEach((region, index) => {
-                // ✓✓✓ FIXED: Use safeSplit helper instead of .split() directly ✓✓✓
-                const galleryArray = safeSplit(region.gallery_images);
-                const audioArray = safeSplit(region.audio_files);
-                
-                const hasAudio = audioArray.length > 0;
-                const hasImages = galleryArray.length > 0;
-                
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50 transition cursor-pointer';
-                row.onclick = (e) => {
-                    if (!e.target.closest('button')) {
-                        console.log('Editing region:', region.id);
+            regions.forEach(function(region, index) {
+                try {
+                    var galleryArr = safeSplit(region.gallery_images);
+                    var audioArr = safeSplit(region.audio_files);
+                    
+                    var hasAudio = audioArr.length > 0;
+                    var hasImages = galleryArr.length > 0;
+                    
+                    var row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 transition cursor-pointer';
+                    
+                    row.innerHTML = 
+                        '<td class="px-4 py-4 text-sm">' + (index + 1) + '</td>' +
+                        '<td class="px-4 py-4"><span class="font-semibold">' + (region.name || 'Unknown') + '</span></td>' +
+                        '<td class="px-4 py-4 text-sm">' + (region.capital || '—') + '</td>' +
+                        '<td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs">' + (region.category || 'Uncategorized') + '</span></td>' +
+                        '<td class="px-4 py-4 text-sm">' + (hasImages ? '🖼️ ' : '') + (hasAudio ? '🎵' : '') + '</td>' +
+                        '<td class="px-4 py-4 whitespace-nowrap">' +
+                            '<button class="edit-btn mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button>' +
+                            '<button class="delete-btn text-red-600 hover:underline text-sm">🗑️ Delete</button>' +
+                        '</td>';
+                    
+                    row.querySelector('.edit-btn').onclick = function(e) {
+                        e.stopPropagation();
                         editRegion(region.id);
-                    }
-                };
-                
-                row.innerHTML = `
-                    <td class="px-4 py-4 text-sm text-gray-600">${index + 1}</td>
-                    <td class="px-4 py-4"><span class="font-semibold">${region.name || 'Unknown'}</span></td>
-                    <td class="px-4 py-4 text-sm text-gray-600">${region.capital || '—'}</td>
-                    <td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">${region.category || 'Uncategorized'}</span></td>
-                    <td class="px-4 py-4 text-sm">${hasImages ? '🖼️ ' : ''}${hasAudio ? '🎵' : ''}</td>
-                    <td class="px-4 py-4 whitespace-nowrap">
-                        <button onclick="editRegion(${region.id})" class="mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button>
-                        <button onclick="deleteRegion(${region.id}, '${region.name}') " class="text-red-600 hover:underline text-sm">🗑️ Delete</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
+                    };
+                    
+                    row.querySelector('.delete-btn').onclick = function(e) {
+                        e.stopPropagation();
+                        deleteRegion(region.id, region.name);
+                    };
+                    
+                    row.onclick = function(e) {
+                        if (!e.target.closest('button')) {
+                            editRegion(region.id);
+                        }
+                    };
+                    
+                    tbody.appendChild(row);
+                } catch (err) {
+                    console.error('Error rendering region:', err);
+                }
             });
         }
 
-        document.getElementById('search-regions')?.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = allRegions.filter(r => 
-                r.name.toLowerCase().includes(term) ||
-                (r.capital && r.capital.toLowerCase().includes(term)) ||
-                (r.category && r.category.toLowerCase().includes(term))
-            );
+        // Search functionality
+        document.getElementById('search-regions').addEventListener('input', function(e) {
+            var term = e.target.value.toLowerCase();
+            var filtered = allRegions.filter(function(r) {
+                return r.name.toLowerCase().indexOf(term) !== -1 ||
+                    (r.capital && r.capital.toLowerCase().indexOf(term) !== -1) ||
+                    (r.category && r.category.toLowerCase().indexOf(term) !== -1);
+            });
             renderTable(filtered);
         });
 
@@ -404,23 +421,29 @@
         function resetForm() {
             document.getElementById('region-form').reset();
             document.getElementById('region-id').value = '';
-            document.getElementById('form-title').innerText = 'Add New Region';
-            document.getElementById('save-btn').innerText = '💾 Save Region';
+            document.getElementById('form-title').textContent = 'Add New Region';
+            document.getElementById('save-btn').textContent = '💾 Save Region';
             document.getElementById('hero-preview').classList.add('hidden');
         }
 
         function editRegion(id) {
-            console.log('Edit clicked for ID:', id);
+            console.log('Editing ID:', id);
             
-            const region = allRegions.find(r => r.id === id);
+            var region = null;
+            for (var i = 0; i < allRegions.length; i++) {
+                if (allRegions[i].id === id) {
+                    region = allRegions[i];
+                    break;
+                }
+            }
             
             if (!region) {
-                alert('Error: Region not found! Try refreshing.');
+                alert('Region not found!');
                 return;
             }
             
-            document.getElementById('form-title').innerText = `Edit: ${region.name}`;
-            document.getElementById('save-btn').innerText = '💾 Update Region';
+            document.getElementById('form-title').textContent = 'Edit: ' + region.name;
+            document.getElementById('save-btn').textContent = '💾 Update Region';
             
             document.getElementById('region-id').value = region.id || '';
             document.getElementById('reg-name').value = region.name || '';
@@ -434,12 +457,11 @@
             document.getElementById('reg-overview').value = region.overview || '';
             document.getElementById('reg-hero-image').value = region.hero_image || '';
             
-            // ✓✓✓ FIXED: Use safeSplit for arrays ✓✓✓
-            const galleryArray = safeSplit(region.gallery_images);
-            const audioArray = safeSplit(region.audio_files);
+            var galleryArr = safeSplit(region.gallery_images);
+            var audioArr = safeSplit(region.audio_files);
             
-            document.getElementById('reg-gallery-images').value = galleryArray.join(', ');
-            document.getElementById('reg-audio-files').value = audioArray.join(', ');
+            document.getElementById('reg-gallery-images').value = galleryArr.join(', ');
+            document.getElementById('reg-audio-files').value = audioArr.join(', ');
             
             if (region.hero_image) {
                 showHeroPreview(region.hero_image);
@@ -447,19 +469,18 @@
                 hideHeroPreview();
             }
             
-            console.log('✅ Form populated with:', region.name);
             showSection('create');
         }
 
         async function handleSave(e) {
             e.preventDefault();
             
-            const regionId = document.getElementById('region-id').value;
-            const submitBtn = document.getElementById('save-btn');
+            var regionId = document.getElementById('region-id').value;
+            var submitBtn = document.getElementById('save-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Saving...';
+            submitBtn.textContent = '⏳ Saving...';
             
-            const formData = new FormData();
+            var formData = new FormData();
             formData.append('name', document.getElementById('reg-name').value);
             formData.append('capital', document.getElementById('reg-capital').value);
             formData.append('population', document.getElementById('reg-population').value);
@@ -474,42 +495,51 @@
             formData.append('overview', document.getElementById('reg-overview').value);
             
             try {
-                const method = regionId ? 'PUT' : 'POST';
-                const url = regionId ? `${API_URL}/regions/${regionId}` : `${API_URL}/regions`;
+                var method = regionId ? 'PUT' : 'POST';
+                var url = regionId ? API_URL + '/regions/' + regionId : API_URL + '/regions';
                 
-                const response = await fetch(url, { method: method, body: formData });
+                console.log('Saving with:', method, url);
+                
+                const response = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
                 
                 if (!response.ok) {
-                    throw new Error(`Server returned ${response.status}`);
+                    throw new Error('Server returned ' + response.status);
                 }
                 
-                const data = await response.json();
+                var data = await response.json();
                 
                 if (data.success) {
-                    showNotification(data.message || 'Saved successfully!', 'success');
+                    showNotification('Saved successfully!', 'success');
+                    
+                    // Reload immediately
                     await loadRegions();
                     await loadStats();
+                    
                     showSection('dashboard');
                 } else {
                     throw new Error(data.detail || 'Save failed');
                 }
             } catch (error) {
-                showNotification(`❌ ${error.message}`, 'error');
+                console.error('Save error:', error);
+                showNotification('❌ ' + error.message, 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = regionId ? '💾 Update Region' : '💾 Save Region';
+                submitBtn.textContent = regionId ? '💾 Update Region' : '💾 Save Region';
             }
         }
 
         async function deleteRegion(id, name) {
-            if (!confirm(`Delete "${name}"? This CANNOT be undone.`)) return;
+            if (!confirm('Delete "' + name + '"? This CANNOT be undone.')) return;
             
             try {
-                const response = await fetch(`${API_URL}/regions/${id}`, { method: 'DELETE' });
-                const data = await response.json();
+                const response = await fetch(API_URL + '/regions/' + id, { method: 'DELETE' });
+                var data = await response.json();
                 
                 if (response.ok && data.success) {
-                    showNotification('Deleted successfully!', 'success');
+                    showNotification('Deleted!', 'success');
                     loadRegions();
                     loadStats();
                 } else {
@@ -524,30 +554,30 @@
         // FILE UPLOADS
         // ===============================
         async function uploadFile(type) {
-            const input = document.createElement('input');
+            var input = document.createElement('input');
             input.type = 'file';
             input.accept = type === 'hero' ? 'image/*' : 'audio/*';
             
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
+            input.onchange = async function(e) {
+                var file = e.target.files[0];
                 if (!file) return;
                 
-                const formData = new FormData();
+                var formData = new FormData();
                 formData.append('file', file);
                 formData.append('filename', file.name);
                 
                 try {
-                    const endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/audio';
+                    var endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/audio';
                     const response = await fetch(endpoint, { method: 'POST', body: formData });
-                    const data = await response.json();
+                    var data = await response.json();
                     
                     if (data.success) {
                         if (type === 'hero') {
                             document.getElementById('reg-hero-image').value = data.url;
                             showHeroPreview(data.url);
                         } else {
-                            const currentValue = document.getElementById('reg-audio-files').value;
-                            const newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
+                            var currentValue = document.getElementById('reg-audio-files').value;
+                            var newValue = currentValue ? currentValue + ', ' + data.url : data.url;
                             document.getElementById('reg-audio-files').value = newValue;
                         }
                         showNotification('Uploaded!', 'success');
@@ -575,13 +605,13 @@
         // ===============================
         async function exportData() {
             try {
-                const response = await fetch(`${API_URL}/regions`);
-                const data = await response.json();
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
+                const response = await fetch(API_URL + '/regions');
+                var data = await response.json();
+                var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
                 a.href = url;
-                a.download = `echostack-backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.download = 'echostack-backup-' + new Date().toISOString().split('T')[0] + '.json';
                 a.click();
                 URL.revokeObjectURL(url);
                 showNotification('Exported!', 'success');
@@ -591,13 +621,13 @@
         }
 
         async function importData(input) {
-            const file = input.files[0];
+            var file = input.files[0];
             if (!file) return;
             
-            const reader = new FileReader();
-            reader.onload = async (e) => {
+            var reader = new FileReader();
+            reader.onload = async function(e) {
                 try {
-                    const data = JSON.parse(e.target.result);
+                    var data = JSON.parse(e.target.result);
                     const response = await fetch('/api/import/json', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
@@ -627,12 +657,15 @@
         // ===============================
         // NOTIFICATIONS
         // ===============================
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.className = `fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
-            notification.innerText = message;
+        function showNotification(message, type) {
+            var notification = document.getElementById('notification');
+            notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ' + 
+                (type === 'success' ? 'bg-green-600' : 'bg-red-600');
+            notification.textContent = message;
             notification.classList.remove('hidden');
-            setTimeout(() => notification.classList.add('hidden'), 3000);
+            setTimeout(function() {
+                notification.classList.add('hidden');
+            }, 3000);
         }
     </script>
 </body>
