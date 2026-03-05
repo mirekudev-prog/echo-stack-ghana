@@ -1,33 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Character Set -->
     <meta charset="UTF-8">
-    
-    <!-- Viewport for Mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Cache Control (Prevent Browser Caching Issues) -->
+    <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <!-- Page Title -->
     <title>EchoStack - Ghana's Heritage Archive</title>
     
-    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1a1e29">
-    <meta name="apple-mobile-web-app-title" content="EchoStack">
     <link rel="manifest" href="/manifest.json">
     
-    <!-- Custom Styles -->
     <style>
         /* BRAND COLORS */
         :root {
-            --brand-dark: #1a1e29;
-            --brand-blue: #0077b6;
+            --brand-dark: #1a1e29;      /* Dark Gray from logo */
+            --brand-blue: #0077b6;       /* Blue accent from logo */
             --brand-light-gray: #f5f5f5;
             --brand-white: #ffffff;
+            --brand-gradient: linear-gradient(135deg, #e8f4f8 0%, #ffffff 100%);
         }
         
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
@@ -44,11 +38,11 @@
             color: var(--brand-dark);
         }
         
-        /* HEADER */
+        /* HEADER WITH BLUE GRADIENT */
         .header {
-            border-bottom: 1px solid #e0e0e0;
-            padding: 1.5rem 1rem;
-            background-color: var(--brand-white);
+            background: var(--brand-gradient);
+            border-bottom: 3px solid var(--brand-blue);
+            padding: 2rem 1rem;
         }
         
         .header-content {
@@ -91,6 +85,7 @@
         
         .nav-links a:hover {
             color: var(--brand-blue);
+            font-weight: 600;
         }
         
         /* MAIN CONTENT */
@@ -100,22 +95,41 @@
             padding: 2rem 1rem;
         }
         
+        /* TITLE SECTION WITH BLUE ACCENT */
         .intro {
             text-align: center;
             margin-bottom: 3rem;
+            padding: 2rem 1rem;
+            background: linear-gradient(180deg, rgba(0, 119, 182, 0.05) 0%, transparent 100%);
+            border-radius: 8px;
         }
         
         .intro h2 {
-            font-size: 2.25rem;
+            font-size: 2.5rem;
             color: var(--brand-dark);
             margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .intro h2::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--brand-blue);
+            border-radius: 2px;
         }
         
         .intro p {
-            color: #666;
-            line-height: 1.6;
+            color: #555;
+            line-height: 1.7;
             max-width: 600px;
-            margin: 0 auto;
+            margin: 1.5rem auto 0;
+            font-size: 1.1rem;
         }
         
         /* MAP SECTION */
@@ -124,18 +138,19 @@
         }
         
         .map-section h3 {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             color: var(--brand-dark);
             margin-bottom: 1.5rem;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 0.5rem;
+            border-left: 4px solid var(--brand-blue);
+            padding-left: 1rem;
         }
         
         .map-wrapper {
             background-color: var(--brand-white);
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            border: 2px solid #d0d0d0;
+            border-radius: 12px;
             padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
         
         svg {
@@ -147,8 +162,8 @@
         .region-path {
             transition: all 0.3s ease;
             cursor: pointer;
-            stroke: #d0d0d0;
-            stroke-width: 1;
+            stroke: #c0c0c0;
+            stroke-width: 1.5;
             fill: #f0f0f0;
         }
         
@@ -156,7 +171,7 @@
             fill: var(--brand-blue);
             stroke: var(--brand-dark);
             stroke-width: 2;
-            opacity: 0.7;
+            opacity: 0.9;
         }
         
         .region-active {
@@ -164,6 +179,7 @@
             stroke: var(--brand-dark) !important;
             stroke-width: 2.5 !important;
             opacity: 1 !important;
+            filter: drop-shadow(0 2px 6px rgba(0, 119, 182, 0.4));
         }
         
         .map-label {
@@ -174,38 +190,46 @@
             fill: var(--brand-dark);
             paint-order: stroke;
             stroke: var(--brand-white);
-            stroke-width: 2px;
+            stroke-width: 2.5px;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
         
-        /* INFO PANEL */
+        /* INFO PANEL WITH BLUE TOP BORDER */
         .info-panel {
             background-color: var(--brand-white);
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            border-top: 4px solid var(--brand-blue);
+            border-radius: 12px;
             padding: 2rem;
             margin-bottom: 3rem;
             display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
         
         .info-panel.show {
             display: block;
+            animation: slideDown 0.4s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .region-code {
             font-size: 0.75rem;
             font-weight: bold;
-            background-color: var(--brand-light-gray);
+            background: linear-gradient(135deg, var(--brand-blue), #3399cc);
+            color: white;
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
-            color: #666;
             display: inline-block;
             margin-bottom: 0.75rem;
         }
         
         .region-title {
-            font-size: 1.75rem;
+            font-size: 1.85rem;
             color: var(--brand-dark);
             margin-bottom: 0.5rem;
         }
@@ -224,16 +248,16 @@
         }
         
         .stat-box {
-            background-color: var(--brand-light-gray);
+            background: linear-gradient(135deg, rgba(0, 119, 182, 0.05), rgba(0, 119, 182, 0.1));
             padding: 1rem;
             border-radius: 8px;
-            border: 1px solid #e0e0e0;
+            border-left: 3px solid var(--brand-blue);
         }
         
         .stat-label {
             font-size: 0.75rem;
             font-weight: bold;
-            color: #666;
+            color: var(--brand-blue);
             text-transform: uppercase;
             margin-bottom: 0.25rem;
         }
@@ -248,12 +272,14 @@
             color: #333;
             line-height: 1.7;
             margin-bottom: 1.5rem;
+            border-left: 3px solid var(--brand-blue);
+            padding-left: 1rem;
         }
         
         .back-btn {
-            background: transparent;
-            border: 2px solid var(--brand-dark);
-            color: var(--brand-dark);
+            background: white;
+            border: 2px solid var(--brand-blue);
+            color: var(--brand-blue);
             padding: 0.75rem 1.5rem;
             border-radius: 6px;
             cursor: pointer;
@@ -262,7 +288,7 @@
         }
         
         .back-btn:hover {
-            background-color: var(--brand-dark);
+            background: var(--brand-blue);
             color: white;
         }
         
@@ -295,12 +321,13 @@
         
         .footer-links a:hover {
             color: var(--brand-blue);
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
     
-    <!-- HEADER -->
+    <!-- HEADER WITH BLUE BORDER -->
     <header class="header">
         <div class="header-content">
             <div class="logo-container">
@@ -323,7 +350,7 @@
     <!-- MAIN CONTENT -->
     <main class="main">
         
-        <!-- INTRO -->
+        <!-- INTRO WITH BLUE GRADIENT BACKGROUND -->
         <section class="intro">
             <h2>Ghana's Living Heritage Archive</h2>
             <p>Explore the cultural stories, landscapes, and history of Ghana's 16 regions through an interactive map experience.</p>
