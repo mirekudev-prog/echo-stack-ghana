@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
 import os
+import json
 
 # Database imports
 from database import engine, get_db, Base
@@ -26,6 +27,15 @@ def read_root():
     if os.path.exists("index.html"):
         return FileResponse("index.html")
     return {"message": "Welcome to EchoStack"}
+
+@app.get("/manifest.json")
+def serve_manifest():
+    """Serve PWA manifest file"""
+    if os.path.exists("manifest.json"):
+        with open("manifest.json", "r") as f:
+            content = json.load(f)
+        return JSONResponse(content=content, media_type="application/json")
+    raise HTTPException(status_code=404, detail="Manifest not found")
 
 @app.get("/regions/{region_name}")
 def region_page(region_name: str):
