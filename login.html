@@ -97,18 +97,15 @@
     
     <div class="login-card">
         <!-- Logo Section - CENTERED AND FULL SIZE -->
-        <div class="logo-container">
-            <svg class="logo-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Top Dark Gray Part of S -->
-                <path d="M20 40C20 25 30 15 45 15H55V35H45C40 35 35 38 35 40C35 43 40 45 45 45H55C65 45 75 50 75 60H65C65 55 60 55 55 55H45C30 55 20 50 20 40Z" 
-                      fill="#1a1e29"/>
-                <!-- Bottom Blue Part of S -->
-                <path d="M45 45C50 45 55 43 55 40V55C55 55 45 55 45 45Z" 
-                      fill="#0077b6"/>
-            </svg>
-            <h1 class="logo-text">EchoStack</h1>
-            <p class="subtitle">Admin Management Portal</p>
-        </div>
+       <div class="logo-container">
+    <!-- REAL LOGO IMAGE -->
+    <img src="/echostack-logo.png" alt="EchoStack Logo" class="logo-icon mb-4">
+    
+    <!-- OR IF YOU WANT BOTH IMAGE + TEXT -->
+    <img src="/echostack-logo.png" alt="EchoStack Logo" class="logo-icon mb-2">
+    <h1 class="logo-text">EchoStack</h1>
+    <p class="subtitle">Admin Management Portal</p>
+</div>
         
         <!-- Security Question -->
         <div class="security-question">
@@ -122,7 +119,7 @@
                     Who are you? 😊
                 </label>
                 <input type="text" id="answer" 
-                       placeholder="Enter your designation"
+                       placeholder="Enter"
                        class="w-full p-3 border rounded-lg focus:outline-none"
                        required
                        autocomplete="off">
