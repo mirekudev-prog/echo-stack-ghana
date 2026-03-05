@@ -11,25 +11,18 @@
         :root {
             --brand-dark: #1a1e29 !important;
             --brand-blue: #0077b6 !important;
-            --brand-light-gray: #f5f5f5 !important;
-            --brand-white: #ffffff !important;
         }
         
         body {
             font-family: 'Georgia', serif !important;
-            background-color: var(--brand-white) !important;
+            background-color: #ffffff !important;
             color: var(--brand-dark) !important;
         }
         
-        .brand-text { color: var(--brand-dark) !important; }
-        .brand-blue { color: var(--brand-blue) !important; }
         .btn-primary { 
             background-color: var(--brand-blue) !important; 
             color: white !important; 
-        }
-        .btn-danger { 
-            background-color: #dc2626 !important; 
-            color: white !important; 
+            border: none !important;
         }
         .btn-secondary { 
             border: 2px solid var(--brand-dark) !important;
@@ -39,109 +32,66 @@
         input, textarea, select {
             border-color: #d0d0d0 !important;
             color: var(--brand-dark) !important;
+            background: white !important;
         }
         input:focus, textarea:focus, select:focus {
             outline: none !important;
             border-color: var(--brand-blue) !important;
-            box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.1) !important;
         }
     </style>
 </head>
 <body class="antialiased">
     
-   <!-- TOP NAVIGATION BAR (Updated) -->
-<header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <svg width="36" height="36" viewBox="0 0 60 40" fill="none">
-                <path d="M5 20C5 12 10 5 25 5H35V15H25C20 15 15 17 15 20C15 23 20 25 25 25H35C45 25 55 30 55 40H45C45 35 40 35 35 35H25C10 35 5 28 5 20Z" fill="#1a1e29"/>
-                <path d="M25 25C30 25 35 23 35 20V30C35 30 25 30 25 25Z" fill="#0077b6"/>
-            </svg>
-            <h1 class="text-2xl font-bold brand-text">EchoStack Admin</h1>
+    <!-- NAVIGATION -->
+    <header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <svg width="36" height="36" viewBox="0 0 60 40" fill="none">
+                    <path d="M5 20C5 12 10 5 25 5H35V15H25C20 15 15 17 15 20C15 23 20 25 25 25H35C45 25 55 30 55 40H45C45 35 40 35 35 35H25C10 35 5 28 5 20Z" fill="#1a1e29"/>
+                    <path d="M25 25C30 25 35 23 35 20V30C35 30 25 30 25 25Z" fill="#0077b6"/>
+                </svg>
+                <h1 class="text-2xl font-bold">EchoStack Admin</h1>
+            </div>
+            <nav class="flex gap-3 items-center">
+                <a href="/" target="_blank" class="px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">🌍 View Site ↗</a>
+                <button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 text-sm font-medium">📊 Dashboard</button>
+                <button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
+                <button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 text-sm font-medium">🚪 Logout</button>
+            </nav>
         </div>
-        
-        <!-- NAVIGATION BUTTONS WITH LIVE VIEW -->
-        <nav class="flex gap-3 items-center">
-            <a href="/" target="_blank" class="px-3 py-2 rounded hover:bg-blue-50 brand-text text-sm font-medium flex items-center gap-2" title="Opens in new tab">
-                🌍 View Live Site
-            </a>
-            <button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 brand-text text-sm font-medium">📊 Dashboard</button>
-            <button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
-            <button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 hover:bg-red-50 text-sm font-medium">🚪 Logout</button>
-        </nav>
-    </div>
-</header>
+    </header>
 
-<!-- NEW SECTION: LIVE SITE PREVIEW (Add this AFTER the header, BEFORE main content) -->
-<section id="preview-section" class="mb-8 hidden">
-    <div class="bg-gradient-to-r from-[#0077b6] to-[#3399cc] p-6 rounded-lg text-white shadow-lg">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="text-xl font-bold mb-2"> Live Site Preview Mode</h2>
-                <p class="text-blue-100 text-sm">See exactly what visitors see on your website. Click a region below to test interactions.</p>
-            </div>
-            <button onclick="openSitePreview()" class="bg-white text-[#0077b6] px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition">
-                🔗 Open Full Website ↗
-            </button>
-        </div>
-        
-        <!-- QUICK REGION PREVIEW CARDS -->
-        <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white/10 backdrop-blur p-4 rounded-lg" onclick="window.open('/#ashanti', '_blank')">
-                <p class="text-xs text-blue-100 uppercase mb-1">Ashanti Region</p>
-                <p class="font-semibold">Kumasi</p>
-                <p class="text-xs mt-1 opacity-80">Click to preview →</p>
-            </div>
-            <div class="bg-white/10 backdrop-blur p-4 rounded-lg" onclick="window.open('/#eastern', '_blank')">
-                <p class="text-xs text-blue-100 uppercase mb-1">Eastern Region</p>
-                <p class="font-semibold">Koforidua</p>
-                <p class="text-xs mt-1 opacity-80">Click to preview →</p>
-            </div>
-            <div class="bg-white/10 backdrop-blur p-4 rounded-lg" onclick="window.open('/#volta', '_blank')">
-                <p class="text-xs text-blue-100 uppercase mb-1">Volta Region</p>
-                <p class="font-semibold">Ho</p>
-                <p class="text-xs mt-1 opacity-80">Click to preview →</p>
-            </div>
-            <div class="bg-white/10 backdrop-blur p-4 rounded-lg" onclick="window.open('/#greater-accra', '_blank')">
-                <p class="text-xs text-blue-100 uppercase mb-1">Greater Accra</p>
-                <p class="font-semibold">Accra</p>
-                <p class="text-xs mt-1 opacity-80">Click to preview →</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-    <!-- MAIN CONTENT AREA -->
+    <!-- MAIN CONTENT -->
     <main class="max-w-7xl mx-auto px-4 py-8">
         
-        <!-- SECTION 1: DASHBOARD OVERVIEW -->
+        <!-- DASHBOARD SECTION -->
         <section id="dashboard-section" class="space-y-8">
-            <!-- Stats Cards -->
+            <!-- Stats -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Total Regions</p>
-                    <p class="text-3xl font-bold brand-text" id="stat-total">0</p>
+                    <p class="text-3xl font-bold" id="stat-total">0</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">With Audio</p>
-                    <p class="text-3xl font-bold brand-text" id="stat-audio">0</p>
+                    <p class="text-3xl font-bold" id="stat-audio">0</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">With Images</p>
-                    <p class="text-3xl font-bold brand-text" id="stat-images">0</p>
+                    <p class="text-3xl font-bold" id="stat-images">0</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Database Size</p>
-                    <p class="text-2xl font-bold brand-text" id="stat-size">— MB</p>
+                    <p class="text-2xl font-bold" id="stat-size">— MB</p>
                 </div>
             </div>
 
             <!-- Quick Actions -->
             <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                <h2 class="text-xl font-bold brand-text mb-4">⚡ Quick Actions</h2>
+                <h2 class="text-xl font-bold mb-4">⚡ Quick Actions</h2>
                 <div class="flex flex-wrap gap-4">
                     <button onclick="showSection('create')" class="btn-primary px-6 py-3 rounded-lg font-semibold">➕ Create New Region</button>
-                    <button onclick="exportData()" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📤 Export All Data</button>
+                    <button onclick="exportData()" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📤 Export Data</button>
                     <button onclick="document.getElementById('import-file').click()" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📥 Import Data</button>
                     <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
                 </div>
@@ -150,7 +100,7 @@
             <!-- Regions Table -->
             <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                 <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-                    <h2 class="text-xl font-bold brand-text">📍 All Regions</h2>
+                    <h2 class="text-xl font-bold">📍 All Regions</h2>
                     <input type="text" id="search-regions" placeholder="Search..." class="p-2 border rounded-lg text-sm w-64">
                 </div>
                 <div class="overflow-x-auto">
@@ -166,18 +116,18 @@
                             </tr>
                         </thead>
                         <tbody id="regions-table-body" class="divide-y divide-gray-200">
-                            <!-- Will be filled by JavaScript -->
+                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- SECTION 2: CREATE/EDIT REGION FORM -->
+        <!-- CREATE/EDIT FORM SECTION -->
         <section id="create-section" class="hidden">
             <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-4xl mx-auto">
                 <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-2xl font-bold brand-text" id="form-title">Add New Region</h2>
+                    <h2 class="text-2xl font-bold" id="form-title">Add New Region</h2>
                     <button onclick="showSection('dashboard')" class="text-gray-500 hover:text-black text-2xl">×</button>
                 </div>
                 
@@ -187,110 +137,96 @@
                     <!-- Basic Info -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium mb-2 brand-text">Region Name *</label>
+                            <label class="block text-sm font-medium mb-2">Region Name *</label>
                             <input type="text" id="reg-name" required class="w-full p-3 border rounded-lg" placeholder="e.g., Ashanti">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2 brand-text">Capital City *</label>
+                            <label class="block text-sm font-medium mb-2">Capital City *</label>
                             <input type="text" id="reg-capital" required class="w-full p-3 border rounded-lg" placeholder="e.g., Kumasi">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2 brand-text">Population</label>
+                            <label class="block text-sm font-medium mb-2">Population</label>
                             <input type="text" id="reg-population" class="w-full p-3 border rounded-lg" placeholder="e.g., 5,440,463">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2 brand-text">Terrain/Elevation</label>
-                            <input type="text" id="reg-terrain" class="w-full p-3 border rounded-lg" placeholder="e.g., Highland (200-600m)">
+                            <label class="block text-sm font-medium mb-2">Terrain</label>
+                            <input type="text" id="reg-terrain" class="w-full p-3 border rounded-lg" placeholder="e.g., Highland">
                         </div>
                     </div>
 
-                    <!-- Content & Category -->
+                    <!-- Description -->
                     <div>
-                        <label class="block text-sm font-medium mb-2 brand-text">Heritage Description *</label>
-                        <textarea id="reg-description" rows="5" required class="w-full p-3 border rounded-lg" placeholder="Write about this region's cultural significance, history, landmarks..."></textarea>
+                        <label class="block text-sm font-medium mb-2">Heritage Description *</label>
+                        <textarea id="reg-description" rows="5" required class="w-full p-3 border rounded-lg" placeholder="Write about this region..."></textarea>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Category & Tags -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium mb-2 brand-text">Content Category</label>
+                            <label class="block text-sm font-medium mb-2">Category</label>
                             <select id="reg-category" class="w-full p-3 border rounded-lg">
                                 <option value="">Select...</option>
-                                <option value="Culture">Culture & Traditions</option>
-                                <option value="History">Historical Sites</option>
-                                <option value="Nature">Natural Landscapes</option>
-                                <option value="Tourism">Tourist Attractions</option>
-                                <option value="Food">Local Cuisine</option>
-                                <option value="Music">Music & Arts</option>
+                                <option value="Culture">Culture</option>
+                                <option value="History">History</option>
+                                <option value="Nature">Nature</option>
+                                <option value="Tourism">Tourism</option>
+                                <option value="Food">Food</option>
+                                <option value="Music">Music</option>
                             </select>
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium mb-2 brand-text">Tags (comma-separated)</label>
-                            <input type="text" id="reg-tags" class="w-full p-3 border rounded-lg" placeholder="festivals, kings, music, gold">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Tags (comma-separated)</label>
+                            <input type="text" id="reg-tags" class="w-full p-3 border rounded-lg" placeholder="festivals, kings, gold">
                         </div>
                     </div>
 
                     <!-- Media Uploads -->
                     <div class="border-t pt-6">
-                        <h3 class="text-lg font-bold brand-text mb-4">📸 Images & Media</h3>
+                        <h3 class="text-lg font-bold mb-4">📸 Images & Audio</h3>
                         
                         <!-- Hero Image -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2 brand-text">Hero Image (Main Display)</label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-brand-blue" onclick="document.getElementById('hero-upload').click()">
-                                <p class="text-gray-600 text-sm">Click to upload or drag image here</p>
-                                <p class="text-xs text-gray-500 mt-1">JPG, PNG, GIF up to 5MB</p>
-                                <input type="file" id="hero-upload" accept="image/*" class="hidden" onchange="uploadImage(this, 'hero')">
+                            <label class="block text-sm font-medium mb-2">Hero Image URL</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="reg-hero-image" class="flex-1 p-3 border rounded-lg" placeholder="/uploads/image.jpg">
+                                <button type="button" onclick="uploadFile('hero')" class="btn-secondary px-4 py-3 rounded-lg">📁 Upload</button>
                             </div>
-                            <input type="hidden" id="reg-hero-image">
-                            <div id="hero-preview" class="mt-2 hidden">
-                                <img id="hero-img-preview" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg border">
+                            <div id="hero-preview" class="hidden mt-2">
+                                <img id="preview-img" src="" class="w-full h-48 object-cover rounded border">
                                 <button type="button" onclick="removeHeroImage()" class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-xs">Remove</button>
                             </div>
                         </div>
 
                         <!-- Gallery Images -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2 brand-text">Additional Images (Upload Multiple)</label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-brand-blue" onclick="document.getElementById('gallery-upload').click()">
-                                <p class="text-gray-600 text-sm">Click to upload additional images</p>
-                                <p class="text-xs text-gray-500 mt-1">Multiple files allowed</p>
-                                <input type="file" id="gallery-upload" accept="image/*" multiple class="hidden" onchange="uploadGallery(this)">
-                            </div>
-                            <input type="hidden" id="reg-gallery-images">
-                            <div id="gallery-list" class="mt-2 space-y-2"></div>
+                            <label class="block text-sm font-medium mb-2">Gallery Images (URLs)</label>
+                            <textarea id="reg-gallery-images" rows="2" class="w-full p-3 border rounded-lg" placeholder="/uploads/img1.jpg, /uploads/img2.jpg"></textarea>
                         </div>
 
                         <!-- Audio Files -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2 brand-text">🎵 Audio Recordings (Oral Histories)</label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-brand-blue" onclick="document.getElementById('audio-upload').click()">
-                                <p class="text-gray-600 text-sm">Click to upload audio files</p>
-                                <p class="text-xs text-gray-500 mt-1">MP3, WAV, OGG - record elders, storytellers, songs</p>
-                                <input type="file" id="audio-upload" accept="audio/*" multiple class="hidden" onchange="uploadAudio(this)">
-                            </div>
-                            <input type="hidden" id="reg-audio-files">
-                            <div id="audio-list" class="mt-2 space-y-2"></div>
+                            <label class="block text-sm font-medium mb-2">🎵 Audio Recordings (URLs)</label>
+                            <textarea id="reg-audio-files" rows="2" class="w-full p-3 border rounded-lg" placeholder="/uploads/story1.mp3, /uploads/song2.wav"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Upload audio files via button below</p>
+                            <button type="button" onclick="uploadFile('audio')" class="btn-secondary px-4 py-2 rounded-lg mt-2">📁 Upload Audio</button>
                         </div>
                     </div>
 
                     <!-- Additional Info -->
-                    <div class="border-t pt-6">
-                        <h3 class="text-lg font-bold brand-text mb-4">ℹ️ Additional Information</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium mb-2 brand-text">Source Reference</label>
-                                <input type="text" id="reg-source" class="w-full p-3 border rounded-lg" placeholder="Where did you get this information?">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2 brand-text">Brief Overview</label>
-                                <input type="text" id="reg-overview" class="w-full p-3 border rounded-lg" placeholder="Short summary for cards">
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Source Reference</label>
+                            <input type="text" id="reg-source" class="w-full p-3 border rounded-lg" placeholder="Where did you find this info?">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Brief Overview</label>
+                            <input type="text" id="reg-overview" class="w-full p-3 border rounded-lg" placeholder="Short summary">
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
+                    <!-- Submit Button -->
                     <div class="flex gap-4 pt-6 border-t">
-                        <button type="submit" class="btn-primary flex-1 py-3 rounded-lg font-bold">💾 Save Region</button>
+                        <button type="submit" class="btn-primary flex-1 py-3 rounded-lg font-bold" id="save-btn">💾 Save Region</button>
                         <button type="button" onclick="showSection('dashboard')" class="btn-secondary flex-1 py-3 rounded-lg font-bold">Cancel</button>
                     </div>
                 </form>
@@ -299,19 +235,10 @@
 
     </main>
 
-    <!-- FOOTER -->
-    <footer class="border-t border-gray-200 py-6 mt-12 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-sm brand-text">&copy; 2026 EchoStack Admin. Full Control Panel.</p>
-        </div>
-    </footer>
+    <!-- NOTIFICATION -->
+    <div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50"></div>
 
-    <!-- NOTIFICATION TOAST -->
-    <div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50">
-        <!-- Will be filled by JavaScript -->
-    </div>
-
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT -->
     <script>
         const API_URL = '/api';
         let allRegions = [];
@@ -322,55 +249,47 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadStats();
             loadRegions();
-            
-            // Set form submit handler
-            document.getElementById('region-form').addEventListener('submit', saveRegion);
+            document.getElementById('region-form').addEventListener('submit', handleSave);
         });
 
         // ===============================
         // NAVIGATION
         // ===============================
         function showSection(sectionId) {
-            document.getElementById('dashboard-section').classList.add('hidden');
-            document.getElementById('create-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.toggle('hidden', sectionId !== 'dashboard');
+            document.getElementById('create-section').classList.toggle('hidden', sectionId !== 'create');
             
             if (sectionId === 'dashboard') {
-                document.getElementById('dashboard-section').classList.remove('hidden');
                 loadRegions();
-            } else if (sectionId === 'create') {
-                document.getElementById('create-section').classList.remove('hidden');
+                loadStats();
+            } else {
                 resetForm();
             }
         }
 
         // ===============================
-        // STATISTICS
+        // LOAD DATA
         // ===============================
         async function loadStats() {
             try {
                 const response = await fetch(`${API_URL}/stats`);
                 const stats = await response.json();
-                
                 document.getElementById('stat-total').innerText = stats.total_regions || 0;
                 document.getElementById('stat-audio').innerText = stats.with_audio || 0;
                 document.getElementById('stat-images').innerText = stats.with_images || 0;
                 document.getElementById('stat-size').innerText = `${stats.database_size_mb || 0} MB`;
             } catch (error) {
-                console.error('Failed to load stats:', error);
+                console.error('Stats error:', error);
             }
         }
 
-        // ===============================
-        // LOAD REGIONS
-        // ===============================
         async function loadRegions() {
             try {
                 const response = await fetch(`${API_URL}/regions`);
                 allRegions = await response.json();
                 renderTable(allRegions);
-                document.getElementById('stat-total').innerText = allRegions.length;
             } catch (error) {
-                console.error('Failed to load regions:', error);
+                console.error('Load error:', error);
                 showNotification('Failed to load regions', 'error');
             }
         }
@@ -389,27 +308,26 @@
                 const hasImages = region.gallery_images && region.gallery_images.length > 0;
                 
                 const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50 transition';
+                row.className = 'hover:bg-gray-50 transition cursor-pointer';
+                row.onclick = (e) => {
+                    if (!e.target.closest('button')) editRegion(region.id);
+                };
+                
                 row.innerHTML = `
                     <td class="px-4 py-4 text-sm text-gray-600">${index + 1}</td>
-                    <td class="px-4 py-4"><span class="font-semibold brand-text">${region.name}</span></td>
+                    <td class="px-4 py-4"><span class="font-semibold">${region.name}</span></td>
                     <td class="px-4 py-4 text-sm text-gray-600">${region.capital || '—'}</td>
                     <td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">${region.category || 'Uncategorized'}</span></td>
-                    <td class="px-4 py-4 text-sm">
-                        ${hasImages ? '🖼️' : ''} ${hasAudio ? '🎵' : ''}
-                    </td>
+                    <td class="px-4 py-4 text-sm">${hasImages ? '🖼️ ' : ''}${hasAudio ? '🎵' : ''}</td>
                     <td class="px-4 py-4">
                         <button onclick="editRegion(${region.id})" class="mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button>
-                        <button onclick="deleteRegion(${region.id}, '${region.name}')" class="text-red-600 hover:underline text-sm">🗑️ Delete</button>
+                        <button onclick="deleteRegion(${region.id}, '${region.name}') " class="text-red-600 hover:underline text-sm">🗑️ Delete</button>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        // ===============================
-        // SEARCH FUNCTIONALITY
-        // ===============================
         document.getElementById('search-regions')?.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = allRegions.filter(r => 
@@ -427,9 +345,8 @@
             document.getElementById('region-form').reset();
             document.getElementById('region-id').value = '';
             document.getElementById('form-title').innerText = 'Add New Region';
-            hideHeroPreview();
-            document.getElementById('gallery-list').innerHTML = '';
-            document.getElementById('audio-list').innerHTML = '';
+            document.getElementById('save-btn').innerText = '💾 Save Region';
+            document.getElementById('hero-preview').classList.add('hidden');
         }
 
         function editRegion(id) {
@@ -437,6 +354,7 @@
             if (!region) return;
             
             document.getElementById('form-title').innerText = `Edit: ${region.name}`;
+            document.getElementById('save-btn').innerText = '💾 Update Region';
             document.getElementById('region-id').value = region.id;
             document.getElementById('reg-name').value = region.name;
             document.getElementById('reg-capital').value = region.capital || '';
@@ -448,26 +366,22 @@
             document.getElementById('reg-source').value = region.source || '';
             document.getElementById('reg-overview').value = region.overview || '';
             document.getElementById('reg-hero-image').value = region.hero_image || '';
+            document.getElementById('reg-gallery-images').value = Array.isArray(region.gallery_images) ? region.gallery_images.join(', ') : region.gallery_images || '';
+            document.getElementById('reg-audio-files').value = Array.isArray(region.audio_files) ? region.audio_files.join(', ') : region.audio_files || '';
             
             if (region.hero_image) showHeroPreview(region.hero_image);
-            if (Array.isArray(region.gallery_images) && region.gallery_images.length > 0) {
-                document.getElementById('reg-gallery-images').value = region.gallery_images.join(', ');
-                renderGalleryList(region.gallery_images);
-            }
-            if (Array.isArray(region.audio_files) && region.audio_files.length > 0) {
-                document.getElementById('reg-audio-files').value = region.audio_files.join(', ');
-                renderAudioList(region.audio_files);
-            }
-            
             showSection('create');
         }
 
-        async function saveRegion(e) {
+        async function handleSave(e) {
             e.preventDefault();
             
             const regionId = document.getElementById('region-id').value;
-            const formData = new FormData();
+            const submitBtn = document.getElementById('save-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Saving...';
             
+            const formData = new FormData();
             formData.append('name', document.getElementById('reg-name').value);
             formData.append('capital', document.getElementById('reg-capital').value);
             formData.append('population', document.getElementById('reg-population').value);
@@ -481,209 +395,110 @@
             formData.append('source', document.getElementById('reg-source').value);
             formData.append('overview', document.getElementById('reg-overview').value);
             
-            const method = regionId ? 'PUT' : 'POST';
-            const url = regionId ? `${API_URL}/regions/${regionId}` : `${API_URL}/regions`;
-            
             try {
+                const method = regionId ? 'PUT' : 'POST';
+                const url = regionId ? `${API_URL}/regions/${regionId}` : `${API_URL}/regions`;
+                
                 const response = await fetch(url, {
                     method: method,
                     body: formData
                 });
                 
-                if (!response.ok) throw new Error('Save failed');
+                const data = await response.json();
                 
-                showNotification('✅ Region saved successfully!', 'success');
-                loadRegions();
-                loadStats();
-                showSection('dashboard');
+                if (response.ok && data.success) {
+                    showNotification(data.message || 'Saved successfully!', 'success');
+                    loadRegions();
+                    loadStats();
+                    showSection('dashboard');
+                } else {
+                    throw new Error(data.detail || 'Save failed');
+                }
             } catch (error) {
                 console.error('Save error:', error);
-                showNotification('❌ Failed to save region', 'error');
+                showNotification(`❌ ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = regionId ? '💾 Update Region' : '💾 Save Region';
             }
         }
 
         async function deleteRegion(id, name) {
-            if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) return;
+            if (!confirm(`Delete "${name}"? This CANNOT be undone.`)) return;
             
             try {
-                const response = await fetch(`${API_URL}/regions/${id}`, {
-                    method: 'DELETE'
-                });
+                const response = await fetch(`${API_URL}/regions/${id}`, { method: 'DELETE' });
+                const data = await response.json();
                 
-                if (!response.ok) throw new Error('Delete failed');
-                
-                showNotification('✅ Region deleted successfully!', 'success');
-                loadRegions();
-                loadStats();
+                if (response.ok && data.success) {
+                    showNotification('✅ Deleted successfully!', 'success');
+                    loadRegions();
+                    loadStats();
+                } else {
+                    throw new Error('Delete failed');
+                }
             } catch (error) {
-                console.error('Delete error:', error);
-                showNotification('❌ Failed to delete region', 'error');
+                showNotification('❌ Delete failed', 'error');
             }
         }
 
         // ===============================
-        // MEDIA UPLOADS
+        // FILE UPLOADS
         // ===============================
-        async function uploadImage(input, type) {
-            const file = input.files[0];
-            if (!file) return;
+        async function uploadFile(type) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = type === 'hero' ? 'image/*' : 'audio/*';
             
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('filename', file.name);
-            
-            try {
-                const endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/image';
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    body: formData
-                });
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
                 
-                const data = await response.json();
-                if (data.success) {
-                    if (type === 'hero') {
-                        document.getElementById('reg-hero-image').value = data.url;
-                        showHeroPreview(data.url);
-                    } else {
-                        appendToGallery(data.url);
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('filename', file.name);
+                
+                try {
+                    const endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/audio';
+                    const response = await fetch(endpoint, { method: 'POST', body: formData });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        if (type === 'hero') {
+                            document.getElementById('reg-hero-image').value = data.url;
+                            showHeroPreview(data.url);
+                        } else {
+                            const currentValue = document.getElementById('reg-audio-files').value;
+                            const newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
+                            document.getElementById('reg-audio-files').value = newValue;
+                        }
+                        showNotification('✅ Uploaded!', 'success');
                     }
-                    showNotification('✅ Image uploaded!', 'success');
+                } catch (error) {
+                    showNotification('❌ Upload failed', 'error');
                 }
-            } catch (error) {
-                showNotification('❌ Upload failed', 'error');
-            }
-        }
-
-        async function uploadGallery(input) {
-            const files = input.files;
-            if (files.length === 0) return;
+            };
             
-            for (const file of files) {
-                await uploadImageFromElement(file, 'gallery');
-            }
-            input.value = ''; // Reset
-        }
-
-        async function uploadAudio(input) {
-            const files = input.files;
-            if (files.length === 0) return;
-            
-            for (const file of files) {
-                await uploadAudioFile(file);
-            }
-            input.value = ''; // Reset
-        }
-
-        async function uploadImageFromElement(file, type) {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('filename', file.name);
-            
-            try {
-                const response = await fetch('/api/upload/image', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    appendToGallery(data.url);
-                }
-            } catch (error) {
-                console.error('Gallery upload error:', error);
-            }
-        }
-
-        async function uploadAudioFile(file) {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('filename', file.name);
-            
-            try {
-                const response = await fetch('/api/upload/audio', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    appendToAudioList(data.url);
-                }
-            } catch (error) {
-                console.error('Audio upload error:', error);
-            }
+            input.click();
         }
 
         function showHeroPreview(url) {
-            document.getElementById('hero-img-preview').src = url;
+            document.getElementById('preview-img').src = url;
             document.getElementById('hero-preview').classList.remove('hidden');
         }
 
-        function hideHeroPreview() {
-            document.getElementById('hero-preview').classList.add('hidden');
-            document.getElementById('reg-hero-image').value = '';
-        }
-
         function removeHeroImage() {
-            hideHeroPreview();
-        }
-
-        function appendToGallery(url) {
-            const current = document.getElementById('reg-gallery-images').value.split(',').filter(u => u.trim());
-            current.push(url);
-            document.getElementById('reg-gallery-images').value = current.join(',');
-            renderGalleryList(current);
-        }
-
-        function renderGalleryList(urls) {
-            const container = document.getElementById('gallery-list');
-            container.innerHTML = urls.map((url, i) => `
-                <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <img src="${url}" class="h-12 w-12 object-cover rounded">
-                    <button type="button" onclick="removeGalleryItem(${i})" class="text-red-600 text-sm ml-2">× Remove</button>
-                </div>
-            `).join('');
-        }
-
-        function removeGalleryItem(index) {
-            const urls = document.getElementById('reg-gallery-images').value.split(',').filter(u => u.trim());
-            urls.splice(index, 1);
-            document.getElementById('reg-gallery-images').value = urls.join(',');
-            renderGalleryList(urls);
-        }
-
-        function appendToAudioList(url) {
-            const current = document.getElementById('reg-audio-files').value.split(',').filter(u => u.trim());
-            current.push(url);
-            document.getElementById('reg-audio-files').value = current.join(',');
-            renderAudioList(current);
-        }
-
-        function renderAudioList(urls) {
-            const container = document.getElementById('audio-list');
-            container.innerHTML = urls.map((url, i) => `
-                <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <audio controls src="${url}" class="h-8 mr-2"></audio>
-                    <button type="button" onclick="removeAudioItem(${i})" class="text-red-600 text-sm">× Remove</button>
-                </div>
-            `).join('');
-        }
-
-        function removeAudioItem(index) {
-            const urls = document.getElementById('reg-audio-files').value.split(',').filter(u => u.trim());
-            urls.splice(index, 1);
-            document.getElementById('reg-audio-files').value = urls.join(',');
-            renderAudioList(urls);
+            document.getElementById('reg-hero-image').value = '';
+            document.getElementById('hero-preview').classList.add('hidden');
         }
 
         // ===============================
-        // EXPORT/IMPORT DATA
+        // EXPORT/IMPORT
         // ===============================
         async function exportData() {
             try {
-                const response = await fetch(`${API_URL}/export/json`);
+                const response = await fetch(`${API_URL}/regions`);
                 const data = await response.json();
-                
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -691,8 +506,7 @@
                 a.download = `echostack-backup-${new Date().toISOString().split('T')[0]}.json`;
                 a.click();
                 URL.revokeObjectURL(url);
-                
-                showNotification('✅ Data exported successfully!', 'success');
+                showNotification('✅ Exported!', 'success');
             } catch (error) {
                 showNotification('❌ Export failed', 'error');
             }
@@ -706,23 +520,18 @@
             reader.onload = async (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    
-                    const response = await fetch(`${API_URL}/import/json`, {
+                    const response = await fetch('/api/import/json', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(data)
                     });
-                    
-                    const result = await response.json();
-                    showNotification(`✅ Imported ${result.imported} regions!`, 'success');
+                    showNotification('✅ Imported!', 'success');
                     loadRegions();
-                    loadStats();
                 } catch (error) {
-                    showNotification('❌ Invalid JSON file', 'error');
+                    showNotification('❌ Invalid file', 'error');
                 }
             };
             reader.readAsText(file);
-            input.value = '';
         }
 
         // ===============================
@@ -739,13 +548,10 @@
         // ===============================
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
-            notification.className = `fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white`;
+            notification.className = `fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
             notification.innerText = message;
             notification.classList.remove('hidden');
-            
-            setTimeout(() => {
-                notification.classList.add('hidden');
-            }, 3000);
+            setTimeout(() => notification.classList.add('hidden'), 3000);
         }
     </script>
 </body>
