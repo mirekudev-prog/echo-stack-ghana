@@ -49,23 +49,67 @@
 </head>
 <body class="antialiased">
     
-    <!-- TOP NAVIGATION BAR -->
-    <header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <svg width="36" height="36" viewBox="0 0 60 40" fill="none">
-                    <path d="M5 20C5 12 10 5 25 5H35V15H25C20 15 15 17 15 20C15 23 20 25 25 25H35C45 25 55 30 55 40H45C45 35 40 35 35 35H25C10 35 5 28 5 20Z" fill="#1a1e29"/>
-                    <path d="M25 25C30 25 35 23 35 20V30C35 30 25 30 25 25Z" fill="#0077b6"/>
-                </svg>
-                <h1 class="text-2xl font-bold brand-text">EchoStack Admin</h1>
-            </div>
-            <nav class="flex gap-4 items-center">
-                <button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 brand-text text-sm font-medium">📊 Dashboard</button>
-                <button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
-                <button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 hover:bg-red-50 text-sm font-medium">🚪 Logout</button>
-            </nav>
+   <!-- TOP NAVIGATION BAR (Updated) -->
+<header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <svg width="36" height="36" viewBox="0 0 60 40" fill="none">
+                <path d="M5 20C5 12 10 5 25 5H35V15H25C20 15 15 17 15 20C15 23 20 25 25 25H35C45 25 55 30 55 40H45C45 35 40 35 35 35H25C10 35 5 28 5 20Z" fill="#1a1e29"/>
+                <path d="M25 25C30 25 35 23 35 20V30C35 30 25 30 25 25Z" fill="#0077b6"/>
+            </svg>
+            <h1 class="text-2xl font-bold brand-text">EchoStack Admin</h1>
         </div>
-    </header>
+        
+        <!-- NAVIGATION BUTTONS WITH LIVE VIEW -->
+        <nav class="flex gap-3 items-center">
+            <a href="/" target="_blank" class="px-3 py-2 rounded hover:bg-blue-50 brand-text text-sm font-medium flex items-center gap-2" title="Opens in new tab">
+                🌍 View Live Site
+            </a>
+            <button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 brand-text text-sm font-medium">📊 Dashboard</button>
+            <button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
+            <button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 hover:bg-red-50 text-sm font-medium">🚪 Logout</button>
+        </nav>
+    </div>
+</header>
+
+<!-- NEW SECTION: LIVE SITE PREVIEW (Add this AFTER the header, BEFORE main content) -->
+<section id="preview-section" class="mb-8 hidden">
+    <div class="bg-gradient-to-r from-[#0077b6] to-[#3399cc] p-6 rounded-lg text-white shadow-lg">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-xl font-bold mb-2"> Live Site Preview Mode</h2>
+                <p class="text-blue-100 text-sm">See exactly what visitors see on your website. Click a region below to test interactions.</p>
+            </div>
+            <button onclick="openSitePreview()" class="bg-white text-[#0077b6] px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition">
+                🔗 Open Full Website ↗
+            </button>
+        </div>
+        
+        <!-- QUICK REGION PREVIEW CARDS -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white/10 backdrop-blur p-4 rounded-lg" onclick="window.open('/#ashanti', '_blank')">
+                <p class="text-xs text-blue-100 uppercase mb-1">Ashanti Region</p>
+                <p class="font-semibold">Kumasi</p>
+                <p class="text-xs mt-1 opacity-80">Click to preview →</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur p-4 rounded-lg" onclick="window.open('/#eastern', '_blank')">
+                <p class="text-xs text-blue-100 uppercase mb-1">Eastern Region</p>
+                <p class="font-semibold">Koforidua</p>
+                <p class="text-xs mt-1 opacity-80">Click to preview →</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur p-4 rounded-lg" onclick="window.open('/#volta', '_blank')">
+                <p class="text-xs text-blue-100 uppercase mb-1">Volta Region</p>
+                <p class="font-semibold">Ho</p>
+                <p class="text-xs mt-1 opacity-80">Click to preview →</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur p-4 rounded-lg" onclick="window.open('/#greater-accra', '_blank')">
+                <p class="text-xs text-blue-100 uppercase mb-1">Greater Accra</p>
+                <p class="font-semibold">Accra</p>
+                <p class="text-xs mt-1 opacity-80">Click to preview →</p>
+            </div>
+        </div>
+    </div>
+</section>
 
     <!-- MAIN CONTENT AREA -->
     <main class="max-w-7xl mx-auto px-4 py-8">
