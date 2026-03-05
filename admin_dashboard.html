@@ -15,6 +15,7 @@
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1a1e29">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="EchoStack">
     
     <!-- Favicon & Icons -->
@@ -260,7 +261,7 @@
     <!-- NOTIFICATION -->
     <div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50"></div>
 
-    <!-- COMPLETE JAVASCRIPT (FIXED) -->
+    <!-- COMPLETE JAVASCRIPT (FIXED TYPE CHECKING) -->
     <script>
         console.log('✅ Admin Dashboard Script Loaded');
         
@@ -273,16 +274,27 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOM Ready - Loading data...');
             
-            // Initial data load
             loadStats();
             loadRegions();
             
-            // Attach form submit handler
             const form = document.getElementById('region-form');
             if (form) {
                 form.addEventListener('submit', handleSave);
             }
         });
+
+        // ===============================
+        // HELPER FUNCTION - SAFE SPLIT
+        // ===============================
+        function safeSplit(value) {
+            // Safely handle string, array, null, undefined
+            if (!value) return [];
+            if (Array.isArray(value)) return value.filter(x => x && x.trim());
+            if (typeof value === 'string') {
+                return value.split(',').map(s => s.trim()).filter(s => s);
+            }
+            return [];
+        }
 
         // ===============================
         // NAVIGATION
@@ -325,7 +337,7 @@
                 }
                 
                 allRegions = await response.json();
-                console.log(`✅ Loaded ${allRegions.length} regions`);
+                console.log(`✅ Loaded ${allRegions.length} regions`, allRegions);
                 
                 renderTable(allRegions);
             } catch (error) {
@@ -345,9 +357,12 @@
             }
             
             regions.forEach((region, index) => {
-                // Ensure we have valid data
-                const hasAudio = region.audio_files && region.audio_files.split(',').filter(x => x.trim()).length > 0;
-                const hasImages = region.gallery_images && region.gallery_images.split(',').filter(x => x.trim()).length > 0;
+                // ✓✓✓ FIXED: Use safeSplit helper instead of .split() directly ✓✓✓
+                const galleryArray = safeSplit(region.gallery_images);
+                const audioArray = safeSplit(region.audio_files);
+                
+                const hasAudio = audioArray.length > 0;
+                const hasImages = galleryArray.length > 0;
                 
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50 transition cursor-pointer';
@@ -396,21 +411,17 @@
 
         function editRegion(id) {
             console.log('Edit clicked for ID:', id);
-            console.log('All regions:', allRegions);
             
             const region = allRegions.find(r => r.id === id);
             
             if (!region) {
-                alert('Error: Region not found! Try refreshing the page.');
-                console.error('Region not found:', id);
+                alert('Error: Region not found! Try refreshing.');
                 return;
             }
             
-            // Update UI
             document.getElementById('form-title').innerText = `Edit: ${region.name}`;
             document.getElementById('save-btn').innerText = '💾 Update Region';
             
-            // Populate all fields
             document.getElementById('region-id').value = region.id || '';
             document.getElementById('reg-name').value = region.name || '';
             document.getElementById('reg-capital').value = region.capital || '';
@@ -423,26 +434,13 @@
             document.getElementById('reg-overview').value = region.overview || '';
             document.getElementById('reg-hero-image').value = region.hero_image || '';
             
-            // Handle arrays (gallery & audio)
-            if (region.gallery_images) {
-                const images = typeof region.gallery_images === 'string' 
-                    ? region.gallery_images.split(',').map(s => s.trim()).filter(s => s)
-                    : region.gallery_images;
-                document.getElementById('reg-gallery-images').value = images.join(', ');
-            } else {
-                document.getElementById('reg-gallery-images').value = '';
-            }
+            // ✓✓✓ FIXED: Use safeSplit for arrays ✓✓✓
+            const galleryArray = safeSplit(region.gallery_images);
+            const audioArray = safeSplit(region.audio_files);
             
-            if (region.audio_files) {
-                const audios = typeof region.audio_files === 'string'
-                    ? region.audio_files.split(',').map(s => s.trim()).filter(s => s)
-                    : region.audio_files;
-                document.getElementById('reg-audio-files').value = audios.join(', ');
-            } else {
-                document.getElementById('reg-audio-files').value = '';
-            }
+            document.getElementById('reg-gallery-images').value = galleryArray.join(', ');
+            document.getElementById('reg-audio-files').value = audioArray.join(', ');
             
-            // Show preview
             if (region.hero_image) {
                 showHeroPreview(region.hero_image);
             } else {
@@ -453,9 +451,6 @@
             showSection('create');
         }
 
-        // ===============================
-        // SAVE REGION - CRITICAL FIX HERE!
-        // ===============================
         async function handleSave(e) {
             e.preventDefault();
             
@@ -464,7 +459,6 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '⏳ Saving...';
             
-            // Build FormData
             const formData = new FormData();
             formData.append('name', document.getElementById('reg-name').value);
             formData.append('capital', document.getElementById('reg-capital').value);
@@ -483,41 +477,23 @@
                 const method = regionId ? 'PUT' : 'POST';
                 const url = regionId ? `${API_URL}/regions/${regionId}` : `${API_URL}/regions`;
                 
-                console.log(`Saving with ${method}:`, url);
-                
-                const response = await fetch(url, {
-                    method: method,
-                    body: formData
-                });
-                
-                console.log('Response status:', response.status);
+                const response = await fetch(url, { method: method, body: formData });
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Server error:', errorText);
                     throw new Error(`Server returned ${response.status}`);
                 }
                 
                 const data = await response.json();
-                console.log('Response data:', data);
                 
-                // Success!
                 if (data.success) {
                     showNotification(data.message || 'Saved successfully!', 'success');
-                    
-                    // IMPORTANT: Reload everything immediately
-                    await loadRegions();  // Refresh the table
-                    await loadStats();    // Refresh the stats
-                    
-                    // Go back to dashboard
+                    await loadRegions();
+                    await loadStats();
                     showSection('dashboard');
-                    
-                    console.log('✅ Save complete! Regions reloaded.');
                 } else {
                     throw new Error(data.detail || 'Save failed');
                 }
             } catch (error) {
-                console.error('❌ Save error:', error);
                 showNotification(`❌ ${error.message}`, 'error');
             } finally {
                 submitBtn.disabled = false;
@@ -525,9 +501,6 @@
             }
         }
 
-        // ===============================
-        // DELETE REGION
-        // ===============================
         async function deleteRegion(id, name) {
             if (!confirm(`Delete "${name}"? This CANNOT be undone.`)) return;
             
