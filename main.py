@@ -14,22 +14,21 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="EchoStack API")
 
 # Mount static folders (CSS/JS)
-app.mount("/css", StaticFiles(directory="css"), name="css")
-app.mount("/js", StaticFiles(directory="js"), name="js")
+try:
+    app.mount("/css", StaticFiles(directory="css"), name="css")
+    app.mount("/js", StaticFiles(directory="js"), name="js")
+except:
+    pass
 
-@app.on_event("startup")
-async def startup():
-    """Test database connection on startup"""
-    print("🚀 Starting EchoStack...")
-    
 @app.get("/")
 def read_root():
     """Serve the homepage HTML"""
-    return FileResponse("index.html")
+    if os.path.exists("index.html"):
+        return FileResponse("index.html")
+    return {"message": "Welcome to EchoStack"}
 
 @app.get("/regions/{region_name}")
 def region_page(region_name: str):
-    """Serve individual region pages"""
     file_path = f"regions/{region_name}.html"
     if os.path.exists(file_path):
         return FileResponse(file_path)
@@ -39,7 +38,6 @@ def region_page(region_name: str):
 def get_regions(db: Session = Depends(get_db)):
     regions = db.query(models.Region).all()
     if not regions:
-        # Return sample data for demo
         return [
             {"id": 1, "name": "Ashanti", "overview": "Heart of the Ashanti Kingdom"},
             {"id": 2, "name": "Eastern", "overview": "Sixth largest region by area"},
