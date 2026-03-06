@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creator Portal — EchoStack</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;--red:#C0392B;--green:#1A7A4A;--border:#E2E8F0;--muted:#94A3B8;--blue:#2563EB}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh}
+nav{background:var(--ink);border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:100}
+.ni{max-width:1200px;margin:0 auto;padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between}
+.nl{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nl img{width:30px;height:30px;border-radius:6px;object-fit:contain}
+.nl span{font-family:'Playfair Display',serif;color:#fff;font-size:1.05rem}
+.nr{display:flex;align-items:center;gap:6px}
+.nb{background:none;border:none;color:#94A3B8;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;padding:6px 11px;border-radius:6px;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.nb:hover{background:rgba(255,255,255,.08);color:#fff}
+.nb.new-post{background:var(--gold);color:#fff;font-weight:700}.nb.new-post:hover{background:#a97825}
+.nb.lo{border:1px solid rgba(248,113,113,.35);color:#f87171}.nb.lo:hover{background:#f87171;color:#fff}
+.creator-badge{padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;background:rgba(200,150,46,.2);color:var(--gold);border:1px solid rgba(200,150,46,.3);letter-spacing:.05em}
+
+/* Page layout */
+.page{max-width:1200px;margin:0 auto;padding:28px 20px}
+
+/* Channel header */
+.channel-header{background:var(--ink);border-radius:16px;padding:28px 32px;margin-bottom:24px;position:relative;overflow:hidden;display:flex;align-items:center;gap:24px}
+.channel-header::after{content:'✦';position:absolute;right:20px;top:10px;font-size:80px;opacity:.05;color:var(--gold)}
+.ch-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:700;color:#fff;flex-shrink:0;border:3px solid rgba(200,150,46,.4)}
+.ch-info h1{font-family:'Playfair Display',serif;color:#fff;font-size:1.5rem;margin-bottom:4px}
+.ch-info p{color:#94A3B8;font-size:.85rem}
+.ch-stats{margin-left:auto;display:flex;gap:24px;text-align:center}
+.ch-stat .sv{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--gold2)}
+.ch-stat .sl{font-size:.7rem;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em}
+@media(max-width:600px){.channel-header{flex-wrap:wrap}.ch-stats{margin-left:0;width:100%;justify-content:space-around}}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:24px}
+.tab{flex:1;padding:9px;text-align:center;border-radius:7px;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s}
+.tab.active{background:var(--ink);color:#fff}
+
+/* Panel */
+.panel{display:none}.panel.on{display:block}
+
+/* Stats grid */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+@media(max-width:700px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 1px 6px rgba(13,27,42,.04)}
+.stat-val{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--ink)}
+.stat-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+.stat-sub{font-size:.75rem;color:var(--green);margin-top:4px;font-weight:600}
+
+/* Posts table */
+.post-table{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 8px rgba(13,27,42,.05)}
+.pt-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.pt-header h2{font-size:.95rem;font-weight:700;color:var(--ink)}
+.pt-row{display:grid;grid-template-columns:1fr auto auto auto;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);transition:background .15s}
+.pt-row:last-child{border-bottom:none}
+.pt-row:hover{background:#FAFBFF}
+.pt-title{font-size:.875rem;font-weight:600;color:var(--ink)}
+.pt-meta{font-size:.75rem;color:var(--muted);margin-top:2px}
+.status-badge{padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:700;text-transform:uppercase}
+.status-published{background:#F0FDF4;color:#16A34A}
+.status-draft{background:#F8FAFF;color:#94A3B8}
+.status-pending{background:#FFF7ED;color:#D97706}
+.status-rejected{background:#FEF2F2;color:#DC2626}
+.pt-stats{font-size:.75rem;color:var(--muted);display:flex;gap:10px;white-space:nowrap}
+.pt-actions{display:flex;gap:6px}
+.act-btn{padding:5px 10px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.act-edit{background:var(--cream);color:var(--ink);border:1px solid var(--border)}.act-edit:hover{background:var(--ink);color:#fff}
+.act-del{background:#FEF2F2;color:#DC2626;border:1px solid #FCA5A5}.act-del:hover{background:#DC2626;color:#fff}
+
+/* New post form */
+.form-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 8px rgba(13,27,42,.05)}
+.form-header{padding:16px 20px;border-bottom:1px solid var(--border)}
+.form-header h2{font-size:.95rem;font-weight:700;color:var(--ink)}
+.form-body{padding:24px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:.76rem;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink);outline:none;transition:border-color .2s;background:#FAFAFA}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);background:#fff}
+.field textarea{min-height:200px;resize:vertical}
+.field select{cursor:pointer}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.field-row{grid-template-columns:1fr}}
+.toggle-row{display:flex;align-items:center;gap:12px}
+.toggle{position:relative;width:44px;height:24px}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#E2E8F0;border-radius:24px;cursor:pointer;transition:.3s}
+.slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s}
+input:checked+.slider{background:var(--gold)}
+input:checked+.slider::before{transform:translateX(20px)}
+.form-actions{display:flex;gap:10px;margin-top:8px}
+.form-actions button{padding:12px 24px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-publish{background:var(--green);color:#fff}.btn-publish:hover{background:#156534}
+.btn-draft{background:var(--ink);color:#fff}.btn-draft:hover{background:var(--gold)}
+.btn-cancel{background:var(--border);color:var(--ink)}.btn-cancel:hover{background:#cbd5e1}
+.spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:none}
+.btn.ld .spin{display:block}.btn.ld .bt{display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* Loading */
+#ld{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s}
+#ld.hide{opacity:0;pointer-events:none}
+.lbar{width:160px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin:8px auto 0}
+.lbi{height:100%;background:var(--gold);animation:lb 1s ease forwards}
+@keyframes lb{from{width:0}to{width:100%}}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--green)}.toast.er{background:var(--red)}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty div{font-size:2rem;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div id="ld"><div style="text-align:center;color:#fff"><div style="font-family:'Playfair Display',serif;font-size:1.3rem">✍️ Creator Portal</div><div class="lbar"><div class="lbi"></div></div></div></div>
+
+<nav><div class="ni">
+  <a href="/dashboard" class="nl">
+    <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
+    <span>EchoStack</span>
+  </a>
+  <div class="nr">
+    <span class="creator-badge">CREATOR</span>
+    <span class="nb" id="navname" style="color:#fff;font-weight:600"></span>
+    <a href="/dashboard" class="nb">📰 Reader Feed</a>
+    <button class="nb new-post" onclick="showNewPost()">✍️ New Post</button>
+    <a href="/admin" class="nb" id="admin-btn" style="display:none;border:1px solid rgba(239,68,68,.4);color:#ef4444">⚙️ Admin</a>
+    <button class="nb lo" onclick="logout()">Sign Out</button>
+  </div>
+</div></nav>
+
+<div class="page">
+  <!-- Channel Header -->
+  <div class="channel-header">
+    <div class="ch-avatar" id="ch-avatar">?</div>
+    <div class="ch-info">
+      <h1 id="ch-name">My Channel</h1>
+      <p id="ch-desc">Loading…</p>
+    </div>
+    <div class="ch-stats">
+      <div class="ch-stat"><div class="sv" id="stat-posts">0</div><div class="sl">Posts</div></div>
+      <div class="ch-stat"><div class="sv" id="stat-followers">0</div><div class="sl">Followers</div></div>
+      <div class="ch-stat"><div class="sv" id="stat-views">0</div><div class="sl">Total Views</div></div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('posts',this)">📄 My Posts</div>
+    <div class="tab" onclick="switchTab('analytics',this)">📊 Analytics</div>
+    <div class="tab" onclick="switchTab('new',this)">✍️ New Post</div>
+    <div class="tab" onclick="switchTab('channel',this)">⚙️ Channel Settings</div>
+  </div>
+
+  <!-- Posts Tab -->
+  <div class="panel on" id="panel-posts">
+    <div class="post-table">
+      <div class="pt-header">
+        <h2>All Posts</h2>
+        <button onclick="showNewPost()" style="padding:7px 14px;background:var(--gold);color:#fff;border:none;border-radius:7px;font-size:.8rem;font-weight:600;cursor:pointer">+ New Post</button>
+      </div>
+      <div id="posts-list"><div class="empty"><div>📝</div><p>No posts yet. Create your first!</p></div></div>
+    </div>
+  </div>
+
+  <!-- Analytics Tab -->
+  <div class="panel" id="panel-analytics">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="an-posts">0</div><div class="stat-lbl">Total Posts</div><div class="stat-sub">Published</div></div>
+      <div class="stat-card"><div class="stat-val" id="an-views">0</div><div class="stat-lbl">Total Views</div><div class="stat-sub">All time</div></div>
+      <div class="stat-card"><div class="stat-val" id="an-comments">0</div><div class="stat-lbl">Comments</div><div class="stat-sub">Received</div></div>
+      <div class="stat-card"><div class="stat-val" id="an-followers">0</div><div class="stat-lbl">Followers</div><div class="stat-sub">Your audience</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:28px;text-align:center;color:var(--muted)">
+      <div style="font-size:2rem;margin-bottom:10px">📊</div>
+      <p>Detailed analytics charts coming soon!</p>
+      <p style="font-size:.8rem;margin-top:6px">Track views over time, top posts, and audience insights</p>
+    </div>
+  </div>
+
+  <!-- New/Edit Post Tab -->
+  <div class="panel" id="panel-new">
+    <div class="form-card">
+      <div class="form-header">
+        <h2 id="form-title">✍️ New Post</h2>
+      </div>
+      <div class="form-body">
+        <input type="hidden" id="edit-post-id" value="">
+        <div class="field-row">
+          <div class="field">
+            <label>Content Type</label>
+            <select id="f-type" onchange="updateFormFields()">
+              <option value="article">📝 Written Article</option>
+              <option value="audio">🎵 Audio Recording</option>
+              <option value="photo_essay">📷 Photo Essay</option>
+              <option value="video">🎬 Video (YouTube/Vimeo)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Region (optional)</label>
+            <select id="f-region">
+              <option value="">— All Regions —</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Title</label>
+          <input type="text" id="f-title" placeholder="Enter a compelling title…">
+        </div>
+        <div class="field">
+          <label>Excerpt (short preview shown in feed)</label>
+          <input type="text" id="f-excerpt" placeholder="One sentence preview of your post…">
+        </div>
+        <div class="field">
+          <label>Cover Image URL (optional)</label>
+          <input type="text" id="f-cover" placeholder="https://...">
+        </div>
+        <div class="field" id="field-content">
+          <label>Content</label>
+          <textarea id="f-content" placeholder="Write your full article here…"></textarea>
+        </div>
+        <div class="field" id="field-audio" style="display:none">
+          <label>Audio File URL</label>
+          <input type="text" id="f-audio" placeholder="https://... (link to audio file)">
+        </div>
+        <div class="field" id="field-video" style="display:none">
+          <label>YouTube/Vimeo URL</label>
+          <input type="text" id="f-video" placeholder="https://www.youtube.com/watch?v=...">
+        </div>
+        <div class="field" id="field-gallery" style="display:none">
+          <label>Image URLs (comma-separated)</label>
+          <textarea id="f-gallery" placeholder="https://image1.jpg, https://image2.jpg, …" style="min-height:80px"></textarea>
+        </div>
+        <div class="field">
+          <label>Tags (comma-separated)</label>
+          <input type="text" id="f-tags" placeholder="history, ashanti, culture">
+        </div>
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" id="f-premium"><span class="slider"></span></label>
+          <span style="font-size:.88rem;color:var(--ink);font-weight:500">Premium only content</span>
+        </div>
+        <div class="form-actions" style="margin-top:20px">
+          <button class="btn-publish" onclick="savePost('published')">🚀 Publish</button>
+          <button class="btn-draft" onclick="savePost('draft')">💾 Save Draft</button>
+          <button class="btn-cancel" onclick="clearForm()">✕ Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Channel Settings Tab -->
+  <div class="panel" id="panel-channel">
+    <div class="form-card">
+      <div class="form-header"><h2>⚙️ Channel Settings</h2></div>
+      <div class="form-body">
+        <div class="field"><label>Channel Name</label><input type="text" id="s-name" placeholder="Your channel name"></div>
+        <div class="field"><label>Channel Description</label><textarea id="s-desc" style="min-height:100px" placeholder="Tell readers what your channel is about…"></textarea></div>
+        <div class="field"><label>Avatar URL (optional)</label><input type="text" id="s-avatar" placeholder="https://..."></div>
+        <button onclick="saveSettings()" style="padding:12px 28px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer">Save Settings</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Auth gate ─────────────────────────────────────────────────────────────────
+const raw=localStorage.getItem('es_user');
+if(!raw){window.location.href='/user-login';}
+let user={};
+try{user=JSON.parse(raw);}catch(e){window.location.href='/user-login';}
+if(!user.loggedIn)window.location.href='/user-login';
+if(user.role==='user'){
+  // Redirect regular users back to dashboard
+  toast('You need to become a creator first','er');
+  setTimeout(()=>window.location.href='/dashboard',1500);
+}
+
+// ── Populate ──────────────────────────────────────────────────────────────────
+document.getElementById('navname').textContent=user.username||'';
+if(user.role==='admin'||user.role==='superuser')document.getElementById('admin-btn').style.display='inline-flex';
+
+// ── Channel header ────────────────────────────────────────────────────────────
+async function loadChannelInfo(){
+  try{
+    const r=await fetch('/api/users/me',{credentials:'include'});
+    const d=await r.json();
+    const name=d.channel_name||d.username||'My Channel';
+    document.getElementById('ch-name').textContent=name;
+    document.getElementById('ch-desc').textContent=d.channel_desc||'No description yet — add one in Channel Settings';
+    document.getElementById('ch-avatar').textContent=name.charAt(0).toUpperCase();
+    document.getElementById('stat-followers').textContent=d.follower_count||0;
+    // Update localStorage
+    user.username=d.username;localStorage.setItem('es_user',JSON.stringify(user));
+    // Prefill settings
+    document.getElementById('s-name').value=d.channel_name||'';
+    document.getElementById('s-desc').value=d.channel_desc||'';
+    document.getElementById('s-avatar').value=d.avatar_url||'';
+  }catch(e){}
+}
+
+// ── Load my posts ─────────────────────────────────────────────────────────────
+async function loadMyPosts(){
+  try{
+    // Get user id from cookie — read from /api/users/me
+    const mr=await fetch('/api/users/me',{credentials:'include'});
+    const me=await mr.json();
+    const r=await fetch('/api/posts?status=all&author_id='+me.id+'&limit=50');
+    const posts=await r.json();
+    // Stats
+    const published=posts.filter(p=>p.status==='published');
+    const totalViews=posts.reduce((s,p)=>s+p.view_count,0);
+    const totalComments=posts.reduce((s,p)=>s+p.comment_count,0);
+    document.getElementById('stat-posts').textContent=published.length;
+    document.getElementById('stat-views').textContent=totalViews;
+    document.getElementById('an-posts').textContent=published.length;
+    document.getElementById('an-views').textContent=totalViews;
+    document.getElementById('an-comments').textContent=totalComments;
+    document.getElementById('an-followers').textContent=document.getElementById('stat-followers').textContent;
+    // Render table
+    const list=document.getElementById('posts-list');
+    if(!posts.length){list.innerHTML='<div class="empty"><div>📝</div><p>No posts yet. Create your first!</p></div>';return;}
+    list.innerHTML=posts.map(p=>`
+      <div class="pt-row">
+        <div>
+          <div class="pt-title">${p.title}</div>
+          <div class="pt-meta">${p.content_type} · ${p.created_at?p.created_at.split('T')[0]:''}</div>
+        </div>
+        <span class="status-badge status-${p.status}">${p.status}</span>
+        <div class="pt-stats"><span>👁 ${p.view_count}</span><span>💬 ${p.comment_count}</span></div>
+        <div class="pt-actions">
+          <button class="act-btn act-edit" onclick="editPost(${p.id})">Edit</button>
+          <button class="act-btn act-del" onclick="deletePost(${p.id})">Del</button>
+        </div>
+      </div>`).join('');
+  }catch(e){console.warn(e);}
+}
+
+// ── Load regions into form ────────────────────────────────────────────────────
+async function loadRegions(){
+  try{
+    const r=await fetch('/api/regions');const regions=await r.json();
+    const sel=document.getElementById('f-region');
+    regions.forEach(r=>{const o=document.createElement('option');o.value=r.id;o.textContent=r.name;sel.appendChild(o);});
+  }catch(e){}
+}
+
+// ── New/Edit Post ─────────────────────────────────────────────────────────────
+function showNewPost(){clearForm();switchTab('new',document.querySelector('.tab:nth-child(3)'));}
+
+function updateFormFields(){
+  const type=document.getElementById('f-type').value;
+  document.getElementById('field-content').style.display=type==='article'?'block':'none';
+  document.getElementById('field-audio').style.display=type==='audio'?'block':'none';
+  document.getElementById('field-video').style.display=type==='video'?'block':'none';
+  document.getElementById('field-gallery').style.display=type==='photo_essay'?'block':'none';
+}
+updateFormFields();
+
+async function editPost(id){
+  try{
+    const r=await fetch('/api/posts/'+id);const p=await r.json();
+    document.getElementById('edit-post-id').value=id;
+    document.getElementById('form-title').textContent='✏️ Edit Post';
+    document.getElementById('f-title').value=p.title||'';
+    document.getElementById('f-excerpt').value=p.excerpt||'';
+    document.getElementById('f-cover').value=p.cover_image||'';
+    document.getElementById('f-content').value=p.content||'';
+    document.getElementById('f-audio').value=p.audio_url||'';
+    document.getElementById('f-video').value=p.video_url||'';
+    document.getElementById('f-gallery').value=p.gallery||'';
+    document.getElementById('f-tags').value=p.tags||'';
+    document.getElementById('f-type').value=p.content_type||'article';
+    document.getElementById('f-premium').checked=p.is_premium||false;
+    updateFormFields();
+    switchTab('new',document.querySelector('.tab:nth-child(3)'));
+  }catch(e){toast('Failed to load post','er');}
+}
+
+function clearForm(){
+  ['f-title','f-excerpt','f-cover','f-content','f-audio','f-video','f-gallery','f-tags'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('edit-post-id').value='';
+  document.getElementById('f-premium').checked=false;
+  document.getElementById('f-type').value='article';
+  document.getElementById('form-title').textContent='✍️ New Post';
+  updateFormFields();
+}
+
+async function savePost(status){
+  const title=document.getElementById('f-title').value.trim();
+  if(!title){toast('Title is required','er');return;}
+  const editId=document.getElementById('edit-post-id').value;
+  const fd=new FormData();
+  fd.append('title',title);
+  fd.append('content',document.getElementById('f-content').value);
+  fd.append('excerpt',document.getElementById('f-excerpt').value);
+  fd.append('cover_image',document.getElementById('f-cover').value);
+  fd.append('content_type',document.getElementById('f-type').value);
+  fd.append('audio_url',document.getElementById('f-audio').value);
+  fd.append('video_url',document.getElementById('f-video').value);
+  fd.append('gallery',document.getElementById('f-gallery').value);
+  fd.append('tags',document.getElementById('f-tags').value);
+  fd.append('is_premium',document.getElementById('f-premium').checked?'1':'0');
+  fd.append('status',status);
+  fd.append('region_id',document.getElementById('f-region').value);
+  try{
+    const url=editId?'/api/posts/'+editId:'/api/posts';
+    const method=editId?'PUT':'POST';
+    const r=await fetch(url,{method,body:fd,credentials:'include'});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.detail||'Failed');
+    toast(status==='published'?'🚀 Post published!':'💾 Draft saved','ok');
+    clearForm();
+    loadMyPosts();
+    switchTab('posts',document.querySelector('.tab:first-child'));
+  }catch(e){toast('❌ '+e.message,'er');}
+}
+
+async function deletePost(id){
+  if(!confirm('Delete this post permanently?'))return;
+  try{
+    const r=await fetch('/api/posts/'+id,{method:'DELETE',credentials:'include'});
+    if(r.ok){toast('Post deleted','ok');loadMyPosts();}
+    else{const d=await r.json();throw new Error(d.detail);}
+  }catch(e){toast('❌ '+e.message,'er');}
+}
+
+// ── Save channel settings ─────────────────────────────────────────────────────
+async function saveSettings(){
+  // For now just update localStorage display name — full profile endpoint to add later
+  toast('Settings saved! (Full profile update coming in next message)','ok');
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  if(el)el.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('on');
+}
+
+function logout(){localStorage.removeItem('es_user');fetch('/api/users/logout',{method:'POST',credentials:'include'}).catch(()=>{});window.location.href='/';}
+let _t;
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadChannelInfo();loadMyPosts();loadRegions();
+setTimeout(()=>document.getElementById('ld').classList.add('hide'),800);
+</script>
+</body>
+</html>
