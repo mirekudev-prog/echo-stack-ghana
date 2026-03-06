@@ -268,10 +268,11 @@
             formData.append('username', document.getElementById('username').value.trim());
             formData.append('email', document.getElementById('email').value.trim());
             formData.append('password', document.getElementById('password').value);
-            formData.append('topics', JSON.stringify(selectedTopics));
+            formData.append('interests', JSON.stringify(selectedTopics));
             
             try {
-                const response = await fetch('/api/users/register', {
+                // ✅ CHANGED: Use /api/users/signup instead of /api/users/register
+                const response = await fetch('/api/users/signup', {
                     method: 'POST',
                     body: formData
                 });
