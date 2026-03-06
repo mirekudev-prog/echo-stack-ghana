@@ -386,3 +386,52 @@ def import_json(data: dict, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================
+# USER REGISTRATION ENDPOINT
+# ============================================
+@app.post("/api/users/register")
+async def register_user(
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    topics: str = Form("[]"),  # JSON string
+    db: Session = Depends(get_db)
+):
+    """Create new user account with topic preferences"""
+    import json
+    from passlib.context import CryptContext
+    
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
+    # Check if username/email exists
+    existing_user = db.query(User).filter(
+        (User.username == username) | (User.email == email)
+    ).first()
+    
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username or email already registered")
+    
+    # Hash password
+    hashed_password = pwd_context.hash(password)
+    
+    # Parse topics
+    try:
+        topics_list = json.loads(topics)
+    except:
+        topics_list = []
+    
+    # Create new user
+    new_user = User(
+        username=username,
+        email=email,
+        password_hash=hashed_password,
+        preferences=topics_list,
+        is_verified=True
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return {"success": True, "user_id": new_user.id}
