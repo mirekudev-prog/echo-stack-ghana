@@ -1,4 +1,8 @@
 fastapi==0.95.0
-uvicorn==0.22.0
-sqlalchemy==1.4.48
+uvicorn[standard]==0.22.0
+sqlalchemy==2.0.7
 python-multipart==0.0.6
+psycopg2-binary==2.9.9  ← CRITICAL!
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+supabase==2.0.3  # Optional for direct access
