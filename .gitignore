@@ -1,0 +1,113 @@
+# ==========================
+# ECHOSTACK PROJECT GITIGNORE
+# ==========================
+
+# 🔐 Sensitive Data (NEVER COMMIT!)
+.env
+.env.local
+.env.development
+.env.production
+SECRET_KEY
+DATABASE_PASSWORD
+SUPABASE_SERVICE_ROLE_KEY
+
+# 🗄️ Database Files (Keep on server, not GitHub)
+*.db
+*.sqlite
+*.sqlite3
+echostack.db
+instance/
+
+# 📁 Uploads Folder (User-uploaded content)
+uploads/
+upload/
+static/uploads/
+
+# 🐍 Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 🕹️ Virtual Environments
+venv/
+ENV/
+env/
+.venv/
+
+# 💻 IDE Settings (Personal settings only)
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# 🖥️ Operating System Files
+.DS_Store          # Mac
+.DS_Store?         # Mac search
+._*                # Mac metadata
+.Spotlight-V100    # Mac indexing
+.Trashes           # Mac trash
+Thumbs.db          # Windows thumbnail cache
+ehthumbs.db        # Windows preview cache
+Desktop.ini        # Windows custom folder view
+
+# 🔧 Build Artifacts
+dist/
+build/
+*.tar.gz
+*.whl
+
+# 🔍 Search Indexes
+*.idx
+*.idx-*
+
+# 🌐 Dependency Lock Files (Optional - depends on package manager)
+package-lock.json  # If using npm/yarn
+yarn.lock          # If using yarn
+
+# 📝 Test Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# 🔊 Logs
+*.log
+logs/
+error.log
+
+# 🏗️ Temp Files
+.tmp/
+temp/
+.tmps/
+*.tmp
+*.bak
+
+# 🤖 AI/ML Models (If you add ML features later)
+*.pth
+*.pt
+*.onnx
+*.pb
+
+# 🎨 Compiled Stylesheets
+*.css.map
+*.js.map
