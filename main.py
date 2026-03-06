@@ -191,7 +191,12 @@ async def admin_logout(response: Response):
     response.delete_cookie("admin_session")
     return {"success": True}
 
-
+@app.get("/login")
+def login_redirect():
+    # Redirect old /login to /admin
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/admin")
+    
 # ════════════════════════════════════════════════════════════════════════════
 # STATS
 # ════════════════════════════════════════════════════════════════════════════
