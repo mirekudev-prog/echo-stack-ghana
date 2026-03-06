@@ -435,3 +435,92 @@ async def register_user(
     db.refresh(new_user)
     
     return {"success": True, "user_id": new_user.id}
+
+# ============================================
+# USER AUTHENTICATION ENDPOINTS
+# ============================================
+@app.post("/api/users/register")
+async def register_user(
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    topics: str = Form("[]"),
+    db: Session = Depends(get_db)
+):
+    """Create new user account"""
+    import json
+    from passlib.context import CryptContext
+    
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
+    # Check if exists
+    existing = db.query(User).filter(
+        (User.username == username) | (User.email == email)
+    ).first()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Username or email already registered")
+    
+    # Hash password
+    hashed_password = pwd_context.hash(password)
+    
+    # Parse topics
+    try:
+        topics_list = json.loads(topics)
+    except:
+        topics_list = []
+    
+    # Create user
+    new_user = User(
+        username=username,
+        email=email,
+        password_hash=hashed_password,
+        preferences=topics_list,
+        is_verified=True
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    # Set session cookie
+    response = JSONResponse(content={"success": True, "user_id": new_user.id})
+    response.set_cookie(key="user_session", value=str(new_user.id), max_age=86400, path="/")
+    
+    return response
+
+@app.post("/api/users/login")
+async def user_login(
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    """User login"""
+    from passlib.context import CryptContext
+    
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
+    # Find user
+    user = db.query(User).filter(
+        (User.username == username) | (User.email == username)
+    ).first()
+    
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Verify password
+    if not pwd_context.verify(password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Set session cookie
+    response = JSONResponse(content={"success": True, "user_id": user.id})
+    response.set_cookie(key="user_session", value=str(user.id), max_age=86400, path="/")
+    
+    return response
+
+@app.post("/api/users/logout")
+def user_logout():
+    """User logout"""
+    response = JSONResponse(content={"success": True})
+    response.delete_cookie(key="user_session", path="/")
+    return response
