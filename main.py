@@ -524,3 +524,15 @@ def user_logout():
     response = JSONResponse(content={"success": True})
     response.delete_cookie(key="user_session", path="/")
     return response
+
+@app.get("/signup")
+async def signup_page():
+    if os.path.exists("signup.html"):
+        return FileResponse("signup.html")
+    raise HTTPException(status_code=404)
+
+@app.get("/user-login")
+async def user_login_page():
+    if os.path.exists("user-login.html"):
+        return FileResponse("user-login.html")
+    raise HTTPException(status_code=404)
