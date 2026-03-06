@@ -271,7 +271,7 @@
             formData.append('interests', JSON.stringify(selectedTopics));
             
             try {
-                // ✅ CHANGED: Use /api/users/signup instead of /api/users/register
+                // ✅ CHANGED: Use /api/users/signup (matches your main.py)
                 const response = await fetch('/api/users/signup', {
                     method: 'POST',
                     body: formData
