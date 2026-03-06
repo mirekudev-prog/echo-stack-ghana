@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 import re
 import hashlib
+import hmac
 import urllib.request
 
 from database import engine, get_db, Base
@@ -25,7 +26,11 @@ except Exception as e:
     print(f"Warning: Could not mount uploads folder")
 
 CORRECT_ANSWER = "THE ADMIN"
+PAYSTACK_SECRET = os.environ.get("PAYSTACK_SECRET_KEY", "")
 
+# ============================================
+# HELPERS
+# ============================================
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
@@ -171,6 +176,8 @@ def admin_logout():
 
 # ============================================
 # PUBLIC USER ACCOUNTS
+# NOTE: Table is named "es_users" in models.py to avoid conflict
+# with Supabase's built-in "users" table (which uses UUID).
 # ============================================
 @app.post("/api/users/signup")
 async def user_signup(
@@ -249,7 +256,7 @@ def user_logout():
     return response
 
 @app.get("/api/users/me")
-async def get_current_user(request: Request, db: Session = Depends(get_db)):
+async def get_current_user_me(request: Request, db: Session = Depends(get_db)):
     user_id = request.cookies.get("user_session")
     if not user_id:
         raise HTTPException(status_code=401, detail="Not logged in")
@@ -269,6 +276,25 @@ async def get_current_user(request: Request, db: Session = Depends(get_db)):
         "created_at": str(user.created_at)
     }
 
+# Alias — some frontend pages call this route
+@app.post("/api/users/become-creator")
+async def become_creator_alias(request: Request, db: Session = Depends(get_db)):
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401)
+    user.role = "creator"
+    existing = db.query(models.CreatorChannel).filter(
+        models.CreatorChannel.user_id == user.id
+    ).first()
+    if not existing:
+        channel = models.CreatorChannel(user_id=user.id, channel_name=user.username)
+        db.add(channel)
+    db.commit()
+    return {"success": True, "message": "You are now a creator!"}
+
+# ============================================
+# ADMIN USER MANAGEMENT
+# ============================================
 @app.get("/api/admin/users")
 async def get_all_users(request: Request, db: Session = Depends(get_db)):
     admin_token = request.cookies.get("admin_session")
@@ -301,7 +327,7 @@ async def update_user_role(
         raise HTTPException(status_code=404)
     user.role = role
     db.commit()
-    return {"success": True}
+    return {"success": True, "role": role}
 
 @app.put("/api/admin/users/{user_id}/premium")
 async def toggle_premium(
@@ -314,12 +340,12 @@ async def toggle_premium(
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404)
-    user.is_premium = 1 if not user.is_premium else 0
+    user.is_premium = 0 if user.is_premium else 1
     db.commit()
     return {"success": True, "is_premium": user.is_premium}
 
 # ============================================
-# CLIENT
+# CLIENT (Ghana Heritage Foundation)
 # ============================================
 @app.post("/api/client/login")
 async def client_login(
@@ -360,9 +386,7 @@ async def get_client(request: Request, db: Session = Depends(get_db)):
     client_id = request.cookies.get("client_session")
     if not client_id:
         raise HTTPException(status_code=401, detail="Not logged in")
-    client = db.query(models.Client).filter(
-        models.Client.id == int(client_id)
-    ).first()
+    client = db.query(models.Client).filter(models.Client.id == int(client_id)).first()
     if not client:
         raise HTTPException(status_code=404)
     return {
@@ -409,10 +433,10 @@ async def create_client(
         organisation_name=organisation_name, plan="freemium"
     )
     db.add(client); db.commit(); db.refresh(client)
-    return {"success": True, "client_id": client.id}
+    return {"success": True, "client_id": client.id, "message": f"Client created for {email}"}
 
 # ============================================
-# POSTS (Creator content)
+# POSTS
 # ============================================
 @app.get("/api/posts")
 async def get_posts(
@@ -427,21 +451,16 @@ async def get_posts(
             q = q.filter(models.Post.content_type == content_type)
         posts = q.order_by(models.Post.created_at.desc()).limit(limit).all()
         return [{
-            "id": p.id,
-            "title": p.title,
-            "excerpt": p.excerpt or "",
+            "id": p.id, "title": p.title, "excerpt": p.excerpt or "",
             "cover_image": p.cover_image or "",
             "content_type": p.content_type or "article",
             "author_username": p.author_username or "",
-            "author_id": p.author_id,
-            "status": p.status,
-            "views": p.views or 0,
-            "likes": p.likes or 0,
+            "author_id": p.author_id, "status": p.status,
+            "views": p.views or 0, "likes": p.likes or 0,
             "is_premium": p.is_premium or 0,
-            "region_id": p.region_id,
-            "created_at": str(p.created_at)
+            "region_id": p.region_id, "created_at": str(p.created_at)
         } for p in posts]
-    except Exception as e:
+    except:
         return []
 
 @app.get("/api/posts/my")
@@ -466,41 +485,28 @@ async def get_single_post(post_id: int, request: Request, db: Session = Depends(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     user = get_user_from_request(request, db)
-    # increment views
     post.views = (post.views or 0) + 1
     db.commit()
-    # check if full content is locked
     is_locked = bool(post.is_premium) and (not user or not user.is_premium)
     return {
-        "id": post.id,
-        "title": post.title,
-        "excerpt": post.excerpt or "",
+        "id": post.id, "title": post.title, "excerpt": post.excerpt or "",
         "content": post.content if not is_locked else None,
         "cover_image": post.cover_image or "",
         "content_type": post.content_type or "article",
         "author_username": post.author_username or "",
-        "author_id": post.author_id,
-        "status": post.status,
-        "views": post.views or 0,
-        "likes": post.likes or 0,
-        "is_premium": post.is_premium or 0,
-        "is_locked": is_locked,
-        "region_id": post.region_id,
-        "created_at": str(post.created_at)
+        "author_id": post.author_id, "status": post.status,
+        "views": post.views or 0, "likes": post.likes or 0,
+        "is_premium": post.is_premium or 0, "is_locked": is_locked,
+        "region_id": post.region_id, "created_at": str(post.created_at)
     }
 
 @app.post("/api/posts")
 async def create_post(
-    title: str = Form(...),
-    excerpt: str = Form(""),
-    content: str = Form(""),
-    cover_image: str = Form(""),
-    content_type: str = Form("article"),
-    region_id: str = Form(""),
-    status: str = Form("draft"),
-    is_premium: str = Form("0"),
-    request: Request = None,
-    db: Session = Depends(get_db)
+    title: str = Form(...), excerpt: str = Form(""),
+    content: str = Form(""), cover_image: str = Form(""),
+    content_type: str = Form("article"), region_id: str = Form(""),
+    status: str = Form("draft"), is_premium: str = Form("0"),
+    request: Request = None, db: Session = Depends(get_db)
 ):
     user = get_user_from_request(request, db)
     if not user:
@@ -508,28 +514,21 @@ async def create_post(
     if user.role not in ["creator", "superuser", "admin"]:
         raise HTTPException(status_code=403, detail="Creator account required")
     post = models.Post(
-        author_id=user.id,
-        author_username=user.username,
-        title=title.strip(),
-        excerpt=excerpt.strip(),
-        content=content.strip(),
-        cover_image=cover_image.strip(),
-        content_type=content_type,
+        author_id=user.id, author_username=user.username,
+        title=title.strip(), excerpt=excerpt.strip(), content=content.strip(),
+        cover_image=cover_image.strip(), content_type=content_type,
         region_id=int(region_id) if region_id and region_id.isdigit() else None,
-        status=status,
-        is_premium=int(is_premium)
+        status=status, is_premium=int(is_premium)
     )
     db.add(post); db.commit(); db.refresh(post)
     return {"success": True, "post_id": post.id, "status": post.status}
 
 @app.put("/api/posts/{post_id}")
 async def update_post(
-    post_id: int,
-    title: str = Form(None), excerpt: str = Form(None),
+    post_id: int, title: str = Form(None), excerpt: str = Form(None),
     content: str = Form(None), cover_image: str = Form(None),
     content_type: str = Form(None), status: str = Form(None),
-    is_premium: str = Form(None),
-    request: Request = None,
+    is_premium: str = Form(None), request: Request = None,
     db: Session = Depends(get_db)
 ):
     user = get_user_from_request(request, db)
@@ -576,10 +575,8 @@ def get_comments(post_id: int, db: Session = Depends(get_db)):
 
 @app.post("/api/posts/{post_id}/comments")
 async def add_comment(
-    post_id: int,
-    content: str = Form(...),
-    request: Request = None,
-    db: Session = Depends(get_db)
+    post_id: int, content: str = Form(...),
+    request: Request = None, db: Session = Depends(get_db)
 ):
     user = get_user_from_request(request, db)
     if not user:
@@ -610,6 +607,17 @@ async def follow_user(user_id: int, request: Request, db: Session = Depends(get_
     follow = models.Follow(follower_id=user.id, following_id=user_id)
     db.add(follow); db.commit()
     return {"success": True, "following": True}
+
+@app.get("/api/follow/{user_id}/status")
+async def follow_status(user_id: int, request: Request, db: Session = Depends(get_db)):
+    user = get_user_from_request(request, db)
+    if not user:
+        return {"following": False}
+    existing = db.query(models.Follow).filter(
+        models.Follow.follower_id == user.id,
+        models.Follow.following_id == user_id
+    ).first()
+    return {"following": bool(existing)}
 
 @app.post("/api/posts/{post_id}/like")
 async def like_post(post_id: int, request: Request, db: Session = Depends(get_db)):
@@ -662,10 +670,8 @@ async def get_channel(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/api/creator/channel")
 async def update_channel(
-    channel_name: str = Form(""),
-    channel_description: str = Form(""),
-    channel_image: str = Form(""),
-    request: Request = None,
+    channel_name: str = Form(""), channel_description: str = Form(""),
+    channel_image: str = Form(""), request: Request = None,
     db: Session = Depends(get_db)
 ):
     user = get_user_from_request(request, db)
@@ -682,10 +688,8 @@ async def update_channel(
         channel.channel_image = channel_image
     else:
         channel = models.CreatorChannel(
-            user_id=user.id,
-            channel_name=channel_name or user.username,
-            channel_description=channel_description,
-            channel_image=channel_image
+            user_id=user.id, channel_name=channel_name or user.username,
+            channel_description=channel_description, channel_image=channel_image
         )
         db.add(channel)
     db.commit()
@@ -701,10 +705,7 @@ async def become_creator(request: Request, db: Session = Depends(get_db)):
         models.CreatorChannel.user_id == user.id
     ).first()
     if not existing:
-        channel = models.CreatorChannel(
-            user_id=user.id, channel_name=user.username
-        )
-        db.add(channel)
+        db.add(models.CreatorChannel(user_id=user.id, channel_name=user.username))
     db.commit()
     return {"success": True, "message": "You are now a creator!"}
 
@@ -716,18 +717,14 @@ def get_creators(db: Session = Depends(get_db)):
     result = []
     for c in creators:
         follower_count = db.query(models.Follow).filter(
-            models.Follow.following_id == c.id
-        ).count()
+            models.Follow.following_id == c.id).count()
         post_count = db.query(models.Post).filter(
             models.Post.author_id == c.id,
-            models.Post.status == "published"
-        ).count()
+            models.Post.status == "published").count()
         result.append({
-            "id": c.id, "username": c.username,
-            "full_name": c.full_name or "",
+            "id": c.id, "username": c.username, "full_name": c.full_name or "",
             "avatar_url": c.avatar_url or "",
-            "follower_count": follower_count,
-            "post_count": post_count
+            "follower_count": follower_count, "post_count": post_count
         })
     return result
 
@@ -757,25 +754,22 @@ def get_regions(db: Session = Depends(get_db)):
 
 @app.post("/api/regions")
 def create_region(
-    name: str = Form(...), capital: str = Form(""),
-    population: str = Form(""), terrain: str = Form(""),
-    description: str = Form(""), category: str = Form(""),
-    tags: str = Form(""), hero_image: str = Form(""),
-    gallery_images: str = Form(""), audio_files: str = Form(""),
-    source: str = Form(""), overview: str = Form(""),
+    name: str = Form(...), capital: str = Form(""), population: str = Form(""),
+    terrain: str = Form(""), description: str = Form(""), category: str = Form(""),
+    tags: str = Form(""), hero_image: str = Form(""), gallery_images: str = Form(""),
+    audio_files: str = Form(""), source: str = Form(""), overview: str = Form(""),
     db: Session = Depends(get_db)
 ):
     try:
         if not name.strip():
             raise HTTPException(status_code=400, detail="Region name required")
         r = models.Region(
-            name=name.strip(), capital=capital.strip(),
-            population=population.strip(), terrain=terrain.strip(),
-            description=description.strip(),
+            name=name.strip(), capital=capital.strip(), population=population.strip(),
+            terrain=terrain.strip(), description=description.strip(),
             overview=overview.strip() or description.strip(),
-            category=category.strip(), tags=tags.strip(),
-            hero_image=hero_image.strip(), gallery_images=gallery_images.strip(),
-            audio_files=audio_files.strip(), source=source.strip()
+            category=category.strip(), tags=tags.strip(), hero_image=hero_image.strip(),
+            gallery_images=gallery_images.strip(), audio_files=audio_files.strip(),
+            source=source.strip()
         )
         db.add(r); db.commit(); db.refresh(r)
         return {"success": True, "region_id": r.id}
@@ -845,15 +839,14 @@ async def upload_file(
 ):
     try:
         ext = os.path.splitext(filename)[1].lower()
-        safe_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename.replace(' ','_')}"
+        safe_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename.replace(' ', '_')}"
         file_path = os.path.join(UPLOAD_DIR, safe_name)
         content = await file.read()
         with open(file_path, "wb") as f:
             f.write(content)
         uf = models.UploadedFile(
-            filename=safe_name, original_name=filename,
-            file_path=file_path, file_size=len(content),
-            mime_type=file.content_type or "application/octet-stream",
+            filename=safe_name, original_name=filename, file_path=file_path,
+            file_size=len(content), mime_type=file.content_type or "application/octet-stream",
             category=category,
             region_id=int(region_id) if region_id and region_id.isdigit() else None,
             description=description, uploaded_by="admin",
@@ -861,10 +854,9 @@ async def upload_file(
         )
         db.add(uf); db.commit(); db.refresh(uf)
         return {
-            "success": True, "file_id": uf.id,
-            "url": f"/uploads/{safe_name}",
-            "filename": safe_name, "original_name": filename,
-            "category": category, "size_bytes": len(content),
+            "success": True, "file_id": uf.id, "url": f"/uploads/{safe_name}",
+            "filename": safe_name, "original_name": filename, "category": category,
+            "size_bytes": len(content),
             "file_size_mb": round(len(content) / (1024 * 1024), 2),
             "mime_type": file.content_type
         }
@@ -878,10 +870,8 @@ def get_files(category: str = "", region_id: str = "", db: Session = Depends(get
         if category: q = q.filter(models.UploadedFile.category == category)
         if region_id: q = q.filter(models.UploadedFile.region_id == int(region_id))
         return [{
-            "id": f.id, "filename": f.filename,
-            "original_name": f.original_name,
-            "file_url": f"/uploads/{f.filename}",
-            "file_size": f.file_size,
+            "id": f.id, "filename": f.filename, "original_name": f.original_name,
+            "file_url": f"/uploads/{f.filename}", "file_size": f.file_size,
             "file_size_mb": round(f.file_size / (1024 * 1024), 2),
             "mime_type": f.mime_type, "category": f.category,
             "region_id": f.region_id, "description": f.description,
@@ -893,9 +883,7 @@ def get_files(category: str = "", region_id: str = "", db: Session = Depends(get
 @app.delete("/api/files/{file_id}")
 def delete_file(file_id: int, db: Session = Depends(get_db)):
     try:
-        f = db.query(models.UploadedFile).filter(
-            models.UploadedFile.id == file_id
-        ).first()
+        f = db.query(models.UploadedFile).filter(models.UploadedFile.id == file_id).first()
         if not f: raise HTTPException(status_code=404)
         if os.path.exists(f.file_path): os.remove(f.file_path)
         db.delete(f); db.commit()
@@ -918,8 +906,7 @@ def create_section(
         slug = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
         if db.query(models.Section).filter(models.Section.slug == slug).first():
             raise HTTPException(status_code=400, detail="Already exists")
-        s = models.Section(name=name, slug=slug, description=description,
-                           display_order=display_order)
+        s = models.Section(name=name, slug=slug, description=description, display_order=display_order)
         db.add(s); db.commit(); db.refresh(s)
         return {"success": True, "section_id": s.id}
     except HTTPException:
@@ -933,8 +920,7 @@ def get_sections(active_only: int = 1, db: Session = Depends(get_db)):
     try:
         q = db.query(models.Section)
         if active_only:
-            q = q.filter(models.Section.is_active == 1).order_by(
-                models.Section.display_order)
+            q = q.filter(models.Section.is_active == 1).order_by(models.Section.display_order)
         return [{"id": s.id, "name": s.name, "slug": s.slug,
                  "description": s.description} for s in q.all()]
     except:
@@ -943,9 +929,7 @@ def get_sections(active_only: int = 1, db: Session = Depends(get_db)):
 @app.delete("/api/sections/{section_id}")
 def delete_section(section_id: int, db: Session = Depends(get_db)):
     try:
-        s = db.query(models.Section).filter(
-            models.Section.id == section_id
-        ).first()
+        s = db.query(models.Section).filter(models.Section.id == section_id).first()
         if not s: raise HTTPException(status_code=404)
         s.is_active = 0; db.commit()
         return {"success": True}
@@ -966,8 +950,7 @@ def get_messages(region_id: str = "", db: Session = Depends(get_db)):
             q = q.filter(models.ChatMessage.region_id == int(region_id))
         msgs = q.order_by(models.ChatMessage.created_at.desc()).limit(50).all()
         return [{"id": m.id, "username": m.username, "message": m.message,
-                 "region_id": m.region_id, "created_at": str(m.created_at)}
-                for m in msgs]
+                 "region_id": m.region_id, "created_at": str(m.created_at)} for m in msgs]
     except:
         return []
 
@@ -987,16 +970,13 @@ async def post_message(
         region_id=int(region_id) if region_id and region_id.isdigit() else None
     )
     db.add(msg); db.commit(); db.refresh(msg)
-    return {"success": True, "id": msg.id,
-            "username": msg.username, "message": msg.message}
+    return {"success": True, "id": msg.id, "username": msg.username, "message": msg.message}
 
 @app.delete("/api/chat/{message_id}")
 async def delete_message(message_id: int, request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("client_session") or request.cookies.get("admin_session")
     if not token: raise HTTPException(status_code=403)
-    msg = db.query(models.ChatMessage).filter(
-        models.ChatMessage.id == message_id
-    ).first()
+    msg = db.query(models.ChatMessage).filter(models.ChatMessage.id == message_id).first()
     if not msg: raise HTTPException(status_code=404)
     db.delete(msg); db.commit()
     return {"success": True}
@@ -1020,8 +1000,7 @@ async def submit_story(
         status="pending"
     )
     db.add(story); db.commit(); db.refresh(story)
-    return {"success": True, "story_id": story.id,
-            "message": "Story submitted for review!"}
+    return {"success": True, "story_id": story.id, "message": "Story submitted for review!"}
 
 @app.get("/api/stories")
 def get_stories(status: str = "approved", db: Session = Depends(get_db)):
@@ -1031,17 +1010,14 @@ def get_stories(status: str = "approved", db: Session = Depends(get_db)):
     return [{
         "id": s.id, "username": s.username, "title": s.title,
         "content": s.content[:200] + "..." if len(s.content) > 200 else s.content,
-        "region_id": s.region_id, "status": s.status,
-        "created_at": str(s.created_at)
+        "region_id": s.region_id, "status": s.status, "created_at": str(s.created_at)
     } for s in stories]
 
 @app.put("/api/stories/{story_id}/approve")
 async def approve_story(story_id: int, request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("client_session") or request.cookies.get("admin_session")
     if not token: raise HTTPException(status_code=403)
-    s = db.query(models.StorySubmission).filter(
-        models.StorySubmission.id == story_id
-    ).first()
+    s = db.query(models.StorySubmission).filter(models.StorySubmission.id == story_id).first()
     if not s: raise HTTPException(status_code=404)
     s.status = "approved"; db.commit()
     return {"success": True}
@@ -1050,9 +1026,7 @@ async def approve_story(story_id: int, request: Request, db: Session = Depends(g
 async def reject_story(story_id: int, request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("client_session") or request.cookies.get("admin_session")
     if not token: raise HTTPException(status_code=403)
-    s = db.query(models.StorySubmission).filter(
-        models.StorySubmission.id == story_id
-    ).first()
+    s = db.query(models.StorySubmission).filter(models.StorySubmission.id == story_id).first()
     if not s: raise HTTPException(status_code=404)
     s.status = "rejected"; db.commit()
     return {"success": True}
@@ -1104,8 +1078,7 @@ async def create_event(
     token = request.cookies.get("client_session") or request.cookies.get("admin_session")
     if not token: raise HTTPException(status_code=403)
     event = models.Event(title=title, description=description,
-                         event_date=event_date, location=location,
-                         image_url=image_url)
+                         event_date=event_date, location=location, image_url=image_url)
     db.add(event); db.commit(); db.refresh(event)
     return {"success": True, "event_id": event.id}
 
@@ -1119,7 +1092,7 @@ async def delete_event(event_id: int, request: Request, db: Session = Depends(ge
     return {"success": True}
 
 # ============================================
-# STATS
+# STATS & MISC
 # ============================================
 @app.get("/api/stats")
 def get_stats(db: Session = Depends(get_db)):
@@ -1168,7 +1141,183 @@ def import_json(data: dict, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# ECHOBOT AI — premium users only on dashboard
+# PAYSTACK PAYMENTS 💳
+# ─────────────────────────────────────────────
+# SETUP CHECKLIST (one-time):
+#   1. Go to dashboard.paystack.com → Settings → API Keys
+#   2. Copy your Secret Key (sk_live_... or sk_test_...)
+#   3. Add it to Render: Environment → PAYSTACK_SECRET_KEY = sk_live_...
+#   4. In Paystack dashboard → Settings → Webhooks, set:
+#      https://echo-stack-ghana.onrender.com/api/payments/webhook
+# ─────────────────────────────────────────────
+# PAYMENT FLOW:
+#   Frontend: fetch POST /api/payments/initialize
+#   → redirect user to authorization_url (Paystack checkout)
+#   → Paystack POSTs to /api/payments/webhook on success
+#   → user redirected to /payment/callback
+#   → user.is_premium set to 1 ✅
+# ============================================
+@app.post("/api/payments/initialize")
+async def initialize_payment(request: Request, db: Session = Depends(get_db)):
+    """
+    Frontend usage:
+      const r = await fetch('/api/payments/initialize', {method:'POST', credentials:'include'});
+      const d = await r.json();
+      if (d.authorization_url) window.location.href = d.authorization_url;
+    """
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Please log in first")
+
+    if not PAYSTACK_SECRET:
+        raise HTTPException(status_code=500,
+            detail="Paystack not configured. Add PAYSTACK_SECRET_KEY to Render environment variables.")
+
+    payload = json.dumps({
+        "email": user.email,
+        "amount": 15000,            # GH₵150 = 15000 pesewas
+        "currency": "GHS",
+        "callback_url": "https://echo-stack-ghana.onrender.com/payment/callback",
+        "metadata": {"user_id": user.id, "plan": "premium"}
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        "https://api.paystack.co/transaction/initialize",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {PAYSTACK_SECRET}",
+            "Content-Type": "application/json"
+        },
+        method="POST"
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Paystack connection error: {str(e)}")
+
+    if not result.get("status"):
+        raise HTTPException(status_code=400, detail="Payment initialization failed")
+
+    ref = result["data"]["reference"]
+    payment = models.Payment(
+        user_id=user.id, email=user.email,
+        amount=15000, reference=ref,
+        status="pending", plan="premium"
+    )
+    db.add(payment); db.commit()
+
+    return {
+        "success": True,
+        "authorization_url": result["data"]["authorization_url"],
+        "reference": ref
+    }
+
+
+@app.post("/api/payments/webhook")
+async def paystack_webhook(request: Request, db: Session = Depends(get_db)):
+    """Paystack calls this automatically after payment. No action needed from frontend."""
+    body = await request.body()
+    signature = request.headers.get("x-paystack-signature", "")
+
+    # Verify the request is really from Paystack
+    if PAYSTACK_SECRET and signature:
+        expected = hmac.new(
+            PAYSTACK_SECRET.encode(), body, hashlib.sha512
+        ).hexdigest()
+        if signature != expected:
+            raise HTTPException(status_code=400, detail="Invalid signature")
+
+    try:
+        data = json.loads(body.decode("utf-8"))
+    except:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+    if data.get("event") == "charge.success":
+        ref = data["data"]["reference"]
+        user_id = data["data"].get("metadata", {}).get("user_id")
+
+        # Mark payment as successful
+        payment = db.query(models.Payment).filter(models.Payment.reference == ref).first()
+        if payment:
+            payment.status = "success"
+
+        # Upgrade user to premium
+        if user_id:
+            user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+            if user:
+                user.is_premium = 1
+
+        db.commit()
+
+    return {"status": "ok"}
+
+
+@app.get("/payment/callback")
+async def payment_callback(reference: str, db: Session = Depends(get_db)):
+    """User lands here after completing Paystack checkout."""
+    if not PAYSTACK_SECRET:
+        return RedirectResponse("/dashboard?payment=error")
+
+    req = urllib.request.Request(
+        f"https://api.paystack.co/transaction/verify/{reference}",
+        headers={"Authorization": f"Bearer {PAYSTACK_SECRET}"},
+        method="GET"
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+    except:
+        return RedirectResponse("/dashboard?payment=error")
+
+    if result.get("status") and result["data"].get("status") == "success":
+        user_id = result["data"].get("metadata", {}).get("user_id")
+        if user_id:
+            # Use a fresh db session here (callback comes via browser redirect)
+            from database import SessionLocal
+            db2 = SessionLocal()
+            try:
+                user = db2.query(models.User).filter(models.User.id == int(user_id)).first()
+                if user:
+                    user.is_premium = 1
+                payment = db2.query(models.Payment).filter(
+                    models.Payment.reference == reference
+                ).first()
+                if payment:
+                    payment.status = "success"
+                db2.commit()
+            finally:
+                db2.close()
+        return RedirectResponse("/dashboard?upgraded=1")
+
+    return RedirectResponse("/dashboard?payment=failed")
+
+
+@app.get("/api/payments/my")
+async def get_my_payments(request: Request, db: Session = Depends(get_db)):
+    """Returns a user's payment history."""
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401)
+    payments = db.query(models.Payment).filter(
+        models.Payment.user_id == user.id
+    ).order_by(models.Payment.created_at.desc()).all()
+    return [{
+        "id": p.id, "amount": p.amount, "reference": p.reference,
+        "status": p.status, "plan": p.plan, "created_at": str(p.created_at)
+    } for p in payments]
+
+# ============================================
+# ECHOBOT AI
+# ─────────────────────────────────────────────
+# SETUP: Add HF_TOKEN to Render environment variables.
+# Get token at: huggingface.co → Settings → Access Tokens
+# ─────────────────────────────────────────────
+# ACCESS:
+#   FREE users    → locked (show upgrade prompt)
+#   PREMIUM users → full access ✅
+#   Creators      → full access ✅
+#   Superuser     → full access ✅
 # ============================================
 @app.post("/api/ai/chat")
 async def ai_chat(
@@ -1180,26 +1329,32 @@ async def ai_chat(
     try:
         user = get_user_from_request(request, db)
         if not user:
-            return {"reply": "Please log in to use EchoBot.", "success": False,
-                    "locked": True}
+            return {"reply": "Please log in to use EchoBot.", "success": False, "locked": True}
+
+        # Gate behind premium for regular users
         if not user.is_premium and user.role not in ["superuser", "admin", "creator"]:
             return {
-                "reply": "EchoBot is a premium feature. Subscribe to unlock unlimited AI heritage assistance!",
+                "reply": "EchoBot is a premium feature 🔒 Subscribe for GH₵150/month to unlock unlimited AI heritage assistance!",
                 "success": False,
                 "locked": True
             }
+
         hf_token = os.environ.get("HF_TOKEN", "")
         if not hf_token:
-            return {"reply": "EchoBot is not configured yet. Add HF_TOKEN to environment.",
+            return {"reply": "EchoBot is not configured. Add HF_TOKEN to Render environment.",
                     "success": False}
+
         system_prompt = """You are EchoBot, a friendly and knowledgeable AI heritage guide for Ghana.
 You specialise in Ghana's 16 regions, culture, history, traditions, food, music, festivals, and people.
 Keep answers concise (3-5 sentences), warm, and educational.
 If asked about something unrelated to Ghana or heritage, politely redirect to Ghana topics.
 Always respond in English."""
+
         if region_context:
             system_prompt += f"\n\nThe user is currently viewing the {region_context} region."
+
         full_prompt = f"<s>[INST] {system_prompt}\n\nUser question: {message} [/INST]"
+
         payload = json.dumps({
             "inputs": full_prompt,
             "parameters": {
@@ -1207,21 +1362,23 @@ Always respond in English."""
                 "do_sample": True, "return_full_text": False
             }
         }).encode("utf-8")
+
         req = urllib.request.Request(
             "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
             data=payload,
-            headers={"Authorization": f"Bearer {hf_token}",
-                     "Content-Type": "application/json"},
+            headers={"Authorization": f"Bearer {hf_token}", "Content-Type": "application/json"},
             method="POST"
         )
         with urllib.request.urlopen(req, timeout=30) as response:
             result = json.loads(response.read().decode("utf-8"))
+
         if isinstance(result, list) and len(result) > 0:
             reply = result[0].get("generated_text", "").strip()
         else:
             reply = "I'm having trouble responding right now. Please try again!"
+
         return {"reply": reply, "success": True, "locked": False}
+
     except Exception as e:
         print(f"AI error: {e}")
-        return {"reply": "EchoBot is warming up! Please try again in a moment.",
-                "success": False}
+        return {"reply": "EchoBot is warming up! Please try again in a moment.", "success": False}
