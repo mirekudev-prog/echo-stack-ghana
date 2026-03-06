@@ -30,7 +30,6 @@
         .btn-primary:hover {
             background: #0077b6 !important;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,119,182,0.4);
         }
     </style>
 </head>
@@ -55,6 +54,7 @@
             
             <button 
                 type="submit" 
+                id="submit-btn"
                 class="w-full btn-primary py-3 rounded-lg font-semibold text-lg"
             >
                 Enter Admin Portal →
@@ -62,10 +62,6 @@
             
             <p id="error-message" class="text-red-600 text-sm text-center hidden"></p>
         </form>
-        
-        <p class="text-center text-xs text-gray-400 mt-6">
-            Protected area • Authorized personnel only
-        </p>
     </div>
 
     <script>
@@ -74,41 +70,41 @@
             
             const answer = document.getElementById('answer').value;
             const errorMsg = document.getElementById('error-message');
-            const submitBtn = e.target.querySelector('button');
+            const submitBtn = document.getElementById('submit-btn');
             
-            // Disable button while logging in
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Verifying...';
+            errorMsg.classList.add('hidden');
             
             try {
-                // ✅ CORRECT ENDPOINT: /api/auth/login (NOT /api/users/login)
-                const formData = new FormData();
+                // ✅ USE THIS ENDPOINT: /api/auth/login
+                const formData = new URLSearchParams();
                 formData.append('answer', answer);
                 
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
                     body: formData
                 });
                 
+                console.log('Response status:', response.status);
                 const data = await response.json();
+                console.log('Response data:', data);
                 
                 if (response.ok && data.success) {
                     // ✅ Success - redirect to admin dashboard
                     window.location.href = '/admin';
                 } else {
-                    // ❌ Failed - show error
                     throw new Error(data.detail || 'Incorrect answer');
                 }
             } catch (error) {
-                // Show error message
-                errorMsg.textContent = '❌ ' + error.message + '. The answer is case-sensitive.';
+                console.error('Login error:', error);
+                errorMsg.textContent = '❌ Incorrect answer. Try again.';
                 errorMsg.classList.remove('hidden');
-                
-                // Reset button
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Enter Admin Portal →';
-                
-                // Clear input
                 document.getElementById('answer').value = '';
                 document.getElementById('answer').focus();
             }
