@@ -192,6 +192,10 @@ async def user_login(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/dashboard")
+async def dashboard_redirect():
+    return RedirectResponse(url="/client-dashboard")
+    
 @app.post("/api/users/logout")
 def user_logout():
     response = JSONResponse(content={"success": True})
