@@ -1,14 +1,17 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Float, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from database import Base
 import datetime
+import uuid
 
 
-# ── USERS (all roles in one table) ───────────────────────────────────────────
+# ── USERS ─────────────────────────────────────────────────────────────────────
 class User(Base):
     __tablename__ = "users"
 
-    id            = Column(Integer, primary_key=True, index=True)
+    # UUID primary key — matches Supabase default
+    id            = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     username      = Column(String(100), unique=True, index=True, nullable=False)
     email         = Column(String(255), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
@@ -19,47 +22,48 @@ class User(Base):
     interests     = Column(Text, default="General")
     plan          = Column(String(20), default="free")   # free | premium
     is_active     = Column(Boolean, default=True)
-    # Creator-specific
+    # Creator fields
     channel_name  = Column(String(200), default="")
     channel_desc  = Column(Text, default="")
     channel_banner= Column(Text, default="")
     creator_since = Column(DateTime, nullable=True)
-    # Stats
     follower_count= Column(Integer, default=0)
     post_count    = Column(Integer, default=0)
     created_at    = Column(DateTime, default=datetime.datetime.utcnow)
 
-    posts         = relationship("Post", back_populates="author", cascade="all, delete-orphan")
+    posts         = relationship("Post", back_populates="author", cascade="all, delete-orphan",
+                                 foreign_keys="Post.author_id")
     comments      = relationship("Comment", back_populates="author", cascade="all, delete-orphan")
 
 
-# ── POSTS (creator content) ───────────────────────────────────────────────────
+# ── POSTS ─────────────────────────────────────────────────────────────────────
 class Post(Base):
     __tablename__ = "posts"
 
     id            = Column(Integer, primary_key=True, index=True)
-    author_id     = Column(Integer, ForeignKey("users.id"), nullable=False)
+    author_id     = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     title         = Column(String(400), nullable=False)
     slug          = Column(String(400), unique=True, index=True)
     content       = Column(Text, default="")
     excerpt       = Column(Text, default="")
     cover_image   = Column(Text, default="")
-    content_type  = Column(String(50), default="article")  # article | audio | photo_essay | video
+    content_type  = Column(String(50), default="article")
     audio_url     = Column(Text, default="")
     video_url     = Column(Text, default="")
-    gallery       = Column(Text, default="")   # comma-separated image URLs
-    region_id     = Column(Integer, ForeignKey("regions.id"), nullable=True)
+    gallery       = Column(Text, default="")
+    region_id     = Column(Integer, nullable=True)
     tags          = Column(Text, default="")
-    status        = Column(String(20), default="draft")  # draft | pending | published | rejected
+    status        = Column(String(20), default="draft")
     is_premium    = Column(Boolean, default=False)
     view_count    = Column(Integer, default=0)
     like_count    = Column(Integer, default=0)
     comment_count = Column(Integer, default=0)
     published_at  = Column(DateTime, nullable=True)
     created_at    = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at    = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    updated_at    = Column(DateTime, default=datetime.datetime.utcnow,
+                           onupdate=datetime.datetime.utcnow)
 
-    author        = relationship("User", back_populates="posts")
+    author        = relationship("User", back_populates="posts", foreign_keys=[author_id])
     comments      = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
 
 
@@ -69,7 +73,7 @@ class Comment(Base):
 
     id          = Column(Integer, primary_key=True, index=True)
     post_id     = Column(Integer, ForeignKey("posts.id"), nullable=False)
-    author_id   = Column(Integer, ForeignKey("users.id"), nullable=False)
+    author_id   = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     content     = Column(Text, nullable=False)
     is_approved = Column(Boolean, default=True)
     created_at  = Column(DateTime, default=datetime.datetime.utcnow)
@@ -78,13 +82,13 @@ class Comment(Base):
     author      = relationship("User", back_populates="comments")
 
 
-# ── FOLLOWS (user follows creator) ───────────────────────────────────────────
+# ── FOLLOWS ───────────────────────────────────────────────────────────────────
 class Follow(Base):
     __tablename__ = "follows"
 
     id          = Column(Integer, primary_key=True, index=True)
-    follower_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    creator_id  = Column(Integer, ForeignKey("users.id"), nullable=False)
+    follower_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    creator_id  = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     created_at  = Column(DateTime, default=datetime.datetime.utcnow)
 
 
@@ -106,7 +110,8 @@ class Region(Base):
     audio_files    = Column(Text, default="")
     source         = Column(Text, default="")
     created_at     = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at     = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    updated_at     = Column(DateTime, default=datetime.datetime.utcnow,
+                            onupdate=datetime.datetime.utcnow)
 
 
 # ── UPLOADED FILES ────────────────────────────────────────────────────────────
@@ -124,7 +129,7 @@ class UploadedFile(Base):
     category      = Column(String(100), default="general")
     description   = Column(Text, default="")
     is_public     = Column(Boolean, default=True)
-    region_id     = Column(Integer, ForeignKey("regions.id"), nullable=True)
+    region_id     = Column(Integer, nullable=True)
     uploaded_by   = Column(String(100), default="")
     created_at    = Column(DateTime, default=datetime.datetime.utcnow)
 
@@ -147,10 +152,10 @@ class ChatMessage(Base):
     __tablename__ = "chat_messages"
 
     id          = Column(Integer, primary_key=True, index=True)
-    user_id     = Column(Integer, ForeignKey("users.id"), nullable=True)
+    user_id     = Column(UUID(as_uuid=True), nullable=True)
     username    = Column(String(100), default="Anonymous")
     message     = Column(Text, nullable=False)
-    region_id   = Column(Integer, ForeignKey("regions.id"), nullable=True)
+    region_id   = Column(Integer, nullable=True)
     is_approved = Column(Boolean, default=True)
     created_at  = Column(DateTime, default=datetime.datetime.utcnow)
 
@@ -159,25 +164,25 @@ class ChatMessage(Base):
 class StorySubmission(Base):
     __tablename__ = "story_submissions"
 
-    id        = Column(Integer, primary_key=True, index=True)
-    user_id   = Column(Integer, ForeignKey("users.id"), nullable=True)
-    username  = Column(String(100), default="Anonymous")
-    title     = Column(String(300), nullable=False)
-    content   = Column(Text, nullable=False)
-    region_id = Column(Integer, ForeignKey("regions.id"), nullable=True)
-    status    = Column(String(50), default="pending")
-    created_at= Column(DateTime, default=datetime.datetime.utcnow)
+    id         = Column(Integer, primary_key=True, index=True)
+    user_id    = Column(UUID(as_uuid=True), nullable=True)
+    username   = Column(String(100), default="Anonymous")
+    title      = Column(String(300), nullable=False)
+    content    = Column(Text, nullable=False)
+    region_id  = Column(Integer, nullable=True)
+    status     = Column(String(50), default="pending")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 
 # ── NEWSLETTER ────────────────────────────────────────────────────────────────
 class NewsletterSubscriber(Base):
     __tablename__ = "newsletter_subscribers"
 
-    id           = Column(Integer, primary_key=True, index=True)
-    email        = Column(String(255), unique=True, index=True, nullable=False)
-    full_name    = Column(String(200), default="")
-    is_active    = Column(Boolean, default=True)
-    subscribed_at= Column(DateTime, default=datetime.datetime.utcnow)
+    id            = Column(Integer, primary_key=True, index=True)
+    email         = Column(String(255), unique=True, index=True, nullable=False)
+    full_name     = Column(String(200), default="")
+    is_active     = Column(Boolean, default=True)
+    subscribed_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 
 # ── EVENTS ────────────────────────────────────────────────────────────────────
