@@ -4,218 +4,292 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — EchoStack</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;--red:#DC2626;--green:#16A34A;--border:#E2E8F0;--muted:#94A3B8;--sw:220px}
-body{font-family:'DM Sans',sans-serif;background:#F1F5F9;min-height:100vh;display:flex}
+:root{--ink:#0D1B2A;--ink2:#1E2D3E;--gold:#C8962E;--gold2:#E8B84B;--gold3:rgba(200,150,46,.12);--cream:#FAF6EF;--red:#DC2626;--green:#16A34A;--blue:#2563EB;--border:#E2E8F0;--muted:#94A3B8;--soft:#F8FAFC;--sw:230px}
+html,body{height:100%}
+body{font-family:'DM Sans',sans-serif;background:#EEF2F7;display:flex;min-height:100vh}
+
+/* Sidebar */
 .sidebar{width:var(--sw);background:var(--ink);min-height:100vh;position:fixed;top:0;left:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto}
-.sb-logo{padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;flex-shrink:0}
-.sb-logo img{width:28px;height:28px;border-radius:6px;object-fit:contain}
-.sb-logo-text span{display:block;font-family:'Playfair Display',serif;color:#fff;font-size:1rem;line-height:1}
-.sb-badge{font-size:.6rem;font-weight:700;color:var(--gold);letter-spacing:.06em;margin-top:3px}
-.sb-nav{padding:14px 10px;flex:1}
-.sb-section{font-size:.62rem;font-weight:700;color:rgba(255,255,255,.25);letter-spacing:.1em;text-transform:uppercase;padding:12px 12px 5px}
-.sb-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;color:#94A3B8;font-size:.82rem;font-weight:500;cursor:pointer;transition:all .18s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
+.sb-logo{padding:18px 16px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sb-logo img{width:30px;height:30px;border-radius:7px;object-fit:contain}
+.brand{font-family:'Playfair Display',serif;color:#fff;font-size:1.05rem;line-height:1}
+.sb-badge{font-size:.58rem;font-weight:700;color:var(--gold);letter-spacing:.1em;margin-top:3px;text-transform:uppercase}
+.sb-nav{padding:10px 8px;flex:1}
+.sb-section{font-size:.58rem;font-weight:700;color:rgba(255,255,255,.22);letter-spacing:.12em;text-transform:uppercase;padding:14px 10px 4px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;color:#8FA3B4;font-size:.8rem;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:1px;border:none;background:none;width:100%;text-align:left}
 .sb-item:hover{background:rgba(255,255,255,.07);color:#fff}
-.sb-item.on{background:rgba(200,150,46,.15);color:var(--gold2)}
-.sb-bottom{padding:14px 10px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0}
-.sb-user{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.05);margin-bottom:6px}
-.sb-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0}
-.sb-uname{font-size:.78rem;font-weight:600;color:#fff;line-height:1}
-.sb-role{font-size:.62rem;color:var(--gold);font-weight:700;margin-top:2px}
-.main{margin-left:var(--sw);flex:1;padding:26px;min-height:100vh}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px}
-.topbar h1{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--ink)}
-.topbar p{font-size:.8rem;color:var(--muted);margin-top:2px}
-.topbar-btns{display:flex;gap:8px}
-.tbtn{padding:8px 16px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
-.tbtn.gold{background:var(--gold);color:#fff}.tbtn.gold:hover{background:#a97825}
-.tbtn.ghost{background:#fff;color:var(--ink);border:1px solid var(--border)}.tbtn.ghost:hover{background:var(--ink);color:#fff}
+.sb-item.on{background:var(--gold3);color:var(--gold2)}
+.ic{width:18px;text-align:center;font-size:.88rem;flex-shrink:0}
+.sb-bottom{padding:12px 8px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.sb-user{display:flex;align-items:center;gap:9px;padding:10px;border-radius:8px;background:rgba(255,255,255,.05);margin-bottom:6px}
+.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;color:#fff;flex-shrink:0}
+.sb-uname{font-size:.76rem;font-weight:600;color:#fff}
+.sb-role{font-size:.58rem;color:var(--gold);font-weight:700;margin-top:1px}
+
+/* Main */
+.main{margin-left:var(--sw);flex:1;padding:24px;min-height:100vh}
 .panel{display:none}.panel.on{display:block}
-.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
-@media(max-width:900px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
-.sc{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(13,27,42,.04)}
-.sv{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--ink)}
-.sl{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
-.sbg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.66rem;font-weight:700;margin-top:6px}
-.bg-blue{background:#EFF6FF;color:#2563EB}.bg-gold{background:rgba(200,150,46,.12);color:var(--gold)}
-.bg-green{background:#F0FDF4;color:var(--green)}.bg-gray{background:#F8FAFC;color:var(--muted)}
-.tcard{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 6px rgba(13,27,42,.05);margin-bottom:18px}
-.thead{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.thead h2{font-size:.9rem;font-weight:700;color:var(--ink)}
-.srch{padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;width:200px;transition:border-color .2s}
-.srch:focus{border-color:var(--gold)}
-.fsel{padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;cursor:pointer}
+
+/* Topbar */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.topbar h1{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--ink)}
+.topbar p{font-size:.78rem;color:var(--muted);margin-top:2px}
+.topbar-r{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* Buttons */
+.btn{padding:8px 16px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;border:none;transition:all .18s;display:inline-flex;align-items:center;gap:5px;text-decoration:none;white-space:nowrap}
+.bg{background:#fff;color:var(--ink);border:1.5px solid var(--border)}.bg:hover{background:var(--ink);color:#fff}
+.bo{background:var(--gold);color:#fff}.bo:hover{background:#a97825}
+.br{background:var(--red);color:#fff}.br:hover{background:#b91c1c}
+.bgr{background:var(--green);color:#fff}.bgr:hover{background:#15803d}
+.bb{background:var(--blue);color:#fff}.bb:hover{background:#1d4ed8}
+.btn-sm{padding:4px 9px;font-size:.69rem;border-radius:6px}
+
+/* Stats */
+.sg{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:1100px){.sg{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.sg{grid-template-columns:repeat(2,1fr)}}
+.sc{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.sv{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--ink);line-height:1}
+.sl{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:4px}
+.sb2{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.61rem;font-weight:700;margin-top:7px}
+.c-blue{background:#EFF6FF;color:var(--blue)}.c-gold{background:var(--gold3);color:var(--gold)}
+.c-green{background:#F0FDF4;color:var(--green)}.c-gray{background:var(--soft);color:var(--muted)}
+.c-red{background:#FEF2F2;color:var(--red)}
+
+/* Card */
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.04);margin-bottom:18px}
+.ch{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ch h2{font-size:.88rem;font-weight:700;color:var(--ink)}
+.ct{font-size:.77rem;color:var(--muted);font-weight:400;margin-left:5px}
+
+/* Table */
+.tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-th{padding:10px 14px;text-align:left;font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:#FAFBFF;white-space:nowrap}
-td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:.83rem;color:var(--ink);vertical-align:middle}
+th{padding:9px 14px;text-align:left;font-size:.64rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);background:var(--soft);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:.81rem;color:var(--ink);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#FAFBFF}
-.rb{padding:2px 8px;border-radius:20px;font-size:.66rem;font-weight:700;text-transform:uppercase;white-space:nowrap}
-.r-user{background:#F0F9FF;color:#0369A1}.r-creator{background:rgba(200,150,46,.12);color:var(--gold)}
+
+/* Badges */
+.badge{padding:2px 8px;border-radius:20px;font-size:.63rem;font-weight:700;text-transform:uppercase;white-space:nowrap}
+.r-user{background:#F0F9FF;color:#0369A1}.r-creator{background:var(--gold3);color:var(--gold)}
 .r-admin{background:#F0FDF4;color:var(--green)}.r-superuser{background:#FEF2F2;color:var(--red)}
-.s-published{background:#F0FDF4;color:var(--green)}.s-draft{background:#F8FAFC;color:var(--muted)}
+.s-published{background:#F0FDF4;color:var(--green)}.s-draft{background:var(--soft);color:var(--muted)}
 .s-pending{background:#FFF7ED;color:#D97706}.s-rejected{background:#FEF2F2;color:var(--red)}
-.ab{padding:4px 9px;border-radius:6px;font-size:.71rem;font-weight:600;cursor:pointer;border:none;transition:all .18s;margin-right:3px;white-space:nowrap}
-.ag{background:#F0FDF4;color:var(--green)}.ag:hover{background:var(--green);color:#fff}
-.ab2{background:#EFF6FF;color:#2563EB}.ab2:hover{background:#2563EB;color:#fff}
-.ao{background:rgba(200,150,46,.1);color:var(--gold)}.ao:hover{background:var(--gold);color:#fff}
-.ar{background:#FEF2F2;color:var(--red)}.ar:hover{background:var(--red);color:#fff}
-.agr{background:#F1F5F9;color:var(--ink)}.agr:hover{background:var(--ink);color:#fff}
-.rsel{padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:.75rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
+.p-yes{background:var(--gold3);color:var(--gold)}.p-no{background:var(--soft);color:var(--muted)}
+
+/* Form elements */
+.rsel{padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:.74rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;background:#fff}
 .rsel:focus{border-color:var(--gold)}
-#login-overlay{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s}
-#login-overlay.hide{display:none}
-.lbox{background:#fff;border-radius:20px;padding:36px;max-width:380px;width:92%;text-align:center}
-.lbox .ltitle{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--ink);margin-bottom:6px}
-.lbox p{color:var(--muted);font-size:.83rem;margin-bottom:20px}
-.lbox input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;margin-bottom:12px;transition:border-color .2s}
+.srch{padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;background:#fff;transition:border .2s}
+.srch:focus{border-color:var(--gold)}
+.fsel{padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;cursor:pointer;background:#fff}
+
+/* Empty */
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:.83rem}
+.ei{font-size:2rem;margin-bottom:8px}
+
+/* Login */
+#lo{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:9999}
+#lo.hide{display:none}
+.lbox{background:#fff;border-radius:20px;padding:38px 36px;max-width:380px;width:92%;text-align:center}
+.l-icon{font-size:2.4rem;margin-bottom:6px}
+.l-title{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--ink);margin-bottom:4px}
+.l-sub{font-size:.8rem;color:var(--muted);margin-bottom:22px}
+.lbox input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;margin-bottom:12px;text-align:center;letter-spacing:.08em;transition:border .2s}
 .lbox input:focus{border-color:var(--gold)}
-.lbox button{width:100%;padding:12px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .2s}
-.lbox button:hover{background:var(--gold)}
-.lerr{color:var(--red);font-size:.78rem;margin-top:8px;display:none}
-.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
-.mbg.open{display:flex}
-.modal{background:#fff;border-radius:16px;padding:26px;max-width:460px;width:92%;max-height:88vh;overflow-y:auto}
-.modal h2{font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:14px;color:var(--ink)}
-.mf{margin-bottom:13px}
-.mf label{display:block;font-size:.72rem;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
-.mf input,.mf select,.mf textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s}
+.l-btn{width:100%;padding:12px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:600;cursor:pointer;transition:background .2s}
+.l-btn:hover{background:var(--gold)}
+.lerr{color:var(--red);font-size:.77rem;margin-top:10px;display:none}
+.l-hint{font-size:.7rem;color:var(--muted);margin-top:14px}
+
+/* Modals */
+.ovl{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:16px}
+.ovl.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:26px;max-width:580px;width:100%;max-height:92vh;overflow-y:auto}
+.modal h2{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:18px;color:var(--ink)}
+.mf{margin-bottom:14px}
+.mf label{display:block;font-size:.7rem;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.mf input,.mf select,.mf textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.87rem;outline:none;transition:border .2s;background:#fff}
 .mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--gold)}
-.mf textarea{min-height:90px;resize:vertical}
-.mbtns{display:flex;gap:10px;margin-top:16px}
+.mf textarea{min-height:100px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mbtns{display:flex;gap:10px;margin-top:18px}
 .mbtns button{flex:1;padding:10px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
-.mc{background:var(--gold);color:#fff}.mc:hover{background:#a97825}
-.mx{background:var(--border);color:var(--ink)}.mx:hover{background:#cbd5e1}
-.md{background:var(--red);color:#fff}.md:hover{background:#b91c1c}
-.toast{position:fixed;bottom:22px;right:22px;background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:.84rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .3s,opacity .3s;z-index:9999;transform:translateY(60px);opacity:0;pointer-events:none}
-.toast.on{transform:translateY(0);opacity:1}
+
+/* Toast */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--ink);color:#fff;padding:11px 20px;border-radius:11px;font-size:.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:transform .3s,opacity .3s;z-index:9999;transform:translateY(60px);opacity:0;pointer-events:none;max-width:300px}
+.toast.show{transform:translateY(0);opacity:1}
 .toast.ok{background:var(--green)}.toast.er{background:var(--red)}.toast.warn{background:#D97706}
-.empty{text-align:center;padding:36px;color:var(--muted);font-size:.85rem}
-.eicon{font-size:1.8rem;margin-bottom:8px}
+
+/* Img preview */
+.iprev{width:100%;height:110px;object-fit:cover;border-radius:8px;margin-top:6px;display:none;border:1px solid var(--border)}
+
+/* Form panel */
+.form-panel{max-width:780px}
+.form-panel .card .fp{padding:22px}
 </style>
 </head>
 <body>
 
-<div id="login-overlay">
+<!-- LOGIN -->
+<div id="lo">
   <div class="lbox">
-    <div class="ltitle">🇬🇭 EchoStack Admin</div>
-    <p>Superuser access only</p>
-    <input type="password" id="li" placeholder="Enter your account password" autocomplete="current-password">
-    <button onclick="doLogin()">Enter Admin Portal →</button>
-    <div class="lerr" id="lerr">Incorrect credentials. Try signing in at /user-login first.</div>
+    <div class="l-icon">🇬🇭</div>
+    <div class="l-title">EchoStack Admin</div>
+    <div class="l-sub">Enter the secret key to continue</div>
+    <input type="text" id="li" placeholder="Type: admin" autocomplete="off">
+    <button class="l-btn" onclick="doLogin()">Enter Admin Portal →</button>
+    <div class="lerr" id="lerr">Wrong key. Try again.</div>
+    <div class="l-hint">Share this URL + key with trusted team members only</div>
   </div>
 </div>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sb-logo">
     <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-    <div class="sb-logo-text">
-      <span>EchoStack</span>
-      <div class="sb-badge">⚙️ ADMIN PORTAL</div>
-    </div>
+    <div><div class="brand">EchoStack</div><div class="sb-badge">⚙ Admin Portal</div></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Overview</div>
-    <button class="sb-item on" onclick="go('overview',this)">📊 Dashboard</button>
+    <button class="sb-item on" onclick="go('overview',this)"><span class="ic">📊</span> Dashboard</button>
     <div class="sb-section">Content</div>
-    <button class="sb-item" onclick="go('posts',this)">📝 All Posts</button>
-    <button class="sb-item" onclick="go('stories',this)">📖 Story Submissions</button>
-    <button class="sb-item" onclick="go('regions',this)">🗺 Regions</button>
+    <button class="sb-item" onclick="go('posts',this)"><span class="ic">📝</span> All Posts</button>
+    <button class="sb-item" onclick="go('newpost',this)"><span class="ic">✍️</span> Write a Post</button>
+    <button class="sb-item" onclick="go('comments',this)"><span class="ic">💬</span> Comments</button>
+    <button class="sb-item" onclick="go('stories',this)"><span class="ic">📖</span> Story Submissions</button>
+    <div class="sb-section">Heritage</div>
+    <button class="sb-item" onclick="go('regions',this)"><span class="ic">🗺</span> Regions</button>
+    <button class="sb-item" onclick="go('newregion',this)"><span class="ic">➕</span> Add Region</button>
     <div class="sb-section">People</div>
-    <button class="sb-item" onclick="go('users',this)">👥 All Users</button>
-    <button class="sb-item" onclick="go('creators',this)">✍️ Creators</button>
-    <button class="sb-item" onclick="go('subs',this)">📧 Newsletter</button>
+    <button class="sb-item" onclick="go('users',this)"><span class="ic">👥</span> All Users</button>
+    <button class="sb-item" onclick="go('creators',this)"><span class="ic">🎙</span> Creators</button>
+    <button class="sb-item" onclick="go('subs',this)"><span class="ic">📧</span> Newsletter</button>
     <div class="sb-section">Site</div>
-    <button class="sb-item" onclick="go('events',this)">🎉 Events</button>
-    <button class="sb-item" onclick="go('files',this)">📁 Files</button>
-    <div class="sb-section">Portals</div>
-    <button class="sb-item" onclick="window.open('/dashboard','_blank')">📰 User Feed ↗</button>
-    <button class="sb-item" onclick="window.open('/creator','_blank')">✍️ Creator Portal ↗</button>
-    <button class="sb-item" onclick="window.open('/app','_blank')">🗺 Heritage Map ↗</button>
+    <button class="sb-item" onclick="go('events',this)"><span class="ic">🎉</span> Events</button>
+    <button class="sb-item" onclick="go('files',this)"><span class="ic">📁</span> Files</button>
+    <div class="sb-section">Visit</div>
+    <button class="sb-item" onclick="window.open('/','_blank')"><span class="ic">🏠</span> Homepage ↗</button>
+    <button class="sb-item" onclick="window.open('/dashboard','_blank')"><span class="ic">📰</span> User Feed ↗</button>
+    <button class="sb-item" onclick="window.open('/creator','_blank')"><span class="ic">✍️</span> Creator Portal ↗</button>
+    <button class="sb-item" onclick="window.open('/app','_blank')"><span class="ic">🗺</span> Heritage Map ↗</button>
   </nav>
   <div class="sb-bottom">
     <div class="sb-user">
-      <div class="sb-av" id="sb-av">E</div>
-      <div>
-        <div class="sb-uname" id="sb-name">Emmanuel</div>
-        <div class="sb-role" id="sb-role">SUPERUSER</div>
-      </div>
+      <div class="av" id="sb-av">A</div>
+      <div><div class="sb-uname" id="sb-name">Admin</div><div class="sb-role">ADMIN ACCESS</div></div>
     </div>
-    <button class="sb-item" onclick="doLogout()">🚪 Sign Out</button>
+    <button class="sb-item" onclick="doLogout()"><span class="ic">🚪</span> Sign Out</button>
   </div>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
   <!-- OVERVIEW -->
   <div class="panel on" id="panel-overview">
     <div class="topbar">
-      <div><h1>Dashboard Overview</h1><p id="welcome-msg">Welcome back 🇬🇭</p></div>
-      <div class="topbar-btns">
-        <button class="tbtn ghost" onclick="loadOverview()">🔄 Refresh</button>
-        <a href="/dashboard" class="tbtn gold" target="_blank">View Site →</a>
+      <div><h1>Dashboard</h1><p id="welcome-msg">Loading…</p></div>
+      <div class="topbar-r">
+        <button class="btn bg" onclick="loadOverview()">🔄 Refresh</button>
+        <a href="/dashboard" class="btn bo" target="_blank">View Site →</a>
       </div>
     </div>
-    <div class="stats-grid">
-      <div class="sc"><div class="sv" id="ov-users">—</div><div class="sl">Total Users</div><span class="sbg bg-blue">Registered</span></div>
-      <div class="sc"><div class="sv" id="ov-creators">—</div><div class="sl">Creators</div><span class="sbg bg-gold">Channels</span></div>
-      <div class="sc"><div class="sv" id="ov-posts">—</div><div class="sl">Posts</div><span class="sbg bg-green">Published</span></div>
-      <div class="sc"><div class="sv" id="ov-regions">—</div><div class="sl">Regions</div><span class="sbg bg-gray">Heritage</span></div>
-      <div class="sc"><div class="sv" id="ov-follows">—</div><div class="sl">Follows</div><span class="sbg bg-green">Active</span></div>
+    <div class="sg">
+      <div class="sc"><div class="sv" id="ov-users">—</div><div class="sl">Total Users</div><span class="sb2 c-blue">Registered</span></div>
+      <div class="sc"><div class="sv" id="ov-creators">—</div><div class="sl">Creators</div><span class="sb2 c-gold">Channels</span></div>
+      <div class="sc"><div class="sv" id="ov-posts">—</div><div class="sl">Published Posts</div><span class="sb2 c-green">Live</span></div>
+      <div class="sc"><div class="sv" id="ov-regions">—</div><div class="sl">Regions</div><span class="sb2 c-gray">Heritage</span></div>
+      <div class="sc"><div class="sv" id="ov-pending">—</div><div class="sl">Pending Review</div><span class="sb2 c-red">Action needed</span></div>
     </div>
-    <div class="tcard">
-      <div class="thead"><h2>📝 Recent Posts</h2><button class="tbtn ghost" style="font-size:.78rem;padding:6px 12px" onclick="go('posts',null)">All Posts →</button></div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Author</th><th>Type</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead>
+    <div class="card">
+      <div class="ch"><h2>📝 Recent Posts</h2><button class="btn bg" style="font-size:.74rem;padding:5px 11px" onclick="go('posts',null)">All Posts →</button></div>
+      <div class="tw"><table><thead><tr><th>Title</th><th>Author</th><th>Type</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead>
       <tbody id="ov-posts-tb"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody></table></div>
     </div>
-    <div class="tcard">
-      <div class="thead"><h2>👥 Recent Users</h2><button class="tbtn ghost" style="font-size:.78rem;padding:6px 12px" onclick="go('users',null)">All Users →</button></div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
-      <tbody id="ov-users-tb"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody></table></div>
+    <div class="card">
+      <div class="ch"><h2>👥 Recent Users</h2><button class="btn bg" style="font-size:.74rem;padding:5px 11px" onclick="go('users',null)">All Users →</button></div>
+      <div class="tw"><table><thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Plan</th><th>Joined</th></tr></thead>
+      <tbody id="ov-users-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div>
     </div>
   </div>
 
-  <!-- USERS -->
-  <div class="panel" id="panel-users">
-    <div class="topbar">
-      <h1>All Users</h1>
-      <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('users-tb',this.value)">
-    </div>
-    <div class="tcard">
-      <div class="thead"><h2>User Management <span id="users-ct" style="font-weight:400;color:var(--muted);font-size:.82rem"></span></h2></div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Plan</th><th>Posts</th><th>Joined</th><th>Actions</th></tr></thead>
-      <tbody id="users-tb"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody></table></div>
-    </div>
-  </div>
-
-  <!-- CREATORS -->
-  <div class="panel" id="panel-creators">
-    <div class="topbar"><h1>Creators</h1></div>
-    <div class="tcard">
-      <div class="thead"><h2>Creator Channels</h2></div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Channel</th><th>Username</th><th>Followers</th><th>Posts</th><th>Actions</th></tr></thead>
-      <tbody id="creators-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div>
-    </div>
-  </div>
-
-  <!-- POSTS -->
+  <!-- ALL POSTS -->
   <div class="panel" id="panel-posts">
     <div class="topbar">
       <h1>All Posts</h1>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <select class="fsel" id="posts-filter" onchange="loadPosts()">
+      <div class="topbar-r">
+        <select class="fsel" id="posts-status" onchange="loadPosts()">
           <option value="all">All Status</option><option value="published">Published</option>
           <option value="draft">Drafts</option><option value="pending">Pending</option><option value="rejected">Rejected</option>
         </select>
-        <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('posts-tb',this.value)">
+        <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('posts-tb',this.value)" style="width:180px">
+        <button class="btn bo" onclick="go('newpost',null)">+ Write Post</button>
       </div>
     </div>
-    <div class="tcard">
-      <div class="thead"><h2>Post Moderation <span id="posts-ct" style="font-weight:400;color:var(--muted);font-size:.82rem"></span></h2></div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Author</th><th>Type</th><th>Status</th><th>Views</th><th>💬</th><th>Actions</th></tr></thead>
-      <tbody id="posts-tb"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody></table></div>
+    <div class="card">
+      <div class="ch"><h2>Post Moderation<span class="ct" id="posts-ct"></span></h2></div>
+      <div class="tw"><table><thead><tr><th>Title</th><th>Author</th><th>Type</th><th>Status</th><th>Views</th><th>💬</th><th>Premium</th><th>Actions</th></tr></thead>
+      <tbody id="posts-tb"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- WRITE POST -->
+  <div class="panel form-panel" id="panel-newpost">
+    <div class="topbar"><div><h1>Write a Post</h1><p>Publish directly as admin — no creator account needed</p></div></div>
+    <div class="card">
+      <div class="fp">
+        <div class="mf"><label>Title *</label><input id="np-title" type="text" placeholder="Post title…"></div>
+        <div class="row2">
+          <div class="mf"><label>Content Type</label>
+            <select id="np-type" onchange="toggleNp()">
+              <option value="article">📝 Article</option><option value="audio">🎵 Audio</option>
+              <option value="photo_essay">📸 Photo Essay</option><option value="video">🎬 Video</option>
+            </select>
+          </div>
+          <div class="mf"><label>Status</label>
+            <select id="np-status">
+              <option value="published">Published (live now)</option>
+              <option value="draft">Draft (hidden)</option>
+              <option value="pending">Pending review</option>
+            </select>
+          </div>
+        </div>
+        <div class="mf"><label>Excerpt / Subtitle</label><input id="np-excerpt" type="text" placeholder="Short description…"></div>
+        <div class="mf"><label>Cover Image URL</label><input id="np-cover" type="text" placeholder="https://…" oninput="pi('np-cover','np-cp')">
+          <img id="np-cp" class="iprev"></div>
+        <div class="mf" id="np-af" style="display:none"><label>Audio URL</label><input id="np-audio" type="text" placeholder="https://…/audio.mp3"></div>
+        <div class="mf" id="np-vf" style="display:none"><label>Video URL</label><input id="np-video" type="text" placeholder="https://youtube.com/…"></div>
+        <div class="mf"><label>Content (body / article text / caption)</label><textarea id="np-content" rows="10" placeholder="Write your content here…"></textarea></div>
+        <div class="mf"><label>Tags (comma separated)</label><input id="np-tags" type="text" placeholder="Ghana, culture, Ashanti…"></div>
+        <div class="mf"><label>Author username (optional — defaults to superuser account)</label><input id="np-author" type="text" placeholder="username"></div>
+        <div class="mf" style="display:flex;align-items:center;gap:10px">
+          <input type="checkbox" id="np-premium" style="width:18px;height:18px;cursor:pointer">
+          <label for="np-premium" style="font-size:.83rem;font-weight:500;color:var(--ink);cursor:pointer;text-transform:none;letter-spacing:0">Premium only post</label>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="btn bo" onclick="submitNewPost()">Publish Post →</button>
+          <button class="btn bg" onclick="go('posts',null)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMENTS -->
+  <div class="panel" id="panel-comments">
+    <div class="topbar">
+      <h1>Comments</h1>
+      <div class="topbar-r"><input class="srch" placeholder="🔍 Search…" oninput="filterTbl('comments-tb',this.value)" style="width:180px"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2>All Comments<span class="ct" id="comments-ct"></span></h2></div>
+      <div class="tw"><table><thead><tr><th>Comment</th><th>Author</th><th>Post</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody id="comments-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div>
     </div>
   </div>
 
@@ -223,33 +297,109 @@ tr:hover td{background:#FAFBFF}
   <div class="panel" id="panel-stories">
     <div class="topbar">
       <h1>Story Submissions</h1>
-      <select class="fsel" id="stories-filter" onchange="loadStories()">
-        <option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option>
-      </select>
+      <div class="topbar-r">
+        <select class="fsel" id="stories-filter" onchange="loadStories()">
+          <option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option>
+        </select>
+      </div>
     </div>
-    <div class="tcard">
-      <div class="thead"><h2>Submissions</h2></div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Author</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+    <div class="card">
+      <div class="ch"><h2>Submissions</h2></div>
+      <div class="tw"><table><thead><tr><th>Title</th><th>Author</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
       <tbody id="stories-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div>
     </div>
   </div>
 
   <!-- REGIONS -->
   <div class="panel" id="panel-regions">
-    <div class="topbar"><h1>Regions</h1></div>
-    <div class="tcard">
-      <div class="thead"><h2>Heritage Regions <span id="regions-ct" style="font-weight:400;color:var(--muted);font-size:.82rem"></span></h2></div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Name</th><th>Capital</th><th>Category</th><th>Audio</th><th>Images</th></tr></thead>
-      <tbody id="regions-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div>
+    <div class="topbar">
+      <h1>Regions</h1>
+      <div class="topbar-r">
+        <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('regions-tb',this.value)" style="width:180px">
+        <button class="btn bo" onclick="go('newregion',null)">+ Add Region</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2>Heritage Regions<span class="ct" id="regions-ct"></span></h2></div>
+      <div class="tw"><table><thead><tr><th>Name</th><th>Capital</th><th>Category</th><th>Population</th><th>Audio</th><th>Images</th><th>Actions</th></tr></thead>
+      <tbody id="regions-tb"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- ADD/EDIT REGION -->
+  <div class="panel form-panel" id="panel-newregion">
+    <div class="topbar">
+      <h1 id="reg-form-title">Add Region</h1>
+      <div class="topbar-r"><button class="btn bg" onclick="go('regions',null)">← Back to Regions</button></div>
+    </div>
+    <div class="card">
+      <div class="fp">
+        <input type="hidden" id="reg-id">
+        <div class="row2">
+          <div class="mf"><label>Region Name *</label><input id="reg-name" type="text" placeholder="e.g. Ashanti Region"></div>
+          <div class="mf"><label>Capital City</label><input id="reg-capital" type="text" placeholder="e.g. Kumasi"></div>
+        </div>
+        <div class="row2">
+          <div class="mf"><label>Population</label><input id="reg-pop" type="text" placeholder="e.g. 5,420,000"></div>
+          <div class="mf"><label>Terrain</label><input id="reg-terrain" type="text" placeholder="e.g. Forest, Savanna…"></div>
+        </div>
+        <div class="row2">
+          <div class="mf"><label>Category</label><input id="reg-cat" type="text" placeholder="e.g. Cultural, Coastal…"></div>
+          <div class="mf"><label>Tags (comma separated)</label><input id="reg-tags" type="text" placeholder="e.g. history, festivals, gold"></div>
+        </div>
+        <div class="mf"><label>Short Description</label><textarea id="reg-desc" rows="3" placeholder="Brief overview shown in cards…"></textarea></div>
+        <div class="mf"><label>Full Overview (shown on region detail page)</label><textarea id="reg-overview" rows="6" placeholder="Detailed content about this region…"></textarea></div>
+        <div class="mf"><label>Hero / Banner Image URL</label><input id="reg-hero" type="text" placeholder="https://…" oninput="pi('reg-hero','reg-hp')">
+          <img id="reg-hp" class="iprev"></div>
+        <div class="mf"><label>Gallery Image URLs (comma separated)</label><textarea id="reg-gallery" rows="3" placeholder="https://img1.jpg, https://img2.jpg, …"></textarea></div>
+        <div class="mf"><label>Audio File URLs (comma separated)</label><textarea id="reg-audio" rows="2" placeholder="https://…mp3, https://…mp3"></textarea></div>
+        <div class="mf"><label>Source / Credits</label><input id="reg-source" type="text" placeholder="Wikipedia, Ghana Tourism Board…"></div>
+        <div style="display:flex;gap:10px;margin-top:6px">
+          <button class="btn bo" onclick="saveRegion()">Save Region →</button>
+          <button class="btn bg" onclick="go('regions',null)">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="panel" id="panel-users">
+    <div class="topbar">
+      <h1>All Users</h1>
+      <div class="topbar-r">
+        <select class="fsel" id="users-rf" onchange="loadUsers()">
+          <option value="">All Roles</option><option value="user">Users</option>
+          <option value="creator">Creators</option><option value="admin">Admins</option><option value="superuser">Superusers</option>
+        </select>
+        <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('users-tb',this.value)" style="width:180px">
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2>User Management<span class="ct" id="users-ct"></span></h2></div>
+      <div class="tw"><table><thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Plan</th><th>Posts</th><th>Followers</th><th>Joined</th><th>Actions</th></tr></thead>
+      <tbody id="users-tb"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- CREATORS -->
+  <div class="panel" id="panel-creators">
+    <div class="topbar"><h1>Creators</h1></div>
+    <div class="card">
+      <div class="ch"><h2>Creator Channels<span class="ct" id="creators-ct"></span></h2></div>
+      <div class="tw"><table><thead><tr><th>Channel</th><th>Username</th><th>Followers</th><th>Posts</th><th>Actions</th></tr></thead>
+      <tbody id="creators-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div>
     </div>
   </div>
 
   <!-- NEWSLETTER -->
   <div class="panel" id="panel-subs">
-    <div class="topbar"><h1>Newsletter Subscribers</h1></div>
-    <div class="tcard">
-      <div class="thead"><h2>Email List <span id="subs-ct" style="font-weight:400;color:var(--muted);font-size:.82rem"></span></h2></div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Email</th><th>Name</th><th>Subscribed</th></tr></thead>
+    <div class="topbar">
+      <h1>Newsletter</h1>
+      <div class="topbar-r"><button class="btn bg" onclick="exportSubs()">⬇ Export CSV</button></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2>Subscribers<span class="ct" id="subs-ct"></span></h2></div>
+      <div class="tw"><table><thead><tr><th>Email</th><th>Name</th><th>Subscribed</th></tr></thead>
       <tbody id="subs-tb"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody></table></div>
     </div>
   </div>
@@ -258,11 +408,11 @@ tr:hover td{background:#FAFBFF}
   <div class="panel" id="panel-events">
     <div class="topbar">
       <h1>Events</h1>
-      <button class="tbtn gold" onclick="openEvModal()">+ Add Event</button>
+      <div class="topbar-r"><button class="btn bo" onclick="openM('ev-modal')">+ Add Event</button></div>
     </div>
-    <div class="tcard">
-      <div class="thead"><h2>Upcoming Events</h2></div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Date</th><th>Location</th><th>Actions</th></tr></thead>
+    <div class="card">
+      <div class="ch"><h2>Events</h2></div>
+      <div class="tw"><table><thead><tr><th>Title</th><th>Date</th><th>Location</th><th>Actions</th></tr></thead>
       <tbody id="events-tb"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody></table></div>
     </div>
   </div>
@@ -270,72 +420,136 @@ tr:hover td{background:#FAFBFF}
   <!-- FILES -->
   <div class="panel" id="panel-files">
     <div class="topbar">
-      <h1>Uploaded Files</h1>
-      <label class="tbtn gold" style="cursor:pointer">📎 Upload<input type="file" style="display:none" onchange="uploadFile(this)"></label>
+      <h1>Files</h1>
+      <div class="topbar-r">
+        <label class="btn bo" style="cursor:pointer">📎 Upload File<input type="file" style="display:none" onchange="uploadFile(this)"></label>
+      </div>
     </div>
-    <div class="tcard">
-      <div class="thead"><h2>File Manager <span id="files-ct" style="font-weight:400;color:var(--muted);font-size:.82rem"></span></h2></div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Filename</th><th>Category</th><th>Size</th><th>Uploaded</th><th>Actions</th></tr></thead>
-      <tbody id="files-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div>
+    <div class="card">
+      <div class="ch"><h2>File Manager<span class="ct" id="files-ct"></span></h2></div>
+      <div class="tw"><table><thead><tr><th>Filename</th><th>Type</th><th>Size</th><th>URL</th><th>Uploaded</th><th>Actions</th></tr></thead>
+      <tbody id="files-tb"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody></table></div>
     </div>
   </div>
 
+</div><!-- /main -->
+
+<!-- MODALS -->
+
+<!-- Edit Post -->
+<div class="ovl" id="edit-post-modal">
+  <div class="modal">
+    <h2>✏️ Edit Post</h2>
+    <input type="hidden" id="ep-id">
+    <div class="mf"><label>Title</label><input id="ep-title" type="text"></div>
+    <div class="mf"><label>Excerpt</label><input id="ep-excerpt" type="text"></div>
+    <div class="mf"><label>Cover Image URL</label><input id="ep-cover" type="text" oninput="pi('ep-cover','ep-cp')">
+      <img id="ep-cp" class="iprev"></div>
+    <div class="row2">
+      <div class="mf"><label>Audio URL</label><input id="ep-audio" type="text"></div>
+      <div class="mf"><label>Video URL</label><input id="ep-video" type="text"></div>
+    </div>
+    <div class="mf"><label>Content</label><textarea id="ep-content" rows="8"></textarea></div>
+    <div class="mf"><label>Tags</label><input id="ep-tags" type="text"></div>
+    <div class="row2">
+      <div class="mf"><label>Status</label>
+        <select id="ep-status">
+          <option value="published">Published</option><option value="draft">Draft</option>
+          <option value="pending">Pending</option><option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="mf"><label>Premium</label>
+        <select id="ep-premium"><option value="0">Free</option><option value="1">Premium only</option></select>
+      </div>
+    </div>
+    <div class="mbtns">
+      <button class="btn bg" style="flex:1" onclick="closeM('edit-post-modal')">Cancel</button>
+      <button class="btn bo" style="flex:2" onclick="saveEditPost()">Save Changes →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit User -->
+<div class="ovl" id="edit-user-modal">
+  <div class="modal">
+    <h2>👤 Edit User</h2>
+    <input type="hidden" id="eu-id">
+    <div class="mf"><label>Full Name</label><input id="eu-fname" type="text"></div>
+    <div class="mf"><label>Bio</label><textarea id="eu-bio" rows="3"></textarea></div>
+    <div class="mf"><label>Avatar URL</label><input id="eu-avatar" type="text" oninput="pi('eu-avatar','eu-ap')">
+      <img id="eu-ap" class="iprev" style="height:80px;width:80px;border-radius:50%;object-fit:cover"></div>
+    <div class="row2">
+      <div class="mf"><label>Role</label>
+        <select id="eu-role">
+          <option value="user">User</option><option value="creator">Creator</option>
+          <option value="admin">Admin</option><option value="superuser">Superuser</option>
+        </select>
+      </div>
+      <div class="mf"><label>Plan</label>
+        <select id="eu-plan"><option value="free">Free</option><option value="premium">Premium</option></select>
+      </div>
+    </div>
+    <div class="mbtns">
+      <button class="btn bg" style="flex:1" onclick="closeM('edit-user-modal')">Cancel</button>
+      <button class="btn bo" style="flex:2" onclick="saveEditUser()">Save Changes →</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Content -->
+<div class="ovl" id="view-modal">
+  <div class="modal">
+    <h2 id="vm-t">Content</h2>
+    <div id="vm-b" style="font-size:.83rem;line-height:1.7;color:#374151;white-space:pre-wrap;max-height:420px;overflow-y:auto;border:1px solid var(--border);border-radius:9px;padding:14px;background:var(--soft)"></div>
+    <div class="mbtns"><button class="btn bg" style="width:100%" onclick="closeM('view-modal')">Close</button></div>
+  </div>
 </div>
 
 <!-- Event Modal -->
-<div class="mbg" id="ev-modal">
+<div class="ovl" id="ev-modal">
   <div class="modal">
     <h2>🎉 New Event</h2>
-    <div class="mf"><label>Title</label><input id="ev-t" type="text"></div>
+    <div class="mf"><label>Title *</label><input id="ev-t" type="text"></div>
     <div class="mf"><label>Description</label><textarea id="ev-d"></textarea></div>
-    <div class="mf"><label>Date</label><input id="ev-dt" type="text" placeholder="e.g. 25 December 2025"></div>
-    <div class="mf"><label>Location</label><input id="ev-l" type="text"></div>
-    <div class="mf"><label>Image URL</label><input id="ev-i" type="text" placeholder="https://..."></div>
-    <div class="mbtns"><button class="mx" onclick="closeM('ev-modal')">Cancel</button><button class="mc" onclick="saveEvent()">Save Event</button></div>
-  </div>
-</div>
-
-<!-- View Modal -->
-<div class="mbg" id="view-modal">
-  <div class="modal">
-    <h2 id="vm-t">Content</h2>
-    <div id="vm-b" style="font-size:.84rem;line-height:1.7;color:#374151;white-space:pre-wrap;max-height:380px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:14px;background:#FAFBFF"></div>
-    <div class="mbtns"><button class="mx" onclick="closeM('view-modal')">Close</button></div>
+    <div class="row2">
+      <div class="mf"><label>Date</label><input id="ev-dt" type="text" placeholder="e.g. 25 Dec 2025"></div>
+      <div class="mf"><label>Location</label><input id="ev-l" type="text"></div>
+    </div>
+    <div class="mf"><label>Image URL</label><input id="ev-i" type="text" placeholder="https://…"></div>
+    <div class="mbtns">
+      <button class="btn bg" style="flex:1" onclick="closeM('ev-modal')">Cancel</button>
+      <button class="btn bo" style="flex:2" onclick="saveEvent()">Save Event</button>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── AUTH ──────────────────────────────────────────────────────────────────────
-const esU = (() => { try { return JSON.parse(localStorage.getItem('es_user')||'{}') } catch(e) { return {} } })();
-const authorized = esU.role === 'superuser' || esU.role === 'admin';
+// AUTH
+const _key = localStorage.getItem('admin_access');
+const _u = (() => { try { return JSON.parse(localStorage.getItem('es_user')||'{}') } catch(e) { return {} } })();
+const authed = _key || document.cookie.includes('admin_session=') || _u.role==='superuser' || _u.role==='admin';
 
-if (authorized) {
-  document.getElementById('login-overlay').classList.add('hide');
+if (authed) {
+  document.getElementById('lo').classList.add('hide');
+  const n = _u.username || 'Admin';
+  document.getElementById('sb-name').textContent = n;
+  document.getElementById('sb-av').textContent = n.charAt(0).toUpperCase();
+  document.getElementById('welcome-msg').textContent = 'Welcome back 🇬🇭 — ' + new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
   boot();
-} else {
-  document.getElementById('login-overlay').classList.remove('hide');
-}
-
-// Populate sidebar
-if (esU.username) {
-  document.getElementById('sb-name').textContent = esU.username;
-  document.getElementById('sb-av').textContent = esU.username.charAt(0).toUpperCase();
-  document.getElementById('sb-role').textContent = (esU.role||'admin').toUpperCase();
-  document.getElementById('welcome-msg').textContent = 'Welcome back, ' + esU.username + ' 🇬🇭';
 }
 
 async function doLogin() {
-  const pw = document.getElementById('li').value.trim();
-  if (!pw) return;
-  const fd = new FormData(); fd.append('email', esU.email || ''); fd.append('username', esU.email || ''); fd.append('password', pw);
+  const key = document.getElementById('li').value.trim().toLowerCase();
+  if (!key) return;
+  const fd = new FormData(); fd.append('secret', key);
   try {
-    const r = await fetch('/api/users/login', {method:'POST', body:fd});
+    const r = await fetch('/api/auth/admin', {method:'POST', body:fd});
     const d = await r.json();
-    if (r.ok && d.success && (d.role === 'admin' || d.role === 'superuser')) {
-      localStorage.setItem('es_user', JSON.stringify({...esU, role:d.role, loggedIn:true}));
-      document.getElementById('login-overlay').classList.add('hide');
+    if (r.ok && d.success) {
+      localStorage.setItem('admin_access', key);
+      document.getElementById('lo').classList.add('hide');
       boot();
     } else {
       document.getElementById('lerr').style.display = 'block';
@@ -345,321 +559,270 @@ async function doLogin() {
 document.getElementById('li').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 
 function doLogout() {
-  localStorage.removeItem('es_user');
-  fetch('/api/users/logout', {method:'POST', credentials:'include'}).catch(()=>{});
-  window.location.href = '/';
+  localStorage.removeItem('admin_access'); localStorage.removeItem('es_user');
+  fetch('/api/auth/logout',{method:'POST'}).catch(()=>{});
+  location.reload();
 }
-
 function boot() { loadOverview(); }
 
-// ── PANELS ────────────────────────────────────────────────────────────────────
-const loaders = { overview:loadOverview, users:loadUsers, creators:loadCreators, posts:loadPosts, stories:loadStories, regions:loadRegions, subs:loadSubs, events:loadEvents, files:loadFiles };
-
-function go(name, el) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
-  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('on'));
-  document.getElementById('panel-'+name).classList.add('on');
-  if (el) el.classList.add('on');
-  if (loaders[name]) loaders[name]();
+// NAVIGATION
+const _loaders = {overview:loadOverview,posts:loadPosts,newpost:()=>{},comments:loadComments,stories:loadStories,regions:loadRegions,newregion:resetRF,users:loadUsers,creators:loadCreators,subs:loadSubs,events:loadEvents,files:loadFiles};
+function go(n, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
+  const p=document.getElementById('panel-'+n); if(p) p.classList.add('on');
+  if(el) el.classList.add('on');
+  if(_loaders[n]) _loaders[n]();
 }
 
-// ── OVERVIEW ──────────────────────────────────────────────────────────────────
+// UTILS
+function e2(s){return(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' ').slice(0,400)}
+function pi(i,p){const u=document.getElementById(i)?.value?.trim(),el=document.getElementById(p);if(!el)return;el.style.display=u&&(u.startsWith('http')||u.startsWith('/'))?(el.src=u,'block'):'none'}
+function filterTbl(id,q){document.querySelectorAll('#'+id+' tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none'})}
+function openM(id){document.getElementById(id).classList.add('open')}
+function closeM(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.ovl').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+let _t;
+function toast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className='toast show '+(type||'');clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000)}
+async function api(url,opts={}){opts.credentials='include';return fetch(url,opts)}
+function vc(title,body){document.getElementById('vm-t').textContent=title;document.getElementById('vm-b').textContent=body;openM('view-modal')}
+
+// OVERVIEW
 async function loadOverview() {
   try {
-    const [sr, ur, pr] = await Promise.all([
-      fetch('/api/stats'),
-      fetch('/api/admin/users', {credentials:'include'}),
-      fetch('/api/posts?status=all&limit=8')
-    ]);
-    if (sr.ok) {
-      const s = await sr.json();
-      document.getElementById('ov-users').textContent    = s.user_count || 0;
-      document.getElementById('ov-creators').textContent = s.total_creators || 0;
-      document.getElementById('ov-posts').textContent    = s.total_posts || 0;
-      document.getElementById('ov-regions').textContent  = s.total_regions || 0;
-      document.getElementById('ov-follows').textContent  = s.total_follows || 0;
-    }
-    if (ur.ok) {
-      const users = await ur.json();
-      document.getElementById('ov-users-tb').innerHTML = users.slice(0,5).map(u => `
-        <tr><td><strong>${u.username}</strong></td><td style="color:var(--muted);font-size:.8rem">${u.email}</td>
-        <td><span class="rb r-${u.role}">${u.role}</span></td>
-        <td style="color:var(--muted);font-size:.78rem">${(u.created_at||'').split('T')[0]}</td></tr>`).join('');
-    }
-    if (pr.ok) {
-      const posts = await pr.json();
-      document.getElementById('ov-posts-tb').innerHTML = posts.slice(0,5).map(p => `
-        <tr><td style="max-width:200px"><strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.title}</strong></td>
-        <td style="font-size:.8rem">${p.author_username||'—'}</td>
-        <td><span class="rb r-user" style="font-size:.62rem">${p.content_type}</span></td>
-        <td><span class="rb s-${p.status}">${p.status}</span></td>
-        <td>${p.view_count||0}</td>
-        <td>
-          ${p.status!=='published'?`<button class="ab ag" onclick="setPostStatus(${p.id},'published')">✓ Publish</button>`:''}
-          <button class="ab ar" onclick="delPost(${p.id})">Del</button>
-        </td></tr>`).join('');
-    }
-  } catch(e) { console.warn(e); }
+    const [sr,ur,pr]=await Promise.all([api('/api/stats'),api('/api/admin/users'),api('/api/admin/posts?status=all&limit=10')]);
+    if(sr.ok){const s=await sr.json();document.getElementById('ov-users').textContent=s.user_count||s.total_users||0;document.getElementById('ov-creators').textContent=s.total_creators||0;document.getElementById('ov-posts').textContent=s.total_posts||0;document.getElementById('ov-regions').textContent=s.total_regions||0}
+    if(ur.ok){const us=await ur.json();document.getElementById('ov-users-tb').innerHTML=us.slice(0,6).map(u=>`<tr><td><strong>${e2(u.username)}</strong></td><td style="color:var(--muted);font-size:.77rem">${e2(u.email)}</td><td><span class="badge r-${u.role}">${u.role}</span></td><td><span class="badge ${u.plan==='premium'?'c-gold':'c-gray'}">${u.plan||'free'}</span></td><td style="font-size:.75rem;color:var(--muted)">${(u.created_at||'').split('T')[0]}</td></tr>`).join('')}
+    if(pr.ok){const ps=await pr.json();const pend=ps.filter(p=>p.status==='pending').length;document.getElementById('ov-pending').textContent=pend;document.getElementById('ov-posts-tb').innerHTML=ps.slice(0,6).map(p=>`<tr><td style="max-width:200px"><strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e2(p.title)}</strong></td><td style="font-size:.78rem">${e2(p.author_username||'—')}</td><td><span class="badge r-user" style="font-size:.6rem">${p.content_type}</span></td><td><span class="badge s-${p.status}">${p.status}</span></td><td>${p.view_count||0}</td><td style="white-space:nowrap">${p.status!=='published'?`<button class="btn btn-sm bgr" onclick="qStatus(${p.id},'published')">✓ Publish</button>`:''}${p.status==='published'?`<button class="btn btn-sm bg" onclick="qStatus(${p.id},'draft')">Unpublish</button>`:''}<button class="btn btn-sm br" onclick="delPost(${p.id})">Del</button></td></tr>`).join('')}
+  } catch(e){console.warn(e)}
 }
 
-// ── USERS ─────────────────────────────────────────────────────────────────────
-async function loadUsers() {
-  try {
-    const r = await fetch('/api/admin/users', {credentials:'include'});
-    if (!r.ok) { toast('401 — Are you logged in as admin?', 'er'); return; }
-    const users = await r.json();
-    document.getElementById('users-ct').textContent = '— ' + users.length + ' total';
-    document.getElementById('users-tb').innerHTML = users.map(u => `
-      <tr id="ur-${u.id}">
-        <td><strong>${u.username}</strong></td>
-        <td style="font-size:.78rem;color:var(--muted)">${u.email}</td>
-        <td>
-          <select class="rsel" onchange="setRole('${u.id}',this.value)" ${u.role==='superuser'?'disabled':''}>
-            <option value="user"      ${u.role==='user'     ?'selected':''}>User</option>
-            <option value="creator"   ${u.role==='creator'  ?'selected':''}>Creator</option>
-            <option value="admin"     ${u.role==='admin'    ?'selected':''}>Admin</option>
-            <option value="superuser" ${u.role==='superuser'?'selected':''}>Superuser</option>
-          </select>
-        </td>
-        <td><span class="rb ${u.plan==='premium'?'bg-gold':'bg-gray'}">${u.plan||'free'}</span></td>
-        <td>${u.post_count||0}</td>
-        <td style="font-size:.76rem;color:var(--muted)">${(u.created_at||'').split('T')[0]}</td>
-        <td>
-          <button class="ab ${u.is_active?'ar':'ag'}" onclick="toggleSuspend('${u.id}',${u.is_active})">${u.is_active?'Suspend':'Restore'}</button>
-          ${u.role!=='superuser'?`<button class="ab ar" onclick="delUser('${u.id}','${u.username}')">Delete</button>`:'<span style="font-size:.72rem;color:var(--gold)">★ Super</span>'}
-        </td>
-      </tr>`).join('');
-  } catch(e) { console.warn(e); }
+// POSTS
+async function loadPosts(){
+  const st=document.getElementById('posts-status')?.value||'all';
+  try{
+    const r=await api(`/api/admin/posts?status=${st}&limit=200`);
+    if(!r.ok){toast('Failed to load posts','er');return}
+    const ps=await r.json();
+    document.getElementById('posts-ct').textContent=` — ${ps.length} posts`;
+    document.getElementById('posts-tb').innerHTML=ps.length?ps.map(p=>`<tr><td style="max-width:200px"><strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e2(p.title)}</strong></td><td style="font-size:.78rem">${e2(p.author_username||'—')}</td><td><span class="badge r-user" style="font-size:.6rem">${p.content_type}</span></td><td><span class="badge s-${p.status}">${p.status}</span></td><td>${p.view_count||0}</td><td>${p.comment_count||0}</td><td><span class="badge ${p.is_premium?'p-yes':'p-no'}">${p.is_premium?'Premium':'Free'}</span></td><td style="white-space:nowrap"><button class="btn btn-sm bg" onclick="openEP(${p.id})">✏️ Edit</button><button class="btn btn-sm bb" onclick="vc('${esc(p.title)}','${esc(p.content||p.excerpt||'')}')">👁</button>${p.status!=='published'?`<button class="btn btn-sm bgr" onclick="qStatus(${p.id},'published')">✓</button>`:''}<button class="btn btn-sm br" onclick="delPost(${p.id})">🗑</button></td></tr>`).join(''):'<tr><td colspan="8" class="empty"><div class="ei">📝</div>No posts found</td></tr>';
+  }catch(e){}
 }
 
-async function setRole(uid, role) {
-  const fd = new FormData(); fd.append('role', role);
-  try {
-    const r = await fetch('/api/admin/users/'+uid+'/role', {method:'PUT', body:fd, credentials:'include'});
-    if (r.ok) { toast('Role → ' + role, 'ok'); }
-    else { const d = await r.json(); throw new Error(d.detail); }
-  } catch(e) { toast('❌ '+e.message, 'er'); }
+async function qStatus(id,st){const fd=new FormData();fd.append('status',st);const r=await api(`/api/admin/posts/${id}/status`,{method:'PUT',body:fd});if(r.ok){toast(`Post → ${st}`,'ok');loadPosts();loadOverview()}else{const d=await r.json();toast('❌ '+d.detail,'er')}}
+async function delPost(id){if(!confirm('Delete this post permanently?'))return;const r=await api(`/api/admin/posts/${id}`,{method:'DELETE'});if(r.ok){toast('Post deleted','ok');loadPosts();loadOverview()}else toast('❌ Failed','er')}
+
+async function openEP(id){
+  try{
+    const r=await fetch(`/api/posts/${id}`);const p=await r.json();
+    ['ep-id','ep-title','ep-excerpt','ep-cover','ep-audio','ep-video','ep-content','ep-tags'].forEach((fid,i)=>{const vals=[p.id,p.title,p.excerpt,p.cover_image,p.audio_url,p.video_url,p.content,p.tags];document.getElementById(fid).value=vals[i]||''});
+    document.getElementById('ep-status').value=p.status||'draft';
+    document.getElementById('ep-premium').value=p.is_premium?'1':'0';
+    pi('ep-cover','ep-cp');openM('edit-post-modal');
+  }catch(e){toast('❌ Could not load post','er')}
 }
 
-async function toggleSuspend(uid, active) {
-  try {
-    const r = await fetch('/api/admin/users/'+uid+'/suspend', {method:'PUT', credentials:'include'});
-    if (r.ok) { toast(active?'User suspended':'User restored', 'ok'); loadUsers(); }
-  } catch(e) { toast('❌ Failed', 'er'); }
+async function saveEditPost(){
+  const id=document.getElementById('ep-id').value;
+  const fd=new FormData();
+  ['title','excerpt','cover_image','audio_url','video_url','content','tags'].forEach((k,i)=>{const ids=['ep-title','ep-excerpt','ep-cover','ep-audio','ep-video','ep-content','ep-tags'];fd.append(k,document.getElementById(ids[i]).value)});
+  fd.append('status',document.getElementById('ep-status').value);
+  fd.append('is_premium',document.getElementById('ep-premium').value);
+  const r=await api(`/api/admin/posts/${id}`,{method:'PUT',body:fd});
+  if(r.ok){toast('Post saved ✅','ok');closeM('edit-post-modal');loadPosts()}else{const d=await r.json();toast('❌ '+(d.detail||'Failed'),'er')}
 }
 
-async function delUser(uid, uname) {
-  if (!confirm('Delete "'+uname+'" permanently?')) return;
-  try {
-    const r = await fetch('/api/admin/users/'+uid, {method:'DELETE', credentials:'include'});
-    if (r.ok) { toast('Deleted', 'ok'); loadUsers(); }
-    else { const d = await r.json(); throw new Error(d.detail); }
-  } catch(e) { toast('❌ '+e.message, 'er'); }
+function toggleNp(){const t=document.getElementById('np-type').value;document.getElementById('np-af').style.display=t==='audio'?'':'none';document.getElementById('np-vf').style.display=t==='video'?'':'none'}
+
+async function submitNewPost(){
+  const title=document.getElementById('np-title').value.trim();
+  if(!title){toast('Title is required','warn');return}
+  const fd=new FormData();
+  fd.append('title',title);fd.append('content',document.getElementById('np-content').value);
+  fd.append('excerpt',document.getElementById('np-excerpt').value);
+  fd.append('cover_image',document.getElementById('np-cover').value);
+  fd.append('content_type',document.getElementById('np-type').value);
+  fd.append('audio_url',document.getElementById('np-audio').value);
+  fd.append('video_url',document.getElementById('np-video').value);
+  fd.append('tags',document.getElementById('np-tags').value);
+  fd.append('is_premium',document.getElementById('np-premium').checked?'1':'0');
+  fd.append('status',document.getElementById('np-status').value);
+  fd.append('author_username',document.getElementById('np-author').value);
+  const r=await api('/api/admin/create-post',{method:'POST',body:fd});
+  if(r.ok){toast('Post published! ✅','ok');['np-title','np-excerpt','np-cover','np-audio','np-video','np-content','np-tags','np-author'].forEach(id=>document.getElementById(id).value='');document.getElementById('np-premium').checked=false;go('posts',null)}
+  else{const d=await r.json();toast('❌ '+(d.detail||'Failed'),'er')}
 }
 
-// ── CREATORS ──────────────────────────────────────────────────────────────────
-async function loadCreators() {
-  try {
-    const r = await fetch('/api/creators');
-    const creators = await r.json();
-    document.getElementById('creators-tb').innerHTML = creators.length ? creators.map(c => `
-      <tr>
-        <td><strong>${c.channel_name||c.username}</strong><br><span style="font-size:.74rem;color:var(--muted)">${(c.channel_desc||'').slice(0,60)}</span></td>
-        <td>${c.username}</td><td>${c.follower_count||0}</td><td>${c.post_count||0}</td>
-        <td>
-          <button class="ab ar" onclick="setRole('${c.id}','user')">Revoke Creator</button>
-        </td>
-      </tr>`).join('')
-    : '<tr><td colspan="5" class="empty"><div class="eicon">✍️</div>No creators yet</td></tr>';
-  } catch(e) {}
+// COMMENTS
+async function loadComments(){
+  try{
+    const r=await api('/api/admin/comments');
+    if(!r.ok){document.getElementById('comments-tb').innerHTML='<tr><td colspan="5" class="empty">Could not load comments</td></tr>';return}
+    const cs=await r.json();
+    document.getElementById('comments-ct').textContent=` — ${cs.length} total`;
+    document.getElementById('comments-tb').innerHTML=cs.length?cs.map(c=>`<tr><td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e2(c.content)}</td><td>${e2(c.author||'?')}</td><td><a href="/post/${c.post_id}" target="_blank" style="color:var(--blue)">#${c.post_id}</a></td><td style="font-size:.75rem;color:var(--muted)">${(c.created_at||'').split('T')[0]}</td><td><button class="btn btn-sm br" onclick="delComment(${c.id})">Delete</button></td></tr>`).join(''):'<tr><td colspan="5" class="empty"><div class="ei">💬</div>No comments</td></tr>';
+  }catch(e){}
+}
+async function delComment(id){if(!confirm('Delete comment?'))return;const r=await api(`/api/admin/comments/${id}`,{method:'DELETE'});if(r.ok){toast('Deleted','ok');loadComments()}}
+
+// STORIES
+async function loadStories(){
+  const st=document.getElementById('stories-filter')?.value||'pending';
+  try{
+    const r=await api(`/api/stories?status=${st}`);
+    if(!r.ok){document.getElementById('stories-tb').innerHTML='<tr><td colspan="5" class="empty">No stories endpoint</td></tr>';return}
+    const ss=await r.json();
+    document.getElementById('stories-tb').innerHTML=ss.length?ss.map(s=>`<tr><td><strong>${e2(s.title)}</strong></td><td>${e2(s.username)}</td><td><span class="badge s-${s.status}">${s.status}</span></td><td style="font-size:.75rem;color:var(--muted)">${(s.created_at||'').split('T')[0]}</td><td style="white-space:nowrap"><button class="btn btn-sm bg" onclick="vc('${esc(s.title)}','${esc(s.content)}')">Read</button>${s.status!=='approved'?`<button class="btn btn-sm bgr" onclick="sAct(${s.id},'approve')">Approve</button>`:''}${s.status!=='rejected'?`<button class="btn btn-sm br" onclick="sAct(${s.id},'reject')">Reject</button>`:''}</td></tr>`).join(''):'<tr><td colspan="5" class="empty"><div class="ei">📖</div>None</td></tr>';
+  }catch(e){}
+}
+async function sAct(id,action){const r=await api(`/api/stories/${id}/${action}`,{method:'PUT'});if(r.ok){toast(`Story ${action}d ✅`,'ok');loadStories()}}
+
+// REGIONS
+async function loadRegions(){
+  try{
+    const r=await fetch('/api/regions');const regs=await r.json();
+    document.getElementById('regions-ct').textContent=` — ${regs.length}`;
+    document.getElementById('regions-tb').innerHTML=regs.length?regs.map(reg=>`<tr><td><strong>${e2(reg.name)}</strong></td><td>${e2(reg.capital||'—')}</td><td>${e2(reg.category||'—')}</td><td style="font-size:.78rem">${e2(reg.population||'—')}</td><td>${reg.audio_files?'✅':'—'}</td><td>${reg.gallery_images?'✅':'—'}</td><td style="white-space:nowrap"><button class="btn btn-sm bg" onclick="editReg(${reg.id})">✏️ Edit</button><button class="btn btn-sm br" onclick="delReg(${reg.id},'${esc(reg.name)}')">🗑</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty"><div class="ei">🗺</div>No regions</td></tr>';
+  }catch(e){}
 }
 
-// ── POSTS ─────────────────────────────────────────────────────────────────────
-async function loadPosts() {
-  const st = document.getElementById('posts-filter')?.value||'all';
-  try {
-    const r = await fetch('/api/posts?status='+st+'&limit=100');
-    const posts = await r.json();
-    document.getElementById('posts-ct').textContent = '— '+posts.length+' posts';
-    document.getElementById('posts-tb').innerHTML = posts.length ? posts.map(p => `
-      <tr>
-        <td style="max-width:200px"><strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.title}</strong></td>
-        <td style="font-size:.8rem">${p.author_username||'—'}</td>
-        <td><span class="rb r-user" style="font-size:.62rem">${p.content_type}</span></td>
-        <td><span class="rb s-${p.status}">${p.status}</span></td>
-        <td>${p.view_count||0}</td><td>${p.comment_count||0}</td>
-        <td>
-          <button class="ab agr" onclick="viewC('${esc(p.title)}','${esc(p.excerpt||p.content?.slice(0,500)||'')}')">View</button>
-          ${p.status!=='published'?`<button class="ab ag" onclick="setPostStatus(${p.id},'published')">✓</button>`:''}
-          ${p.status!=='rejected' ?`<button class="ab ar" onclick="setPostStatus(${p.id},'rejected')">✗</button>`:''}
-          <button class="ab ar" onclick="delPost(${p.id})">Del</button>
-        </td>
-      </tr>`).join('')
-    : '<tr><td colspan="7" class="empty"><div class="eicon">📝</div>No posts</td></tr>';
-  } catch(e) {}
+function resetRF(){
+  document.getElementById('reg-form-title').textContent='Add Region';
+  document.getElementById('reg-id').value='';
+  ['reg-name','reg-capital','reg-pop','reg-terrain','reg-cat','reg-tags','reg-desc','reg-overview','reg-hero','reg-gallery','reg-audio','reg-source'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('reg-hp').style.display='none';
 }
 
-async function setPostStatus(id, st) {
-  const fd = new FormData(); fd.append('status', st);
-  try {
-    const r = await fetch('/api/admin/posts/'+id+'/status', {method:'PUT', body:fd, credentials:'include'});
-    if (r.ok) { toast('Post '+st, 'ok'); loadPosts(); loadOverview(); }
-    else { const d = await r.json(); throw new Error(d.detail); }
-  } catch(e) { toast('❌ '+e.message, 'er'); }
+async function editReg(id){
+  try{
+    const r=await fetch(`/api/regions/${id}`);const reg=await r.json();
+    document.getElementById('reg-form-title').textContent='Edit Region';
+    document.getElementById('reg-id').value=reg.id;
+    const m={name:'reg-name',capital:'reg-capital',population:'reg-pop',terrain:'reg-terrain',category:'reg-cat',tags:'reg-tags',description:'reg-desc',overview:'reg-overview',hero_image:'reg-hero',gallery_images:'reg-gallery',audio_files:'reg-audio',source:'reg-source'};
+    for(const[k,fid]of Object.entries(m)) document.getElementById(fid).value=reg[k]||'';
+    pi('reg-hero','reg-hp');go('newregion',null);
+  }catch(e){toast('❌ Could not load region','er')}
 }
 
-async function delPost(id) {
-  if (!confirm('Delete this post?')) return;
-  try {
-    const r = await fetch('/api/posts/'+id, {method:'DELETE', credentials:'include'});
-    if (r.ok) { toast('Post deleted', 'ok'); loadPosts(); }
-  } catch(e) {}
+async function saveRegion(){
+  const id=document.getElementById('reg-id').value;
+  const name=document.getElementById('reg-name').value.trim();
+  if(!name){toast('Region name required','warn');return}
+  const fd=new FormData();
+  const m={name:'reg-name',capital:'reg-capital',population:'reg-pop',terrain:'reg-terrain',category:'reg-cat',tags:'reg-tags',description:'reg-desc',overview:'reg-overview',hero_image:'reg-hero',gallery_images:'reg-gallery',audio_files:'reg-audio',source:'reg-source'};
+  for(const[k,fid]of Object.entries(m)) fd.append(k,document.getElementById(fid).value);
+  const r=await api(id?`/api/regions/${id}`:'/api/regions',{method:id?'PUT':'POST',body:fd});
+  if(r.ok){toast(id?'Region updated ✅':'Region created ✅','ok');go('regions',null)}
+  else{const d=await r.json();toast('❌ '+(d.detail||'Failed'),'er')}
 }
 
-// ── STORIES ───────────────────────────────────────────────────────────────────
-async function loadStories() {
-  const st = document.getElementById('stories-filter')?.value||'pending';
-  try {
-    const r = await fetch('/api/stories?status='+st);
-    if (!r.ok) { document.getElementById('stories-tb').innerHTML='<tr><td colspan="5" class="empty">No story endpoint yet</td></tr>'; return; }
-    const stories = await r.json();
-    document.getElementById('stories-tb').innerHTML = stories.length ? stories.map(s => `
-      <tr>
-        <td><strong>${s.title}</strong></td><td>${s.username}</td>
-        <td><span class="rb s-${s.status}">${s.status}</span></td>
-        <td style="font-size:.78rem;color:var(--muted)">${(s.created_at||'').split('T')[0]}</td>
-        <td>
-          <button class="ab agr" onclick="viewC('${esc(s.title)}','${esc(s.content)}')">Read</button>
-          ${s.status!=='approved'?`<button class="ab ag" onclick="storyAct(${s.id},'approve')">Approve</button>`:''}
-          ${s.status!=='rejected'?`<button class="ab ar" onclick="storyAct(${s.id},'reject')">Reject</button>`:''}
-        </td>
-      </tr>`).join('')
-    : '<tr><td colspan="5" class="empty"><div class="eicon">📖</div>None in this status</td></tr>';
-  } catch(e) { document.getElementById('stories-tb').innerHTML='<tr><td colspan="5" class="empty">Loading failed</td></tr>'; }
+async function delReg(id,name){
+  if(!confirm(`Delete region "${name}"?`))return;
+  const r=await api(`/api/regions/${id}`,{method:'DELETE'});
+  if(r.ok){toast('Region deleted','ok');loadRegions()}else toast('❌ Failed','er');
 }
 
-async function storyAct(id, action) {
-  try {
-    const r = await fetch('/api/stories/'+id+'/'+action, {method:'PUT', credentials:'include'});
-    if (r.ok) { toast('Story '+action+'d', 'ok'); loadStories(); }
-  } catch(e) {}
+// USERS
+async function loadUsers(){
+  const rf=document.getElementById('users-rf')?.value||'';
+  try{
+    const r=await api('/api/admin/users');
+    if(!r.ok){toast('Failed to load users','er');return}
+    let us=await r.json();
+    if(rf) us=us.filter(u=>u.role===rf);
+    document.getElementById('users-ct').textContent=` — ${us.length} total`;
+    document.getElementById('users-tb').innerHTML=us.map(u=>`<tr><td><strong>${e2(u.username)}</strong><br><span style="font-size:.71rem;color:var(--muted)">${e2(u.full_name||'')}</span></td><td style="font-size:.75rem;color:var(--muted)">${e2(u.email)}</td><td><select class="rsel" onchange="setRole('${u.id}',this.value)" ${u.role==='superuser'?'disabled':''}><option value="user" ${u.role==='user'?'selected':''}>User</option><option value="creator" ${u.role==='creator'?'selected':''}>Creator</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option><option value="superuser" ${u.role==='superuser'?'selected':''}>Superuser</option></select></td><td><span class="badge ${u.plan==='premium'?'c-gold':'c-gray'}">${u.plan||'free'}</span></td><td>${u.post_count||0}</td><td>${u.follower_count||0}</td><td style="font-size:.73rem;color:var(--muted)">${(u.created_at||'').split('T')[0]}</td><td style="white-space:nowrap"><button class="btn btn-sm bb" onclick="openEU('${u.id}','${esc(u.full_name||'')}','${esc(u.bio||'')}','${esc(u.avatar_url||'')}','${u.role||'user'}','${u.plan||'free'}')">✏️</button><button class="btn btn-sm ${u.is_active?'br':'bgr'}" onclick="toggleSusp('${u.id}',${u.is_active})">${u.is_active?'Suspend':'Restore'}</button>${u.role!=='superuser'?`<button class="btn btn-sm br" onclick="delUser('${u.id}','${esc(u.username)}')">Del</button>`:'<span style="font-size:.67rem;color:var(--gold);font-weight:700;padding:4px">★</span>'}</td></tr>`).join('');
+  }catch(e){console.warn(e)}
 }
 
-// ── REGIONS ───────────────────────────────────────────────────────────────────
-async function loadRegions() {
-  try {
-    const r = await fetch('/api/regions');
-    const regs = await r.json();
-    document.getElementById('regions-ct').textContent = '— '+regs.length;
-    document.getElementById('regions-tb').innerHTML = regs.length ? regs.map(reg => `
-      <tr>
-        <td><strong>${reg.name}</strong></td><td>${reg.capital||'—'}</td>
-        <td>${reg.category||'—'}</td>
-        <td>${reg.audio_files?'✅':'—'}</td><td>${reg.gallery_images?'✅':'—'}</td>
-      </tr>`).join('')
-    : '<tr><td colspan="5" class="empty"><div class="eicon">🗺</div>No regions</td></tr>';
-  } catch(e) {}
+async function setRole(uid,role){const fd=new FormData();fd.append('role',role);const r=await api(`/api/admin/users/${uid}/role`,{method:'PUT',body:fd});if(r.ok)toast(`Role → ${role}`,'ok');else{const d=await r.json();toast('❌ '+d.detail,'er');loadUsers()}}
+async function toggleSusp(uid,active){const r=await api(`/api/admin/users/${uid}/suspend`,{method:'PUT'});if(r.ok){toast(active?'User suspended':'User restored','ok');loadUsers()}}
+async function delUser(uid,uname){if(!confirm(`Permanently delete "${uname}"?`))return;const r=await api(`/api/admin/users/${uid}`,{method:'DELETE'});if(r.ok){toast('User deleted','ok');loadUsers()}else{const d=await r.json();toast('❌ '+d.detail,'er')}}
+
+function openEU(id,fname,bio,avatar,role,plan){
+  document.getElementById('eu-id').value=id;
+  document.getElementById('eu-fname').value=fname;
+  document.getElementById('eu-bio').value=bio;
+  document.getElementById('eu-avatar').value=avatar;
+  document.getElementById('eu-role').value=role;
+  document.getElementById('eu-plan').value=plan;
+  pi('eu-avatar','eu-ap');openM('edit-user-modal');
 }
 
-// ── NEWSLETTER ────────────────────────────────────────────────────────────────
-async function loadSubs() {
-  try {
-    const r = await fetch('/api/newsletter/subscribers', {credentials:'include'});
-    if (!r.ok) { document.getElementById('subs-tb').innerHTML='<tr><td colspan="3" class="empty">Unauthorized</td></tr>'; return; }
-    const subs = await r.json();
-    document.getElementById('subs-ct').textContent = '— '+subs.length;
-    document.getElementById('subs-tb').innerHTML = subs.length ? subs.map(s => `
-      <tr><td><strong>${s.email}</strong></td><td>${s.full_name||'—'}</td>
-      <td style="font-size:.78rem;color:var(--muted)">${(s.created_at||s.subscribed_at||'').split('T')[0]}</td></tr>`).join('')
-    : '<tr><td colspan="3" class="empty"><div class="eicon">📧</div>No subscribers</td></tr>';
-  } catch(e) {}
+async function saveEditUser(){
+  const id=document.getElementById('eu-id').value;
+  const fd=new FormData();
+  fd.append('full_name',document.getElementById('eu-fname').value);
+  fd.append('bio',document.getElementById('eu-bio').value);
+  fd.append('avatar_url',document.getElementById('eu-avatar').value);
+  fd.append('plan',document.getElementById('eu-plan').value);
+  const rfd=new FormData();rfd.append('role',document.getElementById('eu-role').value);
+  const [r1,r2]=await Promise.all([api(`/api/admin/users/${id}/edit`,{method:'PUT',body:fd}),api(`/api/admin/users/${id}/role`,{method:'PUT',body:rfd})]);
+  if(r1.ok){toast('User updated ✅','ok');closeM('edit-user-modal');loadUsers()}
+  else{const d=await r1.json();toast('❌ '+d.detail,'er')}
 }
 
-// ── EVENTS ────────────────────────────────────────────────────────────────────
-async function loadEvents() {
-  try {
-    const r = await fetch('/api/events');
-    const evs = await r.json();
-    document.getElementById('events-tb').innerHTML = evs.length ? evs.map(e => `
-      <tr><td><strong>${e.title}</strong></td><td>${e.event_date||'—'}</td><td>${e.location||'—'}</td>
-      <td><button class="ab ar" onclick="delEvent(${e.id})">Delete</button></td></tr>`).join('')
-    : '<tr><td colspan="4" class="empty"><div class="eicon">🎉</div>No events yet</td></tr>';
-  } catch(e) {}
+// CREATORS
+async function loadCreators(){
+  try{
+    const r=await fetch('/api/creators');const cs=await r.json();
+    document.getElementById('creators-ct').textContent=` — ${cs.length}`;
+    document.getElementById('creators-tb').innerHTML=cs.length?cs.map(c=>`<tr><td><strong>${e2(c.channel_name||c.username)}</strong><br><span style="font-size:.72rem;color:var(--muted)">${e2((c.channel_desc||'').slice(0,60))}</span></td><td>${e2(c.username)}</td><td>${c.follower_count||0}</td><td>${c.post_count||0}</td><td><button class="btn btn-sm br" onclick="setRole('${c.id}','user')">Revoke Creator</button></td></tr>`).join(''):'<tr><td colspan="5" class="empty"><div class="ei">🎙</div>No creators yet</td></tr>';
+  }catch(e){}
 }
 
-function openEvModal() { document.getElementById('ev-modal').classList.add('open'); }
-
-async function saveEvent() {
-  const fd = new FormData();
-  ['t','d','dt','l','i'].forEach(k => fd.append(k==='t'?'title':k==='d'?'description':k==='dt'?'event_date':k==='l'?'location':'image_url', document.getElementById('ev-'+k).value));
-  try {
-    const r = await fetch('/api/events', {method:'POST', body:fd, credentials:'include'});
-    if (r.ok) { closeM('ev-modal'); toast('Event created!', 'ok'); loadEvents(); }
-    else { const d = await r.json(); throw new Error(d.detail); }
-  } catch(e) { toast('❌ '+e.message, 'er'); }
+// NEWSLETTER
+let _subs=[];
+async function loadSubs(){
+  try{
+    const r=await api('/api/newsletter/subscribers');
+    if(!r.ok){document.getElementById('subs-tb').innerHTML='<tr><td colspan="3" class="empty">Unauthorized</td></tr>';return}
+    _subs=await r.json();
+    document.getElementById('subs-ct').textContent=` — ${_subs.length}`;
+    document.getElementById('subs-tb').innerHTML=_subs.length?_subs.map(s=>`<tr><td><strong>${e2(s.email)}</strong></td><td>${e2(s.full_name||'—')}</td><td style="font-size:.75rem;color:var(--muted)">${(s.created_at||'').split('T')[0]}</td></tr>`).join(''):'<tr><td colspan="3" class="empty"><div class="ei">📧</div>No subscribers</td></tr>';
+  }catch(e){}
+}
+function exportSubs(){
+  if(!_subs.length){toast('No subscribers','warn');return}
+  const csv='Email,Name,Date\n'+_subs.map(s=>`${s.email},${s.full_name||''},${(s.created_at||'').split('T')[0]}`).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='subscribers.csv';a.click();toast('CSV exported ✅','ok');
 }
 
-async function delEvent(id) {
-  try {
-    const r = await fetch('/api/events/'+id, {method:'DELETE', credentials:'include'});
-    if (r.ok) { toast('Deleted', 'ok'); loadEvents(); }
-  } catch(e) {}
+// EVENTS
+async function loadEvents(){
+  try{
+    const r=await fetch('/api/events');const evs=await r.json();
+    document.getElementById('events-tb').innerHTML=evs.length?evs.map(e=>`<tr><td><strong>${e2(e.title)}</strong></td><td>${e2(e.event_date||'—')}</td><td>${e2(e.location||'—')}</td><td><button class="btn btn-sm br" onclick="delEv(${e.id})">Delete</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty"><div class="ei">🎉</div>No events</td></tr>';
+  }catch(e){}
 }
+async function saveEvent(){
+  const title=document.getElementById('ev-t').value.trim();
+  if(!title){toast('Title required','warn');return}
+  const fd=new FormData();fd.append('title',title);fd.append('description',document.getElementById('ev-d').value);fd.append('event_date',document.getElementById('ev-dt').value);fd.append('location',document.getElementById('ev-l').value);fd.append('image_url',document.getElementById('ev-i').value);
+  const r=await api('/api/events',{method:'POST',body:fd});
+  if(r.ok){closeM('ev-modal');toast('Event created ✅','ok');loadEvents();['ev-t','ev-d','ev-dt','ev-l','ev-i'].forEach(id=>document.getElementById(id).value='')}
+  else{const d=await r.json();toast('❌ '+d.detail,'er')}
+}
+async function delEv(id){if(!confirm('Delete event?'))return;const r=await api(`/api/events/${id}`,{method:'DELETE'});if(r.ok){toast('Deleted','ok');loadEvents()}}
 
-// ── FILES ─────────────────────────────────────────────────────────────────────
-async function loadFiles() {
-  try {
-    const r = await fetch('/api/files');
-    const files = await r.json();
-    document.getElementById('files-ct').textContent = '— '+files.length;
-    document.getElementById('files-tb').innerHTML = files.length ? files.map(f => `
-      <tr>
-        <td><a href="${f.file_url}" target="_blank" style="color:var(--gold);font-weight:600">${f.original_name||f.filename}</a></td>
-        <td>${f.category}</td><td>${f.file_size_mb||0} MB</td>
-        <td style="font-size:.78rem;color:var(--muted)">${(f.created_at||'').split('T')[0]}</td>
-        <td><button class="ab ar" onclick="delFile(${f.id})">Delete</button></td>
-      </tr>`).join('')
-    : '<tr><td colspan="5" class="empty"><div class="eicon">📁</div>No files</td></tr>';
-  } catch(e) {}
+// FILES
+async function loadFiles(){
+  try{
+    const r=await fetch('/api/files');const fs=await r.json();
+    document.getElementById('files-ct').textContent=` — ${fs.length}`;
+    document.getElementById('files-tb').innerHTML=fs.length?fs.map(f=>`<tr><td><strong>${e2(f.original_name||f.filename)}</strong></td><td style="font-size:.75rem">${e2(f.mime_type||f.category||'—')}</td><td style="font-size:.75rem">${f.file_size_mb||0} MB</td><td><button class="btn btn-sm bg" style="font-size:.65rem" onclick="copyUrl('${f.file_url}')">📋 Copy URL</button> <a href="${f.file_url}" target="_blank" class="btn btn-sm bb" style="font-size:.65rem">Open ↗</a></td><td style="font-size:.73rem;color:var(--muted)">${(f.created_at||'').split('T')[0]}</td><td><button class="btn btn-sm br" onclick="delFile(${f.id})">🗑</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty"><div class="ei">📁</div>No files</td></tr>';
+  }catch(e){}
 }
-
-async function uploadFile(input) {
-  if (!input.files[0]) return;
-  const fd = new FormData(); fd.append('file', input.files[0]);
-  try {
-    toast('Uploading…', '');
-    const r = await fetch('/api/upload/file', {method:'POST', body:fd});
-    if (r.ok) { toast('✅ Uploaded!', 'ok'); loadFiles(); }
-    else { const d = await r.json(); throw new Error(d.detail); }
-  } catch(e) { toast('❌ '+e.message, 'er'); }
+function copyUrl(url){navigator.clipboard.writeText(window.location.origin+url).then(()=>toast('URL copied ✅','ok')).catch(()=>toast('Copy failed','er'))}
+async function uploadFile(input){
+  if(!input.files[0])return;
+  const fd=new FormData();fd.append('file',input.files[0]);fd.append('filename',input.files[0].name);fd.append('category','general');
+  toast('Uploading…');
+  const r=await fetch('/api/upload/file',{method:'POST',body:fd});
+  if(r.ok){toast('Uploaded ✅','ok');loadFiles()}else{const d=await r.json();toast('❌ '+(d.detail||'Failed'),'er')}
 }
-
-async function delFile(id) {
-  try {
-    const r = await fetch('/api/files/'+id, {method:'DELETE'});
-    if (r.ok) { toast('Deleted', 'ok'); loadFiles(); }
-  } catch(e) {}
-}
-
-// ── UTILS ─────────────────────────────────────────────────────────────────────
-function viewC(title, body) {
-  document.getElementById('vm-t').textContent = title;
-  document.getElementById('vm-b').textContent = body;
-  document.getElementById('view-modal').classList.add('open');
-}
-function closeM(id) { document.getElementById(id).classList.remove('open'); }
-function filterTbl(id, q) {
-  document.querySelectorAll('#'+id+' tr').forEach(r => {
-    r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
-  });
-}
-function esc(s) { return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ').slice(0,400); }
-let _t;
-function toast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.className = 'toast on '+(type||'');
-  clearTimeout(_t); _t = setTimeout(() => el.className='toast', 4000);
-}
+async function delFile(id){if(!confirm('Delete file?'))return;const r=await fetch(`/api/files/${id}`,{method:'DELETE'});if(r.ok){toast('Deleted','ok');loadFiles()}}
 </script>
 </body>
 </html>
