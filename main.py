@@ -931,6 +931,32 @@ async def import_json(request: Request, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback(); raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/post/{post_id}")
+async def post_page(post_id: int, request: Request):
+    if os.path.exists("post.html"):
+        return FileResponse("post.html")
+    raise HTTPException(status_code=404)
+
+@app.get("/api/posts/{post_id}")
+async def get_single_post(post_id: int, request: Request, db: Session = Depends(get_db)):
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    # increment views
+    post.views = (post.views or 0) + 1
+    db.commit()
+    return {
+        "id": post.id,
+        "title": post.title,
+        "content": post.content,
+        "excerpt": post.excerpt or "",
+        "cover_image": post.cover_image or "",
+        "content_type": post.content_type or "article",
+        "author_username": post.author_username or "",
+        "status": post.status,
+        "views": post.views,
+        "created_at": str(post.created_at)
+    }
 
 # ════════════════════════════════════════════════════════════════════════════
 # ECHOBOT AI (Hugging Face — kept from original)
