@@ -501,3 +501,80 @@ async def import_json(request: Request, db: Session = Depends(get_db)):
         return {"success": True, "imported": count}
     except Exception as e:
         db.rollback(); raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================
+# AI ASSISTANT - ECHOBOT
+# ============================================
+import urllib.request
+
+@app.post("/api/ai/chat")
+async def ai_chat(
+    message: str = Form(...),
+    region_context: str = Form(""),
+    db: Session = Depends(get_db)
+):
+    try:
+        hf_token = os.environ.get("HF_TOKEN", "")
+        if not hf_token:
+            return {"reply": "EchoBot is not configured yet. Please add HF_TOKEN to environment variables."}
+
+        # Build system context
+        system_prompt = """You are EchoBot, a friendly and knowledgeable AI heritage guide for Ghana.
+You specialise in Ghana's 16 regions, culture, history, traditions, food, music, festivals, and people.
+Keep answers concise (3-5 sentences), warm, and educational.
+If asked about something unrelated to Ghana or heritage, politely redirect to Ghana topics.
+Always respond in English."""
+
+        if region_context:
+            system_prompt += f"\n\nThe user is currently viewing the {region_context} region."
+
+        full_prompt = f"<s>[INST] {system_prompt}\n\nUser question: {message} [/INST]"
+
+        payload = json.dumps({
+            "inputs": full_prompt,
+            "parameters": {
+                "max_new_tokens": 300,
+                "temperature": 0.7,
+                "do_sample": True,
+                "return_full_text": False
+            }
+        }).encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+            data=payload,
+            headers={
+                "Authorization": f"Bearer {hf_token}",
+                "Content-Type": "application/json"
+            },
+            method="POST"
+        )
+
+        with urllib.request.urlopen(req, timeout=30) as response:
+            result = json.loads(response.read().decode("utf-8"))
+
+        if isinstance(result, list) and len(result) > 0:
+            reply = result[0].get("generated_text", "").strip()
+        else:
+            reply = "I'm having trouble responding right now. Please try again!"
+
+        return {"reply": reply, "success": True}
+
+    except Exception as e:
+        print(f"AI error: {e}")
+        return {"reply": "EchoBot is warming up! Please try again in a moment.", "success": False}
+
+@app.get("/api/admin/users")
+async def get_all_users(request: Request, db: Session = Depends(get_db)):
+    token = request.cookies.get("client_session") or request.cookies.get("admin_session")
+    if not token:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    users = db.query(models.User).order_by(models.User.created_at.desc()).all()
+    return [{
+        "id": u.id,
+        "username": u.username,
+        "email": u.email,
+        "full_name": u.full_name or "",
+        "is_active": u.is_active,
+        "created_at": str(u.created_at)
+    } for u in users]
