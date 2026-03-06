@@ -3,1259 +3,662 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- FIX: Removed no-cache meta tags that conflicted with SW caching strategy -->
-<title>EchoStack Admin Dashboard</title>
-<meta name="theme-color" content="#1a1e29">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="EchoStack">
-<link rel="icon" type="image/png" href="/echostack-logo.png">
-<link rel="apple-touch-icon" href="/echostack-logo.png">
-<link rel="manifest" href="/manifest.json">
-<!-- Google Fonts: Playfair Display + DM Sans (no CSP issues on Render) -->
+<title>Admin — EchoStack</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
 <style>
-:root {
-  --brand-dark:  #1a1e29;
-  --brand-gold:  #C8962E;
-  --brand-blue:  #0077b6;
-  --brand-light: #f4f6fb;
-  --brand-border:#e2e8f0;
-}
-
-*, *::before, *::after { box-sizing: border-box; }
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--brand-light);
-  color: var(--brand-dark);
-  min-height: 100vh;
-}
-
-h1, h2, h3, .logo-text {
-  font-family: 'Playfair Display', serif;
-}
-
-/* ── Nav ── */
-header {
-  background: var(--brand-dark);
-  border-bottom: 3px solid var(--brand-gold);
-  position: sticky; top: 0; z-index: 50;
-}
-
-.nav-btn {
-  padding: 7px 14px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  color: #cbd5e1;
-  transition: background 0.2s, color 0.2s;
-}
-.nav-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
-.nav-btn.active { background: var(--brand-gold); color: #fff; }
-.nav-btn.danger { border: 1px solid #f87171; color: #f87171; }
-.nav-btn.danger:hover { background: #f87171; color: #fff; }
-.nav-btn.primary { background: var(--brand-blue); color: #fff; }
-.nav-btn.primary:hover { background: #005f94; }
-
-/* ── Cards / panels ── */
-.card {
-  background: #fff;
-  border: 1px solid var(--brand-border);
-  border-radius: 12px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
-  padding: 24px;
-}
-
-/* ── Stat tiles ── */
-.stat-tile {
-  background: #fff;
-  border: 1px solid var(--brand-border);
-  border-radius: 12px;
-  padding: 22px 24px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
-  position: relative;
-  overflow: hidden;
-}
-.stat-tile::after {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--brand-gold);
-  border-radius: 0 0 12px 12px;
-}
-.stat-tile .label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: #94a3b8; }
-.stat-tile .value { font-size: 2.2rem; font-weight: 700; color: var(--brand-dark); line-height: 1.1; margin-top: 4px; }
-
-/* ── Buttons (form / action) ── */
-.btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 10px 20px; border-radius: 8px;
-  font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600;
-  cursor: pointer; border: none; transition: all 0.18s;
-}
-.btn-primary   { background: var(--brand-dark); color: #fff; }
-.btn-primary:hover   { background: var(--brand-blue); }
-.btn-secondary { background: transparent; border: 1.5px solid var(--brand-dark); color: var(--brand-dark); }
-.btn-secondary:hover { background: var(--brand-dark); color: #fff; }
-.btn-gold      { background: var(--brand-gold); color: #fff; }
-.btn-gold:hover      { background: #a97825; }
-.btn-danger    { background: #ef4444; color: #fff; }
-.btn-danger:hover    { background: #b91c1c; }
-.btn:disabled  { opacity: 0.5; cursor: not-allowed; }
-
-/* ── Form inputs ── */
-input[type="text"], input[type="email"], input[type="password"],
-input[type="number"], textarea, select {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1.5px solid var(--brand-border);
-  border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  color: var(--brand-dark);
-  background: #fff;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
-}
-input:focus, textarea:focus, select:focus {
-  border-color: var(--brand-blue);
-  box-shadow: 0 0 0 3px rgba(0,119,182,0.1);
-}
-
-label { display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 5px; }
-
-/* ── Table ── */
-table { width: 100%; border-collapse: collapse; }
-thead { background: var(--brand-light); }
-th { padding: 10px 16px; text-align: left; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #64748b; border-bottom: 1px solid var(--brand-border); }
-td { padding: 13px 16px; font-size: 0.875rem; border-bottom: 1px solid var(--brand-border); vertical-align: middle; }
-tbody tr:hover { background: #f8faff; }
-tbody tr:last-child td { border-bottom: none; }
-
-/* ── Site Builder ── */
-.site-builder-container {
-  display: grid;
-  grid-template-columns: 240px 1fr 280px;
-  gap: 16px;
-  height: calc(100vh - 180px);
-}
-.builder-panel {
-  background: #fff;
-  border: 1px solid var(--brand-border);
-  border-radius: 12px;
-  padding: 16px;
-  overflow-y: auto;
-}
-.builder-canvas {
-  background: #fff;
-  border: 2px dashed var(--brand-border);
-  border-radius: 12px;
-  padding: 24px;
-  overflow-y: auto;
-  transition: border-color 0.2s;
-}
-.builder-canvas.drag-over { border-color: var(--brand-blue); background: #f0f9ff; }
-
-.widget-card {
-  background: #fff;
-  border: 1.5px solid var(--brand-border);
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 10px;
-  cursor: grab;
-  transition: all 0.2s;
-  user-select: none;
-}
-.widget-card:hover { border-color: var(--brand-blue); box-shadow: 0 2px 8px rgba(0,119,182,0.1); }
-.widget-card.selected { border-color: var(--brand-gold); box-shadow: 0 0 0 3px rgba(200,150,46,0.15); }
-
-.canvas-widget {
-  background: #f8faff;
-  border: 1.5px solid var(--brand-border);
-  border-radius: 8px;
-  padding: 14px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  transition: all 0.15s;
-  position: relative;
-}
-.canvas-widget:hover { border-color: var(--brand-blue); }
-.canvas-widget.selected { border-color: var(--brand-gold); box-shadow: 0 0 0 3px rgba(200,150,46,0.15); }
-
-.canvas-widget .widget-del {
-  position: absolute; top: 8px; right: 8px;
-  background: #ef4444; color: #fff;
-  border: none; border-radius: 4px;
-  padding: 2px 7px; font-size: 0.7rem; cursor: pointer;
-  display: none;
-}
-.canvas-widget:hover .widget-del { display: block; }
-
-.theme-card {
-  border: 1.5px solid var(--brand-border);
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.theme-card:hover, .theme-card.selected { border-color: var(--brand-blue); background: #f0f9ff; }
-
-.page-item {
-  padding: 9px 12px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.15s;
-  margin-bottom: 4px;
-}
-.page-item:hover, .page-item.active { background: #f0f9ff; color: var(--brand-blue); font-weight: 600; }
-
-/* ── Section badge ── */
-.section-tag {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 14px;
-  background: var(--brand-light);
-  border: 1px solid var(--brand-border);
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-/* ── File grid ── */
-.file-card {
-  background: #fff;
-  border: 1px solid var(--brand-border);
-  border-radius: 10px;
-  padding: 14px;
-  transition: box-shadow 0.2s;
-}
-.file-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-
-/* ── Toast ── */
-#notification {
-  position: fixed; bottom: 24px; right: 24px;
-  padding: 12px 22px;
-  border-radius: 10px;
-  font-size: 0.875rem; font-weight: 500;
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  z-index: 9999;
-  transform: translateY(80px);
-  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
-  opacity: 0;
-  pointer-events: none;
-}
-#notification.show { transform: translateY(0); opacity: 1; }
-#notification.success { background: #16a34a; }
-#notification.error   { background: #dc2626; }
-#notification.info    { background: var(--brand-blue); }
-
-/* ── Upload dropzone ── */
-.dropzone {
-  border: 2px dashed var(--brand-border);
-  border-radius: 10px;
-  padding: 28px;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-}
-.dropzone:hover { border-color: var(--brand-blue); background: #f0f9ff; }
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;--red:#DC2626;--green:#16A34A;--border:#E2E8F0;--muted:#94A3B8;--sw:220px}
+body{font-family:'DM Sans',sans-serif;background:#F1F5F9;min-height:100vh;display:flex}
+.sidebar{width:var(--sw);background:var(--ink);min-height:100vh;position:fixed;top:0;left:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto}
+.sb-logo{padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sb-logo img{width:28px;height:28px;border-radius:6px;object-fit:contain}
+.sb-logo-text span{display:block;font-family:'Playfair Display',serif;color:#fff;font-size:1rem;line-height:1}
+.sb-badge{font-size:.6rem;font-weight:700;color:var(--gold);letter-spacing:.06em;margin-top:3px}
+.sb-nav{padding:14px 10px;flex:1}
+.sb-section{font-size:.62rem;font-weight:700;color:rgba(255,255,255,.25);letter-spacing:.1em;text-transform:uppercase;padding:12px 12px 5px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;color:#94A3B8;font-size:.82rem;font-weight:500;cursor:pointer;transition:all .18s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
+.sb-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.sb-item.on{background:rgba(200,150,46,.15);color:var(--gold2)}
+.sb-bottom{padding:14px 10px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.sb-user{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.05);margin-bottom:6px}
+.sb-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0}
+.sb-uname{font-size:.78rem;font-weight:600;color:#fff;line-height:1}
+.sb-role{font-size:.62rem;color:var(--gold);font-weight:700;margin-top:2px}
+.main{margin-left:var(--sw);flex:1;padding:26px;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px}
+.topbar h1{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--ink)}
+.topbar p{font-size:.8rem;color:var(--muted);margin-top:2px}
+.topbar-btns{display:flex;gap:8px}
+.tbtn{padding:8px 16px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.tbtn.gold{background:var(--gold);color:#fff}.tbtn.gold:hover{background:#a97825}
+.tbtn.ghost{background:#fff;color:var(--ink);border:1px solid var(--border)}.tbtn.ghost:hover{background:var(--ink);color:#fff}
+.panel{display:none}.panel.on{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+.sc{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(13,27,42,.04)}
+.sv{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--ink)}
+.sl{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+.sbg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.66rem;font-weight:700;margin-top:6px}
+.bg-blue{background:#EFF6FF;color:#2563EB}.bg-gold{background:rgba(200,150,46,.12);color:var(--gold)}
+.bg-green{background:#F0FDF4;color:var(--green)}.bg-gray{background:#F8FAFC;color:var(--muted)}
+.tcard{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 6px rgba(13,27,42,.05);margin-bottom:18px}
+.thead{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.thead h2{font-size:.9rem;font-weight:700;color:var(--ink)}
+.srch{padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;width:200px;transition:border-color .2s}
+.srch:focus{border-color:var(--gold)}
+.fsel{padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;cursor:pointer}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 14px;text-align:left;font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:#FAFBFF;white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:.83rem;color:var(--ink);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFBFF}
+.rb{padding:2px 8px;border-radius:20px;font-size:.66rem;font-weight:700;text-transform:uppercase;white-space:nowrap}
+.r-user{background:#F0F9FF;color:#0369A1}.r-creator{background:rgba(200,150,46,.12);color:var(--gold)}
+.r-admin{background:#F0FDF4;color:var(--green)}.r-superuser{background:#FEF2F2;color:var(--red)}
+.s-published{background:#F0FDF4;color:var(--green)}.s-draft{background:#F8FAFC;color:var(--muted)}
+.s-pending{background:#FFF7ED;color:#D97706}.s-rejected{background:#FEF2F2;color:var(--red)}
+.ab{padding:4px 9px;border-radius:6px;font-size:.71rem;font-weight:600;cursor:pointer;border:none;transition:all .18s;margin-right:3px;white-space:nowrap}
+.ag{background:#F0FDF4;color:var(--green)}.ag:hover{background:var(--green);color:#fff}
+.ab2{background:#EFF6FF;color:#2563EB}.ab2:hover{background:#2563EB;color:#fff}
+.ao{background:rgba(200,150,46,.1);color:var(--gold)}.ao:hover{background:var(--gold);color:#fff}
+.ar{background:#FEF2F2;color:var(--red)}.ar:hover{background:var(--red);color:#fff}
+.agr{background:#F1F5F9;color:var(--ink)}.agr:hover{background:var(--ink);color:#fff}
+.rsel{padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:.75rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
+.rsel:focus{border-color:var(--gold)}
+#login-overlay{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s}
+#login-overlay.hide{display:none}
+.lbox{background:#fff;border-radius:20px;padding:36px;max-width:380px;width:92%;text-align:center}
+.lbox .ltitle{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--ink);margin-bottom:6px}
+.lbox p{color:var(--muted);font-size:.83rem;margin-bottom:20px}
+.lbox input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;margin-bottom:12px;transition:border-color .2s}
+.lbox input:focus{border-color:var(--gold)}
+.lbox button{width:100%;padding:12px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .2s}
+.lbox button:hover{background:var(--gold)}
+.lerr{color:var(--red);font-size:.78rem;margin-top:8px;display:none}
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
+.mbg.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:26px;max-width:460px;width:92%;max-height:88vh;overflow-y:auto}
+.modal h2{font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:14px;color:var(--ink)}
+.mf{margin-bottom:13px}
+.mf label{display:block;font-size:.72rem;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.mf input,.mf select,.mf textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s}
+.mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--gold)}
+.mf textarea{min-height:90px;resize:vertical}
+.mbtns{display:flex;gap:10px;margin-top:16px}
+.mbtns button{flex:1;padding:10px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.mc{background:var(--gold);color:#fff}.mc:hover{background:#a97825}
+.mx{background:var(--border);color:var(--ink)}.mx:hover{background:#cbd5e1}
+.md{background:var(--red);color:#fff}.md:hover{background:#b91c1c}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:.84rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .3s,opacity .3s;z-index:9999;transform:translateY(60px);opacity:0;pointer-events:none}
+.toast.on{transform:translateY(0);opacity:1}
+.toast.ok{background:var(--green)}.toast.er{background:var(--red)}.toast.warn{background:#D97706}
+.empty{text-align:center;padding:36px;color:var(--muted);font-size:.85rem}
+.eicon{font-size:1.8rem;margin-bottom:8px}
 </style>
 </head>
 <body>
 
-<!-- ═══ NAVIGATION ══════════════════════════════════════════════════════════ -->
-<header>
-  <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-    <div class="flex items-center gap-3">
-      <img src="/echostack-logo.png" alt="EchoStack" style="width:38px;height:38px;object-fit:contain;border-radius:8px;" onerror="this.style.display='none'">
-      <span class="logo-text text-white text-xl">EchoStack Admin</span>
-    </div>
-    <nav class="flex gap-2 items-center flex-wrap">
-      <a href="/" target="_blank" class="nav-btn">🌍 View Site ↗</a>
-      <button onclick="showSection('dashboard')" class="nav-btn active" id="nav-dashboard">📊 Dashboard</button>
-      <button onclick="showSection('site-builder')" class="nav-btn" id="nav-site-builder">🎨 Site Builder</button>
-      <button onclick="showSection('create')" class="nav-btn primary" id="nav-create">➕ New Region</button>
-      <button onclick="logout()" class="nav-btn danger">🚪 Logout</button>
-    </nav>
+<div id="login-overlay">
+  <div class="lbox">
+    <div class="ltitle">🇬🇭 EchoStack Admin</div>
+    <p>Superuser access only</p>
+    <input type="password" id="li" placeholder="Enter your account password" autocomplete="current-password">
+    <button onclick="doLogin()">Enter Admin Portal →</button>
+    <div class="lerr" id="lerr">Incorrect credentials. Try signing in at /user-login first.</div>
   </div>
-</header>
+</div>
 
-<!-- ═══ MAIN ════════════════════════════════════════════════════════════════ -->
-<main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-
-  <!-- ── DASHBOARD ───────────────────────────────────────────────────────── -->
-  <section id="dashboard-section" class="space-y-8">
-
-    <!-- Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
-      <div class="stat-tile"><div class="label">Total Regions</div><div class="value" id="stat-total">—</div></div>
-      <div class="stat-tile"><div class="label">With Audio</div><div class="value" id="stat-audio">—</div></div>
-      <div class="stat-tile"><div class="label">With Images</div><div class="value" id="stat-images">—</div></div>
-      <div class="stat-tile"><div class="label">Database Size</div><div class="value" id="stat-size" style="font-size:1.5rem">—</div></div>
+<div class="sidebar">
+  <div class="sb-logo">
+    <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
+    <div class="sb-logo-text">
+      <span>EchoStack</span>
+      <div class="sb-badge">⚙️ ADMIN PORTAL</div>
     </div>
-
-    <!-- Quick Actions -->
-    <div class="card">
-      <h2 class="text-xl mb-4">⚡ Quick Actions</h2>
-      <div class="flex flex-wrap gap-3">
-        <button onclick="showSection('create')" class="btn btn-primary">➕ Create New Region</button>
-        <button onclick="showSection('site-builder')" class="btn btn-gold">🎨 Site Builder</button>
-        <button onclick="exportData()" class="btn btn-secondary">📤 Export Data</button>
-        <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">📥 Import Data</button>
-        <button onclick="showSection('files-manager')" class="btn btn-secondary">📁 File Manager</button>
-        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
-      </div>
-    </div>
-
-    <!-- Categories -->
-    <div class="card">
-      <h2 class="text-xl mb-4">🏷️ Manage Categories / Sections</h2>
-      <div class="flex gap-2 mb-4">
-        <input type="text" id="new-section-name" placeholder="New section name..." style="max-width:320px">
-        <button onclick="createSection()" class="btn btn-primary" style="white-space:nowrap">➕ Add Section</button>
-      </div>
-      <div id="sections-list" class="space-y-2 max-h-56 overflow-y-auto">
-        <p class="text-sm text-gray-400">Loading…</p>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Overview</div>
+    <button class="sb-item on" onclick="go('overview',this)">📊 Dashboard</button>
+    <div class="sb-section">Content</div>
+    <button class="sb-item" onclick="go('posts',this)">📝 All Posts</button>
+    <button class="sb-item" onclick="go('stories',this)">📖 Story Submissions</button>
+    <button class="sb-item" onclick="go('regions',this)">🗺 Regions</button>
+    <div class="sb-section">People</div>
+    <button class="sb-item" onclick="go('users',this)">👥 All Users</button>
+    <button class="sb-item" onclick="go('creators',this)">✍️ Creators</button>
+    <button class="sb-item" onclick="go('subs',this)">📧 Newsletter</button>
+    <div class="sb-section">Site</div>
+    <button class="sb-item" onclick="go('events',this)">🎉 Events</button>
+    <button class="sb-item" onclick="go('files',this)">📁 Files</button>
+    <div class="sb-section">Portals</div>
+    <button class="sb-item" onclick="window.open('/dashboard','_blank')">📰 User Feed ↗</button>
+    <button class="sb-item" onclick="window.open('/creator','_blank')">✍️ Creator Portal ↗</button>
+    <button class="sb-item" onclick="window.open('/app','_blank')">🗺 Heritage Map ↗</button>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-av" id="sb-av">E</div>
+      <div>
+        <div class="sb-uname" id="sb-name">Emmanuel</div>
+        <div class="sb-role" id="sb-role">SUPERUSER</div>
       </div>
     </div>
+    <button class="sb-item" onclick="doLogout()">🚪 Sign Out</button>
+  </div>
+</div>
 
-    <!-- Regions Table -->
-    <div class="card" style="padding:0;overflow:hidden">
-      <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--brand-border)">
-        <h2 class="text-xl">📍 All Regions</h2>
-        <input type="text" id="search-regions" placeholder="Search regions…" style="width:220px">
-      </div>
-      <div class="overflow-x-auto">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th><th>Name</th><th>Capital</th><th>Category</th><th>Media</th><th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="regions-table-body">
-            <tr><td colspan="6" style="text-align:center;padding:32px;color:#94a3b8">Loading regions…</td></tr>
-          </tbody>
-        </table>
+<div class="main">
+
+  <!-- OVERVIEW -->
+  <div class="panel on" id="panel-overview">
+    <div class="topbar">
+      <div><h1>Dashboard Overview</h1><p id="welcome-msg">Welcome back 🇬🇭</p></div>
+      <div class="topbar-btns">
+        <button class="tbtn ghost" onclick="loadOverview()">🔄 Refresh</button>
+        <a href="/dashboard" class="tbtn gold" target="_blank">View Site →</a>
       </div>
     </div>
-  </section>
-
-  <!-- ── SITE BUILDER ─────────────────────────────────────────────────────── -->
-  <section id="site-builder-section" class="hidden space-y-4">
-    <div class="flex justify-between items-center">
-      <h2 class="text-2xl">🎨 Site Builder</h2>
-      <div class="flex gap-3">
-        <button onclick="saveSiteBuilder()" class="btn btn-primary">💾 Save Changes</button>
-        <button onclick="previewSite()" class="btn btn-secondary">👁️ Preview</button>
-      </div>
+    <div class="stats-grid">
+      <div class="sc"><div class="sv" id="ov-users">—</div><div class="sl">Total Users</div><span class="sbg bg-blue">Registered</span></div>
+      <div class="sc"><div class="sv" id="ov-creators">—</div><div class="sl">Creators</div><span class="sbg bg-gold">Channels</span></div>
+      <div class="sc"><div class="sv" id="ov-posts">—</div><div class="sl">Posts</div><span class="sbg bg-green">Published</span></div>
+      <div class="sc"><div class="sv" id="ov-regions">—</div><div class="sl">Regions</div><span class="sbg bg-gray">Heritage</span></div>
+      <div class="sc"><div class="sv" id="ov-follows">—</div><div class="sl">Follows</div><span class="sbg bg-green">Active</span></div>
     </div>
-
-    <div class="site-builder-container">
-      <!-- Left: Pages + Themes + Widgets -->
-      <div class="builder-panel">
-        <h3 class="text-base font-bold mb-3">Pages</h3>
-        <div id="pages-list" class="mb-3"></div>
-        <button onclick="addNewPage()" class="btn btn-secondary w-full mb-5" style="justify-content:center">➕ Add Page</button>
-
-        <h3 class="text-base font-bold mb-3">Theme</h3>
-        <div id="themes-list">
-          <div class="theme-card selected" onclick="selectTheme('default', this)">
-            <div class="font-semibold text-sm">Default</div>
-            <div class="text-xs text-gray-500">Clean, modern</div>
-          </div>
-          <div class="theme-card" onclick="selectTheme('dark', this)">
-            <div class="font-semibold text-sm">Dark</div>
-            <div class="text-xs text-gray-500">Dark background</div>
-          </div>
-          <div class="theme-card" onclick="selectTheme('minimal', this)">
-            <div class="font-semibold text-sm">Minimal</div>
-            <div class="text-xs text-gray-500">Clean & minimal</div>
-          </div>
-        </div>
-
-        <h3 class="text-base font-bold mt-5 mb-3">Widgets</h3>
-        <div>
-          <div class="widget-card" draggable="true" ondragstart="dragWidget(event,'text')">
-            <div class="font-semibold text-sm">📝 Text Block</div>
-            <div class="text-xs text-gray-500">Rich text content</div>
-          </div>
-          <div class="widget-card" draggable="true" ondragstart="dragWidget(event,'image')">
-            <div class="font-semibold text-sm">🖼️ Image</div>
-            <div class="text-xs text-gray-500">Add an image</div>
-          </div>
-          <div class="widget-card" draggable="true" ondragstart="dragWidget(event,'video')">
-            <div class="font-semibold text-sm">🎬 Video</div>
-            <div class="text-xs text-gray-500">Embed a video</div>
-          </div>
-          <div class="widget-card" draggable="true" ondragstart="dragWidget(event,'regions')">
-            <div class="font-semibold text-sm">🗺️ Regions Grid</div>
-            <div class="text-xs text-gray-500">Display regions</div>
-          </div>
-          <div class="widget-card" draggable="true" ondragstart="dragWidget(event,'newsletter')">
-            <div class="font-semibold text-sm">📧 Newsletter</div>
-            <div class="text-xs text-gray-500">Newsletter signup</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Centre: Canvas -->
-      <div class="builder-canvas" id="builder-canvas"
-           ondrop="dropWidget(event)" ondragover="allowDrop(event)"
-           ondragenter="this.classList.add('drag-over')"
-           ondragleave="this.classList.remove('drag-over')">
-        <div id="canvas-content">
-          <div class="text-center text-gray-400 py-16">
-            <div style="font-size:2.5rem" class="mb-3">🎨</div>
-            <div>Drag widgets here to build your page</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: Properties -->
-      <div class="builder-panel">
-        <h3 class="text-base font-bold mb-3">Properties</h3>
-        <div id="properties-content">
-          <p class="text-sm text-gray-400">Select a widget to edit its properties</p>
-        </div>
-      </div>
+    <div class="tcard">
+      <div class="thead"><h2>📝 Recent Posts</h2><button class="tbtn ghost" style="font-size:.78rem;padding:6px 12px" onclick="go('posts',null)">All Posts →</button></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Author</th><th>Type</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead>
+      <tbody id="ov-posts-tb"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody></table></div>
     </div>
-  </section>
-
-  <!-- ── CREATE / EDIT ────────────────────────────────────────────────────── -->
-  <section id="create-section" class="hidden">
-    <div class="card max-w-4xl mx-auto">
-      <div class="flex justify-between items-start mb-6">
-        <h2 class="text-2xl" id="form-title">Add New Region</h2>
-        <button onclick="showSection('dashboard')" style="background:none;border:none;font-size:1.6rem;cursor:pointer;color:#94a3b8">×</button>
-      </div>
-      <input type="hidden" id="region-id">
-      <form id="region-form" class="space-y-5" novalidate>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div><label>Region Name *</label><input type="text" id="reg-name" required placeholder="e.g., Ashanti"></div>
-          <div><label>Capital City *</label><input type="text" id="reg-capital" required placeholder="e.g., Kumasi"></div>
-          <div><label>Population</label><input type="text" id="reg-population" placeholder="e.g., 5,440,463"></div>
-          <div><label>Terrain</label><input type="text" id="reg-terrain" placeholder="e.g., Highland"></div>
-        </div>
-        <div>
-          <label>Heritage Description *</label>
-          <textarea id="reg-description" rows="5" required placeholder="Write about this region…"></textarea>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label>Category</label>
-            <select id="reg-category">
-              <option value="">Select…</option>
-              <option value="Culture">Culture</option>
-              <option value="History">History</option>
-              <option value="Nature">Nature</option>
-              <option value="Tourism">Tourism</option>
-              <option value="Food">Food</option>
-              <option value="Music">Music</option>
-            </select>
-          </div>
-          <div><label>Tags (comma-separated)</label><input type="text" id="reg-tags" placeholder="festivals, kings, gold"></div>
-        </div>
-
-        <!-- Media -->
-        <div style="border-top:1px solid var(--brand-border);padding-top:20px">
-          <h3 class="text-lg font-bold mb-4">📸 Images &amp; Audio</h3>
-          <div class="mb-4">
-            <label>Hero Image URL</label>
-            <div class="flex gap-2">
-              <input type="text" id="reg-hero-image" placeholder="/uploads/image.jpg">
-              <button type="button" onclick="uploadFile('hero')" class="btn btn-secondary" style="white-space:nowrap">📁 Upload</button>
-            </div>
-            <div id="hero-preview" class="hidden mt-2">
-              <img id="preview-img" src="" class="rounded" style="width:100%;height:160px;object-fit:cover;border:1px solid var(--brand-border)">
-              <button type="button" onclick="removeHeroImage()" class="btn btn-danger mt-2" style="padding:4px 12px;font-size:0.75rem">Remove</button>
-            </div>
-          </div>
-          <div class="mb-4">
-            <label>Gallery Images (URLs, comma-separated)</label>
-            <textarea id="reg-gallery-images" rows="2" placeholder="/uploads/img1.jpg, /uploads/img2.jpg"></textarea>
-          </div>
-          <div class="mb-4">
-            <label>🎵 Audio Recordings (URLs, comma-separated)</label>
-            <textarea id="reg-audio-files" rows="2" placeholder="/uploads/story1.mp3, /uploads/song2.wav"></textarea>
-            <button type="button" onclick="uploadFile('audio')" class="btn btn-secondary mt-2">📁 Upload Audio</button>
-          </div>
-        </div>
-
-        <!-- Universal Upload -->
-        <div style="border-top:1px solid var(--brand-border);padding-top:20px">
-          <h3 class="text-lg font-bold mb-4">📦 Universal File Upload</h3>
-          <div class="dropzone" onclick="document.getElementById('universal-file-upload').click()">
-            <p class="text-gray-500 text-sm">Click to select OR drag &amp; drop files here</p>
-            <p class="text-xs text-gray-400 mt-1">Videos, Audio, Images, Documents — any format · Max 50 MB per file</p>
-            <input type="file" id="universal-file-upload" multiple class="hidden" onchange="uploadUniversalFiles(this)">
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div>
-              <label>File Category</label>
-              <select id="file-category">
-                <option value="general">General</option>
-                <option value="video">Video</option>
-                <option value="audio">Audio</option>
-                <option value="image">Image</option>
-                <option value="document">Document</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div>
-              <label>Link to Current Region</label>
-              <select id="file-region-link">
-                <option value="no">No Link (Global)</option>
-              </select>
-            </div>
-            <div class="md:col-span-2">
-              <label>Description</label>
-              <input type="text" id="file-description" placeholder="Describe this file">
-            </div>
-            <div class="md:col-span-2">
-              <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:0.875rem">
-                <input type="checkbox" id="file-is-public" checked style="width:auto;padding:0;border:none;box-shadow:none">
-                Public (Visible to All Users)
-              </label>
-            </div>
-          </div>
-          <div id="session-uploads-list" class="mt-4 space-y-2"></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div><label>Source Reference</label><input type="text" id="reg-source" placeholder="Where did you find this info?"></div>
-          <div><label>Brief Overview</label><input type="text" id="reg-overview" placeholder="Short summary"></div>
-        </div>
-
-        <div class="flex gap-4 pt-4" style="border-top:1px solid var(--brand-border)">
-          <button type="submit" class="btn btn-primary flex-1" id="save-btn" style="justify-content:center">💾 Save Region</button>
-          <button type="button" onclick="showSection('dashboard')" class="btn btn-secondary flex-1" style="justify-content:center">Cancel</button>
-        </div>
-      </form>
+    <div class="tcard">
+      <div class="thead"><h2>👥 Recent Users</h2><button class="tbtn ghost" style="font-size:.78rem;padding:6px 12px" onclick="go('users',null)">All Users →</button></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+      <tbody id="ov-users-tb"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody></table></div>
     </div>
-  </section>
+  </div>
 
-  <!-- ── FILES MANAGER ────────────────────────────────────────────────────── -->
-  <section id="files-manager-section" class="hidden">
-    <div class="card max-w-6xl mx-auto">
-      <div class="flex justify-between items-start mb-5">
-        <h2 class="text-2xl">📁 File Manager</h2>
-        <div class="flex gap-2">
-          <button onclick="showSection('dashboard')" class="btn btn-secondary" style="padding:8px 14px">← Back</button>
-          <button onclick="loadAllFiles()" class="btn btn-secondary" style="padding:8px 14px">🔄 Refresh</button>
-        </div>
-      </div>
-      <div class="flex gap-2 mb-4">
-        <input type="text" id="file-search" placeholder="Search files…" onkeyup="filterFiles()">
-        <select id="file-filter-category" onchange="filterFiles()" style="width:160px">
-          <option value="">All Types</option>
-          <option value="video">Videos</option>
-          <option value="audio">Audio</option>
-          <option value="image">Images</option>
-          <option value="document">Documents</option>
-          <option value="other">Other</option>
+  <!-- USERS -->
+  <div class="panel" id="panel-users">
+    <div class="topbar">
+      <h1>All Users</h1>
+      <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('users-tb',this.value)">
+    </div>
+    <div class="tcard">
+      <div class="thead"><h2>User Management <span id="users-ct" style="font-weight:400;color:var(--muted);font-size:.82rem"></span></h2></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Plan</th><th>Posts</th><th>Joined</th><th>Actions</th></tr></thead>
+      <tbody id="users-tb"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- CREATORS -->
+  <div class="panel" id="panel-creators">
+    <div class="topbar"><h1>Creators</h1></div>
+    <div class="tcard">
+      <div class="thead"><h2>Creator Channels</h2></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Channel</th><th>Username</th><th>Followers</th><th>Posts</th><th>Actions</th></tr></thead>
+      <tbody id="creators-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- POSTS -->
+  <div class="panel" id="panel-posts">
+    <div class="topbar">
+      <h1>All Posts</h1>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="fsel" id="posts-filter" onchange="loadPosts()">
+          <option value="all">All Status</option><option value="published">Published</option>
+          <option value="draft">Drafts</option><option value="pending">Pending</option><option value="rejected">Rejected</option>
         </select>
+        <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('posts-tb',this.value)">
       </div>
-      <div id="all-files-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto"></div>
     </div>
-  </section>
+    <div class="tcard">
+      <div class="thead"><h2>Post Moderation <span id="posts-ct" style="font-weight:400;color:var(--muted);font-size:.82rem"></span></h2></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Author</th><th>Type</th><th>Status</th><th>Views</th><th>💬</th><th>Actions</th></tr></thead>
+      <tbody id="posts-tb"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody></table></div>
+    </div>
+  </div>
 
-</main>
+  <!-- STORIES -->
+  <div class="panel" id="panel-stories">
+    <div class="topbar">
+      <h1>Story Submissions</h1>
+      <select class="fsel" id="stories-filter" onchange="loadStories()">
+        <option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option>
+      </select>
+    </div>
+    <div class="tcard">
+      <div class="thead"><h2>Submissions</h2></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Author</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody id="stories-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div>
+    </div>
+  </div>
 
-<!-- Toast -->
-<div id="notification"></div>
+  <!-- REGIONS -->
+  <div class="panel" id="panel-regions">
+    <div class="topbar"><h1>Regions</h1></div>
+    <div class="tcard">
+      <div class="thead"><h2>Heritage Regions <span id="regions-ct" style="font-weight:400;color:var(--muted);font-size:.82rem"></span></h2></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Name</th><th>Capital</th><th>Category</th><th>Audio</th><th>Images</th></tr></thead>
+      <tbody id="regions-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div>
+    </div>
+  </div>
 
-<!-- ═══ JAVASCRIPT ═══════════════════════════════════════════════════════════ -->
+  <!-- NEWSLETTER -->
+  <div class="panel" id="panel-subs">
+    <div class="topbar"><h1>Newsletter Subscribers</h1></div>
+    <div class="tcard">
+      <div class="thead"><h2>Email List <span id="subs-ct" style="font-weight:400;color:var(--muted);font-size:.82rem"></span></h2></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Email</th><th>Name</th><th>Subscribed</th></tr></thead>
+      <tbody id="subs-tb"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- EVENTS -->
+  <div class="panel" id="panel-events">
+    <div class="topbar">
+      <h1>Events</h1>
+      <button class="tbtn gold" onclick="openEvModal()">+ Add Event</button>
+    </div>
+    <div class="tcard">
+      <div class="thead"><h2>Upcoming Events</h2></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Date</th><th>Location</th><th>Actions</th></tr></thead>
+      <tbody id="events-tb"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- FILES -->
+  <div class="panel" id="panel-files">
+    <div class="topbar">
+      <h1>Uploaded Files</h1>
+      <label class="tbtn gold" style="cursor:pointer">📎 Upload<input type="file" style="display:none" onchange="uploadFile(this)"></label>
+    </div>
+    <div class="tcard">
+      <div class="thead"><h2>File Manager <span id="files-ct" style="font-weight:400;color:var(--muted);font-size:.82rem"></span></h2></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Filename</th><th>Category</th><th>Size</th><th>Uploaded</th><th>Actions</th></tr></thead>
+      <tbody id="files-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Event Modal -->
+<div class="mbg" id="ev-modal">
+  <div class="modal">
+    <h2>🎉 New Event</h2>
+    <div class="mf"><label>Title</label><input id="ev-t" type="text"></div>
+    <div class="mf"><label>Description</label><textarea id="ev-d"></textarea></div>
+    <div class="mf"><label>Date</label><input id="ev-dt" type="text" placeholder="e.g. 25 December 2025"></div>
+    <div class="mf"><label>Location</label><input id="ev-l" type="text"></div>
+    <div class="mf"><label>Image URL</label><input id="ev-i" type="text" placeholder="https://..."></div>
+    <div class="mbtns"><button class="mx" onclick="closeM('ev-modal')">Cancel</button><button class="mc" onclick="saveEvent()">Save Event</button></div>
+  </div>
+</div>
+
+<!-- View Modal -->
+<div class="mbg" id="view-modal">
+  <div class="modal">
+    <h2 id="vm-t">Content</h2>
+    <div id="vm-b" style="font-size:.84rem;line-height:1.7;color:#374151;white-space:pre-wrap;max-height:380px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:14px;background:#FAFBFF"></div>
+    <div class="mbtns"><button class="mx" onclick="closeM('view-modal')">Close</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-'use strict';
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+const esU = (() => { try { return JSON.parse(localStorage.getItem('es_user')||'{}') } catch(e) { return {} } })();
+const authorized = esU.role === 'superuser' || esU.role === 'admin';
 
-const API = '/api';
-let allRegions  = [];
-let allFiles    = [];
-let allSections = [];
-let currentPageWidgets = [];
-let selectedWidget = null;
-let currentTheme   = 'default';
-
-// ── Init ─────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  loadStats();
-  loadRegions();
-  loadAllSections();
-  loadSiteBuilderData();
-
-  document.getElementById('region-form').addEventListener('submit', handleSave);
-  document.getElementById('search-regions').addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
-    renderTable(allRegions.filter(r =>
-      r.name.toLowerCase().includes(term) ||
-      (r.capital  && r.capital.toLowerCase().includes(term)) ||
-      (r.category && r.category.toLowerCase().includes(term))
-    ));
-  });
-});
-
-// ── Navigation ───────────────────────────────────────────────────────────────
-function showSection(id) {
-  const sections = ['dashboard','site-builder','create','files-manager'];
-  sections.forEach(s => {
-    const el = document.getElementById(s + '-section');
-    if (el) el.classList.add('hidden');
-    const btn = document.getElementById('nav-' + s);
-    if (btn) btn.classList.remove('active');
-  });
-
-  const target = document.getElementById(id + '-section');
-  if (target) target.classList.remove('hidden');
-  const navBtn = document.getElementById('nav-' + id);
-  if (navBtn) navBtn.classList.add('active');
-
-  if (id === 'dashboard')    { loadRegions(); loadStats(); }
-  if (id === 'files-manager') loadAllFiles();
-  if (id === 'site-builder')  loadSiteBuilderData();
-  if (id === 'create')        resetForm();
+if (authorized) {
+  document.getElementById('login-overlay').classList.add('hide');
+  boot();
+} else {
+  document.getElementById('login-overlay').classList.remove('hide');
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function safeSplit(value) {
-  if (!value) return [];
-  if (Array.isArray(value)) return value.filter(v => String(v).trim());
-  return String(value).split(',').map(s => s.trim()).filter(Boolean);
+// Populate sidebar
+if (esU.username) {
+  document.getElementById('sb-name').textContent = esU.username;
+  document.getElementById('sb-av').textContent = esU.username.charAt(0).toUpperCase();
+  document.getElementById('sb-role').textContent = (esU.role||'admin').toUpperCase();
+  document.getElementById('welcome-msg').textContent = 'Welcome back, ' + esU.username + ' 🇬🇭';
 }
 
-// ── Stats ────────────────────────────────────────────────────────────────────
-async function loadStats() {
+async function doLogin() {
+  const pw = document.getElementById('li').value.trim();
+  if (!pw) return;
+  const fd = new FormData(); fd.append('email', esU.email || ''); fd.append('username', esU.email || ''); fd.append('password', pw);
   try {
-    const res  = await fetch(API + '/stats');
-    if (!res.ok) throw new Error('Stats ' + res.status);
-    const data = await res.json();
-    document.getElementById('stat-total').textContent  = data.total_regions  ?? 0;
-    document.getElementById('stat-audio').textContent  = data.with_audio     ?? 0;
-    document.getElementById('stat-images').textContent = data.with_images    ?? 0;
-    document.getElementById('stat-size').textContent   = (data.database_size_mb ?? 0) + ' MB';
-  } catch (err) {
-    console.warn('Stats error:', err);
-  }
+    const r = await fetch('/api/users/login', {method:'POST', body:fd});
+    const d = await r.json();
+    if (r.ok && d.success && (d.role === 'admin' || d.role === 'superuser')) {
+      localStorage.setItem('es_user', JSON.stringify({...esU, role:d.role, loggedIn:true}));
+      document.getElementById('login-overlay').classList.add('hide');
+      boot();
+    } else {
+      document.getElementById('lerr').style.display = 'block';
+    }
+  } catch(e) { document.getElementById('lerr').style.display = 'block'; }
+}
+document.getElementById('li').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function doLogout() {
+  localStorage.removeItem('es_user');
+  fetch('/api/users/logout', {method:'POST', credentials:'include'}).catch(()=>{});
+  window.location.href = '/';
 }
 
-// ── Regions ───────────────────────────────────────────────────────────────────
+function boot() { loadOverview(); }
+
+// ── PANELS ────────────────────────────────────────────────────────────────────
+const loaders = { overview:loadOverview, users:loadUsers, creators:loadCreators, posts:loadPosts, stories:loadStories, regions:loadRegions, subs:loadSubs, events:loadEvents, files:loadFiles };
+
+function go(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('on'));
+  document.getElementById('panel-'+name).classList.add('on');
+  if (el) el.classList.add('on');
+  if (loaders[name]) loaders[name]();
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────────────────────────
+async function loadOverview() {
+  try {
+    const [sr, ur, pr] = await Promise.all([
+      fetch('/api/stats'),
+      fetch('/api/admin/users', {credentials:'include'}),
+      fetch('/api/posts?status=all&limit=8')
+    ]);
+    if (sr.ok) {
+      const s = await sr.json();
+      document.getElementById('ov-users').textContent    = s.user_count || 0;
+      document.getElementById('ov-creators').textContent = s.total_creators || 0;
+      document.getElementById('ov-posts').textContent    = s.total_posts || 0;
+      document.getElementById('ov-regions').textContent  = s.total_regions || 0;
+      document.getElementById('ov-follows').textContent  = s.total_follows || 0;
+    }
+    if (ur.ok) {
+      const users = await ur.json();
+      document.getElementById('ov-users-tb').innerHTML = users.slice(0,5).map(u => `
+        <tr><td><strong>${u.username}</strong></td><td style="color:var(--muted);font-size:.8rem">${u.email}</td>
+        <td><span class="rb r-${u.role}">${u.role}</span></td>
+        <td style="color:var(--muted);font-size:.78rem">${(u.created_at||'').split('T')[0]}</td></tr>`).join('');
+    }
+    if (pr.ok) {
+      const posts = await pr.json();
+      document.getElementById('ov-posts-tb').innerHTML = posts.slice(0,5).map(p => `
+        <tr><td style="max-width:200px"><strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.title}</strong></td>
+        <td style="font-size:.8rem">${p.author_username||'—'}</td>
+        <td><span class="rb r-user" style="font-size:.62rem">${p.content_type}</span></td>
+        <td><span class="rb s-${p.status}">${p.status}</span></td>
+        <td>${p.view_count||0}</td>
+        <td>
+          ${p.status!=='published'?`<button class="ab ag" onclick="setPostStatus(${p.id},'published')">✓ Publish</button>`:''}
+          <button class="ab ar" onclick="delPost(${p.id})">Del</button>
+        </td></tr>`).join('');
+    }
+  } catch(e) { console.warn(e); }
+}
+
+// ── USERS ─────────────────────────────────────────────────────────────────────
+async function loadUsers() {
+  try {
+    const r = await fetch('/api/admin/users', {credentials:'include'});
+    if (!r.ok) { toast('401 — Are you logged in as admin?', 'er'); return; }
+    const users = await r.json();
+    document.getElementById('users-ct').textContent = '— ' + users.length + ' total';
+    document.getElementById('users-tb').innerHTML = users.map(u => `
+      <tr id="ur-${u.id}">
+        <td><strong>${u.username}</strong></td>
+        <td style="font-size:.78rem;color:var(--muted)">${u.email}</td>
+        <td>
+          <select class="rsel" onchange="setRole('${u.id}',this.value)" ${u.role==='superuser'?'disabled':''}>
+            <option value="user"      ${u.role==='user'     ?'selected':''}>User</option>
+            <option value="creator"   ${u.role==='creator'  ?'selected':''}>Creator</option>
+            <option value="admin"     ${u.role==='admin'    ?'selected':''}>Admin</option>
+            <option value="superuser" ${u.role==='superuser'?'selected':''}>Superuser</option>
+          </select>
+        </td>
+        <td><span class="rb ${u.plan==='premium'?'bg-gold':'bg-gray'}">${u.plan||'free'}</span></td>
+        <td>${u.post_count||0}</td>
+        <td style="font-size:.76rem;color:var(--muted)">${(u.created_at||'').split('T')[0]}</td>
+        <td>
+          <button class="ab ${u.is_active?'ar':'ag'}" onclick="toggleSuspend('${u.id}',${u.is_active})">${u.is_active?'Suspend':'Restore'}</button>
+          ${u.role!=='superuser'?`<button class="ab ar" onclick="delUser('${u.id}','${u.username}')">Delete</button>`:'<span style="font-size:.72rem;color:var(--gold)">★ Super</span>'}
+        </td>
+      </tr>`).join('');
+  } catch(e) { console.warn(e); }
+}
+
+async function setRole(uid, role) {
+  const fd = new FormData(); fd.append('role', role);
+  try {
+    const r = await fetch('/api/admin/users/'+uid+'/role', {method:'PUT', body:fd, credentials:'include'});
+    if (r.ok) { toast('Role → ' + role, 'ok'); }
+    else { const d = await r.json(); throw new Error(d.detail); }
+  } catch(e) { toast('❌ '+e.message, 'er'); }
+}
+
+async function toggleSuspend(uid, active) {
+  try {
+    const r = await fetch('/api/admin/users/'+uid+'/suspend', {method:'PUT', credentials:'include'});
+    if (r.ok) { toast(active?'User suspended':'User restored', 'ok'); loadUsers(); }
+  } catch(e) { toast('❌ Failed', 'er'); }
+}
+
+async function delUser(uid, uname) {
+  if (!confirm('Delete "'+uname+'" permanently?')) return;
+  try {
+    const r = await fetch('/api/admin/users/'+uid, {method:'DELETE', credentials:'include'});
+    if (r.ok) { toast('Deleted', 'ok'); loadUsers(); }
+    else { const d = await r.json(); throw new Error(d.detail); }
+  } catch(e) { toast('❌ '+e.message, 'er'); }
+}
+
+// ── CREATORS ──────────────────────────────────────────────────────────────────
+async function loadCreators() {
+  try {
+    const r = await fetch('/api/creators');
+    const creators = await r.json();
+    document.getElementById('creators-tb').innerHTML = creators.length ? creators.map(c => `
+      <tr>
+        <td><strong>${c.channel_name||c.username}</strong><br><span style="font-size:.74rem;color:var(--muted)">${(c.channel_desc||'').slice(0,60)}</span></td>
+        <td>${c.username}</td><td>${c.follower_count||0}</td><td>${c.post_count||0}</td>
+        <td>
+          <button class="ab ar" onclick="setRole('${c.id}','user')">Revoke Creator</button>
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty"><div class="eicon">✍️</div>No creators yet</td></tr>';
+  } catch(e) {}
+}
+
+// ── POSTS ─────────────────────────────────────────────────────────────────────
+async function loadPosts() {
+  const st = document.getElementById('posts-filter')?.value||'all';
+  try {
+    const r = await fetch('/api/posts?status='+st+'&limit=100');
+    const posts = await r.json();
+    document.getElementById('posts-ct').textContent = '— '+posts.length+' posts';
+    document.getElementById('posts-tb').innerHTML = posts.length ? posts.map(p => `
+      <tr>
+        <td style="max-width:200px"><strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.title}</strong></td>
+        <td style="font-size:.8rem">${p.author_username||'—'}</td>
+        <td><span class="rb r-user" style="font-size:.62rem">${p.content_type}</span></td>
+        <td><span class="rb s-${p.status}">${p.status}</span></td>
+        <td>${p.view_count||0}</td><td>${p.comment_count||0}</td>
+        <td>
+          <button class="ab agr" onclick="viewC('${esc(p.title)}','${esc(p.excerpt||p.content?.slice(0,500)||'')}')">View</button>
+          ${p.status!=='published'?`<button class="ab ag" onclick="setPostStatus(${p.id},'published')">✓</button>`:''}
+          ${p.status!=='rejected' ?`<button class="ab ar" onclick="setPostStatus(${p.id},'rejected')">✗</button>`:''}
+          <button class="ab ar" onclick="delPost(${p.id})">Del</button>
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="empty"><div class="eicon">📝</div>No posts</td></tr>';
+  } catch(e) {}
+}
+
+async function setPostStatus(id, st) {
+  const fd = new FormData(); fd.append('status', st);
+  try {
+    const r = await fetch('/api/admin/posts/'+id+'/status', {method:'PUT', body:fd, credentials:'include'});
+    if (r.ok) { toast('Post '+st, 'ok'); loadPosts(); loadOverview(); }
+    else { const d = await r.json(); throw new Error(d.detail); }
+  } catch(e) { toast('❌ '+e.message, 'er'); }
+}
+
+async function delPost(id) {
+  if (!confirm('Delete this post?')) return;
+  try {
+    const r = await fetch('/api/posts/'+id, {method:'DELETE', credentials:'include'});
+    if (r.ok) { toast('Post deleted', 'ok'); loadPosts(); }
+  } catch(e) {}
+}
+
+// ── STORIES ───────────────────────────────────────────────────────────────────
+async function loadStories() {
+  const st = document.getElementById('stories-filter')?.value||'pending';
+  try {
+    const r = await fetch('/api/stories?status='+st);
+    if (!r.ok) { document.getElementById('stories-tb').innerHTML='<tr><td colspan="5" class="empty">No story endpoint yet</td></tr>'; return; }
+    const stories = await r.json();
+    document.getElementById('stories-tb').innerHTML = stories.length ? stories.map(s => `
+      <tr>
+        <td><strong>${s.title}</strong></td><td>${s.username}</td>
+        <td><span class="rb s-${s.status}">${s.status}</span></td>
+        <td style="font-size:.78rem;color:var(--muted)">${(s.created_at||'').split('T')[0]}</td>
+        <td>
+          <button class="ab agr" onclick="viewC('${esc(s.title)}','${esc(s.content)}')">Read</button>
+          ${s.status!=='approved'?`<button class="ab ag" onclick="storyAct(${s.id},'approve')">Approve</button>`:''}
+          ${s.status!=='rejected'?`<button class="ab ar" onclick="storyAct(${s.id},'reject')">Reject</button>`:''}
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty"><div class="eicon">📖</div>None in this status</td></tr>';
+  } catch(e) { document.getElementById('stories-tb').innerHTML='<tr><td colspan="5" class="empty">Loading failed</td></tr>'; }
+}
+
+async function storyAct(id, action) {
+  try {
+    const r = await fetch('/api/stories/'+id+'/'+action, {method:'PUT', credentials:'include'});
+    if (r.ok) { toast('Story '+action+'d', 'ok'); loadStories(); }
+  } catch(e) {}
+}
+
+// ── REGIONS ───────────────────────────────────────────────────────────────────
 async function loadRegions() {
   try {
-    const res = await fetch(API + '/regions');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    allRegions = await res.json();
-    renderTable(allRegions);
-    populateRegionDropdown();
-  } catch (err) {
-    document.getElementById('regions-table-body').innerHTML =
-      `<tr><td colspan="6" style="text-align:center;padding:24px;color:#ef4444">Error loading regions: ${err.message}</td></tr>`;
-  }
+    const r = await fetch('/api/regions');
+    const regs = await r.json();
+    document.getElementById('regions-ct').textContent = '— '+regs.length;
+    document.getElementById('regions-tb').innerHTML = regs.length ? regs.map(reg => `
+      <tr>
+        <td><strong>${reg.name}</strong></td><td>${reg.capital||'—'}</td>
+        <td>${reg.category||'—'}</td>
+        <td>${reg.audio_files?'✅':'—'}</td><td>${reg.gallery_images?'✅':'—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty"><div class="eicon">🗺</div>No regions</td></tr>';
+  } catch(e) {}
 }
 
-function renderTable(regions) {
-  const tbody = document.getElementById('regions-table-body');
-  if (!regions || regions.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:#94a3b8">No regions yet. Create one!</td></tr>';
-    return;
-  }
-  tbody.innerHTML = regions.map((r, i) => {
-    const hasImg   = safeSplit(r.gallery_images).length > 0;
-    const hasAudio = safeSplit(r.audio_files).length > 0;
-    return `<tr style="cursor:pointer" onclick="editRegion('${r.id}')">
-      <td style="color:#94a3b8">${i + 1}</td>
-      <td><strong>${r.name || 'Unknown'}</strong></td>
-      <td>${r.capital || '—'}</td>
-      <td><span style="background:var(--brand-light);padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600">${r.category || 'Uncategorized'}</span></td>
-      <td style="font-size:1.1rem">${hasImg ? '🖼️ ' : ''}${hasAudio ? '🎵' : ''}</td>
-      <td onclick="event.stopPropagation()">
-        <button onclick="editRegion('${r.id}')" class="btn btn-secondary" style="padding:5px 12px;font-size:0.78rem;margin-right:6px">✏️ Edit</button>
-        <button onclick="deleteRegion('${r.id}','${r.name.replace(/'/g,"\\\'")}')" class="btn btn-danger" style="padding:5px 12px;font-size:0.78rem">🗑️</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-function resetForm() {
-  document.getElementById('region-form').reset();
-  document.getElementById('region-id').value = '';
-  document.getElementById('form-title').textContent = 'Add New Region';
-  document.getElementById('save-btn').textContent = '💾 Save Region';
-  document.getElementById('hero-preview').classList.add('hidden');
-  document.getElementById('session-uploads-list').innerHTML = '';
-}
-
-function editRegion(id) {
-  const region = allRegions.find(r => String(r.id) === String(id));
-  if (!region) { showNotification('Region not found', 'error'); return; }
-
-  document.getElementById('form-title').textContent = 'Edit: ' + region.name;
-  document.getElementById('save-btn').textContent = '💾 Update Region';
-  document.getElementById('region-id').value       = region.id;
-  document.getElementById('reg-name').value        = region.name        || '';
-  document.getElementById('reg-capital').value     = region.capital     || '';
-  document.getElementById('reg-population').value  = region.population  || '';
-  document.getElementById('reg-terrain').value     = region.terrain     || '';
-  document.getElementById('reg-description').value = region.description || '';
-  document.getElementById('reg-category').value    = region.category    || '';
-  document.getElementById('reg-tags').value        = region.tags        || '';
-  document.getElementById('reg-source').value      = region.source      || '';
-  document.getElementById('reg-overview').value    = region.overview    || '';
-  document.getElementById('reg-hero-image').value  = region.hero_image  || '';
-  document.getElementById('reg-gallery-images').value = safeSplit(region.gallery_images).join(', ');
-  document.getElementById('reg-audio-files').value    = safeSplit(region.audio_files).join(', ');
-
-  if (region.hero_image) showHeroPreview(region.hero_image);
-  else document.getElementById('hero-preview').classList.add('hidden');
-
-  populateRegionDropdown(region.id);
-  showSection('create');
-}
-
-async function handleSave(e) {
-  e.preventDefault();
-  const regionId = document.getElementById('region-id').value;
-  const btn = document.getElementById('save-btn');
-  btn.disabled = true;
-  const original = btn.textContent;
-  btn.textContent = '⏳ Saving…';
-
-  // FIX: client-side validation before hitting server
-  const name = document.getElementById('reg-name').value.trim();
-  const capital = document.getElementById('reg-capital').value.trim();
-  const description = document.getElementById('reg-description').value.trim();
-  if (!name || !capital || !description) {
-    showNotification('Please fill all required fields (*)', 'error');
-    btn.disabled = false; btn.textContent = original; return;
-  }
-
-  const body = new FormData();
-  body.append('name', name);
-  body.append('capital', capital);
-  body.append('population',   document.getElementById('reg-population').value);
-  body.append('terrain',      document.getElementById('reg-terrain').value);
-  body.append('description',  description);
-  body.append('category',     document.getElementById('reg-category').value);
-  body.append('tags',         document.getElementById('reg-tags').value);
-  body.append('hero_image',   document.getElementById('reg-hero-image').value);
-  body.append('gallery_images', document.getElementById('reg-gallery-images').value);
-  body.append('audio_files',  document.getElementById('reg-audio-files').value);
-  body.append('source',       document.getElementById('reg-source').value);
-  body.append('overview',     document.getElementById('reg-overview').value);
-
+// ── NEWSLETTER ────────────────────────────────────────────────────────────────
+async function loadSubs() {
   try {
-    const method = regionId ? 'PUT' : 'POST';
-    const url    = regionId ? `${API}/regions/${regionId}` : `${API}/regions`;
-    const res    = await fetch(url, { method, body });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || 'Server error ' + res.status);
-    }
-    const data = await res.json();
-    if (data.success) {
-      showNotification(regionId ? 'Region updated!' : 'Region created!', 'success');
-      await loadRegions();
-      await loadStats();
-      showSection('dashboard');
-    } else {
-      throw new Error(data.detail || 'Save failed');
-    }
-  } catch (err) {
-    showNotification('❌ ' + err.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = original;
-  }
+    const r = await fetch('/api/newsletter/subscribers', {credentials:'include'});
+    if (!r.ok) { document.getElementById('subs-tb').innerHTML='<tr><td colspan="3" class="empty">Unauthorized</td></tr>'; return; }
+    const subs = await r.json();
+    document.getElementById('subs-ct').textContent = '— '+subs.length;
+    document.getElementById('subs-tb').innerHTML = subs.length ? subs.map(s => `
+      <tr><td><strong>${s.email}</strong></td><td>${s.full_name||'—'}</td>
+      <td style="font-size:.78rem;color:var(--muted)">${(s.created_at||s.subscribed_at||'').split('T')[0]}</td></tr>`).join('')
+    : '<tr><td colspan="3" class="empty"><div class="eicon">📧</div>No subscribers</td></tr>';
+  } catch(e) {}
 }
 
-async function deleteRegion(id, name) {
-  if (!confirm(`Delete "${name}"? This CANNOT be undone.`)) return;
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+async function loadEvents() {
   try {
-    const res  = await fetch(`${API}/regions/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      showNotification('Region deleted!', 'success');
-      await loadRegions();
-      await loadStats();
-    } else throw new Error('Delete failed');
-  } catch (err) {
-    showNotification('❌ Delete failed', 'error');
-  }
+    const r = await fetch('/api/events');
+    const evs = await r.json();
+    document.getElementById('events-tb').innerHTML = evs.length ? evs.map(e => `
+      <tr><td><strong>${e.title}</strong></td><td>${e.event_date||'—'}</td><td>${e.location||'—'}</td>
+      <td><button class="ab ar" onclick="delEvent(${e.id})">Delete</button></td></tr>`).join('')
+    : '<tr><td colspan="4" class="empty"><div class="eicon">🎉</div>No events yet</td></tr>';
+  } catch(e) {}
 }
 
-// ── Hero preview ──────────────────────────────────────────────────────────────
-function showHeroPreview(url) {
-  document.getElementById('preview-img').src = url;
-  document.getElementById('hero-preview').classList.remove('hidden');
-}
-function removeHeroImage() {
-  document.getElementById('reg-hero-image').value = '';
-  document.getElementById('hero-preview').classList.add('hidden');
-}
+function openEvModal() { document.getElementById('ev-modal').classList.add('open'); }
 
-// ── File uploads ──────────────────────────────────────────────────────────────
-async function uploadFile(type) {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = type === 'hero' ? 'image/*' : 'audio/*';
-  input.onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('filename', file.name);
-    try {
-      const endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/audio';
-      const res  = await fetch(endpoint, { method: 'POST', body: fd });
-      const data = await res.json();
-      if (data.success) {
-        if (type === 'hero') {
-          document.getElementById('reg-hero-image').value = data.url;
-          showHeroPreview(data.url);
-        } else {
-          const cur = document.getElementById('reg-audio-files').value;
-          document.getElementById('reg-audio-files').value = cur ? cur + ', ' + data.url : data.url;
-        }
-        showNotification('Uploaded!', 'success');
-      } else throw new Error(data.detail || 'Upload failed');
-    } catch (err) {
-      showNotification('❌ ' + err.message, 'error');
-    }
-  };
-  input.click();
-}
-
-async function uploadUniversalFiles(input) {
-  const files = Array.from(input.files);
-  if (!files.length) return;
-  let ok = 0, fail = 0;
-  for (const file of files) {
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('filename', file.name);
-      fd.append('category', document.getElementById('file-category').value);
-      fd.append('description', document.getElementById('file-description').value);
-      fd.append('is_public', document.getElementById('file-is-public').checked ? '1' : '0');
-      const res  = await fetch('/api/upload/file', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        ok++;
-        const cat = document.getElementById('file-category').value;
-        if (cat === 'audio') {
-          const cur = document.getElementById('reg-audio-files').value;
-          document.getElementById('reg-audio-files').value = cur ? cur + ', ' + data.url : data.url;
-        } else if (cat === 'image') {
-          const cur = document.getElementById('reg-gallery-images').value;
-          document.getElementById('reg-gallery-images').value = cur ? cur + ', ' + data.url : data.url;
-        }
-        addToSessionUploadList(data);
-        showNotification(`✅ ${file.name} uploaded!`, 'success');
-      } else throw new Error(data.detail || 'Upload failed');
-    } catch (err) {
-      fail++;
-      showNotification(`❌ Failed: ${file.name}`, 'error');
-    }
-  }
-  if (files.length > 1) showNotification(`📁 ${ok}/${files.length} files uploaded`, ok === files.length ? 'success' : 'info');
-  input.value = '';
-}
-
-function addToSessionUploadList(fd) {
-  const item = document.createElement('div');
-  item.style.cssText = 'background:#f0f9ff;border:1px solid #bae6fd;padding:10px 14px;border-radius:8px;font-size:0.82rem';
-  item.innerHTML = `✅ <strong>${fd.original_name}</strong> (${fd.file_size_mb} MB) · ${fd.category.toUpperCase()} <a href="${fd.url}" target="_blank" style="color:var(--brand-blue);margin-left:8px">🔗 View</a>`;
-  document.getElementById('session-uploads-list').appendChild(item);
-}
-
-// ── Files Manager ─────────────────────────────────────────────────────────────
-async function loadAllFiles() {
+async function saveEvent() {
+  const fd = new FormData();
+  ['t','d','dt','l','i'].forEach(k => fd.append(k==='t'?'title':k==='d'?'description':k==='dt'?'event_date':k==='l'?'location':'image_url', document.getElementById('ev-'+k).value));
   try {
-    const res = await fetch('/api/files');
-    allFiles  = await res.json();
-    renderFilesGrid(allFiles);
-  } catch (err) {
-    showNotification('Failed to load files', 'error');
-  }
+    const r = await fetch('/api/events', {method:'POST', body:fd, credentials:'include'});
+    if (r.ok) { closeM('ev-modal'); toast('Event created!', 'ok'); loadEvents(); }
+    else { const d = await r.json(); throw new Error(d.detail); }
+  } catch(e) { toast('❌ '+e.message, 'er'); }
 }
 
-function renderFilesGrid(files) {
-  const container = document.getElementById('all-files-grid');
-  if (!files || !files.length) {
-    container.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:32px;color:#94a3b8">No files uploaded yet.</p>';
-    return;
-  }
-  container.innerHTML = files.map(f => `
-    <div class="file-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <span style="font-weight:600;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${f.original_name}</span>
-        <button onclick="deleteFile(${f.id})" class="btn btn-danger" style="padding:3px 9px;font-size:0.72rem;margin-left:8px;flex-shrink:0">🗑️</button>
-      </div>
-      <p style="font-size:0.75rem;color:#64748b">${f.category.toUpperCase()} · ${f.file_size_mb} MB</p>
-      ${f.description ? `<p style="font-size:0.75rem;color:#94a3b8;margin-top:4px">${f.description}</p>` : ''}
-      <a href="${f.file_url}" target="_blank" style="font-size:0.78rem;color:var(--brand-blue);margin-top:6px;display:inline-block">🔗 Open File</a>
-    </div>
-  `).join('');
-}
-
-function filterFiles() {
-  const search = document.getElementById('file-search').value.toLowerCase();
-  const cat    = document.getElementById('file-filter-category').value;
-  renderFilesGrid(allFiles.filter(f =>
-    (!search || f.original_name.toLowerCase().includes(search) || (f.description && f.description.toLowerCase().includes(search))) &&
-    (!cat    || f.category === cat)
-  ));
-}
-
-async function deleteFile(id) {
-  if (!confirm('Delete this file permanently?')) return;
+async function delEvent(id) {
   try {
-    const res  = await fetch(`/api/files/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      showNotification('File deleted!', 'success');
-      await loadAllFiles();
-    } else throw new Error('Delete failed');
-  } catch (err) {
-    showNotification('❌ Delete failed', 'error');
-  }
+    const r = await fetch('/api/events/'+id, {method:'DELETE', credentials:'include'});
+    if (r.ok) { toast('Deleted', 'ok'); loadEvents(); }
+  } catch(e) {}
 }
 
-// ── Sections ──────────────────────────────────────────────────────────────────
-async function loadAllSections() {
+// ── FILES ─────────────────────────────────────────────────────────────────────
+async function loadFiles() {
   try {
-    const res = await fetch('/api/sections');
-    allSections = await res.json();
-    const container = document.getElementById('sections-list');
-    if (!allSections.length) {
-      container.innerHTML = '<p style="font-size:0.85rem;color:#94a3b8">No sections yet.</p>';
-      return;
-    }
-    container.innerHTML = allSections.map(s => `
-      <div class="section-tag">
-        <span>${s.name}</span>
-        <button onclick="deleteSection(${s.id})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.9rem">✖</button>
-      </div>
-    `).join('');
-  } catch (err) { console.warn('Sections load error:', err); }
+    const r = await fetch('/api/files');
+    const files = await r.json();
+    document.getElementById('files-ct').textContent = '— '+files.length;
+    document.getElementById('files-tb').innerHTML = files.length ? files.map(f => `
+      <tr>
+        <td><a href="${f.file_url}" target="_blank" style="color:var(--gold);font-weight:600">${f.original_name||f.filename}</a></td>
+        <td>${f.category}</td><td>${f.file_size_mb||0} MB</td>
+        <td style="font-size:.78rem;color:var(--muted)">${(f.created_at||'').split('T')[0]}</td>
+        <td><button class="ab ar" onclick="delFile(${f.id})">Delete</button></td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty"><div class="eicon">📁</div>No files</td></tr>';
+  } catch(e) {}
 }
 
-async function createSection() {
-  const name = document.getElementById('new-section-name').value.trim();
-  if (!name) { showNotification('Enter a section name', 'error'); return; }
+async function uploadFile(input) {
+  if (!input.files[0]) return;
+  const fd = new FormData(); fd.append('file', input.files[0]);
   try {
-    const fd = new FormData();
-    fd.append('name', name);
-    const res  = await fetch('/api/sections', { method: 'POST', body: fd });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      showNotification('Section created!', 'success');
-      document.getElementById('new-section-name').value = '';
-      await loadAllSections();
-    } else throw new Error(data.detail || 'Failed');
-  } catch (err) {
-    showNotification('❌ ' + err.message, 'error');
-  }
+    toast('Uploading…', '');
+    const r = await fetch('/api/upload/file', {method:'POST', body:fd});
+    if (r.ok) { toast('✅ Uploaded!', 'ok'); loadFiles(); }
+    else { const d = await r.json(); throw new Error(d.detail); }
+  } catch(e) { toast('❌ '+e.message, 'er'); }
 }
 
-async function deleteSection(id) {
-  if (!confirm('Delete this section?')) return;
+async function delFile(id) {
   try {
-    const res  = await fetch(`/api/sections/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      showNotification('Section deleted!', 'success');
-      await loadAllSections();
-    } else throw new Error('Delete failed');
-  } catch (err) {
-    showNotification('❌ Delete failed', 'error');
-  }
+    const r = await fetch('/api/files/'+id, {method:'DELETE'});
+    if (r.ok) { toast('Deleted', 'ok'); loadFiles(); }
+  } catch(e) {}
 }
 
-// ── Region dropdown (file uploader) ──────────────────────────────────────────
-function populateRegionDropdown(selectedId) {
-  const select = document.getElementById('file-region-link');
-  select.innerHTML = '<option value="no">No Link (Global)</option>';
-  allRegions.forEach(r => {
-    const opt = document.createElement('option');
-    opt.value = r.id;
-    opt.textContent = r.name;
-    if (selectedId && String(selectedId) === String(r.id)) opt.selected = true;
-    select.appendChild(opt);
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function viewC(title, body) {
+  document.getElementById('vm-t').textContent = title;
+  document.getElementById('vm-b').textContent = body;
+  document.getElementById('view-modal').classList.add('open');
+}
+function closeM(id) { document.getElementById(id).classList.remove('open'); }
+function filterTbl(id, q) {
+  document.querySelectorAll('#'+id+' tr').forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
   });
 }
-
-// ── Export / Import ───────────────────────────────────────────────────────────
-async function exportData() {
-  try {
-    const res  = await fetch(API + '/regions');
-    const data = await res.json();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = Object.assign(document.createElement('a'), {
-      href: url,
-      download: `echostack-backup-${new Date().toISOString().split('T')[0]}.json`
-    });
-    a.click();
-    URL.revokeObjectURL(url);
-    showNotification('Exported!', 'success');
-  } catch (err) {
-    showNotification('❌ Export failed', 'error');
-  }
-}
-
-async function importData(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      await fetch('/api/import/json', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      showNotification('Imported!', 'success');
-      await loadRegions();
-    } catch (err) {
-      showNotification('❌ Invalid file', 'error');
-    }
-  };
-  reader.readAsText(file);
-  input.value = '';
-}
-
-// ── Logout ───────────────────────────────────────────────────────────────────
-function logout() {
-  if (!confirm('Logout now?')) return;
-  fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
-    document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
-    window.location.href = '/admin';
-  });
-}
-
-// ── Site Builder ──────────────────────────────────────────────────────────────
-async function loadSiteBuilderData() {
-  try {
-    const [pagesRes, themeRes] = await Promise.all([
-      fetch('/api/site-pages'),
-      fetch('/api/theme')
-    ]);
-    // FIX: check response.ok before parsing to avoid JSON parse errors on 404/500
-    if (pagesRes.ok) {
-      const pages = await pagesRes.json();
-      renderPagesList(pages);
-    }
-    if (themeRes.ok) {
-      const theme = await themeRes.json();
-      if (theme.name) {
-        currentTheme = theme.name;
-        document.querySelectorAll('.theme-card').forEach(opt => {
-          opt.classList.toggle('selected', opt.querySelector('.font-semibold').textContent.toLowerCase().includes(theme.name));
-        });
-      }
-    }
-  } catch (err) {
-    console.warn('Site builder load error:', err);
-  }
-}
-
-function renderPagesList(pages) {
-  const container = document.getElementById('pages-list');
-  if (!pages || !pages.length) {
-    container.innerHTML = '<p style="font-size:0.82rem;color:#94a3b8;margin-bottom:8px">No pages yet</p>';
-    return;
-  }
-  container.innerHTML = pages.map(p => `
-    <div class="page-item ${p.is_home ? 'active' : ''}" onclick="loadPage('${p.slug}')">
-      <div style="font-weight:600">${p.title}</div>
-      <div style="font-size:0.72rem;color:#94a3b8">/${p.slug}</div>
-    </div>
-  `).join('');
-}
-
-function addNewPage() {
-  const title = prompt('Enter page title:');
-  if (!title) return;
-  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  fetch('/api/site-pages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, slug, content: '', template: 'default' })
-  }).then(r => r.json()).then(d => {
-    if (d.success) { showNotification('Page created!', 'success'); loadSiteBuilderData(); loadPage(slug); }
-    else showNotification('Error creating page', 'error');
-  }).catch(() => showNotification('Error creating page', 'error'));
-}
-
-function loadPage(slug) {
-  fetch(`/api/site-pages/${slug}`)
-    .then(r => r.json())
-    .then(page => { currentPageWidgets = page.widgets || []; renderCanvas(); })
-    .catch(() => showNotification('Error loading page', 'error'));
-}
-
-function dragWidget(event, type)  { event.dataTransfer.setData('widget-type', type); }
-function allowDrop(event)         { event.preventDefault(); }
-
-function dropWidget(event) {
-  event.preventDefault();
-  document.getElementById('builder-canvas').classList.remove('drag-over');
-  const type = event.dataTransfer.getData('widget-type');
-  if (!type) return;
-  const widget = { id: Date.now(), type, data: getDefaultWidgetData(type), order: currentPageWidgets.length };
-  currentPageWidgets.push(widget);
-  renderCanvas();
-  selectWidgetById(widget.id);
-}
-
-function getDefaultWidgetData(type) {
-  const defaults = {
-    text: { content: 'Enter your text here…', alignment: 'left' },
-    image: { url: '', alt: '', caption: '' },
-    video: { url: '', title: '' },
-    regions: { limit: 6, category: '' },
-    newsletter: { title: 'Subscribe to our newsletter' }
-  };
-  return defaults[type] || {};
-}
-
-function renderCanvas() {
-  const canvas = document.getElementById('canvas-content');
-  if (!currentPageWidgets.length) {
-    canvas.innerHTML = `<div style="text-align:center;color:#94a3b8;padding:64px 0">
-      <div style="font-size:2.5rem;margin-bottom:12px">🎨</div>
-      <div>Drag widgets here to build your page</div>
-    </div>`;
-    return;
-  }
-  canvas.innerHTML = currentPageWidgets.map(w => `
-    <div class="canvas-widget ${selectedWidget && selectedWidget.id === w.id ? 'selected' : ''}"
-         onclick="selectWidgetById(${w.id})"
-         draggable="true"
-         ondragstart="dragExistingWidget(event,${w.id})"
-         ondragover="allowDrop(event)"
-         ondrop="reorderWidget(event,${w.id})">
-      ${renderWidgetPreview(w)}
-      <button class="widget-del" onclick="event.stopPropagation();deleteWidget(${w.id})">🗑 Remove</button>
-    </div>
-  `).join('');
-}
-
-function renderWidgetPreview(w) {
-  switch (w.type) {
-    case 'text':       return `<div style="text-align:${w.data.alignment}">${w.data.content}</div>`;
-    case 'image':      return `<img src="${w.data.url || 'https://placehold.co/400x180/e2e8f0/94a3b8?text=Image'}" alt="${w.data.alt}" style="width:100%;border-radius:6px">`;
-    case 'video':      return `<div style="background:#f1f5f9;padding:24px;border-radius:8px;text-align:center">🎬 Video: ${w.data.title || 'Untitled'}</div>`;
-    case 'regions':    return `<div style="background:#eff6ff;padding:16px;border-radius:8px;text-align:center">🗺️ Regions Grid (${w.data.limit} items)</div>`;
-    case 'newsletter': return `<div style="background:#f8faff;padding:20px;border-radius:8px;text-align:center"><strong>${w.data.title}</strong><input type="email" placeholder="Enter email" style="margin-top:10px" onclick="event.stopPropagation()"></div>`;
-    default:           return '<div>Unknown widget</div>';
-  }
-}
-
-function selectWidgetById(id) {
-  selectedWidget = currentPageWidgets.find(w => w.id === id) || null;
-  renderCanvas();
-  renderProperties();
-}
-
-function renderProperties() {
-  const container = document.getElementById('properties-content');
-  if (!selectedWidget) {
-    container.innerHTML = '<p style="font-size:0.85rem;color:#94a3b8">Select a widget to edit</p>';
-    return;
-  }
-  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-    <strong style="text-transform:capitalize">${selectedWidget.type} Widget</strong>
-  </div>`;
-
-  if (selectedWidget.type === 'text') {
-    html += `
-      <label>Content</label>
-      <textarea rows="5" oninput="updateWidgetData('content',this.value)" style="margin-bottom:12px">${selectedWidget.data.content}</textarea>
-      <label>Alignment</label>
-      <select onchange="updateWidgetData('alignment',this.value)">
-        <option value="left"   ${selectedWidget.data.alignment==='left'   ?'selected':''}>Left</option>
-        <option value="center" ${selectedWidget.data.alignment==='center' ?'selected':''}>Centre</option>
-        <option value="right"  ${selectedWidget.data.alignment==='right'  ?'selected':''}>Right</option>
-      </select>`;
-  } else if (selectedWidget.type === 'image') {
-    html += `
-      <label>Image URL</label>
-      <input type="text" value="${selectedWidget.data.url}" oninput="updateWidgetData('url',this.value)" style="margin-bottom:12px">
-      <label>Alt Text</label>
-      <input type="text" value="${selectedWidget.data.alt}" oninput="updateWidgetData('alt',this.value)">`;
-  } else if (selectedWidget.type === 'newsletter') {
-    html += `<label>Title</label><input type="text" value="${selectedWidget.data.title}" oninput="updateWidgetData('title',this.value)">`;
-  } else if (selectedWidget.type === 'regions') {
-    html += `<label>Limit</label><input type="number" value="${selectedWidget.data.limit}" min="1" max="16" oninput="updateWidgetData('limit',this.value)">`;
-  }
-
-  container.innerHTML = html;
-}
-
-function updateWidgetData(key, value) {
-  if (selectedWidget) { selectedWidget.data[key] = value; renderCanvas(); }
-}
-
-function deleteWidget(id) {
-  currentPageWidgets = currentPageWidgets.filter(w => w.id !== id);
-  if (selectedWidget && selectedWidget.id === id) selectedWidget = null;
-  renderCanvas();
-  renderProperties();
-}
-
-function dragExistingWidget(event, id) {
-  event.dataTransfer.setData('existing-widget-id', String(id));
-}
-
-function reorderWidget(event, targetId) {
-  event.preventDefault();
-  const sourceId = parseInt(event.dataTransfer.getData('existing-widget-id'));
-  if (!sourceId || sourceId === targetId) return;
-  const si = currentPageWidgets.findIndex(w => w.id === sourceId);
-  const ti = currentPageWidgets.findIndex(w => w.id === targetId);
-  const [removed] = currentPageWidgets.splice(si, 1);
-  currentPageWidgets.splice(ti, 0, removed);
-  renderCanvas();
-}
-
-function selectTheme(name, el) {
-  currentTheme = name;
-  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-}
-
-async function saveSiteBuilder() {
-  try {
-    const res = await fetch('/api/theme', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: currentTheme })
-    });
-    if (res.ok) showNotification('Site builder saved!', 'success');
-    else showNotification('Error saving', 'error');
-  } catch (err) {
-    showNotification('Error saving', 'error');
-  }
-}
-
-function previewSite() { window.open('/?preview=true', '_blank'); }
-
-// ── Toast notification ────────────────────────────────────────────────────────
-let _toastTimer;
-function showNotification(msg, type = 'info') {
-  const el = document.getElementById('notification');
-  el.textContent = msg;
-  el.className = `show ${type}`;
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => { el.className = ''; }, 3500);
+function esc(s) { return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ').slice(0,400); }
+let _t;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast on '+(type||'');
+  clearTimeout(_t); _t = setTimeout(() => el.className='toast', 4000);
 }
 </script>
 </body>
