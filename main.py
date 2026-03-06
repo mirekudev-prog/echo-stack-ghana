@@ -42,9 +42,12 @@ def get_user_from_request(request: Request, db: Session):
     if not user_id:
         return None
     try:
-        user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+        import uuid as _uuid
+        uid = _uuid.UUID(str(user_id))
+        user = db.query(models.User).filter(models.User.id == uid).first()
         return user
-    except:
+    except Exception as e:
+        print(f"get_user error: {e}")
         return None
 
 def require_role(user, *roles):
@@ -491,12 +494,12 @@ async def delete_comment(comment_id: int, request: Request, db: Session = Depend
 # ════════════════════════════════════════════════════════════════════════════
 
 @app.post("/api/follow/{creator_id}")
-async def follow(creator_id: int, request: Request, db: Session = Depends(get_db)):
+async def follow(creator_id: str, request: Request, db: Session = Depends(get_db)):
     user = get_user_from_request(request, db)
     if not user: raise HTTPException(status_code=401)
     existing = db.query(models.Follow).filter(
         models.Follow.follower_id == user.id,
-        models.Follow.creator_id == creator_id
+        models.Follow.creator_id == _uuid.UUID(str(creator_id))
     ).first()
     if existing:
         db.delete(existing)
@@ -504,7 +507,8 @@ async def follow(creator_id: int, request: Request, db: Session = Depends(get_db
         if creator: creator.follower_count = max(0, creator.follower_count - 1)
         db.commit()
         return {"success": True, "following": False}
-    follow = models.Follow(follower_id=user.id, creator_id=creator_id)
+    import uuid as _uuid2
+    follow = models.Follow(follower_id=user.id, creator_id=_uuid2.UUID(str(creator_id)))
     db.add(follow)
     creator = db.query(models.User).filter(models.User.id == creator_id).first()
     if creator: creator.follower_count += 1
@@ -512,12 +516,12 @@ async def follow(creator_id: int, request: Request, db: Session = Depends(get_db
     return {"success": True, "following": True}
 
 @app.get("/api/follow/{creator_id}/status")
-async def follow_status(creator_id: int, request: Request, db: Session = Depends(get_db)):
+async def follow_status(creator_id: str, request: Request, db: Session = Depends(get_db)):
     user = get_user_from_request(request, db)
     if not user: return {"following": False}
     existing = db.query(models.Follow).filter(
         models.Follow.follower_id == user.id,
-        models.Follow.creator_id == creator_id
+        models.Follow.creator_id == _uuid.UUID(str(creator_id))
     ).first()
     return {"following": bool(existing)}
 
@@ -542,14 +546,15 @@ async def admin_get_users(request: Request, db: Session = Depends(get_db)):
 
 @app.put("/api/admin/users/{user_id}/role")
 async def set_role(
-    user_id: int, role: str = Form(...),
+    user_id: str, role: str = Form(...),
     request: Request = None, db: Session = Depends(get_db)
 ):
     admin_cookie = request.cookies.get("admin_session")
     user = get_user_from_request(request, db)
     if admin_cookie != "ADMIN_AUTHORIZED" and (not user or user.role not in ("admin", "superuser")):
         raise HTTPException(status_code=403)
-    target = db.query(models.User).filter(models.User.id == user_id).first()
+    import uuid as _u
+    target = db.query(models.User).filter(models.User.id == _u.UUID(str(user_id))).first()
     if not target: raise HTTPException(status_code=404)
     if role not in ("user", "creator", "admin", "superuser"):
         raise HTTPException(status_code=400, detail="Invalid role")
@@ -559,24 +564,26 @@ async def set_role(
     return {"success": True, "role": role}
 
 @app.put("/api/admin/users/{user_id}/suspend")
-async def suspend_user(user_id: int, request: Request, db: Session = Depends(get_db)):
+async def suspend_user(user_id: str, request: Request, db: Session = Depends(get_db)):
     admin_cookie = request.cookies.get("admin_session")
     user = get_user_from_request(request, db)
     if admin_cookie != "ADMIN_AUTHORIZED" and (not user or user.role not in ("admin", "superuser")):
         raise HTTPException(status_code=403)
-    target = db.query(models.User).filter(models.User.id == user_id).first()
+    import uuid as _u
+    target = db.query(models.User).filter(models.User.id == _u.UUID(str(user_id))).first()
     if not target: raise HTTPException(status_code=404)
     target.is_active = not target.is_active
     db.commit()
     return {"success": True, "is_active": target.is_active}
 
 @app.delete("/api/admin/users/{user_id}")
-async def admin_delete_user(user_id: int, request: Request, db: Session = Depends(get_db)):
+async def admin_delete_user(user_id: str, request: Request, db: Session = Depends(get_db)):
     admin_cookie = request.cookies.get("admin_session")
     user = get_user_from_request(request, db)
     if admin_cookie != "ADMIN_AUTHORIZED" and (not user or user.role not in ("admin", "superuser")):
         raise HTTPException(status_code=403)
-    target = db.query(models.User).filter(models.User.id == user_id).first()
+    import uuid as _u
+    target = db.query(models.User).filter(models.User.id == _u.UUID(str(user_id))).first()
     if not target: raise HTTPException(status_code=404)
     if target.role == "superuser": raise HTTPException(status_code=403, detail="Cannot delete superuser")
     try:
