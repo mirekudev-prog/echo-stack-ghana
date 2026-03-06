@@ -517,3 +517,35 @@ async def register_user(
     db.refresh(new_user)
     
     return {"success": True, "user_id": new_user.id}
+
+@app.post("/api/users/register")
+async def register_user(
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    # Check if exists
+    existing = db.query(User).filter(
+        (User.username == username) | (User.email == email)
+    ).first()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Username/email taken")
+    
+    # Hash password
+    hashed_pw = pwd_context.hash(password)
+    
+    # Create user
+    new_user = User(
+        username=username,
+        email=email,
+        password_hash=hashed_pw,
+        preferences="[]"
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return {"success": True, "user_id": new_user.id}
