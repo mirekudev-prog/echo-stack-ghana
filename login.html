@@ -3,121 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>EchoStack Admin Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --brand-dark: #1a1e29; --brand-blue: #0077b6; }
         body {
-            font-family: 'Georgia', serif !important;
-            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1e29 0%, #2d3748 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0;
-            padding: 1rem;
         }
         .login-card {
             background: white;
-            padding: 2.5rem;
+            padding: 3rem;
             border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(26, 30, 41, 0.1);
-            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 450px;
             width: 100%;
-            text-align: center;
         }
-        h1 { color: var(--brand-dark) !important; font-size: 2rem; margin-bottom: 0.5rem; }
-        .subtitle { color: #666; margin-bottom: 2rem; }
-        .security-box {
-            background: rgba(0, 119, 182, 0.05);
-            border-left: 4px solid var(--brand-blue);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-        input {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #d0d0d0 !important;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        input:focus { outline: none !important; border-color: var(--brand-blue) !important; }
-        button {
-            width: 100%;
-            padding: 1rem;
-            background-color: var(--brand-blue) !important;
+        .btn-primary {
+            background: #1a1e29 !important;
             color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            font-weight: bold !important;
-            font-size: 1rem !important;
-            cursor: pointer !important;
+            transition: all 0.2s;
         }
-        button:hover { opacity: 0.9 !important; }
-        .error-message {
-            background-color: #fef2f2 !important;
-            color: #dc2626 !important;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            display: none;
+        .btn-primary:hover {
+            background: #0077b6 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,119,182,0.4);
         }
-        a { color: var(--brand-blue) !important; text-decoration: none !important; margin-top: 1rem; display: inline-block; }
     </style>
 </head>
 <body>
     <div class="login-card">
-        <h1>EchoStack</h1>
-        <p class="subtitle">Admin Management Portal</p>
-        <div class="security-box">
-            <p>To protect our heritage archive, please confirm your identity.</p>
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-2" style="color: #1a1e29;">GH EchoStack Admin</h1>
+            <p class="text-gray-500 text-sm">Superuser access only</p>
         </div>
-        <p style="text-align: left; margin-bottom: 0.5rem;">Who are you? 😊</p>
-        <input type="password" id="answer" placeholder="Enter secret key..." onkeydown="if(event.key==='Enter') verifyLogin()">
-        <button onclick="verifyLogin()">🔒 Verify & Access Admin Panel</button>
-        <div id="error-message" class="error-message">❌ Incorrect answer. Please try again.</div>
-        <a href="/">← Back to Main Site</a>
+        
+        <form id="admin-login-form" class="space-y-6">
+            <div>
+                <input 
+                    type="password" 
+                    id="answer" 
+                    required 
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#0077b6] transition"
+                    placeholder="Enter the secret answer"
+                    autocomplete="off"
+                >
+            </div>
+            
+            <button 
+                type="submit" 
+                class="w-full btn-primary py-3 rounded-lg font-semibold text-lg"
+            >
+                Enter Admin Portal →
+            </button>
+            
+            <p id="error-message" class="text-red-600 text-sm text-center hidden"></p>
+        </form>
+        
+        <p class="text-center text-xs text-gray-400 mt-6">
+            Protected area • Authorized personnel only
+        </p>
     </div>
 
     <script>
-        async function verifyLogin() {
-            const answer = document.getElementById('answer').value.trim();
-            const btn = document.querySelector('button');
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const answer = document.getElementById('answer').value;
             const errorMsg = document.getElementById('error-message');
-
-            if (!answer) return;
-
-            btn.disabled = true;
-            btn.innerHTML = '⏳ Verifying...';
-            errorMsg.style.display = 'none';
-
+            const submitBtn = e.target.querySelector('button');
+            
+            // Disable button while logging in
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Verifying...';
+            
             try {
+                // ✅ CORRECT ENDPOINT: /api/auth/login (NOT /api/users/login)
+                const formData = new FormData();
+                formData.append('answer', answer);
+                
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'answer=' + encodeURIComponent(answer),
-                    credentials: 'include'   // ← makes sure the cookie is accepted
+                    body: formData
                 });
-
-                if (response.ok) {
-                    // Server already set the admin_session cookie — just redirect
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // ✅ Success - redirect to admin dashboard
                     window.location.href = '/admin';
                 } else {
-                    throw new Error('Incorrect answer');
+                    // ❌ Failed - show error
+                    throw new Error(data.detail || 'Incorrect answer');
                 }
             } catch (error) {
-                errorMsg.style.display = 'block';
-                btn.disabled = false;
-                btn.innerHTML = '🔒 Verify & Access Admin Panel';
+                // Show error message
+                errorMsg.textContent = '❌ ' + error.message + '. The answer is case-sensitive.';
+                errorMsg.classList.remove('hidden');
+                
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Enter Admin Portal →';
+                
+                // Clear input
                 document.getElementById('answer').value = '';
+                document.getElementById('answer').focus();
             }
-        }
+        });
     </script>
 </body>
 </html>
