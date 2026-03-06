@@ -122,14 +122,21 @@ async def user_register(
 
 @app.post("/api/users/login")
 async def user_login(
-    email:    str = Form(...),
+    email:    str = Form(default=""),
+    username: str = Form(default=""),
     password: str = Form(...),
     response: Response = None,
     db: Session = Depends(get_db)
 ):
+    # Accept either "email" or "username" field from the form
+    login_value = (email or username).lower().strip()
+
+    if not login_value:
+        raise HTTPException(status_code=400, detail="Email is required")
+
     try:
         user = db.query(models.User).filter(
-            models.User.email == email.lower().strip()
+            models.User.email == login_value
         ).first()
 
         if not user or not verify_password(password, user.password_hash):
@@ -143,7 +150,7 @@ async def user_login(
             key="user_session",
             value=session_token,
             httponly=True,
-            max_age=86400 * 7,   # 7 days
+            max_age=86400 * 7,
             samesite="lax"
         )
         return {"success": True, "username": user.username, "message": "Logged in!"}
@@ -725,45 +732,4 @@ async def import_json(request: Request, db: Session = Depends(get_db)):
         return {"success": True, "imported": count}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/users/login")
-async def user_login(
-    email:    str = Form(default=""),
-    username: str = Form(default=""),  # accept both field names
-    password: str = Form(...),
-    response: Response = None,
-    db: Session = Depends(get_db)
-):
-    # Use whichever field was sent
-    login_value = (email or username).lower().strip()
-    
-    if not login_value:
-        raise HTTPException(status_code=422, detail="Email is required")
-
-    try:
-        user = db.query(models.User).filter(
-            models.User.email == login_value
-        ).first()
-
-        if not user or not verify_password(password, user.password_hash):
-            raise HTTPException(status_code=401, detail="Invalid email or password")
-
-        if not user.is_active:
-            raise HTTPException(status_code=403, detail="Account is deactivated")
-
-        session_token = hash_password(f"{user.id}{user.email}{datetime.datetime.utcnow()}")
-        response.set_cookie(
-            key="user_session",
-            value=session_token,
-            httponly=True,
-            max_age=86400 * 7,
-            samesite="lax"
-        )
-        return {"success": True, "username": user.username, "message": "Logged in!"}
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"❌ LOGIN ERROR: {e}")
         raise HTTPException(status_code=500, detail=str(e))
