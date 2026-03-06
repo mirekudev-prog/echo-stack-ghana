@@ -131,7 +131,8 @@ def admin_logout():
 # ============================================
 # USER ACCOUNTS (Public Users)
 # ============================================
-@app.post("/api/users/signup")
+# FIXED: Changed path from /signup to /register to match your frontend
+@app.post("/api/users/register") 
 async def user_signup(
     username: str = Form(...),
     email: str = Form(...),
@@ -148,6 +149,7 @@ async def user_signup(
             raise HTTPException(status_code=400, detail="Username already taken")
         if len(password) < 6:
             raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+        
         new_user = models.User(
             username=username.strip(),
             email=email.lower().strip(),
@@ -157,6 +159,7 @@ async def user_signup(
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
+        
         response = JSONResponse(content={"success": True, "user_id": new_user.id, "username": new_user.username})
         response.set_cookie(key="user_session", value=str(new_user.id), max_age=86400*7, path="/")
         return response
