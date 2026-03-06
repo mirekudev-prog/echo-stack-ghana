@@ -31,7 +31,7 @@ input.err{border-color:var(--red)}
 .spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:none}
 .btn.ld .spin{display:block}.btn.ld .bt{display:none}
 @keyframes sp{to{transform:rotate(360deg)}}
-.div{border:none;border-top:1px solid var(--border);margin:20px 0}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
 .foot{text-align:center;padding:0 36px 24px;font-size:.83rem;color:var(--muted)}
 .foot a{color:var(--gold);font-weight:600;text-decoration:none}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
@@ -69,15 +69,20 @@ input.err{border-color:var(--red)}
     <button class="btn" id="sbtn" onclick="doLogin()">
       <div class="spin"></div><span class="bt">Sign In →</span>
     </button>
-    <hr class="div">
+    <hr class="divider">
   </div>
   <div class="foot">
-    Don't have an account? <a href="/signup">Join EchoStack</a><br><br>
+    Don't have an account? <a href="/signup">Create Account</a><br><br>
     <a href="/" style="color:var(--muted);font-weight:400">← Back to Home</a>
   </div>
 </div>
 <div class="toast" id="toast"></div>
 <script>
+function redirectByRole(role){
+  if(role==='superuser'||role==='admin')window.location.href='/admin';
+  else if(role==='creator')window.location.href='/creator';
+  else window.location.href='/dashboard';
+}
 async function doLogin(){
   const lv=document.getElementById('login').value.trim();
   const pv=document.getElementById('pw').value;
@@ -87,41 +92,25 @@ async function doLogin(){
   if(!lv){document.getElementById('le').classList.add('on');document.getElementById('login').classList.add('err');ok=false;}
   if(!pv){document.getElementById('pe').classList.add('on');document.getElementById('pw').classList.add('err');ok=false;}
   if(!ok)return;
-
   const btn=document.getElementById('sbtn');btn.classList.add('ld');btn.disabled=true;
   const fd=new FormData();
-  fd.append('email',lv);    // backend checks email first
-  fd.append('username',lv); // then username
-  fd.append('password',pv);
-
+  fd.append('email',lv);fd.append('username',lv);fd.append('password',pv);
   try{
     const r=await fetch('/api/users/login',{method:'POST',body:fd});
     const d=await r.json();
     if(r.ok&&d.success){
-      localStorage.setItem('es_user',JSON.stringify({
-        username:d.username,email:d.email||lv,plan:d.plan||'free',loggedIn:true
-      }));
+      localStorage.setItem('es_user',JSON.stringify({id:d.id,username:d.username,email:d.email||lv,role:d.role||'user',plan:d.plan||'free',loggedIn:true}));
       toast('✅ Welcome back, '+d.username+'!','ok');
-      setTimeout(()=>window.location.href='/dashboard',1200);
-    }else{
-      throw new Error(d.detail||'Invalid email or password');
-    }
-  }catch(err){
-    toast('❌ '+err.message,'er');btn.classList.remove('ld');btn.disabled=false;
-  }
+      setTimeout(()=>redirectByRole(d.role||'user'),1200);
+    }else{throw new Error(d.detail||'Invalid email or password');}
+  }catch(err){toast('❌ '+err.message,'er');btn.classList.remove('ld');btn.disabled=false;}
 }
-
-// Allow Enter key
 document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-
 let _t;
-function toast(msg,type){
-  const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');
-  clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);
-}
-
-// Already logged in → go straight to dashboard
-if(localStorage.getItem('es_user'))window.location.href='/dashboard';
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);}
+// Smart redirect if already logged in
+const u=localStorage.getItem('es_user');
+if(u){try{const d=JSON.parse(u);if(d.loggedIn)redirectByRole(d.role);}catch(e){}}
 </script>
 </body>
 </html>
