@@ -46,74 +46,133 @@
             color: var(--brand-dark);
         }
         
-        /* HEADER */
-        .header {
-            background: var(--brand-gradient);
-            border-bottom: 3px solid var(--brand-blue);
-            padding: 2rem 1rem;
-        }
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
+        /* SIDEBAR STYLES */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 280px;
+            background: #1a1e29;
+            color: white;
+            padding: 2rem 0;
+            z-index: 1000;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            transition: transform 0.3s ease;
         }
         
-        .logo-container {
+        .sidebar-header {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-logo {
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
         }
         
-        .logo-img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
+        .sidebar-logo img {
+            width: 40px;
+            height: 40px;
             border-radius: 8px;
         }
         
-        .logo-text {
-            font-size: 1.75rem;
-            font-weight: bold;
-            letter-spacing: -0.5px;
-            color: var(--brand-dark);
+        .sidebar-nav {
+            flex: 1;
+            padding: 0 1rem;
         }
         
-        .nav-links {
+        .sidebar-nav a {
             display: flex;
-            gap: 1.5rem;
             align-items: center;
-        }
-        
-        .nav-links a {
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            color: rgba(255,255,255,0.7);
             text-decoration: none;
-            color: var(--brand-dark);
-            font-size: 0.875rem;
-            transition: color 0.3s ease;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
         }
         
-        .nav-links a:hover {
-            color: var(--brand-blue);
-            font-weight: 600;
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .sidebar-nav a svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
         }
         
         .btn-logout {
-            background-color: #dc2626;
+            width: 100%;
+            background: #dc2626;
             color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+            padding: 1rem;
             border: none;
-            cursor: pointer;
+            border-radius: 8px;
             font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
         
         .btn-logout:hover {
-            background-color: #b91c1c;
+            background: #b91c1c;
+            transform: translateY(-2px);
         }
         
-        /* MAIN CONTENT */
+        .main-wrapper {
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+        
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: #1a1e29;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
+        /* MAIN CONTENT STYLES */
         .main {
             max-width: 1200px;
             margin: 0 auto;
@@ -142,7 +201,6 @@
             font-size: 1.1rem;
         }
         
-        /* MAP SECTION */
         .map-section {
             margin-bottom: 4rem;
         }
@@ -203,7 +261,6 @@
             stroke-width: 2.5px;
         }
         
-        /* REGION LIST BELOW MAP */
         .regions-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -239,7 +296,6 @@
             line-height: 1.5;
         }
         
-        /* REGION DETAIL MODAL/PAGE */
         .detail-panel {
             position: fixed;
             top: 0;
@@ -308,7 +364,6 @@
             margin: 0.5rem 0;
         }
         
-        /* FOOTER */
         .footer {
             border-top: 1px solid #e0e0e0;
             padding: 2rem 1rem;
@@ -348,73 +403,166 @@
             font-size: 1.25rem;
             color: #666;
         }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-wrapper {
+                margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
     
-    <!-- HEADER -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo-container">
-                <img src="/echostack-logo.png" alt="EchoStack Logo" class="logo-img">
-                <h1 class="logo-text">EchoStack</h1>
-            </div>
-            <nav class="nav-links">
-                <a href="/">🏠 Home</a>
-                <a href="/user-login">👤 Account</a>
-                <button onclick="logout()" class="btn-logout">🚪 Logout</button>
-            </nav>
-        </div>
-    </header>
-
-    <!-- MAIN CONTENT -->
-    <main class="main">
-        
-        <!-- INTRO -->
-        <section class="intro">
-            <h2>Welcome to EchoStack</h2>
-            <p>Explore Ghana's 16 regions through our interactive map and discover rich cultural heritage, history, and traditions.</p>
-        </section>
-
-        <!-- MAP SECTION -->
-        <section class="map-section" id="explore">
-            <h3>🗺️ Interactive Map</h3>
-            
-            <div class="map-wrapper">
-                <svg viewBox="0 0 400 620" id="ghana-map"></svg>
-            </div>
-            
-            <!-- REGION CARDS -->
-            <div class="regions-grid" id="regions-list">
-                <div class="loading">Loading regions...</div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- REGION DETAIL PANEL -->
-    <div id="detail-panel" class="detail-panel">
-        <div class="detail-header">
-            <div>
-                <span id="detail-code" class="bg-[#0077b6] text-white px-2 py-1 rounded-full text-xs mb-2 inline-block">GH-XX</span>
-                <h2 id="detail-title" class="text-3xl font-bold mb-2">Region Name</h2>
-                <p id="detail-capital" class="text-gray-600 italic">Capital: City</p>
-            </div>
-            <button onclick="closeDetail()" class="close-btn">×</button>
+    <!-- MOBILE MENU TOGGLE -->
+    <button class="menu-toggle" onclick="toggleSidebar()">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18"/>
+        </svg>
+    </button>
+    
+    <!-- SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <!-- LEFT SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Logo -->
+        <div class="sidebar-header">
+            <a href="/app" class="sidebar-logo">
+                <img src="/echostack-logo.png" alt="EchoStack">
+                <span>EchoStack</span>
+            </a>
         </div>
         
-        <div id="detail-content"></div>
+        <!-- Navigation Links -->
+        <nav class="sidebar-nav">
+            <a href="/app" class="active">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    <polyline points="9,22 9,12 15,12 15,22"/>
+                </svg>
+                <span>Home</span>
+            </a>
+            
+            <a href="/app#explore">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
+                </svg>
+                <span>Explore</span>
+            </a>
+            
+            <a href="/app#regions">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>Regions</span>
+            </a>
+            
+            <a href="/app#favorites">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                </svg>
+                <span>Favorites</span>
+            </a>
+            
+            <a href="/user-profile">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Profile</span>
+            </a>
+            
+            <a href="/user-settings">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                </svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+        
+        <!-- Footer with Logout -->
+        <div class="sidebar-footer">
+            <button onclick="logout()" class="btn-logout">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                    <polyline points="16,17 21,12 16,7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+            </button>
+        </div>
+    </aside>
+    
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+        
+        <!-- MAIN CONTENT -->
+        <main class="main">
+            
+            <!-- INTRO -->
+            <section class="intro">
+                <h2>Welcome to EchoStack</h2>
+                <p>Explore Ghana's 16 regions through our interactive map and discover rich cultural heritage, history, and traditions.</p>
+            </section>
+
+            <!-- MAP SECTION -->
+            <section class="map-section" id="explore">
+                <h3>🗺️ Interactive Map</h3>
+                
+                <div class="map-wrapper">
+                    <svg viewBox="0 0 400 620" id="ghana-map"></svg>
+                </div>
+                
+                <!-- REGION CARDS -->
+                <div class="regions-grid" id="regions-list">
+                    <div class="loading">Loading regions...</div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- REGION DETAIL PANEL -->
+        <div id="detail-panel" class="detail-panel">
+            <div class="detail-header">
+                <div>
+                    <span id="detail-code" class="bg-[#0077b6] text-white px-2 py-1 rounded-full text-xs mb-2 inline-block">GH-XX</span>
+                    <h2 id="detail-title" class="text-3xl font-bold mb-2">Region Name</h2>
+                    <p id="detail-capital" class="text-gray-600 italic">Capital: City</p>
+                </div>
+                <button onclick="closeDetail()" class="close-btn">×</button>
+            </div>
+            
+            <div id="detail-content"></div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>&copy; 2026 EchoStack. Preserving Ghana's Stories.</p>
+            <div class="footer-links">
+                <a href="/">Home</a>
+                <a href="/user-login">Account</a>
+                <a href="#" onclick="logout(); return false;">Logout</a>
+            </div>
+        </footer>
+        
     </div>
-
-    <!-- FOOTER -->
-    <footer class="footer">
-        <p>&copy; 2026 EchoStack. Preserving Ghana's Stories.</p>
-        <div class="footer-links">
-            <a href="/">Home</a>
-            <a href="/user-login">Account</a>
-            <a href="#" onclick="logout(); return false;">Logout</a>
-        </div>
-    </footer>
+    <!-- END MAIN WRAPPER -->
 
     <!-- SERVICE WORKER REGISTRATION -->
     <script>
@@ -461,6 +609,14 @@
             'western-north': {x:90,y:505}, 'western': {x:80,y:580}, 'central': {x:200,y:570},
             'greater-accra': {x:315,y:602}
         };
+        
+        // Toggle sidebar on mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
         
         // Initialize page
         document.addEventListener('DOMContentLoaded', async () => {
