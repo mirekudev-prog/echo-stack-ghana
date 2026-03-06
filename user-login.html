@@ -1,268 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - EchoStack</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root {
-            --gold: #C8962E;
-            --deep: #0D1B2A;
-            --blue: #0077b6;
-            --cream: #FAF6EF;
-            --red: #C0392B;
-            --green: #1A7A4A;
-        }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background-color: var(--cream);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-image:
-                radial-gradient(ellipse at 10% 20%, rgba(200,150,46,0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 90% 80%, rgba(13,27,42,0.06) 0%, transparent 50%);
-        }
-
-        .card {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 4px 40px rgba(13,27,42,0.10);
-            width: 100%;
-            max-width: 420px;
-            padding: 44px 40px 36px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--gold), #E8B84B, var(--gold));
-        }
-
-        h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.9rem;
-            color: var(--deep);
-            margin-bottom: 6px;
-        }
-
-        .field { margin-bottom: 18px; }
-
-        label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #475569;
-            margin-bottom: 6px;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-
-        input {
-            width: 100%;
-            padding: 11px 14px;
-            border: 1.5px solid #E5E7EB;
-            border-radius: 9px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.95rem;
-            color: var(--deep);
-            background: #FAFAFA;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            outline: none;
-            box-sizing: border-box;
-        }
-
-        input:focus {
-            border-color: var(--gold);
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(200,150,46,0.12);
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 13px;
-            background: var(--deep);
-            color: #fff;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 9px;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            margin-top: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-submit:hover { background: var(--gold); }
-        .btn-submit:active { transform: scale(0.98); }
-        .btn-submit:disabled { background: #D1D5DB; cursor: not-allowed; }
-
-        .btn-submit .spinner {
-            display: none;
-            width: 18px; height: 18px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-        }
-        .btn-submit.loading .spinner { display: block; }
-        .btn-submit.loading .btn-text { display: none; }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .error-msg {
-            font-size: 0.78rem;
-            color: var(--red);
-            margin-top: 5px;
-            display: none;
-        }
-        .error-msg.show { display: block; }
-
-        .toast {
-            position: fixed;
-            bottom: 24px; left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            padding: 12px 22px;
-            border-radius: 10px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #fff;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-            z-index: 100;
-            white-space: nowrap;
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); }
-        .toast.success { background: var(--green); }
-        .toast.error   { background: var(--red); }
-
-        .divider {
-            border: none;
-            border-top: 1px solid #E5E7EB;
-            margin: 20px 0 16px;
-        }
-
-        a { color: var(--gold); text-decoration: none; font-weight: 600; }
-        a:hover { color: var(--deep); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — EchoStack</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;--red:#C0392B;--green:#1A7A4A;--border:#E2E8F0;--muted:#94A3B8}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background-image:radial-gradient(ellipse at 15% 25%,rgba(200,150,46,.09) 0%,transparent 55%),radial-gradient(ellipse at 85% 75%,rgba(13,27,42,.06) 0%,transparent 55%)}
+.card{background:#fff;border-radius:20px;box-shadow:0 8px 48px rgba(13,27,42,.12);width:100%;max-width:420px;overflow:hidden}
+.card-top{background:var(--ink);padding:28px 36px 24px;position:relative}
+.card-top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold))}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.logo img{width:34px;height:34px;border-radius:7px;object-fit:contain}
+.logo span{font-family:'Playfair Display',serif;color:#fff;font-size:1.1rem}
+.card-top h1{font-family:'Playfair Display',serif;color:#fff;font-size:1.65rem;margin-bottom:5px}
+.card-top p{color:#94A3B8;font-size:.85rem}
+.card-body{padding:28px 36px 24px}
+.field{margin-bottom:16px}
+label{display:block;font-size:.76rem;font-weight:600;color:#475569;letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px}
+.iw{position:relative}
+.iw svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
+input{width:100%;padding:10px 12px 10px 36px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink);background:#FAFAFA;outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(200,150,46,.12)}
+input.err{border-color:var(--red)}
+.emsg{font-size:.74rem;color:var(--red);margin-top:4px;display:none}.emsg.on{display:block}
+.btn{width:100%;padding:12px;font-family:'DM Sans',sans-serif;font-size:.93rem;font-weight:600;border:none;border-radius:9px;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;background:var(--ink);color:#fff}
+.btn:hover{background:var(--gold)}.btn:disabled{background:#D1D5DB;cursor:not-allowed}
+.spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:none}
+.btn.ld .spin{display:block}.btn.ld .bt{display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.div{border:none;border-top:1px solid var(--border);margin:20px 0}
+.foot{text-align:center;padding:0 36px 24px;font-size:.83rem;color:var(--muted)}
+.foot a{color:var(--gold);font-weight:600;text-decoration:none}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--green)}.toast.er{background:var(--red)}
+</style>
 </head>
 <body>
-
 <div class="card">
-    <!-- Logo -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px">
-        <img src="/echostack-logo.png" alt="EchoStack"
-             style="width:40px;height:40px;object-fit:contain;border-radius:8px"
-             onerror="this.style.display='none'">
-        <span style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--deep)">EchoStack</span>
+  <div class="card-top">
+    <div class="logo">
+      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
+      <span>EchoStack</span>
     </div>
-
     <h1>Welcome Back</h1>
-    <p style="font-size:0.875rem;color:#6B7280;margin-bottom:28px">Sign in to continue exploring</p>
-
-    <form id="login-form" novalidate>
-
-        <!-- FIX: field name is now "email" to match backend /api/users/login -->
-        <div class="field">
-            <label for="email">Email or Username</label>
-            <input type="text" id="email" placeholder="your@email.com or username" autocomplete="email" required>
-            <div class="error-msg" id="email-error">Please enter your email address</div>
-        </div>
-
-        <div class="field">
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Your password" autocomplete="current-password" required>
-            <div class="error-msg" id="password-error">Please enter your password</div>
-        </div>
-
-        <button type="submit" class="btn-submit" id="submit-btn">
-            <div class="spinner"></div>
-            <span class="btn-text">Sign In →</span>
-        </button>
-    </form>
-
-    <hr class="divider">
-
-    <p style="text-align:center;font-size:0.875rem;color:#6B7280;margin-bottom:10px">
-        Don't have an account? <a href="/signup">Join EchoStack</a>
-    </p>
-    <p style="text-align:center;font-size:0.82rem">
-        <a href="/" style="color:#9CA3AF;font-weight:400">← Back to Home</a>
-    </p>
-
-    <!-- Admin link REMOVED as requested -->
+    <p>Sign in to continue exploring Ghana's heritage</p>
+  </div>
+  <div class="card-body">
+    <div class="field">
+      <label>Email or Username</label>
+      <div class="iw">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        <input type="text" id="login" placeholder="you@example.com or username" autocomplete="username">
+      </div>
+      <div class="emsg" id="le">Please enter your email or username</div>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <div class="iw">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
+        <input type="password" id="pw" placeholder="Your password" autocomplete="current-password">
+      </div>
+      <div class="emsg" id="pe">Please enter your password</div>
+    </div>
+    <button class="btn" id="sbtn" onclick="doLogin()">
+      <div class="spin"></div><span class="bt">Sign In →</span>
+    </button>
+    <hr class="div">
+  </div>
+  <div class="foot">
+    Don't have an account? <a href="/signup">Join EchoStack</a><br><br>
+    <a href="/" style="color:var(--muted);font-weight:400">← Back to Home</a>
+  </div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script>
-    let toastTimer;
-    function showToast(msg, type) {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.className = 'toast show ' + type;
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => { t.className = 'toast'; }, 4000);
+async function doLogin(){
+  const lv=document.getElementById('login').value.trim();
+  const pv=document.getElementById('pw').value;
+  let ok=true;
+  ['le','pe'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  ['login','pw'].forEach(id=>document.getElementById(id).classList.remove('err'));
+  if(!lv){document.getElementById('le').classList.add('on');document.getElementById('login').classList.add('err');ok=false;}
+  if(!pv){document.getElementById('pe').classList.add('on');document.getElementById('pw').classList.add('err');ok=false;}
+  if(!ok)return;
+
+  const btn=document.getElementById('sbtn');btn.classList.add('ld');btn.disabled=true;
+  const fd=new FormData();
+  fd.append('email',lv);    // backend checks email first
+  fd.append('username',lv); // then username
+  fd.append('password',pv);
+
+  try{
+    const r=await fetch('/api/users/login',{method:'POST',body:fd});
+    const d=await r.json();
+    if(r.ok&&d.success){
+      localStorage.setItem('es_user',JSON.stringify({
+        username:d.username,email:d.email||lv,plan:d.plan||'free',loggedIn:true
+      }));
+      toast('✅ Welcome back, '+d.username+'!','ok');
+      setTimeout(()=>window.location.href='/dashboard',1200);
+    }else{
+      throw new Error(d.detail||'Invalid email or password');
     }
+  }catch(err){
+    toast('❌ '+err.message,'er');btn.classList.remove('ld');btn.disabled=false;
+  }
+}
 
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
+// Allow Enter key
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
-        const email    = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
+let _t;
+function toast(msg,type){
+  const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');
+  clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);
+}
 
-        // Client-side validation
-        let valid = true;
-        const emailErr = document.getElementById('email-error');
-        const passErr  = document.getElementById('password-error');
-        emailErr.classList.remove('show');
-        passErr.classList.remove('show');
-
-        if (!email) { emailErr.classList.add('show'); valid = false; }
-        if (!password) { passErr.classList.add('show'); valid = false; }
-        if (!valid) return;
-
-        const btn = document.getElementById('submit-btn');
-        btn.classList.add('loading');
-        btn.disabled = true;
-
-        // FIX: send field as "email" — matches backend Form(...) parameter name
-        const formData = new FormData();
-        formData.append('email', email);
-        formData.append('password', password);
-
-        try {
-            const response = await fetch('/api/users/login', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                showToast('✅ Welcome back, ' + (data.username || '') + '!', 'success');
-                setTimeout(() => { window.location.href = '/app'; }, 1200);
-            } else {
-                throw new Error(data.detail || 'Invalid email or password');
-            }
-        } catch (err) {
-            showToast('❌ ' + err.message, 'error');
-            btn.classList.remove('loading');
-            btn.disabled = false;
-        }
-    });
+// Already logged in → go straight to dashboard
+if(localStorage.getItem('es_user'))window.location.href='/dashboard';
 </script>
 </body>
 </html>
