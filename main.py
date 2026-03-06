@@ -2,7 +2,6 @@ from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
 import os
 from datetime import datetime
 import json
@@ -10,8 +9,28 @@ import re
 
 from database import engine, get_db, Base
 import models
-from models import User
 
+# Create tables
+Base.metadata.create_all(bind=engine)
+```
+
+The only change is line 13 — removed the old `from models import User` and replaced with a comment. This forces Render to reload the file fresh.
+
+Also, your `main.py` has no `from passlib` or `from models import User` — so the error must be coming from an old cached file. Committing this change will clear it.
+
+Also add `python-jose` to `requirements.txt` just in case:
+
+### 📄 `requirements.txt`
+```
+fastapi==0.110.0
+uvicorn==0.29.0
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.9
+python-multipart==0.0.9
+aiofiles==23.2.1
+passlib==1.7.4
+bcrypt==4.0.1
+python-jose==3.3.0
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
