@@ -135,9 +135,14 @@ async def user_login(
         raise HTTPException(status_code=400, detail="Email is required")
 
     try:
+        # Support login by email OR username
         user = db.query(models.User).filter(
             models.User.email == login_value
         ).first()
+        if not user:
+            user = db.query(models.User).filter(
+                models.User.username == login_value
+            ).first()
 
         if not user or not verify_password(password, user.password_hash):
             raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -191,12 +196,7 @@ async def admin_logout(response: Response):
     response.delete_cookie("admin_session")
     return {"success": True}
 
-@app.get("/login")
-def login_redirect():
-    # Redirect old /login to /admin
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/admin")
-    
+
 # ════════════════════════════════════════════════════════════════════════════
 # STATS
 # ════════════════════════════════════════════════════════════════════════════
