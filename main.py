@@ -478,3 +478,42 @@ def import_json(data: dict, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+# ============================================
+# USER REGISTRATION VIA SUPABASE
+# ============================================
+@app.post("/api/users/register")
+async def register_user(
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    """Create new user account in Supabase"""
+    from sqlalchemy.exc import IntegrityError
+    
+    # Check if username/email exists
+    existing_user = db.query(User).filter(
+        (User.username == username) | (User.email == email)
+    ).first()
+    
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username or email already registered")
+    
+    # Create new user
+    from passlib.context import CryptContext
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
+    hashed_password = pwd_context.hash(password)
+    
+    new_user = User(
+        username=username,
+        email=email,
+        password_hash=hashed_password,
+        is_verified=True
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return {"success": True, "user_id": new_user.id}
