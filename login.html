@@ -36,7 +36,7 @@
 <body>
     <div class="login-card">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold mb-2" style="color: #1a1e29;">GH EchoStack Admin</h1>
+            <h1 class="text-3xl font-bold mb-2" style="color: #1a1e29;">🇬🇭 EchoStack Admin</h1>
             <p class="text-gray-500 text-sm">Superuser access only</p>
         </div>
         
@@ -50,6 +50,7 @@
                     placeholder="Enter the secret answer"
                     autocomplete="off"
                 >
+                <p class="text-xs text-gray-400 mt-1">Hint: It's two words, all caps</p>
             </div>
             
             <button 
@@ -62,6 +63,10 @@
             
             <p id="error-message" class="text-red-600 text-sm text-center hidden"></p>
         </form>
+        
+        <p class="text-center text-xs text-gray-400 mt-6">
+            Protected area • Authorized personnel only
+        </p>
     </div>
 
     <script>
@@ -77,11 +82,11 @@
             errorMsg.classList.add('hidden');
             
             try {
-                // ✅ CORRECT ENDPOINT: /api/auth/login
+                // ✅ CORRECT ENDPOINT: /api/auth/login (NOT /api/users/login)
                 const formData = new URLSearchParams();
                 formData.append('answer', answer);
                 
-                console.log('Sending login request to /api/auth/login with answer:', answer);
+                console.log('Sending to /api/auth/login with answer:', answer);
                 
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
