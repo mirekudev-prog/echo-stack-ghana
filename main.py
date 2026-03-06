@@ -1,9 +1,7 @@
-from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, File
+from fastapi import FastAPI, Depends, Form, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-import os
-from datetime import datetime
 import hashlib
 from database import engine, get_db, Base
 import models
@@ -11,26 +9,26 @@ import models
 # Initialize Database
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="EchoStack Full API")
+app = FastAPI()
 
-# --- Helpers ---
+# Helper for passwords
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
-# --- Static Pages (Your Frontend) ---
+# --- NAVIGATION ROUTES ---
 @app.get("/")
 def home(): return FileResponse("index.html")
 
 @app.get("/app")
-def app_page(): return FileResponse("app.html")
+def app_view(): return FileResponse("app.html")
 
 @app.get("/signup")
-def signup(): return FileResponse("signup.html")
+def signup_view(): return FileResponse("signup.html")
 
 @app.get("/admin")
-def admin(): return FileResponse("admin_dashboard.html")
+def admin_view(): return FileResponse("admin_dashboard.html")
 
-# --- Authentication & User API ---
+# --- AUTH & API ROUTES ---
 @app.post("/api/users/register") 
 async def user_signup(
     username: str = Form(...),
@@ -53,29 +51,9 @@ async def user_signup(
     db.commit()
     return {"success": True}
 
-# --- Admin & Site Builder API ---
-@app.post("/api/admin/login")
-async def admin_login(answer: str = Form(...)):
-    # Your secret answer logic
-    if answer.lower().strip() == "the admin":
-        return {"success": True}
-    raise HTTPException(status_code=403, detail="Invalid Access")
-
-@app.get("/api/regions")
-def get_regions(db: Session = Depends(get_db)):
-    return db.query(models.Region).all()
-
-@app.post("/api/upload/file")
-async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
-    # Standard file upload logic
-    file_path = f"uploads/{file.filename}"
-    with open(file_path, "wb") as f:
-        f.write(await file.read())
-    return {"success": True, "path": file_path}
-
-@app.get("/api/stats")
+@app.get("/api/admin/stats")
 def get_stats(db: Session = Depends(get_db)):
+    # Simple stats for your dashboard
     return {
-        "users": db.query(models.User).count(),
-        "regions": db.query(models.Region).count()
+        "user_count": db.query(models.User).count()
     }
