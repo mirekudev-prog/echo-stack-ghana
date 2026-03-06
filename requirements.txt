@@ -1,6 +1,11 @@
-# Change these lines in requirements.txt:
-fastapi==0.95.0
-pydantic==1.10.13  # CHANGE FROM 2.5.0 TO 1.10.13
-# Remove these lines if they exist:
-# pydantic-settings==2.1.0
-# httpx==0.26.0
+fastapi==0.104.0
+uvicorn[standard]==0.22.0
+sqlalchemy==2.0.36
+python-multipart==0.0.6
+psycopg2-binary==2.9.9
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+supabase==2.0.3
+alembic==1.13.1
+pydantic==2.5.0
+httpx==0.26.0
