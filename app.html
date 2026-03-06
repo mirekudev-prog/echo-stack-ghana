@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>EchoStack - Explore Ghana</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1a1e29">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EchoStack">
+    
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="/echostack-logo.png">
+    <link rel="apple-touch-icon" href="/echostack-logo.png">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- AUTH CHECK - MUST BE FIRST -->
+    <script>
+        // Check if user is logged in
+        const token = document.cookie.split('; ').find(row => row.startsWith('user_session='));
+        if (!token) {
+            window.location.href = '/user-login';
+        }
+    </script>
+    
+    <style>
+        :root {
+            --brand-dark: #1a1e29;
+            --brand-blue: #0077b6;
+            --brand-light-gray: #f5f5f5;
+            --brand-white: #ffffff;
+            --brand-gradient: linear-gradient(135deg, #e8f4f8 0%, #ffffff 100%);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            background-color: var(--brand-white);
+            color: var(--brand-dark);
+        }
+        
+        /* HEADER */
+        .header {
+            background: var(--brand-gradient);
+            border-bottom: 3px solid var(--brand-blue);
+            padding: 2rem 1rem;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .logo-img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .logo-text {
+            font-size: 1.75rem;
+            font-weight: bold;
+            letter-spacing: -0.5px;
+            color: var(--brand-dark);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--brand-dark);
+            font-size: 0.875rem;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--brand-blue);
+            font-weight: 600;
+        }
+        
+        .btn-logout {
+            background-color: #dc2626;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-logout:hover {
+            background-color: #b91c1c;
+        }
+        
+        /* MAIN CONTENT */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .intro {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 1rem;
+            background: linear-gradient(180deg, rgba(0,119,182,0.05) 0%, transparent 100%);
+            border-radius: 8px;
+        }
+        
+        .intro h2 {
+            font-size: 2.5rem;
+            color: var(--brand-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .intro p {
+            color: #555;
+            line-height: 1.7;
+            max-width: 600px;
+            margin: 1.5rem auto 0;
+            font-size: 1.1rem;
+        }
+        
+        /* MAP SECTION */
+        .map-section {
+            margin-bottom: 4rem;
+        }
+        
+        .map-section h3 {
+            font-size: 1.35rem;
+            color: var(--brand-dark);
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--brand-blue);
+            padding-left: 1rem;
+        }
+        
+        .map-wrapper {
+            background-color: var(--brand-white);
+            border: 2px solid #d0d0d0;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        svg {
+            width: 100%;
+            height: auto;
+            max-height: 600px;
+        }
+        
+        .region-path {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            stroke: #c0c0c0;
+            stroke-width: 1.5;
+            fill: #f0f0f0;
+        }
+        
+        .region-path:hover {
+            fill: var(--brand-blue);
+            stroke: var(--brand-dark);
+            stroke-width: 2;
+            opacity: 0.9;
+        }
+        
+        .region-active {
+            fill: var(--brand-blue) !important;
+            stroke: var(--brand-dark) !important;
+            stroke-width: 2.5 !important;
+            opacity: 1 !important;
+            filter: drop-shadow(0 2px 6px rgba(0,119,182,0.4));
+        }
+        
+        .map-label {
+            font-size: 9px;
+            font-weight: bold;
+            font-family: Arial, Helvetica, sans-serif;
+            pointer-events: none;
+            fill: var(--brand-dark);
+            paint-order: stroke;
+            stroke: var(--brand-white);
+            stroke-width: 2.5px;
+        }
+        
+        /* REGION LIST BELOW MAP */
+        .regions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .region-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .region-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,119,182,0.15);
+            border-color: var(--brand-blue);
+        }
+        
+        .region-card h4 {
+            font-size: 1.25rem;
+            color: var(--brand-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .region-card p {
+            font-size: 0.875rem;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        /* REGION DETAIL MODAL/PAGE */
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+            transition: right 0.4s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+        
+        .detail-panel.show {
+            right: 0;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            color: var(--brand-dark);
+            margin: 2rem 0 1rem;
+            padding-left: 0.75rem;
+            border-left: 3px solid var(--brand-blue);
+        }
+        
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .media-item {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .media-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .audio-player {
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+        
+        /* FOOTER */
+        .footer {
+            border-top: 1px solid #e0e0e0;
+            padding: 2rem 1rem;
+            background-color: var(--brand-light-gray);
+            text-align: center;
+            margin-top: 4rem;
+        }
+        
+        .footer p {
+            font-size: 0.875rem;
+            color: var(--brand-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        .footer-links a {
+            text-decoration: none;
+            color: var(--brand-dark);
+            font-size: 0.875rem;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--brand-blue);
+            font-weight: 600;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.25rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="/echostack-logo.png" alt="EchoStack Logo" class="logo-img">
+                <h1 class="logo-text">EchoStack</h1>
+            </div>
+            <nav class="nav-links">
+                <a href="/">🏠 Home</a>
+                <a href="/user-login">👤 Account</a>
+                <button onclick="logout()" class="btn-logout">🚪 Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+        
+        <!-- INTRO -->
+        <section class="intro">
+            <h2>Welcome to EchoStack</h2>
+            <p>Explore Ghana's 16 regions through our interactive map and discover rich cultural heritage, history, and traditions.</p>
+        </section>
+
+        <!-- MAP SECTION -->
+        <section class="map-section" id="explore">
+            <h3>🗺️ Interactive Map</h3>
+            
+            <div class="map-wrapper">
+                <svg viewBox="0 0 400 620" id="ghana-map"></svg>
+            </div>
+            
+            <!-- REGION CARDS -->
+            <div class="regions-grid" id="regions-list">
+                <div class="loading">Loading regions...</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- REGION DETAIL PANEL -->
+    <div id="detail-panel" class="detail-panel">
+        <div class="detail-header">
+            <div>
+                <span id="detail-code" class="bg-[#0077b6] text-white px-2 py-1 rounded-full text-xs mb-2 inline-block">GH-XX</span>
+                <h2 id="detail-title" class="text-3xl font-bold mb-2">Region Name</h2>
+                <p id="detail-capital" class="text-gray-600 italic">Capital: City</p>
+            </div>
+            <button onclick="closeDetail()" class="close-btn">×</button>
+        </div>
+        
+        <div id="detail-content"></div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>&copy; 2026 EchoStack. Preserving Ghana's Stories.</p>
+        <div class="footer-links">
+            <a href="/">Home</a>
+            <a href="/user-login">Account</a>
+            <a href="#" onclick="logout(); return false;">Logout</a>
+        </div>
+    </footer>
+
+    <!-- SERVICE WORKER REGISTRATION -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(r => console.log('✅ SW registered:', r.scope))
+                    .catch(e => console.log('⚠️ SW failed:', e));
+            });
+        }
+    </script>
+
+    <!-- COMPLETE JAVASCRIPT -->
+    <script>
+        const API_URL = '/api';
+        let allRegions = [];
+        let mapPaths = {};
+        
+        // Define map SVG paths
+        const svgPaths = {
+            'upper-west': 'M60,40 L160,50 L165,130 L100,140 L50,110 Z',
+            'upper-east': 'M160,50 L280,25 L290,100 L165,130 Z',
+            'north-east': 'M165,130 L290,100 L350,130 L340,190 L180,195 Z',
+            'savannah': 'M50,110 L100,140 L165,130 L180,195 L220,260 L180,340 L80,340 L40,250 Z',
+            'northern': 'M180,195 L340,190 L370,300 L320,320 L220,260 Z',
+            'bono': 'M80,340 L180,340 L160,420 L70,420 Z',
+            'bono-east': 'M180,340 L220,260 L320,320 L330,410 L190,410 L160,420 Z',
+            'ahafo': 'M70,420 L160,420 L140,470 L60,470 Z',
+            'ashanti': 'M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z',
+            'oti': 'M320,320 L370,300 L380,450 L340,450 L330,410 Z',
+            'volta': 'M340,450 L380,450 L400,560 L360,570 L340,510 Z',
+            'eastern': 'M310,510 L330,410 L340,450 L340,510 L360,570 L300,580 L280,510 Z',
+            'western-north': 'M60,470 L140,470 L130,530 L50,530 Z',
+            'western': 'M50,530 L130,530 L110,610 L40,590 Z',
+            'central': 'M130,530 L180,510 L280,510 L250,600 L110,610 Z',
+            'greater-accra': 'M300,580 L360,570 L375,600 L290,610 Z'
+        };
+        
+        const regionLabels = {
+            'upper-west': {x:105,y:100}, 'upper-east': {x:210,y:80}, 'north-east': {x:255,y:155},
+            'savannah': {x:120,y:240}, 'northern': {x:265,y:255}, 'bono': {x:120,y:390},
+            'bono-east': {x:245,y:360}, 'ahafo': {x:105,y:455}, 'ashanti': {x:240,y:475},
+            'oti': {x:355,y:385}, 'volta': {x:370,y:525}, 'eastern': {x:320,y:555},
+            'western-north': {x:90,y:505}, 'western': {x:80,y:580}, 'central': {x:200,y:570},
+            'greater-accra': {x:315,y:602}
+        };
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initMap();
+            await loadRegions();
+        });
+        
+        async function initMap() {
+            const svg = document.getElementById('ghana-map');
+            let s = '';
+            
+            for (const [key, path] of Object.entries(svgPaths)) {
+                mapPaths[key] = path;
+                s += `<path id="${key}" d="${path}" class="region-path" onclick="showRegionDetail('${key}')"/>
+                      <text x="${regionLabels[key].x}" y="${regionLabels[key].y}" class="map-label">${key.replace('-',' ').replace(/\b\w/g,l=>l.toUpperCase())}</text>`;
+            }
+            
+            svg.innerHTML = s;
+        }
+        
+        async function loadRegions() {
+            try {
+                const res = await fetch(`${API_URL}/regions`);
+                allRegions = await res.json();
+                
+                console.log('Loaded regions:', allRegions.length);
+                renderRegionsList();
+                renderMapHighlight();
+            } catch(e) {
+                console.error('Failed to load regions:', e);
+                document.getElementById('regions-list').innerHTML = 
+                    '<div class="loading">Failed to load regions. Please refresh.</div>';
+            }
+        }
+        
+        function renderRegionsList() {
+            const c = document.getElementById('regions-list');
+            
+            if (allRegions.length === 0) {
+                c.innerHTML = '<div class="loading">No regions available yet.</div>';
+                return;
+            }
+            
+            c.innerHTML = allRegions.map(r => `
+                <div class="region-card" onclick="showRegionDetailById(${r.id})">
+                    <h4>${r.name}</h4>
+                    <p><strong>Capital:</strong> ${r.capital||'N/A'}</p>
+                    <p><strong>Category:</strong> ${r.category||'Uncategorized'}</p>
+                </div>
+            `).join('');
+        }
+        
+        function renderMapHighlight() {
+            allRegions.forEach(r => {
+                const k = r.name.toLowerCase().replace(/ /g,'-').replace(' region','');
+                const p = document.getElementById(k);
+                if (p) p.setAttribute('data-region-id', r.id);
+            });
+        }
+        
+        async function showRegionDetailById(id) {
+            const r = allRegions.find(r => r.id === id);
+            if (r) await showRegionDetailFromData(r);
+        }
+        
+        async function showRegionDetail(key) {
+            const name = key.charAt(0).toUpperCase() + key.slice(1).replace('-',' ');
+            let r = allRegions.find(r => 
+                r.name.toLowerCase().includes(name.toLowerCase()) || 
+                r.name.toLowerCase() === key.replace('-',' ')
+            );
+            
+            if (!r && allRegions.length > 0) r = allRegions[0];
+            
+            if (r) await showRegionDetailFromData(r);
+            else alert('Region details loading... Check back soon!');
+        }
+        
+        async function showRegionDetailFromData(region) {
+            document.getElementById('detail-code').innerText = `GH-${String(region.id).padStart(2,'0')}`;
+            document.getElementById('detail-title').innerText = region.name;
+            document.getElementById('detail-capital').innerText = `Capital: ${region.capital||'Not specified'}`;
+            
+            const imgs = Array.isArray(region.gallery_images) ? region.gallery_images : 
+                         (region.gallery_images ? region.gallery_images.split(',') : []);
+            const auds = Array.isArray(region.audio_files) ? region.audio_files :
+                         (region.audio_files ? region.audio_files.split(',') : []);
+            
+            document.getElementById('detail-content').innerHTML = `
+                <div class="section-title">📖 Heritage Description</div>
+                <p style="line-height:1.8;margin-bottom:2rem">${region.description||'No description available.'}</p>
+                
+                <div class="section-title">📊 Quick Facts</div>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:2rem">
+                    <div style="background:#f0f9ff;padding:1rem;border-radius:8px">
+                        <p style="font-size:0.875rem;color:#666">Population</p>
+                        <p style="font-size:1.25rem;font-weight:bold">${region.population||'N/A'}</p>
+                    </div>
+                    <div style="background:#f0f9ff;padding:1rem;border-radius:8px">
+                        <p style="font-size:0.875rem;color:#666">Terrain</p>
+                        <p style="font-size:1.25rem;font-weight:bold">${region.terrain||'N/A'}</p>
+                    </div>
+                </div>
+                
+                <div class="section-title">🏞️ Gallery</div>
+                ${imgs.length>0 ? `
+                    <div class="media-grid">
+                        ${imgs.map(i=>`<div class="media-item"><img src="${i.trim()}" alt="Gallery" onerror="this.src='https://via.placeholder.com/150?text=Image'"></div>`).join('')}
+                    </div>
+                ` : '<p>No images uploaded yet.</p>'}
+                
+                <div class="section-title">🎵 Audio Archives</div>
+                ${auds.length>0 ? `
+                    <div style="margin-bottom:2rem">
+                        ${auds.map(a=>`<div style="margin:1rem 0;padding:1rem;background:#f8f8f8;border-radius:8px">
+                            <audio controls class="audio-player"><source src="${a.trim()}" type="audio/mpeg"></audio>
+                        </div>`).join('')}
+                    </div>
+                ` : '<p>No audio recordings available yet.</p>'}
+                
+                <div class="section-title">🎬 Documentaries (Coming Soon)</div>
+                <p style="color:#666;margin-bottom:2rem">Video documentaries about this region will be available soon.</p>
+                
+                <div class="section-title">📝 Metadata</div>
+                <p><strong>Category:</strong> ${region.category||'Uncategorized'}</p>
+                <p><strong>Tags:</strong> ${Array.isArray(region.tags)?region.tags.join(', '):(region.tags||'None')}</p>
+                ${region.source ? `<p><strong>Source:</strong> ${region.source}</p>` : ''}
+            `;
+            
+            document.getElementById('detail-panel').classList.add('show');
+        }
+        
+        function closeDetail() {
+            document.getElementById('detail-panel').classList.remove('show');
+        }
+        
+        document.getElementById('detail-panel').addEventListener('click', e => {
+            if (e.target.id === 'detail-panel') closeDetail();
+        });
+        
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeDetail();
+        });
+        
+        function logout() {
+            fetch('/api/users/logout', {method: 'POST'})
+                .then(() => {
+                    document.cookie = 'user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+                    window.location.href = '/';
+                });
+        }
+    </script>
+</body>
+</html>
