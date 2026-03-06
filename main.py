@@ -11,20 +11,27 @@ import hashlib
 from database import engine, get_db, Base
 import models
 
+# Create all database tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="EchoStack API")
 
+# ============================================
+# CONFIGURATION
+# ============================================
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 try:
     app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 except Exception as e:
-    print(f"Warning: Could not mount uploads folder")
+    print(f"Warning: Could not mount uploads folder: {e}")
 
 CORRECT_ANSWER = "THE ADMIN"
 
+# ============================================
+# PASSWORD HELPERS
+# ============================================
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
@@ -61,19 +68,21 @@ def user_login_page():
         return FileResponse("user-login.html")
     raise HTTPException(status_code=404)
 
-@app.get("/client-login")
-def client_login_page():
-    if os.path.exists("client_login.html"):
-        return FileResponse("client_login.html")
+@app.get("/login")
+def admin_login_page():
+    if os.path.exists("login.html"):
+        return FileResponse("login.html")
     raise HTTPException(status_code=404)
 
-@app.get("/client-dashboard")
-async def client_dashboard_page(request: Request):
-    token = request.cookies.get("client_session")
-    if not token:
-        return RedirectResponse(url="/client-login")
-    if os.path.exists("client_dashboard.html"):
-        return FileResponse("client_dashboard.html")
+@app.get("/admin")
+async def admin_dashboard_page(request: Request):
+    token = request.cookies.get("admin_session")
+    if not token or token != "ADMIN_AUTHORIZED":
+        if os.path.exists("login.html"):
+            return FileResponse("login.html")
+        raise HTTPException(status_code=404)
+    if os.path.exists("admin_dashboard.html"):
+        return FileResponse("admin_dashboard.html")
     raise HTTPException(status_code=404)
 
 @app.get("/test")
@@ -101,19 +110,8 @@ def manifest_route():
     raise HTTPException(status_code=404)
 
 # ============================================
-# YOUR SUPER ADMIN (Emmanuel)
+# ADMIN AUTHENTICATION
 # ============================================
-@app.get("/admin")
-async def admin_page(request: Request):
-    token = request.cookies.get("admin_session")
-    if not token or token != "ADMIN_AUTHORIZED":
-        if os.path.exists("login.html"):
-            return FileResponse("login.html")
-        raise HTTPException(status_code=404)
-    if os.path.exists("admin_dashboard.html"):
-        return FileResponse("admin_dashboard.html")
-    raise HTTPException(status_code=404)
-
 @app.post("/api/auth/login")
 async def admin_login(answer: str = Form(...)):
     cleaned = CORRECT_ANSWER.lower().replace(" ", "")
@@ -131,7 +129,7 @@ def admin_logout():
     return response
 
 # ============================================
-# PUBLIC USER ACCOUNTS (visitors on the site)
+# USER ACCOUNTS (Public Users)
 # ============================================
 @app.post("/api/users/signup")
 async def user_signup(
@@ -221,281 +219,6 @@ async def get_current_user(request: Request, db: Session = Depends(get_db)):
     }
 
 # ============================================
-# CLIENT (Ghana Heritage Foundation)
-# ============================================
-@app.post("/api/client/login")
-async def client_login(
-    email: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    try:
-        client = db.query(models.Client).filter(models.Client.email == email.lower().strip()).first()
-        if not client or not verify_password(password, client.password_hash):
-            raise HTTPException(status_code=401, detail="Invalid email or password")
-        if not client.is_active:
-            raise HTTPException(status_code=403, detail="Account suspended")
-        response = JSONResponse(content={
-            "success": True,
-            "client_id": client.id,
-            "full_name": client.full_name,
-            "organisation_name": client.organisation_name or ""
-        })
-        response.set_cookie(key="client_session", value=str(client.id), max_age=86400*7, path="/")
-        return response
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/client/logout")
-def client_logout():
-    response = JSONResponse(content={"success": True})
-    response.delete_cookie(key="client_session", path="/")
-    return response
-
-@app.get("/api/client/me")
-async def get_client(request: Request, db: Session = Depends(get_db)):
-    client_id = request.cookies.get("client_session")
-    if not client_id:
-        raise HTTPException(status_code=401, detail="Not logged in")
-    client = db.query(models.Client).filter(models.Client.id == int(client_id)).first()
-    if not client:
-        raise HTTPException(status_code=404, detail="Not found")
-    return {
-        "id": client.id,
-        "full_name": client.full_name,
-        "email": client.email,
-        "organisation_name": client.organisation_name or "",
-        "plan": client.plan,
-        "created_at": str(client.created_at)
-    }
-
-@app.get("/api/client/stats")
-async def get_client_stats(request: Request, db: Session = Depends(get_db)):
-    client_id = request.cookies.get("client_session")
-    if not client_id:
-        raise HTTPException(status_code=401, detail="Not logged in")
-    return {
-        "total_regions": db.query(models.Region).count(),
-        "total_users": db.query(models.User).count(),
-        "total_messages": db.query(models.ChatMessage).count(),
-        "total_stories": db.query(models.StorySubmission).count(),
-        "pending_stories": db.query(models.StorySubmission).filter(models.StorySubmission.status == "pending").count(),
-        "total_subscribers": db.query(models.NewsletterSubscriber).count(),
-        "total_events": db.query(models.Event).count(),
-        "total_files": db.query(models.UploadedFile).count()
-    }
-
-# YOU create the client account manually via this route (one time)
-@app.post("/api/admin/create-client")
-async def create_client(
-    full_name: str = Form(...),
-    email: str = Form(...),
-    password: str = Form(...),
-    organisation_name: str = Form(""),
-    request: Request = None,
-    db: Session = Depends(get_db)
-):
-    token = request.cookies.get("admin_session")
-    if token != "ADMIN_AUTHORIZED":
-        raise HTTPException(status_code=403, detail="Not authorized")
-    existing = db.query(models.Client).filter(models.Client.email == email.lower()).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already exists")
-    client = models.Client(
-        full_name=full_name,
-        email=email.lower(),
-        password_hash=hash_password(password),
-        organisation_name=organisation_name,
-        plan="freemium"
-    )
-    db.add(client)
-    db.commit()
-    db.refresh(client)
-    return {"success": True, "client_id": client.id, "message": f"Client account created for {email}"}
-
-# ============================================
-# CHAT MESSAGES
-# ============================================
-@app.get("/api/chat")
-def get_messages(region_id: str = "", db: Session = Depends(get_db)):
-    try:
-        query = db.query(models.ChatMessage).filter(models.ChatMessage.is_approved == 1)
-        if region_id:
-            query = query.filter(models.ChatMessage.region_id == int(region_id))
-        messages = query.order_by(models.ChatMessage.created_at.desc()).limit(50).all()
-        return [{"id": m.id, "username": m.username, "message": m.message,
-                 "region_id": m.region_id, "created_at": str(m.created_at)} for m in messages]
-    except Exception as e:
-        return []
-
-@app.post("/api/chat")
-async def post_message(
-    message: str = Form(...),
-    region_id: str = Form(""),
-    request: Request = None,
-    db: Session = Depends(get_db)
-):
-    user_id = request.cookies.get("user_session")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Must be logged in to chat")
-    user = db.query(models.User).filter(models.User.id == int(user_id)).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found")
-    if not message.strip():
-        raise HTTPException(status_code=400, detail="Message cannot be empty")
-    msg = models.ChatMessage(
-        user_id=user.id,
-        username=user.username,
-        message=message.strip()[:500],
-        region_id=int(region_id) if region_id and region_id.isdigit() else None
-    )
-    db.add(msg)
-    db.commit()
-    db.refresh(msg)
-    return {"success": True, "id": msg.id, "username": msg.username, "message": msg.message}
-
-@app.delete("/api/chat/{message_id}")
-async def delete_message(message_id: int, request: Request, db: Session = Depends(get_db)):
-    token = request.cookies.get("client_session") or request.cookies.get("admin_session")
-    if not token:
-        raise HTTPException(status_code=403, detail="Not authorized")
-    msg = db.query(models.ChatMessage).filter(models.ChatMessage.id == message_id).first()
-    if not msg:
-        raise HTTPException(status_code=404, detail="Not found")
-    db.delete(msg)
-    db.commit()
-    return {"success": True}
-
-# ============================================
-# STORY SUBMISSIONS
-# ============================================
-@app.post("/api/stories")
-async def submit_story(
-    title: str = Form(...),
-    content: str = Form(...),
-    region_id: str = Form(""),
-    request: Request = None,
-    db: Session = Depends(get_db)
-):
-    user_id = request.cookies.get("user_session")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Must be logged in")
-    user = db.query(models.User).filter(models.User.id == int(user_id)).first()
-    story = models.StorySubmission(
-        user_id=user.id if user else None,
-        username=user.username if user else "Anonymous",
-        title=title.strip(),
-        content=content.strip(),
-        region_id=int(region_id) if region_id and region_id.isdigit() else None,
-        status="pending"
-    )
-    db.add(story)
-    db.commit()
-    db.refresh(story)
-    return {"success": True, "story_id": story.id, "message": "Story submitted for review!"}
-
-@app.get("/api/stories")
-def get_stories(status: str = "approved", db: Session = Depends(get_db)):
-    stories = db.query(models.StorySubmission).filter(models.StorySubmission.status == status).all()
-    return [{"id": s.id, "username": s.username, "title": s.title,
-             "content": s.content[:200] + "..." if len(s.content) > 200 else s.content,
-             "region_id": s.region_id, "status": s.status,
-             "created_at": str(s.created_at)} for s in stories]
-
-@app.put("/api/stories/{story_id}/approve")
-async def approve_story(story_id: int, request: Request, db: Session = Depends(get_db)):
-    token = request.cookies.get("client_session") or request.cookies.get("admin_session")
-    if not token:
-        raise HTTPException(status_code=403)
-    story = db.query(models.StorySubmission).filter(models.StorySubmission.id == story_id).first()
-    if not story:
-        raise HTTPException(status_code=404)
-    story.status = "approved"
-    db.commit()
-    return {"success": True}
-
-@app.put("/api/stories/{story_id}/reject")
-async def reject_story(story_id: int, request: Request, db: Session = Depends(get_db)):
-    token = request.cookies.get("client_session") or request.cookies.get("admin_session")
-    if not token:
-        raise HTTPException(status_code=403)
-    story = db.query(models.StorySubmission).filter(models.StorySubmission.id == story_id).first()
-    if not story:
-        raise HTTPException(status_code=404)
-    story.status = "rejected"
-    db.commit()
-    return {"success": True}
-
-# ============================================
-# NEWSLETTER
-# ============================================
-@app.post("/api/newsletter/subscribe")
-async def newsletter_subscribe(
-    email: str = Form(...),
-    full_name: str = Form(""),
-    db: Session = Depends(get_db)
-):
-    existing = db.query(models.NewsletterSubscriber).filter(models.NewsletterSubscriber.email == email.lower()).first()
-    if existing:
-        return {"success": True, "message": "Already subscribed!"}
-    sub = models.NewsletterSubscriber(email=email.lower(), full_name=full_name)
-    db.add(sub)
-    db.commit()
-    return {"success": True, "message": "Subscribed successfully!"}
-
-@app.get("/api/newsletter/subscribers")
-async def get_subscribers(request: Request, db: Session = Depends(get_db)):
-    token = request.cookies.get("client_session") or request.cookies.get("admin_session")
-    if not token:
-        raise HTTPException(status_code=403)
-    subs = db.query(models.NewsletterSubscriber).filter(models.NewsletterSubscriber.is_active == 1).all()
-    return [{"id": s.id, "email": s.email, "full_name": s.full_name, "created_at": str(s.created_at)} for s in subs]
-
-# ============================================
-# EVENTS
-# ============================================
-@app.get("/api/events")
-def get_events(db: Session = Depends(get_db)):
-    events = db.query(models.Event).filter(models.Event.is_active == 1).all()
-    return [{"id": e.id, "title": e.title, "description": e.description,
-             "event_date": e.event_date, "location": e.location,
-             "image_url": e.image_url} for e in events]
-
-@app.post("/api/events")
-async def create_event(
-    title: str = Form(...),
-    description: str = Form(""),
-    event_date: str = Form(""),
-    location: str = Form(""),
-    image_url: str = Form(""),
-    request: Request = None,
-    db: Session = Depends(get_db)
-):
-    token = request.cookies.get("client_session") or request.cookies.get("admin_session")
-    if not token:
-        raise HTTPException(status_code=403)
-    event = models.Event(title=title, description=description,
-                         event_date=event_date, location=location, image_url=image_url)
-    db.add(event)
-    db.commit()
-    db.refresh(event)
-    return {"success": True, "event_id": event.id}
-
-@app.delete("/api/events/{event_id}")
-async def delete_event(event_id: int, request: Request, db: Session = Depends(get_db)):
-    token = request.cookies.get("client_session") or request.cookies.get("admin_session")
-    if not token:
-        raise HTTPException(status_code=403)
-    event = db.query(models.Event).filter(models.Event.id == event_id).first()
-    if not event:
-        raise HTTPException(status_code=404)
-    event.is_active = 0
-    db.commit()
-    return {"success": True}
-
-# ============================================
 # REGIONS
 # ============================================
 @app.get("/api/regions")
@@ -517,6 +240,7 @@ def get_regions(db: Session = Depends(get_db)):
             "source": str(r.source) if r.source else ""
         } for r in regions]
     except Exception as e:
+        print(f"Error getting regions: {e}")
         return []
 
 @app.post("/api/regions")
@@ -629,6 +353,7 @@ async def upload_file(
                 "size_bytes": len(content), "file_size_mb": round(len(content)/(1024*1024), 2),
                 "mime_type": file.content_type}
     except Exception as e:
+        print(f"Upload error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/files")
@@ -642,7 +367,8 @@ def get_files(category: str = "", region_id: str = "", db: Session = Depends(get
                  "file_size_mb": round(f.file_size/(1024*1024), 2), "mime_type": f.mime_type,
                  "category": f.category, "region_id": f.region_id, "description": f.description,
                  "created_at": str(f.created_at)} for f in q.order_by(models.UploadedFile.created_at.desc()).all()]
-    except:
+    except Exception as e:
+        print(f"Error getting files: {e}")
         return []
 
 @app.delete("/api/files/{file_id}")
@@ -670,12 +396,15 @@ def create_section(name: str = Form(...), description: str = Form(""), display_o
         if db.query(models.Section).filter(models.Section.slug == slug).first():
             raise HTTPException(status_code=400, detail="Already exists")
         s = models.Section(name=name, slug=slug, description=description, display_order=display_order)
-        db.add(s); db.commit(); db.refresh(s)
+        db.add(s)
+        db.commit()
+        db.refresh(s)
         return {"success": True, "section_id": s.id}
     except HTTPException:
         raise
     except Exception as e:
-        db.rollback(); raise HTTPException(status_code=500, detail=str(e))
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/sections")
 def get_sections(active_only: int = 1, db: Session = Depends(get_db)):
@@ -683,7 +412,8 @@ def get_sections(active_only: int = 1, db: Session = Depends(get_db)):
         q = db.query(models.Section)
         if active_only: q = q.filter(models.Section.is_active == 1).order_by(models.Section.display_order)
         return [{"id": s.id, "name": s.name, "slug": s.slug, "description": s.description} for s in q.all()]
-    except:
+    except Exception as e:
+        print(f"Error getting sections: {e}")
         return []
 
 @app.delete("/api/sections/{section_id}")
@@ -691,27 +421,30 @@ def delete_section(section_id: int, db: Session = Depends(get_db)):
     try:
         s = db.query(models.Section).filter(models.Section.id == section_id).first()
         if not s: raise HTTPException(status_code=404)
-        s.is_active = 0; db.commit()
+        s.is_active = 0
+        db.commit()
         return {"success": True}
     except HTTPException:
         raise
     except Exception as e:
-        db.rollback(); raise HTTPException(status_code=500, detail=str(e))
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# STATS & MISC
+# STATS
 # ============================================
 @app.get("/api/stats")
 def get_stats(db: Session = Depends(get_db)):
     try:
         return {
             "total_regions": db.query(models.Region).count(),
-            "total_users": db.query(models.User).count(),
+            "total_users": db.query(models.User).count() if hasattr(models, 'User') else 0,
             "with_audio": db.query(models.UploadedFile).filter(models.UploadedFile.category == "audio").count(),
             "with_images": db.query(models.UploadedFile).filter(models.UploadedFile.category == "image").count(),
             "database_size_mb": 0
         }
-    except:
+    except Exception as e:
+        print(f"Stats error: {e}")
         return {"total_regions": 0, "database_size_mb": 0}
 
 @app.post("/api/import/json")
@@ -720,13 +453,19 @@ def import_json(data: dict, db: Session = Depends(get_db)):
         if not isinstance(data, list): data = [data]
         imported = 0
         for rd in data:
-            try: db.add(models.Region(**rd)); imported += 1
+            try:
+                db.add(models.Region(**rd))
+                imported += 1
             except: continue
         db.commit()
         return {"success": True, "imported": imported}
     except Exception as e:
-        db.rollback(); raise HTTPException(status_code=500, detail=str(e))
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
+# ============================================
+# THEME
+# ============================================
 @app.post("/api/theme")
 async def save_theme(theme: str = Form(...)):
     try:
@@ -743,98 +482,3 @@ def get_theme():
         return {}
     except:
         return {}
-
-# ============================================
-# USER REGISTRATION ENDPOINT
-# ============================================
-@app.post("/api/users/register")
-async def register_user(
-    username: str = Form(...),
-    email: str = Form(...),
-    password: str = Form(...),
-    topics: str = Form("[]"),
-    db: Session = Depends(get_db)
-):
-    """Create new user account with topic preferences"""
-    import json
-    from passlib.context import CryptContext
-    
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    
-    # Check if username/email exists
-    existing_user = db.query(User).filter(
-        (User.username == username) | (User.email == email)
-    ).first()
-    
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Username or email already registered")
-    
-    # Hash password
-    hashed_password = pwd_context.hash(password)
-    
-    # Parse topics
-    try:
-        topics_list = json.loads(topics)
-    except:
-        topics_list = []
-    
-    # Create new user
-    new_user = User(
-        username=username,
-        email=email,
-        password_hash=hashed_password,
-        preferences=topics_list,
-        is_verified=True
-    )
-    
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    
-    # Set session cookie
-    response = JSONResponse(content={"success": True, "user_id": str(new_user.id)})
-    response.set_cookie(key="user_session", value=str(new_user.id), max_age=86400, path="/")
-    
-    return response
-
-# ============================================
-# USER LOGIN ENDPOINT
-# ============================================
-@app.post("/api/users/login")
-async def user_login(
-    username: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    """User login"""
-    from passlib.context import CryptContext
-    
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    
-    # Find user
-    user = db.query(User).filter(
-        (User.username == username) | (User.email == username)
-    ).first()
-    
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    # Verify password
-    if not pwd_context.verify(password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    # Set session cookie
-    response = JSONResponse(content={"success": True, "user_id": str(user.id)})
-    response.set_cookie(key="user_session", value=str(user.id), max_age=86400, path="/")
-    
-    return response
-
-# ============================================
-# USER LOGOUT ENDPOINT
-# ============================================
-@app.post("/api/users/logout")
-def user_logout():
-    """User logout"""
-    response = JSONResponse(content={"success": True})
-    response.delete_cookie(key="user_session", path="/")
-    return response
