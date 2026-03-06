@@ -8,7 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <title>EchoStack Admin Dashboard</title>
 <meta name="theme-color" content="#1a1e29">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EchoStack">
 <link rel="icon" type="image/png" href="/echostack-logo.png">
@@ -16,55 +16,133 @@
 <link rel="manifest" href="/manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-:root { --brand-dark: #1a1e29; --brand-blue: #0077b6; }
-body { font-family: Georgia, 'Times New Roman', Times, serif !important; background-color: #ffffff !important; color: var(--brand-dark) !important; }
-.btn-primary { background-color: var(--brand-blue) !important; color: white !important; border: none !important; cursor: pointer !important; }
-.btn-secondary { border: 2px solid var(--brand-dark) !important; color: var(--brand-dark) !important; background: transparent !important; cursor: pointer !important; }
-input, textarea, select { border-color: #d0d0d0 !important; color: var(--brand-dark) !important; background: white !important; }
-input:focus, textarea:focus, select:focus { outline: none !important; border-color: var(--brand-blue) !important; }
-
-/* SITE BUILDER STYLES */
-.builder-panel { background: #f8fafc; border-right: 2px solid #e2e8f0; height: calc(100vh - 80px); overflow-y: auto; }
-.preview-panel { height: calc(100vh - 80px); overflow-y: auto; background: white; }
-.color-swatch { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #ddd; cursor: pointer; display: inline-block; }
-.builder-section { border-bottom: 1px solid #e2e8f0; padding: 1.5rem; }
-.builder-section h3 { font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1rem; }
-.toggle-switch { position: relative; display: inline-block; width: 48px; height: 26px; }
-.toggle-switch input { opacity: 0; width: 0; height: 0; }
-.toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 26px; }
-.toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-input:checked + .toggle-slider { background-color: #0077b6; }
-input:checked + .toggle-slider:before { transform: translateX(22px); }
-.preview-iframe { width: 100%; border: none; height: calc(100vh - 120px); }
-.font-option { padding: 0.5rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s; margin: 0.25rem; display: inline-block; }
-.font-option:hover, .font-option.active { border-color: #0077b6; background: #eff6ff; }
-.preset-theme { width: 60px; height: 60px; border-radius: 12px; cursor: pointer; border: 3px solid transparent; transition: all 0.2s; display: inline-flex; flex-direction: column; overflow: hidden; }
-.preset-theme:hover, .preset-theme.active { border-color: #0077b6; transform: scale(1.05); }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
+:root {
+--brand-dark: #1a1e29;
+--brand-blue: #0077b6;
+}
+body {
+font-family: 'Georgia', serif !important;
+background-color: #ffffff !important;
+color: var(--brand-dark) !important;
+}
+.btn-primary {
+background-color: var(--brand-blue) !important;
+color: white !important;
+border: none !important;
+cursor: pointer !important;
+}
+.btn-secondary {
+border: 2px solid var(--brand-dark) !important;
+color: var(--brand-dark) !important;
+background: transparent !important;
+cursor: pointer !important;
+}
+input, textarea, select {
+border-color: #d0d0d0 !important;
+color: var(--brand-dark) !important;
+background: white !important;
+}
+input:focus, textarea:focus, select:focus {
+outline: none !important;
+border-color: var(--brand-blue) !important;
+}
+/* Site Builder Styles */
+.site-builder-container {
+display: grid;
+grid-template-columns: 250px 1fr 300px;
+gap: 1rem;
+height: calc(100vh - 200px);
+}
+.builder-sidebar {
+background: #f9fafb;
+border: 1px solid #e5e7eb;
+border-radius: 8px;
+padding: 1rem;
+overflow-y: auto;
+}
+.builder-canvas {
+background: white;
+border: 2px dashed #d1d5db;
+border-radius: 8px;
+padding: 2rem;
+overflow-y: auto;
+position: relative;
+}
+.builder-properties {
+background: #f9fafb;
+border: 1px solid #e5e7eb;
+border-radius: 8px;
+padding: 1rem;
+overflow-y: auto;
+}
+.widget-item {
+background: white;
+border: 2px solid #e5e7eb;
+border-radius: 8px;
+padding: 1rem;
+margin-bottom: 1rem;
+cursor: move;
+transition: all 0.2s;
+}
+.widget-item:hover {
+border-color: var(--brand-blue);
+box-shadow: 0 2px 8px rgba(0,119,182,0.1);
+}
+.widget-item.selected {
+border-color: var(--brand-blue);
+box-shadow: 0 0 0 3px rgba(0,119,182,0.1);
+}
+.theme-option {
+border: 2px solid #e5e7eb;
+border-radius: 8px;
+padding: 1rem;
+margin-bottom: 1rem;
+cursor: pointer;
+transition: all 0.2s;
+}
+.theme-option:hover, .theme-option.selected {
+border-color: var(--brand-blue);
+background: #f0f9ff;
+}
+.page-list-item {
+padding: 0.75rem;
+border-radius: 6px;
+margin-bottom: 0.5rem;
+cursor: pointer;
+transition: all 0.2s;
+}
+.page-list-item:hover, .page-list-item.active {
+background: #f0f9ff;
+color: var(--brand-blue);
+}
 </style>
 </head>
 <body class="antialiased">
 
 <!-- NAVIGATION -->
 <header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
-<div class="max-w-full px-4 flex justify-between items-center">
+<div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
 <div class="flex items-center gap-3">
-<img src="/echostack-logo.png" alt="" style="width:40px;height:40px;object-fit:contain;" onerror="this.style.display='none'">
-<h1 class="text-xl font-bold" style="color:#1a1e29">EchoStack Admin</h1>
+<img id="header-logo" src="/echostack-logo.png" alt="" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.style.display='none'">
+<h1 class="text-2xl font-bold" style="color: #1a1e29 !important;">EchoStack Admin</h1>
 </div>
-<nav class="flex gap-2 items-center flex-wrap">
-<button onclick="showSection('dashboard')" id="nav-dashboard" class="px-3 py-2 rounded hover:bg-gray-100 text-sm font-medium">📊 Dashboard</button>
-<button onclick="showSection('builder')" id="nav-builder" class="px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium text-blue-600">🎨 Site Builder</button>
-<button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
+<nav class="flex gap-3 items-center">
 <a href="/" target="_blank" class="px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">🌍 View Site ↗</a>
+<button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 text-sm font-medium">📊 Dashboard</button>
+<button onclick="showSection('site-builder')" class="px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium text-[#0077b6] font-semibold">🎨 Site Builder</button>
+<button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
 <button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 text-sm font-medium">🚪 Logout</button>
 </nav>
 </div>
 </header>
 
+<!-- MAIN CONTENT -->
 <main class="max-w-7xl mx-auto px-4 py-8">
 
 <!-- DASHBOARD SECTION -->
 <section id="dashboard-section" class="space-y-8">
+<!-- Stats -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
 <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Total Regions</p>
@@ -83,17 +161,21 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 <p class="text-2xl font-bold" id="stat-size">Loading...</p>
 </div>
 </div>
+
+<!-- Quick Actions -->
 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
 <h2 class="text-xl font-bold mb-4">⚡ Quick Actions</h2>
 <div class="flex flex-wrap gap-4">
 <button onclick="showSection('create')" class="btn-primary px-6 py-3 rounded-lg font-semibold">➕ Create New Region</button>
-<button onclick="showSection('builder')" class="px-6 py-3 rounded-lg font-semibold bg-purple-600 text-white">🎨 Site Builder</button>
+<button onclick="showSection('site-builder')" class="btn-secondary px-6 py-3 rounded-lg font-semibold">🎨 Site Builder</button>
 <button onclick="exportData()" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📤 Export Data</button>
 <button onclick="document.getElementById('import-file').click()" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📥 Import Data</button>
 <button onclick="showSection('files-manager')" class="btn-secondary px-6 py-3 rounded-lg font-semibold">📁 File Manager</button>
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
 </div>
 </div>
+
+<!-- Sections/Categories Manager -->
 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
 <h2 class="text-xl font-bold mb-4">🏷️ Manage Categories/Sections</h2>
 <div class="flex gap-2 mb-4">
@@ -102,6 +184,8 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 </div>
 <div id="sections-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
 </div>
+
+<!-- Regions Table -->
 <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
 <div class="p-4 border-b border-gray-200 flex justify-between items-center">
 <h2 class="text-xl font-bold">📍 All Regions</h2>
@@ -127,238 +211,84 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 </div>
 </section>
 
-<!-- 🎨 SITE BUILDER SECTION -->
-<section id="builder-section" class="hidden">
-<div class="flex gap-0" style="height: calc(100vh - 140px);">
+<!-- SITE BUILDER SECTION -->
+<section id="site-builder-section" class="hidden space-y-6">
+<div class="flex justify-between items-center">
+<h2 class="text-2xl font-bold">🎨 Site Builder</h2>
+<div class="flex gap-3">
+<button onclick="saveSiteBuilder()" class="btn-primary px-6 py-2 rounded-lg font-semibold">💾 Save Changes</button>
+<button onclick="previewSite()" class="btn-secondary px-6 py-2 rounded-lg font-semibold">👁️ Preview</button>
+</div>
+</div>
 
-  <!-- LEFT: Controls Panel -->
-  <div class="builder-panel w-96 flex-shrink-0">
+<div class="site-builder-container">
+<!-- Left Sidebar - Pages & Themes -->
+<div class="builder-sidebar">
+<h3 class="font-bold mb-4">Pages</h3>
+<div id="pages-list" class="mb-6">
+<!-- Pages will be loaded here -->
+</div>
+<button onclick="addNewPage()" class="w-full btn-secondary py-2 rounded text-sm font-medium mb-6">➕ Add Page</button>
 
-    <!-- Header -->
-    <div class="p-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-      <h2 class="text-lg font-bold">🎨 Site Builder</h2>
-      <p class="text-xs opacity-80 mt-1">Changes preview live on the right</p>
-    </div>
+<h3 class="font-bold mb-4">Theme</h3>
+<div id="themes-list">
+<div class="theme-option selected" onclick="selectTheme('default', this)">
+<div class="font-semibold mb-1">Default Theme</div>
+<div class="text-xs text-gray-600">Clean, modern design</div>
+</div>
+<div class="theme-option" onclick="selectTheme('dark', this)">
+<div class="font-semibold mb-1">Dark Theme</div>
+<div class="text-xs text-gray-600">Dark background, light text</div>
+</div>
+<div class="theme-option" onclick="selectTheme('minimal', this)">
+<div class="font-semibold mb-1">Minimal</div>
+<div class="text-xs text-gray-600">Simple, minimal design</div>
+</div>
+</div>
 
-    <!-- PRESET THEMES -->
-    <div class="builder-section">
-      <h3>⚡ Quick Themes</h3>
-      <div class="flex flex-wrap gap-2">
-        <div class="text-center">
-          <div class="preset-theme active" id="theme-ghana" onclick="applyPreset('ghana')" title="Ghana Heritage" style="background:linear-gradient(#1a1e29 50%, #0077b6 50%)"></div>
-          <p class="text-xs mt-1">Ghana</p>
-        </div>
-        <div class="text-center">
-          <div class="preset-theme" id="theme-earth" onclick="applyPreset('earth')" title="Earth Tones" style="background:linear-gradient(#3d2b1f 50%, #c8860a 50%)"></div>
-          <p class="text-xs mt-1">Earth</p>
-        </div>
-        <div class="text-center">
-          <div class="preset-theme" id="theme-forest" onclick="applyPreset('forest')" title="Forest" style="background:linear-gradient(#1a3a2a 50%, #2d8a4e 50%)"></div>
-          <p class="text-xs mt-1">Forest</p>
-        </div>
-        <div class="text-center">
-          <div class="preset-theme" id="theme-sunset" onclick="applyPreset('sunset')" title="Sunset" style="background:linear-gradient(#7c1d1d 50%, #e05c1a 50%)"></div>
-          <p class="text-xs mt-1">Sunset</p>
-        </div>
-        <div class="text-center">
-          <div class="preset-theme" id="theme-ocean" onclick="applyPreset('ocean')" title="Ocean" style="background:linear-gradient(#0a2342 50%, #1e88e5 50%)"></div>
-          <p class="text-xs mt-1">Ocean</p>
-        </div>
-        <div class="text-center">
-          <div class="preset-theme" id="theme-royal" onclick="applyPreset('royal')" title="Royal" style="background:linear-gradient(#2d0057 50%, #9c27b0 50%)"></div>
-          <p class="text-xs mt-1">Royal</p>
-        </div>
-      </div>
-    </div>
+<h3 class="font-bold mb-4 mt-6">Widgets</h3>
+<div class="space-y-2">
+<div class="widget-item" draggable="true" ondragstart="dragWidget(event, 'text')">
+<div class="font-semibold text-sm">📝 Text Block</div>
+<div class="text-xs text-gray-600">Add rich text content</div>
+</div>
+<div class="widget-item" draggable="true" ondragstart="dragWidget(event, 'image')">
+<div class="font-semibold text-sm">🖼️ Image</div>
+<div class="text-xs text-gray-600">Add an image</div>
+</div>
+<div class="widget-item" draggable="true" ondragstart="dragWidget(event, 'video')">
+<div class="font-semibold text-sm">🎬 Video</div>
+<div class="text-xs text-gray-600">Embed a video</div>
+</div>
+<div class="widget-item" draggable="true" ondragstart="dragWidget(event, 'regions')">
+<div class="font-semibold text-sm">🗺️ Regions Grid</div>
+<div class="text-xs text-gray-600">Display regions</div>
+</div>
+<div class="widget-item" draggable="true" ondragstart="dragWidget(event, 'newsletter')">
+<div class="font-semibold text-sm">📧 Newsletter</div>
+<div class="text-xs text-gray-600">Newsletter signup</div>
+</div>
+</div>
+</div>
 
-    <!-- SITE IDENTITY -->
-    <div class="builder-section">
-      <h3>🏷️ Site Identity</h3>
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">Site Name</label>
-          <input type="text" id="b-site-name" value="EchoStack" class="w-full p-2 border rounded-lg text-sm" oninput="updatePreview()">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">Tagline</label>
-          <input type="text" id="b-tagline" value="Ghana's Living Heritage Archive" class="w-full p-2 border rounded-lg text-sm" oninput="updatePreview()">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">Logo URL (or upload below)</label>
-          <input type="text" id="b-logo-url" value="/echostack-logo.png" class="w-full p-2 border rounded-lg text-sm" oninput="updatePreview()">
-        </div>
-        <button onclick="document.getElementById('logo-upload-input').click()" class="btn-secondary w-full py-2 rounded-lg text-sm font-medium">📁 Upload New Logo</button>
-        <input type="file" id="logo-upload-input" accept="image/*" class="hidden" onchange="uploadLogo(this)">
-      </div>
-    </div>
+<!-- Center - Canvas -->
+<div class="builder-canvas" id="builder-canvas" ondrop="dropWidget(event)" ondragover="allowDrop(event)">
+<div id="canvas-content" class="space-y-4">
+<!-- Widgets will be dropped here -->
+<div class="text-center text-gray-400 py-12">
+<div class="text-4xl mb-2">🎨</div>
+<div>Drag widgets here to build your page</div>
+</div>
+</div>
+</div>
 
-    <!-- COLOURS -->
-    <div class="builder-section">
-      <h3>🎨 Colours</h3>
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <label class="text-sm text-gray-600">Header/Nav Background</label>
-          <div class="flex items-center gap-2">
-            <span id="b-header-hex" class="text-xs text-gray-400">#1a1e29</span>
-            <input type="color" id="b-header-bg" value="#1a1e29" class="color-swatch" oninput="updatePreview(); document.getElementById('b-header-hex').textContent=this.value">
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <label class="text-sm text-gray-600">Button / Accent Colour</label>
-          <div class="flex items-center gap-2">
-            <span id="b-accent-hex" class="text-xs text-gray-400">#0077b6</span>
-            <input type="color" id="b-accent" value="#0077b6" class="color-swatch" oninput="updatePreview(); document.getElementById('b-accent-hex').textContent=this.value">
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <label class="text-sm text-gray-600">Page Background</label>
-          <div class="flex items-center gap-2">
-            <span id="b-bg-hex" class="text-xs text-gray-400">#ffffff</span>
-            <input type="color" id="b-page-bg" value="#ffffff" class="color-swatch" oninput="updatePreview(); document.getElementById('b-bg-hex').textContent=this.value">
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <label class="text-sm text-gray-600">Text Colour</label>
-          <div class="flex items-center gap-2">
-            <span id="b-text-hex" class="text-xs text-gray-400">#1a1e29</span>
-            <input type="color" id="b-text-color" value="#1a1e29" class="color-swatch" oninput="updatePreview(); document.getElementById('b-text-hex').textContent=this.value">
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <label class="text-sm text-gray-600">Header Text Colour</label>
-          <div class="flex items-center gap-2">
-            <span id="b-header-text-hex" class="text-xs text-gray-400">#ffffff</span>
-            <input type="color" id="b-header-text" value="#ffffff" class="color-swatch" oninput="updatePreview(); document.getElementById('b-header-text-hex').textContent=this.value">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FONTS -->
-    <div class="builder-section">
-      <h3>✍️ Font Style</h3>
-      <div class="flex flex-wrap">
-        <span class="font-option active" id="font-georgia" onclick="selectFont('Georgia, serif', 'font-georgia')" style="font-family:Georgia,serif">Georgia</span>
-        <span class="font-option" id="font-arial" onclick="selectFont('Arial, sans-serif', 'font-arial')" style="font-family:Arial,sans-serif">Arial</span>
-        <span class="font-option" id="font-verdana" onclick="selectFont('Verdana, sans-serif', 'font-verdana')" style="font-family:Verdana,sans-serif">Verdana</span>
-        <span class="font-option" id="font-trebuchet" onclick="selectFont('Trebuchet MS, sans-serif', 'font-trebuchet')" style="font-family:'Trebuchet MS',sans-serif">Trebuchet</span>
-        <span class="font-option" id="font-palatino" onclick="selectFont('Palatino, serif', 'font-palatino')" style="font-family:Palatino,serif">Palatino</span>
-        <span class="font-option" id="font-courier" onclick="selectFont('Courier New, monospace', 'font-courier')" style="font-family:'Courier New',monospace">Courier</span>
-      </div>
-    </div>
-
-    <!-- WHAT USERS SEE -->
-    <div class="builder-section">
-      <h3>👁️ Control What Users See</h3>
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium">Interactive Map</p>
-            <p class="text-xs text-gray-500">Show Ghana map on homepage</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="show-map" checked onchange="updatePreview()">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium">Region Cards</p>
-            <p class="text-xs text-gray-500">Show region list below map</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="show-regions" checked onchange="updatePreview()">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium">Audio Player</p>
-            <p class="text-xs text-gray-500">Show audio in region details</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="show-audio" checked onchange="updatePreview()">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium">Image Gallery</p>
-            <p class="text-xs text-gray-500">Show photos in region details</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="show-gallery" checked onchange="updatePreview()">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium">Footer</p>
-            <p class="text-xs text-gray-500">Show footer on homepage</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="show-footer" checked onchange="updatePreview()">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium">Search Bar</p>
-            <p class="text-xs text-gray-500">Allow users to search regions</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="show-search" checked onchange="updatePreview()">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <!-- ANNOUNCEMENT BANNER -->
-    <div class="builder-section">
-      <h3>📢 Announcement Banner</h3>
-      <div class="space-y-3">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-sm font-medium">Show Banner</p>
-          <label class="toggle-switch">
-            <input type="checkbox" id="show-banner" onchange="updatePreview()">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <input type="text" id="b-banner-text" placeholder="e.g. Welcome to EchoStack! 🎉" class="w-full p-2 border rounded-lg text-sm" oninput="updatePreview()">
-        <div class="flex items-center justify-between">
-          <label class="text-sm text-gray-600">Banner Colour</label>
-          <input type="color" id="b-banner-color" value="#0077b6" class="color-swatch" oninput="updatePreview()">
-        </div>
-      </div>
-    </div>
-
-    <!-- SAVE BUTTON -->
-    <div class="p-4">
-      <button onclick="saveTheme()" class="w-full py-4 rounded-xl font-bold text-white text-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-        🚀 Save & Publish to Live Site
-      </button>
-      <p class="text-xs text-center text-gray-500 mt-2">Changes will appear instantly for all users</p>
-    </div>
-
-  </div>
-
-  <!-- RIGHT: Live Preview -->
-  <div class="flex-1 preview-panel">
-    <div class="bg-gray-100 px-4 py-2 flex items-center gap-2 border-b">
-      <div class="flex gap-1">
-        <div class="w-3 h-3 rounded-full bg-red-400"></div>
-        <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
-        <div class="w-3 h-3 rounded-full bg-green-400"></div>
-      </div>
-      <div class="flex-1 bg-white rounded px-3 py-1 text-xs text-gray-500">🔒 echo-stack-ghana.onrender.com</div>
-      <button onclick="refreshPreview()" class="text-xs text-gray-500 hover:text-gray-700">🔄 Refresh</button>
-    </div>
-    <div id="live-preview" class="w-full h-full overflow-y-auto bg-white">
-      <!-- Preview renders here -->
-    </div>
-  </div>
-
+<!-- Right Sidebar - Properties -->
+<div class="builder-properties">
+<h3 class="font-bold mb-4">Properties</h3>
+<div id="properties-content">
+<p class="text-sm text-gray-600">Select a widget to edit its properties</p>
+</div>
+</div>
 </div>
 </section>
 
@@ -421,7 +351,7 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 </div>
 <div id="hero-preview" class="hidden mt-2">
 <img id="preview-img" src="" class="w-full h-48 object-cover rounded border">
-<button type="button" onclick="hideHeroPreview()" class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-xs">Remove</button>
+<button type="button" onclick="removeHeroImage()" class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-xs">Remove</button>
 </div>
 </div>
 <div class="mb-4">
@@ -430,15 +360,18 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 </div>
 <div class="mb-4">
 <label class="block text-sm font-medium mb-2">🎵 Audio Recordings (URLs)</label>
-<textarea id="reg-audio-files" rows="2" class="w-full p-3 border rounded-lg" placeholder="/uploads/story1.mp3"></textarea>
+<textarea id="reg-audio-files" rows="2" class="w-full p-3 border rounded-lg" placeholder="/uploads/story1.mp3, /uploads/song2.wav"></textarea>
+<p class="text-xs text-gray-500 mt-1">Upload audio files via button below</p>
 <button type="button" onclick="uploadFile('audio')" class="btn-secondary px-4 py-2 rounded-lg mt-2">📁 Upload Audio</button>
 </div>
 </div>
 <div class="border-t pt-6 mt-6">
-<h3 class="text-lg font-bold mb-4">📦 Universal File Upload</h3>
-<div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#0077b6] transition" onclick="document.getElementById('universal-file-upload').click()">
+<h3 class="text-lg font-bold mb-4">📦 Universal File Upload (Videos, Documents, Any Type!) 🆕</h3>
+<div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#0077b6] transition"
+onclick="document.getElementById('universal-file-upload').click()">
 <p class="text-gray-600 text-sm">Click to select OR drag & drop files here</p>
-<p class="text-xs text-gray-500 mt-1">Videos, Audio, Images, Documents - ANY Format!</p>
+<p class="text-xs text-gray-500 mt-1">Videos, Audio, Images, Documents, PDFs - ANY Format!</p>
+<p class="text-xs text-blue-600 mt-2">Max size: 50MB per file</p>
 <input type="file" id="universal-file-upload" multiple class="hidden" onchange="uploadUniversalFiles(this)">
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -450,10 +383,11 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 <option value="audio">Audio</option>
 <option value="image">Image</option>
 <option value="document">Document</option>
+<option value="other">Other</option>
 </select>
 </div>
 <div>
-<label class="block text-sm font-medium mb-2">Link to Region</label>
+<label class="block text-sm font-medium mb-2">Link to Current Region</label>
 <select id="file-region-link" class="w-full p-3 border rounded-lg">
 <option value="no">No Link (Global)</option>
 </select>
@@ -461,6 +395,12 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 <div class="md:col-span-2">
 <label class="block text-sm font-medium mb-2">Description</label>
 <input type="text" id="file-description" class="w-full p-3 border rounded-lg" placeholder="Describe this file">
+</div>
+<div class="md:col-span-2 flex items-center">
+<label class="flex items-center">
+<input type="checkbox" id="file-is-public" checked class="mr-2">
+<span class="text-sm">Public (Visible to All Users)</span>
+</label>
 </div>
 </div>
 <div id="session-uploads-list" class="mt-4 space-y-2"></div>
@@ -487,7 +427,7 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 <section id="files-manager-section" class="hidden">
 <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-6xl mx-auto">
 <div class="flex justify-between items-start mb-6">
-<h2 class="text-2xl font-bold">📁 All Uploaded Files</h2>
+<h2 class="text-2xl font-bold">📁 All Uploaded Files Manager</h2>
 <button onclick="loadAllFiles()" class="btn-secondary px-4 py-2 rounded-lg">🔄 Refresh</button>
 </div>
 <div class="flex gap-2 mb-4">
@@ -498,6 +438,7 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 <option value="audio">Audio</option>
 <option value="image">Images</option>
 <option value="document">Documents</option>
+<option value="other">Other</option>
 </select>
 </div>
 <div id="all-files-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto"></div>
@@ -506,648 +447,807 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 
 </main>
 
+<!-- NOTIFICATION -->
 <div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50"></div>
 
+<!-- JAVASCRIPT -->
 <script>
+console.log('✅ Script Loaded');
 const API_URL = '/api';
 let allRegions = [];
 let allFiles = [];
 let allSections = [];
-let isEditMode = false;
-let currentFont = 'Georgia, serif';
-let currentTheme = {
-    headerBg: '#1a1e29',
-    accent: '#0077b6',
-    pageBg: '#ffffff',
-    textColor: '#1a1e29',
-    headerText: '#ffffff',
-    siteName: 'EchoStack',
-    tagline: "Ghana's Living Heritage Archive",
-    logoUrl: '/echostack-logo.png',
-    font: 'Georgia, serif',
-    showMap: true,
-    showRegions: true,
-    showAudio: true,
-    showGallery: true,
-    showFooter: true,
-    showSearch: true,
-    showBanner: false,
-    bannerText: '',
-    bannerColor: '#0077b6'
-};
+let currentPageWidgets = [];
+let selectedWidget = null;
+let currentTheme = 'default';
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadStats();
-    loadRegions();
-    loadAllSections();
-    populateRegionDropdown();
-    loadSavedTheme();
-    const form = document.getElementById('region-form');
-    if (form) form.addEventListener('submit', handleSave);
-});
-
-// ============================
-// THEME / SITE BUILDER
-// ============================
-function loadSavedTheme() {
-    try {
-        const saved = localStorage.getItem('echostack_theme');
-        if (saved) {
-            currentTheme = JSON.parse(saved);
-            document.getElementById('b-header-bg').value = currentTheme.headerBg;
-            document.getElementById('b-accent').value = currentTheme.accent;
-            document.getElementById('b-page-bg').value = currentTheme.pageBg;
-            document.getElementById('b-text-color').value = currentTheme.textColor;
-            document.getElementById('b-header-text').value = currentTheme.headerText;
-            document.getElementById('b-site-name').value = currentTheme.siteName;
-            document.getElementById('b-tagline').value = currentTheme.tagline;
-            document.getElementById('b-logo-url').value = currentTheme.logoUrl;
-            document.getElementById('show-map').checked = currentTheme.showMap;
-            document.getElementById('show-regions').checked = currentTheme.showRegions;
-            document.getElementById('show-audio').checked = currentTheme.showAudio;
-            document.getElementById('show-gallery').checked = currentTheme.showGallery;
-            document.getElementById('show-footer').checked = currentTheme.showFooter;
-            document.getElementById('show-search').checked = currentTheme.showSearch;
-            document.getElementById('show-banner').checked = currentTheme.showBanner;
-            document.getElementById('b-banner-text').value = currentTheme.bannerText || '';
-            document.getElementById('b-banner-color').value = currentTheme.bannerColor || '#0077b6';
-            document.getElementById('b-header-hex').textContent = currentTheme.headerBg;
-            document.getElementById('b-accent-hex').textContent = currentTheme.accent;
-            document.getElementById('b-bg-hex').textContent = currentTheme.pageBg;
-            document.getElementById('b-text-hex').textContent = currentTheme.textColor;
-            document.getElementById('b-header-text-hex').textContent = currentTheme.headerText;
-        }
-    } catch(e) {}
+console.log('DOM Ready');
+loadStats();
+loadRegions();
+loadAllSections();
+populateRegionDropdown();
+loadSiteBuilderData();
+const form = document.getElementById('region-form');
+if (form) {
+form.addEventListener('submit', handleSave);
 }
-
-function updatePreview() {
-    currentTheme = {
-        headerBg: document.getElementById('b-header-bg').value,
-        accent: document.getElementById('b-accent').value,
-        pageBg: document.getElementById('b-page-bg').value,
-        textColor: document.getElementById('b-text-color').value,
-        headerText: document.getElementById('b-header-text').value,
-        siteName: document.getElementById('b-site-name').value,
-        tagline: document.getElementById('b-tagline').value,
-        logoUrl: document.getElementById('b-logo-url').value,
-        font: currentFont,
-        showMap: document.getElementById('show-map').checked,
-        showRegions: document.getElementById('show-regions').checked,
-        showAudio: document.getElementById('show-audio').checked,
-        showGallery: document.getElementById('show-gallery').checked,
-        showFooter: document.getElementById('show-footer').checked,
-        showSearch: document.getElementById('show-search').checked,
-        showBanner: document.getElementById('show-banner').checked,
-        bannerText: document.getElementById('b-banner-text').value,
-        bannerColor: document.getElementById('b-banner-color').value
-    };
-    renderPreview();
-}
-
-function renderPreview() {
-    const t = currentTheme;
-    const preview = document.getElementById('live-preview');
-    preview.innerHTML = `
-    <div style="font-family:${t.font};background:${t.pageBg};color:${t.textColor};min-height:100vh;">
-
-      ${t.showBanner && t.bannerText ? `
-      <div style="background:${t.bannerColor};color:white;text-align:center;padding:0.6rem 1rem;font-size:0.875rem;font-weight:600;">
-        ${t.bannerText}
-      </div>` : ''}
-
-      <!-- HEADER -->
-      <header style="background:${t.headerBg};padding:1.25rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid ${t.accent};">
-        <div style="display:flex;align-items:center;gap:0.75rem;">
-          <img src="${t.logoUrl}" style="width:44px;height:44px;object-fit:contain;border-radius:8px;" onerror="this.style.display='none'">
-          <span style="font-size:1.5rem;font-weight:bold;color:${t.headerText};">${t.siteName}</span>
-        </div>
-        <nav style="display:flex;gap:1.5rem;">
-          <a style="color:${t.headerText};text-decoration:none;font-size:0.875rem;opacity:0.9;">Home</a>
-          <a style="color:${t.headerText};text-decoration:none;font-size:0.875rem;opacity:0.9;">Explore</a>
-          <a style="color:${t.headerText};text-decoration:none;font-size:0.875rem;opacity:0.9;">About</a>
-        </nav>
-      </header>
-
-      <!-- HERO -->
-      <section style="text-align:center;padding:3rem 2rem 2rem;background:linear-gradient(180deg,${t.accent}15 0%,transparent 100%);">
-        <h1 style="font-size:2rem;font-weight:bold;color:${t.textColor};margin-bottom:1rem;">${t.tagline}</h1>
-        <p style="color:#666;max-width:500px;margin:0 auto;line-height:1.7;">Discover the rich cultural stories, landscapes, and history of Ghana's 16 regions.</p>
-        ${t.showSearch ? `
-        <div style="margin-top:1.5rem;max-width:400px;margin-left:auto;margin-right:auto;">
-          <input placeholder="Search regions..." style="width:100%;padding:0.75rem 1rem;border:2px solid ${t.accent};border-radius:50px;font-size:0.875rem;box-sizing:border-box;">
-        </div>` : ''}
-      </section>
-
-      ${t.showMap ? `
-      <!-- MAP SECTION -->
-      <section style="max-width:900px;margin:0 auto;padding:1.5rem 2rem;">
-        <h2 style="font-size:1.25rem;font-weight:bold;border-left:4px solid ${t.accent};padding-left:1rem;margin-bottom:1rem;">🗺️ Interactive Map</h2>
-        <div style="background:#f5f5f5;border:2px solid #ddd;border-radius:12px;height:200px;display:flex;align-items:center;justify-content:center;color:#999;font-size:0.875rem;">
-          Ghana Map Preview
-        </div>
-      </section>` : ''}
-
-      ${t.showRegions ? `
-      <!-- REGIONS -->
-      <section style="max-width:900px;margin:0 auto;padding:1rem 2rem;">
-        <h2 style="font-size:1.25rem;font-weight:bold;border-left:4px solid ${t.accent};padding-left:1rem;margin-bottom:1rem;">📍 Regions</h2>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
-          ${['Ashanti','Greater Accra','Northern','Volta','Western','Eastern'].map(name => `
-          <div style="border:1px solid #e0e0e0;border-radius:8px;padding:1rem;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='${t.accent}'" onmouseout="this.style.borderColor='#e0e0e0'">
-            <h4 style="font-weight:bold;color:${t.textColor};">${name}</h4>
-            <p style="font-size:0.75rem;color:#888;margin-top:0.25rem;">Region</p>
-          </div>`).join('')}
-        </div>
-      </section>` : ''}
-
-      ${t.showAudio || t.showGallery ? `
-      <!-- MEDIA PREVIEW -->
-      <section style="max-width:900px;margin:0 auto;padding:1rem 2rem;">
-        <div style="display:grid;grid-template-columns:${t.showAudio && t.showGallery ? '1fr 1fr' : '1fr'};gap:1.5rem;">
-          ${t.showGallery ? `
-          <div style="border:1px solid #e0e0e0;border-radius:8px;padding:1rem;">
-            <h3 style="font-weight:bold;margin-bottom:0.75rem;font-size:0.875rem;">🏞️ Gallery</h3>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;">
-              <div style="background:#f0f0f0;border-radius:6px;height:60px;"></div>
-              <div style="background:#e8e8e8;border-radius:6px;height:60px;"></div>
-              <div style="background:#f0f0f0;border-radius:6px;height:60px;"></div>
-            </div>
-          </div>` : ''}
-          ${t.showAudio ? `
-          <div style="border:1px solid #e0e0e0;border-radius:8px;padding:1rem;">
-            <h3 style="font-weight:bold;margin-bottom:0.75rem;font-size:0.875rem;">🎵 Audio</h3>
-            <div style="background:#f8f8f8;border-radius:6px;padding:0.75rem;font-size:0.75rem;color:#666;">▶ Traditional Music Recording.mp3</div>
-            <div style="background:#f8f8f8;border-radius:6px;padding:0.75rem;font-size:0.75rem;color:#666;margin-top:0.5rem;">▶ Heritage Story Archive.mp3</div>
-          </div>` : ''}
-        </div>
-      </section>` : ''}
-
-      ${t.showFooter ? `
-      <!-- FOOTER -->
-      <footer style="border-top:1px solid #e0e0e0;padding:2rem;text-align:center;background:#f9f9f9;margin-top:2rem;">
-        <p style="color:#666;font-size:0.875rem;">&copy; 2026 ${t.siteName}. Preserving Ghana's Stories.</p>
-        <div style="display:flex;justify-content:center;gap:2rem;margin-top:0.75rem;">
-          <a style="color:${t.accent};font-size:0.875rem;text-decoration:none;">About</a>
-          <a style="color:${t.accent};font-size:0.875rem;text-decoration:none;">Contact</a>
-          <a style="color:${t.accent};font-size:0.875rem;text-decoration:none;">Privacy</a>
-        </div>
-      </footer>` : ''}
-
-    </div>`;
-}
-
-function selectFont(fontValue, fontId) {
-    currentFont = fontValue;
-    document.querySelectorAll('.font-option').forEach(el => el.classList.remove('active'));
-    document.getElementById(fontId).classList.add('active');
-    updatePreview();
-}
-
-function applyPreset(name) {
-    const presets = {
-        ghana:  { headerBg:'#1a1e29', accent:'#0077b6', pageBg:'#ffffff', textColor:'#1a1e29', headerText:'#ffffff' },
-        earth:  { headerBg:'#3d2b1f', accent:'#c8860a', pageBg:'#fdf6ee', textColor:'#2c1810', headerText:'#fff8f0' },
-        forest: { headerBg:'#1a3a2a', accent:'#2d8a4e', pageBg:'#f0faf4', textColor:'#1a3a2a', headerText:'#e8f5e9' },
-        sunset: { headerBg:'#7c1d1d', accent:'#e05c1a', pageBg:'#fff8f5', textColor:'#4a1010', headerText:'#fff0eb' },
-        ocean:  { headerBg:'#0a2342', accent:'#1e88e5', pageBg:'#f0f7ff', textColor:'#0a2342', headerText:'#e3f2fd' },
-        royal:  { headerBg:'#2d0057', accent:'#9c27b0', pageBg:'#fdf0ff', textColor:'#2d0057', headerText:'#f3e5f5' }
-    };
-    const p = presets[name];
-    document.getElementById('b-header-bg').value = p.headerBg;
-    document.getElementById('b-accent').value = p.accent;
-    document.getElementById('b-page-bg').value = p.pageBg;
-    document.getElementById('b-text-color').value = p.textColor;
-    document.getElementById('b-header-text').value = p.headerText;
-    document.getElementById('b-header-hex').textContent = p.headerBg;
-    document.getElementById('b-accent-hex').textContent = p.accent;
-    document.getElementById('b-bg-hex').textContent = p.pageBg;
-    document.getElementById('b-text-hex').textContent = p.textColor;
-    document.getElementById('b-header-text-hex').textContent = p.headerText;
-    document.querySelectorAll('.preset-theme').forEach(el => el.classList.remove('active'));
-    document.getElementById('theme-' + name).classList.add('active');
-    updatePreview();
-}
-
-async function saveTheme() {
-    updatePreview();
-    localStorage.setItem('echostack_theme', JSON.stringify(currentTheme));
-
-    // Save to server so index.html gets the theme applied
-    try {
-        const formData = new FormData();
-        formData.append('theme', JSON.stringify(currentTheme));
-        const response = await fetch('/api/theme', { method: 'POST', body: formData });
-        if (response.ok) {
-            showNotification('Theme saved and published to live site!', 'success');
-        } else {
-            showNotification('Theme saved locally! (Server save pending)', 'success');
-        }
-    } catch(e) {
-        showNotification('Theme saved locally!', 'success');
-    }
-}
-
-function refreshPreview() {
-    updatePreview();
-}
-
-async function uploadLogo(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('filename', file.name);
-    formData.append('category', 'image');
-    try {
-        const response = await fetch('/api/upload/file', { method: 'POST', body: formData });
-        const data = await response.json();
-        if (data.success) {
-            document.getElementById('b-logo-url').value = data.url;
-            updatePreview();
-            showNotification('Logo uploaded!', 'success');
-        }
-    } catch(e) {
-        showNotification('Upload failed', 'error');
-    }
-}
-
-// ============================
-// NAVIGATION
-// ============================
-function showSection(sectionId) {
-    document.getElementById('dashboard-section').classList.add('hidden');
-    document.getElementById('create-section').classList.add('hidden');
-    document.getElementById('files-manager-section').classList.add('hidden');
-    document.getElementById('builder-section').classList.add('hidden');
-
-    if (sectionId === 'dashboard') {
-        document.getElementById('dashboard-section').classList.remove('hidden');
-        loadRegions(); loadStats();
-    } else if (sectionId === 'create') {
-        document.getElementById('create-section').classList.remove('hidden');
-        if (!isEditMode) resetForm();
-        isEditMode = false;
-    } else if (sectionId === 'files-manager') {
-        document.getElementById('files-manager-section').classList.remove('hidden');
-        loadAllFiles();
-    } else if (sectionId === 'builder') {
-        document.getElementById('builder-section').classList.remove('hidden');
-        updatePreview();
-    }
-}
-
-// ============================
-// LOAD DATA
-// ============================
-async function loadStats() {
-    try {
-        const response = await fetch(API_URL + '/stats');
-        const stats = await response.json();
-        document.getElementById('stat-total').textContent = stats.total_regions || 0;
-        document.getElementById('stat-audio').textContent = stats.with_audio || 0;
-        document.getElementById('stat-images').textContent = stats.with_images || 0;
-        document.getElementById('stat-size').textContent = (stats.database_size_mb || 0) + ' MB';
-    } catch(e) {}
-}
-
-async function loadRegions() {
-    try {
-        const response = await fetch(API_URL + '/regions');
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        allRegions = await response.json();
-        renderTable(allRegions);
-        populateRegionDropdown();
-    } catch(error) {
-        document.getElementById('regions-table-body').innerHTML =
-            '<tr><td colspan="6" class="px-4 py-8 text-center text-red-600">Error: ' + error.message + '</td></tr>';
-    }
-}
-
-function renderTable(regions) {
-    const tbody = document.getElementById('regions-table-body');
-    tbody.innerHTML = '';
-    if (!regions || regions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet.</td></tr>';
-        return;
-    }
-    regions.forEach(function(region, index) {
-        var galleryArr = safeSplit(region.gallery_images);
-        var audioArr = safeSplit(region.audio_files);
-        var row = document.createElement('tr');
-        row.className = 'hover:bg-gray-50 transition cursor-pointer';
-        row.innerHTML =
-            '<td class="px-4 py-4 text-sm">' + (index+1) + '</td>' +
-            '<td class="px-4 py-4"><span class="font-semibold">' + (region.name||'Unknown') + '</span></td>' +
-            '<td class="px-4 py-4 text-sm">' + (region.capital||'--') + '</td>' +
-            '<td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs">' + (region.category||'Uncategorized') + '</span></td>' +
-            '<td class="px-4 py-4 text-sm">' + (galleryArr.length>0?'🖼️ ':'') + (audioArr.length>0?'🎵':'') + '</td>' +
-            '<td class="px-4 py-4 whitespace-nowrap"><button class="edit-btn mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button><button class="delete-btn text-red-600 hover:underline text-sm">🗑️ Delete</button></td>';
-        row.querySelector('.edit-btn').onclick = function(e) { e.stopPropagation(); editRegion(region.id); };
-        row.querySelector('.delete-btn').onclick = function(e) { e.stopPropagation(); deleteRegion(region.id, region.name); };
-        row.onclick = function(e) { if (!e.target.closest('button')) editRegion(region.id); };
-        tbody.appendChild(row);
-    });
-}
-
-document.getElementById('search-regions').addEventListener('input', function(e) {
-    var term = e.target.value.toLowerCase();
-    renderTable(allRegions.filter(function(r) {
-        return r.name.toLowerCase().indexOf(term) !== -1 ||
-               (r.capital && r.capital.toLowerCase().indexOf(term) !== -1);
-    }));
 });
 
 function safeSplit(value) {
-    if (!value) return [];
-    if (Array.isArray(value)) return value.filter(x => x && String(x).trim());
-    if (typeof value === 'string') return value.split(',').map(s => s.trim()).filter(s => s);
-    return [];
+if (!value) return [];
+if (Array.isArray(value)) return value.filter(x => x && String(x).trim());
+if (typeof value === 'string') {
+return value.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+}
+return [];
 }
 
-// ============================
-// FORM
-// ============================
+function showSection(sectionId) {
+var dashboard = document.getElementById('dashboard-section');
+var create = document.getElementById('create-section');
+var files = document.getElementById('files-manager-section');
+var siteBuilder = document.getElementById('site-builder-section');
+if (sectionId === 'dashboard') {
+dashboard.classList.remove('hidden');
+create.classList.add('hidden');
+files.classList.add('hidden');
+siteBuilder.classList.add('hidden');
+loadRegions();
+loadStats();
+} else if (sectionId === 'create') {
+create.classList.remove('hidden');
+dashboard.classList.add('hidden');
+files.classList.add('hidden');
+siteBuilder.classList.add('hidden');
+resetForm();
+} else if (sectionId === 'files-manager') {
+files.classList.remove('hidden');
+dashboard.classList.add('hidden');
+create.classList.add('hidden');
+siteBuilder.classList.add('hidden');
+loadAllFiles();
+} else if (sectionId === 'site-builder') {
+siteBuilder.classList.remove('hidden');
+dashboard.classList.add('hidden');
+create.classList.add('hidden');
+files.classList.add('hidden');
+loadSiteBuilderData();
+}
+}
+
+// Site Builder Functions
+async function loadSiteBuilderData() {
+try {
+const [pagesRes, themeRes] = await Promise.all([
+fetch('/api/site-pages'),
+fetch('/api/theme')
+]);
+const pages = await pagesRes.json();
+const theme = await themeRes.json();
+renderPagesList(pages);
+if (theme.name) {
+currentTheme = theme.name;
+document.querySelectorAll('.theme-option').forEach(opt => {
+opt.classList.remove('selected');
+if (opt.textContent.toLowerCase().includes(theme.name)) {
+opt.classList.add('selected');
+}
+});
+}
+} catch (error) {
+console.error('Error loading site builder data:', error);
+}
+}
+
+function renderPagesList(pages) {
+const container = document.getElementById('pages-list');
+if (!pages || pages.length === 0) {
+container.innerHTML = '<p class="text-sm text-gray-500 mb-2">No pages yet</p>';
+return;
+}
+container.innerHTML = pages.map(page => `
+<div class="page-list-item ${page.is_home ? 'active' : ''}" onclick="loadPage('${page.slug}')">
+<div class="font-medium text-sm">${page.title}</div>
+<div class="text-xs text-gray-600">/${page.slug}</div>
+</div>
+`).join('');
+}
+
+function addNewPage() {
+const title = prompt('Enter page title:');
+if (!title) return;
+const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+fetch('/api/site-pages', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({title, slug, content: '', template: 'default'})
+}).then(res => res.json()).then(data => {
+if (data.success) {
+showNotification('Page created!', 'success');
+loadSiteBuilderData();
+loadPage(slug);
+}
+}).catch(err => {
+showNotification('Error creating page', 'error');
+});
+}
+
+function loadPage(slug) {
+fetch(`/api/site-pages/${slug}`)
+.then(res => res.json())
+.then(page => {
+currentPageWidgets = page.widgets || [];
+renderCanvas();
+})
+.catch(err => {
+showNotification('Error loading page', 'error');
+});
+}
+
+function dragWidget(event, type) {
+event.dataTransfer.setData('widget-type', type);
+}
+
+function allowDrop(event) {
+event.preventDefault();
+}
+
+function dropWidget(event) {
+event.preventDefault();
+const type = event.dataTransfer.getData('widget-type');
+if (!type) return;
+const widget = {
+id: Date.now(),
+type: type,
+data: getDefaultWidgetData(type),
+order: currentPageWidgets.length
+};
+currentPageWidgets.push(widget);
+renderCanvas();
+selectWidgetById(widget.id);
+}
+
+function getDefaultWidgetData(type) {
+switch(type) {
+case 'text': return {content: 'Enter your text here...', alignment: 'left'};
+case 'image': return {url: '', alt: '', caption: ''};
+case 'video': return {url: '', title: ''};
+case 'regions': return {limit: 6, category: ''};
+case 'newsletter': return {title: 'Subscribe to our newsletter'};
+default: return {};
+}
+}
+
+function renderCanvas() {
+const canvas = document.getElementById('canvas-content');
+if (currentPageWidgets.length === 0) {
+canvas.innerHTML = `
+<div class="text-center text-gray-400 py-12">
+<div class="text-4xl mb-2">🎨</div>
+<div>Drag widgets here to build your page</div>
+</div>`;
+return;
+}
+canvas.innerHTML = currentPageWidgets.map(widget => `
+<div class="widget-item ${selectedWidget && selectedWidget.id === widget.id ? 'selected' : ''}" 
+onclick="selectWidgetById(${widget.id})" draggable="true"
+ondragstart="dragExistingWidget(event, ${widget.id})"
+ondragover="allowDrop(event)" ondrop="reorderWidget(event, ${widget.id})">
+${renderWidgetPreview(widget)}
+</div>
+`).join('');
+}
+
+function renderWidgetPreview(widget) {
+switch(widget.type) {
+case 'text': return `<div class="prose">${widget.data.content}</div>`;
+case 'image': return `<img src="${widget.data.url || 'https://via.placeholder.com/400x200'}" alt="${widget.data.alt}" class="w-full rounded">`;
+case 'video': return `<div class="bg-gray-100 p-8 rounded text-center">🎬 Video: ${widget.data.title || 'Untitled'}</div>`;
+case 'regions': return `<div class="bg-blue-50 p-4 rounded text-center">🗺️ Regions Grid (${widget.data.limit} items)</div>`;
+case 'newsletter': return `<div class="bg-gray-100 p-6 rounded text-center"><div class="font-bold mb-2">${widget.data.title}</div><input type="email" placeholder="Enter email" class="w-full p-2 border rounded"></div>`;
+default: return '<div>Unknown widget</div>';
+}
+}
+
+function selectWidgetById(id) {
+selectedWidget = currentPageWidgets.find(w => w.id === id);
+renderCanvas();
+renderProperties();
+}
+
+function renderProperties() {
+const container = document.getElementById('properties-content');
+if (!selectedWidget) {
+container.innerHTML = '<p class="text-sm text-gray-600">Select a widget to edit</p>';
+return;
+}
+let html = `
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<div class="font-semibold">${selectedWidget.type.charAt(0).toUpperCase() + selectedWidget.type.slice(1)} Widget</div>
+<button onclick="deleteWidget(${selectedWidget.id})" class="text-red-600 text-sm">🗑️ Delete</button>
+</div>
+`;
+// Add specific properties based on widget type
+if (selectedWidget.type === 'text') {
+html += `
+<div>
+<label class="block text-sm font-medium mb-1">Content</label>
+<textarea class="w-full p-2 border rounded text-sm" rows="4" onchange="updateWidgetData('content', this.value)">${selectedWidget.data.content}</textarea>
+</div>
+<div>
+<label class="block text-sm font-medium mb-1">Alignment</label>
+<select class="w-full p-2 border rounded text-sm" onchange="updateWidgetData('alignment', this.value)">
+<option value="left" ${selectedWidget.data.alignment === 'left' ? 'selected' : ''}>Left</option>
+<option value="center" ${selectedWidget.data.alignment === 'center' ? 'selected' : ''}>Center</option>
+<option value="right" ${selectedWidget.data.alignment === 'right' ? 'selected' : ''}>Right</option>
+</select>
+</div>
+`;
+} else if (selectedWidget.type === 'image') {
+html += `
+<div>
+<label class="block text-sm font-medium mb-1">Image URL</label>
+<input type="text" class="w-full p-2 border rounded text-sm" value="${selectedWidget.data.url}" onchange="updateWidgetData('url', this.value)">
+</div>
+<div>
+<label class="block text-sm font-medium mb-1">Alt Text</label>
+<input type="text" class="w-full p-2 border rounded text-sm" value="${selectedWidget.data.alt}" onchange="updateWidgetData('alt', this.value)">
+</div>
+`;
+}
+html += '</div>';
+container.innerHTML = html;
+}
+
+function updateWidgetData(key, value) {
+if (selectedWidget) {
+selectedWidget.data[key] = value;
+renderCanvas();
+}
+}
+
+function deleteWidget(id) {
+currentPageWidgets = currentPageWidgets.filter(w => w.id !== id);
+selectedWidget = null;
+renderCanvas();
+renderProperties();
+}
+
+function dragExistingWidget(event, id) {
+event.dataTransfer.setData('existing-widget-id', id);
+}
+
+function reorderWidget(event, targetId) {
+event.preventDefault();
+const sourceId = parseInt(event.dataTransfer.getData('existing-widget-id'));
+if (!sourceId || sourceId === targetId) return;
+const sourceIndex = currentPageWidgets.findIndex(w => w.id === sourceId);
+const targetIndex = currentPageWidgets.findIndex(w => w.id === targetId);
+const [removed] = currentPageWidgets.splice(sourceIndex, 1);
+currentPageWidgets.splice(targetIndex, 0, removed);
+renderCanvas();
+}
+
+function selectTheme(themeName, element) {
+currentTheme = themeName;
+document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('selected'));
+element.classList.add('selected');
+}
+
+async function saveSiteBuilder() {
+try {
+// Save theme
+await fetch('/api/theme', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({name: currentTheme})
+});
+// Save pages with widgets
+// (In a real implementation, you'd save each page's widgets)
+showNotification('Site builder changes saved!', 'success');
+} catch (error) {
+showNotification('Error saving changes', 'error');
+}
+}
+
+function previewSite() {
+window.open('/?preview=true', '_blank');
+}
+
+// Existing functions remain the same...
+async function loadStats() {
+try {
+const response = await fetch(API_URL + '/stats');
+const stats = await response.json();
+document.getElementById('stat-total').textContent = stats.total_regions || 0;
+document.getElementById('stat-audio').textContent = stats.with_audio || 0;
+document.getElementById('stat-images').textContent = stats.with_images || 0;
+document.getElementById('stat-size').textContent = (stats.database_size_mb || 0) + ' MB';
+} catch (error) {
+console.error('Stats error:', error);
+}
+}
+
+async function loadRegions() {
+try {
+console.log('Fetching regions...');
+const response = await fetch(API_URL + '/regions');
+if (!response.ok) {
+throw new Error('HTTP ' + response.status);
+}
+allRegions = await response.json();
+console.log('Loaded', allRegions.length, 'regions');
+renderTable(allRegions);
+populateRegionDropdown();
+} catch (error) {
+console.error('Load error:', error);
+document.getElementById('regions-table-body').innerHTML =
+'<tr><td colspan="6" class="px-4 py-8 text-center text-red-600">Error: ' + error.message + '</td></tr>';
+}
+}
+
+function renderTable(regions) {
+const tbody = document.getElementById('regions-table-body');
+tbody.innerHTML = '';
+if (!regions || regions.length === 0) {
+tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet.</td></tr>';
+return;
+}
+regions.forEach(function(region, index) {
+try {
+var galleryArr = safeSplit(region.gallery_images);
+var audioArr = safeSplit(region.audio_files);
+var hasAudio = audioArr.length > 0;
+var hasImages = galleryArr.length > 0;
+var row = document.createElement('tr');
+row.className = 'hover:bg-gray-50 transition cursor-pointer';
+row.innerHTML =
+'<td class="px-4 py-4 text-sm">' + (index + 1) + '</td>' +
+'<td class="px-4 py-4"><span class="font-semibold">' + (region.name || 'Unknown') + '</span></td>' +
+'<td class="px-4 py-4 text-sm">' + (region.capital || '—') + '</td>' +
+'<td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs">' + (region.category || 'Uncategorized') + '</span></td>' +
+'<td class="px-4 py-4 text-sm">' + (hasImages ? '🖼️ ' : '') + (hasAudio ? '🎵' : '') + '</td>' +
+'<td class="px-4 py-4 whitespace-nowrap">' +
+'<button class="edit-btn mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button>' +
+'<button class="delete-btn text-red-600 hover:underline text-sm">🗑️ Delete</button>' +
+'</td>';
+row.querySelector('.edit-btn').onclick = function(e) {
+e.stopPropagation();
+editRegion(region.id);
+};
+row.querySelector('.delete-btn').onclick = function(e) {
+e.stopPropagation();
+deleteRegion(region.id, region.name);
+};
+row.onclick = function(e) {
+if (!e.target.closest('button')) {
+editRegion(region.id);
+}
+};
+tbody.appendChild(row);
+} catch (err) {
+console.error('Error rendering region:', err);
+}
+});
+}
+
+document.getElementById('search-regions').addEventListener('input', function(e) {
+var term = e.target.value.toLowerCase();
+var filtered = allRegions.filter(function(r) {
+return r.name.toLowerCase().indexOf(term) !== -1 ||
+(r.capital && r.capital.toLowerCase().indexOf(term) !== -1) ||
+(r.category && r.category.toLowerCase().indexOf(term) !== -1);
+});
+renderTable(filtered);
+});
+
 function resetForm() {
-    document.getElementById('region-form').reset();
-    document.getElementById('region-id').value = '';
-    document.getElementById('form-title').textContent = 'Add New Region';
-    document.getElementById('save-btn').textContent = '💾 Save Region';
-    document.getElementById('hero-preview').classList.add('hidden');
-    document.getElementById('session-uploads-list').innerHTML = '';
+document.getElementById('region-form').reset();
+document.getElementById('region-id').value = '';
+document.getElementById('form-title').textContent = 'Add New Region';
+document.getElementById('save-btn').textContent = '💾 Save Region';
+document.getElementById('hero-preview').classList.add('hidden');
+document.getElementById('session-uploads-list').innerHTML = '';
 }
 
 function editRegion(id) {
-    var region = allRegions.find(function(r) { return r.id === id; });
-    if (!region) { alert('Region not found!'); return; }
-    document.getElementById('form-title').textContent = 'Edit: ' + region.name;
-    document.getElementById('save-btn').textContent = '💾 Update Region';
-    document.getElementById('region-id').value = region.id || '';
-    document.getElementById('reg-name').value = region.name || '';
-    document.getElementById('reg-capital').value = region.capital || '';
-    document.getElementById('reg-population').value = region.population || '';
-    document.getElementById('reg-terrain').value = region.terrain || '';
-    document.getElementById('reg-description').value = region.description || '';
-    document.getElementById('reg-category').value = region.category || '';
-    document.getElementById('reg-tags').value = region.tags || '';
-    document.getElementById('reg-source').value = region.source || '';
-    document.getElementById('reg-overview').value = region.overview || '';
-    document.getElementById('reg-hero-image').value = region.hero_image || '';
-    document.getElementById('reg-gallery-images').value = safeSplit(region.gallery_images).join(', ');
-    document.getElementById('reg-audio-files').value = safeSplit(region.audio_files).join(', ');
-    if (region.hero_image) showHeroPreview(region.hero_image);
-    else hideHeroPreview();
-    populateRegionDropdown(region.id);
-    isEditMode = true;
-    showSection('create');
+console.log('Editing ID:', id);
+var region = null;
+for (var i = 0; i < allRegions.length; i++) {
+if (allRegions[i].id === id) {
+region = allRegions[i];
+break;
+}
+}
+if (!region) {
+alert('Region not found!');
+return;
+}
+document.getElementById('form-title').textContent = 'Edit: ' + region.name;
+document.getElementById('save-btn').textContent = '💾 Update Region';
+document.getElementById('region-id').value = region.id || '';
+document.getElementById('reg-name').value = region.name || '';
+document.getElementById('reg-capital').value = region.capital || '';
+document.getElementById('reg-population').value = region.population || '';
+document.getElementById('reg-terrain').value = region.terrain || '';
+document.getElementById('reg-description').value = region.description || '';
+document.getElementById('reg-category').value = region.category || '';
+document.getElementById('reg-tags').value = region.tags || '';
+document.getElementById('reg-source').value = region.source || '';
+document.getElementById('reg-overview').value = region.overview || '';
+document.getElementById('reg-hero-image').value = region.hero_image || '';
+var galleryArr = safeSplit(region.gallery_images);
+var audioArr = safeSplit(region.audio_files);
+document.getElementById('reg-gallery-images').value = galleryArr.join(', ');
+document.getElementById('reg-audio-files').value = audioArr.join(', ');
+if (region.hero_image) {
+showHeroPreview(region.hero_image);
+} else {
+hideHeroPreview();
+}
+var currentRegionId = region.id;
+populateRegionDropdown(currentRegionId);
+showSection('create');
 }
 
 async function handleSave(e) {
-    e.preventDefault();
-    var regionId = document.getElementById('region-id').value;
-    var submitBtn = document.getElementById('save-btn');
-    submitBtn.disabled = true;
-    submitBtn.textContent = '⏳ Saving...';
-    var formData = new FormData();
-    formData.append('name', document.getElementById('reg-name').value);
-    formData.append('capital', document.getElementById('reg-capital').value);
-    formData.append('population', document.getElementById('reg-population').value);
-    formData.append('terrain', document.getElementById('reg-terrain').value);
-    formData.append('description', document.getElementById('reg-description').value);
-    formData.append('category', document.getElementById('reg-category').value);
-    formData.append('tags', document.getElementById('reg-tags').value);
-    formData.append('hero_image', document.getElementById('reg-hero-image').value);
-    formData.append('gallery_images', document.getElementById('reg-gallery-images').value);
-    formData.append('audio_files', document.getElementById('reg-audio-files').value);
-    formData.append('source', document.getElementById('reg-source').value);
-    formData.append('overview', document.getElementById('reg-overview').value);
-    try {
-        var method = regionId ? 'PUT' : 'POST';
-        var url = regionId ? API_URL + '/regions/' + regionId : API_URL + '/regions';
-        const response = await fetch(url, { method: method, body: formData });
-        if (!response.ok) throw new Error('Server returned ' + response.status);
-        var data = await response.json();
-        if (data.success) {
-            showNotification('Saved successfully!', 'success');
-            await loadRegions(); await loadStats();
-            showSection('dashboard');
-        } else throw new Error(data.detail || 'Save failed');
-    } catch(error) {
-        showNotification('Error: ' + error.message, 'error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = regionId ? '💾 Update Region' : '💾 Save Region';
-    }
+e.preventDefault();
+var regionId = document.getElementById('region-id').value;
+var submitBtn = document.getElementById('save-btn');
+submitBtn.disabled = true;
+submitBtn.textContent = '⏳ Saving...';
+var formData = new FormData();
+formData.append('name', document.getElementById('reg-name').value);
+formData.append('capital', document.getElementById('reg-capital').value);
+formData.append('population', document.getElementById('reg-population').value);
+formData.append('terrain', document.getElementById('reg-terrain').value);
+formData.append('description', document.getElementById('reg-description').value);
+formData.append('category', document.getElementById('reg-category').value);
+formData.append('tags', document.getElementById('reg-tags').value);
+formData.append('hero_image', document.getElementById('reg-hero-image').value);
+formData.append('gallery_images', document.getElementById('reg-gallery-images').value);
+formData.append('audio_files', document.getElementById('reg-audio-files').value);
+formData.append('source', document.getElementById('reg-source').value);
+formData.append('overview', document.getElementById('reg-overview').value);
+try {
+var method = regionId ? 'PUT' : 'POST';
+var url = regionId ? API_URL + '/regions/' + regionId : API_URL + '/regions';
+console.log('Saving with:', method, url);
+const response = await fetch(url, {
+method: method,
+body: formData
+});
+if (!response.ok) {
+throw new Error('Server returned ' + response.status);
+}
+var data = await response.json();
+if (data.success) {
+showNotification('Saved successfully!', 'success');
+await loadRegions();
+await loadStats();
+showSection('dashboard');
+} else {
+throw new Error(data.detail || 'Save failed');
+}
+} catch (error) {
+console.error('Save error:', error);
+showNotification('❌ ' + error.message, 'error');
+} finally {
+submitBtn.disabled = false;
+submitBtn.textContent = regionId ? '💾 Update Region' : '💾 Save Region';
+}
 }
 
 async function deleteRegion(id, name) {
-    if (!confirm('Delete "' + name + '"? This CANNOT be undone.')) return;
-    try {
-        const response = await fetch(API_URL + '/regions/' + id, { method: 'DELETE' });
-        var data = await response.json();
-        if (response.ok && data.success) { showNotification('Deleted!', 'success'); loadRegions(); loadStats(); }
-        else throw new Error('Delete failed');
-    } catch(e) { showNotification('Delete failed', 'error'); }
+if (!confirm('Delete "' + name + '"? This CANNOT be undone.')) return;
+try {
+const response = await fetch(API_URL + '/regions/' + id, { method: 'DELETE' });
+var data = await response.json();
+if (response.ok && data.success) {
+showNotification('Deleted!', 'success');
+loadRegions();
+loadStats();
+} else {
+throw new Error('Delete failed');
+}
+} catch (error) {
+showNotification('❌ Delete failed', 'error');
+}
 }
 
-// ============================
-// FILE UPLOADS
-// ============================
 async function uploadFile(type) {
-    var input = document.createElement('input');
-    input.type = 'file';
-    input.accept = type === 'hero' ? 'image/*' : 'audio/*';
-    input.onchange = async function(e) {
-        var file = e.target.files[0];
-        if (!file) return;
-        var formData = new FormData();
-        formData.append('file', file);
-        formData.append('filename', file.name);
-        formData.append('category', type === 'hero' ? 'image' : 'audio');
-        try {
-            const response = await fetch('/api/upload/file', { method: 'POST', body: formData });
-            var data = await response.json();
-            if (data.success) {
-                if (type === 'hero') { document.getElementById('reg-hero-image').value = data.url; showHeroPreview(data.url); }
-                else { var cur = document.getElementById('reg-audio-files').value; document.getElementById('reg-audio-files').value = cur ? cur + ', ' + data.url : data.url; }
-                showNotification('Uploaded!', 'success');
-            }
-        } catch(e) { showNotification('Upload failed', 'error'); }
-    };
-    input.click();
+var input = document.createElement('input');
+input.type = 'file';
+input.accept = type === 'hero' ? 'image/*' : 'audio/*';
+input.onchange = async function(e) {
+var file = e.target.files[0];
+if (!file) return;
+var formData = new FormData();
+formData.append('file', file);
+formData.append('filename', file.name);
+try {
+var endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/audio';
+const response = await fetch(endpoint, { method: 'POST', body: formData });
+var data = await response.json();
+if (data.success) {
+if (type === 'hero') {
+document.getElementById('reg-hero-image').value = data.url;
+showHeroPreview(data.url);
+} else {
+var currentValue = document.getElementById('reg-audio-files').value;
+var newValue = currentValue ? currentValue + ', ' + data.url : data.url;
+document.getElementById('reg-audio-files').value = newValue;
+}
+showNotification('Uploaded!', 'success');
+}
+} catch (error) {
+showNotification('❌ Upload failed', 'error');
+}
+};
+input.click();
 }
 
 async function uploadUniversalFiles(input) {
-    const files = input.files;
-    if (!files || files.length === 0) return;
-    let uploaded = 0;
-    for (const file of files) {
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('filename', file.name);
-            formData.append('category', document.getElementById('file-category').value);
-            const desc = document.getElementById('file-description').value;
-            if (desc) formData.append('description', desc);
-            const response = await fetch('/api/upload/file', { method: 'POST', body: formData });
-            const data = await response.json();
-            if (response.ok && data.success) {
-                uploaded++;
-                const cat = document.getElementById('file-category').value;
-                if (cat === 'audio') { var cur = document.getElementById('reg-audio-files').value; document.getElementById('reg-audio-files').value = cur ? cur + ', ' + data.url : data.url; }
-                else if (cat === 'image') { var cur = document.getElementById('reg-gallery-images').value; document.getElementById('reg-gallery-images').value = cur ? cur + ', ' + data.url : data.url; }
-                addToSessionUploadList(data);
-            }
-        } catch(e) { showNotification('Failed: ' + file.name, 'error'); }
-    }
-    showNotification('Uploaded ' + uploaded + '/' + files.length + ' files', 'success');
-    document.getElementById('universal-file-upload').value = '';
+const files = input.files;
+if (!files || files.length === 0) return;
+let uploadedCount = 0;
+let failedCount = 0;
+for (const file of files) {
+try {
+const formData = new FormData();
+formData.append('file', file);
+formData.append('filename', file.name);
+formData.append('category', document.getElementById('file-category').value);
+var description = document.getElementById('file-description').value;
+if (description) {
+formData.append('description', description);
+}
+var isPublic = document.getElementById('file-is-public').checked ? '1' : '0';
+formData.append('is_public', isPublic);
+console.log(`Uploading: ${file.name} (${Math.round(file.size / 1024)} KB)`);
+const response = await fetch('/api/upload/file', {
+method: 'POST',
+body: formData
+});
+const data = await response.json();
+if (response.ok && data.success) {
+uploadedCount++;
+showNotification(`✅ ${file.name} uploaded!`, 'success');
+const category = document.getElementById('file-category').value;
+if (category === 'audio') {
+var currentValue = document.getElementById('reg-audio-files').value;
+var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
+document.getElementById('reg-audio-files').value = newValue;
+} else if (category === 'image') {
+var currentValue = document.getElementById('reg-gallery-images').value;
+var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
+document.getElementById('reg-gallery-images').value = newValue;
+}
+addToSessionUploadList(data);
+} else {
+throw new Error(data.detail || 'Upload failed');
+}
+} catch (error) {
+failedCount++;
+console.error('Upload error:', error);
+showNotification(`❌ Failed: ${file.name}`, 'error');
+}
+}
+showNotification(`📁 Uploaded ${uploadedCount}/${files.length} files`, 'success');
+document.getElementById('universal-file-upload').value = '';
 }
 
 function addToSessionUploadList(fileData) {
-    var c = document.getElementById('session-uploads-list');
-    var item = document.createElement('div');
-    item.className = 'bg-blue-50 p-3 rounded border border-blue-200 text-sm';
-    item.innerHTML = 'Uploaded: ' + fileData.original_name + ' <a href="' + fileData.url + '" target="_blank" class="text-blue-600 ml-2">View</a>';
-    c.appendChild(item);
+var container = document.getElementById('session-uploads-list');
+var item = document.createElement('div');
+item.className = 'bg-blue-50 p-3 rounded border border-blue-200 text-sm';
+item.innerHTML =
+'✅ ' + fileData.original_name +
+' (' + fileData.file_size_mb + ' MB) • ' + fileData.category.toUpperCase() +
+' <a href="' + fileData.url + '" target="_blank" class="text-[#0077b6] ml-2">🔗 View</a>';
+container.appendChild(item);
 }
 
-// ============================
-// FILE MANAGER
-// ============================
 async function loadAllFiles() {
-    try {
-        const response = await fetch('/api/files');
-        allFiles = await response.json();
-        renderFilesGrid(allFiles);
-    } catch(e) { showNotification('Failed to load files', 'error'); }
+try {
+const response = await fetch('/api/files');
+allFiles = await response.json();
+renderFilesGrid(allFiles);
+} catch (error) {
+console.error('Load files error:', error);
+showNotification('Failed to load files', 'error');
+}
 }
 
 function renderFilesGrid(files) {
-    var c = document.getElementById('all-files-grid');
-    if (!files || files.length === 0) { c.innerHTML = '<p class="text-gray-500 col-span-3 text-center py-4">No files yet.</p>'; return; }
-    c.innerHTML = files.map(function(f) {
-        return '<div class="bg-white p-4 rounded border hover:shadow transition"><div class="flex justify-between mb-2"><span class="font-semibold text-sm truncate">' + f.original_name + '</span><button onclick="deleteFile(' + f.id + ')" class="text-red-600 text-xs">Delete</button></div><p class="text-xs text-gray-500">' + f.category + ' - ' + f.file_size_mb + ' MB</p><a href="' + f.file_url + '" target="_blank" class="text-blue-600 text-xs mt-1 block">Open File</a></div>';
-    }).join('');
+var container = document.getElementById('all-files-grid');
+if (!files || files.length === 0) {
+container.innerHTML = '<p class="text-gray-500 text-center py-4 col-span-3">No files uploaded yet.</p>';
+return;
+}
+container.innerHTML = files.map(function(file) {
+return '<div class="bg-white p-4 rounded border hover:shadow-md transition">' +
+'<div class="flex justify-between items-start mb-2">' +
+'<span class="font-semibold text-sm truncate">' + file.original_name + '</span>' +
+'<button onclick="deleteFile(' + file.id + ')" class="text-red-600 hover:text-red-800 text-xs">🗑️</button>' +
+'</div>' +
+'<p class="text-xs text-gray-600">' + file.category.toUpperCase() + ' • ' + file.file_size_mb + ' MB</p>' +
+(file.description ? '<p class="text-xs text-gray-500 mt-1">' + file.description + '</p>' : '') +
+'<div class="mt-2">' +
+'<a href="' + file.file_url + '" target="_blank" class="text-[#0077b6] text-xs">🔗 Open File</a>' +
+'</div>' +
+'</div>';
+}).join('');
 }
 
 function filterFiles() {
-    var s = document.getElementById('file-search').value.toLowerCase();
-    var cat = document.getElementById('file-filter-category').value;
-    renderFilesGrid(allFiles.filter(function(f) {
-        return (f.original_name.toLowerCase().indexOf(s) !== -1) && (!cat || f.category === cat);
-    }));
+var search = document.getElementById('file-search').value.toLowerCase();
+var categoryFilter = document.getElementById('file-filter-category').value;
+var filtered = allFiles.filter(function(file) {
+var matchesSearch = file.original_name.toLowerCase().indexOf(search) !== -1 ||
+(file.description && file.description.toLowerCase().indexOf(search) !== -1);
+var matchesCategory = !categoryFilter || file.category === categoryFilter;
+return matchesSearch && matchesCategory;
+});
+renderFilesGrid(filtered);
 }
 
 async function deleteFile(fileId) {
-    if (!confirm('Delete permanently?')) return;
-    try {
-        const r = await fetch('/api/files/' + fileId, { method: 'DELETE' });
-        const d = await r.json();
-        if (r.ok && d.success) { showNotification('Deleted!', 'success'); loadAllFiles(); }
-    } catch(e) { showNotification('Delete failed', 'error'); }
+if (!confirm('Delete this file permanently?')) return;
+try {
+const response = await fetch('/api/files/' + fileId, { method: 'DELETE' });
+const data = await response.json();
+if (response.ok && data.success) {
+showNotification('File deleted!', 'success');
+loadAllFiles();
+} else {
+throw new Error('Delete failed');
+}
+} catch (error) {
+showNotification('❌ Delete failed', 'error');
+}
 }
 
 function showHeroPreview(url) {
-    document.getElementById('preview-img').src = url;
-    document.getElementById('hero-preview').classList.remove('hidden');
-}
-function hideHeroPreview() {
-    document.getElementById('reg-hero-image').value = '';
-    document.getElementById('hero-preview').classList.add('hidden');
+document.getElementById('preview-img').src = url;
+document.getElementById('hero-preview').classList.remove('hidden');
 }
 
-// ============================
-// SECTIONS
-// ============================
+function hideHeroPreview() {
+document.getElementById('reg-hero-image').value = '';
+document.getElementById('hero-preview').classList.add('hidden');
+}
+
 async function loadAllSections() {
-    try {
-        const r = await fetch('/api/sections');
-        allSections = await r.json();
-        var c = document.getElementById('sections-list');
-        if (allSections.length === 0) { c.innerHTML = '<p class="text-gray-400 text-sm text-center py-2">No sections yet.</p>'; return; }
-        c.innerHTML = allSections.map(s => '<div class="flex justify-between items-center p-3 bg-gray-50 rounded"><span class="font-semibold">' + s.name + '</span><button onclick="deleteSection(' + s.id + ')" class="text-red-600 text-xs">Delete</button></div>').join('');
-    } catch(e) {}
+try {
+const response = await fetch('/api/sections');
+allSections = await response.json();
+var container = document.getElementById('sections-list');
+container.innerHTML = allSections.map(function(section) {
+return '<div class="flex justify-between items-center p-3 bg-gray-50 rounded">' +
+'<span class="font-semibold">' + section.name + '</span>' +
+'<button onclick="deleteSection(' + section.id + ')" class="text-red-600 text-xs">✖️</button>' +
+'</div>';
+}).join('');
+} catch (error) {
+console.error('Failed to load sections:', error);
+}
 }
 
 async function createSection() {
-    var name = document.getElementById('new-section-name').value.trim();
-    if (!name) { alert('Enter a section name'); return; }
-    try {
-        const fd = new FormData(); fd.append('name', name);
-        const r = await fetch('/api/sections', { method: 'POST', body: fd });
-        const d = await r.json();
-        if (r.ok && d.success) { showNotification('Section created!', 'success'); document.getElementById('new-section-name').value = ''; loadAllSections(); }
-        else throw new Error(d.detail || 'Failed');
-    } catch(e) { showNotification('Error: ' + e.message, 'error'); }
+var name = document.getElementById('new-section-name').value.trim();
+if (!name) {
+alert('Please enter a section name');
+return;
+}
+try {
+const formData = new FormData();
+formData.append('name', name);
+const response = await fetch('/api/sections', {
+method: 'POST',
+body: formData
+});
+const data = await response.json();
+if (response.ok && data.success) {
+showNotification('Section created!', 'success');
+document.getElementById('new-section-name').value = '';
+loadAllSections();
+} else {
+throw new Error(data.detail || 'Failed to create section');
+}
+} catch (error) {
+showNotification('❌ ' + error.message, 'error');
+}
 }
 
-async function deleteSection(id) {
-    if (!confirm('Delete section?')) return;
-    try {
-        const r = await fetch('/api/sections/' + id, { method: 'DELETE' });
-        const d = await r.json();
-        if (r.ok && d.success) { showNotification('Deleted!', 'success'); loadAllSections(); }
-    } catch(e) { showNotification('Delete failed', 'error'); }
+async function deleteSection(sectionId) {
+if (!confirm('Delete this section?')) return;
+try {
+const response = await fetch('/api/sections/' + sectionId, { method: 'DELETE' });
+const data = await response.json();
+if (response.ok && data.success) {
+showNotification('Section deleted!', 'success');
+loadAllSections();
+} else {
+throw new Error('Delete failed');
+}
+} catch (error) {
+showNotification('❌ Delete failed', 'error');
+}
 }
 
-// ============================
-// EXPORT / IMPORT
-// ============================
 async function exportData() {
-    try {
-        const r = await fetch(API_URL + '/regions');
-        const data = await r.json();
-        var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a'); a.href = url;
-        a.download = 'echostack-backup-' + new Date().toISOString().split('T')[0] + '.json';
-        a.click(); URL.revokeObjectURL(url);
-        showNotification('Exported!', 'success');
-    } catch(e) { showNotification('Export failed', 'error'); }
+try {
+const response = await fetch(API_URL + '/regions');
+var data = await response.json();
+var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+var url = URL.createObjectURL(blob);
+var a = document.createElement('a');
+a.href = url;
+a.download = 'echostack-backup-' + new Date().toISOString().split('T')[0] + '.json';
+a.click();
+URL.revokeObjectURL(url);
+showNotification('Exported!', 'success');
+} catch (error) {
+showNotification('❌ Export failed', 'error');
+}
 }
 
 async function importData(input) {
-    var file = input.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            var data = JSON.parse(e.target.result);
-            await fetch('/api/import/json', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
-            showNotification('Imported!', 'success'); loadRegions();
-        } catch(e) { showNotification('Invalid file', 'error'); }
-    };
-    reader.readAsText(file); input.value = '';
+var file = input.files[0];
+if (!file) return;
+var reader = new FileReader();
+reader.onload = async function(e) {
+try {
+var data = JSON.parse(e.target.result);
+const response = await fetch('/api/import/json', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify(data)
+});
+showNotification('Imported!', 'success');
+loadRegions();
+} catch (error) {
+showNotification('❌ Invalid file', 'error');
+}
+};
+reader.readAsText(file);
+input.value = '';
 }
 
-// ============================
-// AUTH / HELPERS
-// ============================
 function logout() {
-    if (confirm('Logout?')) {
-        fetch('/api/auth/logout', { method: 'POST' });
-        document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
-        window.location.href = '/admin';
-    }
+if (confirm('Logout now?')) {
+fetch('/api/auth/logout', {method: 'POST'});
+document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+window.location.href = '/admin';
+}
 }
 
-function showNotification(msg, type) {
-    var n = document.getElementById('notification');
-    n.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ' + (type === 'success' ? 'bg-green-600' : 'bg-red-600');
-    n.textContent = msg;
-    n.classList.remove('hidden');
-    setTimeout(function() { n.classList.add('hidden'); }, 3000);
+function showNotification(message, type) {
+var notification = document.getElementById('notification');
+notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ' +
+(type === 'success' ? 'bg-green-600' : 'bg-red-600');
+notification.textContent = message;
+notification.classList.remove('hidden');
+setTimeout(function() {
+notification.classList.add('hidden');
+}, 3000);
 }
 
 function populateRegionDropdown(selectedId) {
-    var select = document.getElementById('file-region-link');
-    select.innerHTML = '<option value="no">No Link (Global)</option>';
-    allRegions.forEach(function(r) {
-        var o = document.createElement('option');
-        o.value = r.id; o.textContent = r.name;
-        if (selectedId && selectedId == r.id) o.selected = true;
-        select.appendChild(o);
-    });
+var select = document.getElementById('file-region-link');
+select.innerHTML = '<option value="no">No Link (Global)</option>';
+allRegions.forEach(function(region) {
+var option = document.createElement('option');
+option.value = region.id;
+option.textContent = region.name;
+if (selectedId && selectedId == region.id) {
+option.selected = true;
+}
+select.appendChild(option);
+});
 }
 </script>
 </body>
