@@ -224,10 +224,7 @@ user.role=user.role||'user';
 user.plan=user.plan||'free';
 
 // ── Populate nav ──────────────────────────────────────────────────────────────
-// Refresh role from server in background so it stays current
-fetch('/api/users/me',{credentials:'include'}).then(r=>r.json()).then(d=>{
-  if(d.role&&d.role!==user.role){user.role=d.role;user.plan=d.plan||user.plan;localStorage.setItem('es_user',JSON.stringify(user));location.reload();}
-}).catch(()=>{});
+// Role loaded from localStorage
 
 document.getElementById('gtag').textContent=`👋 Welcome back, ${user.username||'Explorer'}!`;
 document.getElementById('navname').textContent=user.username||'';
