@@ -1,244 +1,212 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON, ForeignKey, Float
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
 
-from database import Base
-
+Base = declarative_base()
 
 # ============================================
-# USERS
+# USER ACCOUNTS (Public Users)
 # ============================================
-
 class User(Base):
     __tablename__ = "users"
-
+    
     id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(80), unique=True, nullable=False, index=True)
+    email = Column(String(120), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    full_name = Column(String(200), default="")
+    bio = Column(Text, default="")
+    interests = Column(Text, default="")  # JSON string of selected topics
+    avatar_url = Column(String(500), default="")
+    is_active = Column(Boolean, default=True)
+    is_verified = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    username = Column(String(50), unique=True, index=True, nullable=False)
-    email = Column(String(120), unique=True, index=True, nullable=False)
+# ============================================
+# REGIONS (Ghana's 16 Regions)
+# ============================================
+class Region(Base):
+    __tablename__ = "regions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False, index=True)
+    capital = Column(String(100), default="")
+    population = Column(String(50), default="")
+    terrain = Column(String(100), default="")
+    description = Column(Text, default="")
+    overview = Column(Text, default="")
+    category = Column(String(50), default="", index=True)
+    tags = Column(String(500), default="")  # Comma-separated tags
+    hero_image = Column(String(500), default="")
+    gallery_images = Column(Text, default="")  # Comma-separated URLs
+    audio_files = Column(Text, default="")  # Comma-separated URLs
+    source = Column(String(500), default="")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    password_hash = Column(String(256), nullable=False)
+# ============================================
+# UPLOADED FILES (Media Manager)
+# ============================================
+class UploadedFile(Base):
+    __tablename__ = "uploaded_files"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    filename = Column(String(255), nullable=False)
+    original_name = Column(String(255), default="")
+    file_path = Column(String(500), nullable=False)
+    file_size = Column(Integer, default=0)
+    mime_type = Column(String(100), default="")
+    category = Column(String(50), default="general", index=True)  # image, audio, video, document
+    region_id = Column(Integer, ForeignKey('regions.id'), nullable=True, index=True)
+    description = Column(Text, default="")
+    uploaded_by = Column(String(100), default="admin")
+    is_public = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    full_name = Column(String(120))
-    bio = Column(Text)
-
-    interests = Column(Text)
-
-    avatar_url = Column(String(255))
-
+# ============================================
+# SECTIONS/CATEGORIES
+# ============================================
+class Section(Base):
+    __tablename__ = "sections"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False, unique=True)
+    slug = Column(String(100), unique=True, index=True)
+    description = Column(Text, default="")
+    display_order = Column(Integer, default=0)
     is_active = Column(Integer, default=1)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    messages = relationship("ChatMessage", back_populates="user")
-    stories = relationship("StorySubmission", back_populates="user")
-
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 # ============================================
-# CLIENTS (Organisations using EchoStack)
+# SITE BUILDER - THEMES
 # ============================================
-
-class Client(Base):
-    __tablename__ = "clients"
-
+class SiteTheme(Base):
+    __tablename__ = "site_themes"
+    
     id = Column(Integer, primary_key=True, index=True)
-
-    full_name = Column(String(120), nullable=False)
-
-    email = Column(String(120), unique=True, index=True, nullable=False)
-
-    password_hash = Column(String(256), nullable=False)
-
-    organisation_name = Column(String(255))
-
-    plan = Column(String(50), default="freemium")
-
-    is_active = Column(Integer, default=1)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
+    name = Column(String(100), nullable=False)
+    theme_data = Column(JSON, default={})  # Colors, fonts, layout settings
+    is_active = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 # ============================================
-# CHAT MESSAGES
+# SITE BUILDER - PAGES
 # ============================================
-
-class ChatMessage(Base):
-    __tablename__ = "chat_messages"
-
+class SitePage(Base):
+    __tablename__ = "site_pages"
+    
     id = Column(Integer, primary_key=True, index=True)
-
-    user_id = Column(Integer, ForeignKey("users.id"))
-
-    username = Column(String(50))
-
-    message = Column(Text, nullable=False)
-
-    region_id = Column(Integer, ForeignKey("regions.id"))
-
-    is_approved = Column(Integer, default=1)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    user = relationship("User", back_populates="messages")
-    region = relationship("Region")
-
+    title = Column(String(200), nullable=False)
+    slug = Column(String(200), unique=True, index=True)
+    content = Column(Text, default="")
+    meta_description = Column(String(500), default="")
+    meta_keywords = Column(String(500), default="")
+    is_published = Column(Boolean, default=False)
+    template = Column(String(100), default="default")
+    parent_id = Column(Integer, ForeignKey('site_pages.id'), nullable=True)
+    display_order = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 # ============================================
-# STORY SUBMISSIONS
+# SITE BUILDER - WIDGETS
 # ============================================
-
-class StorySubmission(Base):
-    __tablename__ = "story_submissions"
-
+class SiteWidget(Base):
+    __tablename__ = "site_widgets"
+    
     id = Column(Integer, primary_key=True, index=True)
-
-    user_id = Column(Integer, ForeignKey("users.id"))
-
-    username = Column(String(50))
-
-    title = Column(String(255), nullable=False)
-
-    content = Column(Text, nullable=False)
-
-    region_id = Column(Integer, ForeignKey("regions.id"))
-
-    status = Column(String(20), default="pending")
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    user = relationship("User", back_populates="stories")
-    region = relationship("Region")
-
+    name = Column(String(100), nullable=False)
+    widget_type = Column(String(50), nullable=False)  # text, image, video, form, etc.
+    widget_data = Column(JSON, default={})
+    page_id = Column(Integer, ForeignKey('site_pages.id'), nullable=True, index=True)
+    display_order = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 # ============================================
-# NEWSLETTER
+# NEWSLETTER SUBSCRIBERS
 # ============================================
-
 class NewsletterSubscriber(Base):
     __tablename__ = "newsletter_subscribers"
-
+    
     id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(120), unique=True, nullable=False, index=True)
+    full_name = Column(String(200), default="")
+    is_active = Column(Boolean, default=True)
+    subscribed_at = Column(DateTime, default=datetime.utcnow)
 
-    email = Column(String(120), unique=True, index=True, nullable=False)
+# ============================================
+# CHAT MESSAGES (Region Comments)
+# ============================================
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    username = Column(String(80), nullable=False)
+    message = Column(Text, nullable=False)
+    region_id = Column(Integer, ForeignKey('regions.id'), nullable=True, index=True)
+    is_approved = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-    full_name = Column(String(120))
-
-    is_active = Column(Integer, default=1)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
+# ============================================
+# STORY SUBMISSIONS (User Content)
+# ============================================
+class StorySubmission(Base):
+    __tablename__ = "story_submissions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    username = Column(String(80), default="Anonymous")
+    title = Column(String(200), nullable=False)
+    content = Column(Text, nullable=False)
+    region_id = Column(Integer, ForeignKey('regions.id'), nullable=True, index=True)
+    status = Column(String(20), default="pending")  # pending, approved, rejected
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 # ============================================
 # EVENTS
 # ============================================
-
 class Event(Base):
     __tablename__ = "events"
-
+    
     id = Column(Integer, primary_key=True, index=True)
-
-    title = Column(String(255), nullable=False)
-
-    description = Column(Text)
-
-    event_date = Column(String(50))
-
-    location = Column(String(255))
-
-    image_url = Column(String(255))
-
-    is_active = Column(Integer, default=1)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
+    title = Column(String(200), nullable=False)
+    description = Column(Text, default="")
+    event_date = Column(String(50), default="")
+    location = Column(String(200), default="")
+    image_url = Column(String(500), default="")
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 # ============================================
-# REGIONS
+# ANALYTICS (Page Views, etc.)
 # ============================================
-
-class Region(Base):
-    __tablename__ = "regions"
-
+class Analytics(Base):
+    __tablename__ = "analytics"
+    
     id = Column(Integer, primary_key=True, index=True)
-
-    name = Column(String(120), nullable=False)
-
-    capital = Column(String(120))
-
-    population = Column(String(120))
-
-    terrain = Column(String(120))
-
-    description = Column(Text)
-
-    overview = Column(Text)
-
-    category = Column(String(120))
-
-    tags = Column(Text)
-
-    hero_image = Column(String(255))
-
-    gallery_images = Column(Text)
-
-    audio_files = Column(Text)
-
-    source = Column(Text)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
+    page_url = Column(String(500), index=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    session_id = Column(String(100), index=True)
+    ip_address = Column(String(50), default="")
+    user_agent = Column(String(500), default="")
+    visited_at = Column(DateTime, default=datetime.utcnow)
 
 # ============================================
-# FILE UPLOADS
+# API KEYS (For External Integrations)
 # ============================================
-
-class UploadedFile(Base):
-    __tablename__ = "uploaded_files"
-
+class APIKey(Base):
+    __tablename__ = "api_keys"
+    
     id = Column(Integer, primary_key=True, index=True)
-
-    filename = Column(String(255), nullable=False)
-
-    original_name = Column(String(255))
-
-    file_path = Column(String(255))
-
-    file_size = Column(Integer)
-
-    mime_type = Column(String(120))
-
-    category = Column(String(50))
-
-    region_id = Column(Integer, ForeignKey("regions.id"))
-
-    description = Column(Text)
-
-    uploaded_by = Column(String(120))
-
-    is_public = Column(Integer, default=1)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    region = relationship("Region")
-
-
-# ============================================
-# CONTENT SECTIONS
-# ============================================
-
-class Section(Base):
-    __tablename__ = "sections"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    name = Column(String(120), nullable=False)
-
-    slug = Column(String(120), unique=True, index=True)
-
-    description = Column(Text)
-
-    display_order = Column(Integer, default=0)
-
-    is_active = Column(Integer, default=1)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    key_name = Column(String(100), nullable=False)
+    key_value = Column(String(255), unique=True, nullable=False)
+    permissions = Column(JSON, default={})
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=True)
