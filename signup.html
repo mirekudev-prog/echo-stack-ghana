@@ -11,10 +11,11 @@
         :root {
             --brand-dark: #1a1e29;
             --brand-blue: #0077b6;
+            --brand-orange: #ff6b35;
         }
         
         body {
-            font-family: Georgia, serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Georgia, serif;
             background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
             min-height: 100vh;
             display: flex;
@@ -32,15 +33,15 @@
             width: 100%;
         }
         
-        h1, h2 { color: var(--brand-dark) !important; }
+        h1, h2, h3 { color: var(--brand-dark) !important; }
         
-        input {
+        input, textarea {
             border-color: #d0d0d0 !important;
             color: var(--brand-dark) !important;
             background: white !important;
         }
         
-        input:focus {
+        input:focus, textarea:focus {
             outline: none !important;
             border-color: var(--brand-blue) !important;
         }
@@ -72,8 +73,13 @@
         }
         
         .btn-primary {
-            background-color: var(--brand-blue) !important;
+            background-color: var(--brand-orange) !important;
             color: white !important;
+        }
+        
+        .btn-primary:hover {
+            background-color: #e55a2b !important;
+            transform: translateY(-1px);
         }
         
         .progress-bar {
@@ -86,16 +92,77 @@
         
         .progress-fill {
             height: 100%;
-            background: var(--brand-blue);
+            background: var(--brand-orange);
             transition: width 0.3s ease;
         }
         
         .step { display: none; }
         .step.active { display: block; }
         
+        .option-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .option-card:hover {
+            border-color: var(--brand-orange);
+            background: #fff5f2;
+        }
+        
+        .option-card.selected {
+            border-color: var(--brand-orange);
+            background: #fff5f2;
+        }
+        
+        .option-card.selected .radio-dot {
+            background: var(--brand-orange);
+            border-color: var(--brand-orange);
+        }
+        
+        .radio-dot {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #d1d5db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .radio-dot::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            display: none;
+        }
+        
+        .option-card.selected .radio-dot::after {
+            display: block;
+        }
+        
+        .option-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
         .loading-spinner {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--brand-blue);
+            border-top: 3px solid var(--brand-orange);
             border-radius: 50%;
             width: 24px;
             height: 24px;
@@ -113,61 +180,125 @@
     
     <div class="signup-card">
         <div class="text-center mb-8">
-            <img src="/echostack-logo.png" alt="EchoStack" class="w-16 h-16 mx-auto mb-4">
+            <div class="flex justify-center mb-4">
+                <div style="background: var(--brand-orange); padding: 0.75rem; border-radius: 8px;">
+                    <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                        <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+                    </svg>
+                </div>
+            </div>
             <h1 class="text-3xl font-bold mb-2">Join EchoStack</h1>
             <p class="text-gray-600">Create your account to explore Ghana's heritage</p>
         </div>
         
         <div class="progress-bar">
-            <div class="progress-fill" id="progress-fill" style="width: 50%"></div>
+            <div class="progress-fill" id="progress-fill" style="width: 20%"></div>
         </div>
         
+        <!-- Step 1: Email -->
         <div class="step active" id="step-1">
-            <h2 class="text-xl font-semibold mb-6">Create Your Account</h2>
+            <h2 class="text-2xl font-bold mb-2 text-center">Sign up to EchoStack</h2>
+            <p class="text-gray-600 text-center mb-6">Already have an account? <a href="/user-login" style="color: var(--brand-orange);">Sign in</a></p>
             
             <form id="signup-form" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-2">Username *</label>
-                    <input type="text" id="username" required class="w-full p-3 border rounded-lg" placeholder="Choose a username">
+                    <input type="email" id="email" required class="w-full p-4 border-2 rounded-lg text-lg" placeholder="Your email">
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium mb-2">Email *</label>
-                    <input type="email" id="email" required class="w-full p-3 border rounded-lg" placeholder="your@email.com">
+                <div class="flex items-start gap-2">
+                    <input type="checkbox" id="terms" required class="mt-1">
+                    <label for="terms" class="text-sm text-gray-600">By creating an account, I agree to EchoStack's <a href="#" style="color: var(--brand-orange); text-decoration: underline;">Terms of Use</a> and acknowledge its <a href="#" style="color: var(--brand-orange); text-decoration: underline;">Privacy Policy</a>.</label>
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium mb-2">Password *</label>
-                    <input type="password" id="password" required class="w-full p-3 border rounded-lg" placeholder="Min 6 characters">
-                </div>
-                
-                <button type="button" onclick="goToStep(2)" class="w-full btn-primary py-3 rounded-lg font-bold mt-6">
-                    Continue →
+                <button type="button" onclick="goToStep(2)" class="w-full btn-primary py-4 rounded-lg font-bold text-lg">
+                    Continue
                 </button>
             </form>
-            
-            <p class="text-center text-sm text-gray-600 mt-6">
-                Already have an account? <a href="/user-login" class="text-[#0077b6] hover:underline">Sign In</a>
-            </p>
-            
-            <p class="text-center text-sm text-gray-600 mt-4">
-                <a href="/" class="text-[#0077b6] hover:underline">← Back to Home</a>
-            </p>
         </div>
         
+        <!-- Step 2: Profile Info -->
         <div class="step" id="step-2">
-            <h2 class="text-xl font-semibold mb-2">Select 3 Topics</h2>
-            <p class="text-gray-600 mb-6">We'll recommend stories that match your interests</p>
+            <h2 class="text-2xl font-bold mb-2 text-center">Tell us about yourself</h2>
+            <p class="text-gray-600 text-center mb-6">Add your name, and a bit more about who you are.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Name <span style="color: var(--brand-orange);">*</span></label>
+                    <input type="text" id="username" required class="w-full p-3 border-2 rounded-lg" placeholder="Type your name...">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Password <span style="color: var(--brand-orange);">*</span></label>
+                    <input type="password" id="password" required class="w-full p-3 border-2 rounded-lg" placeholder="Min 6 characters">
+                </div>
+                
+                <button type="button" onclick="goToStep(3)" class="w-full btn-primary py-4 rounded-lg font-bold text-lg">
+                    Continue
+                </button>
+                <button type="button" onclick="goToStep(1)" class="w-full py-2 text-gray-600 hover:text-gray-800">
+                    ← Back
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Select Topics -->
+        <div class="step" id="step-3">
+            <h2 class="text-2xl font-bold mb-2 text-center">Select 3 topics</h2>
+            <p class="text-gray-600 text-center mb-6">We'll recommend stories that fit your interests.</p>
             
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6" id="topics-container"></div>
             
-            <div class="flex items-center justify-between mb-6">
-                <p id="selected-count" class="text-sm font-medium text-[#0077b6]">0 / 3 selected</p>
-                <button onclick="goToStep(1)" class="text-sm text-gray-500 hover:text-gray-700">← Back</button>
+            <button onclick="goToStep(4)" id="topics-btn" disabled class="w-full btn-primary py-4 rounded-lg font-bold text-lg opacity-50 cursor-not-allowed">
+                Continue
+            </button>
+            <button type="button" onclick="goToStep(2)" class="w-full py-2 text-gray-600 hover:text-gray-800 mt-2">
+                ← Back
+            </button>
+        </div>
+        
+        <!-- Step 4: Where to Start -->
+        <div class="step" id="step-4">
+            <h2 class="text-2xl font-bold mb-2 text-center">Where do you want to start?</h2>
+            <p class="text-gray-600 text-center mb-6">We'll tailor your setup experience accordingly.</p>
+            
+            <div class="space-y-3">
+                <div class="option-card" onclick="selectOption('discover', this)">
+                    <div class="radio-dot"></div>
+                    <div class="option-icon" style="background: #f3f4f6;">🧭</div>
+                    <div>
+                        <h3 class="font-bold text-lg">Discover</h3>
+                        <p class="text-gray-600 text-sm">Find ideas that inspire you.</p>
+                    </div>
+                </div>
+                
+                <div class="option-card" onclick="selectOption('create', this)">
+                    <div class="radio-dot"></div>
+                    <div class="option-icon" style="background: #f3f4f6;">✏️</div>
+                    <div>
+                        <h3 class="font-bold text-lg">Create</h3>
+                        <p class="text-gray-600 text-sm">Share your work with the world.</p>
+                    </div>
+                </div>
             </div>
             
-            <button onclick="completeSignup()" id="complete-btn" disabled class="w-full btn-primary py-3 rounded-lg font-bold opacity-50 cursor-not-allowed">
+            <button onclick="goToStep(5)" id="start-btn" disabled class="w-full btn-primary py-4 rounded-lg font-bold text-lg opacity-50 cursor-not-allowed mt-6">
+                Continue
+            </button>
+            <button type="button" onclick="goToStep(3)" class="w-full py-2 text-gray-600 hover:text-gray-800 mt-2">
+                ← Back
+            </button>
+        </div>
+        
+        <!-- Step 5: Complete Signup -->
+        <div class="step" id="step-5">
+            <h2 class="text-2xl font-bold mb-2 text-center">Almost there!</h2>
+            <p class="text-gray-600 text-center mb-6">Create your account and start exploring.</p>
+            
+            <button onclick="completeSignup()" id="complete-btn" class="w-full btn-primary py-4 rounded-lg font-bold text-lg">
                 ✨ Create Free Account
+            </button>
+            <button type="button" onclick="goToStep(4)" class="w-full py-2 text-gray-600 hover:text-gray-800 mt-2">
+                ← Back
             </button>
         </div>
     </div>
@@ -185,6 +316,8 @@
         
         let selectedTopics = [];
         const MAX_TOPICS = 3;
+        let selectedStartOption = null;
+        let currentStep = 1;
 
         document.addEventListener('DOMContentLoaded', () => {
             renderTopics();
@@ -218,48 +351,67 @@
                 element.classList.remove('selected');
             }
             
-            document.getElementById('selected-count').textContent = `${selectedTopics.length} / ${MAX_TOPICS} selected`;
-            
-            const completeBtn = document.getElementById('complete-btn');
+            const btn = document.getElementById('topics-btn');
             if (selectedTopics.length === MAX_TOPICS) {
-                completeBtn.disabled = false;
-                completeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
             } else {
-                completeBtn.disabled = true;
-                completeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
             }
         }
 
+        function selectOption(option, element) {
+            selectedStartOption = option;
+            
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+            
+            const btn = document.getElementById('start-btn');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
         function goToStep(step) {
+            // Validation
             if (step === 2) {
+                const email = document.getElementById('email').value;
+                const terms = document.getElementById('terms').checked;
+                if (!email || !terms) {
+                    showNotification('Please enter email and accept terms', 'error');
+                    return;
+                }
+            } else if (step === 3) {
                 const username = document.getElementById('username').value.trim();
-                const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
-                
-                if (!username || !email || !password) {
+                if (!username || !password) {
                     showNotification('Please fill in all fields', 'error');
                     return;
                 }
-                
                 if (password.length < 6) {
                     showNotification('Password must be at least 6 characters', 'error');
                     return;
                 }
             }
             
+            // Hide all steps
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            
+            // Show target step
             document.getElementById(`step-${step}`).classList.add('active');
             
+            // Update progress bar
             const progressFill = document.getElementById('progress-fill');
-            progressFill.style.width = step === 1 ? '50%' : '100%';
+            const progressPercent = (step / 5) * 100;
+            progressFill.style.width = progressPercent + '%';
+            
+            currentStep = step;
         }
 
         async function completeSignup() {
-            if (selectedTopics.length !== MAX_TOPICS) {
-                showNotification(`Please select exactly ${MAX_TOPICS} topics`, 'error');
-                return;
-            }
-            
             const btn = document.getElementById('complete-btn');
             btn.innerHTML = '<div class="loading-spinner"></div> Creating Account...';
             btn.disabled = true;
@@ -271,7 +423,6 @@
             formData.append('interests', JSON.stringify(selectedTopics));
             
             try {
-                // ✅ CHANGED: Use /api/users/signup (matches your main.py)
                 const response = await fetch('/api/users/signup', {
                     method: 'POST',
                     body: formData
@@ -291,7 +442,6 @@
                 showNotification('❌ ' + error.message, 'error');
                 btn.innerHTML = '✨ Create Free Account';
                 btn.disabled = false;
-                btn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
 
