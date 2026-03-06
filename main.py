@@ -141,7 +141,7 @@ async def register(
             role=role, plan=plan, is_active=True
         )
         db.add(user); db.commit(); db.refresh(user)
-        return {"success": True, "message": "Account created!"}
+        return {"success": True, "id": str(user.id), "username": user.username, "message": "Account created!"}
     except HTTPException:
         raise
     except Exception as e:
@@ -179,7 +179,7 @@ async def login(
 
         resp = JSONResponse(content={
             "success":  True,
-            "id":       user.id,
+            "id":       str(user.id),
             "username": user.username,
             "email":    user.email,
             "role":     user.role,
@@ -311,7 +311,7 @@ def get_posts(
             "tags": p.tags or "", "status": p.status, "is_premium": p.is_premium,
             "view_count": p.view_count, "like_count": p.like_count,
             "comment_count": p.comment_count,
-            "author_id": p.author_id,
+            "author_id": str(p.author_id),
             "author_username": p.author.username if p.author else "",
             "author_channel": p.author.channel_name if p.author else "",
             "published_at": str(p.published_at) if p.published_at else "",
@@ -333,7 +333,7 @@ def get_post(post_id: int, db: Session = Depends(get_db)):
         "video_url": p.video_url or "", "gallery": p.gallery or "",
         "tags": p.tags or "", "status": p.status, "is_premium": p.is_premium,
         "view_count": p.view_count, "like_count": p.like_count,
-        "comment_count": p.comment_count, "author_id": p.author_id,
+        "comment_count": p.comment_count, "author_id": str(p.author_id),
         "author_username": p.author.username if p.author else "",
         "author_channel": p.author.channel_name if p.author else "",
         "published_at": str(p.published_at) if p.published_at else "",
