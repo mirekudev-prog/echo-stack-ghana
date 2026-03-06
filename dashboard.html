@@ -3,14 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard — EchoStack</title>
+<title>My Feed — EchoStack</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;--red:#C0392B;--green:#1A7A4A;--border:#E2E8F0;--muted:#94A3B8}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh}
-
-/* Nav */
 nav{background:var(--ink);border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:100}
 .ni{max-width:1100px;margin:0 auto;padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between}
 .nl{display:flex;align-items:center;gap:10px;text-decoration:none}
@@ -19,177 +17,195 @@ nav{background:var(--ink);border-bottom:3px solid var(--gold);position:sticky;to
 .nr{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .nb{background:none;border:none;color:#94A3B8;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;padding:6px 11px;border-radius:6px;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 .nb:hover{background:rgba(255,255,255,.08);color:#fff}
-.nb.up{background:var(--gold);color:#fff;font-weight:600}.nb.up:hover{background:#a97825}
+.nb.creator-btn{background:var(--gold);color:#fff;font-weight:600}.nb.creator-btn:hover{background:#a97825}
 .nb.lo{border:1px solid rgba(248,113,113,.35);color:#f87171}.nb.lo:hover{background:#f87171;color:#fff}
-.pbadge{padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:rgba(148,163,184,.15);color:var(--muted)}
-.pbadge.pr{background:rgba(200,150,46,.2);color:var(--gold);border:1px solid rgba(200,150,46,.3)}
+.rbadge{padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.rbadge.user{background:rgba(148,163,184,.15);color:var(--muted)}
+.rbadge.creator{background:rgba(200,150,46,.2);color:var(--gold);border:1px solid rgba(200,150,46,.3)}
+.rbadge.superuser,.rbadge.admin{background:rgba(220,38,38,.15);color:#ef4444;border:1px solid rgba(220,38,38,.2)}
 
 /* Hero */
-.hero{background:var(--ink);padding:40px 20px;text-align:center;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 50%,rgba(200,150,46,.06) 0%,transparent 50%),radial-gradient(circle at 80% 50%,rgba(200,150,46,.04) 0%,transparent 50%)}
+.hero{background:var(--ink);padding:36px 20px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 50%,rgba(200,150,46,.06) 0%,transparent 50%)}
 .hero-in{max-width:680px;margin:0 auto;position:relative}
-.gtag{display:inline-block;background:rgba(200,150,46,.15);border:1px solid rgba(200,150,46,.3);color:var(--gold2);padding:5px 16px;border-radius:30px;font-size:.8rem;font-weight:600;margin-bottom:14px}
-.hero h1{font-family:'Playfair Display',serif;color:#fff;font-size:1.9rem;margin-bottom:8px}
-.hero p{color:#94A3B8;font-size:.9rem}
+.gtag{display:inline-block;background:rgba(200,150,46,.15);border:1px solid rgba(200,150,46,.3);color:var(--gold2);padding:5px 16px;border-radius:30px;font-size:.8rem;font-weight:600;margin-bottom:12px}
+.hero h1{font-family:'Playfair Display',serif;color:#fff;font-size:1.8rem;margin-bottom:6px}
+.hero p{color:#94A3B8;font-size:.88rem}
 
 /* Layout */
-.main{max-width:1100px;margin:0 auto;padding:28px 20px;display:grid;grid-template-columns:1fr 300px;gap:22px}
+.main{max-width:1100px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:1fr 290px;gap:20px}
 @media(max-width:768px){.main{grid-template-columns:1fr}}
 
-/* Stats */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
-.stat{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 6px rgba(13,27,42,.04)}
-.sv{font-size:1.5rem;font-weight:700;color:var(--ink);font-family:'Playfair Display',serif}
-.sl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+/* Feed tabs */
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:4px}
+.tab{flex:1;padding:8px;text-align:center;border-radius:7px;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s}
+.tab.active{background:var(--ink);color:#fff}
 
-/* Feature grid */
-.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:22px}
-@media(max-width:480px){.fgrid{grid-template-columns:1fr}}
-.fc{border:1.5px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s;text-decoration:none;display:block;background:#fff;position:relative;box-shadow:0 1px 6px rgba(13,27,42,.04)}
-.fc:hover{border-color:var(--gold);box-shadow:0 4px 16px rgba(200,150,46,.1);transform:translateY(-1px)}
-.fc.locked{cursor:default;background:#FAFAFA}
-.fc.locked:hover{border-color:var(--border);box-shadow:none;transform:none}
-.fi{font-size:1.7rem;margin-bottom:8px}
-.ft{font-weight:700;font-size:.87rem;color:var(--ink);margin-bottom:3px}
-.fd{font-size:.76rem;color:var(--muted);line-height:1.5}
-.lbadge{position:absolute;top:9px;right:9px;background:var(--gold);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.03em}
+/* Post card */
+.post-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 8px rgba(13,27,42,.05);transition:box-shadow .2s}
+.post-card:hover{box-shadow:0 4px 20px rgba(13,27,42,.1)}
+.post-cover{width:100%;height:180px;object-fit:cover;background:#f1f5f9}
+.post-cover.placeholder{display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:var(--muted)}
+.post-body{padding:18px}
+.post-meta{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.post-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
+.post-author{font-size:.8rem;font-weight:600;color:var(--ink)}
+.post-channel{font-size:.72rem;color:var(--muted)}
+.post-type{margin-left:auto;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.type-article{background:#EFF6FF;color:#2563EB}
+.type-audio{background:#F0FDF4;color:#16A34A}
+.type-photo_essay{background:#FFF7ED;color:#D97706}
+.type-video{background:#FDF4FF;color:#9333EA}
+.post-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink);margin-bottom:6px;line-height:1.35}
+.post-excerpt{font-size:.82rem;color:#475569;line-height:1.6;margin-bottom:14px}
+.post-footer{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border)}
+.post-stats{display:flex;gap:14px;font-size:.75rem;color:var(--muted)}
+.post-stats span{display:flex;align-items:center;gap:4px;cursor:pointer;transition:color .15s}
+.post-stats span:hover{color:var(--gold)}
+.read-btn{padding:6px 14px;background:var(--ink);color:#fff;border:none;border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer;transition:background .2s}
+.read-btn:hover{background:var(--gold)}
 
-/* Regions list */
-.card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(13,27,42,.05)}
-.ch{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.ch h2{font-size:.95rem;font-weight:700;color:var(--ink)}
-.cb{padding:18px}
-.ri{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:color .15s;text-decoration:none}
-.ri:last-child{border-bottom:none}
-.ri:hover .rn{color:var(--gold)}
-.rf{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
-.rn{font-weight:600;font-size:.85rem;color:var(--ink)}
-.rc{font-size:.73rem;color:var(--muted)}
-.rt{margin-left:auto;padding:2px 8px;border-radius:20px;font-size:.66rem;font-weight:600;background:var(--cream);color:var(--muted)}
+/* Comments panel */
+.comments-panel{display:none;padding:16px;border-top:1px solid var(--border);background:#FAFBFF}
+.comments-panel.open{display:block}
+.comment-item{display:flex;gap:10px;margin-bottom:12px}
+.c-av{width:28px;height:28px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0}
+.c-body{flex:1}
+.c-name{font-size:.75rem;font-weight:600;color:var(--ink)}
+.c-text{font-size:.8rem;color:#475569;margin-top:2px;line-height:1.5}
+.c-input-row{display:flex;gap:8px;margin-top:12px}
+.c-input{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;transition:border-color .2s}
+.c-input:focus{border-color:var(--gold)}
+.c-submit{padding:8px 14px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap}
 
-/* Upgrade card */
-.ucard{background:linear-gradient(135deg,var(--ink) 0%,#1a3050 100%);border-radius:14px;padding:22px;color:#fff;position:relative;overflow:hidden;margin-bottom:16px}
-.ucard::after{content:'✦';position:absolute;right:-8px;top:-8px;font-size:70px;opacity:.05;color:var(--gold)}
-.ucard h3{font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:7px}
-.ucard p{font-size:.8rem;color:#94A3B8;margin-bottom:14px;line-height:1.6}
-.perks{list-style:none;margin-bottom:16px}
-.perks li{font-size:.78rem;color:#cbd5e1;margin-bottom:5px;display:flex;align-items:center;gap:7px}
-.perks li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0}
-.ubtn{width:100%;padding:11px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .2s}
-.ubtn:hover{background:var(--gold2);color:var(--ink)}
+/* Sidebar */
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 8px rgba(13,27,42,.05);margin-bottom:16px}
+.ch{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ch h3{font-size:.88rem;font-weight:700;color:var(--ink)}
+.cb{padding:14px 16px}
 
-/* Profile card */
-.prow{font-size:.85rem;line-height:2;color:var(--ink)}
+/* Creator list */
+.creator-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.creator-item:last-child{border-bottom:none}
+.cr-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:#fff;flex-shrink:0}
+.cr-name{font-size:.82rem;font-weight:600;color:var(--ink)}
+.cr-subs{font-size:.72rem;color:var(--muted)}
+.follow-btn{margin-left:auto;padding:4px 10px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1.5px solid var(--gold);color:var(--gold);background:none;transition:all .2s}
+.follow-btn.following{background:var(--gold);color:#fff}
+.follow-btn:hover{background:var(--gold);color:#fff}
+
+/* Become creator card */
+.creator-cta{background:linear-gradient(135deg,var(--ink),#1a3050);border-radius:14px;padding:20px;color:#fff;margin-bottom:16px}
+.creator-cta h3{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:7px}
+.creator-cta p{font-size:.78rem;color:#94A3B8;margin-bottom:14px;line-height:1.6}
+.cta-btn{width:100%;padding:10px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:background .2s}
+.cta-btn:hover{background:var(--gold2);color:var(--ink)}
 
 /* Loading */
 #ld{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s}
 #ld.hide{opacity:0;pointer-events:none}
-.lbar{width:180px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin:10px auto 0}
+.lbar{width:160px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin:8px auto 0}
 .lbi{height:100%;background:var(--gold);animation:lb 1s ease forwards}
 @keyframes lb{from{width:0}to{width:100%}}
+
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:440px;width:90%;position:relative}
+.modal h2{font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:16px;color:var(--ink)}
+.mfield{margin-bottom:14px}
+.mfield label{display:block;font-size:.76rem;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.mfield input,.mfield textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s}
+.mfield input:focus,.mfield textarea:focus{border-color:var(--gold)}
+.mfield textarea{height:80px;resize:vertical}
+.modal-btns{display:flex;gap:10px;margin-top:18px}
+.modal-btns button{flex:1;padding:11px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.modal-btns .confirm{background:var(--gold);color:#fff}.modal-btns .confirm:hover{background:#a97825}
+.modal-btns .cancel{background:var(--border);color:var(--ink)}.modal-btns .cancel:hover{background:#cbd5e1}
 
 /* Toast */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
 .toast.on{transform:translateX(-50%) translateY(0)}
 .toast.ok{background:var(--green)}.toast.er{background:var(--red)}
+
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:.875rem}
+.empty div{font-size:2rem;margin-bottom:10px}
 </style>
 </head>
 <body>
 
-<!-- Loading -->
-<div id="ld"><div style="text-align:center;color:#fff"><div style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:4px">🇬🇭 EchoStack</div><div class="lbar"><div class="lbi"></div></div></div></div>
+<div id="ld"><div style="text-align:center;color:#fff"><div style="font-family:'Playfair Display',serif;font-size:1.3rem">🇬🇭 EchoStack</div><div class="lbar"><div class="lbi"></div></div></div></div>
 
-<!-- Nav -->
 <nav><div class="ni">
   <a href="/dashboard" class="nl">
     <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
     <span>EchoStack</span>
   </a>
   <div class="nr">
-    <span class="pbadge" id="pbadge">FREE</span>
-    <span class="nb" id="navname" style="color:#fff"></span>
+    <span class="rbadge user" id="rbadge">USER</span>
+    <span class="nb" id="navname" style="color:#fff;font-weight:600"></span>
     <a href="/app" class="nb">🗺 Map</a>
-    <button class="nb up" onclick="showUpgrade()">⭐ Upgrade</button>
+    <button class="nb creator-btn" id="creator-nav-btn" onclick="showCreatorModal()" style="display:none">✍️ Become Creator</button>
+    <a href="/creator" class="nb creator-btn" id="creator-portal-btn" style="display:none">✍️ My Channel</a>
+    <a href="/admin" class="nb" id="admin-btn" style="display:none;border:1px solid rgba(239,68,68,.4);color:#ef4444">⚙️ Admin</a>
     <button class="nb lo" onclick="logout()">Sign Out</button>
   </div>
 </div></nav>
 
-<!-- Hero -->
 <div class="hero"><div class="hero-in">
   <div class="gtag" id="gtag">👋 Welcome back!</div>
-  <h1>Ghana's Heritage Archive</h1>
-  <p>Explore 16 regions, centuries of culture, and thousands of stories</p>
+  <h1>Ghana's Heritage Feed</h1>
+  <p>Stories, audio, and culture from Ghana's finest creators</p>
 </div></div>
 
-<!-- Main -->
 <div class="main">
+  <!-- Feed -->
   <div>
-    <!-- Stats -->
-    <div class="stats">
-      <div class="stat"><div class="sv" id="st-r">16</div><div class="sl">Regions</div></div>
-      <div class="stat"><div class="sv" id="st-u">0</div><div class="sl">Members</div></div>
-      <div class="stat"><div class="sv" id="st-a">0</div><div class="sl">Audio Files</div></div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('all',this)">🌍 All Posts</div>
+      <div class="tab" onclick="switchTab('article',this)">📝 Articles</div>
+      <div class="tab" onclick="switchTab('audio',this)">🎵 Audio</div>
+      <div class="tab" onclick="switchTab('photo_essay',this)">📷 Photos</div>
+      <div class="tab" onclick="switchTab('video',this)">🎬 Video</div>
     </div>
-
-    <!-- Features -->
-    <div class="fgrid">
-      <a href="/app" class="fc">
-        <div class="fi">🗺️</div>
-        <div class="ft">Interactive Map</div>
-        <div class="fd">Explore all 16 regions on our interactive map</div>
-      </a>
-      <div class="fc locked" id="fc-audio" onclick="gate('audio')">
-        <div class="lbadge" id="lb-audio">PREMIUM</div>
-        <div class="fi">🎵</div>
-        <div class="ft">Audio Stories</div>
-        <div class="fd">Listen to oral histories and cultural recordings</div>
-      </div>
-      <div class="fc locked" id="fc-stories" onclick="gate('stories')">
-        <div class="lbadge" id="lb-stories">PREMIUM</div>
-        <div class="fi">📖</div>
-        <div class="ft">Submit Stories</div>
-        <div class="fd">Share your own heritage experiences</div>
-      </div>
-      <div class="fc locked" id="fc-ai" onclick="gate('ai')">
-        <div class="lbadge" id="lb-ai">PREMIUM</div>
-        <div class="fi">🤖</div>
-        <div class="ft">AI Assistant</div>
-        <div class="fd">Ask questions about Ghana's heritage instantly</div>
-      </div>
-    </div>
-
-    <!-- Regions -->
-    <div class="card">
-      <div class="ch">
-        <h2>📍 Explore Regions</h2>
-        <a href="/app" style="font-size:.78rem;color:var(--gold);text-decoration:none;font-weight:600">View Map →</a>
-      </div>
-      <div class="cb" id="rlist"><p style="color:var(--muted);font-size:.85rem;text-align:center;padding:18px">Loading regions…</p></div>
-    </div>
+    <div id="feed-container"><div class="empty"><div>🇬🇭</div>Loading posts…</div></div>
   </div>
 
   <!-- Sidebar -->
   <div>
-    <div class="ucard" id="ucard">
-      <h3>Go Premium ⭐</h3>
-      <p>Unlock the full EchoStack experience</p>
-      <ul class="perks">
-        <li>Full region details & audio recordings</li>
-        <li>AI Heritage Assistant (24/7)</li>
-        <li>Submit & share your stories</li>
-        <li>Offline download access</li>
-      </ul>
-      <button class="ubtn" onclick="showUpgrade()">Upgrade — Coming Soon</button>
+    <div id="creator-cta-card" class="creator-cta" style="display:none">
+      <h3>Become a Creator ✍️</h3>
+      <p>Share Ghana's stories your way — articles, audio, photos, or video.</p>
+      <button class="cta-btn" onclick="showCreatorModal()">Start Your Channel</button>
     </div>
+
     <div class="card">
-      <div class="ch"><h2>👤 Your Profile</h2></div>
-      <div class="cb">
-        <div class="prow">
-          <div>🧑 <strong id="pu">—</strong></div>
-          <div>📧 <strong id="pe">—</strong></div>
-          <div>🎁 Plan: <strong id="pp" style="color:var(--gold)">Free</strong></div>
-        </div>
+      <div class="ch"><h3>✍️ Featured Creators</h3></div>
+      <div class="cb" id="creators-list"><p style="color:var(--muted);font-size:.8rem">Loading…</p></div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><h3>👤 My Profile</h3></div>
+      <div class="cb" style="font-size:.85rem;line-height:2;color:var(--ink)">
+        <div>🧑 <strong id="pu">—</strong></div>
+        <div>📧 <strong id="pe">—</strong></div>
+        <div>🎁 Plan: <strong id="pp" style="color:var(--gold)">Free</strong></div>
+        <div>🗺 <a href="/app" style="color:var(--gold);font-weight:600;text-decoration:none">Explore Map</a></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Become Creator Modal -->
+<div class="modal-bg" id="creator-modal">
+  <div class="modal">
+    <h2>✍️ Start Your Channel</h2>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:18px">Share Ghana's culture with the world. It's free and instant.</p>
+    <div class="mfield"><label>Channel Name</label><input type="text" id="ch-name" placeholder="e.g. Ashanti Heritage Stories"></div>
+    <div class="mfield"><label>Channel Description</label><textarea id="ch-desc" placeholder="What will you share on your channel?"></textarea></div>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeModal()">Cancel</button>
+      <button class="confirm" onclick="becomeCreator()">Launch My Channel 🚀</button>
     </div>
   </div>
 </div>
@@ -197,65 +213,181 @@ nav{background:var(--ink);border-bottom:3px solid var(--gold);position:sticky;to
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Auth gate ─────────────────────────────────────────────────────────────────
+// ── Auth ──────────────────────────────────────────────────────────────────────
 const raw=localStorage.getItem('es_user');
 if(!raw){window.location.href='/user-login';}
 let user={};
 try{user=JSON.parse(raw);}catch(e){window.location.href='/user-login';}
-if(!user.loggedIn){window.location.href='/user-login';}
+if(!user.loggedIn)window.location.href='/user-login';
 
-// ── Populate ──────────────────────────────────────────────────────────────────
+// ── Populate nav ──────────────────────────────────────────────────────────────
 document.getElementById('gtag').textContent=`👋 Welcome back, ${user.username||'Explorer'}!`;
 document.getElementById('navname').textContent=user.username||'';
 document.getElementById('pu').textContent=user.username||'—';
 document.getElementById('pe').textContent=user.email||'—';
+document.getElementById('pp').textContent=user.plan==='premium'?'Premium ⭐':'Free';
 
-const isPremium=user.plan==='premium';
-if(isPremium){
-  document.getElementById('pbadge').textContent='PREMIUM';
-  document.getElementById('pbadge').className='pbadge pr';
-  document.getElementById('pp').textContent='Premium ⭐';
-  document.getElementById('ucard').style.display='none';
-  ['lb-audio','lb-stories','lb-ai'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
-  ['fc-audio','fc-stories','fc-ai'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.remove('locked');el.style.background='#fff';}});
+const badge=document.getElementById('rbadge');
+badge.textContent=user.role.toUpperCase();
+badge.className='rbadge '+(user.role||'user');
+
+if(user.role==='user'){
+  document.getElementById('creator-nav-btn').style.display='inline-flex';
+  document.getElementById('creator-cta-card').style.display='block';
+}
+if(user.role==='creator'||user.role==='superuser'){
+  document.getElementById('creator-portal-btn').style.display='inline-flex';
+}
+if(user.role==='admin'||user.role==='superuser'){
+  document.getElementById('admin-btn').style.display='inline-flex';
 }
 
-// ── Load data ─────────────────────────────────────────────────────────────────
-async function load(){
+// ── Feed ──────────────────────────────────────────────────────────────────────
+let currentTab='all';
+async function loadFeed(type=''){
   try{
-    const [sr,rr]=await Promise.all([fetch('/api/stats'),fetch('/api/regions')]);
-    if(sr.ok){const s=await sr.json();document.getElementById('st-u').textContent=s.user_count||0;document.getElementById('st-a').textContent=s.with_audio||0;}
-    if(rr.ok){const regions=await rr.json();document.getElementById('st-r').textContent=regions.length||16;renderRegions(regions);}
+    const url='/api/posts?status=published'+(type&&type!=='all'?'&content_type='+type:'')+'&limit=20';
+    const r=await fetch(url);const posts=await r.json();
+    const container=document.getElementById('feed-container');
+    if(!posts.length){container.innerHTML='<div class="empty"><div>🇬🇭</div><p>No posts yet. Be the first to share Ghana\'s stories!</p></div>';return;}
+    container.innerHTML=posts.map(p=>renderPost(p)).join('');
   }catch(e){console.warn(e);}
 }
-
-const EMO=['🏔','🌊','🌿','🦁','🥁','👑','🎭','🌅','⛰','🐘','🌺','🎵','🏺','🌾','🦅','💎'];
-function renderRegions(regions){
-  const c=document.getElementById('rlist');
-  if(!regions||!regions.length){c.innerHTML='<p style="color:var(--muted);font-size:.85rem;text-align:center;padding:16px">No regions yet. Check back soon!</p>';return;}
-  c.innerHTML=regions.slice(0,8).map((r,i)=>`
-    <a href="/app" class="ri">
-      <div class="rf">${EMO[i%EMO.length]}</div>
-      <div><div class="rn">${r.name}</div><div class="rc">${r.capital||'Ghana'}</div></div>
-      <span class="rt">${r.category||'Heritage'}</span>
-    </a>`).join('');
-  if(regions.length>8)c.innerHTML+=`<div style="text-align:center;padding:12px 0 0"><a href="/app" style="font-size:.8rem;color:var(--gold);font-weight:600;text-decoration:none">View all ${regions.length} regions →</a></div>`;
+function renderPost(p){
+  const typeColors={'article':'type-article','audio':'type-audio','photo_essay':'type-photo_essay','video':'type-video'};
+  const typeLabels={'article':'📝 Article','audio':'🎵 Audio','photo_essay':'📷 Photo Essay','video':'🎬 Video'};
+  const initials=(p.author_channel||p.author_username||'?').charAt(0).toUpperCase();
+  const cover=p.cover_image?`<img src="${p.cover_image}" class="post-cover" onerror="this.className='post-cover placeholder';this.textContent='🇬🇭'" alt="">`:`<div class="post-cover placeholder">🇬🇭</div>`;
+  return`<div class="post-card" id="post-${p.id}">
+    ${cover}
+    <div class="post-body">
+      <div class="post-meta">
+        <div class="post-avatar">${initials}</div>
+        <div><div class="post-author">${p.author_channel||p.author_username||'Creator'}</div><div class="post-channel">${p.published_at?p.published_at.split('T')[0]:''}</div></div>
+        <span class="post-type ${typeColors[p.content_type]||'type-article'}">${typeLabels[p.content_type]||p.content_type}</span>
+      </div>
+      <div class="post-title">${p.title}</div>
+      <div class="post-excerpt">${p.excerpt||p.content?.slice(0,140)||''}</div>
+      ${p.audio_url?`<audio controls src="${p.audio_url}" style="width:100%;margin-bottom:10px;border-radius:8px"></audio>`:''}
+      ${p.video_url?`<div style="margin-bottom:10px"><iframe width="100%" height="200" src="${p.video_url.replace('watch?v=','embed/')}" frameborder="0" allowfullscreen style="border-radius:8px"></iframe></div>`:''}
+      <div class="post-footer">
+        <div class="post-stats">
+          <span onclick="toggleComments(${p.id})">💬 <span id="cc-${p.id}">${p.comment_count||0}</span></span>
+          <span>👁 ${p.view_count||0}</span>
+        </div>
+        <button class="read-btn" onclick="readPost(${p.id})">Read More</button>
+      </div>
+    </div>
+    <div class="comments-panel" id="comments-${p.id}">
+      <div id="comments-list-${p.id}"></div>
+      <div class="c-input-row">
+        <input class="c-input" id="comment-input-${p.id}" placeholder="Write a comment…">
+        <button class="c-submit" onclick="submitComment(${p.id})">Post</button>
+      </div>
+    </div>
+  </div>`;
 }
 
-function gate(f){
-  if(isPremium){window.location.href='/app';}
-  else{toast('⭐ Premium feature — coming soon!','');document.getElementById('ucard').scrollIntoView({behavior:'smooth'});}
+function switchTab(type,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');currentTab=type;
+  loadFeed(type==='all'?'':type);
 }
-function showUpgrade(){toast('💳 Premium subscriptions coming soon! Stay tuned.','');}
-function logout(){localStorage.removeItem('es_user');fetch('/api/users/logout',{method:'POST'}).catch(()=>{});window.location.href='/';}
+
+async function toggleComments(postId){
+  const panel=document.getElementById('comments-'+postId);
+  if(panel.classList.contains('open')){panel.classList.remove('open');return;}
+  panel.classList.add('open');
+  try{
+    const r=await fetch('/api/posts/'+postId+'/comments');
+    const comments=await r.json();
+    const list=document.getElementById('comments-list-'+postId);
+    list.innerHTML=comments.length?comments.map(c=>`
+      <div class="comment-item">
+        <div class="c-av">${(c.author_username||'?').charAt(0).toUpperCase()}</div>
+        <div class="c-body"><div class="c-name">${c.author_username}</div><div class="c-text">${c.content}</div></div>
+      </div>`).join(''):`<p style="font-size:.78rem;color:var(--muted);text-align:center;padding:8px">No comments yet. Be first!</p>`;
+  }catch(e){}
+}
+
+async function submitComment(postId){
+  const input=document.getElementById('comment-input-'+postId);
+  const text=input.value.trim();
+  if(!text){toast('Write something first','er');return;}
+  const fd=new FormData();fd.append('content',text);
+  try{
+    const r=await fetch('/api/posts/'+postId+'/comments',{method:'POST',body:fd,credentials:'include'});
+    if(r.ok){
+      input.value='';
+      const cc=document.getElementById('cc-'+postId);
+      if(cc)cc.textContent=parseInt(cc.textContent||0)+1;
+      toggleComments(postId);setTimeout(()=>toggleComments(postId),100);
+    }else{const d=await r.json();throw new Error(d.detail);}
+  }catch(e){toast('❌ '+e.message,'er');}
+}
+
+function readPost(id){window.location.href='/app?post='+id;}
+
+// ── Creators ──────────────────────────────────────────────────────────────────
+async function loadCreators(){
+  try{
+    const r=await fetch('/api/creators');const creators=await r.json();
+    const c=document.getElementById('creators-list');
+    if(!creators.length){c.innerHTML='<p style="color:var(--muted);font-size:.8rem;text-align:center">No creators yet — be first!</p>';return;}
+    c.innerHTML=creators.slice(0,5).map(cr=>`
+      <div class="creator-item">
+        <div class="cr-av">${(cr.channel_name||cr.username||'?').charAt(0).toUpperCase()}</div>
+        <div><div class="cr-name">${cr.channel_name||cr.username}</div><div class="cr-subs">${cr.follower_count||0} followers</div></div>
+        <button class="follow-btn" id="fb-${cr.id}" onclick="toggleFollow(${cr.id})">Follow</button>
+      </div>`).join('');
+    // Check follow status
+    creators.slice(0,5).forEach(cr=>{
+      fetch('/api/follow/'+cr.id+'/status',{credentials:'include'}).then(r=>r.json()).then(d=>{
+        const btn=document.getElementById('fb-'+cr.id);
+        if(btn&&d.following){btn.textContent='Following';btn.classList.add('following');}
+      }).catch(()=>{});
+    });
+  }catch(e){}
+}
+
+async function toggleFollow(creatorId){
+  try{
+    const r=await fetch('/api/follow/'+creatorId,{method:'POST',credentials:'include'});
+    const d=await r.json();
+    const btn=document.getElementById('fb-'+creatorId);
+    if(btn){btn.textContent=d.following?'Following':'Follow';btn.classList.toggle('following',d.following);}
+  }catch(e){toast('Must be logged in to follow','er');}
+}
+
+// ── Become Creator ────────────────────────────────────────────────────────────
+function showCreatorModal(){document.getElementById('creator-modal').classList.add('open');}
+function closeModal(){document.getElementById('creator-modal').classList.remove('open');}
+async function becomeCreator(){
+  const name=document.getElementById('ch-name').value.trim();
+  const desc=document.getElementById('ch-desc').value.trim();
+  if(!name){toast('Channel name is required','er');return;}
+  const fd=new FormData();fd.append('channel_name',name);fd.append('channel_desc',desc);
+  try{
+    const r=await fetch('/api/users/become-creator',{method:'POST',body:fd,credentials:'include'});
+    const d=await r.json();
+    if(r.ok&&d.success){
+      closeModal();
+      user.role='creator';user.plan='premium';
+      localStorage.setItem('es_user',JSON.stringify(user));
+      toast('🎉 Channel created! Redirecting…','ok');
+      setTimeout(()=>window.location.href='/creator',1500);
+    }else{throw new Error(d.detail||'Failed');}
+  }catch(e){toast('❌ '+e.message,'er');}
+}
+
+// ── Logout ────────────────────────────────────────────────────────────────────
+function logout(){localStorage.removeItem('es_user');fetch('/api/users/logout',{method:'POST',credentials:'include'}).catch(()=>{});window.location.href='/';}
 
 let _t;
-function toast(msg,type){
-  const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');
-  clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);
-}
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);}
 
-load();
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadFeed();loadCreators();
 setTimeout(()=>document.getElementById('ld').classList.add('hide'),800);
 </script>
 </body>
