@@ -66,7 +66,7 @@ input.err{border-color:var(--red)}
   <div class="card-body">
     <div class="steps"><div class="step active" id="s1"></div><div class="step" id="s2"></div><div class="step" id="s3"></div></div>
 
-    <!-- Step 1: Account details -->
+    <!-- Step 1 -->
     <div class="panel on" id="p1">
       <div class="field">
         <label>Username</label>
@@ -88,16 +88,16 @@ input.err{border-color:var(--red)}
         <label>Password</label>
         <div class="iw">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
-          <input type="password" id="pw" placeholder="At least 8 characters" autocomplete="new-password">
+          <input type="password" id="pw" placeholder="At least 6 characters" autocomplete="new-password">
         </div>
         <div class="sbar"><span id="b1"></span><span id="b2"></span><span id="b3"></span><span id="b4"></span></div>
         <div class="slbl" id="sl"></div>
-        <div class="emsg" id="pe">Password must be at least 8 characters</div>
+        <div class="emsg" id="pe">Password must be at least 6 characters</div>
       </div>
       <button class="btn bp" onclick="next1()"><div class="spin"></div><span class="bt">Continue →</span></button>
     </div>
 
-    <!-- Step 2: Topics -->
+    <!-- Step 2 -->
     <div class="panel" id="p2">
       <p style="font-size:.88rem;color:#475569;margin-bottom:14px">Select <strong>3 topics</strong> you care about most:</p>
       <div class="topics" id="tgrid"></div>
@@ -106,7 +106,7 @@ input.err{border-color:var(--red)}
       <button class="btn bg" onclick="goStep(1)">← Back</button>
     </div>
 
-    <!-- Step 3: Confirm -->
+    <!-- Step 3 -->
     <div class="panel" id="p3">
       <div style="text-align:center;padding:10px 0 18px">
         <div style="font-size:2.2rem;margin-bottom:8px">🇬🇭</div>
@@ -124,8 +124,6 @@ input.err{border-color:var(--red)}
 <script>
 const TOPICS=['Ashanti Culture','Ga Traditions','Ewe Music','Northern Heritage','Gold Coast History','Slave Castles','Highlife Music','Traditional Drums','Kente Cloth','Fante Language','Mole National Park','Kakum Forest','Lake Volta','Twi Language','Dagomba Stories','Chieftaincy','Oral Histories','Modern Ghana Art','Afrobeats History','Festivals & Ceremonies'];
 let sel=[];
-
-// Render topics
 const tg=document.getElementById('tgrid');
 TOPICS.forEach(t=>{
   const d=document.createElement('div');d.className='topic';d.textContent=t;
@@ -137,19 +135,16 @@ TOPICS.forEach(t=>{
   };
   tg.appendChild(d);
 });
-
-// Password strength
 document.getElementById('pw').addEventListener('input',function(){
   const v=this.value;let s=0;
-  if(v.length>=8)s++;if(v.length>=12)s++;
+  if(v.length>=6)s++;if(v.length>=10)s++;
   if(/[A-Z]/.test(v)&&/[a-z]/.test(v))s++;
-  if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+  if(/[0-9]/.test(v))s++;
   const l=s<=1?1:s===2?2:s===3?3:4;
   const c=['','#C0392B','#E67E22','#2980B9','#1A7A4A'];
   ['b1','b2','b3','b4'].forEach((id,i)=>document.getElementById(id).style.background=i<l?c[l]:'#E2E8F0');
   const sl=document.getElementById('sl');sl.textContent=v?['','Weak','Fair','Good','Strong'][l]:'';sl.style.color=c[l];
 });
-
 function goStep(n){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
   document.getElementById('p'+n).classList.add('on');
@@ -158,7 +153,6 @@ function goStep(n){
     if(i+1<n)el.classList.add('done');else if(i+1===n)el.classList.add('active');
   });
 }
-
 function next1(){
   const u=document.getElementById('uname').value.trim();
   const e=document.getElementById('em').value.trim();
@@ -168,54 +162,41 @@ function next1(){
   ['uname','em','pw'].forEach(id=>document.getElementById(id).classList.remove('err'));
   if(!u||u.length<3||u.length>30||!/^[a-zA-Z0-9_.]+$/.test(u)){document.getElementById('ue').classList.add('on');document.getElementById('uname').classList.add('err');ok=false;}
   if(!e||!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)){document.getElementById('ee').classList.add('on');document.getElementById('em').classList.add('err');ok=false;}
-  if(!p||p.length<8){document.getElementById('pe').classList.add('on');document.getElementById('pw').classList.add('err');ok=false;}
+  if(!p||p.length<6){document.getElementById('pe').classList.add('on');document.getElementById('pw').classList.add('err');ok=false;}
   if(ok)goStep(2);
 }
-
 function next2(){
   if(sel.length<3)return;
-  const u=document.getElementById('uname').value.trim();
-  const e=document.getElementById('em').value.trim();
-  document.getElementById('cbox').innerHTML=`<div>👤 <strong>Username:</strong> ${u}</div><div>📧 <strong>Email:</strong> ${e}</div><div>🎯 <strong>Interests:</strong> ${sel.join(', ')}</div><div>🎁 <strong>Plan:</strong> Free (upgrade anytime)</div>`;
+  const u=document.getElementById('uname').value.trim(),e=document.getElementById('em').value.trim();
+  document.getElementById('cbox').innerHTML=`<div>👤 <strong>Username:</strong> ${u}</div><div>📧 <strong>Email:</strong> ${e}</div><div>🎯 <strong>Interests:</strong> ${sel.join(', ')}</div><div>🎁 <strong>Plan:</strong> Free Reader (upgrade to Creator anytime)</div>`;
   goStep(3);
 }
-
 async function create(){
-  const btn=document.getElementById('cbtn');
-  btn.classList.add('ld');btn.disabled=true;
-  const email=document.getElementById('em').value.trim();
-  const password=document.getElementById('pw').value;
+  const btn=document.getElementById('cbtn');btn.classList.add('ld');btn.disabled=true;
+  const email=document.getElementById('em').value.trim(),pw=document.getElementById('pw').value;
   const fd=new FormData();
   fd.append('username',document.getElementById('uname').value.trim());
-  fd.append('email',email);fd.append('password',password);fd.append('interests',sel.join(','));
+  fd.append('email',email);fd.append('password',pw);fd.append('interests',sel.join(','));
   try{
     const r=await fetch('/api/users/register',{method:'POST',body:fd});
     const d=await r.json();
     if(!r.ok)throw new Error(d.detail||'Registration failed');
     // Auto-login
-    const lf=new FormData();lf.append('email',email);lf.append('username',email);lf.append('password',password);
+    const lf=new FormData();lf.append('email',email);lf.append('username',email);lf.append('password',pw);
     const lr=await fetch('/api/users/login',{method:'POST',body:lf});
     const ld=await lr.json();
     if(lr.ok&&ld.success){
-      localStorage.setItem('es_user',JSON.stringify({username:ld.username,email:ld.email||email,plan:ld.plan||'free',loggedIn:true}));
+      localStorage.setItem('es_user',JSON.stringify({id:ld.id,username:ld.username,email:ld.email||email,role:ld.role||'user',plan:ld.plan||'free',loggedIn:true}));
       toast('🎉 Welcome to EchoStack!','ok');
       setTimeout(()=>window.location.href='/dashboard',1200);
     }else{
       toast('Account created! Please sign in.','ok');
       setTimeout(()=>window.location.href='/user-login',1500);
     }
-  }catch(err){
-    toast('❌ '+err.message,'er');btn.classList.remove('ld');btn.disabled=false;
-  }
+  }catch(err){toast('❌ '+err.message,'er');btn.classList.remove('ld');btn.disabled=false;}
 }
-
 let _t;
-function toast(msg,type){
-  const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');
-  clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);
-}
-
-// Already logged in
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);}
 if(localStorage.getItem('es_user'))window.location.href='/dashboard';
 </script>
 </body>
