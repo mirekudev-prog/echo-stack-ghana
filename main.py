@@ -31,6 +31,7 @@ aiofiles==23.2.1
 passlib==1.7.4
 bcrypt==4.0.1
 python-jose==3.3.0
+
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
