@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from database import Base
 
@@ -48,7 +47,6 @@ class Section(Base):
     is_active = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-# ✅ Public visitors who sign up on the site
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -57,14 +55,13 @@ class User(Base):
     password_hash = Column(String(500), nullable=False)
     full_name = Column(String(200))
     bio = Column(Text)
-    interests = Column(String)  # comma-separated topics
+    interests = Column(String)
     avatar_url = Column(String(500))
     is_active = Column(Integer, default=1)
     is_verified = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-# ✅ Your client (Ghana Heritage Foundation admin)
 class Client(Base):
     __tablename__ = "clients"
     id = Column(Integer, primary_key=True, index=True)
@@ -78,7 +75,6 @@ class Client(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-# ✅ Chat messages from public users
 class ChatMessage(Base):
     __tablename__ = "chat_messages"
     id = Column(Integer, primary_key=True, index=True)
@@ -89,7 +85,6 @@ class ChatMessage(Base):
     is_approved = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-# ✅ Heritage story submissions from public users
 class StorySubmission(Base):
     __tablename__ = "story_submissions"
     id = Column(Integer, primary_key=True, index=True)
@@ -98,10 +93,9 @@ class StorySubmission(Base):
     title = Column(String(300), nullable=False)
     content = Column(Text, nullable=False)
     region_id = Column(Integer, ForeignKey('regions.id'), nullable=True)
-    status = Column(String(50), default="pending")  # pending, approved, rejected
+    status = Column(String(50), default="pending")
     created_at = Column(DateTime, default=datetime.utcnow)
 
-# ✅ Newsletter subscribers
 class NewsletterSubscriber(Base):
     __tablename__ = "newsletter_subscribers"
     id = Column(Integer, primary_key=True, index=True)
@@ -110,7 +104,6 @@ class NewsletterSubscriber(Base):
     is_active = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-# ✅ Events
 class Event(Base):
     __tablename__ = "events"
     id = Column(Integer, primary_key=True, index=True)
