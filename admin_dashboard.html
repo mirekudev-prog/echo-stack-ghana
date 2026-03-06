@@ -8,7 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <title>EchoStack Admin Dashboard</title>
 <meta name="theme-color" content="#1a1e29">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EchoStack">
 <link rel="icon" type="image/png" href="/echostack-logo.png">
@@ -16,37 +16,226 @@
 <link rel="manifest" href="/manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-:root { --brand-dark: #1a1e29; --brand-blue: #0077b6; }
-body { font-family: Georgia, 'Times New Roman', Times, serif !important; background-color: #ffffff !important; color: var(--brand-dark) !important; }
-.btn-primary { background-color: var(--brand-blue) !important; color: white !important; border: none !important; cursor: pointer !important; }
-.btn-secondary { border: 2px solid var(--brand-dark) !important; color: var(--brand-dark) !important; background: transparent !important; cursor: pointer !important; }
-input, textarea, select { border-color: #d0d0d0 !important; color: var(--brand-dark) !important; background: white !important; }
-input:focus, textarea:focus, select:focus { outline: none !important; border-color: var(--brand-blue) !important; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
+:root {
+--brand-dark: #1a1e29;
+--brand-blue: #0077b6;
+}
+body {
+font-family: 'Georgia', serif !important;
+background-color: #f5f5f5 !important;
+color: var(--brand-dark) !important;
+}
+.btn-primary {
+background-color: var(--brand-blue) !important;
+color: white !important;
+border: none !important;
+cursor: pointer !important;
+}
+.btn-secondary {
+border: 2px solid var(--brand-dark) !important;
+color: var(--brand-dark) !important;
+background: transparent !important;
+cursor: pointer !important;
+}
+input, textarea, select {
+border-color: #d0d0d0 !important;
+color: var(--brand-dark) !important;
+background: white !important;
+}
+input:focus, textarea:focus, select:focus {
+outline: none !important;
+border-color: var(--brand-blue) !important;
+}
+/* SIDEBAR STYLES */
+.sidebar {
+position: fixed;
+left: 0;
+top: 0;
+height: 100vh;
+width: 280px;
+background: #1a1e29;
+color: white;
+padding: 2rem 0;
+z-index: 1000;
+display: flex;
+flex-direction: column;
+transition: transform 0.3s ease;
+}
+.sidebar-header {
+padding: 0 1.5rem 2rem;
+border-bottom: 1px solid rgba(255,255,255,0.1);
+margin-bottom: 1.5rem;
+}
+.sidebar-logo {
+display: flex;
+align-items: center;
+gap: 0.75rem;
+font-size: 1.5rem;
+font-weight: bold;
+color: white;
+text-decoration: none;
+}
+.sidebar-logo img {
+width: 40px;
+height: 40px;
+border-radius: 8px;
+}
+.sidebar-nav {
+flex: 1;
+padding: 0 1rem;
+}
+.sidebar-nav a {
+display: flex;
+align-items: center;
+gap: 1rem;
+padding: 1rem 1.25rem;
+color: rgba(255,255,255,0.7);
+text-decoration: none;
+border-radius: 8px;
+margin-bottom: 0.5rem;
+transition: all 0.2s ease;
+}
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+background: rgba(255,255,255,0.1);
+color: white;
+}
+.sidebar-nav a svg {
+width: 20px;
+height: 20px;
+}
+.sidebar-footer {
+padding: 1.5rem;
+border-top: 1px solid rgba(255,255,255,0.1);
+}
+.btn-logout {
+width: 100%;
+background: #dc2626;
+color: white;
+padding: 1rem;
+border: none;
+border-radius: 8px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s ease;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 0.5rem;
+}
+.btn-logout:hover {
+background: #b91c1c;
+transform: translateY(-2px);
+}
+.main-wrapper {
+margin-left: 280px;
+min-height: 100vh;
+}
+.menu-toggle {
+display: none;
+position: fixed;
+top: 1rem;
+left: 1rem;
+z-index: 1001;
+background: #1a1e29;
+color: white;
+border: none;
+padding: 0.75rem;
+border-radius: 8px;
+cursor: pointer;
+}
+.sidebar-overlay {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0,0,0,0.5);
+z-index: 999;
+}
+.sidebar-overlay.show {
+display: block;
+}
+@media (max-width: 768px) {
+.sidebar {
+transform: translateX(-100%);
+}
+.sidebar.open {
+transform: translateX(0);
+}
+.main-wrapper {
+margin-left: 0;
+}
+.menu-toggle {
+display: block;
+}
+}
 </style>
 </head>
 <body class="antialiased">
-
-<!-- NAVIGATION -->
-<header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
-<div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
-<div class="flex items-center gap-3">
-<img id="header-logo" src="/echostack-logo.png" alt="" style="width:50px;height:50px;object-fit:contain;" onerror="this.style.display='none'">
-<h1 class="text-2xl font-bold" style="color:#1a1e29 !important;">EchoStack Admin</h1>
+<!-- MOBILE MENU TOGGLE -->
+<button class="menu-toggle" onclick="toggleSidebar()">
+<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+<path d="M3 12h18M3 6h18M3 18h18"/>
+</svg>
+</button>
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+<!-- LEFT SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-header">
+<a href="/admin" class="sidebar-logo">
+<img src="/echostack-logo.png" alt="EchoStack">
+<span>EchoStack Admin</span>
+</a>
 </div>
-<nav class="flex gap-3 items-center">
-<a href="/" target="_blank" class="px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">🌍 View Site ↗</a>
-<button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 text-sm font-medium">📊 Dashboard</button>
-<button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
-<button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 text-sm font-medium">🚪 Logout</button>
+<nav class="sidebar-nav">
+<a href="/admin" class="active" onclick="showSection('dashboard')">
+<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+<polyline points="9,22 9,12 15,12 15,22"/>
+</svg>
+<span>Dashboard</span>
+</a>
+<a href="/admin" onclick="showSection('create'); return false;">
+<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4"/>
+</svg>
+<span>New Region</span>
+</a>
+<a href="/admin" onclick="showSection('files-manager'); return false;">
+<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+</svg>
+<span>File Manager</span>
+</a>
+<a href="/" target="_blank">
+<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"/>
+<polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
+</svg>
+<span>View Site</span>
+</a>
 </nav>
+<div class="sidebar-footer">
+<button onclick="logout()" class="btn-logout">
+<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+<polyline points="16,17 21,12 16,7"/>
+<line x1="21" y1="12" x2="9" y2="12"/>
+</svg>
+Logout
+</button>
 </div>
-</header>
-
-<!-- MAIN CONTENT -->
+</aside>
+<!-- MAIN CONTENT WRAPPER -->
+<div class="main-wrapper">
 <main class="max-w-7xl mx-auto px-4 py-8">
-
 <!-- DASHBOARD SECTION -->
 <section id="dashboard-section" class="space-y-8">
+<!-- Stats -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
 <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Total Regions</p>
@@ -65,7 +254,6 @@ input:focus, textarea:focus, select:focus { outline: none !important; border-col
 <p class="text-2xl font-bold" id="stat-size">Loading...</p>
 </div>
 </div>
-
 <!-- Quick Actions -->
 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
 <h2 class="text-xl font-bold mb-4">⚡ Quick Actions</h2>
@@ -77,7 +265,6 @@ input:focus, textarea:focus, select:focus { outline: none !important; border-col
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
 </div>
 </div>
-
 <!-- Sections/Categories Manager -->
 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
 <h2 class="text-xl font-bold mb-4">🏷️ Manage Categories/Sections</h2>
@@ -87,7 +274,6 @@ input:focus, textarea:focus, select:focus { outline: none !important; border-col
 </div>
 <div id="sections-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
 </div>
-
 <!-- Regions Table -->
 <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
 <div class="p-4 border-b border-gray-200 flex justify-between items-center">
@@ -113,7 +299,6 @@ input:focus, textarea:focus, select:focus { outline: none !important; border-col
 </div>
 </div>
 </section>
-
 <!-- CREATE/EDIT FORM SECTION -->
 <section id="create-section" class="hidden">
 <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-4xl mx-auto">
@@ -173,7 +358,7 @@ input:focus, textarea:focus, select:focus { outline: none !important; border-col
 </div>
 <div id="hero-preview" class="hidden mt-2">
 <img id="preview-img" src="" class="w-full h-48 object-cover rounded border">
-<button type="button" onclick="hideHeroPreview()" class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-xs">Remove</button>
+<button type="button" onclick="removeHeroImage()" class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-xs">Remove</button>
 </div>
 </div>
 <div class="mb-4">
@@ -188,7 +373,7 @@ input:focus, textarea:focus, select:focus { outline: none !important; border-col
 </div>
 </div>
 <div class="border-t pt-6 mt-6">
-<h3 class="text-lg font-bold mb-4">📦 Universal File Upload (Videos, Documents, Any Type!)</h3>
+<h3 class="text-lg font-bold mb-4">📦 Universal File Upload (Videos, Documents, Any Type!) 🆕</h3>
 <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#0077b6] transition" onclick="document.getElementById('universal-file-upload').click()">
 <p class="text-gray-600 text-sm">Click to select OR drag & drop files here</p>
 <p class="text-xs text-gray-500 mt-1">Videos, Audio, Images, Documents, PDFs - ANY Format!</p>
@@ -243,7 +428,6 @@ input:focus, textarea:focus, select:focus { outline: none !important; border-col
 </form>
 </div>
 </section>
-
 <!-- FILES MANAGER SECTION -->
 <section id="files-manager-section" class="hidden">
 <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-6xl mx-auto">
@@ -265,495 +449,534 @@ input:focus, textarea:focus, select:focus { outline: none !important; border-col
 <div id="all-files-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto"></div>
 </div>
 </section>
-
 </main>
-
+</div>
 <!-- NOTIFICATION -->
 <div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50"></div>
-
+<!-- JAVASCRIPT -->
 <script>
 console.log('✅ Script Loaded');
 const API_URL = '/api';
 let allRegions = [];
 let allFiles = [];
 let allSections = [];
-let isEditMode = false; // ✅ FIX: track whether we are editing or creating new
-
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Ready');
-    loadStats();
-    loadRegions();
-    loadAllSections();
-    populateRegionDropdown();
-    const form = document.getElementById('region-form');
-    if (form) form.addEventListener('submit', handleSave);
+console.log('DOM Ready');
+loadStats();
+loadRegions();
+loadAllSections();
+populateRegionDropdown();
+const form = document.getElementById('region-form');
+if (form) {
+form.addEventListener('submit', handleSave);
+}
 });
-
 function safeSplit(value) {
-    if (!value) return [];
-    if (Array.isArray(value)) return value.filter(x => x && String(x).trim());
-    if (typeof value === 'string') return value.split(',').map(s => s.trim()).filter(s => s);
-    return [];
+if (!value) return [];
+if (Array.isArray(value)) return value.filter(x => x && String(x).trim());
+if (typeof value === 'string') {
+return value.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
 }
-
-// ✅ FIX: showSection now checks isEditMode before resetting the form
+return [];
+}
+function toggleSidebar() {
+const sidebar = document.getElementById('sidebar');
+const overlay = document.querySelector('.sidebar-overlay');
+sidebar.classList.toggle('open');
+overlay.classList.toggle('show');
+}
 function showSection(sectionId) {
-    var dashboard = document.getElementById('dashboard-section');
-    var create = document.getElementById('create-section');
-    var files = document.getElementById('files-manager-section');
-
-    if (sectionId === 'dashboard') {
-        dashboard.classList.remove('hidden');
-        create.classList.add('hidden');
-        files.classList.add('hidden');
-        loadRegions();
-        loadStats();
-    } else if (sectionId === 'create') {
-        create.classList.remove('hidden');
-        dashboard.classList.add('hidden');
-        files.classList.add('hidden');
-        // Only reset the form if we are creating a NEW region, not editing
-        if (!isEditMode) {
-            resetForm();
-        }
-        // Always reset the flag after using it
-        isEditMode = false;
-    } else if (sectionId === 'files-manager') {
-        files.classList.remove('hidden');
-        dashboard.classList.add('hidden');
-        create.classList.add('hidden');
-        loadAllFiles();
-    }
+var dashboard = document.getElementById('dashboard-section');
+var create = document.getElementById('create-section');
+var files = document.getElementById('files-manager-section');
+if (sectionId === 'dashboard') {
+dashboard.classList.remove('hidden');
+create.classList.add('hidden');
+files.classList.add('hidden');
+loadRegions();
+loadStats();
+} else if (sectionId === 'create') {
+create.classList.remove('hidden');
+dashboard.classList.add('hidden');
+files.classList.add('hidden');
+resetForm();
+} else if (sectionId === 'files-manager') {
+files.classList.remove('hidden');
+dashboard.classList.add('hidden');
+create.classList.add('hidden');
+loadAllFiles();
 }
-
+if (window.innerWidth <= 768) {
+toggleSidebar();
+}
+}
 async function loadStats() {
-    try {
-        const response = await fetch(API_URL + '/stats');
-        const stats = await response.json();
-        document.getElementById('stat-total').textContent = stats.total_regions || 0;
-        document.getElementById('stat-audio').textContent = stats.with_audio || 0;
-        document.getElementById('stat-images').textContent = stats.with_images || 0;
-        document.getElementById('stat-size').textContent = (stats.database_size_mb || 0) + ' MB';
-    } catch (error) {
-        console.error('Stats error:', error);
-    }
+try {
+const response = await fetch(API_URL + '/stats');
+const stats = await response.json();
+document.getElementById('stat-total').textContent = stats.total_regions || 0;
+document.getElementById('stat-audio').textContent = stats.with_audio || 0;
+document.getElementById('stat-images').textContent = stats.with_images || 0;
+document.getElementById('stat-size').textContent = (stats.database_size_mb || 0) + ' MB';
+} catch (error) {
+console.error('Stats error:', error);
 }
-
+}
 async function loadRegions() {
-    try {
-        console.log('Fetching regions...');
-        const response = await fetch(API_URL + '/regions');
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        allRegions = await response.json();
-        console.log('Loaded', allRegions.length, 'regions');
-        renderTable(allRegions);
-        populateRegionDropdown();
-    } catch (error) {
-        console.error('Load error:', error);
-        document.getElementById('regions-table-body').innerHTML =
-            '<tr><td colspan="6" class="px-4 py-8 text-center text-red-600">Error: ' + error.message + '</td></tr>';
-    }
+try {
+console.log('Fetching regions...');
+const response = await fetch(API_URL + '/regions');
+if (!response.ok) {
+throw new Error('HTTP ' + response.status);
 }
-
+allRegions = await response.json();
+console.log('Loaded', allRegions.length, 'regions');
+renderTable(allRegions);
+populateRegionDropdown();
+} catch (error) {
+console.error('Load error:', error);
+document.getElementById('regions-table-body').innerHTML =
+'<tr><td colspan="6" class="px-4 py-8 text-center text-red-600">Error: ' + error.message + '</td></tr>';
+}
+}
 function renderTable(regions) {
-    const tbody = document.getElementById('regions-table-body');
-    tbody.innerHTML = '';
-    if (!regions || regions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet.</td></tr>';
-        return;
-    }
-    regions.forEach(function(region, index) {
-        try {
-            var galleryArr = safeSplit(region.gallery_images);
-            var audioArr = safeSplit(region.audio_files);
-            var row = document.createElement('tr');
-            row.className = 'hover:bg-gray-50 transition cursor-pointer';
-            row.innerHTML =
-                '<td class="px-4 py-4 text-sm">' + (index + 1) + '</td>' +
-                '<td class="px-4 py-4"><span class="font-semibold">' + (region.name || 'Unknown') + '</span></td>' +
-                '<td class="px-4 py-4 text-sm">' + (region.capital || '—') + '</td>' +
-                '<td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs">' + (region.category || 'Uncategorized') + '</span></td>' +
-                '<td class="px-4 py-4 text-sm">' + (galleryArr.length > 0 ? '🖼️ ' : '') + (audioArr.length > 0 ? '🎵' : '') + '</td>' +
-                '<td class="px-4 py-4 whitespace-nowrap">' +
-                '<button class="edit-btn mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button>' +
-                '<button class="delete-btn text-red-600 hover:underline text-sm">🗑️ Delete</button>' +
-                '</td>';
-            row.querySelector('.edit-btn').onclick = function(e) { e.stopPropagation(); editRegion(region.id); };
-            row.querySelector('.delete-btn').onclick = function(e) { e.stopPropagation(); deleteRegion(region.id, region.name); };
-            row.onclick = function(e) { if (!e.target.closest('button')) editRegion(region.id); };
-            tbody.appendChild(row);
-        } catch (err) {
-            console.error('Error rendering region:', err);
-        }
-    });
+const tbody = document.getElementById('regions-table-body');
+tbody.innerHTML = '';
+if (!regions || regions.length === 0) {
+tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No regions yet.</td></tr>';
+return;
 }
-
-document.getElementById('search-regions').addEventListener('input', function(e) {
-    var term = e.target.value.toLowerCase();
-    var filtered = allRegions.filter(function(r) {
-        return r.name.toLowerCase().indexOf(term) !== -1 ||
-               (r.capital && r.capital.toLowerCase().indexOf(term) !== -1) ||
-               (r.category && r.category.toLowerCase().indexOf(term) !== -1);
-    });
-    renderTable(filtered);
+regions.forEach(function(region, index) {
+try {
+var galleryArr = safeSplit(region.gallery_images);
+var audioArr = safeSplit(region.audio_files);
+var hasAudio = audioArr.length > 0;
+var hasImages = galleryArr.length > 0;
+var row = document.createElement('tr');
+row.className = 'hover:bg-gray-50 transition cursor-pointer';
+row.innerHTML =
+'<td class="px-4 py-4 text-sm">' + (index + 1) + '</td>' +
+'<td class="px-4 py-4"><span class="font-semibold">' + (region.name || 'Unknown') + '</span></td>' +
+'<td class="px-4 py-4 text-sm">' + (region.capital || '—') + '</td>' +
+'<td class="px-4 py-4"><span class="px-2 py-1 bg-gray-100 rounded text-xs">' + (region.category || 'Uncategorized') + '</span></td>' +
+'<td class="px-4 py-4 text-sm">' + (hasImages ? '🖼️ ' : '') + (hasAudio ? '🎵' : '') + '</td>' +
+'<td class="px-4 py-4 whitespace-nowrap">' +
+'<button class="edit-btn mr-2 text-[#0077b6] hover:underline text-sm">✏️ Edit</button>' +
+'<button class="delete-btn text-red-600 hover:underline text-sm">🗑️ Delete</button>' +
+'</td>';
+row.querySelector('.edit-btn').onclick = function(e) {
+e.stopPropagation();
+editRegion(region.id);
+};
+row.querySelector('.delete-btn').onclick = function(e) {
+e.stopPropagation();
+deleteRegion(region.id, region.name);
+};
+row.onclick = function(e) {
+if (!e.target.closest('button')) {
+editRegion(region.id);
+}
+};
+tbody.appendChild(row);
+} catch (err) {
+console.error('Error rendering region:', err);
+}
 });
-
+}
+document.getElementById('search-regions').addEventListener('input', function(e) {
+var term = e.target.value.toLowerCase();
+var filtered = allRegions.filter(function(r) {
+return r.name.toLowerCase().indexOf(term) !== -1 ||
+(r.capital && r.capital.toLowerCase().indexOf(term) !== -1) ||
+(r.category && r.category.toLowerCase().indexOf(term) !== -1);
+});
+renderTable(filtered);
+});
 function resetForm() {
-    document.getElementById('region-form').reset();
-    document.getElementById('region-id').value = '';
-    document.getElementById('form-title').textContent = 'Add New Region';
-    document.getElementById('save-btn').textContent = '💾 Save Region';
-    document.getElementById('hero-preview').classList.add('hidden');
-    document.getElementById('session-uploads-list').innerHTML = '';
+document.getElementById('region-form').reset();
+document.getElementById('region-id').value = '';
+document.getElementById('form-title').textContent = 'Add New Region';
+document.getElementById('save-btn').textContent = '💾 Save Region';
+document.getElementById('hero-preview').classList.add('hidden');
+document.getElementById('session-uploads-list').innerHTML = '';
 }
-
-// ✅ FIX: editRegion sets isEditMode = true BEFORE calling showSection
-// so the form data is filled in and NOT wiped
 function editRegion(id) {
-    console.log('Editing ID:', id);
-    var region = allRegions.find(function(r) { return r.id === id; });
-    if (!region) { alert('Region not found!'); return; }
-
-    // Fill in all the form fields with existing data
-    document.getElementById('form-title').textContent = 'Edit: ' + region.name;
-    document.getElementById('save-btn').textContent = '💾 Update Region';
-    document.getElementById('region-id').value = region.id || '';
-    document.getElementById('reg-name').value = region.name || '';
-    document.getElementById('reg-capital').value = region.capital || '';
-    document.getElementById('reg-population').value = region.population || '';
-    document.getElementById('reg-terrain').value = region.terrain || '';
-    document.getElementById('reg-description').value = region.description || '';
-    document.getElementById('reg-category').value = region.category || '';
-    document.getElementById('reg-tags').value = region.tags || '';
-    document.getElementById('reg-source').value = region.source || '';
-    document.getElementById('reg-overview').value = region.overview || '';
-    document.getElementById('reg-hero-image').value = region.hero_image || '';
-    document.getElementById('reg-gallery-images').value = safeSplit(region.gallery_images).join(', ');
-    document.getElementById('reg-audio-files').value = safeSplit(region.audio_files).join(', ');
-
-    if (region.hero_image) {
-        showHeroPreview(region.hero_image);
-    } else {
-        hideHeroPreview();
-    }
-
-    populateRegionDropdown(region.id);
-
-    // ✅ Set flag so showSection knows NOT to reset the form
-    isEditMode = true;
-    showSection('create');
+console.log('Editing ID:', id);
+var region = null;
+for (var i = 0; i < allRegions.length; i++) {
+if (allRegions[i].id === id) {
+region = allRegions[i];
+break;
 }
-
+}
+if (!region) {
+alert('Region not found!');
+return;
+}
+document.getElementById('form-title').textContent = 'Edit: ' + region.name;
+document.getElementById('save-btn').textContent = '💾 Update Region';
+document.getElementById('region-id').value = region.id || '';
+document.getElementById('reg-name').value = region.name || '';
+document.getElementById('reg-capital').value = region.capital || '';
+document.getElementById('reg-population').value = region.population || '';
+document.getElementById('reg-terrain').value = region.terrain || '';
+document.getElementById('reg-description').value = region.description || '';
+document.getElementById('reg-category').value = region.category || '';
+document.getElementById('reg-tags').value = region.tags || '';
+document.getElementById('reg-source').value = region.source || '';
+document.getElementById('reg-overview').value = region.overview || '';
+document.getElementById('reg-hero-image').value = region.hero_image || '';
+var galleryArr = safeSplit(region.gallery_images);
+var audioArr = safeSplit(region.audio_files);
+document.getElementById('reg-gallery-images').value = galleryArr.join(', ');
+document.getElementById('reg-audio-files').value = audioArr.join(', ');
+if (region.hero_image) {
+showHeroPreview(region.hero_image);
+} else {
+hideHeroPreview();
+}
+var currentRegionId = region.id;
+populateRegionDropdown(currentRegionId);
+showSection('create');
+}
 async function handleSave(e) {
-    e.preventDefault();
-    var regionId = document.getElementById('region-id').value;
-    var submitBtn = document.getElementById('save-btn');
-    submitBtn.disabled = true;
-    submitBtn.textContent = '⏳ Saving...';
-    var formData = new FormData();
-    formData.append('name', document.getElementById('reg-name').value);
-    formData.append('capital', document.getElementById('reg-capital').value);
-    formData.append('population', document.getElementById('reg-population').value);
-    formData.append('terrain', document.getElementById('reg-terrain').value);
-    formData.append('description', document.getElementById('reg-description').value);
-    formData.append('category', document.getElementById('reg-category').value);
-    formData.append('tags', document.getElementById('reg-tags').value);
-    formData.append('hero_image', document.getElementById('reg-hero-image').value);
-    formData.append('gallery_images', document.getElementById('reg-gallery-images').value);
-    formData.append('audio_files', document.getElementById('reg-audio-files').value);
-    formData.append('source', document.getElementById('reg-source').value);
-    formData.append('overview', document.getElementById('reg-overview').value);
-    try {
-        var method = regionId ? 'PUT' : 'POST';
-        var url = regionId ? API_URL + '/regions/' + regionId : API_URL + '/regions';
-        const response = await fetch(url, { method: method, body: formData });
-        if (!response.ok) throw new Error('Server returned ' + response.status);
-        var data = await response.json();
-        if (data.success) {
-            showNotification('Saved successfully!', 'success');
-            await loadRegions();
-            await loadStats();
-            showSection('dashboard');
-        } else {
-            throw new Error(data.detail || 'Save failed');
-        }
-    } catch (error) {
-        console.error('Save error:', error);
-        showNotification('❌ ' + error.message, 'error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = regionId ? '💾 Update Region' : '💾 Save Region';
-    }
+e.preventDefault();
+var regionId = document.getElementById('region-id').value;
+var submitBtn = document.getElementById('save-btn');
+submitBtn.disabled = true;
+submitBtn.textContent = '⏳ Saving...';
+var formData = new FormData();
+formData.append('name', document.getElementById('reg-name').value);
+formData.append('capital', document.getElementById('reg-capital').value);
+formData.append('population', document.getElementById('reg-population').value);
+formData.append('terrain', document.getElementById('reg-terrain').value);
+formData.append('description', document.getElementById('reg-description').value);
+formData.append('category', document.getElementById('reg-category').value);
+formData.append('tags', document.getElementById('reg-tags').value);
+formData.append('hero_image', document.getElementById('reg-hero-image').value);
+formData.append('gallery_images', document.getElementById('reg-gallery-images').value);
+formData.append('audio_files', document.getElementById('reg-audio-files').value);
+formData.append('source', document.getElementById('reg-source').value);
+formData.append('overview', document.getElementById('reg-overview').value);
+try {
+var method = regionId ? 'PUT' : 'POST';
+var url = regionId ? API_URL + '/regions/' + regionId : API_URL + '/regions';
+console.log('Saving with:', method, url);
+const response = await fetch(url, {
+method: method,
+body: formData
+});
+if (!response.ok) {
+throw new Error('Server returned ' + response.status);
 }
-
+var data = await response.json();
+if (data.success) {
+showNotification('Saved successfully!', 'success');
+await loadRegions();
+await loadStats();
+showSection('dashboard');
+} else {
+throw new Error(data.detail || 'Save failed');
+}
+} catch (error) {
+console.error('Save error:', error);
+showNotification('❌ ' + error.message, 'error');
+} finally {
+submitBtn.disabled = false;
+submitBtn.textContent = regionId ? '💾 Update Region' : '💾 Save Region';
+}
+}
 async function deleteRegion(id, name) {
-    if (!confirm('Delete "' + name + '"? This CANNOT be undone.')) return;
-    try {
-        const response = await fetch(API_URL + '/regions/' + id, { method: 'DELETE' });
-        var data = await response.json();
-        if (response.ok && data.success) {
-            showNotification('Deleted!', 'success');
-            loadRegions();
-            loadStats();
-        } else throw new Error('Delete failed');
-    } catch (error) {
-        showNotification('❌ Delete failed', 'error');
-    }
+if (!confirm('Delete "' + name + '"? This CANNOT be undone.')) return;
+try {
+const response = await fetch(API_URL + '/regions/' + id, { method: 'DELETE' });
+var data = await response.json();
+if (response.ok && data.success) {
+showNotification('Deleted!', 'success');
+loadRegions();
+loadStats();
+} else {
+throw new Error('Delete failed');
 }
-
+} catch (error) {
+showNotification('❌ Delete failed', 'error');
+}
+}
 async function uploadFile(type) {
-    var input = document.createElement('input');
-    input.type = 'file';
-    input.accept = type === 'hero' ? 'image/*' : 'audio/*';
-    input.onchange = async function(e) {
-        var file = e.target.files[0];
-        if (!file) return;
-        var formData = new FormData();
-        formData.append('file', file);
-        formData.append('filename', file.name);
-        try {
-            var endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/audio';
-            const response = await fetch(endpoint, { method: 'POST', body: formData });
-            var data = await response.json();
-            if (data.success) {
-                if (type === 'hero') {
-                    document.getElementById('reg-hero-image').value = data.url;
-                    showHeroPreview(data.url);
-                } else {
-                    var cur = document.getElementById('reg-audio-files').value;
-                    document.getElementById('reg-audio-files').value = cur ? cur + ', ' + data.url : data.url;
-                }
-                showNotification('Uploaded!', 'success');
-            }
-        } catch (error) {
-            showNotification('❌ Upload failed', 'error');
-        }
-    };
-    input.click();
+var input = document.createElement('input');
+input.type = 'file';
+input.accept = type === 'hero' ? 'image/*' : 'audio/*';
+input.onchange = async function(e) {
+var file = e.target.files[0];
+if (!file) return;
+var formData = new FormData();
+formData.append('file', file);
+formData.append('filename', file.name);
+try {
+var endpoint = type === 'hero' ? '/api/upload/image' : '/api/upload/audio';
+const response = await fetch(endpoint, { method: 'POST', body: formData });
+var data = await response.json();
+if (data.success) {
+if (type === 'hero') {
+document.getElementById('reg-hero-image').value = data.url;
+showHeroPreview(data.url);
+} else {
+var currentValue = document.getElementById('reg-audio-files').value;
+var newValue = currentValue ? currentValue + ', ' + data.url : data.url;
+document.getElementById('reg-audio-files').value = newValue;
 }
-
+showNotification('Uploaded!', 'success');
+}
+} catch (error) {
+showNotification('❌ Upload failed', 'error');
+}
+};
+input.click();
+}
 async function uploadUniversalFiles(input) {
-    const files = input.files;
-    if (!files || files.length === 0) return;
-    let uploadedCount = 0;
-    for (const file of files) {
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('filename', file.name);
-            formData.append('category', document.getElementById('file-category').value);
-            var description = document.getElementById('file-description').value;
-            if (description) formData.append('description', description);
-            formData.append('is_public', document.getElementById('file-is-public').checked ? '1' : '0');
-            const response = await fetch('/api/upload/file', { method: 'POST', body: formData });
-            const data = await response.json();
-            if (response.ok && data.success) {
-                uploadedCount++;
-                const category = document.getElementById('file-category').value;
-                if (category === 'audio') {
-                    var cur = document.getElementById('reg-audio-files').value;
-                    document.getElementById('reg-audio-files').value = cur ? cur + ', ' + data.url : data.url;
-                } else if (category === 'image') {
-                    var cur = document.getElementById('reg-gallery-images').value;
-                    document.getElementById('reg-gallery-images').value = cur ? cur + ', ' + data.url : data.url;
-                }
-                addToSessionUploadList(data);
-            } else throw new Error(data.detail || 'Upload failed');
-        } catch (error) {
-            showNotification('❌ Failed: ' + file.name, 'error');
-        }
-    }
-    showNotification('📁 Uploaded ' + uploadedCount + '/' + files.length + ' files', 'success');
-    document.getElementById('universal-file-upload').value = '';
+const files = input.files;
+if (!files || files.length === 0) return;
+let uploadedCount = 0;
+let failedCount = 0;
+for (const file of files) {
+try {
+const formData = new FormData();
+formData.append('file', file);
+formData.append('filename', file.name);
+formData.append('category', document.getElementById('file-category').value);
+var description = document.getElementById('file-description').value;
+if (description) {
+formData.append('description', description);
 }
-
+var isPublic = document.getElementById('file-is-public').checked ? '1' : '0';
+formData.append('is_public', isPublic);
+console.log(`Uploading: ${file.name} (${Math.round(file.size / 1024)} KB)`);
+const response = await fetch('/api/upload/file', {
+method: 'POST',
+body: formData
+});
+const data = await response.json();
+if (response.ok && data.success) {
+uploadedCount++;
+showNotification(`✅ ${file.name} uploaded!`, 'success');
+const category = document.getElementById('file-category').value;
+if (category === 'audio') {
+var currentValue = document.getElementById('reg-audio-files').value;
+var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
+document.getElementById('reg-audio-files').value = newValue;
+} else if (category === 'image') {
+var currentValue = document.getElementById('reg-gallery-images').value;
+var newValue = currentValue ? `${currentValue}, ${data.url}` : data.url;
+document.getElementById('reg-gallery-images').value = newValue;
+}
+addToSessionUploadList(data);
+} else {
+throw new Error(data.detail || 'Upload failed');
+}
+} catch (error) {
+failedCount++;
+console.error('Upload error:', error);
+showNotification(`❌ Failed: ${file.name}`, 'error');
+}
+}
+showNotification(`📁 Uploaded ${uploadedCount}/${files.length} files`, 'success');
+document.getElementById('universal-file-upload').value = '';
+}
 function addToSessionUploadList(fileData) {
-    var container = document.getElementById('session-uploads-list');
-    var item = document.createElement('div');
-    item.className = 'bg-blue-50 p-3 rounded border border-blue-200 text-sm';
-    item.innerHTML = '✅ ' + fileData.original_name + ' (' + fileData.file_size_mb + ' MB) • ' +
-        fileData.category.toUpperCase() + ' <a href="' + fileData.url + '" target="_blank" class="text-[#0077b6] ml-2">🔗 View</a>';
-    container.appendChild(item);
+var container = document.getElementById('session-uploads-list');
+var item = document.createElement('div');
+item.className = 'bg-blue-50 p-3 rounded border border-blue-200 text-sm';
+item.innerHTML =
+'✅ ' + fileData.original_name +
+' (' + fileData.file_size_mb + ' MB) • ' + fileData.category.toUpperCase() +
+' <a href="' + fileData.url + '" target="_blank" class="text-[#0077b6] ml-2">🔗 View</a>';
+container.appendChild(item);
 }
-
 async function loadAllFiles() {
-    try {
-        const response = await fetch('/api/files');
-        allFiles = await response.json();
-        renderFilesGrid(allFiles);
-    } catch (error) {
-        showNotification('Failed to load files', 'error');
-    }
+try {
+const response = await fetch('/api/files');
+allFiles = await response.json();
+renderFilesGrid(allFiles);
+} catch (error) {
+console.error('Load files error:', error);
+showNotification('Failed to load files', 'error');
 }
-
+}
 function renderFilesGrid(files) {
-    var container = document.getElementById('all-files-grid');
-    if (!files || files.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-center py-4 col-span-3">No files uploaded yet.</p>';
-        return;
-    }
-    container.innerHTML = files.map(function(file) {
-        return '<div class="bg-white p-4 rounded border hover:shadow-md transition">' +
-            '<div class="flex justify-between items-start mb-2">' +
-            '<span class="font-semibold text-sm truncate">' + file.original_name + '</span>' +
-            '<button onclick="deleteFile(' + file.id + ')" class="text-red-600 hover:text-red-800 text-xs">🗑️</button>' +
-            '</div>' +
-            '<p class="text-xs text-gray-600">' + file.category.toUpperCase() + ' • ' + file.file_size_mb + ' MB</p>' +
-            (file.description ? '<p class="text-xs text-gray-500 mt-1">' + file.description + '</p>' : '') +
-            '<div class="mt-2"><a href="' + file.file_url + '" target="_blank" class="text-[#0077b6] text-xs">🔗 Open File</a></div>' +
-            '</div>';
-    }).join('');
+var container = document.getElementById('all-files-grid');
+if (!files || files.length === 0) {
+container.innerHTML = '<p class="text-gray-500 text-center py-4 col-span-3">No files uploaded yet.</p>';
+return;
 }
-
+container.innerHTML = files.map(function(file) {
+return '<div class="bg-white p-4 rounded border hover:shadow-md transition">' +
+'<div class="flex justify-between items-start mb-2">' +
+'<span class="font-semibold text-sm truncate">' + file.original_name + '</span>' +
+'<button onclick="deleteFile(' + file.id + ')" class="text-red-600 hover:text-red-800 text-xs">🗑️</button>' +
+'</div>' +
+'<p class="text-xs text-gray-600">' + file.category.toUpperCase() + ' • ' + file.file_size_mb + ' MB</p>' +
+(file.description ? '<p class="text-xs text-gray-500 mt-1">' + file.description + '</p>' : '') +
+'<div class="mt-2">' +
+'<a href="' + file.file_url + '" target="_blank" class="text-[#0077b6] text-xs">🔗 Open File</a>' +
+'</div>' +
+'</div>';
+}).join('');
+}
 function filterFiles() {
-    var search = document.getElementById('file-search').value.toLowerCase();
-    var cat = document.getElementById('file-filter-category').value;
-    var filtered = allFiles.filter(function(file) {
-        return (file.original_name.toLowerCase().indexOf(search) !== -1 ||
-               (file.description && file.description.toLowerCase().indexOf(search) !== -1)) &&
-               (!cat || file.category === cat);
-    });
-    renderFilesGrid(filtered);
+var search = document.getElementById('file-search').value.toLowerCase();
+var categoryFilter = document.getElementById('file-filter-category').value;
+var filtered = allFiles.filter(function(file) {
+var matchesSearch = file.original_name.toLowerCase().indexOf(search) !== -1 ||
+(file.description && file.description.toLowerCase().indexOf(search) !== -1);
+var matchesCategory = !categoryFilter || file.category === categoryFilter;
+return matchesSearch && matchesCategory;
+});
+renderFilesGrid(filtered);
 }
-
 async function deleteFile(fileId) {
-    if (!confirm('Delete this file permanently?')) return;
-    try {
-        const response = await fetch('/api/files/' + fileId, { method: 'DELETE' });
-        const data = await response.json();
-        if (response.ok && data.success) { showNotification('File deleted!', 'success'); loadAllFiles(); }
-        else throw new Error('Delete failed');
-    } catch (error) {
-        showNotification('❌ Delete failed', 'error');
-    }
+if (!confirm('Delete this file permanently?')) return;
+try {
+const response = await fetch('/api/files/' + fileId, { method: 'DELETE' });
+const data = await response.json();
+if (response.ok && data.success) {
+showNotification('File deleted!', 'success');
+loadAllFiles();
+} else {
+throw new Error('Delete failed');
 }
-
+} catch (error) {
+showNotification('❌ Delete failed', 'error');
+}
+}
 function showHeroPreview(url) {
-    document.getElementById('preview-img').src = url;
-    document.getElementById('hero-preview').classList.remove('hidden');
+document.getElementById('preview-img').src = url;
+document.getElementById('hero-preview').classList.remove('hidden');
 }
-
 function hideHeroPreview() {
-    document.getElementById('reg-hero-image').value = '';
-    document.getElementById('hero-preview').classList.add('hidden');
+document.getElementById('reg-hero-image').value = '';
+document.getElementById('hero-preview').classList.add('hidden');
 }
-
 async function loadAllSections() {
-    try {
-        const response = await fetch('/api/sections');
-        allSections = await response.json();
-        var container = document.getElementById('sections-list');
-        if (allSections.length === 0) {
-            container.innerHTML = '<p class="text-gray-400 text-sm text-center py-2">No sections yet.</p>';
-            return;
-        }
-        container.innerHTML = allSections.map(function(section) {
-            return '<div class="flex justify-between items-center p-3 bg-gray-50 rounded">' +
-                '<span class="font-semibold">' + section.name + '</span>' +
-                '<button onclick="deleteSection(' + section.id + ')" class="text-red-600 text-xs">✖️ Delete</button>' +
-                '</div>';
-        }).join('');
-    } catch (error) {
-        console.error('Failed to load sections:', error);
-    }
+try {
+const response = await fetch('/api/sections');
+allSections = await response.json();
+var container = document.getElementById('sections-list');
+container.innerHTML = allSections.map(function(section) {
+return '<div class="flex justify-between items-center p-3 bg-gray-50 rounded">' +
+'<span class="font-semibold">' + section.name + '</span>' +
+'<button onclick="deleteSection(' + section.id + ')" class="text-red-600 text-xs">✖️</button>' +
+'</div>';
+}).join('');
+} catch (error) {
+console.error('Failed to load sections:', error);
 }
-
+}
 async function createSection() {
-    var name = document.getElementById('new-section-name').value.trim();
-    if (!name) { alert('Please enter a section name'); return; }
-    try {
-        const formData = new FormData();
-        formData.append('name', name);
-        const response = await fetch('/api/sections', { method: 'POST', body: formData });
-        const data = await response.json();
-        if (response.ok && data.success) {
-            showNotification('Section created!', 'success');
-            document.getElementById('new-section-name').value = '';
-            loadAllSections();
-        } else throw new Error(data.detail || 'Failed to create section');
-    } catch (error) {
-        showNotification('❌ ' + error.message, 'error');
-    }
+var name = document.getElementById('new-section-name').value.trim();
+if (!name) {
+alert('Please enter a section name');
+return;
 }
-
+try {
+const formData = new FormData();
+formData.append('name', name);
+const response = await fetch('/api/sections', {
+method: 'POST',
+body: formData
+});
+const data = await response.json();
+if (response.ok && data.success) {
+showNotification('Section created!', 'success');
+document.getElementById('new-section-name').value = '';
+loadAllSections();
+} else {
+throw new Error(data.detail || 'Failed to create section');
+}
+} catch (error) {
+showNotification('❌ ' + error.message, 'error');
+}
+}
 async function deleteSection(sectionId) {
-    if (!confirm('Delete this section?')) return;
-    try {
-        const response = await fetch('/api/sections/' + sectionId, { method: 'DELETE' });
-        const data = await response.json();
-        if (response.ok && data.success) { showNotification('Section deleted!', 'success'); loadAllSections(); }
-        else throw new Error('Delete failed');
-    } catch (error) {
-        showNotification('❌ Delete failed', 'error');
-    }
+if (!confirm('Delete this section?')) return;
+try {
+const response = await fetch('/api/sections/' + sectionId, { method: 'DELETE' });
+const data = await response.json();
+if (response.ok && data.success) {
+showNotification('Section deleted!', 'success');
+loadAllSections();
+} else {
+throw new Error('Delete failed');
 }
-
+} catch (error) {
+showNotification('❌ Delete failed', 'error');
+}
+}
 async function exportData() {
-    try {
-        const response = await fetch(API_URL + '/regions');
-        var data = await response.json();
-        var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'echostack-backup-' + new Date().toISOString().split('T')[0] + '.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        showNotification('Exported!', 'success');
-    } catch (error) {
-        showNotification('❌ Export failed', 'error');
-    }
+try {
+const response = await fetch(API_URL + '/regions');
+var data = await response.json();
+var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+var url = URL.createObjectURL(blob);
+var a = document.createElement('a');
+a.href = url;
+a.download = 'echostack-backup-' + new Date().toISOString().split('T')[0] + '.json';
+a.click();
+URL.revokeObjectURL(url);
+showNotification('Exported!', 'success');
+} catch (error) {
+showNotification('❌ Export failed', 'error');
 }
-
+}
 async function importData(input) {
-    var file = input.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            var data = JSON.parse(e.target.result);
-            await fetch('/api/import/json', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            showNotification('Imported!', 'success');
-            loadRegions();
-        } catch (error) {
-            showNotification('❌ Invalid file', 'error');
-        }
-    };
-    reader.readAsText(file);
-    input.value = '';
+var file = input.files[0];
+if (!file) return;
+var reader = new FileReader();
+reader.onload = async function(e) {
+try {
+var data = JSON.parse(e.target.result);
+const response = await fetch('/api/import/json', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify(data)
+});
+showNotification('Imported!', 'success');
+loadRegions();
+} catch (error) {
+showNotification('❌ Invalid file', 'error');
 }
-
+};
+reader.readAsText(file);
+input.value = '';
+}
 function logout() {
-    if (confirm('Logout now?')) {
-        fetch('/api/auth/logout', { method: 'POST' });
-        document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
-        window.location.href = '/admin';
-    }
+if (confirm('Logout now?')) {
+fetch('/api/auth/logout', {method: 'POST'});
+document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+window.location.href = '/admin';
 }
-
+}
 function showNotification(message, type) {
-    var n = document.getElementById('notification');
-    n.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ' +
-        (type === 'success' ? 'bg-green-600' : 'bg-red-600');
-    n.textContent = message;
-    n.classList.remove('hidden');
-    setTimeout(function() { n.classList.add('hidden'); }, 3000);
+var notification = document.getElementById('notification');
+notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ' +
+(type === 'success' ? 'bg-green-600' : 'bg-red-600');
+notification.textContent = message;
+notification.classList.remove('hidden');
+setTimeout(function() {
+notification.classList.add('hidden');
+}, 3000);
 }
-
 function populateRegionDropdown(selectedId) {
-    var select = document.getElementById('file-region-link');
-    select.innerHTML = '<option value="no">No Link (Global)</option>';
-    allRegions.forEach(function(region) {
-        var option = document.createElement('option');
-        option.value = region.id;
-        option.textContent = region.name;
-        if (selectedId && selectedId == region.id) option.selected = true;
-        select.appendChild(option);
-    });
+var select = document.getElementById('file-region-link');
+select.innerHTML = '<option value="no">No Link (Global)</option>';
+allRegions.forEach(function(region) {
+var option = document.createElement('option');
+option.value = region.id;
+option.textContent = region.name;
+if (selectedId && selectedId == region.id) {
+option.selected = true;
+}
+select.appendChild(option);
+});
 }
 </script>
 </body>
