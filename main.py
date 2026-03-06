@@ -3,29 +3,34 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 import os
+from datetime import datetime
 import hashlib
 from database import engine, get_db, Base
 import models
 
-# Create database tables
+# Initialize Database
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="EchoStack API")
+app = FastAPI(title="EchoStack Full API")
 
-# --- Password Helpers ---
+# --- Helpers ---
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
-# --- Static Routes ---
+# --- Static Pages (Your Frontend) ---
 @app.get("/")
-def homepage():
-    return FileResponse("index.html")
+def home(): return FileResponse("index.html")
+
+@app.get("/app")
+def app_page(): return FileResponse("app.html")
 
 @app.get("/signup")
-def signup_page():
-    return FileResponse("signup.html")
+def signup(): return FileResponse("signup.html")
 
-# --- Signup Endpoint (Fixed to match your frontend) ---
+@app.get("/admin")
+def admin(): return FileResponse("admin_dashboard.html")
+
+# --- Authentication & User API ---
 @app.post("/api/users/register") 
 async def user_signup(
     username: str = Form(...),
@@ -34,12 +39,10 @@ async def user_signup(
     interests: str = Form(""),
     db: Session = Depends(get_db)
 ):
-    # Check if user already exists
-    existing_user = db.query(models.User).filter(models.User.email == email.lower().strip()).first()
-    if existing_user:
+    existing = db.query(models.User).filter(models.User.email == email.lower().strip()).first()
+    if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    # Create user
     new_user = models.User(
         username=username.strip(),
         email=email.lower().strip(),
@@ -48,12 +51,31 @@ async def user_signup(
     )
     db.add(new_user)
     db.commit()
-    return {"success": True, "message": "User created successfully"}
+    return {"success": True}
 
-# --- Other Essential Routes ---
+# --- Admin & Site Builder API ---
+@app.post("/api/admin/login")
+async def admin_login(answer: str = Form(...)):
+    # Your secret answer logic
+    if answer.lower().strip() == "the admin":
+        return {"success": True}
+    raise HTTPException(status_code=403, detail="Invalid Access")
+
+@app.get("/api/regions")
+def get_regions(db: Session = Depends(get_db)):
+    return db.query(models.Region).all()
+
+@app.post("/api/upload/file")
+async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    # Standard file upload logic
+    file_path = f"uploads/{file.filename}"
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+    return {"success": True, "path": file_path}
+
 @app.get("/api/stats")
 def get_stats(db: Session = Depends(get_db)):
     return {
-        "total_users": db.query(models.User).count(),
-        "total_regions": db.query(models.Region).count()
+        "users": db.query(models.User).count(),
+        "regions": db.query(models.Region).count()
     }
