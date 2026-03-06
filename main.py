@@ -531,17 +531,19 @@ async def follow_status(creator_id: str, request: Request, db: Session = Depends
 # ════════════════════════════════════════════════════════════════════════════
 
 @app.get("/api/admin/users")
-async def admin_get_users(request: Request, db: Session = Depends(get_db)):
-    admin_cookie = request.cookies.get("admin_session")
-    user = get_user_from_request(request, db)
-    if admin_cookie != "ADMIN_AUTHORIZED" and (not user or user.role not in ("admin", "superuser")):
-        raise HTTPException(status_code=403)
+async def get_all_users(request: Request, db: Session = Depends(get_db)):
+    admin_token = request.cookies.get("admin_session")
+    client_token = request.cookies.get("client_session")
+    if not admin_token and not client_token:
+        raise HTTPException(status_code=403, detail="Not authorized")
     users = db.query(models.User).order_by(models.User.created_at.desc()).all()
     return [{
-        "id": u.id, "username": u.username, "email": u.email,
-        "role": u.role, "plan": u.plan, "is_active": u.is_active,
-        "full_name": u.full_name or "", "follower_count": u.follower_count,
-        "post_count": u.post_count, "created_at": str(u.created_at)
+        "id": u.id,
+        "username": u.username,
+        "email": u.email,
+        "full_name": u.full_name or "",
+        "is_active": u.is_active,
+        "created_at": str(u.created_at)
     } for u in users]
 
 @app.put("/api/admin/users/{user_id}/role")
