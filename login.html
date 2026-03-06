@@ -3,20 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    
     <title>EchoStack Admin Login</title>
-    
     <style>
-        :root {
-            --brand-dark: #1a1e29;
-            --brand-blue: #0077b6;
-        }
-        
+        :root { --brand-dark: #1a1e29; --brand-blue: #0077b6; }
         body {
             font-family: 'Georgia', serif !important;
             background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
@@ -27,7 +19,6 @@
             margin: 0;
             padding: 1rem;
         }
-        
         .login-card {
             background: white;
             padding: 2.5rem;
@@ -37,18 +28,8 @@
             width: 100%;
             text-align: center;
         }
-        
-        h1 {
-            color: var(--brand-dark) !important;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 2rem;
-        }
-        
+        h1 { color: var(--brand-dark) !important; font-size: 2rem; margin-bottom: 0.5rem; }
+        .subtitle { color: #666; margin-bottom: 2rem; }
         .security-box {
             background: rgba(0, 119, 182, 0.05);
             border-left: 4px solid var(--brand-blue);
@@ -57,7 +38,6 @@
             margin-bottom: 1.5rem;
             text-align: left;
         }
-        
         input {
             width: 100%;
             padding: 1rem;
@@ -65,13 +45,9 @@
             border-radius: 8px;
             margin-bottom: 1rem;
             font-size: 1rem;
+            box-sizing: border-box;
         }
-        
-        input:focus {
-            outline: none !important;
-            border-color: var(--brand-blue) !important;
-        }
-        
+        input:focus { outline: none !important; border-color: var(--brand-blue) !important; }
         button {
             width: 100%;
             padding: 1rem;
@@ -83,11 +59,7 @@
             font-size: 1rem !important;
             cursor: pointer !important;
         }
-        
-        button:hover {
-            opacity: 0.9 !important;
-        }
-        
+        button:hover { opacity: 0.9 !important; }
         .error-message {
             background-color: #fef2f2 !important;
             color: #dc2626 !important;
@@ -96,68 +68,55 @@
             margin-top: 1rem;
             display: none;
         }
-        
-        a {
-            color: var(--brand-blue) !important;
-            text-decoration: none !important;
-            margin-top: 1rem;
-            display: inline-block;
-        }
+        a { color: var(--brand-blue) !important; text-decoration: none !important; margin-top: 1rem; display: inline-block; }
     </style>
 </head>
-<body class="antialiased">
-    
+<body>
     <div class="login-card">
         <h1>EchoStack</h1>
         <p class="subtitle">Admin Management Portal</p>
-        
         <div class="security-box">
             <p>To protect our heritage archive, please confirm your identity.</p>
         </div>
-        
         <p style="text-align: left; margin-bottom: 0.5rem;">Who are you? 😊</p>
-        <input type="password" id="answer" placeholder="Enter secret key...">
-        
+        <input type="password" id="answer" placeholder="Enter secret key..." onkeydown="if(event.key==='Enter') verifyLogin()">
         <button onclick="verifyLogin()">🔒 Verify & Access Admin Panel</button>
-        
         <div id="error-message" class="error-message">❌ Incorrect answer. Please try again.</div>
-        
         <a href="/">← Back to Main Site</a>
     </div>
 
     <script>
-        function verifyLogin() {
+        async function verifyLogin() {
             const answer = document.getElementById('answer').value.trim();
             const btn = document.querySelector('button');
             const errorMsg = document.getElementById('error-message');
-            
+
+            if (!answer) return;
+
             btn.disabled = true;
             btn.innerHTML = '⏳ Verifying...';
             errorMsg.style.display = 'none';
-            
-            fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'answer=' + encodeURIComponent(answer)
-            })
-            .then(response => {
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'answer=' + encodeURIComponent(answer),
+                    credentials: 'include'   // ← makes sure the cookie is accepted
+                });
+
                 if (response.ok) {
-                    return response.json().then(data => {
-                        document.cookie = "admin_session=" + data.token + "; path=/; max-age=86400";
-                        window.location.href = '/admin';
-                    });
+                    // Server already set the admin_session cookie — just redirect
+                    window.location.href = '/admin';
                 } else {
                     throw new Error('Incorrect answer');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 errorMsg.style.display = 'block';
                 btn.disabled = false;
                 btn.innerHTML = '🔒 Verify & Access Admin Panel';
                 document.getElementById('answer').value = '';
-            });
+            }
         }
     </script>
 </body>
