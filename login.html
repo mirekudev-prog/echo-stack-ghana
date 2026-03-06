@@ -77,9 +77,11 @@
             errorMsg.classList.add('hidden');
             
             try {
-                // ✅ USE THIS ENDPOINT: /api/auth/login
+                // ✅ CORRECT ENDPOINT: /api/auth/login
                 const formData = new URLSearchParams();
                 formData.append('answer', answer);
+                
+                console.log('Sending login request to /api/auth/login with answer:', answer);
                 
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
@@ -95,6 +97,7 @@
                 
                 if (response.ok && data.success) {
                     // ✅ Success - redirect to admin dashboard
+                    console.log('Login successful! Redirecting to /admin');
                     window.location.href = '/admin';
                 } else {
                     throw new Error(data.detail || 'Incorrect answer');
