@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post — EchoStack</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0D1B2A;--gold:#C8962E;--cream:#FAF6EF;--border:#E2E8F0;--muted:#94A3B8}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh}
+nav{background:var(--ink);border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:100}
+.ni{max-width:900px;margin:0 auto;padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between}
+.nl{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nl img{width:30px;height:30px;border-radius:6px}
+.nl span{font-family:'Playfair Display',serif;color:#fff;font-size:1.05rem}
+.nb{background:none;border:none;color:#94A3B8;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;padding:6px 11px;border-radius:6px;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.nb:hover{background:rgba(255,255,255,.08);color:#fff}
+.nb.lo{border:1px solid rgba(248,113,113,.35);color:#f87171}.nb.lo:hover{background:#f87171;color:#fff}
+
+.page{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.82rem;text-decoration:none;margin-bottom:24px;cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif}
+.back-btn:hover{color:var(--ink)}
+
+.post-type-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;text-transform:uppercase;margin-bottom:12px}
+.type-article{background:#EFF6FF;color:#2563EB}
+.type-audio{background:#F0FDF4;color:#16A34A}
+.type-photo_essay{background:#FFF7ED;color:#D97706}
+
+h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--ink);line-height:1.3;margin-bottom:16px}
+
+.post-meta{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.author-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E8B84B);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.9rem;flex-shrink:0}
+.author-name{font-size:.85rem;font-weight:600;color:var(--ink)}
+.post-date{font-size:.75rem;color:var(--muted)}
+.post-views{margin-left:auto;font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:4px}
+
+.cover-img{width:100%;max-height:420px;object-fit:cover;border-radius:12px;margin-bottom:28px}
+
+.post-content{font-size:1rem;line-height:1.85;color:#2d3748}
+.post-content p{margin-bottom:1.25rem}
+.post-content h2,.post-content h3{font-family:'Playfair Display',serif;color:var(--ink);margin:2rem 0 1rem}
+.post-content blockquote{border-left:4px solid var(--gold);padding:1rem 1.5rem;background:#fff;border-radius:0 8px 8px 0;margin:1.5rem 0;color:#475569;font-style:italic}
+.post-content img{width:100%;border-radius:8px;margin:1rem 0}
+
+/* LOCKED CONTENT */
+.locked-wall{background:linear-gradient(180deg,rgba(250,246,239,0) 0%,var(--cream) 60%);padding:60px 20px 40px;text-align:center;margin-top:-80px;position:relative}
+.locked-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;margin:0 auto;box-shadow:0 4px 24px rgba(13,27,42,.08)}
+.locked-card h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--ink);margin-bottom:8px}
+.locked-card p{font-size:.85rem;color:var(--muted);margin-bottom:20px;line-height:1.6}
+.subscribe-btn{width:100%;padding:12px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:background .2s}
+.subscribe-btn:hover{background:#a97825}
+
+/* LIKE / SHARE BAR */
+.action-bar{display:flex;align-items:center;gap:12px;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:28px 0}
+.action-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--ink);transition:all .2s}
+.action-btn:hover,.action-btn.liked{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+/* COMMENTS */
+.comments-section{margin-top:32px}
+.comments-section h3{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:16px;color:var(--ink)}
+.comment-item{display:flex;gap:10px;margin-bottom:16px}
+.c-av{width:32px;height:32px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0}
+.c-body{flex:1;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.c-name{font-size:.78rem;font-weight:700;color:var(--ink)}
+.c-text{font-size:.83rem;color:#475569;margin-top:4px;line-height:1.5}
+.c-input-row{display:flex;gap:8px;margin-top:16px}
+.c-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s}
+.c-input:focus{border-color:var(--gold)}
+.c-send{padding:10px 18px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-size:.82rem;font-weight:700;cursor:pointer}
+
+/* ECHOBOT on post page */
+.ai-btn{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0D1B2A,#C8962E);color:#fff;border:none;cursor:pointer;font-size:1.4rem;box-shadow:0 4px 20px rgba(0,0,0,.25);z-index:2000;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.ai-btn:hover{transform:scale(1.1)}
+.ai-panel{position:fixed;bottom:5rem;right:2rem;width:340px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.15);z-index:2000;display:none;flex-direction:column;overflow:hidden;border:1px solid var(--border);max-height:480px}
+.ai-panel.open{display:flex}
+.ai-hdr{background:linear-gradient(135deg,#0D1B2A,#0077b6);color:#fff;padding:.875rem 1.25rem;display:flex;justify-content:space-between;align-items:center}
+.ai-hdr h3{font-size:.9rem;font-weight:700}
+.ai-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem;min-height:220px;max-height:300px}
+.ai-msg{max-width:85%;padding:.6rem .875rem;border-radius:12px;font-size:.83rem;line-height:1.5}
+.ai-msg.bot{background:#f0f7ff;color:#1a1e29;align-self:flex-start}
+.ai-msg.user{background:#0077b6;color:#fff;align-self:flex-end}
+.ai-msg.locked-msg{background:#fff7ed;color:#92400e;border:1px solid #fde68a;align-self:flex-start}
+.ai-inp-row{padding:.75rem;border-top:1px solid #f0f0f0;display:flex;gap:.5rem}
+.ai-inp{flex:1;padding:.6rem .875rem;border:1.5px solid var(--border);border-radius:20px;font-size:.83rem;outline:none;font-family:'DM Sans',sans-serif}
+.ai-inp:focus{border-color:var(--gold)}
+.ai-send{background:var(--gold);color:#fff;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .35s;z-index:999}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.toast.ok{background:#1A7A4A}.toast.er{background:#C0392B}
+@media(max-width:600px){.ai-panel{width:calc(100vw - 2rem);right:1rem}}
+</style>
+</head>
+<body>
+
+<nav><div class="ni">
+  <a href="/dashboard" class="nl">
+    <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
+    <span>EchoStack</span>
+  </a>
+  <div style="display:flex;gap:6px;align-items:center">
+    <a href="/dashboard" class="nb">📰 Feed</a>
+    <button class="nb lo" onclick="logout()">Sign Out</button>
+  </div>
+</div></nav>
+
+<div class="page">
+  <button onclick="history.back()" class="back-btn">← Back to Feed</button>
+
+  <div id="post-loading" style="text-align:center;padding:60px;color:var(--muted)">Loading article...</div>
+  <div id="post-body" style="display:none">
+    <span class="post-type-badge type-article" id="post-type-badge">Article</span>
+    <h1 id="post-title"></h1>
+    <div class="post-meta">
+      <div class="author-av" id="author-av">?</div>
+      <div>
+        <div class="author-name" id="author-name"></div>
+        <div class="post-date" id="post-date"></div>
+      </div>
+      <div class="post-views">👁 <span id="post-views">0</span> views</div>
+    </div>
+    <img id="cover-img" class="cover-img" src="" style="display:none" onerror="this.style.display='none'">
+
+    <div id="content-area"></div>
+
+    <div class="action-bar">
+      <button class="action-btn" id="like-btn" onclick="toggleLike()">
+        ❤️ <span id="like-count">0</span> Likes
+      </button>
+      <button class="action-btn" onclick="sharePost()">🔗 Share</button>
+    </div>
+
+    <div class="comments-section" id="comments-area">
+      <h3>💬 Comments</h3>
+      <div id="comments-list"></div>
+      <div class="c-input-row">
+        <input type="text" class="c-input" id="comment-input" placeholder="Add a comment...">
+        <button class="c-send" onclick="postComment()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ECHOBOT -->
+<button class="ai-btn" onclick="toggleAI()" title="Ask EchoBot">🤖</button>
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-hdr">
+    <div><h3>🤖 EchoBot</h3><p style="font-size:.7rem;opacity:.8">Ghana Heritage AI</p></div>
+    <button onclick="toggleAI()" style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer">×</button>
+  </div>
+  <div class="ai-msgs" id="ai-msgs">
+    <div class="ai-msg bot">Akwaaba! Ask me anything about Ghana's heritage, regions, or culture!</div>
+  </div>
+  <div class="ai-inp-row">
+    <input type="text" class="ai-inp" id="ai-input" placeholder="Ask about Ghana..." onkeydown="if(event.key==='Enter') sendAI()">
+    <button onclick="sendAI()" class="ai-send">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+    </button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const postId = window.location.pathname.split('/').pop();
+let currentUser = null;
+let postData = null;
+let liked = false;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const r = await fetch('/api/users/me');
+    if (r.ok) currentUser = await r.json();
+  } catch(e) {}
+  loadPost();
+});
+
+async function loadPost() {
+  try {
+    const r = await fetch('/api/posts/' + postId);
+    if (!r.ok) { document.getElementById('post-loading').textContent = 'Post not found.'; return; }
+    postData = await r.json();
+
+    document.title = postData.title + ' — EchoStack';
+    document.getElementById('post-title').textContent = postData.title;
+    document.getElementById('post-views').textContent = postData.views || 0;
+    document.getElementById('like-count').textContent = postData.likes || 0;
+    document.getElementById('author-name').textContent = postData.author_username || 'Creator';
+    document.getElementById('author-av').textContent = (postData.author_username || 'C')[0].toUpperCase();
+    document.getElementById('post-date').textContent = new Date(postData.created_at).toLocaleDateString('en-GB', {year:'numeric',month:'long',day:'numeric'});
+
+    // Badge
+    const badge = document.getElementById('post-type-badge');
+    badge.textContent = (postData.content_type || 'article').replace('_',' ').toUpperCase();
+    badge.className = 'post-type-badge type-' + (postData.content_type || 'article');
+
+    // Cover image
+    if (postData.cover_image) {
+      const img = document.getElementById('cover-img');
+      img.src = postData.cover_image;
+      img.style.display = 'block';
+    }
+
+    // Content or locked wall
+    const contentArea = document.getElementById('content-area');
+    if (postData.is_locked) {
+      // Show excerpt + paywall
+      contentArea.innerHTML = `
+        <div class="post-content"><p>${postData.excerpt || ''}</p></div>
+        <div class="locked-wall">
+          <div class="locked-card">
+            <div style="font-size:2rem;margin-bottom:12px">🔒</div>
+            <h3>Premium Content</h3>
+            <p>This article is for premium subscribers. Upgrade to read the full story and unlock EchoBot AI assistance.</p>
+            <button class="subscribe-btn" onclick="showToast('Premium subscriptions coming soon! 🚀','ok')">⭐ Subscribe — Coming Soon</button>
+          </div>
+        </div>`;
+      document.getElementById('comments-area').style.display = 'none';
+    } else {
+      // Render full content — convert newlines to paragraphs
+      const paragraphs = (postData.content || '').split('\n').filter(p => p.trim()).map(p => `<p>${p}</p>`).join('');
+      contentArea.innerHTML = `<div class="post-content">${paragraphs || '<p>No content.</p>'}</div>`;
+      loadComments();
+    }
+
+    document.getElementById('post-loading').style.display = 'none';
+    document.getElementById('post-body').style.display = 'block';
+  } catch(e) {
+    document.getElementById('post-loading').textContent = 'Failed to load post.';
+  }
+}
+
+async function loadComments() {
+  try {
+    const r = await fetch('/api/posts/' + postId + '/comments');
+    const comments = await r.json();
+    const list = document.getElementById('comments-list');
+    if (!comments.length) {
+      list.innerHTML = '<p style="color:var(--muted);font-size:.82rem;margin-bottom:12px">No comments yet. Be the first!</p>';
+      return;
+    }
+    list.innerHTML = comments.map(c => `
+      <div class="comment-item">
+        <div class="c-av">${c.username[0].toUpperCase()}</div>
+        <div class="c-body">
+          <div class="c-name">${c.username}</div>
+          <div class="c-text">${c.content}</div>
+        </div>
+      </div>`).join('');
+  } catch(e) {}
+}
+
+async function postComment() {
+  const input = document.getElementById('comment-input');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!currentUser) { showToast('Please log in to comment', 'er'); return; }
+  try {
+    const fd = new FormData(); fd.append('content', text);
+    const r = await fetch('/api/posts/' + postId + '/comments', {method:'POST', body:fd});
+    const d = await r.json();
+    if (d.success) { input.value = ''; loadComments(); showToast('Comment posted!', 'ok'); }
+  } catch(e) { showToast('Failed to post comment', 'er'); }
+}
+
+async function toggleLike() {
+  if (!currentUser) { showToast('Please log in to like', 'er'); return; }
+  try {
+    const r = await fetch('/api/posts/' + postId + '/like', {method:'POST'});
+    const d = await r.json();
+    document.getElementById('like-count').textContent = d.likes || 0;
+    const btn = document.getElementById('like-btn');
+    if (d.liked) btn.classList.add('liked'); else btn.classList.remove('liked');
+  } catch(e) {}
+}
+
+function sharePost() {
+  if (navigator.share) {
+    navigator.share({title: postData?.title, url: window.location.href});
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    showToast('Link copied!', 'ok');
+  }
+}
+
+// ECHOBOT
+function toggleAI() {
+  document.getElementById('ai-panel').classList.toggle('open');
+}
+
+async function sendAI() {
+  const input = document.getElementById('ai-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addMsg(msg, 'user');
+  const tid = addMsg('Thinking...', 'bot');
+  try {
+    const fd = new FormData();
+    fd.append('message', msg);
+    fd.append('region_context', postData?.title || '');
+    const r = await fetch('/api/ai/chat', {method:'POST', body:fd});
+    const d = await r.json();
+    removeMsg(tid);
+    addMsg(d.reply, d.locked ? 'locked-msg' : 'bot');
+  } catch(e) {
+    removeMsg(tid);
+    addMsg('Connection error. Please try again.', 'bot');
+  }
+}
+
+function addMsg(text, type) {
+  const c = document.getElementById('ai-msgs');
+  const id = 'msg-' + Date.now();
+  const d = document.createElement('div');
+  d.className = 'ai-msg ' + type; d.id = id; d.textContent = text;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+  return id;
+}
+function removeMsg(id) { const el = document.getElementById(id); if(el) el.remove(); }
+
+function logout() {
+  fetch('/api/users/logout', {method:'POST'}).finally(() => { window.location.href = '/'; });
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast on ' + (type || '');
+  setTimeout(() => t.className = 'toast', 3000);
+}
+</script>
+</body>
+</html>
