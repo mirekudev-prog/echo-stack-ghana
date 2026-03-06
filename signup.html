@@ -7,9 +7,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
         
@@ -25,20 +22,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 2rem 1rem;
         }
         
-        .auth-card {
+        .signup-card {
             background: white;
             padding: 3rem;
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(26, 30, 41, 0.1);
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
-            margin: 2rem;
         }
         
-        h1 { color: var(--brand-dark) !important; }
-        p { color: #666 !important; }
+        h1, h2 { color: var(--brand-dark) !important; }
         
         input {
             border-color: #d0d0d0 !important;
@@ -51,38 +47,61 @@
             border-color: var(--brand-blue) !important;
         }
         
-        /* Topic Tags */
+        /* Topic Tags - Substack Style */
         .topic-tag {
-            padding: 0.5rem 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
+            padding: 0.75rem 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 9999px;
             cursor: pointer;
             transition: all 0.2s;
             font-weight: 500;
+            font-size: 0.875rem;
+            background: white;
+            color: #374151;
         }
         
         .topic-tag:hover {
             border-color: var(--brand-blue);
             color: var(--brand-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 119, 182, 0.15);
         }
         
         .topic-tag.selected {
             background-color: var(--brand-blue) !important;
             border-color: var(--brand-blue) !important;
             color: white !important;
+            box-shadow: 0 4px 12px rgba(0, 119, 182, 0.3);
         }
         
-        button[type="submit"] {
+        .btn-primary {
             background-color: var(--brand-blue) !important;
             color: white !important;
         }
+        
+        .progress-bar {
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--brand-blue);
+            transition: width 0.3s ease;
+        }
+        
+        .step { display: none; }
+        .step.active { display: block; }
         
         .loading-spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid var(--brand-blue);
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
             display: inline-block;
         }
@@ -93,70 +112,88 @@
         }
     </style>
 </head>
-<body class="antialiased">
+<body>
     
-    <div class="auth-card">
-        <!-- Logo Section -->
+    <div class="signup-card">
+        <!-- Header -->
         <div class="text-center mb-8">
+            <div class="flex justify-center mb-4">
+                <img src="/echostack-logo.png" alt="EchoStack" class="w-16 h-16 object-contain">
+            </div>
             <h1 class="text-3xl font-bold mb-2">Join EchoStack</h1>
-            <p>Create your account to explore Ghana's stories</p>
+            <p class="text-gray-600">Create your account to explore Ghana's heritage</p>
         </div>
         
-        <!-- Signup Form -->
-        <form id="signup-form" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium mb-2" style="color: #1a1e29 !important;">Username *</label>
-                <input type="text" id="username" required class="w-full p-3 border rounded-lg" placeholder="Choose a username">
-            </div>
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 50%"></div>
+        </div>
+        
+        <!-- Step 1: Account Info -->
+        <div class="step active" id="step-1">
+            <h2 class="text-xl font-semibold mb-6">Create Your Account</h2>
             
-            <div>
-                <label class="block text-sm font-medium mb-2" style="color: #1a1e29 !important;">Email *</label>
-                <input type="email" id="email" required class="w-full p-3 border rounded-lg" placeholder="your@email.com">
-            </div>
-            
-            <div>
-                <label class="block text-sm font-medium mb-2" style="color: #1a1e29 !important;">Password *</label>
-                <input type="password" id="password" required class="w-full p-3 border rounded-lg" placeholder="Min 6 characters">
-            </div>
-            
-            <!-- Step 2: Topic Selection -->
-            <div class="mt-6">
-                <h2 class="text-xl font-semibold mb-4" style="color: #1a1e29 !important;">Select Your Interests (Pick 3)</h2>
-                <p class="mb-4 text-sm" style="color: #666 !important;">We'll recommend stories that match your interests</p>
-                
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="topics-container">
-                    <!-- Topics generated by JavaScript -->
+            <form id="signup-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Username *</label>
+                    <input type="text" id="username" required class="w-full p-3 border rounded-lg" 
+                           placeholder="Choose a username">
                 </div>
                 
-                <p id="selected-count" class="text-sm mt-2 text-[#0077b6] font-medium"></p>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Email *</label>
+                    <input type="email" id="email" required class="w-full p-3 border rounded-lg" 
+                           placeholder="your@email.com">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Password *</label>
+                    <input type="password" id="password" required class="w-full p-3 border rounded-lg" 
+                           placeholder="Min 6 characters">
+                </div>
+                
+                <button type="button" onclick="goToStep(2)" 
+                        class="w-full btn-primary py-3 rounded-lg font-bold mt-6">
+                    Continue →
+                </button>
+            </form>
+            
+            <p class="text-center text-sm text-gray-600 mt-6">
+                Already have an account? <a href="/login" class="text-[#0077b6] hover:underline">Sign In</a>
+            </p>
+        </div>
+        
+        <!-- Step 2: Topic Selection -->
+        <div class="step" id="step-2">
+            <h2 class="text-xl font-semibold mb-2">Select 3 Topics</h2>
+            <p class="text-gray-600 mb-6">We'll recommend stories that match your interests</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6" id="topics-container">
+                <!-- Topics generated by JavaScript -->
             </div>
             
-            <button type="submit" id="submit-btn" disabled class="w-full py-3 rounded-lg font-bold transition opacity-50 cursor-not-allowed" style="opacity: 0.5; cursor: not-allowed;">
+            <div class="flex items-center justify-between mb-6">
+                <p id="selected-count" class="text-sm font-medium text-[#0077b6]">0 / 3 selected</p>
+                <button onclick="goToStep(1)" class="text-sm text-gray-500 hover:text-gray-700">← Back</button>
+            </div>
+            
+            <button onclick="completeSignup()" id="complete-btn" disabled
+                    class="w-full btn-primary py-3 rounded-lg font-bold opacity-50 cursor-not-allowed">
                 ✨ Create Free Account
             </button>
-        </form>
-        
-        <!-- Login Link -->
-        <p class="text-center text-sm text-gray-600 mt-6">
-            Already have an account? <a href="/login" class="text-[#0077b6] hover:underline">Sign In</a>
-        </p>
+        </div>
     </div>
 
     <!-- Notification Toast -->
     <div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50"></div>
 
     <script>
-        // Initialize Supabase
-        const supabaseUrl = 'https://trzisijyeetygylpsidl.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyemlzaWp5ZWV0eWd5bHBzaWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NTU0NzYsImV4cCI6MjA4ODIzMTQ3Nn0.sEd4E4n_YgXTgA53Tb-K9ueQvrIFuj9AA0pBshzTVyE';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-        
-        // Define EchoStack-Specific Topics
+        // EchoStack-Specific Topics (Ghana Culture)
         const echoStackTopics = [
             "Ashanti Culture",
-            "Ga Traditions", 
+            "Ga Traditions",
             "Ewe Music",
-            "Northern Food",
+            "Northern Heritage",
             "Gold Coast History",
             "Slave Castles",
             "Highlife Music",
@@ -172,21 +209,33 @@
             "Oral Histories",
             "Modern Ghana Art",
             "Afrobeats History",
-            "Akwaaba Festivals"
+            "Festivals & Ceremonies",
+            "Traditional Food",
+            "Colonial History"
         ];
         
         let selectedTopics = [];
         const MAX_TOPICS = 3;
+        let currentStep = 1;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTopics();
+        });
 
         // Render Topics
-        const container = document.getElementById('topics-container');
-        echoStackTopics.forEach(topic => {
-            const tag = document.createElement('div');
-            tag.className = 'topic-tag';
-            tag.textContent = topic;
-            tag.onclick = () => toggleTopic(topic, tag);
-            container.appendChild(tag);
-        });
+        function renderTopics() {
+            const container = document.getElementById('topics-container');
+            container.innerHTML = '';
+            
+            echoStackTopics.forEach(topic => {
+                const tag = document.createElement('div');
+                tag.className = 'topic-tag';
+                tag.textContent = topic;
+                tag.onclick = () => toggleTopic(topic, tag);
+                container.appendChild(tag);
+            });
+        }
 
         // Toggle Topic Selection
         function toggleTopic(topic, element) {
@@ -210,29 +259,57 @@
             const countDisplay = document.getElementById('selected-count');
             countDisplay.textContent = `${selectedTopics.length} / ${MAX_TOPICS} selected`;
             
-            // Enable/disable submit button
-            const submitBtn = document.getElementById('submit-btn');
+            // Enable/disable complete button
+            const completeBtn = document.getElementById('complete-btn');
             if (selectedTopics.length === MAX_TOPICS) {
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '1';
-                submitBtn.style.cursor = 'pointer';
+                completeBtn.disabled = false;
+                completeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             } else {
-                submitBtn.disabled = true;
-                submitBtn.style.opacity = '0.5';
-                submitBtn.style.cursor = 'not-allowed';
+                completeBtn.disabled = true;
+                completeBtn.classList.add('opacity-50', 'cursor-not-allowed');
             }
         }
 
-        // Handle Signup Submission
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Navigate Between Steps
+        function goToStep(step) {
+            // Validate step 1
+            if (step === 2) {
+                const username = document.getElementById('username').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                
+                if (!username || !email || !password) {
+                    showNotification('Please fill in all fields', 'error');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showNotification('Password must be at least 6 characters', 'error');
+                    return;
+                }
+            }
             
+            // Hide all steps
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            
+            // Show target step
+            document.getElementById(`step-${step}`).classList.add('active');
+            
+            // Update progress bar
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.style.width = step === 1 ? '50%' : '100%';
+            
+            currentStep = step;
+        }
+
+        // Complete Signup
+        async function completeSignup() {
             if (selectedTopics.length !== MAX_TOPICS) {
                 showNotification(`Please select exactly ${MAX_TOPICS} topics`, 'error');
                 return;
             }
             
-            const btn = document.getElementById('submit-btn');
+            const btn = document.getElementById('complete-btn');
             btn.innerHTML = '<div class="loading-spinner"></div> Creating Account...';
             btn.disabled = true;
             
@@ -244,52 +321,38 @@
             };
             
             try {
-                // Check if username/email already exists
-                const { data: existingUser, error: checkError } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('username', formData.username)
-                    .or(`email.eq.${formData.email}`)
-                    .single();
+                // Send to backend
+                const formDataObj = new FormData();
+                formDataObj.append('username', formData.username);
+                formDataObj.append('email', formData.email);
+                formDataObj.append('password', formData.password);
+                formDataObj.append('topics', JSON.stringify(formData.topics));
                 
-                if (checkError && !checkError.message.includes('No rows')) {
-                    throw checkError;
+                const response = await fetch('/api/users/register', {
+                    method: 'POST',
+                    body: formDataObj
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showNotification('✅ Account created successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/admin';
+                    }, 1500);
+                } else {
+                    throw new Error(data.detail || 'Registration failed');
                 }
-                
-                if (existingUser) {
-                    throw new Error('Username or email already taken');
-                }
-                
-                // Insert new user into Supabase
-                const { data, error } = await supabase
-                    .from('users')
-                    .insert([{
-                        username: formData.username,
-                        email: formData.email,
-                        password_hash: btoa(formData.password), // Simple encoding (upgrade later)
-                        preferences: formData.topics
-                    }])
-                    .select()
-                    .single();
-                
-                if (error) throw error;
-                
-                showNotification('✅ Account created successfully!', 'success');
-                setTimeout(() => {
-                    window.location.href = '/admin';
-                }, 1500);
-                
             } catch (error) {
                 console.error('Signup error:', error);
-                showNotification('❌ ' + error.message || 'Registration failed', 'error');
+                showNotification('❌ ' + error.message, 'error');
                 btn.innerHTML = '✨ Create Free Account';
                 btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.style.cursor = 'pointer';
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
-        });
+        }
 
-        // Notification Function
+        // Show Notification
         function showNotification(message, type) {
             const notification = document.getElementById('notification');
             notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white ' + 
@@ -298,11 +361,6 @@
             notification.classList.remove('hidden');
             setTimeout(() => notification.classList.add('hidden'), 3000);
         }
-        
-        // Initialize submit button state
-        document.getElementById('submit-btn').disabled = true;
-        document.getElementById('submit-btn').style.opacity = '0.5';
-        document.getElementById('submit-btn').style.cursor = 'not-allowed';
     </script>
 </body>
 </html>
