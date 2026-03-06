@@ -1,9 +1,9 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean
+# ✅ CORRECTED IMPORT - Added ForeignKey back!
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
 Base = declarative_base()
-
 # ============================================
 # REGION (Ghana's 16 Regions)
 # ============================================
