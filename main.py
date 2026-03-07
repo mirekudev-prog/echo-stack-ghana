@@ -74,27 +74,35 @@ def signup_page(): return serve_file("signup.html")
 @app.get("/user-login")
 def user_login_page(): return serve_file("user-login.html")
 
+def is_logged_in(request: Request) -> bool:
+    """Returns True if user is logged in OR admin is previewing the site."""
+    return bool(
+        request.cookies.get("user_session") or
+        request.cookies.get("admin_preview") or
+        request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
+    )
+
 @app.get("/dashboard")
 async def dashboard_page(request: Request):
-    if not request.cookies.get("user_session"):
+    if not is_logged_in(request):
         return RedirectResponse(url="/user-login")
     return serve_file("dashboard.html")
 
 @app.get("/creator")
 async def creator_page(request: Request):
-    if not request.cookies.get("user_session"):
+    if not is_logged_in(request):
         return RedirectResponse(url="/user-login")
     return serve_file("creator.html")
 
 @app.get("/post/{post_id}")
 async def post_page(post_id: int, request: Request):
-    if not request.cookies.get("user_session"):
+    if not is_logged_in(request):
         return RedirectResponse(url="/user-login")
     return serve_file("post.html")
 
 @app.get("/app")
 async def app_page(request: Request):
-    if not request.cookies.get("user_session"):
+    if not is_logged_in(request):
         return RedirectResponse(url="/user-login")
     return serve_file("app.html")
 
@@ -1062,3 +1070,16 @@ async def payment_callback(reference: str, db: Session = Depends(get_db)):
                 pass
         return RedirectResponse("/dashboard?upgraded=1")
     return RedirectResponse("/dashboard?payment=failed")
+
+# ============================================
+# ADMIN PREVIEW — skip user login when viewing site from admin dashboard
+# ============================================
+@app.get("/admin-preview")
+async def admin_preview(request: Request):
+    """Admin clicks 'View Site' — sets a preview cookie and redirects to app."""
+    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED":
+        return RedirectResponse(url="/admin")
+    # Create a preview user session so the app doesn't redirect to login
+    response = RedirectResponse(url="/app")
+    response.set_cookie(key="admin_preview", value="1", max_age=3600, path="/")
+    return response
