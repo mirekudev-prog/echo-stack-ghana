@@ -1147,3 +1147,276 @@ async def post_message(
         "username": msg.username,
         "message": msg.message
     }
+
+# ============================================================
+# ECHOSTACK — MISSING ROUTES FIX
+# ============================================================
+# Copy EVERYTHING below and paste it into your main.py
+# Add it BEFORE the last line of main.py (or at the bottom)
+# ============================================================
+
+
+# ============================================
+# FIX 1: /api/admin/users  ← was causing 404
+# ============================================
+@app.get("/api/admin/users")
+def get_all_users(request: Request, db: Session = Depends(get_db)):
+    """Admin: get all users"""
+    require_admin(request)
+    try:
+        users = db.query(models.User).order_by(models.User.created_at.desc()).all()
+        return [{
+            "id": u.id,
+            "username": u.username,
+            "email": u.email,
+            "role": u.role or "user",
+            "is_premium": u.is_premium or 0,
+            "plan": "premium" if (u.is_premium) else "free",
+            "is_active": u.is_active if u.is_active is not None else True,
+            "created_at": str(u.created_at) if u.created_at else ""
+        } for u in users]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/api/admin/users/{user_id}/role")
+def set_user_role(user_id: int, request: Request, role: str = Form(...), db: Session = Depends(get_db)):
+    """Admin: change a user's role"""
+    require_admin(request)
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if role not in ["user", "creator", "admin", "superuser"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    user.role = role
+    db.commit()
+    return {"success": True, "user_id": user_id, "role": role}
+
+
+@app.put("/api/admin/users/{user_id}/premium")
+def toggle_premium(user_id: int, request: Request, db: Session = Depends(get_db)):
+    """Admin: toggle a user's premium status"""
+    require_admin(request)
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_premium = 0 if user.is_premium else 1
+    db.commit()
+    return {"success": True, "is_premium": user.is_premium}
+
+
+@app.put("/api/admin/users/{user_id}/suspend")
+def toggle_suspend(user_id: int, request: Request, db: Session = Depends(get_db)):
+    """Admin: suspend or restore a user"""
+    require_admin(request)
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = not (user.is_active if user.is_active is not None else True)
+    db.commit()
+    return {"success": True, "is_active": user.is_active}
+
+
+# ============================================
+# FIX 2: /api/newsletter/subscribers  ← was causing 404
+# ============================================
+@app.get("/api/newsletter/subscribers")
+def get_newsletter_subscribers(request: Request, db: Session = Depends(get_db)):
+    """Admin: get all newsletter subscribers"""
+    require_admin(request)
+    try:
+        subs = db.query(models.NewsletterSubscriber).order_by(
+            models.NewsletterSubscriber.created_at.desc()
+        ).all()
+        return [{
+            "id": s.id,
+            "email": s.email,
+            "full_name": s.full_name or "",
+            "created_at": str(s.created_at) if s.created_at else ""
+        } for s in subs]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================
+# FIX 3: PUT /api/posts/{id}  ← needed for editing posts
+# ============================================
+@app.put("/api/posts/{post_id}")
+async def update_post(
+    post_id: int,
+    title: str = Form(None),
+    excerpt: str = Form(None),
+    content: str = Form(None),
+    cover_image: str = Form(None),
+    content_type: str = Form(None),
+    status: str = Form(None),
+    is_premium: str = Form(None),
+    region_id: str = Form(None),
+    request: Request = None,
+    db: Session = Depends(get_db)
+):
+    """Update a post — admin or post author"""
+    # Allow admin OR logged-in creator
+    is_admin = request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
+    user = get_user_from_request(request, db)
+    if not is_admin and not user:
+        raise HTTPException(status_code=401, detail="Not authorized")
+
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    # Only allow edit if admin, or the post's own author
+    if not is_admin and user and post.author_id != user.id:
+        raise HTTPException(status_code=403, detail="Not your post")
+
+    if title is not None and title.strip():
+        post.title = title.strip()
+    if excerpt is not None:
+        post.excerpt = excerpt.strip()
+    if content is not None:
+        post.content = content.strip()
+    if cover_image is not None:
+        post.cover_image = cover_image.strip()
+    if content_type is not None:
+        post.content_type = content_type
+    if status is not None:
+        post.status = status
+    if is_premium is not None:
+        post.is_premium = int(is_premium)
+    if region_id is not None:
+        post.region_id = int(region_id) if region_id and region_id.isdigit() else None
+
+    db.commit()
+    db.refresh(post)
+    return {"success": True, "post_id": post.id, "status": post.status}
+
+
+# ============================================
+# FIX 4: /api/stories  ← was causing 404
+# ============================================
+@app.get("/api/stories")
+def get_stories(status: str = "pending", db: Session = Depends(get_db)):
+    """Get story submissions by status"""
+    try:
+        # Try to query stories table — if it doesn't exist yet, return []
+        stories = db.query(models.Story).filter(
+            models.Story.status == status
+        ).order_by(models.Story.created_at.desc()).all()
+
+        return [{
+            "id": s.id,
+            "title": s.title,
+            "content": s.content or "",
+            "username": s.username or "",
+            "author": s.username or "",
+            "region_id": s.region_id,
+            "status": s.status,
+            "created_at": str(s.created_at) if s.created_at else ""
+        } for s in stories]
+    except Exception as e:
+        print(f"Stories error (table may not exist yet): {e}")
+        return []
+
+
+@app.put("/api/stories/{story_id}/approve")
+def approve_story(story_id: int, request: Request, db: Session = Depends(get_db)):
+    """Admin: approve a story submission"""
+    require_admin(request)
+    try:
+        story = db.query(models.Story).filter(models.Story.id == story_id).first()
+        if not story:
+            raise HTTPException(status_code=404, detail="Story not found")
+        story.status = "approved"
+        db.commit()
+        return {"success": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/api/stories/{story_id}/reject")
+def reject_story(story_id: int, request: Request, db: Session = Depends(get_db)):
+    """Admin: reject a story submission"""
+    require_admin(request)
+    try:
+        story = db.query(models.Story).filter(models.Story.id == story_id).first()
+        if not story:
+            raise HTTPException(status_code=404, detail="Story not found")
+        story.status = "rejected"
+        db.commit()
+        return {"success": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/stories")
+async def submit_story(
+    title: str = Form(...),
+    content: str = Form(...),
+    region_id: str = Form(""),
+    request: Request = None,
+    db: Session = Depends(get_db)
+):
+    """User: submit a story"""
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Must be logged in to submit a story")
+
+    try:
+        story = models.Story(
+            title=title.strip(),
+            content=content.strip(),
+            username=user.username,
+            user_id=user.id,
+            region_id=int(region_id) if region_id and region_id.isdigit() else None,
+            status="pending"
+        )
+        db.add(story)
+        db.commit()
+        db.refresh(story)
+        return {"success": True, "story_id": story.id}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================
+# FIX 5: DELETE /api/chat/{id}  ← for admin moderation
+# ============================================
+@app.delete("/api/chat/{message_id}")
+async def delete_chat_message(message_id: int, request: Request, db: Session = Depends(get_db)):
+    """Admin: delete a chat message"""
+    require_admin(request)
+    msg = db.query(models.ChatMessage).filter(models.ChatMessage.id == message_id).first()
+    if not msg:
+        raise HTTPException(status_code=404, detail="Message not found")
+    db.delete(msg)
+    db.commit()
+    return {"success": True}
+
+
+# ============================================
+# FIX 6: /api/creators  ← for creators panel
+# ============================================
+@app.get("/api/creators")
+def get_creators(db: Session = Depends(get_db)):
+    """Get all creator-role users"""
+    try:
+        creators = db.query(models.User).filter(
+            models.User.role.in_(["creator", "admin"])
+        ).all()
+        return [{
+            "id": c.id,
+            "username": c.username,
+            "channel_name": getattr(c, 'channel_name', None) or c.username,
+            "follower_count": getattr(c, 'follower_count', 0) or 0,
+            "post_count": db.query(models.Post).filter(models.Post.author_id == c.id).count(),
+            "role": c.role
+        } for c in creators]
+    except Exception as e:
+        print(f"Creators error: {e}")
+        return []
