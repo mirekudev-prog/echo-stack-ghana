@@ -1,116 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign In — EchoStack</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;--red:#C0392B;--green:#1A7A4A;--border:#E2E8F0;--muted:#94A3B8}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background-image:radial-gradient(ellipse at 15% 25%,rgba(200,150,46,.09) 0%,transparent 55%),radial-gradient(ellipse at 85% 75%,rgba(13,27,42,.06) 0%,transparent 55%)}
-.card{background:#fff;border-radius:20px;box-shadow:0 8px 48px rgba(13,27,42,.12);width:100%;max-width:420px;overflow:hidden}
-.card-top{background:var(--ink);padding:28px 36px 24px;position:relative}
-.card-top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold))}
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.logo img{width:34px;height:34px;border-radius:7px;object-fit:contain}
-.logo span{font-family:'Playfair Display',serif;color:#fff;font-size:1.1rem}
-.card-top h1{font-family:'Playfair Display',serif;color:#fff;font-size:1.65rem;margin-bottom:5px}
-.card-top p{color:#94A3B8;font-size:.85rem}
-.card-body{padding:28px 36px 24px}
-.field{margin-bottom:16px}
-label{display:block;font-size:.76rem;font-weight:600;color:#475569;letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px}
-.iw{position:relative}
-.iw svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
-input{width:100%;padding:10px 12px 10px 36px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink);background:#FAFAFA;outline:none;transition:border-color .2s,box-shadow .2s}
-input:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(200,150,46,.12)}
-input.err{border-color:var(--red)}
-.emsg{font-size:.74rem;color:var(--red);margin-top:4px;display:none}.emsg.on{display:block}
-.btn{width:100%;padding:12px;font-family:'DM Sans',sans-serif;font-size:.93rem;font-weight:600;border:none;border-radius:9px;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;background:var(--ink);color:#fff}
-.btn:hover{background:var(--gold)}.btn:disabled{background:#D1D5DB;cursor:not-allowed}
-.spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:none}
-.btn.ld .spin{display:block}.btn.ld .bt{display:none}
-@keyframes sp{to{transform:rotate(360deg)}}
-.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
-.foot{text-align:center;padding:0 36px 24px;font-size:.83rem;color:var(--muted)}
-.foot a{color:var(--gold);font-weight:600;text-decoration:none}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
-.toast.on{transform:translateX(-50%) translateY(0)}
-.toast.ok{background:var(--green)}.toast.er{background:var(--red)}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - EchoStack</title>
+    <meta name="theme-color" content="#1a1e29">
+    <link rel="manifest" href="/manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --brand-dark: #1a1e29; --brand-blue: #0077b6; --gold: #C8962E; }
+        body {
+            font-family: Georgia, serif;
+            background: linear-gradient(135deg, #f5f0e8 0%, #ffffff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(26,30,41,0.12);
+            max-width: 420px;
+            width: 100%;
+        }
+        .btn-primary {
+            background-color: var(--brand-dark) !important;
+            color: white !important;
+            transition: background .2s;
+        }
+        .btn-primary:hover { background-color: var(--brand-blue) !important; }
+        input { border: 1.5px solid #e2e8f0; transition: border-color .2s; }
+        input:focus { outline: none; border-color: var(--brand-blue); }
+        .logo-bar { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 6px; }
+        .logo-bar img { width: 40px; height: 40px; object-fit: contain; }
+        .logo-bar span { font-size: 1.4rem; font-weight: bold; color: var(--brand-dark); }
+    </style>
 </head>
 <body>
-<div class="card">
-  <div class="card-top">
-    <div class="logo">
-      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-      <span>EchoStack</span>
+    <div class="login-card">
+        <div class="text-center mb-8">
+            <div class="logo-bar">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </div>
+            <h1 class="text-2xl font-bold mb-1" style="color:#1a1e29">Welcome Back</h1>
+            <p class="text-gray-500 text-sm">Sign in to continue exploring Ghana's heritage</p>
+        </div>
+
+        <form id="login-form" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-gray-600">Email or Username</label>
+                <input type="text" id="username" required
+                    class="w-full p-3 rounded-lg text-sm"
+                    placeholder="Enter your email or username"
+                    autocomplete="username">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-gray-600">Password</label>
+                <input type="password" id="pw" required
+                    class="w-full p-3 rounded-lg text-sm"
+                    placeholder="Your password"
+                    autocomplete="current-password">
+            </div>
+            <button type="submit" id="submit-btn"
+                class="w-full btn-primary py-3 rounded-lg font-bold text-sm mt-2">
+                Sign In →
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-gray-500 mt-6">
+            Don't have an account?
+            <a href="/signup" class="font-semibold hover:underline" style="color:#0077b6">Create Account</a>
+        </p>
+        <p class="text-center text-sm text-gray-400 mt-3">
+            <a href="/" class="hover:underline">← Back to Home</a>
+        </p>
+        <!-- NO admin link here — admin access is via direct URL only -->
     </div>
-    <h1>Welcome Back</h1>
-    <p>Sign in to continue exploring Ghana's heritage</p>
-  </div>
-  <div class="card-body">
-    <div class="field">
-      <label>Email or Username</label>
-      <div class="iw">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-        <input type="text" id="login" placeholder="you@example.com or username" autocomplete="username">
-      </div>
-      <div class="emsg" id="le">Please enter your email or username</div>
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <div class="iw">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
-        <input type="password" id="pw" placeholder="Your password" autocomplete="current-password">
-      </div>
-      <div class="emsg" id="pe">Please enter your password</div>
-    </div>
-    <button class="btn" id="sbtn" onclick="doLogin()">
-      <div class="spin"></div><span class="bt">Sign In →</span>
-    </button>
-    <hr class="divider">
-  </div>
-  <div class="foot">
-    Don't have an account? <a href="/signup">Create Account</a><br><br>
-    <a href="/" style="color:var(--muted);font-weight:400">← Back to Home</a>
-  </div>
-</div>
-<div class="toast" id="toast"></div>
-<script>
-function redirectByRole(role){
-  if(role==='superuser'||role==='admin')window.location.href='/admin';
-  else if(role==='creator')window.location.href='/creator';
-  else window.location.href='/dashboard';
-}
-async function doLogin(){
-  const lv=document.getElementById('login').value.trim();
-  const pv=document.getElementById('pw').value;
-  let ok=true;
-  ['le','pe'].forEach(id=>document.getElementById(id).classList.remove('on'));
-  ['login','pw'].forEach(id=>document.getElementById(id).classList.remove('err'));
-  if(!lv){document.getElementById('le').classList.add('on');document.getElementById('login').classList.add('err');ok=false;}
-  if(!pv){document.getElementById('pe').classList.add('on');document.getElementById('pw').classList.add('err');ok=false;}
-  if(!ok)return;
-  const btn=document.getElementById('sbtn');btn.classList.add('ld');btn.disabled=true;
-  const fd=new FormData();
-  fd.append('email',lv);fd.append('username',lv);fd.append('password',pv);
-  try{
-    const r=await fetch('/api/users/login',{method:'POST',body:fd});
-    const d=await r.json();
-    if(r.ok&&d.success){
-      localStorage.setItem('es_user',JSON.stringify({id:d.id,username:d.username,email:d.email||lv,role:d.role||'user',plan:d.plan||'free',loggedIn:true}));
-      toast('✅ Welcome back, '+d.username+'!','ok');
-      setTimeout(()=>redirectByRole(d.role||'user'),1200);
-    }else{throw new Error(d.detail||'Invalid email or password');}
-  }catch(err){toast('❌ '+err.message,'er');btn.classList.remove('ld');btn.disabled=false;}
-}
-document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-let _t;
-function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);}
-// Smart redirect if already logged in
-const u=localStorage.getItem('es_user');
-if(u){try{const d=JSON.parse(u);if(d.loggedIn)redirectByRole(d.role);}catch(e){}}
-</script>
+
+    <div id="notification" class="fixed bottom-6 right-6 hidden px-5 py-3 rounded-lg shadow-lg z-50 text-white text-sm font-semibold"></div>
+
+    <script>
+        // If already logged in, skip straight to app
+        try {
+            var stored = localStorage.getItem('es_user');
+            if (stored) {
+                var u = JSON.parse(stored);
+                if (u && u.loggedIn) window.location.href = '/app';
+            }
+        } catch(e) {}
+
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Signing in…';
+
+            var formData = new FormData();
+            formData.append('username', document.getElementById('username').value.trim());
+            formData.append('password', document.getElementById('pw').value);
+
+            try {
+                var response = await fetch('/api/users/login', { method: 'POST', body: formData });
+                var data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Save user to localStorage
+                    localStorage.setItem('es_user', JSON.stringify({
+                        loggedIn: true,
+                        user_id: data.user_id,
+                        username: data.username,
+                        email: data.email,
+                        role: data.role || 'user',
+                        plan: data.is_premium ? 'premium' : 'free',
+                        is_premium: data.is_premium || 0
+                    }));
+                    showNotification('✅ Welcome back, ' + data.username + '!', 'success');
+                    setTimeout(function() { window.location.href = '/app'; }, 800);
+                } else {
+                    throw new Error(data.detail || 'Invalid username or password');
+                }
+            } catch(error) {
+                showNotification('❌ ' + error.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Sign In →';
+            }
+        });
+
+        function showNotification(message, type) {
+            var n = document.getElementById('notification');
+            n.className = 'fixed bottom-6 right-6 px-5 py-3 rounded-lg shadow-lg z-50 text-white text-sm font-semibold ' +
+                (type === 'success' ? 'bg-green-600' : 'bg-red-600');
+            n.textContent = message;
+            n.classList.remove('hidden');
+            setTimeout(function() { n.classList.add('hidden'); }, 3500);
+        }
+    </script>
 </body>
 </html>
