@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EchoStack — My Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:#C9A84C; --gold-light:#E8C76A;
+    --dark:#0F1117; --card:#1A1D27; --card2:#21253A;
+    --border:rgba(201,168,76,0.18); --text:#E8E8F0; --muted:#7A7D8E;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--dark); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+  nav {
+    background:rgba(15,17,23,0.95); border-bottom:1px solid var(--border);
+    backdrop-filter:blur(12px); position:sticky; top:0; z-index:100;
+    display:flex; align-items:center; gap:16px; padding:0 24px; height:60px;
+  }
+  .nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .nav-logo span { font-family:'DM Serif Display',serif; font-size:20px; color:var(--gold); }
+  .spacer { flex:1; }
+  .btn-sm { background:var(--gold); color:var(--dark); border:none; padding:7px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:.2s; text-decoration:none; }
+  .btn-sm:hover { background:var(--gold-light); }
+  .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); padding:7px 16px; border-radius:8px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:.2s; }
+  .btn-outline:hover { border-color:var(--gold); color:var(--gold); }
+
+  .page-wrap { max-width:780px; margin:0 auto; padding:32px 16px; }
+  .profile-hero {
+    background:var(--card); border:1px solid var(--border); border-radius:20px;
+    padding:32px; display:flex; align-items:center; gap:24px; margin-bottom:20px;
+  }
+  .big-avatar {
+    width:88px; height:88px; border-radius:50%;
+    background:linear-gradient(135deg,var(--gold),#8B6914);
+    display:flex; align-items:center; justify-content:center;
+    font-size:32px; font-weight:700; color:var(--dark);
+    border:4px solid var(--gold); flex-shrink:0;
+  }
+  .big-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+  .hero-info h1 { font-family:'DM Serif Display',serif; font-size:26px; margin-bottom:4px; }
+  .hero-info .email { color:var(--muted); font-size:14px; margin-bottom:8px; }
+  .role-badge {
+    display:inline-block; background:rgba(201,168,76,.15); color:var(--gold);
+    border:1px solid rgba(201,168,76,.3); padding:4px 14px; border-radius:20px;
+    font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;
+  }
+  .stats-row { display:flex; gap:24px; flex-wrap:wrap; }
+  .stat { text-align:center; }
+  .stat-n { font-size:22px; font-weight:700; color:var(--gold); }
+  .stat-l { font-size:12px; color:var(--muted); }
+
+  .cards-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+  @media(max-width:600px) { .cards-grid { grid-template-columns:1fr; } .profile-hero { flex-direction:column; text-align:center; } .stats-row { justify-content:center; } }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; }
+  .card h3 { font-size:14px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
+  .info-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:14px; }
+  .info-row:last-child { border-bottom:none; }
+  .info-label { color:var(--muted); }
+  .info-val { font-weight:500; color:var(--text); }
+  .info-val.gold { color:var(--gold); }
+
+  /* Edit form */
+  .form-group { margin-bottom:14px; }
+  .form-label { font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; display:block; }
+  .form-input {
+    width:100%; background:var(--card2); border:1px solid var(--border);
+    border-radius:10px; padding:10px 14px; color:var(--text); font-size:14px;
+    font-family:'DM Sans',sans-serif; outline:none; transition:.2s;
+  }
+  .form-input:focus { border-color:var(--gold); }
+  textarea.form-input { resize:vertical; min-height:80px; }
+  .save-btn { background:var(--gold); color:var(--dark); border:none; padding:10px 24px; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; width:100%; margin-top:4px; transition:.2s; }
+  .save-btn:hover { background:var(--gold-light); }
+
+  .posts-section { margin-top:20px; }
+  .posts-section h2 { font-family:'DM Serif Display',serif; font-size:22px; margin-bottom:16px; }
+  .mini-post { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+  .mini-post-title { font-weight:600; font-size:15px; margin-bottom:4px; }
+  .mini-post-meta { font-size:12px; color:var(--muted); display:flex; gap:12px; }
+
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--card); border:1px solid var(--gold); color:var(--text); padding:12px 24px; border-radius:12px; font-size:14px; z-index:9999; transition:.3s; box-shadow:0 8px 32px rgba(0,0,0,.4); }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">
+    <img src="/echostack-logo.png" width="28" height="28" style="border-radius:7px" onerror="this.style.display='none'">
+    <span>EchoStack</span>
+  </a>
+  <div class="spacer"></div>
+  <a href="/dashboard" class="btn-outline" style="margin-right:8px;">← Feed</a>
+  <a href="/creator" id="creator-link" style="display:none;margin-right:8px;" class="btn-outline">My Channel</a>
+  <a href="/admin" id="admin-link" style="display:none;margin-right:8px;" class="btn-outline">Admin</a>
+  <button class="btn-sm" onclick="doSignOut()">Sign Out</button>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- PROFILE HERO -->
+  <div class="profile-hero">
+    <div class="big-avatar" id="big-avatar">?</div>
+    <div class="hero-info" style="flex:1;">
+      <h1 id="hero-name">Loading...</h1>
+      <p class="email" id="hero-email"></p>
+      <span class="role-badge" id="hero-role">user</span>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-n" id="s-posts">0</div><div class="stat-l">Posts</div></div>
+        <div class="stat"><div class="stat-n" id="s-followers">0</div><div class="stat-l">Followers</div></div>
+        <div class="stat"><div class="stat-n" id="s-plan"></div><div class="stat-l">Plan</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARDS GRID -->
+  <div class="cards-grid">
+    <!-- ACCOUNT INFO -->
+    <div class="card">
+      <h3>Account Info</h3>
+      <div class="info-row"><span class="info-label">Username</span><span class="info-val" id="info-username">—</span></div>
+      <div class="info-row"><span class="info-label">Email</span><span class="info-val" id="info-email">—</span></div>
+      <div class="info-row"><span class="info-label">Role</span><span class="info-val gold" id="info-role">—</span></div>
+      <div class="info-row"><span class="info-label">Plan</span><span class="info-val gold" id="info-plan">—</span></div>
+      <div class="info-row"><span class="info-label">Member since</span><span class="info-val" id="info-since">—</span></div>
+    </div>
+
+    <!-- CHANNEL INFO -->
+    <div class="card" id="channel-card">
+      <h3>My Channel</h3>
+      <div id="channel-info" style="font-size:14px;color:var(--muted);">
+        <p>You haven't set up your creator channel yet.</p>
+        <a href="/creator" class="btn-sm" style="display:inline-block;margin-top:12px;font-size:13px;">Become a Creator</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT PROFILE -->
+  <div class="card" style="margin-bottom:20px;">
+    <h3>Edit Profile</h3>
+    <div class="form-group">
+      <label class="form-label">Display Name</label>
+      <input class="form-input" id="edit-fullname" placeholder="Your full name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Bio</label>
+      <textarea class="form-input" id="edit-bio" placeholder="Tell us about yourself..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Avatar URL</label>
+      <input class="form-input" id="edit-avatar" placeholder="https://...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Interests</label>
+      <input class="form-input" id="edit-interests" placeholder="Music, History, Food...">
+    </div>
+    <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+  </div>
+
+  <!-- CHANGE PASSWORD -->
+  <div class="card" style="margin-bottom:20px;">
+    <h3>Change Password</h3>
+    <div class="form-group">
+      <label class="form-label">Current Password</label>
+      <input class="form-input" id="old-pass" type="password" placeholder="Current password">
+    </div>
+    <div class="form-group">
+      <label class="form-label">New Password</label>
+      <input class="form-input" id="new-pass" type="password" placeholder="At least 6 characters">
+    </div>
+    <button class="save-btn" onclick="changePassword()">Update Password</button>
+  </div>
+
+  <!-- MY POSTS -->
+  <div class="posts-section">
+    <h2>My Posts</h2>
+    <div id="my-posts"><p style="color:var(--muted);font-size:14px;">Loading your posts...</p></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '';
+let currentUser = null;
+
+async function init() {
+  try {
+    const r = await fetch(`${API}/api/users/me`, {credentials:'include'});
+    if (!r.ok) { window.location.href = '/user-login'; return; }
+    currentUser = await r.json();
+    renderProfile(currentUser);
+    loadMyPosts();
+  } catch(e) { window.location.href = '/user-login'; }
+}
+
+function renderProfile(u) {
+  const initials = (u.username||'?')[0].toUpperCase();
+  const avatarEl = document.getElementById('big-avatar');
+  if (u.avatar_url) {
+    avatarEl.innerHTML = `<img src="${u.avatar_url}" alt="${u.username}" onerror="this.parentElement.textContent='${initials}'">`;
+  } else {
+    avatarEl.textContent = initials;
+  }
+  document.getElementById('hero-name').textContent = u.full_name || u.username;
+  document.getElementById('hero-email').textContent = u.email;
+  document.getElementById('hero-role').textContent = (u.role||'user').toUpperCase();
+  document.getElementById('s-posts').textContent = u.post_count || 0;
+  document.getElementById('s-followers').textContent = u.follower_count || 0;
+  document.getElementById('s-plan').textContent = (u.plan||'Free').charAt(0).toUpperCase() + (u.plan||'free').slice(1);
+  document.getElementById('info-username').textContent = u.username;
+  document.getElementById('info-email').textContent = u.email;
+  document.getElementById('info-role').textContent = u.role || 'user';
+  document.getElementById('info-plan').textContent = u.plan || 'free';
+  document.getElementById('info-since').textContent = u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB',{year:'numeric',month:'long'}) : '—';
+
+  // Edit form prefill
+  document.getElementById('edit-fullname').value   = u.full_name || '';
+  document.getElementById('edit-bio').value        = u.bio || '';
+  document.getElementById('edit-avatar').value     = u.avatar_url || '';
+  document.getElementById('edit-interests').value  = u.interests || '';
+
+  // Channel info
+  if (u.channel_name) {
+    document.getElementById('channel-info').innerHTML = `
+      <div style="margin-bottom:8px;"><strong>${u.channel_name}</strong></div>
+      <p style="font-size:13px;margin-bottom:10px;">${u.channel_desc||''}</p>
+      <a href="/creator" class="btn-sm" style="display:inline-block;font-size:13px;">Manage Channel</a>`;
+  }
+
+  // Nav links
+  if (['creator','superuser','admin'].includes(u.role)) {
+    document.getElementById('creator-link').style.display = 'inline-block';
+  }
+  if (['admin','superuser'].includes(u.role)) {
+    document.getElementById('admin-link').style.display = 'inline-block';
+  }
+}
+
+async function saveProfile() {
+  const fd = new FormData();
+  fd.append('full_name', document.getElementById('edit-fullname').value);
+  fd.append('bio',       document.getElementById('edit-bio').value);
+  fd.append('avatar_url',document.getElementById('edit-avatar').value);
+  // Note: interests update requires a custom endpoint; show toast
+  try {
+    const r = await fetch(`${API}/api/admin/users/${currentUser.id}/edit`, {
+      method:'PUT', body:fd, credentials:'include'
+    });
+    if (r.ok) { showToast('Profile updated!'); setTimeout(() => location.reload(), 1000); }
+    else { showToast('Could not save. Are you logged in?'); }
+  } catch(e) { showToast('Save failed'); }
+}
+
+async function changePassword() {
+  const oldPass = document.getElementById('old-pass').value;
+  const newPass = document.getElementById('new-pass').value;
+  if (!oldPass || !newPass) { showToast('Fill in both fields'); return; }
+  if (newPass.length < 6) { showToast('New password must be 6+ characters'); return; }
+  // Verify old password by attempting login
+  const fd = new FormData();
+  fd.append('email', currentUser.email);
+  fd.append('password', oldPass);
+  try {
+    const verifyR = await fetch(`${API}/api/users/login`, {method:'POST', body:fd, credentials:'include'});
+    if (!verifyR.ok) { showToast('Current password is incorrect'); return; }
+    showToast('Password change requires backend support. Contact admin.');
+  } catch(e) { showToast('Error verifying password'); }
+}
+
+async function loadMyPosts() {
+  try {
+    const r = await fetch(`${API}/api/posts?status=all&author_id=${currentUser.id}&limit=20`);
+    const posts = await r.json();
+    const container = document.getElementById('my-posts');
+    if (!posts.length) {
+      container.innerHTML = `<p style="color:var(--muted);font-size:14px;">You haven't posted anything yet. <a href="/creator" style="color:var(--gold);">Start creating →</a></p>`;
+      return;
+    }
+    const typeIcons = {article:'📄',video:'🎬',audio:'🎵',photo_essay:'📸'};
+    container.innerHTML = posts.map(p => `
+      <div class="mini-post">
+        <div class="mini-post-title">${typeIcons[p.content_type]||'📝'} ${p.title}</div>
+        <div class="mini-post-meta">
+          <span>${p.status === 'published' ? '🟢 Published' : '⚪ Draft'}</span>
+          <span>${p.view_count||0} views</span>
+          <span>${p.like_count||0} likes</span>
+          <span>${timeAgo(p.created_at)}</span>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    document.getElementById('my-posts').innerHTML = '<p style="color:var(--muted);">Could not load posts.</p>';
+  }
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  const diff = (Date.now() - d.getTime()) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+async function doSignOut() {
+  await fetch(`${API}/api/users/logout`, {method:'POST', credentials:'include'});
+  window.location.href = '/';
+}
+
+init();
+</script>
+</body>
+</html>
