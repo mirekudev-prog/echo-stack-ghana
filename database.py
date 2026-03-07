@@ -43,3 +43,14 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def init_db():
+    """Create all database tables if they don't exist."""
+    try:
+        import models  # noqa: F401 — ensures models are registered on Base
+        Base.metadata.create_all(bind=engine)
+        print("✅ Database tables created/verified successfully")
+    except Exception as e:
+        print(f"❌ Database init error: {e}")
+        raise
