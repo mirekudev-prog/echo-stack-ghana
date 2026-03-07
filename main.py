@@ -34,24 +34,24 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, hashed: str) -> bool:
     return hash_password(password) == hashed
-
+    
 def get_user_from_request(request: Request, db: Session):
-    # Try user_session cookie first
+    """Get current user from session cookie - handles UUID IDs."""
     user_id = request.cookies.get("user_session")
-    if user_id:
+    if not user_id:
+        return None
+    try:
+        import uuid as _uuid
+        # Try UUID first, fallback to integer
         try:
+            uid = _uuid.UUID(str(user_id))
+            return db.query(models.User).filter(models.User.id == uid).first()
+        except (ValueError, AttributeError):
             return db.query(models.User).filter(models.User.id == int(user_id)).first()
-        except:
-            pass
-    # If admin is logged in via admin_session, find their user record by role
-    if request.cookies.get("admin_session") == "ADMIN_AUTHORIZED":
-        try:
-            # Return the first superuser/admin user record so admin can post, chat, etc.
-            admin_user = db.query(models.User).filter(
-                models.User.role.in_(["superuser", "admin"])
-            ).first()
-            if admin_user:
-                return admin_user
+    except Exception as e:
+        print(f"get_user error: {e}")
+        return None
+
         except:
             pass
     return None
