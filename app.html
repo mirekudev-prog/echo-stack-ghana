@@ -657,5 +657,397 @@
         });
     }
 </script>
+
+<!-- ═══════════════════════════════════════════════════
+     ECHOBOT FLOATING CHATBOT WIDGET
+     Works on map page — passes current region context
+════════════════════════════════════════════════════ -->
+<style>
+/* ── FAB button ── */
+#echobot-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c9933a, #e8b45a);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(201,147,58,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 1.5rem;
+}
+#echobot-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(201,147,58,0.55); }
+#echobot-fab .fab-badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    width: 20px; height: 20px;
+    background: #cc2929;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    display: none;
+}
+
+/* ── Chat window ── */
+#echobot-window {
+    position: fixed;
+    bottom: 100px;
+    right: 28px;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    height: 500px;
+    max-height: calc(100vh - 120px);
+    background: #0d0e13;
+    border: 1px solid rgba(201,147,58,0.25);
+    border-radius: 18px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'DM Sans', 'Inter', sans-serif;
+}
+#echobot-window.open { display: flex; animation: botSlideIn 0.25s ease; }
+@keyframes botSlideIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Header */
+.bot-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #1c1f2e, #252840);
+    border-bottom: 1px solid rgba(201,147,58,0.15);
+    flex-shrink: 0;
+}
+.bot-header-left { display: flex; align-items: center; gap: 10px; }
+.bot-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c9933a, #e8b45a);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.bot-name { font-weight: 700; color: #e8e4d8; font-size: 0.95rem; }
+.bot-status { font-size: 0.7rem; color: #7a7a8a; display: flex; align-items: center; gap: 4px; }
+.bot-status::before { content:''; width:6px; height:6px; border-radius:50%; background:#1a7a3c; display:inline-block; }
+.bot-close {
+    background: none; border: none; color: #7a7a8a; cursor: pointer;
+    font-size: 1.3rem; padding: 2px 6px; border-radius: 5px;
+    transition: color 0.15s;
+}
+.bot-close:hover { color: #e8e4d8; }
+
+/* Context strip */
+.bot-context {
+    padding: 6px 14px;
+    background: rgba(201,147,58,0.08);
+    border-bottom: 1px solid rgba(201,147,58,0.12);
+    font-size: 0.72rem;
+    color: #c9933a;
+    font-weight: 600;
+    flex-shrink: 0;
+    display: none;
+}
+.bot-context.visible { display: block; }
+
+/* Messages */
+.bot-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.bot-messages::-webkit-scrollbar { width: 4px; }
+.bot-messages::-webkit-scrollbar-track { background: transparent; }
+.bot-messages::-webkit-scrollbar-thumb { background: rgba(201,147,58,0.2); border-radius: 2px; }
+
+.bot-msg {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    max-width: 90%;
+}
+.bot-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+
+.bot-msg-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #1c1f2e;
+    border: 1px solid rgba(201,147,58,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.bot-msg-bubble {
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #e8e4d8;
+}
+.bot-msg.bot .bot-msg-bubble {
+    background: #1c1f2e;
+    border: 1px solid rgba(201,147,58,0.12);
+    border-radius: 4px 14px 14px 14px;
+}
+.bot-msg.user .bot-msg-bubble {
+    background: linear-gradient(135deg, #c9933a, #e8b45a);
+    color: #0d0e13;
+    font-weight: 500;
+    border-radius: 14px 4px 14px 14px;
+}
+.bot-msg.locked .bot-msg-bubble {
+    background: rgba(204,41,41,0.12);
+    border-color: rgba(204,41,41,0.2);
+    color: #fca5a5;
+}
+
+/* Typing indicator */
+.typing-dots { display: flex; gap: 4px; padding: 4px 0; }
+.typing-dots span {
+    width: 6px; height: 6px;
+    background: #c9933a;
+    border-radius: 50%;
+    animation: typingBounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Input area */
+.bot-input-area {
+    padding: 12px 14px;
+    background: #13151e;
+    border-top: 1px solid rgba(201,147,58,0.12);
+    flex-shrink: 0;
+}
+.bot-input-row { display: flex; gap: 8px; align-items: center; }
+.bot-input {
+    flex: 1;
+    background: #1c1f2e;
+    border: 1px solid rgba(201,147,58,0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    color: #e8e4d8;
+    outline: none;
+    transition: border-color 0.15s;
+    resize: none;
+}
+.bot-input::placeholder { color: rgba(122,122,138,0.6); }
+.bot-input:focus { border-color: #c9933a; }
+.bot-send {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, #c9933a, #e8b45a);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: opacity 0.15s, transform 0.1s;
+}
+.bot-send:hover { opacity: 0.88; transform: scale(1.05); }
+.bot-send:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.bot-footer-note {
+    font-size: 0.68rem;
+    color: #4a4a5a;
+    text-align: center;
+    margin-top: 6px;
+}
+</style>
+
+<!-- FAB button -->
+<button id="echobot-fab" onclick="toggleBot()" title="Ask EchoBot about Ghana heritage">
+    🤖
+    <div class="fab-badge" id="fab-badge"></div>
+</button>
+
+<!-- Chat window -->
+<div id="echobot-window">
+    <div class="bot-header">
+        <div class="bot-header-left">
+            <div class="bot-avatar">🤖</div>
+            <div>
+                <div class="bot-name">EchoBot</div>
+                <div class="bot-status">Ghana Heritage AI</div>
+            </div>
+        </div>
+        <button class="bot-close" onclick="toggleBot()">×</button>
+    </div>
+    <div class="bot-context" id="bot-context"></div>
+    <div class="bot-messages" id="bot-messages"></div>
+    <div class="bot-input-area">
+        <div class="bot-input-row">
+            <textarea class="bot-input" id="bot-input" rows="1" placeholder="Ask about Ghana's heritage…"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendBotMessage();}"
+                oninput="autoResizeInput(this)"></textarea>
+            <button class="bot-send" id="bot-send" onclick="sendBotMessage()">➤</button>
+        </div>
+        <div class="bot-footer-note" id="bot-footer-note">Premium feature · GH₵150/mo</div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var botOpen = false;
+    var botTyping = false;
+    var currentRegionContext = '';
+
+    // Check if user is premium from localStorage
+    function getUser() {
+        try { return JSON.parse(localStorage.getItem('es_user') || '{}'); } catch(e) { return {}; }
+    }
+
+    function isPremium() {
+        var u = getUser();
+        return u.is_premium == 1 || u.plan === 'premium' || u.role === 'admin' || u.role === 'superuser';
+    }
+
+    // Watch for active region in detail panel (app.html specific)
+    function updateRegionContext() {
+        var titleEl = document.getElementById('detail-title');
+        var panel = document.getElementById('detail-panel');
+        if (titleEl && panel && panel.classList.contains('show')) {
+            var name = titleEl.textContent.trim();
+            if (name && name !== currentRegionContext) {
+                currentRegionContext = name;
+                var ctx = document.getElementById('bot-context');
+                ctx.textContent = '📍 Context: ' + name + ' Region';
+                ctx.classList.add('visible');
+            }
+        }
+    }
+
+    // Observe detail panel opening
+    var observer = new MutationObserver(updateRegionContext);
+    var panel = document.getElementById('detail-panel');
+    if (panel) observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+
+    window.toggleBot = function() {
+        botOpen = !botOpen;
+        var win = document.getElementById('echobot-window');
+        if (botOpen) {
+            win.classList.add('open');
+            updateRegionContext();
+            // Show welcome message if empty
+            var msgs = document.getElementById('bot-messages');
+            if (msgs.children.length === 0) {
+                addBotMessage('bot', "Akwaaba! 👋 I'm EchoBot, your Ghana heritage guide.\n\nAsk me about any region's history, culture, festivals, or traditions!", false);
+                if (!isPremium()) {
+                    addBotMessage('locked', '🔒 Full AI responses require a Premium subscription (GH₵150/mo). Try asking anyway — free users get a limited preview!');
+                }
+            }
+            document.getElementById('bot-footer-note').textContent = isPremium() ? '✨ Premium AI active' : 'Premium feature · GH₵150/mo';
+            setTimeout(function() { document.getElementById('bot-input').focus(); }, 100);
+        } else {
+            win.classList.remove('open');
+        }
+    };
+
+    window.sendBotMessage = function() {
+        if (botTyping) return;
+        var input = document.getElementById('bot-input');
+        var msg = input.value.trim();
+        if (!msg) return;
+
+        addBotMessage('user', msg);
+        input.value = '';
+        input.style.height = '';
+
+        botTyping = true;
+        document.getElementById('bot-send').disabled = true;
+        showTyping();
+
+        var fd = new FormData();
+        fd.append('message', msg);
+        fd.append('region_context', currentRegionContext);
+
+        fetch('/api/ai/chat', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                removeTyping();
+                botTyping = false;
+                document.getElementById('bot-send').disabled = false;
+                if (d.locked) {
+                    addBotMessage('locked', d.reply || 'EchoBot is a premium feature 🔒');
+                } else {
+                    addBotMessage('bot', d.reply || 'Sorry, I couldn\'t get a response. Try again!');
+                }
+            })
+            .catch(function() {
+                removeTyping();
+                botTyping = false;
+                document.getElementById('bot-send').disabled = false;
+                addBotMessage('bot', '⚠️ Connection error. Please try again.');
+            });
+    };
+
+    function addBotMessage(type, text) {
+        var msgs = document.getElementById('bot-messages');
+        var div = document.createElement('div');
+        div.className = 'bot-msg ' + type;
+
+        var avatarDiv = document.createElement('div');
+        avatarDiv.className = 'bot-msg-avatar';
+        avatarDiv.textContent = type === 'user' ? '👤' : '🤖';
+
+        var bubble = document.createElement('div');
+        bubble.className = 'bot-msg-bubble';
+        bubble.textContent = text;
+
+        div.appendChild(avatarDiv);
+        div.appendChild(bubble);
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function showTyping() {
+        var msgs = document.getElementById('bot-messages');
+        var div = document.createElement('div');
+        div.className = 'bot-msg bot';
+        div.id = 'typing-indicator';
+        div.innerHTML = '<div class="bot-msg-avatar">🤖</div><div class="bot-msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function removeTyping() {
+        var el = document.getElementById('typing-indicator');
+        if (el) el.remove();
+    }
+
+    window.autoResizeInput = function(el) {
+        el.style.height = '';
+        el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+    };
+})();
+</script>
 </body>
 </html>
