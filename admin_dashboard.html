@@ -660,6 +660,37 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
   </div>
 </div>
 
+<!-- Publish File to Feed Modal -->
+<div class="mbg" id="pf-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="mh"><h2>🚀 Publish File to News Feed</h2><button class="mx" onclick="closeM('pf-modal')">×</button></div>
+    <div class="mb">
+      <input type="hidden" id="pf-file-id">
+      <div class="al ali" id="pf-file-info" style="margin-bottom:14px;font-size:.82rem"></div>
+      <div class="mf"><label>Post Title</label><input id="pf-title" type="text" placeholder="Title for this post in the feed…"></div>
+      <div class="mf"><label>Excerpt / Description</label><textarea id="pf-excerpt" style="min-height:65px" placeholder="Short description shown in the news feed…"></textarea></div>
+      <div class="mf"><label>Publish Status</label>
+        <select id="pf-status">
+          <option value="published">🚀 Publish Now — visible in feed immediately</option>
+          <option value="draft">💾 Save as Draft — hidden until published</option>
+          <option value="pending">⏳ Pending Review</option>
+        </select>
+      </div>
+      <div class="mf"><label>Access Level</label>
+        <select id="pf-premium">
+          <option value="0">🌐 Free — visible to everyone</option>
+          <option value="1">⭐ Premium only</option>
+        </select>
+      </div>
+      <div id="pf-result" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;font-size:.82rem;font-weight:600"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn bh" onclick="closeM('pf-modal')">Cancel</button>
+      <button class="btn bgn" onclick="submitPublishFile()">🚀 Publish to Feed</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1495,17 +1526,23 @@ function renderFilesGrid(files) {
   grid.innerHTML = files.map(f => {
     const isImg = f.mime_type && f.mime_type.startsWith('image/');
     const isAud = f.mime_type && f.mime_type.startsWith('audio/');
+    const isVid = f.mime_type && f.mime_type.startsWith('video/');
     return `<div style="background:#fff;border:1px solid var(--b1);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px">
       ${isImg ? `<img src="${f.file_url}" style="width:100%;height:90px;object-fit:cover;border-radius:7px;border:1px solid var(--b1)" onerror="this.style.display='none'">` : ''}
       ${isAud ? `<audio controls style="width:100%;height:32px;border-radius:5px"><source src="${f.file_url}"></audio>` : ''}
+      ${isVid ? `<video style="width:100%;height:90px;object-fit:cover;border-radius:7px;background:#000" controls><source src="${f.file_url}"></video>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:start;gap:4px">
         <span style="font-weight:600;font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1" title="${esc(f.original_name)}">${icons[f.category]||'📁'} ${esc(f.original_name||f.filename)}</span>
         <button onclick="deleteFile(${f.id})" style="background:none;border:none;cursor:pointer;color:var(--mu);font-size:.85rem;flex-shrink:0;line-height:1" title="Delete">🗑</button>
       </div>
       <p style="font-size:.69rem;color:var(--mu2)">${(f.category||'').toUpperCase()} · ${f.file_size_mb||0} MB</p>
-      <div style="display:flex;gap:8px;align-items:center">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
         <a href="${f.file_url}" target="_blank" style="font-size:.75rem;color:var(--blue);font-weight:600;text-decoration:none">🔗 Open</a>
         <button onclick="copyToClip('${f.file_url}')" style="font-size:.75rem;color:var(--mu2);background:none;border:none;cursor:pointer;font-weight:600">📋 Copy URL</button>
+      </div>
+      <div style="border-top:1px solid var(--b1);padding-top:8px;display:flex;gap:5px;flex-wrap:wrap">
+        <button class="ab agn" style="font-size:.72rem" onclick="openPublishModal(${f.id},'${esc(f.original_name||f.filename).replace(/'/g,"\\'")}','${f.category||'general'}')">🚀 Publish to Feed</button>
+        <button class="ab ab2" style="font-size:.72rem" onclick="publishFileDirect(${f.id},'draft')">💾 Save as Draft</button>
       </div>
     </div>`;
   }).join('');
@@ -1977,6 +2014,81 @@ function splitUrls(v) {
   return String(v).split(',').map(s=>s.trim()).filter(Boolean);
 }
 function var_r() { return 'var(--red)'; }
+
+// ══════════════════════════════════════════════
+// PUBLISH FILE TO FEED
+// ══════════════════════════════════════════════
+function openPublishModal(fileId, fileName, category) {
+  document.getElementById('pf-file-id').value = fileId;
+  document.getElementById('pf-title').value = fileName.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+  document.getElementById('pf-excerpt').value = '';
+  document.getElementById('pf-status').value = 'published';
+  document.getElementById('pf-premium').value = '0';
+  document.getElementById('pf-result').style.display = 'none';
+  const catEmoji = {video:'🎬',audio:'🎵',image:'🖼️',document:'📄',general:'📁'}[category] || '📁';
+  document.getElementById('pf-file-info').innerHTML =
+    catEmoji + ' <strong>' + esc(fileName) + '</strong> &nbsp;·&nbsp; Category: ' + esc(category);
+  openM('pf-modal');
+}
+
+async function submitPublishFile() {
+  const fileId  = document.getElementById('pf-file-id').value;
+  const title   = document.getElementById('pf-title').value.trim();
+  const excerpt = document.getElementById('pf-excerpt').value.trim();
+  const status  = document.getElementById('pf-status').value;
+  const premium = document.getElementById('pf-premium').value;
+  const res     = document.getElementById('pf-result');
+
+  if (!title) { toast('Please enter a title', 'er'); return; }
+
+  res.style.display = 'block';
+  res.style.background = '#EFF6FF'; res.style.border = '1px solid #BFDBFE'; res.style.color = '#1D4ED8';
+  res.innerHTML = '⏳ Publishing…';
+
+  try {
+    const fd = new FormData();
+    fd.append('file_id',   fileId);
+    fd.append('title',     title);
+    fd.append('excerpt',   excerpt);
+    fd.append('status',    status);
+    fd.append('is_premium', premium);
+
+    const r = await fetch('/api/admin/publish-file', { method: 'POST', body: fd });
+    const d = await r.json();
+
+    if (r.ok && d.success) {
+      const label = status === 'published' ? '✅ Published to feed!' : '💾 Saved as draft!';
+      res.style.background = '#F0FDF4'; res.style.border = '1px solid #86efac'; res.style.color = '#15803d';
+      res.innerHTML = label + ' (Post ID: ' + d.post_id + ')';
+      toast(label, 'ok');
+      setTimeout(() => closeM('pf-modal'), 2000);
+    } else {
+      throw new Error(d.detail || 'Failed');
+    }
+  } catch(e) {
+    res.style.background = '#FEF2F2'; res.style.border = '1px solid #fca5a5'; res.style.color = '#b91c1c';
+    res.innerHTML = '❌ ' + e.message;
+  }
+}
+
+async function publishFileDirect(fileId, status) {
+  // Quick publish without modal — uses filename as title
+  const f = allFiles.find(x => x.id === fileId);
+  if (!f) { toast('File not found', 'er'); return; }
+  try {
+    const fd = new FormData();
+    fd.append('file_id',    fileId);
+    fd.append('title',      (f.original_name || f.filename || 'Uploaded file').replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
+    fd.append('excerpt',    f.description || '');
+    fd.append('status',     status);
+    fd.append('is_premium', '0');
+    const r = await fetch('/api/admin/publish-file', { method: 'POST', body: fd });
+    const d = await r.json();
+    if (r.ok && d.success) {
+      toast(status === 'draft' ? '💾 Saved as draft!' : '✅ Published!', 'ok');
+    } else throw new Error(d.detail || 'Failed');
+  } catch(e) { toast('❌ ' + e.message, 'er'); }
+}
 
 // ══════════════════════════════════════════════
 // BOOT
