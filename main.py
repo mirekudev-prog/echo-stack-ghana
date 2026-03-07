@@ -917,12 +917,30 @@ async def newsletter_subscribe(email: str = Form(...), full_name: str = Form("")
 
 @app.get("/api/newsletter/subscribers")
 def get_newsletter_subscribers(request: Request, db: Session = Depends(get_db)):
-    require_admin(request)
+    user = get_user_from_request(request, db)
+    
+    # 1. PUBLIC COUNT (Anyone logged in can see count)
     try:
-        # ✅ FIXED: Changed created_at to subscribed_at to match NewsletterSubscriber model
-        subs = db.query(models.NewsletterSubscriber).order_by(
-            models.NewsletterSubscriber.subscribed_at.desc()).all()
+        total_count = db.query(NewsletterSubscriber).count()
+        if not user:
+            # If not logged in, just send the count
+            return {"count": total_count}
         
+        # If logged in but NOT admin/superuser, return ONLY the count
+        if user.role not in ["admin", "superuser"]:
+            return {"count": total_count}
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    # 2. ADMIN VIEW (Only admins see the list)
+    require_admin(request)  # Ensure they are authorized
+    
+    try:
+        subs = db.query(NewsletterSubscriber).order_by(
+            NewsletterSubscriber.subscribed_at.desc()).all()
+        
+        # Return full details (Names + Emails)
         return [{
             "id": s.id, 
             "email": s.email, 
