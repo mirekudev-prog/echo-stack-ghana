@@ -251,6 +251,47 @@ def manifest_route():
     raise HTTPException(status_code=404)
 
 # ============================================
+# STATIC PAGES (FIXED FOR MISSING FILES)
+# ============================================
+# Redirect to /dashboard if subscribers.html is missing
+@app.get("/subscribers")
+async def subscribers_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    # Check if file exists
+    if os.path.exists("subscribers.html"):
+        return serve_file("subscribers.html")
+    # Otherwise redirect to feed
+    return RedirectResponse(url="/app")
+
+# Redirect to /app if user_settings.html is missing
+@app.get("/user-settings")
+async def user_settings_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    if os.path.exists("user_settings.html"):
+        return serve_file("user_settings.html")
+    # Fallback: Create a simple settings page inline
+    html = f"""<!DOCTYPE html><html><head><title>Settings</title><style>body{{font-family:sans-serif;padding:40px;}}</style></head><body><h1>User Settings</h1><p>This page is under construction.</p><a href="/app"><button>Go Back Home</button></a></body></html>"""
+    return FileResponse(html)
+
+# Same fix for /map (from previous screenshot)
+@app.get("/map")
+async def map_page():
+    if os.path.exists("map.html"):
+        return serve_file("map.html")
+    return RedirectResponse(url="/explore") # Or /app
+
+# Same fix for /archive
+@app.get("/archive")
+async def archive_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    if os.path.exists("archive.html"):
+        return serve_file("archive.html")
+    return RedirectResponse(url="/explore")     
+    
+# ============================================
 # ADMIN AUTH (Secret Answer Login)
 # ============================================
 @app.post("/api/auth/login")
@@ -871,17 +912,23 @@ async def newsletter_subscribe(email: str = Form(...), full_name: str = Form("")
 
 @app.get("/api/newsletter/subscribers")
 def get_newsletter_subscribers(request: Request, db: Session = Depends(get_db)):
-    require_admin(request)
+    """Admin only endpoint to view subscribers."""
+    require_admin(request)  # Ensures only admins can see this list
     try:
-        subs = db.query(NewsletterSubscriber).order_by(
-            NewsletterSubscriber.subscribed_at.desc()).all()
+        # ✅ FIXED: Changed created_at to subscribed_at to match NewsletterSubscriber model
+        subs = db.query(models.NewsletterSubscriber).order_by(
+            models.NewsletterSubscriber.subscribed_at.desc()).all()
+        
         return [{
-            "id": s.id, "email": s.email, "full_name": s.full_name or "",
-            "created_at": str(s.subscribed_at) if s.subscribed_at else ""
+            "id": s.id, 
+            "email": s.email, 
+            "full_name": s.full_name or "",
+            "subscribed_at": str(s.subscribed_at) if s.subscribed_at else ""
         } for s in subs]
     except Exception as e:
+        print(f"❌ Newsletter Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
+           
 # ============================================
 # EVENTS
 # ============================================
@@ -1182,7 +1229,14 @@ RULES:
     except Exception as e:
         print(f"AI chat error: {e}")
         return {"reply": "Something went wrong. Please try again shortly!", "success": False, "locked": False}
-
+# At the top of your /api/ai/chat function:
+try:
+    hf_token = os.environ.get("HF_TOKEN", "")
+    if not hf_token:
+        return {"reply": "Please configure HF_TOKEN env var.", "success": False}
+except:
+    pass
+    
 # ============================================
 # PAYSTACK PAYMENTS
 # ============================================
