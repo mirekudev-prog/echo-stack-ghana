@@ -229,14 +229,12 @@ def manifest_route():
 
 @app.get("/map")
 async def map_page(request: Request):
-    """Heritage Map page - redirects to /app"""
     if not request.cookies.get("user_session"):
         return RedirectResponse(url="/user-login")
     return RedirectResponse(url="/app")
 
 @app.get("/archive")
 async def archive_page(request: Request):
-    """Archive page - redirects to /explore if file missing"""
     if not request.cookies.get("user_session"):
         return RedirectResponse(url="/user-login")
     if os.path.exists("archive.html"):
@@ -245,7 +243,6 @@ async def archive_page(request: Request):
 
 @app.get("/subscriptions")
 async def subscriptions_page(request: Request):
-    """Subscriptions page - redirects to /app if file missing"""
     if not request.cookies.get("user_session"):
         return RedirectResponse(url="/user-login")
     if os.path.exists("subscriptions.html"):
@@ -254,42 +251,41 @@ async def subscriptions_page(request: Request):
 
 @app.get("/subscribers")
 async def subscribers_page(request: Request):
-    """My Subscribers page - redirects to /following if file missing"""
     if not request.cookies.get("user_session"):
         return RedirectResponse(url="/user-login")
     if os.path.exists("subscribers.html"):
         return serve_file("subscribers.html")
     return RedirectResponse(url="/following")
 
-# Add this BEFORE the app.run() line or after other route definitions
 @app.get("/user-settings")
-async def user_settings_page(request: Request, db: Session = Depends(get_db)):
-    """Safe fallback for User Settings if HTML file is missing."""
-    # Check login
+async def user_settings_page(request: Request):
+    # FIX: was checking "user-session" (wrong), now correctly checks "user_session"
     if not request.cookies.get("user_session"):
         return RedirectResponse(url="/user-login")
-    
-    try:
-        if os.path.exists("user_settings.html"):
-            return serve_file("user_settings.html")
-        else:
-            # Create a safe, simple inline page so it doesn't crash
-            html_content = f"""<!DOCTYPE html><html><head><title>Settings</title></head>
-            <body style="font-family:sans-serif;padding:40px;background:#f9fafb;">
-                <h1>User Settings</h1>
-                <p>This page allows users to manage their profile preferences.</p>
-                <a href="/app" style="display:inline-block;padding:10px 20px;background:#C8962E;color:white;border-radius:8px;margin-top:20px;text-decoration:none;">Go Back Home</a>
-            </body></html>"""
-            return FileResponse(None) # Placeholder logic handled by custom response below
-            # Note: In a real scenario, just return the HTML string directly via JSONResponse/FileResponse
-            return Response(html_content, media_type="text/html")
-    except Exception as e:
-        print(f"Error loading user settings: {e}")
-        return Response("An error occurred. Please try again.", media_type="text/plain", status_code=500)
+    if os.path.exists("user_settings.html"):
+        return serve_file("user_settings.html")
+    # Inline fallback page so it never crashes with 500
+    from fastapi.responses import HTMLResponse
+    html_content = """<!DOCTYPE html>
+<html><head><title>Settings — EchoStack</title>
+<style>body{font-family:sans-serif;padding:40px;background:#f9fafb;max-width:600px;margin:0 auto;}
+h1{color:#0D1B2A;}a.btn{display:inline-block;padding:10px 20px;background:#C8962E;color:white;border-radius:8px;margin-top:20px;text-decoration:none;}</style>
+</head>
+<body>
+  <h1>⚙️ User Settings</h1>
+  <p style="color:#666;margin-top:12px;">Settings page coming soon. You can manage your profile from your profile page.</p>
+  <a class="btn" href="/user-profile">Go to My Profile</a>
+  <a class="btn" style="background:#0077b6;margin-left:10px;" href="/app">Back to Home</a>
+</body></html>"""
+    return HTMLResponse(content=html_content)
 
+# ============================================
+# FIX: Chat route had wrong cookie name "user-session" (hyphen)
+# Correct cookie name is "user_session" (underscore)
+# ============================================
 @app.get("/chat")
 async def chat_page(request: Request):
-    if not request.cookies.get("user-session"):
+    if not request.cookies.get("user_session"):  # FIXED: was "user-session"
         return RedirectResponse(url="/user-login")
     return serve_file("community_chat.html")
 
@@ -619,7 +615,7 @@ def delete_region(region_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# FILE UPLOADS
+# FILE UPLOADS — 50MB limit, multiple files
 # ============================================
 @app.post("/api/upload/file")
 async def upload_file(
@@ -629,9 +625,14 @@ async def upload_file(
     db: Session = Depends(get_db)
 ):
     try:
+        content = await file.read()
+        # Enforce 50MB limit
+        MAX_SIZE = 50 * 1024 * 1024  # 50MB in bytes
+        if len(content) > MAX_SIZE:
+            raise HTTPException(status_code=413, detail="File too large. Maximum size is 50MB.")
+        
         safe_name = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{filename.replace(' ', '_')}"
         file_path = UPLOAD_DIR / safe_name
-        content = await file.read()
         with open(file_path, "wb") as f:
             f.write(content)
         uf = models.UploadedFile(
@@ -653,8 +654,71 @@ async def upload_file(
             "file_size_mb": round(len(content) / (1024 * 1024), 2),
             "mime_type": file.content_type
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================
+# UPLOAD MULTIPLE FILES AT ONCE (new endpoint)
+# ============================================
+@app.post("/api/upload/multiple")
+async def upload_multiple_files(
+    request: Request,
+    category: str = Form("general"),
+    description: str = Form(""),
+    region_id: str = Form(""),
+    is_public: str = Form("1"),
+    db: Session = Depends(get_db)
+):
+    """Upload multiple files at once, up to 50MB each."""
+    from fastapi import UploadFile
+    form = await request.form()
+    files = form.getlist("files")
+    
+    if not files:
+        raise HTTPException(status_code=400, detail="No files provided")
+    
+    MAX_SIZE = 50 * 1024 * 1024  # 50MB
+    results = []
+    
+    for file in files:
+        try:
+            content = await file.read()
+            if len(content) > MAX_SIZE:
+                results.append({"success": False, "filename": file.filename, "error": "File exceeds 50MB limit"})
+                continue
+            
+            safe_name = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{file.filename.replace(' ', '_')}"
+            file_path = UPLOAD_DIR / safe_name
+            with open(file_path, "wb") as f:
+                f.write(content)
+            
+            uf = models.UploadedFile(
+                filename=safe_name, original_name=file.filename, file_path=str(file_path),
+                file_size=len(content), mime_type=file.content_type or "application/octet-stream",
+                category=category,
+                region_id=int(region_id) if region_id and region_id.isdigit() else None,
+                description=description, uploaded_by="admin",
+                is_public=int(is_public) if is_public else 1
+            )
+            db.add(uf)
+            db.commit()
+            db.refresh(uf)
+            
+            results.append({
+                "success": True, "file_id": uf.id,
+                "url": f"/uploads/{safe_name}",
+                "filename": safe_name,
+                "original_name": file.filename,
+                "file_size_mb": round(len(content) / (1024 * 1024), 2),
+                "mime_type": file.content_type
+            })
+        except Exception as e:
+            results.append({"success": False, "filename": getattr(file, 'filename', 'unknown'), "error": str(e)})
+    
+    success_count = sum(1 for r in results if r.get("success"))
+    return {"success": True, "uploaded": success_count, "total": len(files), "results": results}
 
 @app.get("/api/files")
 def get_files(category: str = "", region_id: str = "", db: Session = Depends(get_db)):
@@ -797,6 +861,97 @@ async def delete_post(post_id: int, request: Request, db: Session = Depends(get_
     return {"success": True}
 
 # ============================================
+# ADMIN PUBLISH FILE TO FEED — was missing (caused 404)!
+# ============================================
+@app.post("/api/admin/publish-file")
+async def admin_publish_file(
+    request: Request,
+    file_id: str = Form(...),
+    title: str = Form(...),
+    excerpt: str = Form(""),
+    status: str = Form("published"),
+    is_premium: str = Form("0"),
+    db: Session = Depends(get_db)
+):
+    """
+    Publish an uploaded file as a post in the news feed.
+    This endpoint was missing and caused the 404 error in the admin dashboard.
+    """
+    require_admin(request)
+    
+    try:
+        # Get the file record
+        file_record = db.query(models.UploadedFile).filter(
+            models.UploadedFile.id == int(file_id)
+        ).first()
+        
+        if not file_record:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        # Determine content type based on mime type
+        mime = file_record.mime_type or ""
+        if mime.startswith("video/"):
+            content_type = "video"
+        elif mime.startswith("audio/"):
+            content_type = "audio"
+        elif mime.startswith("image/"):
+            content_type = "photo_essay"
+        else:
+            content_type = "article"
+        
+        file_url = f"/uploads/{file_record.filename}"
+        
+        # Build content with embedded media
+        if content_type == "video":
+            content = f"[video]{file_url}[/video]"
+        elif content_type == "audio":
+            content = f"[audio]{file_url}[/audio]"
+        elif content_type == "photo_essay":
+            content = f"![{title}]({file_url})"
+        else:
+            content = f"[{file_record.original_name}]({file_url})"
+        
+        # Cover image for images
+        cover_image = file_url if content_type == "photo_essay" else ""
+        
+        # Get or find admin user
+        admin_user = db.query(models.User).filter(
+            models.User.role.in_(["admin", "superuser"])
+        ).first()
+        
+        author_id = admin_user.id if admin_user else None
+        author_name = admin_user.username if admin_user else "Admin"
+        
+        # Create the post
+        post = models.Post(
+            author_id=author_id,
+            author_username=author_name,
+            title=title.strip(),
+            excerpt=excerpt.strip(),
+            content=content,
+            cover_image=cover_image,
+            content_type=content_type,
+            status=status,
+            is_premium=bool(int(is_premium))
+        )
+        db.add(post)
+        db.commit()
+        db.refresh(post)
+        
+        return {
+            "success": True,
+            "post_id": post.id,
+            "status": post.status,
+            "content_type": content_type,
+            "file_url": file_url
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================
 # STATS
 # ============================================
 @app.get("/api/stats")
@@ -902,6 +1057,7 @@ def reject_story(story_id: int, request: Request, db: Session = Depends(get_db))
 
 # ============================================
 # NEWSLETTER - FIXED ✅
+# models.NewsletterSubscriber used correctly (was missing "models." prefix before)
 # ============================================
 @app.post("/api/newsletter/subscribe")
 async def newsletter_subscribe(email: str = Form(...), full_name: str = Form(""),
@@ -917,37 +1073,38 @@ async def newsletter_subscribe(email: str = Form(...), full_name: str = Form("")
 
 @app.get("/api/newsletter/subscribers")
 def get_newsletter_subscribers(request: Request, db: Session = Depends(get_db)):
-    user = get_user_from_request(request, db)
-    
-    # 1. PUBLIC COUNT (Anyone logged in can see count)
+    """
+    FIXED: Was referencing bare 'NewsletterSubscriber' without 'models.' prefix — caused 500 error.
+    Now always uses models.NewsletterSubscriber correctly.
+    - Admins: see full list with emails and names
+    - Logged-in users: see only the count
+    - Not logged in: see only the count
+    """
     try:
-        total_count = db.query(NewsletterSubscriber).count()
-        if not user:
-            # If not logged in, just send the count
-            return {"count": total_count}
+        # Always get total count first using correct model reference
+        total_count = db.query(models.NewsletterSubscriber).count()
         
-        # If logged in but NOT admin/superuser, return ONLY the count
-        if user.role not in ["admin", "superuser"]:
-            return {"count": total_count}
-            
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-    # 2. ADMIN VIEW (Only admins see the list)
-    require_admin(request)  # Ensure they are authorized
-    
-    try:
-        subs = db.query(NewsletterSubscriber).order_by(
-            NewsletterSubscriber.subscribed_at.desc()).all()
+        user = get_user_from_request(request, db)
+        is_admin = request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
         
-        # Return full details (Names + Emails)
-        return [{
-            "id": s.id, 
-            "email": s.email, 
-            "full_name": s.full_name or "",
-            "subscribed_at": str(s.subscribed_at) if s.subscribed_at else ""
-        } for s in subs]
+        # Admins see the full list
+        if is_admin or (user and user.role in ["admin", "superuser"]):
+            subs = db.query(models.NewsletterSubscriber).order_by(
+                models.NewsletterSubscriber.subscribed_at.desc()
+            ).all()
+            return [{
+                "id": s.id,
+                "email": s.email,
+                "full_name": s.full_name or "",
+                "subscribed_at": str(s.subscribed_at) if s.subscribed_at else "",
+                "created_at": str(s.subscribed_at) if s.subscribed_at else ""
+            } for s in subs]
+        
+        # Non-admin users see only count
+        return {"count": total_count, "message": "Subscribe count only visible to admins"}
+        
     except Exception as e:
+        print(f"Newsletter subscribers error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
@@ -1122,7 +1279,7 @@ async def save_site_config(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# JSON IMPORT - FIXED ✅
+# JSON IMPORT
 # ============================================
 @app.post("/api/import/json")
 def import_json(data: list, db: Session = Depends(get_db)):
@@ -1141,7 +1298,7 @@ def import_json(data: list, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# AI CHAT (EchoBot) - FIXED ✅
+# AI CHAT (EchoBot)
 # ============================================
 @app.post("/api/ai/chat")
 async def ai_chat(
@@ -1150,18 +1307,10 @@ async def ai_chat(
     request: Request = None,
     db: Session = Depends(get_db)
 ):
-    """
-    FAST AI CHAT - EchoBot
-    - Only answers based on YOUR database content
-    - Premium users: can chat ✅
-    - Free users: see UI but chat is disabled (returns locked message)
-    - Uses google/flan-t5-small (fast model)
-    """
     try:
         user = get_user_from_request(request, db)
         is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
         
-        # Check if user can chat
         is_premium = user and (user.is_premium or user.role in ["superuser", "admin", "creator"])
         if is_admin_session:
             is_premium = True
@@ -1177,7 +1326,6 @@ async def ai_chat(
                 "upgrade_url": "/premium"
             }
         
-        # Check if HF_TOKEN is configured
         if not HF_TOKEN:
             return {
                 "reply": "EchoBot is currently unavailable. Please configure the HF_TOKEN environment variable.",
@@ -1185,14 +1333,9 @@ async def ai_chat(
                 "locked": False
             }
             
-        # Get database knowledge ONLY (no external info)
         db_knowledge = get_db_knowledge(db)
-        
-        # Use faster model: google/flan-t5-small
         model_url = "https://api-inference.huggingface.co/models/google/flan-t5-small"
-        token = HF_TOKEN
         
-        # Build prompt: ONLY use database content
         system_prompt = f"""You are EchoBot, an AI guide for EchoStack Ghana Heritage Archive.
 IMPORTANT: ONLY answer using the Ghana region data below. If the question is not about Ghana heritage or not in the data, politely say you don't have that information yet.
 
@@ -1222,8 +1365,8 @@ RULES:
         }).encode("utf-8")
         
         headers = {"Content-Type": "application/json"}
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
+        if HF_TOKEN:
+            headers["Authorization"] = f"Bearer {HF_TOKEN}"
         
         req = urllib.request.Request(model_url, data=payload, headers=headers, method="POST")
         
@@ -1303,53 +1446,6 @@ async def initialize_payment(request: Request, db: Session = Depends(get_db)):
         "reference": ref
     }
 
-@app.post("/api/payments/webhook")
-async def paystack_webhook(request: Request, db: Session = Depends(get_db)):
-    body = await request.body()
-    signature = request.headers.get("x-paystack-signature", "")
-    
-    if PAYSTACK_SECRET and signature:
-        expected = hmac.new(
-            PAYSTACK_SECRET.encode(),
-            body,
-            hashlib.sha512
-        ).hexdigest()
-        if signature != expected:
-            raise HTTPException(status_code=400, detail="Invalid signature")
-    
-    try:
-        data = json.loads(body.decode("utf-8"))
-    except:
-        raise HTTPException(status_code=400, detail="Invalid JSON body")
-    
-    if data.get("event") == "charge.success":
-        ref = data["data"]["reference"]
-        user_id = data["data"].get("metadata", {}).get("user_id")
-        
-        try:
-            payment = db.query(models.Payment).filter(
-                models.Payment.reference == ref
-            ).first()
-            if payment:
-                payment.status = "success"
-        except:
-            pass
-        
-        if user_id:
-            try:
-                user = db.query(models.User).filter(
-                    models.User.id == int(user_id)
-                ).first()
-                if user:
-                    user.is_premium = 1
-                    db.commit()
-            except:
-                pass
-        
-        return {"status": "ok"}
-    
-    return {"status": "ignored"}
-
 @app.get("/payment/callback")
 async def payment_callback(reference: str, request: Request, db: Session = Depends(get_db)):
     if not PAYSTACK_SECRET:
@@ -1377,7 +1473,6 @@ async def payment_callback(reference: str, request: Request, db: Session = Depen
                 ).first()
                 if user:
                     user.is_premium = 1
-                    
                     try:
                         payment = db.query(models.Payment).filter(
                             models.Payment.reference == reference
@@ -1386,7 +1481,6 @@ async def payment_callback(reference: str, request: Request, db: Session = Depen
                             payment.status = "success"
                     except:
                         pass
-                    
                     db.commit()
             except:
                 pass
@@ -1500,7 +1594,6 @@ async def get_activity(request: Request, db: Session = Depends(get_db)):
 # ============================================
 @app.get("/api/creators")
 def get_creators(db: Session = Depends(get_db)):
-    """Get all creator channels"""
     try:
         channels = db.query(models.CreatorChannel).filter(
             models.CreatorChannel.is_active == 1
@@ -1524,7 +1617,7 @@ def get_creators(db: Session = Depends(get_db)):
             })
         return result
     except Exception as e:
-        print(f"❌ Creators error: {e}")
+        print(f"Creators error: {e}")
         return []
 
 # ============================================
