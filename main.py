@@ -36,13 +36,25 @@ def verify_password(password: str, hashed: str) -> bool:
     return hash_password(password) == hashed
 
 def get_user_from_request(request: Request, db: Session):
+    # Try user_session cookie first
     user_id = request.cookies.get("user_session")
-    if not user_id:
-        return None
-    try:
-        return db.query(models.User).filter(models.User.id == int(user_id)).first()
-    except:
-        return None
+    if user_id:
+        try:
+            return db.query(models.User).filter(models.User.id == int(user_id)).first()
+        except:
+            pass
+    # If admin is logged in via admin_session, find their user record by role
+    if request.cookies.get("admin_session") == "ADMIN_AUTHORIZED":
+        try:
+            # Return the first superuser/admin user record so admin can post, chat, etc.
+            admin_user = db.query(models.User).filter(
+                models.User.role.in_(["superuser", "admin"])
+            ).first()
+            if admin_user:
+                return admin_user
+        except:
+            pass
+    return None
 
 def require_admin(request: Request):
     token = request.cookies.get("admin_session")
@@ -1171,38 +1183,88 @@ async def paystack_webhook(request: Request, db: Session = Depends(get_db)):
     return {"status": "ok"}
 
 @app.get("/payment/callback")
-async def payment_callback(reference: str, db: Session = Depends(get_db)):
+async def payment_callback(reference: str, request: Request, db: Session = Depends(get_db)):
     if not PAYSTACK_SECRET:
-        return RedirectResponse("/dashboard?payment=error")
+        return RedirectResponse("/premium?payment=error")
     req = urllib.request.Request(f"https://api.paystack.co/transaction/verify/{reference}",
                                  headers={"Authorization": f"Bearer {PAYSTACK_SECRET}"}, method="GET")
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             result = json.loads(resp.read().decode("utf-8"))
     except:
-        return RedirectResponse("/dashboard?payment=error")
+        return RedirectResponse("/premium?payment=error")
     if result.get("status") and result["data"].get("status") == "success":
+        # Try metadata first, then fall back to current session user
         user_id = result["data"].get("metadata", {}).get("user_id")
+        if not user_id:
+            session_user = get_user_from_request(request, db)
+            if session_user:
+                user_id = session_user.id
         if user_id:
             try:
                 user = db.query(models.User).filter(models.User.id == int(user_id)).first()
                 if user:
                     user.is_premium = 1
                     db.commit()
+                    # Return page that updates localStorage too
+                    html = f"""<!DOCTYPE html><html><head><title>Payment Success</title></head><body>
+<script>
+try {{
+    var u = JSON.parse(localStorage.getItem('es_user') || '{{}}');
+    u.is_premium = 1; u.plan = 'premium';
+    localStorage.setItem('es_user', JSON.stringify(u));
+}} catch(e) {{}}
+window.location.href = '/premium?upgraded=1';
+</script>
+</body></html>"""
+                    from fastapi.responses import HTMLResponse
+                    return HTMLResponse(content=html)
             except:
                 pass
-        return RedirectResponse("/dashboard?upgraded=1")
-    return RedirectResponse("/dashboard?payment=failed")
+        return RedirectResponse("/premium?upgraded=1")
+    return RedirectResponse("/premium?payment=failed")
+
+@app.get("/premium")
+async def premium_page(request: Request):
+    return serve_file("premium.html")
 
 # ============================================
 # ADMIN PREVIEW — skip user login when viewing site from admin dashboard
 # ============================================
 @app.get("/admin-preview")
-async def admin_preview(request: Request):
-    """Admin clicks 'View Site' — sets a preview cookie and redirects to app."""
+async def admin_preview(request: Request, db: Session = Depends(get_db)):
+    """Admin clicks 'View Site' — sets preview + user_session cookies and sets localStorage via redirect page."""
     if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED":
         return RedirectResponse(url="/admin")
-    # Create a preview user session so the app doesn't redirect to login
-    response = RedirectResponse(url="/app")
+    # Also set user_session so admin can interact with the site fully
+    admin_user = db.query(models.User).filter(
+        models.User.role.in_(["superuser", "admin"])
+    ).first()
+    # Serve a small HTML page that sets localStorage then redirects to /app
+    user_id = admin_user.id if admin_user else ""
+    username = admin_user.username if admin_user else "Admin"
+    role = admin_user.role if admin_user else "admin"
+    is_premium = admin_user.is_premium if admin_user else 1
+    html = f"""<!DOCTYPE html><html><head><title>Loading...</title></head><body>
+<script>
+try {{
+    localStorage.setItem('es_user', JSON.stringify({{
+        loggedIn: true,
+        user_id: {user_id if user_id else 1},
+        username: "{username}",
+        email: "",
+        role: "{role}",
+        plan: "premium",
+        is_premium: 1
+    }}));
+}} catch(e) {{}}
+window.location.href = '/app';
+</script>
+<p>Redirecting to site...</p>
+</body></html>"""
+    from fastapi.responses import HTMLResponse
+    response = HTMLResponse(content=html)
     response.set_cookie(key="admin_preview", value="1", max_age=3600, path="/")
+    if user_id:
+        response.set_cookie(key="user_session", value=str(user_id), max_age=3600, path="/")
     return response
