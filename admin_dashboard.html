@@ -1673,7 +1673,7 @@ async function createUser() {
     const fd = new FormData();
     fd.append('username', name); fd.append('email', email);
     fd.append('password', pass); fd.append('interests', '');
-    const r = await fetch(`${API}/users/signup`, { method: 'POST', body: fd });
+    const r = await fetch(`${API}/users/register`, { method: 'POST', body: fd });
     const d = await r.json();
     if (!r.ok) throw new Error(d.detail || 'Failed');
     // If role != user, update it
