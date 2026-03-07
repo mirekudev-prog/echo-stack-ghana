@@ -1,218 +1,694 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Join EchoStack</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;--red:#C0392B;--green:#1A7A4A;--border:#E2E8F0;--muted:#94A3B8}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background-image:radial-gradient(ellipse at 15% 25%,rgba(200,150,46,.09) 0%,transparent 55%),radial-gradient(ellipse at 85% 75%,rgba(13,27,42,.06) 0%,transparent 55%)}
-.card{background:#fff;border-radius:20px;box-shadow:0 8px 48px rgba(13,27,42,.12);width:100%;max-width:460px;overflow:hidden}
-.card-top{background:var(--ink);padding:28px 36px 24px;position:relative}
-.card-top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold))}
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.logo img{width:34px;height:34px;border-radius:7px;object-fit:contain}
-.logo span{font-family:'Playfair Display',serif;color:#fff;font-size:1.1rem}
-.card-top h1{font-family:'Playfair Display',serif;color:#fff;font-size:1.65rem;margin-bottom:5px}
-.card-top p{color:#94A3B8;font-size:.85rem}
-.card-body{padding:28px 36px 24px}
-.steps{display:flex;gap:6px;margin-bottom:24px}
-.step{flex:1;height:3px;border-radius:2px;background:var(--border);transition:background .4s}
-.step.done{background:var(--gold)}.step.active{background:var(--gold2)}
-.panel{display:none}.panel.on{display:block}
-.field{margin-bottom:16px}
-label{display:block;font-size:.76rem;font-weight:600;color:#475569;letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px}
-.iw{position:relative}
-.iw svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
-input{width:100%;padding:10px 12px 10px 36px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink);background:#FAFAFA;outline:none;transition:border-color .2s,box-shadow .2s}
-input:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(200,150,46,.12)}
-input.err{border-color:var(--red)}
-.emsg{font-size:.74rem;color:var(--red);margin-top:4px;display:none}.emsg.on{display:block}
-.sbar{display:flex;gap:4px;margin-top:5px}
-.sbar span{flex:1;height:3px;border-radius:2px;background:var(--border);transition:background .3s}
-.slbl{font-size:.7rem;color:var(--muted);text-align:right;margin-top:2px}
-.topics{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
-.topic{padding:7px 14px;border:1.5px solid var(--border);border-radius:30px;font-size:.8rem;font-weight:500;cursor:pointer;transition:all .18s;color:#475569;user-select:none}
-.topic:hover{border-color:var(--gold);color:var(--gold)}
-.topic.on{background:var(--ink);border-color:var(--ink);color:#fff}
-.tct{font-size:.76rem;color:var(--muted);margin-top:8px}
-.btn{width:100%;padding:12px;font-family:'DM Sans',sans-serif;font-size:.93rem;font-weight:600;border:none;border-radius:9px;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px}
-.bp{background:var(--ink);color:#fff}.bp:hover{background:var(--gold)}.bp:disabled{background:#D1D5DB;cursor:not-allowed}
-.bg{background:transparent;border:1.5px solid var(--border);color:var(--ink);font-size:.83rem;margin-top:7px}
-.bg:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
-.spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:none}
-.btn.ld .spin{display:block}.btn.ld .bt{display:none}
-@keyframes sp{to{transform:rotate(360deg)}}
-.cbox{background:#F8FAFF;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:18px;font-size:.85rem;line-height:2}
-.foot{text-align:center;padding:0 36px 24px;font-size:.83rem;color:var(--muted)}
-.foot a{color:var(--gold);font-weight:600;text-decoration:none}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
-.toast.on{transform:translateX(-50%) translateY(0)}
-.toast.ok{background:var(--green)}.toast.er{background:var(--red)}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join EchoStack - Create Account</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0d0e13;
+            --ink-2: #13151e;
+            --ink-3: #1c1f2e;
+            --ink-4: #252840;
+            --gold: #c9933a;
+            --gold-light: #e8b45a;
+            --gold-glow: rgba(201,147,58,0.18);
+            --red: #cc2929;
+            --green: #1a7a3c;
+            --text: #e8e4d8;
+            --muted: #7a7a8a;
+            --border: rgba(201,147,58,0.18);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            min-height: 100%;
+            background: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* Kente pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                repeating-linear-gradient(0deg,   transparent, transparent 28px, rgba(201,147,58,0.04) 28px, rgba(201,147,58,0.04) 30px),
+                repeating-linear-gradient(90deg,  transparent, transparent 28px, rgba(201,147,58,0.04) 28px, rgba(201,147,58,0.04) 30px),
+                repeating-linear-gradient(45deg,  transparent, transparent 56px, rgba(201,147,58,0.025) 56px, rgba(201,147,58,0.025) 58px),
+                repeating-linear-gradient(-45deg, transparent, transparent 56px, rgba(201,147,58,0.025) 56px, rgba(201,147,58,0.025) 58px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Ghana flag stripe */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--red) 33.3%, var(--gold) 33.3% 66.6%, var(--green) 66.6%);
+            z-index: 100;
+        }
+
+        .bg-glow {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-glow-1 {
+            width: 600px; height: 600px;
+            top: -200px; right: -150px;
+            background: radial-gradient(circle, rgba(201,147,58,0.08) 0%, transparent 70%);
+        }
+        .bg-glow-2 {
+            width: 500px; height: 500px;
+            bottom: -150px; left: -100px;
+            background: radial-gradient(circle, rgba(26,122,60,0.07) 0%, transparent 70%);
+        }
+
+        .page-wrap {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: stretch;
+        }
+
+        /* ── Left panel ── */
+        .left-panel {
+            display: none;
+            width: 42%;
+            min-height: 100vh;
+            background: var(--ink-2);
+            border-right: 1px solid var(--border);
+            padding: 60px 48px;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 900px) { .left-panel { display: flex; } }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                repeating-linear-gradient(0deg,   transparent, transparent 18px, rgba(201,147,58,0.03) 18px, rgba(201,147,58,0.03) 20px),
+                repeating-linear-gradient(90deg,  transparent, transparent 18px, rgba(201,147,58,0.03) 18px, rgba(201,147,58,0.03) 20px);
+        }
+
+        .left-logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            position: relative;
+        }
+
+        .left-logo img { width: 48px; height: 48px; border-radius: 10px; }
+
+        .left-logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--gold);
+        }
+
+        .left-hero { position: relative; }
+
+        .left-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--gold);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+        }
+
+        .left-tag::before {
+            content: '';
+            width: 6px; height: 6px;
+            background: var(--gold);
+            border-radius: 50%;
+        }
+
+        .left-headline {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            line-height: 1.12;
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+
+        .left-headline em { font-style: italic; color: var(--gold); }
+
+        .left-sub {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--muted);
+            max-width: 300px;
+        }
+
+        .left-features {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+
+        .left-feat {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 0.9rem;
+            color: #b0b0c0;
+        }
+
+        .left-feat-icon {
+            width: 36px; height: 36px;
+            background: var(--ink-4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Right panel ── */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 60px 24px 40px;
+            overflow-y: auto;
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .mobile-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 36px;
+        }
+
+        .mobile-logo img { width: 40px; height: 40px; border-radius: 8px; }
+
+        .mobile-logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--gold);
+        }
+
+        @media (min-width: 900px) { .mobile-logo { display: none; } }
+
+        /* Progress */
+        .progress-wrap { margin-bottom: 32px; }
+
+        .progress-steps {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .prog-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .prog-step.active { color: var(--gold); }
+        .prog-step.done { color: var(--green); }
+
+        .prog-num {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            border: 1.5px solid currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .prog-step.done .prog-num { background: var(--green); border-color: var(--green); color: white; }
+        .prog-step.active .prog-num { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+
+        .prog-line { flex: 1; height: 1px; background: var(--border); margin: 0 12px; }
+
+        .prog-bar-track { height: 2px; background: var(--ink-4); border-radius: 1px; overflow: hidden; }
+
+        .prog-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            border-radius: 1px;
+            transition: width 0.4s ease;
+        }
+
+        /* Step headings */
+        .step-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .step-sub {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 28px;
+        }
+
+        /* Fields */
+        .field { margin-bottom: 18px; }
+
+        .field label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .field input {
+            width: 100%;
+            background: var(--ink-3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .field input::placeholder { color: rgba(122,122,138,0.6); }
+
+        .field input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            border: none;
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--ink);
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(201,147,58,0.35);
+        }
+
+        .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        .btn-back {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            color: var(--muted);
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-back:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* Topics */
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 480px) { .topics-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .topic-tag {
+            padding: 10px 12px;
+            background: var(--ink-3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #b0b0c0;
+            cursor: pointer;
+            transition: all 0.18s;
+            text-align: center;
+            line-height: 1.3;
+            user-select: none;
+        }
+
+        .topic-tag:hover { border-color: rgba(201,147,58,0.4); color: var(--gold-light); background: var(--ink-4); }
+
+        .topic-tag.selected {
+            background: linear-gradient(135deg, rgba(201,147,58,0.2), rgba(201,147,58,0.1));
+            border-color: var(--gold);
+            color: var(--gold-light);
+            box-shadow: 0 0 0 1px rgba(201,147,58,0.2);
+        }
+
+        .topics-count { font-size: 0.8rem; color: var(--muted); margin-bottom: 18px; }
+        .topics-count span { color: var(--gold); font-weight: 600; }
+
+        /* Steps */
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Footer */
+        .form-footer {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .form-footer a { color: var(--gold); text-decoration: none; font-weight: 500; }
+        .form-footer a:hover { text-decoration: underline; }
+
+        /* Spinner */
+        .spinner {
+            width: 18px; height: 18px;
+            border: 2px solid rgba(13,14,19,0.3);
+            border-top-color: var(--ink);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 28px; right: 24px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            z-index: 999;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        #toast.show { transform: translateY(0); opacity: 1; }
+        #toast.success { background: #1a7a3c; color: white; border: 1px solid rgba(255,255,255,0.1); }
+        #toast.error { background: #8b1c1c; color: #ffd0d0; border: 1px solid rgba(255,100,100,0.2); }
+
+        /* Adinkra watermark */
+        .adinkra-bg {
+            position: fixed;
+            bottom: -60px; right: -60px;
+            width: 320px; height: 320px;
+            opacity: 0.025;
+            z-index: 0;
+            pointer-events: none;
+            font-size: 260px;
+            line-height: 1;
+            color: var(--gold);
+            user-select: none;
+        }
+    </style>
 </head>
 <body>
-<div class="card">
-  <div class="card-top">
-    <div class="logo">
-      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-      <span>EchoStack</span>
-    </div>
-    <h1>Join EchoStack</h1>
-    <p>Preserving Ghana's Stories for Future Generations 🇬🇭</p>
-  </div>
-  <div class="card-body">
-    <div class="steps"><div class="step active" id="s1"></div><div class="step" id="s2"></div><div class="step" id="s3"></div></div>
 
-    <!-- Step 1 -->
-    <div class="panel on" id="p1">
-      <div class="field">
-        <label>Username</label>
-        <div class="iw">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
-          <input type="text" id="uname" placeholder="e.g. kwame_ghana" autocomplete="username">
-        </div>
-        <div class="emsg" id="ue">3–30 chars, letters/numbers/underscore only</div>
-      </div>
-      <div class="field">
-        <label>Email Address</label>
-        <div class="iw">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-          <input type="email" id="em" placeholder="you@example.com" autocomplete="email">
-        </div>
-        <div class="emsg" id="ee">Enter a valid email address</div>
-      </div>
-      <div class="field">
-        <label>Password</label>
-        <div class="iw">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
-          <input type="password" id="pw" placeholder="At least 6 characters" autocomplete="new-password">
-        </div>
-        <div class="sbar"><span id="b1"></span><span id="b2"></span><span id="b3"></span><span id="b4"></span></div>
-        <div class="slbl" id="sl"></div>
-        <div class="emsg" id="pe">Password must be at least 6 characters</div>
-      </div>
-      <button class="btn bp" onclick="next1()"><div class="spin"></div><span class="bt">Continue →</span></button>
-    </div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+<div class="adinkra-bg" aria-hidden="true">☥</div>
 
-    <!-- Step 2 -->
-    <div class="panel" id="p2">
-      <p style="font-size:.88rem;color:#475569;margin-bottom:14px">Select <strong>3 topics</strong> you care about most:</p>
-      <div class="topics" id="tgrid"></div>
-      <div class="tct" id="tct">0 / 3 selected</div>
-      <button class="btn bp" id="n2btn" style="margin-top:18px" onclick="next2()" disabled><div class="spin"></div><span class="bt">Continue →</span></button>
-      <button class="btn bg" onclick="goStep(1)">← Back</button>
-    </div>
+<div class="page-wrap">
 
-    <!-- Step 3 -->
-    <div class="panel" id="p3">
-      <div style="text-align:center;padding:10px 0 18px">
-        <div style="font-size:2.2rem;margin-bottom:8px">🇬🇭</div>
-        <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--ink);margin-bottom:5px">Almost there!</h2>
-        <p style="font-size:.83rem;color:var(--muted)">Confirm your details below</p>
-      </div>
-      <div class="cbox" id="cbox"></div>
-      <button class="btn bp" id="cbtn" onclick="create()"><div class="spin"></div><span class="bt">✨ Create Free Account</span></button>
-      <button class="btn bg" onclick="goStep(2)">← Back</button>
-    </div>
-  </div>
-  <div class="foot">Already have an account? <a href="/user-login">Sign In</a> &nbsp;·&nbsp; <a href="/" style="color:var(--muted);font-weight:400">← Home</a></div>
+    <!-- LEFT PANEL -->
+    <aside class="left-panel">
+        <div class="left-logo">
+            <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+            <span class="left-logo-text">EchoStack</span>
+        </div>
+
+        <div class="left-hero">
+            <div class="left-tag">Ghana Heritage Platform</div>
+            <h2 class="left-headline">
+                Every story<br>deserves to be<br><em>remembered.</em>
+            </h2>
+            <p class="left-sub">
+                Join thousands preserving the oral traditions, languages, and cultures of Ghana's 16 regions.
+            </p>
+        </div>
+
+        <div class="left-features">
+            <div class="left-feat"><div class="left-feat-icon">🗺️</div><span>Explore all 16 regions of Ghana</span></div>
+            <div class="left-feat"><div class="left-feat-icon">🥁</div><span>Discover music, festivals & traditions</span></div>
+            <div class="left-feat"><div class="left-feat-icon">📖</div><span>Submit your own heritage stories</span></div>
+            <div class="left-feat"><div class="left-feat-icon">🤝</div><span>Connect with culture keepers</span></div>
+        </div>
+    </aside>
+
+    <!-- RIGHT PANEL -->
+    <main class="right-panel">
+        <div class="form-box">
+
+            <div class="mobile-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span class="mobile-logo-text">EchoStack</span>
+            </div>
+
+            <!-- Progress indicator -->
+            <div class="progress-wrap">
+                <div class="progress-steps">
+                    <div class="prog-step active" id="prog-1">
+                        <div class="prog-num">1</div>
+                        <span>Account</span>
+                    </div>
+                    <div class="prog-line"></div>
+                    <div class="prog-step" id="prog-2">
+                        <div class="prog-num">2</div>
+                        <span>Interests</span>
+                    </div>
+                </div>
+                <div class="prog-bar-track">
+                    <div class="prog-bar-fill" id="prog-fill" style="width:50%"></div>
+                </div>
+            </div>
+
+            <!-- STEP 1: Account details -->
+            <div class="step active" id="step-1">
+                <h1 class="step-title">Create your account</h1>
+                <p class="step-sub">Start your journey through Ghana's heritage</p>
+
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Choose a username" autocomplete="username">
+                </div>
+
+                <div class="field">
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Minimum 6 characters" autocomplete="new-password">
+                </div>
+
+                <button class="btn-primary" onclick="goToStep2()">
+                    Continue <span>→</span>
+                </button>
+
+                <div class="form-footer">Already have an account? <a href="/user-login">Sign in</a></div>
+                <div class="form-footer"><a href="/">← Back to home</a></div>
+            </div>
+
+            <!-- STEP 2: Topics -->
+            <div class="step" id="step-2">
+                <h1 class="step-title">Pick your interests</h1>
+                <p class="step-sub">Select <strong style="color:var(--gold)">3 topics</strong> — we'll tailor your feed</p>
+
+                <p class="topics-count"><span id="sel-count">0</span> / 3 selected</p>
+
+                <div class="topics-grid" id="topics-container"></div>
+
+                <button class="btn-primary" id="complete-btn" onclick="completeSignup()" disabled>
+                    ✨ Create Free Account
+                </button>
+
+                <button class="btn-back" onclick="goToStep1()">← Back</button>
+
+                <div class="form-footer"><a href="/">← Back to home</a></div>
+            </div>
+
+        </div>
+    </main>
 </div>
-<div class="toast" id="toast"></div>
+
+<div id="toast"></div>
+
 <script>
-const TOPICS=['Ashanti Culture','Ga Traditions','Ewe Music','Northern Heritage','Gold Coast History','Slave Castles','Highlife Music','Traditional Drums','Kente Cloth','Fante Language','Mole National Park','Kakum Forest','Lake Volta','Twi Language','Dagomba Stories','Chieftaincy','Oral Histories','Modern Ghana Art','Afrobeats History','Festivals & Ceremonies'];
-let sel=[];
-const tg=document.getElementById('tgrid');
-TOPICS.forEach(t=>{
-  const d=document.createElement('div');d.className='topic';d.textContent=t;
-  d.onclick=()=>{
-    if(d.classList.contains('on')){sel=sel.filter(x=>x!==t);d.classList.remove('on');}
-    else{if(sel.length>=3){toast('Max 3 topics','er');return;}sel.push(t);d.classList.add('on');}
-    document.getElementById('tct').textContent=`${sel.length} / 3 selected`;
-    document.getElementById('n2btn').disabled=sel.length<3;
-  };
-  tg.appendChild(d);
-});
-document.getElementById('pw').addEventListener('input',function(){
-  const v=this.value;let s=0;
-  if(v.length>=6)s++;if(v.length>=10)s++;
-  if(/[A-Z]/.test(v)&&/[a-z]/.test(v))s++;
-  if(/[0-9]/.test(v))s++;
-  const l=s<=1?1:s===2?2:s===3?3:4;
-  const c=['','#C0392B','#E67E22','#2980B9','#1A7A4A'];
-  ['b1','b2','b3','b4'].forEach((id,i)=>document.getElementById(id).style.background=i<l?c[l]:'#E2E8F0');
-  const sl=document.getElementById('sl');sl.textContent=v?['','Weak','Fair','Good','Strong'][l]:'';sl.style.color=c[l];
-});
-function goStep(n){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
-  document.getElementById('p'+n).classList.add('on');
-  ['s1','s2','s3'].forEach((id,i)=>{
-    const el=document.getElementById(id);el.classList.remove('active','done');
-    if(i+1<n)el.classList.add('done');else if(i+1===n)el.classList.add('active');
-  });
-}
-function next1(){
-  const u=document.getElementById('uname').value.trim();
-  const e=document.getElementById('em').value.trim();
-  const p=document.getElementById('pw').value;
-  let ok=true;
-  ['ue','ee','pe'].forEach(id=>document.getElementById(id).classList.remove('on'));
-  ['uname','em','pw'].forEach(id=>document.getElementById(id).classList.remove('err'));
-  if(!u||u.length<3||u.length>30||!/^[a-zA-Z0-9_.]+$/.test(u)){document.getElementById('ue').classList.add('on');document.getElementById('uname').classList.add('err');ok=false;}
-  if(!e||!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)){document.getElementById('ee').classList.add('on');document.getElementById('em').classList.add('err');ok=false;}
-  if(!p||p.length<6){document.getElementById('pe').classList.add('on');document.getElementById('pw').classList.add('err');ok=false;}
-  if(ok)goStep(2);
-}
-function next2(){
-  if(sel.length<3)return;
-  const u=document.getElementById('uname').value.trim(),e=document.getElementById('em').value.trim();
-  document.getElementById('cbox').innerHTML=`<div>👤 <strong>Username:</strong> ${u}</div><div>📧 <strong>Email:</strong> ${e}</div><div>🎯 <strong>Interests:</strong> ${sel.join(', ')}</div><div>🎁 <strong>Plan:</strong> Free Reader (upgrade to Creator anytime)</div>`;
-  goStep(3);
-}
-async function create(){
-  const btn=document.getElementById('cbtn');btn.classList.add('ld');btn.disabled=true;
-  const email=document.getElementById('em').value.trim(),pw=document.getElementById('pw').value;
-  const fd=new FormData();
-  fd.append('username',document.getElementById('uname').value.trim());
-  fd.append('email',email);
-  fd.append('password',pw);
-  fd.append('interests',sel.join(','));
-  try{
-    // FIX: changed /api/users/register → /api/users/signup (matches main.py)
-    const r=await fetch('/api/users/signup',{method:'POST',body:fd});
-    const d=await r.json();
-    if(!r.ok)throw new Error(d.detail||'Registration failed');
-    // Auto-login after signup
-    const lf=new FormData();
-    lf.append('username',document.getElementById('uname').value.trim());
-    lf.append('password',pw);
-    const lr=await fetch('/api/users/login',{method:'POST',body:lf});
-    const ld=await lr.json();
-    if(lr.ok&&ld.success){
-      localStorage.setItem('es_user',JSON.stringify({
-        id:ld.user_id,
-        username:ld.username,
-        email:email,
-        role:ld.role||'user',
-        is_premium:ld.is_premium||0,
-        loggedIn:true
-      }));
-      toast('🎉 Welcome to EchoStack!','ok');
-      setTimeout(()=>window.location.href='/dashboard',1200);
-    }else{
-      toast('Account created! Please sign in.','ok');
-      setTimeout(()=>window.location.href='/user-login',1500);
+    const TOPICS = [
+        "Ashanti Culture","Ga Traditions","Ewe Music","Northern Heritage",
+        "Gold Coast History","Slave Castles","Highlife Music","Traditional Drums",
+        "Kente Cloth","Fante Language","Mole National Park","Kakum Forest",
+        "Lake Volta","Twi Language","Dagomba Stories","Chieftaincy",
+        "Oral Histories","Modern Ghana Art","Afrobeats History","Festivals & Ceremonies"
+    ];
+
+    let selected = [];
+
+    // Build topics grid
+    const container = document.getElementById('topics-container');
+    TOPICS.forEach(topic => {
+        const el = document.createElement('div');
+        el.className = 'topic-tag';
+        el.textContent = topic;
+        el.addEventListener('click', () => toggleTopic(topic, el));
+        container.appendChild(el);
+    });
+
+    function toggleTopic(topic, el) {
+        const idx = selected.indexOf(topic);
+        if (idx === -1) {
+            if (selected.length >= 3) { showToast('You can only select 3 topics', 'error'); return; }
+            selected.push(topic);
+            el.classList.add('selected');
+        } else {
+            selected.splice(idx, 1);
+            el.classList.remove('selected');
+        }
+        document.getElementById('sel-count').textContent = selected.length;
+        document.getElementById('complete-btn').disabled = selected.length !== 3;
     }
-  }catch(err){
-    toast('❌ '+err.message,'er');
-    btn.classList.remove('ld');btn.disabled=false;
-  }
-}
-let _t;
-function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);}
-if(localStorage.getItem('es_user'))window.location.href='/dashboard';
+
+    function goToStep2() {
+        const username = document.getElementById('username').value.trim();
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!username || !email || !password) { showToast('Please fill in all fields', 'error'); return; }
+        if (password.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
+        if (!email.includes('@')) { showToast('Please enter a valid email', 'error'); return; }
+
+        document.getElementById('step-1').classList.remove('active');
+        document.getElementById('step-2').classList.add('active');
+        document.getElementById('prog-fill').style.width = '100%';
+
+        const p1 = document.getElementById('prog-1');
+        p1.classList.remove('active'); p1.classList.add('done');
+        p1.querySelector('.prog-num').textContent = '✓';
+        document.getElementById('prog-2').classList.add('active');
+    }
+
+    function goToStep1() {
+        document.getElementById('step-2').classList.remove('active');
+        document.getElementById('step-1').classList.add('active');
+        document.getElementById('prog-fill').style.width = '50%';
+
+        const p1 = document.getElementById('prog-1');
+        p1.classList.remove('done'); p1.classList.add('active');
+        p1.querySelector('.prog-num').textContent = '1';
+        document.getElementById('prog-2').classList.remove('active');
+    }
+
+    async function completeSignup() {
+        if (selected.length !== 3) { showToast('Please select exactly 3 topics', 'error'); return; }
+
+        const btn = document.getElementById('complete-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div> Creating account…';
+
+        const fd = new FormData();
+        fd.append('username', document.getElementById('username').value.trim());
+        fd.append('email',    document.getElementById('email').value.trim());
+        fd.append('password', document.getElementById('password').value);
+        fd.append('topics',   JSON.stringify(selected));
+
+        try {
+            const res  = await fetch('/api/users/register', { method: 'POST', body: fd });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                localStorage.setItem('es_user', JSON.stringify({
+                    loggedIn:   true,
+                    user_id:    data.user_id,
+                    username:   data.username,
+                    email:      data.email,
+                    role:       data.role || 'user',
+                    plan:       data.is_premium ? 'premium' : 'free',
+                    is_premium: data.is_premium || 0
+                }));
+                showToast('✅ Account created! Welcome to EchoStack', 'success');
+                setTimeout(() => { window.location.href = '/app'; }, 1600);
+            } else {
+                throw new Error(data.detail || 'Registration failed. Please try again.');
+            }
+        } catch (err) {
+            showToast('❌ ' + err.message, 'error');
+            btn.innerHTML = '✨ Create Free Account';
+            btn.disabled = false;
+        }
+    }
+
+    let toastTimer;
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'show ' + type;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { t.className = ''; }, 3200);
+    }
 </script>
 </body>
 </html>
