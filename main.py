@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, File
+# ✅ ADD Response to the imports
+from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, File, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
