@@ -193,6 +193,22 @@ window.location.href = '/app';
     )
     
     return response
+    
+# ============================================
+# HERITAGE MAP PAGE
+# ============================================
+@app.get("/map")
+async def map_page(request: Request):
+    """Ghana Heritage Map - interactive map page"""
+    # Check authentication
+    token = request.cookies.get("user_session")
+    if not token:
+        return RedirectResponse(url="/user-login")
+    
+    # Serve the map page
+    if os.path.exists("map.html"):
+        return FileResponse("map.html")
+    raise HTTPException(status_code=404, detail="Map page not found")
 
 @app.get("/client-login")
 def client_login_page(): return serve_file("client_login.html")
