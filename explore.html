@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Explore — EchoStack</title>
+<title>Following — EchoStack</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 :root{--ink:#1a1e29;--blue:#0077b6;--gold:#C8962E;--cream:#f5f5f5;--white:#fff;--border:#e0e0e0;--sidebar-w:260px;}
@@ -83,12 +83,13 @@ body{font-family:Georgia,serif;background:var(--cream);color:var(--ink);}
         <div class="nav-label">Explore</div>
         <a href="/app"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Map &amp; Regions</a>
         <a href="/dashboard"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v12a2 2 0 01-2 2z"/></svg>News Feed</a>
+        <a href="/archive"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 8v13H3V8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg>Archive</a>
         <a href="/explore"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Explore</a>
         <div class="nav-label">Community</div>
         <a href="/chat" id="nav-chat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Community Chat</a>
         <a href="/subscriptions" id="nav-subscriptions"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Subscriptions</a>
         <a href="/subscribers" id="nav-subscribers" style="display:none"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="23" y2="8"/><line x1="21" y1="6" x2="21" y2="10"/></svg>My Subscribers</a>
-        <a href="/following" id="nav-following"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><polyline points="16,11 18,13 22,9"/></svg>Following</a>
+        <a href="/following" id="nav-following" class="active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><polyline points="16,11 18,13 22,9"/></svg>Following</a>
         <a href="/activity" id="nav-activity"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Activity</a>
         <div class="nav-label">Account</div>
         <a href="/user-profile"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile</a>
@@ -116,12 +117,9 @@ body{font-family:Georgia,serif;background:var(--cream);color:var(--ink);}
 </div>
 <main class="main">
 
-<h2 class="page-title">Explore Creators</h2>
-<div style="margin-bottom:1rem;">
-    <input type="text" id="search-input" placeholder="🔍 Search creators by name…" oninput="filterCreators(this.value)"
-        style="width:100%;padding:.85rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-size:.9rem;outline:none;">
-</div>
-<div id="creators-container">
+<h2 class="page-title">Following</h2>
+<p style="color:#888;font-size:.88rem;margin-bottom:1.5rem;">Creators and heritage keepers you follow on EchoStack.</p>
+<div id="following-container">
   <div class="empty-state"><div class="icon">⏳</div><h3>Loading…</h3></div>
 </div>
 </main>
@@ -155,58 +153,43 @@ body{font-family:Georgia,serif;background:var(--cream);color:var(--ink);}
     function logout(){fetch('/api/users/logout',{method:'POST'}).catch(()=>{});localStorage.removeItem('es_user');document.cookie='user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';window.location.href='/';}
 
 
-var allCreators = [];
-async function loadCreators() {
-    const box = document.getElementById('creators-container');
+async function loadFollowing() {
+    const box = document.getElementById('following-container');
     try {
-        const res = await fetch('/api/creators');
-        allCreators = await res.json();
-        renderCreators(allCreators);
+        const res = await fetch('/api/following');
+        const data = await res.json();
+        if (!data.length) {
+            box.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><h3>You're not following anyone yet</h3><p>Discover Ghana heritage creators and follow them to stay updated on new stories and articles.</p><a href="/explore" class="btn btn-blue" style="margin-top:1rem;">Explore Creators</a></div>';
+            return;
+        }
+        box.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">' + data.map(u => `
+            <div class="user-card" style="flex-direction:column;align-items:flex-start;gap:.75rem;">
+                <div style="display:flex;align-items:center;gap:.75rem;width:100%;">
+                    <div class="user-card-av">${u.username.charAt(0).toUpperCase()}</div>
+                    <div class="user-card-info">
+                        <div class="user-card-name">${u.full_name || u.username}</div>
+                        <div class="user-card-meta"><span class="badge badge-creator">${u.role}</span> · ${u.post_count} posts</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:.5rem;width:100%;">
+                    <a href="/dashboard?author=${u.id}" class="btn btn-blue" style="flex:1;justify-content:center;font-size:.8rem;">View Posts</a>
+                    <button onclick="toggleFollow(${u.id}, this)" style="flex:1;background:#fee2e2;color:#b91c1c;border:none;border-radius:7px;padding:6px;font-size:.8rem;font-weight:600;cursor:pointer;">Unfollow</button>
+                </div>
+            </div>
+        `).join('') + '</div>';
     } catch(e) {
         box.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><h3>Failed to load</h3></div>';
     }
 }
-function filterCreators(q) {
-    const filtered = allCreators.filter(c => (c.username||'').toLowerCase().includes(q.toLowerCase()) || (c.full_name||'').toLowerCase().includes(q.toLowerCase()));
-    renderCreators(filtered);
-}
-function renderCreators(list) {
-    const box = document.getElementById('creators-container');
-    if (!list.length) {
-        box.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><h3>No creators found</h3><p>Try a different search.</p></div>';
-        return;
-    }
-    box.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">' + list.map(c => `
-        <div class="user-card" style="flex-direction:column;align-items:flex-start;gap:.75rem;">
-            <div style="display:flex;align-items:center;gap:.75rem;width:100%;">
-                <div class="user-card-av" style="width:52px;height:52px;font-size:1.2rem;">${(c.username||'?').charAt(0).toUpperCase()}</div>
-                <div class="user-card-info">
-                    <div class="user-card-name">${c.full_name || c.username} <span class="badge badge-creator">${c.role}</span></div>
-                    <div class="user-card-meta">${c.post_count || 0} posts published</div>
-                </div>
-            </div>
-            <button onclick="toggleFollow(${c.user_id || c.id}, this)" data-following="${c.is_following||false}"
-                style="width:100%;padding:8px;border-radius:7px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;background:var(--blue);color:white;">
-                ${c.is_following ? '✓ Following' : '+ Follow'}
-            </button>
-        </div>
-    `).join('') + '</div>';
-}
 async function toggleFollow(id, btn) {
-    btn.disabled = true;
+    btn.disabled = true; btn.textContent = '…';
     try {
         const res = await fetch('/api/follow/' + id, {method:'POST'});
         const d = await res.json();
-        if (d.success) {
-            const following = d.action === 'followed';
-            btn.textContent = following ? '✓ Following' : '+ Follow';
-            btn.dataset.following = following;
-            btn.style.background = following ? '#059669' : 'var(--blue)';
-        }
-    } catch(e) {}
-    btn.disabled = false;
+        if (d.success) loadFollowing();
+    } catch(e) { btn.disabled = false; btn.textContent = 'Error'; }
 }
-loadCreators();
+loadFollowing();
 
 </script>
 </body>
