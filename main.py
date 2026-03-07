@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 import os, json, re, hashlib, datetime, shutil, urllib.request
 from pathlib import Path
 
-from database import engine, get_db, Base, init_db
+from database import engine, get_db, Base
 import models
 
-init_db()
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="EchoStack API")
 
