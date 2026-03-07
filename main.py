@@ -755,51 +755,68 @@ def get_posts(status: str = "published", content_type: str = "", limit: int = 50
     except Exception as e:
         print(f"Error getting posts: {e}")
         return []
-
+        
 @app.post("/api/posts")
 async def create_post(
-    title: str = Form(...), excerpt: str = Form(""), content: str = Form(""),
-    cover_image: str = Form(""), content_type: str = Form("article"),
-    region_id: str = Form(""), status: str = Form("draft"), is_premium: str = Form("0"),
-    request: Request = None, db: Session = Depends(get_db)
+    title: str = Form(...),
+    excerpt: str = Form(""),
+    content: str = Form(""),
+    cover_image: str = Form(""),
+    content_type: str = Form("article"),
+    region_id: str = Form(""),  # ← keep as string
+    status: str = Form("draft"),
+    is_premium: str = Form("0"),  # ← string from frontend
+    request: Request = None,
+    db: Session = Depends(get_db)
 ):
-    is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
     user = get_user_from_request(request, db)
-    
-    if is_admin_session and not user:
-        try:
-            admin_user = models.User(
-                username="admin", email="admin@echostack.gh",
-                password_hash="ADMIN_SESSION_ONLY",
-                role="admin", is_active=True, is_premium=True
-            )
-            db.add(admin_user)
-            db.commit()
-            db.refresh(admin_user)
-            user = admin_user
-        except:
-            db.rollback()
-            user = db.query(models.User).filter(models.User.role.in_(["admin","superuser"])).first()
-    
-    if not user and not is_admin_session:
-        raise HTTPException(status_code=401, detail="Must be logged in")
-    if user and user.role not in ["creator", "superuser", "admin"] and not is_admin_session:
-        raise HTTPException(status_code=403, detail="Creator account required")
-    
-    author_id = user.id if user else None
-    author_name = user.username if user else "Admin"
-    
+    if not user:
+        raise HTTPException(status_code=401, detail="Login required")
+
+    # ✅ Safely convert is_premium
+    try:
+        is_premium_bool = bool(int(is_premium)) if is_premium.strip() in ("0", "1") else False
+    except:
+        is_premium_bool = False
+
+    # ✅ Safely handle region_id (allow null)
+    region_id_int = None
+    if region_id and region_id.isdigit():
+        region_id_int = int(region_id)
+
+    # ✅ Ensure author_id is UUID-compatible
+    # Since User.id is UUID, Post.author_id must be UUID too — OR fix model
+    # For now, use str(user.id) if Post.author_id is String/UUID, or int if Integer
+    try:
+        # Try to cast user.id to int (if your Post.author_id is Integer)
+        author_id = int(user.id)
+    except (ValueError, TypeError):
+        # Fallback: use UUID string (if Post.author_id is String/UUID)
+        author_id = str(user.id)
+
+    # ✅ Create post
     post = models.Post(
-        author_id=author_id, author_username=author_name,
-        title=title.strip(), excerpt=excerpt.strip(), content=content.strip(),
-        cover_image=cover_image.strip(), content_type=content_type,
-        region_id=int(region_id) if region_id and region_id.isdigit() else None,
-        status=status, is_premium=bool(int(is_premium))
+        author_id=author_id,
+        author_username=user.username,
+        title=title.strip(),
+        excerpt=excerpt.strip(),
+        content=content.strip(),
+        cover_image=cover_image.strip(),
+        content_type=content_type,
+        region_id=region_id_int,
+        status=status,
+        is_premium=is_premium_bool
     )
-    db.add(post)
-    db.commit()
-    db.refresh(post)
-    return {"success": True, "post_id": post.id, "status": post.status}
+    
+    try:
+        db.add(post)
+        db.commit()
+        db.refresh(post)
+        return {"success": True, "post_id": post.id, "status": post.status}
+    except Exception as e:
+        db.rollback()
+        print(f"❌ Post creation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 @app.delete("/api/posts/{post_id}")
 async def delete_post(post_id: int, request: Request, db: Session = Depends(get_db)):
