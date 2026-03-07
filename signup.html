@@ -176,24 +176,39 @@ async function create(){
   const email=document.getElementById('em').value.trim(),pw=document.getElementById('pw').value;
   const fd=new FormData();
   fd.append('username',document.getElementById('uname').value.trim());
-  fd.append('email',email);fd.append('password',pw);fd.append('interests',sel.join(','));
+  fd.append('email',email);
+  fd.append('password',pw);
+  fd.append('interests',sel.join(','));
   try{
-    const r=await fetch('/api/users/register',{method:'POST',body:fd});
+    // FIX: changed /api/users/register → /api/users/signup (matches main.py)
+    const r=await fetch('/api/users/signup',{method:'POST',body:fd});
     const d=await r.json();
     if(!r.ok)throw new Error(d.detail||'Registration failed');
-    // Auto-login
-    const lf=new FormData();lf.append('email',email);lf.append('username',email);lf.append('password',pw);
+    // Auto-login after signup
+    const lf=new FormData();
+    lf.append('username',document.getElementById('uname').value.trim());
+    lf.append('password',pw);
     const lr=await fetch('/api/users/login',{method:'POST',body:lf});
     const ld=await lr.json();
     if(lr.ok&&ld.success){
-      localStorage.setItem('es_user',JSON.stringify({id:ld.id,username:ld.username,email:ld.email||email,role:ld.role||'user',plan:ld.plan||'free',loggedIn:true}));
+      localStorage.setItem('es_user',JSON.stringify({
+        id:ld.user_id,
+        username:ld.username,
+        email:email,
+        role:ld.role||'user',
+        is_premium:ld.is_premium||0,
+        loggedIn:true
+      }));
       toast('🎉 Welcome to EchoStack!','ok');
       setTimeout(()=>window.location.href='/dashboard',1200);
     }else{
       toast('Account created! Please sign in.','ok');
       setTimeout(()=>window.location.href='/user-login',1500);
     }
-  }catch(err){toast('❌ '+err.message,'er');btn.classList.remove('ld');btn.disabled=false;}
+  }catch(err){
+    toast('❌ '+err.message,'er');
+    btn.classList.remove('ld');btn.disabled=false;
+  }
 }
 let _t;
 function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);}
