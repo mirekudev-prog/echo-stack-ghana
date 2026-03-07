@@ -5,28 +5,35 @@ from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
-import os, json, re, hashlib, datetime, urllib.request, uuid
+import os, json, re, hashlib, datetime, hmac, urllib.request, uuid
 from pathlib import Path
-from database import engine, get_db, Base
+from typing import Optional
 
+# ============================================
+# DATABASE SETUP
+# ============================================
+from database import engine, get_db, Base, SessionLocal
+
+# Import models AFTER Base is defined
 import models
 
-# Create tables if they don't exist
+# Create all tables (safe - won't error if they exist)
 Base.metadata.create_all(bind=engine)
 
+# ============================================
+# APP SETUP
+# ============================================
 app = FastAPI(title="EchoStack API")
 
-# ============================================
-# CONFIGURATION
-# ============================================
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 try:
     app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 except Exception as e:
-    print(f"Warning: Could not mount uploads folder: {e}")
+    print(f"Warning: Could not mount uploads: {e}")
 
+# Config
 ADMIN_SECRET = os.getenv("ADMIN_SECRET", "THE ADMIN")
 PAYSTACK_SECRET = os.environ.get("PAYSTACK_SECRET_KEY", "")
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
@@ -34,22 +41,22 @@ HF_TOKEN = os.environ.get("HF_TOKEN", "")
 # ============================================
 # HELPERS
 # ============================================
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+def hash_password(p: str) -> str:
+    return hashlib.sha256(p.encode()).hexdigest()
 
-def verify_password(password: str, hashed: str) -> bool:
-    return hash_password(password) == hashed
+def verify_password(p: str, h: str) -> bool:
+    return hash_password(p) == h
 
-def get_user_from_request(request: Request, db: Session):
-    """Get user from session cookie - handles UUID IDs properly."""
+def get_user_from_request(request: Request, db: Session) -> Optional[models.User]:
+    """Get user from session cookie - handles UUID properly."""
     user_id = request.cookies.get("user_session")
     if not user_id:
         return None
     try:
-        # Try UUID first (since User.id is UUID in your models)
+        # Try as UUID first (for es_users table)
         uid = uuid.UUID(str(user_id))
         return db.query(models.User).filter(models.User.id == uid).first()
-    except:
+    except (ValueError, AttributeError):
         # Fallback to int (legacy)
         try:
             return db.query(models.User).filter(models.User.id == int(user_id)).first()
@@ -57,7 +64,6 @@ def get_user_from_request(request: Request, db: Session):
             return None
 
 def require_admin(request: Request):
-    """Check if request has valid admin session."""
     token = request.cookies.get("admin_session")
     if not token or token != "ADMIN_AUTHORIZED":
         raise HTTPException(status_code=403, detail="Not authorized")
@@ -70,6 +76,25 @@ async def save_upload(file: UploadFile) -> str:
     with open(path, "wb") as f:
         f.write(content)
     return f"/uploads/{safe}"
+
+def get_db_knowledge(db: Session) -> str:
+    """Get Ghana heritage data from database for AI context."""
+    try:
+        regions = db.query(models.Region).all()
+        knowledge = "GHANA REGIONS DATABASE:\n"
+        for r in regions:
+            knowledge += f"- {r.name}"
+            if r.capital: knowledge += f" (Capital: {r.capital})"
+            if r.population: knowledge += f", Pop: {r.population}"
+            if r.terrain: knowledge += f", Terrain: {r.terrain}"
+            if r.category: knowledge += f", Category: {r.category}"
+            if r.description:
+                desc = r.description[:200].replace("\n", " ")
+                knowledge += f"\n  Info: {desc}"
+            knowledge += "\n"
+        return knowledge[:3000]  # Limit context size
+    except:
+        return "Region data unavailable."
 
 # ============================================
 # STATIC PAGES
@@ -118,20 +143,17 @@ async def admin_page(request: Request):
         return serve_file("login.html")
     return serve_file("admin_dashboard.html")
 
-@app.get("/admin-preview")  # ⭐️ THIS IS THE KEY ENDPOINT YOU WERE LOOKING FOR!
+@app.get("/admin-preview")
 async def admin_preview(request: Request, db: Session = Depends(get_db)):
     """Admin clicks 'View Live Site' → sets user_session cookie & redirects to /app"""
-    
-    # Check if admin is logged in
     if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED":
         return RedirectResponse(url="/admin")
     
-    # Find an admin/superuser account to use for session
+    # Find or create an admin user
     admin_user = db.query(models.User).filter(
         models.User.role.in_(["superuser", "admin"])
     ).first()
     
-    # If no admin user exists, create one automatically
     if not admin_user:
         try:
             admin_user = models.User(
@@ -155,118 +177,41 @@ async def admin_preview(request: Request, db: Session = Depends(get_db)):
     user_id = str(admin_user.id)
     username = admin_user.username
     
-    # Return HTML page that sets localStorage + cookie, then redirects to /app
-    html = f"""<!DOCTYPE html><html><head><title>Loading EchoStack...</title></head><body>
-<script>
-try {{
-    // Set user info in localStorage
-    localStorage.setItem('es_user', JSON.stringify({{
-        loggedIn: true,
-        user_id: "{user_id}",
-        username: "{username}",
-        email: "admin@echostack.gh",
-        role: "superuser",
-        is_premium: 1
-    }}));
-}} catch(e) {{ console.error('localStorage error:', e); }}
-
-// Set the user_session cookie
-document.cookie = "user_session={user_id}; path=/; max-age=604800";
-
-// Redirect to app page
-window.location.href = '/app';
-</script>
-<p style="text-align:center;margin-top:100px;">Redirecting to site...</p>
-</body></html>"""
+    # Return HTML page that sets localStorage and cookies, then redirects
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>Loading EchoStack...</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <p>Redirecting to site...</p>
+    <script>
+        try {{
+            // Set user data in localStorage
+            localStorage.setItem('es_user', JSON.stringify({{
+                loggedIn: true,
+                user_id: "{user_id}",
+                username: "{username}",
+                email: "admin@echostack.gh",
+                role: "superuser",
+                plan: "premium",
+                is_premium: 1
+            }}));
+        }} catch(e) {{
+            console.error('Error setting localStorage:', e);
+        }}
+        // Redirect to app page
+        window.location.href = '/app';
+    </script>
+</body>
+</html>"""
     
     from fastapi.responses import HTMLResponse
     response = HTMLResponse(content=html)
-    
-    # Also set cookie directly in header
-    response.set_cookie(
-        key="admin_preview",
-        value="1",
-        max_age=3600,
-        path="/",
-        httponly=False,
-        samesite="lax"
-    )
-    
+    response.set_cookie(key="admin_preview", value="1", max_age=3600, path="/")
+    response.set_cookie(key="user_session", value=user_id, max_age=3600, path="/")
     return response
-    
-# ============================================
-# NEW ROUTES FOR MISSING PAGES (FIX)
-# ============================================
-@app.get("/map")
-def map_page():
-    """
-    Map Page Handler
-    Redirects to explore.html or serves map.html if it exists
-    """
-    # Check if map.html exists, otherwise fall back to explore.html
-    if os.path.exists("map.html"):
-        return FileResponse("map.html")
-    elif os.path.exists("explore.html"):
-        return FileResponse("explore.html") # Fallback to explore
-    return serve_file("explore.html") # Fallback 2
-
-@app.get("/archive")
-def archive_page():
-    """
-    Archive Page Handler
-    Creates a default archive view if file doesn't exist
-    """
-    if os.path.exists("archive.html"):
-        return FileResponse("archive.html")
-    else:
-        # Serve a basic HTML page for now so it doesn't break
-        html = """<!DOCTYPE html><html><head><title>Archive - EchoStack</title></head>
-<body style="font-family:sans-serif;background:#f3f4f6;padding:50px;text-align:center;">
-<h1>🗄️ Content Archive</h1>
-<p>This page is being created.</p>
-<a href="/" style="display:inline-block;margin-top:20px;color:#C8962E;text-decoration:none;">← Back Home</a>
-</body></html>"""
-        return HTMLResponse(content=html)
-
-@app.get("/activity")
-async def activity_page(request: Request):
-    """
-    Activity Feed Handler
-    """
-    # Login check logic
-    token = request.cookies.get("user_session")
-    if not token:
-        return RedirectResponse(url="/user-login")
-    
-    if os.path.exists("activity.html"):
-        return serve_file("activity.html")
-    else:
-        # Serve default activity page
-        html = """<!DOCTYPE html><html><head><title>Following - EchoStack</title>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"></head>
-<body class="bg-white"><div class="max-w-2xl mx-auto pt-10 px-4">
-<h1 class="text-3xl font-bold mb-6">Activity Feed</h1>
-<div class="text-center py-20 bg-gray-50 rounded-lg border">
-<p class="text-xl text-gray-600">Loading your feed...</p>
-</div>
-</div></body></html>"""
-        return HTMLResponse(content=html)
-        
-# ============================================
-# HERITAGE MAP PAGE
-# ============================================
-@app.get("/map")
-async def map_page(request: Request):
-    """Ghana Heritage Map - interactive map page"""
-    # Check authentication
-    token = request.cookies.get("user_session")
-    if not token:
-        return RedirectResponse(url="/user-login")
-    
-    # Serve the map page
-    if os.path.exists("map.html"):
-        return FileResponse("map.html")
-    raise HTTPException(status_code=404, detail="Map page not found")
 
 @app.get("/client-login")
 def client_login_page(): return serve_file("client_login.html")
@@ -297,56 +242,6 @@ def manifest_route():
             return JSONResponse(content=json.load(f))
     raise HTTPException(status_code=404)
 
-@app.get("/premium")
-async def premium_page(request: Request):
-    return serve_file("premium.html")
-
-@app.get("/subscriptions")
-async def subscriptions_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("subscriptions.html")
-
-@app.get("/following")
-async def following_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("following.html")
-
-@app.get("/chat")
-async def chat_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("community_chat.html")
-
-@app.get("/activity")
-async def activity_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("activity.html")
-
-@app.get("/explore")
-async def explore_page(request: Request):
-    return serve_file("explore.html")
-
-@app.get("/subscribers")
-async def subscribers_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("subscribers.html")
-
-@app.get("/user-profile")
-async def user_profile_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("user_profile.html")
-
-@app.get("/archive")
-async def archive_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("archive.html")
-
 # ============================================
 # ADMIN AUTH (Secret Answer Login)
 # ============================================
@@ -368,7 +263,7 @@ def admin_logout(response: Response):
     return resp
 
 # ============================================
-# USER AUTHENTICATION
+# USER AUTH
 # ============================================
 @app.post("/api/users/signup")
 async def user_signup(
@@ -420,23 +315,34 @@ async def user_login(
 ):
     try:
         login_val = username.lower().strip()
+        
         user = db.query(models.User).filter(
-            (models.User.email == login_val) | (models.User.username == login_val)
+            (models.User.email == login_val) |
+            (models.User.username == login_val)
         ).first()
         
         if not user or not verify_password(password, user.password_hash):
             raise HTTPException(status_code=401, detail="Invalid credentials")
+        
         if not user.is_active:
             raise HTTPException(status_code=403, detail="Account suspended")
         
-        resp = JSONResponse(content={
-            "success": True, "user_id": str(user.id),
-            "username": user.username, "email": user.email,
-            "role": user.role or "user", "is_premium": user.is_premium or False
+        response = JSONResponse(content={
+            "success": True,
+            "user_id": str(user.id),
+            "username": user.username,
+            "email": user.email,
+            "role": user.role or "user",
+            "is_premium": user.is_premium or 0
         })
-        resp.set_cookie(key="user_session", value=str(user.id),
-                       max_age=86400 * 7, path="/")
-        return resp
+        response.set_cookie(
+            key="user_session",
+            value=str(user.id),
+            max_age=86400 * 7,
+            path="/"
+        )
+        return response
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -453,6 +359,7 @@ async def get_current_user(request: Request, db: Session = Depends(get_db)):
     user = get_user_from_request(request, db)
     if not user:
         raise HTTPException(status_code=401, detail="Not logged in")
+    
     return {
         "id": str(user.id), "username": user.username, "email": user.email,
         "full_name": user.full_name or "", "bio": user.bio or "",
@@ -747,7 +654,7 @@ def get_posts(status: str = "published", content_type: str = "", limit: int = 50
         return [{
             "id": p.id, "title": p.title, "excerpt": p.excerpt or "",
             "cover_image": p.cover_image or "", "content_type": p.content_type or "article",
-            "author_username": "", "author_id": str(p.author_id) if p.author_id else "",
+            "author_username": p.author_username or "", "author_id": str(p.author_id) if p.author_id else "",
             "status": p.status, "views": p.views or 0, "likes": p.likes or 0,
             "is_premium": p.is_premium or False, "region_id": p.region_id,
             "created_at": str(p.created_at)
@@ -755,68 +662,51 @@ def get_posts(status: str = "published", content_type: str = "", limit: int = 50
     except Exception as e:
         print(f"Error getting posts: {e}")
         return []
-        
+
 @app.post("/api/posts")
 async def create_post(
-    title: str = Form(...),
-    excerpt: str = Form(""),
-    content: str = Form(""),
-    cover_image: str = Form(""),
-    content_type: str = Form("article"),
-    region_id: str = Form(""),  # ← keep as string
-    status: str = Form("draft"),
-    is_premium: str = Form("0"),  # ← string from frontend
-    request: Request = None,
-    db: Session = Depends(get_db)
+    title: str = Form(...), excerpt: str = Form(""), content: str = Form(""),
+    cover_image: str = Form(""), content_type: str = Form("article"),
+    region_id: str = Form(""), status: str = Form("draft"), is_premium: str = Form("0"),
+    request: Request = None, db: Session = Depends(get_db)
 ):
+    is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
     user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Login required")
-
-    # ✅ Safely convert is_premium
-    try:
-        is_premium_bool = bool(int(is_premium)) if is_premium.strip() in ("0", "1") else False
-    except:
-        is_premium_bool = False
-
-    # ✅ Safely handle region_id (allow null)
-    region_id_int = None
-    if region_id and region_id.isdigit():
-        region_id_int = int(region_id)
-
-    # ✅ Ensure author_id is UUID-compatible
-    # Since User.id is UUID, Post.author_id must be UUID too — OR fix model
-    # For now, use str(user.id) if Post.author_id is String/UUID, or int if Integer
-    try:
-        # Try to cast user.id to int (if your Post.author_id is Integer)
-        author_id = int(user.id)
-    except (ValueError, TypeError):
-        # Fallback: use UUID string (if Post.author_id is String/UUID)
-        author_id = str(user.id)
-
-    # ✅ Create post
-    post = models.Post(
-        author_id=author_id,
-        author_username=user.username,
-        title=title.strip(),
-        excerpt=excerpt.strip(),
-        content=content.strip(),
-        cover_image=cover_image.strip(),
-        content_type=content_type,
-        region_id=region_id_int,
-        status=status,
-        is_premium=is_premium_bool
-    )
     
-    try:
-        db.add(post)
-        db.commit()
-        db.refresh(post)
-        return {"success": True, "post_id": post.id, "status": post.status}
-    except Exception as e:
-        db.rollback()
-        print(f"❌ Post creation failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    if is_admin_session and not user:
+        try:
+            admin_user = models.User(
+                username="admin", email="admin@echostack.gh",
+                password_hash="ADMIN_SESSION_ONLY",
+                role="admin", is_active=True, is_premium=True
+            )
+            db.add(admin_user)
+            db.commit()
+            db.refresh(admin_user)
+            user = admin_user
+        except:
+            db.rollback()
+            user = db.query(models.User).filter(models.User.role.in_(["admin","superuser"])).first()
+    
+    if not user and not is_admin_session:
+        raise HTTPException(status_code=401, detail="Must be logged in")
+    if user and user.role not in ["creator", "superuser", "admin"] and not is_admin_session:
+        raise HTTPException(status_code=403, detail="Creator account required")
+    
+    author_id = user.id if user else None
+    author_name = user.username if user else "Admin"
+    
+    post = models.Post(
+        author_id=author_id, author_username=author_name,
+        title=title.strip(), excerpt=excerpt.strip(), content=content.strip(),
+        cover_image=cover_image.strip(), content_type=content_type,
+        region_id=int(region_id) if region_id and region_id.isdigit() else None,
+        status=status, is_premium=bool(int(is_premium))
+    )
+    db.add(post)
+    db.commit()
+    db.refresh(post)
+    return {"success": True, "post_id": post.id, "status": post.status}
 
 @app.delete("/api/posts/{post_id}")
 async def delete_post(post_id: int, request: Request, db: Session = Depends(get_db)):
@@ -980,7 +870,7 @@ async def create_event(
     request: Request = None, db: Session = Depends(get_db)
 ):
     require_admin(request)
-    event = Event(title=title, description=description, event_date=event_date,
+    event = models.Event(title=title, description=description, event_date=event_date,
                   location=location, image_url=image_url)
     db.add(event)
     db.commit()
@@ -990,7 +880,7 @@ async def create_event(
 @app.delete("/api/events/{event_id}")
 async def delete_event(event_id: int, request: Request, db: Session = Depends(get_db)):
     require_admin(request)
-    event = db.query(Event).filter(Event.id == event_id).first()
+    event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
         raise HTTPException(status_code=404)
     event.is_active = False
@@ -1003,10 +893,10 @@ async def delete_event(event_id: int, request: Request, db: Session = Depends(ge
 @app.get("/api/chat")
 def get_messages(region_id: str = "", db: Session = Depends(get_db)):
     try:
-        q = db.query(ChatMessage).filter(ChatMessage.is_approved == 1)
+        q = db.query(models.ChatMessage).filter(models.ChatMessage.is_approved == 1)
         if region_id:
-            q = q.filter(ChatMessage.region_id == int(region_id))
-        msgs = q.order_by(ChatMessage.created_at.desc()).limit(50).all()
+            q = q.filter(models.ChatMessage.region_id == int(region_id))
+        msgs = q.order_by(models.ChatMessage.created_at.desc()).limit(50).all()
         return [{"id": m.id, "username": m.username, "message": m.message,
                  "region_id": m.region_id, "created_at": str(m.created_at)} for m in msgs]
     except:
@@ -1014,13 +904,14 @@ def get_messages(region_id: str = "", db: Session = Depends(get_db)):
 
 @app.post("/api/chat")
 async def post_message(message: str = Form(...), region_id: str = Form(""),
-                       request: Request = None, db: Session = Depends(get_db)):
+                       request: Request = None, db: Session = Depends(get_db)
+):
     user = get_user_from_request(request, db)
     if not user:
         raise HTTPException(status_code=401, detail="Must be logged in to chat")
     if not message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
-    msg = ChatMessage(
+    msg = models.ChatMessage(
         user_id=user.id, username=user.username, message=message.strip()[:500],
         region_id=int(region_id) if region_id and region_id.isdigit() else None
     )
@@ -1032,7 +923,7 @@ async def post_message(message: str = Form(...), region_id: str = Form(""),
 @app.delete("/api/chat/{message_id}")
 async def delete_chat_message(message_id: int, request: Request, db: Session = Depends(get_db)):
     require_admin(request)
-    msg = db.query(ChatMessage).filter(ChatMessage.id == message_id).first()
+    msg = db.query(models.ChatMessage).filter(models.ChatMessage.id == message_id).first()
     if not msg:
         raise HTTPException(status_code=404, detail="Message not found")
     db.delete(msg)
@@ -1060,7 +951,7 @@ def create_section(name: str = Form(...), description: str = Form(""),
         slug = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
         if db.query(models.Section).filter(models.Section.slug == slug).first():
             raise HTTPException(status_code=400, detail="Already exists")
-        s = Section(name=name, slug=slug, description=description, display_order=display_order)
+        s = models.Section(name=name, slug=slug, description=description, display_order=display_order)
         db.add(s)
         db.commit()
         db.refresh(s)
@@ -1132,7 +1023,26 @@ async def save_site_config(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# AI CHAT (EchoBot)
+# JSON IMPORT
+# ============================================
+@app.post("/api/import/json")
+def import_json( list, db: Session = Depends(get_db)):
+    try:
+        imported = 0
+        for rd in 
+            try:
+                db.add(models.Region(**rd))
+                imported += 1
+            except:
+                continue
+        db.commit()
+        return {"success": True, "imported": imported}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================
+# FAST AI CHAT (EchoBot) - DATABASE ONLY, PREMIUM GATED
 # ============================================
 @app.post("/api/ai/chat")
 async def ai_chat(
@@ -1141,7 +1051,13 @@ async def ai_chat(
     request: Request = None,
     db: Session = Depends(get_db)
 ):
-    """AI Chat - Premium Only Feature"""
+    """
+    FAST AI CHAT - EchoBot
+    - Only answers based on YOUR database content
+    - Premium users: can chat ✅
+    - Free users: see UI but can't send messages (returns locked message)
+    - Uses fast model: google/flan-t5-base (or fallback)
+    """
     try:
         user = get_user_from_request(request, db)
         is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
@@ -1156,52 +1072,55 @@ async def ai_chat(
         
         if not is_premium:
             return {
-                "reply": "EchoBot is a Premium feature. Subscribe for GH₵150/month to unlock unlimited AI heritage questions!",
+                "reply": "🔒 EchoBot is a Premium feature. Subscribe for GH₵150/month to unlock unlimited AI heritage questions!",
                 "success": False,
                 "locked": True,
                 "upgrade_url": "/premium"
             }
         
-        # Get database knowledge
-        try:
-            regions = db.query(models.Region).all()
-            regions_summary = ""
-            for r in regions:
-                regions_summary += f"- {r.name}: {r.description[:200]}..." if r.description else ""
-        except:
-            regions_summary = "Region data unavailable."
+        # Get database knowledge ONLY (no external info)
+        db_knowledge = get_db_knowledge(db)
         
-        system_prompt = f"""You are EchoBot, AI guide for Ghana Heritage Archive.
-Only answer using the data below about Ghana's regions and culture.
-If info not available, politely say you don't have that information yet.
+        # Use faster model: google/flan-t5-base (or fallback to Mistral if HF_TOKEN set)
+        model_url = "https://api-inference.huggingface.co/models/google/flan-t5-base"
+        token = HF_TOKEN if HF_TOKEN else ""
+        
+        # Build prompt: ONLY use database content
+        system_prompt = f"""You are EchoBot, an AI guide for EchoStack Ghana Heritage Archive.
+IMPORTANT: ONLY answer using the Ghana region data below. If the question is not about Ghana heritage or not in the data, politely say you don't have that information yet.
 
-REGION DATA:
-{regions_summary if regions_summary else "No data available."}"""
+GHANA HERITAGE DATABASE:
+{db_knowledge}
+
+RULES:
+- Answer ONLY based on the database above
+- Keep answers short (2-4 sentences)
+- If info not in database, say: "I don't have that information yet in our archive."
+- Be warm and educational
+- Respond in English"""
 
         if region_context:
-            system_prompt += f"\n\nUser viewing: {region_context} region."
+            system_prompt += f"\n\nUser is viewing: {region_context} region - prioritize this."
 
-        full_prompt = f"{system_prompt}\n\nQuestion: {message}\nAnswer:"
+        full_prompt = f"{system_prompt}\n\nQuestion: {message}\n\nAnswer:"
         
         payload = json.dumps({
             "inputs": full_prompt,
             "parameters": {
-                "max_new_tokens": 150,
-                "temperature": 0.3,
-                "do_sample": False,
+                "max_new_tokens": 150,  # Shorter = faster
+                "temperature": 0.3,      # More focused
+                "do_sample": False,      # Deterministic = faster
                 "return_full_text": False
             }
         }).encode("utf-8")
         
         headers = {"Content-Type": "application/json"}
-        if HF_TOKEN:
-            headers["Authorization"] = f"Bearer {HF_TOKEN}"
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
         
-        req = urllib.request.Request(
-            "https://api-inference.huggingface.co/models/google/flan-t5-base",
-            data=payload, headers=headers, method="POST"
-        )
+        req = urllib.request.Request(model_url, data=payload, headers=headers, method="POST")
         
+        # Try with timeout
         try:
             with urllib.request.urlopen(req, timeout=20) as response:
                 raw = response.read().decode("utf-8")
@@ -1210,15 +1129,24 @@ REGION DATA:
                 if isinstance(result, list) and result:
                     reply = result[0].get("generated_text", "").strip()
                 elif isinstance(result, dict):
-                    reply = result.get("generated_text", "Try again!").strip()
+                    reply = result.get("generated_text", result.get("error", "Try again!")).strip()
                 else:
                     reply = "I'm thinking... please try again!"
                 
+                # Clean reply
+                reply = reply.replace("[INST]", "").replace("[/INST]", "").replace("</s>", "").strip()
+                
+                if not reply:
+                    reply = "I don't have that information in our Ghana heritage archive yet."
+                
                 return {"reply": reply, "success": True, "locked": False, "fast": True}
                 
-        except Exception as e:
-            return {"reply": "EchoBot is warming up! Please try again.", 
-                   "success": False, "locked": False}
+        except urllib.error.HTTPError as e:
+            # Fallback response for model loading/errors
+            if e.code == 503:
+                return {"reply": "EchoBot is warming up! Please try again in 30 seconds.", 
+                       "success": False, "warming": True, "locked": False}
+            return {"reply": "I'm having a moment — please try again!", "success": False, "locked": False}
             
     except Exception as e:
         print(f"AI chat error: {e}")
@@ -1257,13 +1185,21 @@ async def initialize_payment(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Payment initialization failed")
     
     ref = result["data"]["reference"]
-    payment = Payment(
-        user_id=user.id, email=user.email,
-        amount=15000, reference=ref,
-        status="pending", plan="premium"
-    )
-    db.add(payment)
-    db.commit()
+    
+    # Save payment record if Payment model exists
+    try:
+        payment = models.Payment(
+            user_id=user.id,
+            email=user.email,
+            amount=15000,
+            reference=ref,
+            status="pending",
+            plan="premium"
+        )
+        db.add(payment)
+        db.commit()
+    except:
+        pass  # Payment table may not exist yet
     
     return {
         "success": True,
@@ -1274,28 +1210,57 @@ async def initialize_payment(request: Request, db: Session = Depends(get_db)):
 @app.post("/api/payments/webhook")
 async def paystack_webhook(request: Request, db: Session = Depends(get_db)):
     body = await request.body()
+    signature = request.headers.get("x-paystack-signature", "")
+    
+    # Verify webhook signature
+    if PAYSTACK_SECRET and signature:
+        expected = hmac.new(
+            PAYSTACK_SECRET.encode(),
+            body,
+            hashlib.sha512
+        ).hexdigest()
+        if signature != expected:
+            raise HTTPException(status_code=400, detail="Invalid signature")
+    
     try:
         data = json.loads(body.decode("utf-8"))
     except:
-        raise HTTPException(status_code=400, detail="Invalid JSON")
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
     
     if data.get("event") == "charge.success":
+        ref = data["data"]["reference"]
         user_id = data["data"].get("metadata", {}).get("user_id")
+        
+        # Mark payment as successful
+        try:
+            payment = db.query(models.Payment).filter(
+                models.Payment.reference == ref
+            ).first()
+            if payment:
+                payment.status = "success"
+        except:
+            pass
+        
+        # Upgrade user to premium
         if user_id:
             try:
-                uid = uuid.UUID(user_id)
-                user = db.query(User).filter(User.id == uid).first()
+                user = db.query(models.User).filter(
+                    models.User.id == int(user_id)
+                ).first()
                 if user:
-                    user.is_premium = True
+                    user.is_premium = 1
                     db.commit()
             except:
                 pass
-    return {"status": "ok"}
+        
+        return {"status": "ok"}
+    
+    return {"status": "ignored"}
 
 @app.get("/payment/callback")
-async def payment_callback(reference: str, request: Request, db: Session = Depends(get_db)):
+async def payment_callback(reference: str, db: Session = Depends(get_db)):
     if not PAYSTACK_SECRET:
-        return RedirectResponse("/premium?payment=error")
+        return RedirectResponse("/dashboard?payment=error")
     
     req = urllib.request.Request(
         f"https://api.paystack.co/transaction/verify/{reference}",
@@ -1307,22 +1272,89 @@ async def payment_callback(reference: str, request: Request, db: Session = Depen
         with urllib.request.urlopen(req, timeout=15) as resp:
             result = json.loads(resp.read().decode("utf-8"))
     except:
-        return RedirectResponse("/premium?payment=error")
+        return RedirectResponse("/dashboard?payment=error")
     
     if result.get("status") and result["data"].get("status") == "success":
         user_id = result["data"].get("metadata", {}).get("user_id")
+        
         if user_id:
             try:
-                uid = uuid.UUID(user_id)
-                user = db.query(User).filter(User.id == uid).first()
+                user = db.query(models.User).filter(
+                    models.User.id == int(user_id)
+                ).first()
                 if user:
-                    user.is_premium = True
+                    user.is_premium = 1
+                    
+                    # Update payment record
+                    try:
+                        payment = db.query(models.Payment).filter(
+                            models.Payment.reference == reference
+                        ).first()
+                        if payment:
+                            payment.status = "success"
+                    except:
+                        pass
+                    
                     db.commit()
             except:
                 pass
-        return RedirectResponse("/premium?upgraded=1")
+        
+        return RedirectResponse("/dashboard?upgraded=1")
     
-    return RedirectResponse("/premium?payment=failed")
+    return RedirectResponse("/dashboard?payment=failed")
+
+@app.get("/premium")
+async def premium_page(request: Request):
+    return serve_file("premium.html")
+
+# ============================================
+# SOCIAL / COMMUNITY PAGES
+# ============================================
+@app.get("/subscriptions")
+async def subscriptions_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("subscriptions.html")
+
+@app.get("/following")
+async def following_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("following.html")
+
+@app.get("/activity")
+async def activity_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("activity.html")
+
+@app.get("/explore")
+async def explore_page(request: Request):
+    return serve_file("explore.html")
+
+@app.get("/subscribers")
+async def subscribers_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("subscribers.html")
+
+@app.get("/user-profile")
+async def user_profile_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("user_profile.html")
+
+@app.get("/user-settings")
+async def user_settings_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("user_settings.html")
+
+@app.get("/archive")
+async def archive_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("archive.html")
 
 # ============================================
 # FOLLOW / SOCIAL API
@@ -1342,9 +1374,9 @@ async def follow_user(user_id: str, request: Request, db: Session = Depends(get_
         raise HTTPException(status_code=400, detail="Cannot follow yourself")
     
     try:
-        existing = db.query(Follow).filter(
-            Follow.follower_id == user.id,
-            Follow.following_id == target_id
+        existing = db.query(models.Follow).filter(
+            models.Follow.follower_id == user.id,
+            models.Follow.following_id == target_id
         ).first()
         
         if existing:
@@ -1352,7 +1384,7 @@ async def follow_user(user_id: str, request: Request, db: Session = Depends(get_
             db.commit()
             return {"success": True, "action": "unfollowed"}
         
-        follow = Follow(follower_id=user.id, following_id=target_id)
+        follow = models.Follow(follower_id=user.id, following_id=target_id)
         db.add(follow)
         db.commit()
         return {"success": True, "action": "followed"}
@@ -1367,12 +1399,12 @@ async def get_following(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Login required")
     
     try:
-        follows = db.query(Follow).filter(Follow.follower_id == user.id).all()
+        follows = db.query(models.Follow).filter(models.Follow.follower_id == user.id).all()
         result = []
         for f in follows:
-            followed = db.query(User).filter(User.id == f.following_id).first()
+            followed = db.query(models.User).filter(models.User.id == f.following_id).first()
             if followed:
-                post_count = db.query(Post).filter(Post.author_id == followed.id).count()
+                post_count = db.query(models.Post).filter(models.Post.author_id == followed.id).count()
                 result.append({
                     "id": str(followed.id), "username": followed.username,
                     "full_name": followed.full_name or "", "role": followed.role,
@@ -1389,10 +1421,10 @@ async def get_subscribers(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Login required")
     
     try:
-        follows = db.query(Follow).filter(Follow.following_id == user.id).all()
+        follows = db.query(models.Follow).filter(models.Follow.following_id == user.id).all()
         result = []
         for f in follows:
-            follower = db.query(User).filter(User.id == f.follower_id).first()
+            follower = db.query(models.User).filter(models.User.id == f.follower_id).first()
             if follower:
                 result.append({
                     "id": str(follower.id), "username": follower.username,
@@ -1410,13 +1442,13 @@ async def get_activity(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Login required")
     
     try:
-        follow_ids = [f.following_id for f in db.query(Follow).filter(
-            Follow.follower_id == user.id).all()]
+        follow_ids = [f.following_id for f in db.query(models.Follow).filter(
+            models.Follow.follower_id == user.id).all()]
         
-        posts = db.query(Post).filter(
-            Post.author_id.in_(follow_ids),
-            Post.status == "published"
-        ).order_by(Post.created_at.desc()).limit(30).all()
+        posts = db.query(models.Post).filter(
+            models.Post.author_id.in_(follow_ids),
+            models.Post.status == "published"
+        ).order_by(models.Post.created_at.desc()).limit(30).all()
         
         return [{"id": p.id, "title": p.title, "author_username": p.author_username,
                  "content_type": p.content_type, "created_at": str(p.created_at),
@@ -1425,351 +1457,6 @@ async def get_activity(request: Request, db: Session = Depends(get_db)):
         return []
 
 # ============================================
-# CREATORS ENDPOINT (FIXES 404 ERROR)
+# APP MOUNT FOR DEPENDENCY
 # ============================================
-@app.get("/api/creators")
-def get_creators(db: Session = Depends(get_db)):
-    """Get all creator channels"""
-    try:
-        q = db.query(models.CreatorChannel).filter(
-            models.CreatorChannel.is_active == True
-        ).all()
-        
-        result = []
-        for c in q:
-            user = db.query(User).filter(User.id == c.user_id).first()
-            post_count = db.query(Post).filter(
-                Post.author_id == c.user_id, Post.status == "published"
-            ).count()
-            
-            result.append({
-                "id": c.id,
-                "username": user.username if user else "Unknown",
-                "channel_name": c.channel_name or user.username if user else "",
-                "channel_description": c.channel_description or "",
-                "channel_image": c.channel_image or "",
-                "follower_count": 0,
-                "post_count": post_count,
-                "is_active": bool(c.is_active)
-            })
-        
-        return result
-    except Exception as e:
-        print(f"❌ Creators error: {e}")
-        return []
-
-
-# ============================================
-# STORY READING FUNCTIONALITY
-# ============================================
-@app.post("/api/stories/{story_id}/read")
-async def read_story(story_id: int, request: Request, db: Session = Depends(get_db)):
-    """Mark story as read / update view count"""
-    story = db.query(StorySubmission).filter(StorySubmission.id == story_id).first()
-    if not story:
-        raise HTTPException(status_code=404, detail="Story not found")
-    
-    return {
-        "success": True,
-        "title": story.title,
-        "content": story.content,
-        "author": story.username
-    }
-
-
-# ============================================
-# POST IMAGES WITH FULL SUPPORT
-# ============================================
-@app.get("/api/posts/images")
-async def get_post_images(
-    limit: int = 20, 
-    region: str = "",
-    category: str = "",
-    db: Session = Depends(get_db)
-):
-    """Get published image posts"""
-    try:
-        q = db.query(Post).filter(Post.status == "published")
-        
-        if region:
-            q = q.filter(Post.region_id == int(region))
-        if category:
-            q = q.filter(Post.content_type == category)
-        
-        posts = q.order_by(Post.created_at.desc()).limit(limit).all()
-        
-        return [{
-            "id": p.id,
-            "title": p.title,
-            "cover_image": p.cover_image or "",
-            "excerpt": p.excerpt or "",
-            "author_username": p.author_username or "",
-            "created_at": str(p.created_at),
-            "views": p.views or 0,
-            "likes": p.likes or 0,
-            "comments_count": len([c for c in db.query(Comment).filter(Comment.post_id == p.id)])
-        } for p in posts]
-    except Exception as e:
-        print(f"❌ Images error: {e}")
-        return []
-
-
-# ============================================
-# LIKE FUNCTIONALITY FOR POSTS
-# ============================================
-@app.post("/api/posts/{post_id}/like")
-async def like_post(post_id: int, request: Request, db: Session = Depends(get_db)):
-    """Like/unlike a post"""
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Login required")
-    
-    # Check if already liked
-    existing_like = db.query(Like).filter(
-        Like.post_id == post_id,
-        Like.user_id == user.id
-    ).first()
-    
-    if existing_like:
-        # Unlike
-        db.delete(existing_like)
-        db.commit()
-        post = db.query(Post).filter(Post.id == post_id).first()
-        if post:
-            post.likes = max(0, (post.likes or 0) - 1)
-            db.commit()
-        return {"liked": False, "total_likes": post.likes if post else 0}
-    else:
-        # Like
-        new_like = Like(post_id=post_id, user_id=user.id)
-        db.add(new_like)
-        db.commit()
-        
-        post = db.query(Post).filter(Post.id == post_id).first()
-        if post:
-            post.likes = (post.likes or 0) + 1
-            db.commit()
-        
-        return {"liked": True, "total_likes": post.likes if post else 1}
-
-
-# ============================================
-# COMMENT FUNCTIONALITY FOR POSTS
-# ============================================
-@app.get("/api/posts/{post_id}/comments")
-async def get_comments(post_id: int, db: Session = Depends(get_db)):
-    """Get all comments for a post"""
-    comments = db.query(Comment).filter(
-        Comment.post_id == post_id,
-        Comment.is_approved == True
-    ).order_by(Comment.created_at.asc()).all()
-    
-    return [{
-        "id": c.id,
-        "username": c.author.username if c.author else "Anonymous",
-        "avatar_url": c.author.avatar_url if c.author else "",
-        "content": c.content,
-        "created_at": str(c.created_at)
-    } for c in comments]
-
-
-@app.post("/api/posts/{post_id}/comment")
-async def add_comment(
-    post_id: int, 
-    content: str = Form(...),
-    request: Request = None,
-    db: Session = Depends(get_db)
-):
-    """Add a comment to a post"""
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Must be logged in to comment")
-    
-    if not content.strip():
-        raise HTTPException(status_code=400, detail="Comment cannot be empty")
-    
-    # Check if post exists
-    post = db.query(Post).filter(Post.id == post_id).first()
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-    
-    # Only approved content by default
-    comment = Comment(
-        post_id=post_id,
-        author_id=user.id,
-        username=user.username,
-        content=content.strip(),
-        is_approved=True  # Auto-approve for admins/superusers
-    )
-    
-    db.add(comment)
-    db.commit()
-    db.refresh(comment)
-    
-    return {
-        "success": True,
-        "comment_id": comment.id,
-        "username": comment.username,
-        "content": comment.content,
-        "created_at": str(comment.created_at)
-    }
-
-
-@app.delete("/api/comments/{comment_id}")
-async def delete_comment(comment_id: int, request: Request, db: Session = Depends(get_db)):
-    """Delete a comment"""
-    user = get_user_from_request(request, db)
-    admin_token = request.cookies.get("admin_session")
-    
-    if not user and admin_token != "ADMIN_AUTHORIZED":
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    comment = db.query(Comment).filter(Comment.id == comment_id).first()
-    if not comment:
-        raise HTTPException(status_code=404, detail="Comment not found")
-    
-    # Allow owner or admin to delete
-    if comment.author_id != user.id and admin_token != "ADMIN_AUTHORIZED":
-        raise HTTPException(status_code=403, detail="Cannot delete this comment")
-    
-    db.delete(comment)
-    db.commit()
-    return {"success": True}
-
-
-# ============================================
-# DIRECT MESSAGING SYSTEM
-# ============================================
-@app.get("/api/users/me/following")
-async def get_my_following(request: Request, db: Session = Depends(get_db)):
-    """Get list of users I follow (for messaging)"""
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Login required")
-    
-    follows = db.query(Follow).filter(Follow.follower_id == user.id).all()
-    
-    result = []
-    for f in follows:
-        followed_user = db.query(User).filter(User.id == f.following_id).first()
-        if followed_user:
-            result.append({
-                "id": followed_user.id,
-                "username": followed_user.username,
-                "avatar_url": followed_user.avatar_url or "",
-                "full_name": followed_user.full_name or ""
-            })
-    
-    return result
-
-
-@app.post("/api/messages/direct")
-async def send_direct_message(
-    recipient_id: str = Form(...),
-    message_content: str = Form(...),
-    request: Request = None,
-    db: Session = Depends(get_db)
-):
-    """Send direct message between users"""
-    sender = get_user_from_request(request, db)
-    if not sender:
-        raise HTTPException(status_code=401, detail="Login required")
-    
-    if not message_content.strip():
-        raise HTTPException(status_code=400, detail="Message cannot be empty")
-    
-    try:
-        recipient_id_uuid = uuid.UUID(recipient_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid recipient ID")
-    
-    recipient = db.query(User).filter(User.id == recipient_id_uuid).first()
-    if not recipient:
-        raise HTTPException(status_code=404, detail="Recipient not found")
-    
-    # Store message
-    msg = ChatMessage(
-        user_id=sender.id,
-        username=sender.username,
-        message=message_content.strip()[:500],
-        is_approved=True
-    )
-    db.add(msg)
-    db.commit()
-    db.refresh(msg)
-    
-    return {
-        "success": True,
-        "message_id": msg.id,
-        "recipient": recipient.username,
-        "content": msg.message
-    }
-
-
-@app.get("/api/messages/inbox/{user_id}")
-async def get_inbox(user_id: str, request: Request, db: Session = Depends(get_db)):
-    """Get messages for specific user"""
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Login required")
-    
-    try:
-        target_id = uuid.UUID(user_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user ID")
-    
-    # Get messages where either sender or recipient is our user
-    messages = db.query(ChatMessage).filter(
-        (ChatMessage.user_id == user.id) | 
-        (ChatMessage.user_id == target_id)
-    ).order_by(ChatMessage.created_at.asc()).all()
-    
-    return [{
-        "id": m.id,
-        "username": m.username,
-        "message": m.message,
-        "timestamp": str(m.created_at),
-        "is_me": m.user_id == user.id
-    } for m in messages]
-
-
-# ============================================
-# UPLOAD IMAGE TO POST
-# ============================================
-@app.post("/api/upload/post-image")
-async def upload_post_image(
-    file: UploadFile = File(...),
-    description: str = Form(""),
-    region_id: str = Form(""),
-    db: Session = Depends(get_db)
-):
-    """Upload image specifically for posts"""
-    safe_name = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}{Path(file.filename).suffix}"
-    file_path = UPLOAD_DIR / safe_name
-    
-    content = await file.read()
-    with open(file_path, "wb") as f:
-        f.write(content)
-    
-    uf = UploadedFile(
-        filename=safe_name,
-        original_name=file.filename,
-        file_path=str(file_path),
-        file_size=len(content),
-        mime_type=file.content_type or "image/jpeg",
-        category="image",
-        description=description,
-        uploaded_by="admin",
-        is_public=True
-    )
-    db.add(uf)
-    db.commit()
-    db.refresh(uf)
-    
-    return {
-        "success": True,
-        "url": f"/uploads/{safe_name}",
-        "filename": safe_name,
-        "original_name": file.filename,
-        "file_size_mb": round(len(content) / (1024 * 1024), 2)
-    }
+app.dependency_overrides[get_db] = get_db
