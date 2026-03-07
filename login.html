@@ -3,41 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EchoStack Admin Login</title>
+    <title>EchoStack Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1e29 0%, #2d3748 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .login-card {
+        .login-box {
             background: white;
             padding: 3rem;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 420px;
             width: 100%;
         }
-        .btn-primary {
-            background: #1a1e29 !important;
+        .btn-submit {
+            background: #0f172a !important;
             color: white !important;
-            transition: all 0.2s;
+            transition: all 0.3s;
         }
-        .btn-primary:hover {
-            background: #0077b6 !important;
+        .btn-submit:hover {
+            background: #1e40af !important;
             transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(30, 64, 175, 0.4);
         }
     </style>
 </head>
 <body>
-    <div class="login-card">
+    <div class="login-box">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold mb-2" style="color: #1a1e29;">🇬🇭 EchoStack Admin</h1>
-            <p class="text-gray-500 text-sm">Superuser access only</p>
+            <h1 class="text-3xl font-bold mb-2" style="color: #0f172a;">🇬🇭 EchoStack</h1>
+            <p class="text-gray-500 text-sm">Administrative Access</p>
         </div>
         
         <form id="admin-login-form" class="space-y-6">
@@ -46,26 +47,25 @@
                     type="password" 
                     id="answer" 
                     required 
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#0077b6] transition"
-                    placeholder="Enter the secret answer"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-600 transition"
+                    placeholder="Enter access credentials"
                     autocomplete="off"
                 >
-                <p class="text-xs text-gray-400 mt-1">Hint: It's two words, all caps</p>
             </div>
             
             <button 
                 type="submit" 
                 id="submit-btn"
-                class="w-full btn-primary py-3 rounded-lg font-semibold text-lg"
+                class="w-full btn-submit py-3 rounded-lg font-semibold text-lg"
             >
-                Enter Admin Portal →
+                Access Dashboard →
             </button>
             
             <p id="error-message" class="text-red-600 text-sm text-center hidden"></p>
         </form>
         
         <p class="text-center text-xs text-gray-400 mt-6">
-            Protected area • Authorized personnel only
+            Restricted area • Authorized access only
         </p>
     </div>
 
@@ -82,11 +82,8 @@
             errorMsg.classList.add('hidden');
             
             try {
-                // ✅ CORRECT ENDPOINT: /api/auth/login (NOT /api/users/login)
                 const formData = new URLSearchParams();
                 formData.append('answer', answer);
-                
-                console.log('Sending to /api/auth/login with answer:', answer);
                 
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
@@ -96,23 +93,18 @@
                     body: formData
                 });
                 
-                console.log('Response status:', response.status);
                 const data = await response.json();
-                console.log('Response data:', data);
                 
                 if (response.ok && data.success) {
-                    // ✅ Success - redirect to admin dashboard
-                    console.log('Login successful! Redirecting to /admin');
                     window.location.href = '/admin';
                 } else {
-                    throw new Error(data.detail || 'Incorrect answer');
+                    throw new Error('Access denied');
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                errorMsg.textContent = '❌ Incorrect answer. Try again.';
+                errorMsg.textContent = '❌ Invalid credentials';
                 errorMsg.classList.remove('hidden');
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Enter Admin Portal →';
+                submitBtn.innerHTML = 'Access Dashboard →';
                 document.getElementById('answer').value = '';
                 document.getElementById('answer').focus();
             }
