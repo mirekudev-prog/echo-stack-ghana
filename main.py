@@ -1045,10 +1045,19 @@ async def ai_chat(message: str = Form(...), region_context: str = Form(""),
         user = get_user_from_request(request, db)
         is_premium = user and (user.is_premium or user.role in ["superuser", "admin", "creator"])
 
-        if not user:
-            return {"reply": "EchoBot is a premium feature 🔒 Subscribe for GH₵150/month to unlock unlimited AI heritage assistance!", "success": False, "locked": True}
+        is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
+        if is_admin_session:
+            is_premium = True  # Admin always has full access
+
+        if not user and not is_admin_session:
+            return {"reply": "Please log in to use EchoBot!", "success": False, "locked": True}
         if not is_premium:
-            return {"reply": "EchoBot is a premium feature 🔒 Subscribe for GH₵150/month to unlock unlimited AI heritage assistance!", "success": False, "locked": True}
+            return {
+                "reply": "EchoBot is a Premium feature 🔒\n\nUpgrade for GH₵150/month to unlock unlimited AI heritage questions, Creator Studio, exclusive content and more.",
+                "success": False,
+                "locked": True,
+                "upgrade_url": "/premium"
+            }
         if not HF_TOKEN:
             return {"reply": "EchoBot is not configured yet. Ask your admin to add HF_TOKEN to Render environment variables.", "success": False}
 
@@ -1282,6 +1291,137 @@ async def premium_page(request: Request):
 # ============================================
 # ADMIN PREVIEW — skip user login when viewing site from admin dashboard
 # ============================================
+# ============================================
+# SOCIAL / COMMUNITY PAGES
+# ============================================
+
+@app.get("/subscriptions")
+async def subscriptions_page(request: Request):
+    if not is_logged_in(request):
+        return RedirectResponse(url="/user-login")
+    return serve_file("subscriptions.html")
+
+@app.get("/following")
+async def following_page(request: Request):
+    if not is_logged_in(request):
+        return RedirectResponse(url="/user-login")
+    return serve_file("following.html")
+
+@app.get("/chat")
+async def chat_page(request: Request):
+    if not is_logged_in(request):
+        return RedirectResponse(url="/user-login")
+    return serve_file("community_chat.html")
+
+@app.get("/activity")
+async def activity_page(request: Request):
+    if not is_logged_in(request):
+        return RedirectResponse(url="/user-login")
+    return serve_file("activity.html")
+
+@app.get("/explore")
+async def explore_page(request: Request):
+    return serve_file("explore.html")
+
+@app.get("/subscribers")
+async def subscribers_page(request: Request):
+    if not is_logged_in(request):
+        return RedirectResponse(url="/user-login")
+    return serve_file("subscribers.html")
+
+@app.get("/user-profile")
+async def user_profile_page(request: Request):
+    if not is_logged_in(request):
+        return RedirectResponse(url="/user-login")
+    return serve_file("user_profile.html")
+
+@app.get("/user-settings")
+async def user_settings_page(request: Request):
+    if not is_logged_in(request):
+        return RedirectResponse(url="/user-login")
+    return serve_file("user_settings.html")
+
+# Follow / subscribe API
+@app.post("/api/follow/{user_id}")
+async def follow_user(user_id: int, request: Request, db: Session = Depends(get_db)):
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Login required")
+    if user.id == user_id:
+        raise HTTPException(status_code=400, detail="Cannot follow yourself")
+    try:
+        existing = db.query(models.Follow).filter(
+            models.Follow.follower_id == user.id,
+            models.Follow.following_id == user_id
+        ).first()
+        if existing:
+            db.delete(existing)
+            db.commit()
+            return {"success": True, "action": "unfollowed"}
+        follow = models.Follow(follower_id=user.id, following_id=user_id)
+        db.add(follow)
+        db.commit()
+        return {"success": True, "action": "followed"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/following")
+async def get_following(request: Request, db: Session = Depends(get_db)):
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Login required")
+    try:
+        follows = db.query(models.Follow).filter(models.Follow.follower_id == user.id).all()
+        result = []
+        for f in follows:
+            followed = db.query(models.User).filter(models.User.id == f.following_id).first()
+            if followed:
+                post_count = db.query(models.Post).filter(models.Post.author_id == followed.id).count()
+                result.append({"id": followed.id, "username": followed.username,
+                    "full_name": followed.full_name or "", "role": followed.role,
+                    "avatar_url": followed.avatar_url or "", "post_count": post_count})
+        return result
+    except Exception as e:
+        return []
+
+@app.get("/api/subscribers")
+async def get_subscribers(request: Request, db: Session = Depends(get_db)):
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Login required")
+    try:
+        follows = db.query(models.Follow).filter(models.Follow.following_id == user.id).all()
+        result = []
+        for f in follows:
+            follower = db.query(models.User).filter(models.User.id == f.follower_id).first()
+            if follower:
+                result.append({"id": follower.id, "username": follower.username,
+                    "full_name": follower.full_name or "", "role": follower.role,
+                    "avatar_url": follower.avatar_url or ""})
+        return result
+    except:
+        return []
+
+@app.get("/api/activity")
+async def get_activity(request: Request, db: Session = Depends(get_db)):
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Login required")
+    try:
+        # Latest posts from people user follows
+        follow_ids = [f.following_id for f in db.query(models.Follow).filter(
+            models.Follow.follower_id == user.id).all()]
+        posts = db.query(models.Post).filter(
+            models.Post.author_id.in_(follow_ids),
+            models.Post.status == "published"
+        ).order_by(models.Post.created_at.desc()).limit(30).all()
+        return [{"id": p.id, "title": p.title, "author_username": p.author_username,
+            "content_type": p.content_type, "created_at": str(p.created_at),
+            "cover_image": p.cover_image or "", "is_premium": p.is_premium} for p in posts]
+    except:
+        return []
+
 @app.get("/admin-preview")
 async def admin_preview(request: Request, db: Session = Depends(get_db)):
     """Admin clicks 'View Site' — sets preview + user_session cookies and sets localStorage via redirect page."""
