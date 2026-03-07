@@ -5,20 +5,15 @@ from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
-import os, json, re, hashlib, datetime, hmac, urllib.request, uuid
+import os, json, re, hashlib, datetime, urllib.request, uuid
 from pathlib import Path
-from typing import Optional, List
+from database import engine, get_db, Base
 
-# ✅ Import database components (get_db is defined in database.py)
-from database import engine, get_db, Base, SessionLocal
-
-# ✅ Import models AFTER Base is defined
 import models
 
-# ✅ Initialize database tables (safe - won't error if tables exist)
+# Create tables if they don't exist
 Base.metadata.create_all(bind=engine)
 
-# ✅ Create FastAPI app
 app = FastAPI(title="EchoStack API")
 
 # ============================================
@@ -45,17 +40,17 @@ def hash_password(password: str) -> str:
 def verify_password(password: str, hashed: str) -> bool:
     return hash_password(password) == hashed
 
-def get_user_from_request(request: Request, db: Session) -> Optional[models.User]:
-    """Get user from cookie - handles UUID properly."""
+def get_user_from_request(request: Request, db: Session):
+    """Get user from session cookie - handles UUID IDs properly."""
     user_id = request.cookies.get("user_session")
     if not user_id:
         return None
     try:
-        # Try as UUID first (for es_users table)
+        # Try UUID first (since User.id is UUID in your models)
         uid = uuid.UUID(str(user_id))
         return db.query(models.User).filter(models.User.id == uid).first()
-    except (ValueError, AttributeError, TypeError):
-        # Fallback to int (legacy support)
+    except:
+        # Fallback to int (legacy)
         try:
             return db.query(models.User).filter(models.User.id == int(user_id)).first()
         except:
@@ -75,25 +70,6 @@ async def save_upload(file: UploadFile) -> str:
     with open(path, "wb") as f:
         f.write(content)
     return f"/uploads/{safe}"
-
-def get_db_knowledge(db: Session) -> str:
-    """Get Ghana heritage data from database for AI context."""
-    try:
-        regions = db.query(models.Region).all()
-        knowledge = "GHANA REGIONS DATABASE:\n"
-        for r in regions:
-            knowledge += f"- {r.name}"
-            if r.capital: knowledge += f" (Capital: {r.capital})"
-            if r.population: knowledge += f", Pop: {r.population}"
-            if r.terrain: knowledge += f", Terrain: {r.terrain}"
-            if r.category: knowledge += f", Category: {r.category}"
-            if r.description:
-                desc = r.description[:200].replace("\n", " ")
-                knowledge += f"\n  Info: {desc}"
-            knowledge += "\n"
-        return knowledge[:3000]  # Limit context size
-    except:
-        return "Region data unavailable."
 
 # ============================================
 # STATIC PAGES
@@ -142,6 +118,82 @@ async def admin_page(request: Request):
         return serve_file("login.html")
     return serve_file("admin_dashboard.html")
 
+@app.get("/admin-preview")  # ⭐️ THIS IS THE KEY ENDPOINT YOU WERE LOOKING FOR!
+async def admin_preview(request: Request, db: Session = Depends(get_db)):
+    """Admin clicks 'View Live Site' → sets user_session cookie & redirects to /app"""
+    
+    # Check if admin is logged in
+    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED":
+        return RedirectResponse(url="/admin")
+    
+    # Find an admin/superuser account to use for session
+    admin_user = db.query(models.User).filter(
+        models.User.role.in_(["superuser", "admin"])
+    ).first()
+    
+    # If no admin user exists, create one automatically
+    if not admin_user:
+        try:
+            admin_user = models.User(
+                username="admin",
+                email="admin@echostack.gh",
+                password_hash=hash_password("admin_temp_password"),
+                role="superuser",
+                plan="premium",
+                is_active=True,
+                is_premium=True
+            )
+            db.add(admin_user)
+            db.commit()
+            db.refresh(admin_user)
+        except Exception as e:
+            print(f"Error creating admin user: {e}")
+            db.rollback()
+            return RedirectResponse(url="/admin")
+    
+    # Get user details
+    user_id = str(admin_user.id)
+    username = admin_user.username
+    
+    # Return HTML page that sets localStorage + cookie, then redirects to /app
+    html = f"""<!DOCTYPE html><html><head><title>Loading EchoStack...</title></head><body>
+<script>
+try {{
+    // Set user info in localStorage
+    localStorage.setItem('es_user', JSON.stringify({{
+        loggedIn: true,
+        user_id: "{user_id}",
+        username: "{username}",
+        email: "admin@echostack.gh",
+        role: "superuser",
+        is_premium: 1
+    }}));
+}} catch(e) {{ console.error('localStorage error:', e); }}
+
+// Set the user_session cookie
+document.cookie = "user_session={user_id}; path=/; max-age=604800";
+
+// Redirect to app page
+window.location.href = '/app';
+</script>
+<p style="text-align:center;margin-top:100px;">Redirecting to site...</p>
+</body></html>"""
+    
+    from fastapi.responses import HTMLResponse
+    response = HTMLResponse(content=html)
+    
+    # Also set cookie directly in header
+    response.set_cookie(
+        key="admin_preview",
+        value="1",
+        max_age=3600,
+        path="/",
+        httponly=False,
+        samesite="lax"
+    )
+    
+    return response
+
 @app.get("/client-login")
 def client_login_page(): return serve_file("client_login.html")
 
@@ -171,6 +223,56 @@ def manifest_route():
             return JSONResponse(content=json.load(f))
     raise HTTPException(status_code=404)
 
+@app.get("/premium")
+async def premium_page(request: Request):
+    return serve_file("premium.html")
+
+@app.get("/subscriptions")
+async def subscriptions_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("subscriptions.html")
+
+@app.get("/following")
+async def following_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("following.html")
+
+@app.get("/chat")
+async def chat_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("community_chat.html")
+
+@app.get("/activity")
+async def activity_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("activity.html")
+
+@app.get("/explore")
+async def explore_page(request: Request):
+    return serve_file("explore.html")
+
+@app.get("/subscribers")
+async def subscribers_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("subscribers.html")
+
+@app.get("/user-profile")
+async def user_profile_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("user_profile.html")
+
+@app.get("/archive")
+async def archive_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("archive.html")
+
 # ============================================
 # ADMIN AUTH (Secret Answer Login)
 # ============================================
@@ -192,7 +294,7 @@ def admin_logout(response: Response):
     return resp
 
 # ============================================
-# USER AUTH
+# USER AUTHENTICATION
 # ============================================
 @app.post("/api/users/signup")
 async def user_signup(
@@ -787,7 +889,7 @@ async def create_event(
     request: Request = None, db: Session = Depends(get_db)
 ):
     require_admin(request)
-    event = models.Event(title=title, description=description, event_date=event_date,
+    event = Event(title=title, description=description, event_date=event_date,
                   location=location, image_url=image_url)
     db.add(event)
     db.commit()
@@ -797,7 +899,7 @@ async def create_event(
 @app.delete("/api/events/{event_id}")
 async def delete_event(event_id: int, request: Request, db: Session = Depends(get_db)):
     require_admin(request)
-    event = db.query(models.Event).filter(models.Event.id == event_id).first()
+    event = db.query(Event).filter(Event.id == event_id).first()
     if not event:
         raise HTTPException(status_code=404)
     event.is_active = False
@@ -810,10 +912,10 @@ async def delete_event(event_id: int, request: Request, db: Session = Depends(ge
 @app.get("/api/chat")
 def get_messages(region_id: str = "", db: Session = Depends(get_db)):
     try:
-        q = db.query(models.ChatMessage).filter(models.ChatMessage.is_approved == 1)
+        q = db.query(ChatMessage).filter(ChatMessage.is_approved == 1)
         if region_id:
-            q = q.filter(models.ChatMessage.region_id == int(region_id))
-        msgs = q.order_by(models.ChatMessage.created_at.desc()).limit(50).all()
+            q = q.filter(ChatMessage.region_id == int(region_id))
+        msgs = q.order_by(ChatMessage.created_at.desc()).limit(50).all()
         return [{"id": m.id, "username": m.username, "message": m.message,
                  "region_id": m.region_id, "created_at": str(m.created_at)} for m in msgs]
     except:
@@ -827,7 +929,7 @@ async def post_message(message: str = Form(...), region_id: str = Form(""),
         raise HTTPException(status_code=401, detail="Must be logged in to chat")
     if not message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
-    msg = models.ChatMessage(
+    msg = ChatMessage(
         user_id=user.id, username=user.username, message=message.strip()[:500],
         region_id=int(region_id) if region_id and region_id.isdigit() else None
     )
@@ -839,7 +941,7 @@ async def post_message(message: str = Form(...), region_id: str = Form(""),
 @app.delete("/api/chat/{message_id}")
 async def delete_chat_message(message_id: int, request: Request, db: Session = Depends(get_db)):
     require_admin(request)
-    msg = db.query(models.ChatMessage).filter(models.ChatMessage.id == message_id).first()
+    msg = db.query(ChatMessage).filter(ChatMessage.id == message_id).first()
     if not msg:
         raise HTTPException(status_code=404, detail="Message not found")
     db.delete(msg)
@@ -867,7 +969,7 @@ def create_section(name: str = Form(...), description: str = Form(""),
         slug = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
         if db.query(models.Section).filter(models.Section.slug == slug).first():
             raise HTTPException(status_code=400, detail="Already exists")
-        s = models.Section(name=name, slug=slug, description=description, display_order=display_order)
+        s = Section(name=name, slug=slug, description=description, display_order=display_order)
         db.add(s)
         db.commit()
         db.refresh(s)
@@ -939,26 +1041,7 @@ async def save_site_config(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# JSON IMPORT
-# ============================================
-@app.post("/api/import/json")
-def import_json(data: list, db: Session = Depends(get_db)):
-    try:
-        imported = 0
-        for rd in data:
-            try:
-                db.add(models.Region(**rd))
-                imported += 1
-            except:
-                continue
-        db.commit()
-        return {"success": True, "imported": imported}
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ============================================
-# FAST AI CHAT (EchoBot) - DATABASE ONLY, PREMIUM GATED
+# AI CHAT (EchoBot)
 # ============================================
 @app.post("/api/ai/chat")
 async def ai_chat(
@@ -967,13 +1050,7 @@ async def ai_chat(
     request: Request = None,
     db: Session = Depends(get_db)
 ):
-    """
-    FAST AI CHAT - EchoBot
-    - Only answers based on YOUR database content
-    - Premium users: can chat ✅
-    - Free users: see UI but chat is disabled (returns locked message)
-    - Uses fast model: google/flan-t5-base (or fallback)
-    """
+    """AI Chat - Premium Only Feature"""
     try:
         user = get_user_from_request(request, db)
         is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
@@ -988,55 +1065,52 @@ async def ai_chat(
         
         if not is_premium:
             return {
-                "reply": "🔒 EchoBot is a Premium feature. Subscribe for GH₵150/month to unlock unlimited AI heritage questions!",
+                "reply": "EchoBot is a Premium feature. Subscribe for GH₵150/month to unlock unlimited AI heritage questions!",
                 "success": False,
                 "locked": True,
                 "upgrade_url": "/premium"
             }
         
-        # Get database knowledge ONLY (no external info)
-        db_knowledge = get_db_knowledge(db)
+        # Get database knowledge
+        try:
+            regions = db.query(models.Region).all()
+            regions_summary = ""
+            for r in regions:
+                regions_summary += f"- {r.name}: {r.description[:200]}..." if r.description else ""
+        except:
+            regions_summary = "Region data unavailable."
         
-        # Use faster model: google/flan-t5-base (or fallback to Mistral if HF_TOKEN set)
-        model_url = "https://api-inference.huggingface.co/models/google/flan-t5-base"
-        token = HF_TOKEN if HF_TOKEN else ""
-        
-        # Build prompt: ONLY use database content
-        system_prompt = f"""You are EchoBot, an AI guide for EchoStack Ghana Heritage Archive.
-IMPORTANT: ONLY answer using the Ghana region data below. If the question is not about Ghana heritage or not in the data, politely say you don't have that information yet.
+        system_prompt = f"""You are EchoBot, AI guide for Ghana Heritage Archive.
+Only answer using the data below about Ghana's regions and culture.
+If info not available, politely say you don't have that information yet.
 
-GHANA HERITAGE DATABASE:
-{db_knowledge}
-
-RULES:
-- Answer ONLY based on the database above
-- Keep answers short (2-4 sentences)
-- If info not in database, say: "I don't have that information yet in our archive."
-- Be warm and educational
-- Respond in English"""
+REGION DATA:
+{regions_summary if regions_summary else "No data available."}"""
 
         if region_context:
-            system_prompt += f"\n\nUser is viewing: {region_context} region - prioritize this."
+            system_prompt += f"\n\nUser viewing: {region_context} region."
 
-        full_prompt = f"{system_prompt}\n\nQuestion: {message}\n\nAnswer:"
+        full_prompt = f"{system_prompt}\n\nQuestion: {message}\nAnswer:"
         
         payload = json.dumps({
             "inputs": full_prompt,
             "parameters": {
-                "max_new_tokens": 150,  # Shorter = faster
-                "temperature": 0.3,      # More focused
-                "do_sample": False,      # Deterministic = faster
+                "max_new_tokens": 150,
+                "temperature": 0.3,
+                "do_sample": False,
                 "return_full_text": False
             }
         }).encode("utf-8")
         
         headers = {"Content-Type": "application/json"}
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
+        if HF_TOKEN:
+            headers["Authorization"] = f"Bearer {HF_TOKEN}"
         
-        req = urllib.request.Request(model_url, data=payload, headers=headers, method="POST")
+        req = urllib.request.Request(
+            "https://api-inference.huggingface.co/models/google/flan-t5-base",
+            data=payload, headers=headers, method="POST"
+        )
         
-        # Try with timeout
         try:
             with urllib.request.urlopen(req, timeout=20) as response:
                 raw = response.read().decode("utf-8")
@@ -1045,24 +1119,15 @@ RULES:
                 if isinstance(result, list) and result:
                     reply = result[0].get("generated_text", "").strip()
                 elif isinstance(result, dict):
-                    reply = result.get("generated_text", result.get("error", "Try again!")).strip()
+                    reply = result.get("generated_text", "Try again!").strip()
                 else:
                     reply = "I'm thinking... please try again!"
                 
-                # Clean reply
-                reply = reply.replace("[INST]", "").replace("[/INST]", "").replace("</s>", "").strip()
-                
-                if not reply:
-                    reply = "I don't have that information in our Ghana heritage archive yet."
-                
                 return {"reply": reply, "success": True, "locked": False, "fast": True}
                 
-        except urllib.error.HTTPError as e:
-            # Fallback response for model loading/errors
-            if e.code == 503:
-                return {"reply": "EchoBot is warming up! Please try again in 30 seconds.", 
-                       "success": False, "warming": True, "locked": False}
-            return {"reply": "I'm having a moment — please try again!", "success": False, "locked": False}
+        except Exception as e:
+            return {"reply": "EchoBot is warming up! Please try again.", 
+                   "success": False, "locked": False}
             
     except Exception as e:
         print(f"AI chat error: {e}")
@@ -1101,7 +1166,7 @@ async def initialize_payment(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Payment initialization failed")
     
     ref = result["data"]["reference"]
-    payment = models.Payment(
+    payment = Payment(
         user_id=user.id, email=user.email,
         amount=15000, reference=ref,
         status="pending", plan="premium"
@@ -1128,7 +1193,7 @@ async def paystack_webhook(request: Request, db: Session = Depends(get_db)):
         if user_id:
             try:
                 uid = uuid.UUID(user_id)
-                user = db.query(models.User).filter(models.User.id == uid).first()
+                user = db.query(User).filter(User.id == uid).first()
                 if user:
                     user.is_premium = True
                     db.commit()
@@ -1158,7 +1223,7 @@ async def payment_callback(reference: str, request: Request, db: Session = Depen
         if user_id:
             try:
                 uid = uuid.UUID(user_id)
-                user = db.query(models.User).filter(models.User.id == uid).first()
+                user = db.query(User).filter(User.id == uid).first()
                 if user:
                     user.is_premium = True
                     db.commit()
@@ -1167,65 +1232,6 @@ async def payment_callback(reference: str, request: Request, db: Session = Depen
         return RedirectResponse("/premium?upgraded=1")
     
     return RedirectResponse("/premium?payment=failed")
-
-@app.get("/premium")
-async def premium_page(request: Request):
-    return serve_file("premium.html")
-
-# ============================================
-# SOCIAL / COMMUNITY PAGES
-# ============================================
-@app.get("/subscriptions")
-async def subscriptions_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("subscriptions.html")
-
-@app.get("/following")
-async def following_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("following.html")
-
-@app.get("/chat")
-async def chat_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("community_chat.html")
-
-@app.get("/activity")
-async def activity_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("activity.html")
-
-@app.get("/explore")
-async def explore_page(request: Request):
-    return serve_file("explore.html")
-
-@app.get("/subscribers")
-async def subscribers_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("subscribers.html")
-
-@app.get("/user-profile")
-async def user_profile_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("user_profile.html")
-
-@app.get("/user-settings")
-async def user_settings_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("user_settings.html")
-
-@app.get("/archive")
-async def archive_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("archive.html")
 
 # ============================================
 # FOLLOW / SOCIAL API
@@ -1245,9 +1251,9 @@ async def follow_user(user_id: str, request: Request, db: Session = Depends(get_
         raise HTTPException(status_code=400, detail="Cannot follow yourself")
     
     try:
-        existing = db.query(models.Follow).filter(
-            models.Follow.follower_id == user.id,
-            models.Follow.following_id == target_id
+        existing = db.query(Follow).filter(
+            Follow.follower_id == user.id,
+            Follow.following_id == target_id
         ).first()
         
         if existing:
@@ -1255,7 +1261,7 @@ async def follow_user(user_id: str, request: Request, db: Session = Depends(get_
             db.commit()
             return {"success": True, "action": "unfollowed"}
         
-        follow = models.Follow(follower_id=user.id, following_id=target_id)
+        follow = Follow(follower_id=user.id, following_id=target_id)
         db.add(follow)
         db.commit()
         return {"success": True, "action": "followed"}
@@ -1270,12 +1276,12 @@ async def get_following(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Login required")
     
     try:
-        follows = db.query(models.Follow).filter(models.Follow.follower_id == user.id).all()
+        follows = db.query(Follow).filter(Follow.follower_id == user.id).all()
         result = []
         for f in follows:
-            followed = db.query(models.User).filter(models.User.id == f.following_id).first()
+            followed = db.query(User).filter(User.id == f.following_id).first()
             if followed:
-                post_count = db.query(models.Post).filter(models.Post.author_id == followed.id).count()
+                post_count = db.query(Post).filter(Post.author_id == followed.id).count()
                 result.append({
                     "id": str(followed.id), "username": followed.username,
                     "full_name": followed.full_name or "", "role": followed.role,
@@ -1292,10 +1298,10 @@ async def get_subscribers(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Login required")
     
     try:
-        follows = db.query(models.Follow).filter(models.Follow.following_id == user.id).all()
+        follows = db.query(Follow).filter(Follow.following_id == user.id).all()
         result = []
         for f in follows:
-            follower = db.query(models.User).filter(models.User.id == f.follower_id).first()
+            follower = db.query(User).filter(User.id == f.follower_id).first()
             if follower:
                 result.append({
                     "id": str(follower.id), "username": follower.username,
@@ -1313,22 +1319,16 @@ async def get_activity(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Login required")
     
     try:
-        follow_ids = [f.following_id for f in db.query(models.Follow).filter(
-            models.Follow.follower_id == user.id).all()]
+        follow_ids = [f.following_id for f in db.query(Follow).filter(
+            Follow.follower_id == user.id).all()]
         
-        posts = db.query(models.Post).filter(
-            models.Post.author_id.in_(follow_ids),
-            models.Post.status == "published"
-        ).order_by(models.Post.created_at.desc()).limit(30).all()
+        posts = db.query(Post).filter(
+            Post.author_id.in_(follow_ids),
+            Post.status == "published"
+        ).order_by(Post.created_at.desc()).limit(30).all()
         
         return [{"id": p.id, "title": p.title, "author_username": p.author_username,
                  "content_type": p.content_type, "created_at": str(p.created_at),
                  "cover_image": p.cover_image or "", "is_premium": p.is_premium} for p in posts]
     except:
         return []
-
-# ============================================
-# APP MOUNT FOR DEPENDENCY (ensure get_db works)
-# ============================================
-# This ensures FastAPI can resolve the get_db dependency
-app.dependency_overrides = {}
