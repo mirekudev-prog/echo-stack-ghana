@@ -1,24 +1,22 @@
 {
-    "name": "EchoStack - Ghana's Heritage Archive",
-    "short_name": "EchoStack",
-    "description": "Preserving Ghana's Living Stories",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#f5f5f5",
-    "theme_color": "#1a1e29",
-    "orientation": "portrait-primary",
-    "icons": [
-        {
-            "src": "/echostack-logo.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any maskable"
-        },
-        {
-            "src": "/echostack-logo.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
-        }
-    ]
+  "name": "EchoStack - Ghana Heritage Archive",
+  "short_name": "EchoStack",
+  "description": "Discover Ghana's rich cultural heritage across 16 regions",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF6EF",
+  "theme_color": "#0D1B2A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/echostack-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/echostack-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
