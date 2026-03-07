@@ -140,6 +140,9 @@ body { font-family: 'Inter', sans-serif; background: #f4f6f9; color: var(--dark)
   <button class="nav-btn" onclick="showSection('media')" id="nav-media">
     <span class="icon">📁</span> File Manager
   </button>
+  <button class="nav-btn" onclick="showSection('write')" id="nav-write">
+    <span class="icon">✍️</span> Write Content
+  </button>
   <button class="nav-btn" onclick="showSection('stories')" id="nav-stories">
     <span class="icon">📖</span> Stories
   </button>
@@ -601,6 +604,101 @@ body { font-family: 'Inter', sans-serif; background: #f4f6f9; color: var(--dark)
               <button onclick="logout()" class="btn btn-danger btn-sm">Logout Now</button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════ WRITE CONTENT ═══════ -->
+    <div class="section" id="section-write">
+      <div class="card" style="max-width:860px;margin:0 auto;">
+        <div class="card-header">
+          <span style="font-weight:700;font-size:1.05rem;">✍️ Write Content</span>
+          <div style="display:flex;gap:8px;">
+            <button onclick="setWriteType('article')" class="btn btn-secondary btn-sm" id="wtype-article" style="border-color:var(--brand);color:var(--brand);">📝 Article</button>
+            <button onclick="setWriteType('story')"   class="btn btn-secondary btn-sm" id="wtype-story">📖 Story</button>
+            <button onclick="setWriteType('video')"   class="btn btn-secondary btn-sm" id="wtype-video">🎬 Video Post</button>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <!-- Type description -->
+          <div id="write-type-desc" style="background:#f0f9ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:0.85rem;color:#1d4ed8;">
+            📝 <strong>Article:</strong> Long-form heritage content — history, culture, traditions, deep-dives. Published directly to the News Feed.
+          </div>
+
+          <input type="hidden" id="write-type" value="article">
+
+          <div class="field"><label>Title *</label><input type="text" id="write-title" placeholder="Give your content a compelling title…"></div>
+          <div class="field"><label>Short Summary / Excerpt</label><input type="text" id="write-excerpt" placeholder="One sentence that hooks the reader…"></div>
+
+          <div class="field"><label>Content *</label>
+            <textarea id="write-content" rows="14" placeholder="Write your full article, story, or description here…" style="font-size:0.9rem;line-height:1.7;"></textarea>
+          </div>
+
+          <!-- Video URL — only for video type -->
+          <div class="field" id="video-url-field" style="display:none;">
+            <label>Video URL / Upload Link</label>
+            <input type="text" id="write-video-url" placeholder="YouTube link, Vimeo, or /uploads/video.mp4 (max 1 min)">
+            <p style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Upload your short video first via File Manager, then paste the URL here. Or paste a YouTube/Vimeo link.</p>
+          </div>
+
+          <!-- Cover image -->
+          <div class="field">
+            <label>Cover Image</label>
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <button type="button" class="upload-tab active" id="cover-tab-upload" onclick="switchCoverTab('upload')">📱 Upload</button>
+              <button type="button" class="upload-tab" id="cover-tab-url" onclick="switchCoverTab('url')">🔗 URL</button>
+            </div>
+            <div id="cover-panel-upload">
+              <input type="file" id="cover-file-input" accept="image/*" style="font-size:0.85rem;" onchange="handleCoverUpload(this)">
+              <p id="cover-upload-status" style="font-size:0.8rem;color:var(--success);margin-top:4px;font-weight:600;"></p>
+            </div>
+            <div id="cover-panel-url" style="display:none;">
+              <input type="text" id="write-cover-url" placeholder="https://… or /uploads/image.jpg" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;outline:none;">
+            </div>
+            <div id="cover-preview" style="display:none;margin-top:8px;">
+              <img id="cover-preview-img" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
+              <button type="button" onclick="removeCover()" style="margin-top:4px;font-size:0.75rem;background:#fee2e2;color:#b91c1c;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;">✕ Remove</button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="field">
+              <label>Region (optional)</label>
+              <select id="write-region" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;outline:none;">
+                <option value="">— All regions —</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Access</label>
+              <select id="write-premium" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;outline:none;">
+                <option value="0">🌐 Public (everyone)</option>
+                <option value="1">⭐ Premium only</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;padding-top:16px;border-top:1px solid var(--border);">
+            <button onclick="publishContent('published')" class="btn btn-primary" style="flex:1;justify-content:center;padding:13px;" id="publish-btn">🚀 Publish Now</button>
+            <button onclick="publishContent('draft')" class="btn btn-secondary" style="flex:1;justify-content:center;padding:13px;" id="draft-btn">💾 Save as Draft</button>
+          </div>
+
+          <div id="write-result" style="display:none;margin-top:14px;padding:14px;border-radius:8px;font-size:0.875rem;font-weight:600;"></div>
+        </div>
+      </div>
+
+      <!-- Posts list -->
+      <div class="card" style="max-width:860px;margin:20px auto 0;">
+        <div class="card-header">
+          <span style="font-weight:700;">📋 Published Content</span>
+          <button onclick="loadPosts()" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="table">
+            <thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Region</th><th>Premium</th><th>Actions</th></tr></thead>
+            <tbody id="posts-tbody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -1221,6 +1319,277 @@ function notify(msg, type) {
   n.className = 'show ' + type;
   clearTimeout(notifyTimer);
   notifyTimer = setTimeout(() => { n.className = ''; }, 3500);
+}
+
+// ══════════════════════════════════════════════════════
+// WRITE CONTENT — full JS
+// ══════════════════════════════════════════════════════
+let coverImageFinal = ''; // resolved cover URL after upload or URL input
+
+// Load regions into the write-region dropdown
+async function loadWriteRegions() {
+  try {
+    const res = await fetch('/api/regions');
+    const regions = await res.json();
+    const sel = document.getElementById('write-region');
+    if (!sel) return;
+    regions.forEach(r => {
+      const o = document.createElement('option');
+      o.value = r.id;
+      o.textContent = r.name;
+      sel.appendChild(o);
+    });
+  } catch(e) {}
+}
+loadWriteRegions();
+
+function setWriteType(type) {
+  document.getElementById('write-type').value = type;
+  const descs = {
+    article: '📝 <strong>Article:</strong> Long-form heritage content — history, culture, traditions, deep-dives. Published directly to the News Feed.',
+    story:   '📖 <strong>Story:</strong> A heritage story or oral tradition submitted to the archive. Auto-approved when posted by admin.',
+    video:   '🎬 <strong>Video Post:</strong> Share a short video (under 1 minute) — upload via File Manager first, then paste the URL below.'
+  };
+  document.getElementById('write-type-desc').innerHTML = descs[type] || '';
+  document.getElementById('video-url-field').style.display = type === 'video' ? 'block' : 'none';
+
+  // Update button active states
+  ['article','story','video'].forEach(t => {
+    const btn = document.getElementById('wtype-' + t);
+    if (!btn) return;
+    if (t === type) {
+      btn.style.borderColor = 'var(--brand)';
+      btn.style.color = 'var(--brand)';
+      btn.style.background = 'rgba(0,119,182,0.08)';
+    } else {
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--dark)';
+      btn.style.background = '#fff';
+    }
+  });
+}
+
+function switchCoverTab(tab) {
+  document.getElementById('cover-panel-upload').style.display = tab === 'upload' ? 'block' : 'none';
+  document.getElementById('cover-panel-url').style.display   = tab === 'url'    ? 'block' : 'none';
+  document.getElementById('cover-tab-upload').classList.toggle('active', tab === 'upload');
+  document.getElementById('cover-tab-url').classList.toggle('active', tab === 'url');
+  if (tab === 'url') {
+    document.getElementById('write-cover-url').oninput = function() {
+      coverImageFinal = this.value.trim();
+      showCoverPreview(coverImageFinal);
+    };
+  }
+}
+
+function showCoverPreview(url) {
+  const preview = document.getElementById('cover-preview');
+  const img = document.getElementById('cover-preview-img');
+  if (url) {
+    img.src = url;
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function removeCover() {
+  coverImageFinal = '';
+  document.getElementById('cover-preview').style.display = 'none';
+  document.getElementById('cover-file-input').value = '';
+  document.getElementById('write-cover-url').value = '';
+  document.getElementById('cover-upload-status').textContent = '';
+}
+
+async function handleCoverUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status = document.getElementById('cover-upload-status');
+  status.textContent = '⏳ Uploading…';
+  status.style.color = 'var(--brand)';
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('filename', file.name);
+    fd.append('category', 'cover');
+    fd.append('is_public', '1');
+    const res = await fetch('/api/upload/file', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.url) {
+      coverImageFinal = data.url;
+      status.textContent = '✅ Uploaded!';
+      status.style.color = 'var(--success)';
+      showCoverPreview(coverImageFinal);
+    } else {
+      status.textContent = '❌ Upload failed';
+      status.style.color = 'var(--danger)';
+    }
+  } catch(e) {
+    status.textContent = '❌ Upload error: ' + e.message;
+    status.style.color = 'var(--danger)';
+  }
+}
+
+async function publishContent(status) {
+  const type    = document.getElementById('write-type').value;
+  const title   = document.getElementById('write-title').value.trim();
+  const excerpt = document.getElementById('write-excerpt').value.trim();
+  const body    = document.getElementById('write-content').value.trim();
+  const region  = document.getElementById('write-region').value;
+  const premium = document.getElementById('write-premium').value;
+  const result  = document.getElementById('write-result');
+
+  if (!title)  { showWriteResult('error', '❌ Please enter a title.'); return; }
+  if (!body)   { showWriteResult('error', '❌ Please write some content.'); return; }
+
+  // Resolve cover image
+  const urlInput = document.getElementById('write-cover-url').value.trim();
+  const cover = coverImageFinal || urlInput || '';
+
+  const publishBtn = document.getElementById('publish-btn');
+  const draftBtn   = document.getElementById('draft-btn');
+  publishBtn.disabled = true;
+  draftBtn.disabled   = true;
+  publishBtn.textContent = '⏳ Saving…';
+
+  try {
+    let res, data;
+
+    if (type === 'story') {
+      // Story submission endpoint
+      const fd = new FormData();
+      fd.append('title', title);
+      fd.append('content', body);
+      if (region) fd.append('region_id', region);
+      res = await fetch('/api/stories', { method: 'POST', body: fd });
+      data = await res.json();
+      if (data.success) {
+        showWriteResult('success', '✅ Story published! It is auto-approved as admin.');
+        resetWriteForm();
+        return;
+      }
+      showWriteResult('error', '❌ ' + (data.detail || 'Failed to save story.'));
+
+    } else {
+      // Article or video post
+      let content_type = type === 'video' ? 'video' : 'article';
+      let videoUrl = document.getElementById('write-video-url').value.trim();
+      let finalContent = body;
+      if (type === 'video' && videoUrl) {
+        finalContent = body + (body ? '\n\n' : '') + '[video]' + videoUrl + '[/video]';
+      }
+      const fd = new FormData();
+      fd.append('title', title);
+      fd.append('excerpt', excerpt);
+      fd.append('content', finalContent);
+      fd.append('cover_image', cover);
+      fd.append('content_type', content_type);
+      fd.append('status', status);
+      fd.append('is_premium', premium);
+      if (region) fd.append('region_id', region);
+
+      res = await fetch('/api/posts', { method: 'POST', body: fd });
+      data = await res.json();
+
+      if (data.success) {
+        const label = status === 'published' ? 'published' : 'saved as draft';
+        showWriteResult('success', '✅ ' + (type === 'video' ? 'Video post' : 'Article') + ' ' + label + '! Post ID: ' + data.post_id);
+        resetWriteForm();
+        loadPosts();
+        return;
+      }
+      showWriteResult('error', '❌ ' + (data.detail || JSON.stringify(data)));
+    }
+
+  } catch(e) {
+    showWriteResult('error', '❌ Network error: ' + e.message);
+  } finally {
+    publishBtn.disabled = false;
+    draftBtn.disabled   = false;
+    publishBtn.textContent = '🚀 Publish Now';
+  }
+}
+
+function showWriteResult(type, msg) {
+  const el = document.getElementById('write-result');
+  el.style.display = 'block';
+  el.style.background = type === 'success' ? '#f0fdf4' : '#fef2f2';
+  el.style.border = '1px solid ' + (type === 'success' ? '#86efac' : '#fca5a5');
+  el.style.color  = type === 'success' ? '#15803d' : '#b91c1c';
+  el.innerHTML = msg;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+function resetWriteForm() {
+  document.getElementById('write-title').value   = '';
+  document.getElementById('write-excerpt').value = '';
+  document.getElementById('write-content').value = '';
+  document.getElementById('write-video-url').value = '';
+  document.getElementById('write-region').value  = '';
+  document.getElementById('write-premium').value = '0';
+  removeCover();
+  setWriteType('article');
+}
+
+// Load published posts list
+async function loadPosts() {
+  const tbody = document.getElementById('posts-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Loading…</td></tr>';
+  try {
+    const res = await fetch('/api/posts');
+    const posts = await res.json();
+    if (!posts.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No posts yet. Write your first one above!</td></tr>';
+      return;
+    }
+    tbody.innerHTML = posts.map(p => `
+      <tr>
+        <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.title}">${p.title}</td>
+        <td><span style="background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">${p.content_type || 'article'}</span></td>
+        <td><span style="background:${p.status==='published'?'#dcfce7':'#fef9c3'};color:${p.status==='published'?'#15803d':'#92400e'};padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">${p.status}</span></td>
+        <td style="font-size:0.8rem;color:var(--muted);">${p.region_id ? 'Region '+p.region_id : '—'}</td>
+        <td style="text-align:center;">${p.is_premium ? '⭐' : '🌐'}</td>
+        <td>
+          <button onclick="deletePost(${p.id})" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:5px;padding:4px 10px;font-size:0.75rem;cursor:pointer;">🗑 Delete</button>
+          ${p.status==='draft' ? `<button onclick="publishPostNow(${p.id})" style="background:#dcfce7;color:#15803d;border:none;border-radius:5px;padding:4px 10px;font-size:0.75rem;cursor:pointer;margin-left:4px;">🚀 Publish</button>` : ''}
+        </td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger);">Error loading posts.</td></tr>';
+  }
+}
+
+async function deletePost(id) {
+  if (!confirm('Delete this post permanently?')) return;
+  try {
+    const res = await fetch('/api/posts/' + id, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) { notify('Post deleted', 'success'); loadPosts(); }
+    else notify('Delete failed', 'error');
+  } catch(e) { notify('Error: ' + e.message, 'error'); }
+}
+
+async function publishPostNow(id) {
+  try {
+    const fd = new FormData();
+    fd.append('status', 'published');
+    const res = await fetch('/api/posts/' + id, { method: 'PUT', body: fd });
+    const data = await res.json();
+    if (data.success) { notify('Post published!', 'success'); loadPosts(); }
+    else notify('Failed to publish', 'error');
+  } catch(e) { notify('Error', 'error'); }
+}
+
+// Auto-load posts when Write Content section opens
+const _origShowSection = showSection;
+function showSection(id) {
+  _origShowSection(id);
+  if (id === 'write') {
+    loadPosts();
+  }
 }
 </script>
 </body>
