@@ -2,121 +2,403 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>EchoStack - Ghana's Heritage Archive</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>EchoStack - Ghana's Living Heritage Archive</title>
+    <link rel="icon" type="image/png" href="/echostack-logo.png">
+    <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
         :root {
-            --brand-dark: #1a1e29;
-            --brand-blue: #0077b6;
+            --ink: #0D1B2A;
+            --gold: #C8962E;
+            --gold2: #E8B84B;
+            --cream: #FAF6EF;
+            --blue: #0077b6;
+        }
+        
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
         }
         
         body {
-            font-family: Georgia, serif;
-            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--ink);
+            line-height: 1.6;
+            overflow-x: hidden;
+            width: 100%;
         }
         
+        /* Simplified Header */
+        .header {
+            background: white;
+            padding: 12px 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+        
+        .logo-text {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+        
+        /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, #e8f4f8 0%, #ffffff 100%);
-            border-bottom: 3px solid var(--brand-blue);
+            min-height: calc(100vh - 64px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            color: var(--ink);
+        }
+        
+        .hero p {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: #555;
+            margin-bottom: 40px;
+            line-height: 1.7;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            max-width: 320px;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .btn-primary {
-            background-color: var(--brand-blue) !important;
-            color: white !important;
-            padding: 0.75rem 2rem !important;
-            border-radius: 9999px !important;
-            font-weight: 600 !important;
-            transition: all 0.2s ease !important;
-            box-shadow: 0 2px 4px rgba(0, 119, 182, 0.2) !important;
+            background: var(--blue);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 119, 182, 0.3);
         }
         
-        .btn-primary:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 12px rgba(0, 119, 182, 0.3) !important;
+        .btn-primary:hover, .btn-primary:active {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 119, 182, 0.4);
         }
         
         .btn-secondary {
-            border: 2px solid var(--brand-blue) !important;
-            color: var(--brand-blue) !important;
-            padding: 0.75rem 2rem !important;
-            border-radius: 9999px !important;
-            font-weight: 600 !important;
-            transition: all 0.2s ease !important;
+            background: white;
+            color: var(--blue);
+            border: 2px solid var(--blue);
         }
         
-        .btn-secondary:hover {
-            background-color: var(--brand-blue) !important;
-            color: white !important;
+        .btn-secondary:hover, .btn-secondary:active {
+            background: var(--blue);
+            color: white;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 60px 20px;
+            background: white;
+        }
+        
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        
+        .feature-card {
+            padding: 32px 24px;
+            background: var(--cream);
+            border-radius: 16px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+        
+        .feature-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            color: var(--ink);
+        }
+        
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--ink);
+            color: white;
+            text-align: center;
+            padding: 32px 20px;
+        }
+        
+        .footer p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            html {
+                font-size: 14px;
+            }
+            
+            .header {
+                padding: 10px 12px;
+            }
+            
+            .logo img {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .logo-text {
+                font-size: 1.25rem;
+            }
+            
+            .hero {
+                padding: 30px 16px;
+                min-height: calc(100vh - 56px);
+            }
+            
+            .hero h1 {
+                margin-bottom: 20px;
+            }
+            
+            .hero p {
+                margin-bottom: 32px;
+            }
+            
+            .btn {
+                padding: 14px 28px;
+                font-size: 0.95rem;
+                max-width: 280px;
+            }
+            
+            .features {
+                padding: 40px 16px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .feature-card {
+                padding: 24px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            html {
+                font-size: 13px;
+            }
+            
+            .hero h1 {
+                font-size: 1.75rem;
+            }
+            
+            .hero p {
+                font-size: 0.95rem;
+            }
+            
+            .btn {
+                padding: 12px 24px;
+                font-size: 0.9rem;
+            }
+            
+            .feature-icon {
+                font-size: 2.5rem;
+            }
+            
+            .feature-card h3 {
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        @media (hover: none) {
+            .btn:active {
+                transform: scale(0.98);
+            }
+            
+            .feature-card:active {
+                transform: scale(0.98);
+            }
+        }
+        
+        /* Prevent zoom on double tap */
+        @media (pointer: coarse) {
+            button, a, input, select, textarea {
+                touch-action: manipulation;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="bg-white shadow-md py-4 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="/echostack-logo.png" alt="EchoStack" class="w-12 h-12">
-                <h1 class="text-2xl font-bold text-[#1a1e29]">EchoStack</h1>
-            </div>
-            <div class="flex gap-4">
-                <a href="/user-login" class="btn-secondary">Login</a>
-                <a href="/signup" class="btn-primary">✨ Join EchoStack</a>
-            </div>
+    <!-- Simplified Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">
+                <img src="/echostack-logo.png" alt="EchoStack">
+                <span class="logo-text">EchoStack</span>
+            </a>
         </div>
-    </nav>
+    </header>
 
     <!-- Hero Section -->
-    <section class="hero py-20">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h2 class="text-5xl font-bold mb-6 text-[#1a1e29]">Ghana's Living Heritage Archive</h2>
-            <p class="text-xl text-gray-600 mb-8">Discover the rich cultural stories, landscapes, and history of Ghana's 16 regions through our interactive archive.</p>
-            <div class="flex gap-4 justify-center flex-wrap">
-                <a href="/signup" class="btn-primary text-lg">✨ Join EchoStack Free</a>
-                <a href="/user-login" class="btn-secondary text-lg">Sign In</a>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Ghana's Living Heritage Archive</h1>
+            <p>Discover the rich cultural stories, landscapes, and history of Ghana's 16 regions through our interactive archive.</p>
+            
+            <div class="cta-buttons">
+                <a href="/signup" class="btn btn-primary">✨ Join EchoStack Free</a>
+                <a href="/user-login" class="btn btn-secondary">Sign In</a>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section class="py-16">
-        <div class="max-w-6xl mx-auto px-4">
-            <h3 class="text-3xl font-bold text-center mb-12">What You'll Discover</h3>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="text-4xl mb-4">🗺️</div>
-                    <h4 class="text-xl font-bold mb-2">Interactive Map</h4>
-                    <p class="text-gray-600">Explore all 16 regions of Ghana with our beautiful interactive map</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="text-4xl mb-4">🎵</div>
-                    <h4 class="text-xl font-bold mb-2">Audio Archives</h4>
-                    <p class="text-gray-600">Listen to oral histories, traditional music, and cultural stories</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="text-4xl mb-4">📚</div>
-                    <h4 class="text-xl font-bold mb-2">Rich Content</h4>
-                    <p class="text-gray-600">Deep dive into history, culture, food, music, and traditions</p>
-                </div>
+    <section class="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🗺️</div>
+                <h3>Explore 16 Regions</h3>
+                <p>Discover the unique heritage, culture, and stories from each of Ghana's regions</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>Rich Archives</h3>
+                <p>Access historical documents, photos, audio recordings, and videos</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">✍️</div>
+                <h3>Share Your Story</h3>
+                <p>Contribute your own heritage stories and cultural knowledge</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🤝</div>
+                <h3>Community</h3>
+                <p>Connect with heritage enthusiasts and culture keepers across Ghana</p>
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="bg-[#1a1e29] text-white py-16">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h3 class="text-3xl font-bold mb-4">Ready to Explore Ghana's Heritage?</h3>
-            <p class="text-xl mb-8">Join thousands of culture enthusiasts preserving Ghana's stories</p>
-            <a href="/signup" class="bg-[#0077b6] px-8 py-4 rounded-lg font-bold text-lg inline-block hover:bg-[#005a8c] transition">Create Free Account</a>
-        </div>
-    </section>
-
     <!-- Footer -->
-    <footer class="bg-gray-100 py-8 text-center">
-        <p class="text-gray-600">&copy; 2026 EchoStack. Preserving Ghana's Stories.</p>
+    <footer class="footer">
+        <p>&copy; 2026 EchoStack - Preserving Ghana's Stories</p>
     </footer>
+
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW error:', err));
+            });
+        }
+
+        // Prevent zoom on double-tap for mobile
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
 </body>
 </html>
