@@ -480,6 +480,14 @@
     </nav>
 
     <div class="sidebar-footer">
+        <!-- Upgrade CTA — shown only to free users -->
+        <a href="/premium" id="upgrade-cta" style="display:none;text-decoration:none;margin-bottom:10px;">
+            <div style="background:linear-gradient(135deg,rgba(201,147,58,0.18),rgba(201,147,58,0.08));border:1px solid rgba(201,147,58,0.3);border-radius:10px;padding:12px 14px;text-align:center;">
+                <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#c9933a;margin-bottom:4px;">⭐ Upgrade to Premium</div>
+                <div style="font-size:0.75rem;color:rgba(255,255,255,0.45);">EchoBot AI + Creator Studio</div>
+                <div style="font-size:0.72rem;color:#c9933a;margin-top:4px;font-weight:600;">GH₵150/month →</div>
+            </div>
+        </a>
         <button onclick="logout()" class="btn-logout">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Sign Out
@@ -562,6 +570,7 @@
 
         // Show creator-specific links
         var isCreator = currentUser.role === 'creator' || currentUser.role === 'admin' || currentUser.role === 'superuser';
+        var isPremium = currentUser.is_premium == 1 || currentUser.plan === 'premium' || isCreator;
         if (isCreator) {
             var creatorEl = document.getElementById('nav-creator');
             var subEl = document.getElementById('nav-subscribers');
@@ -570,6 +579,11 @@
             // Add creator badge to user pill
             var planEl = document.getElementById('user-plan');
             planEl.innerHTML = planLabel + ' <span class="creator-badge">Creator</span>';
+        }
+        // Show upgrade CTA for free/non-premium users
+        if (!isPremium) {
+            var cta = document.getElementById('upgrade-cta');
+            if (cta) cta.style.display = 'block';
         }
     }
 
