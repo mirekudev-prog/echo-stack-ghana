@@ -1029,7 +1029,7 @@ async def save_site_config(request: Request):
 def import_json( list, db: Session = Depends(get_db)):
     try:
         imported = 0
-        for rd in data
+        for rd in data:
             try:
                 db.add(models.Region(**rd))
                 imported += 1
