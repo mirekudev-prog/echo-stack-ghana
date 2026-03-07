@@ -195,6 +195,64 @@ window.location.href = '/app';
     return response
     
 # ============================================
+# NEW ROUTES FOR MISSING PAGES (FIX)
+# ============================================
+@app.get("/map")
+def map_page():
+    """
+    Map Page Handler
+    Redirects to explore.html or serves map.html if it exists
+    """
+    # Check if map.html exists, otherwise fall back to explore.html
+    if os.path.exists("map.html"):
+        return FileResponse("map.html")
+    elif os.path.exists("explore.html"):
+        return FileResponse("explore.html") # Fallback to explore
+    return serve_file("explore.html") # Fallback 2
+
+@app.get("/archive")
+def archive_page():
+    """
+    Archive Page Handler
+    Creates a default archive view if file doesn't exist
+    """
+    if os.path.exists("archive.html"):
+        return FileResponse("archive.html")
+    else:
+        # Serve a basic HTML page for now so it doesn't break
+        html = """<!DOCTYPE html><html><head><title>Archive - EchoStack</title></head>
+<body style="font-family:sans-serif;background:#f3f4f6;padding:50px;text-align:center;">
+<h1>🗄️ Content Archive</h1>
+<p>This page is being created.</p>
+<a href="/" style="display:inline-block;margin-top:20px;color:#C8962E;text-decoration:none;">← Back Home</a>
+</body></html>"""
+        return HTMLResponse(content=html)
+
+@app.get("/activity")
+async def activity_page(request: Request):
+    """
+    Activity Feed Handler
+    """
+    # Login check logic
+    token = request.cookies.get("user_session")
+    if not token:
+        return RedirectResponse(url="/user-login")
+    
+    if os.path.exists("activity.html"):
+        return serve_file("activity.html")
+    else:
+        # Serve default activity page
+        html = """<!DOCTYPE html><html><head><title>Following - EchoStack</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"></head>
+<body class="bg-white"><div class="max-w-2xl mx-auto pt-10 px-4">
+<h1 class="text-3xl font-bold mb-6">Activity Feed</h1>
+<div class="text-center py-20 bg-gray-50 rounded-lg border">
+<p class="text-xl text-gray-600">Loading your feed...</p>
+</div>
+</div></body></html>"""
+        return HTMLResponse(content=html)
+        
+# ============================================
 # HERITAGE MAP PAGE
 # ============================================
 @app.get("/map")
