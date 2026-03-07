@@ -5,494 +5,657 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>EchoStack - Explore Ghana</title>
+
+    <!-- PWA -->
     <meta name="theme-color" content="#1a1e29">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="EchoStack">
     <link rel="icon" type="image/png" href="/echostack-logo.png">
     <link rel="apple-touch-icon" href="/echostack-logo.png">
     <link rel="manifest" href="/manifest.json">
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- AUTH CHECK — uses localStorage (where login saves data) -->
     <script>
-        const token = document.cookie.split('; ').find(row => row.startsWith('user_session='));
-        if (!token) window.location.href = '/user-login';
+        try {
+            var _u = localStorage.getItem('es_user');
+            if (!_u) { window.location.href = '/user-login'; }
+            else {
+                var _p = JSON.parse(_u);
+                if (!_p || !_p.loggedIn) window.location.href = '/user-login';
+            }
+        } catch(e) { window.location.href = '/user-login'; }
     </script>
+
     <style>
-        :root { --brand-dark: #1a1e29; --brand-blue: #0077b6; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Georgia, 'Times New Roman', Times, serif; background: #fff; color: var(--brand-dark); }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-        /* SIDEBAR */
-        .sidebar { position: fixed; left: 0; top: 0; height: 100vh; width: 260px; background: #1a1e29; color: white; padding: 2rem 0; z-index: 1000; display: flex; flex-direction: column; transition: transform 0.3s ease; }
-        .sidebar-header { padding: 0 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1.5rem; }
-        .sidebar-logo { display: flex; align-items: center; gap: 0.75rem; font-size: 1.4rem; font-weight: bold; color: white; text-decoration: none; }
-        .sidebar-logo img { width: 40px; height: 40px; border-radius: 8px; }
-        .sidebar-nav { flex: 1; padding: 0 1rem; }
-        .sidebar-nav a { display: flex; align-items: center; gap: 1rem; padding: 0.875rem 1.25rem; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; margin-bottom: 0.25rem; transition: all 0.2s ease; font-size: 0.95rem; }
-        .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.1); color: white; }
-        .sidebar-footer { padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
-        .btn-logout { width: 100%; background: #dc2626; color: white; padding: 0.875rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; }
-        .btn-logout:hover { background: #b91c1c; }
-        .main-wrapper { margin-left: 260px; min-height: 100vh; }
-        .menu-toggle { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 1001; background: #1a1e29; color: white; border: none; padding: 0.75rem; border-radius: 8px; cursor: pointer; }
-        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
-        .sidebar-overlay.show { display: block; }
+        :root {
+            --ink:   #1a1e29;
+            --blue:  #0077b6;
+            --gold:  #C8962E;
+            --cream: #f5f5f5;
+            --white: #ffffff;
+            --border:#e0e0e0;
+            --sidebar-w: 260px;
+        }
 
-        /* MAIN */
-        .main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
-        .intro { text-align: center; margin-bottom: 2.5rem; padding: 2rem 1rem; background: linear-gradient(180deg, rgba(0,119,182,0.05) 0%, transparent 100%); border-radius: 12px; }
-        .intro h2 { font-size: 2.25rem; color: var(--brand-dark); margin-bottom: 0.75rem; }
-        .intro p { color: #555; max-width: 550px; margin: 0 auto; line-height: 1.7; }
+        body {
+            font-family: Georgia, serif;
+            background: var(--cream);
+            color: var(--ink);
+        }
 
-        /* MAP */
-        .map-section { margin-bottom: 3rem; }
-        .map-section h3 { font-size: 1.25rem; color: var(--brand-dark); margin-bottom: 1.25rem; border-left: 4px solid var(--brand-blue); padding-left: 1rem; }
-        .map-wrapper { background: white; border: 2px solid #d0d0d0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        svg { width: 100%; height: auto; max-height: 580px; }
-        .region-path { transition: all 0.25s ease; cursor: pointer; stroke: #b0b0b0; stroke-width: 1.5; fill: #e8e8e8; }
-        .region-path:hover { fill: #0077b6; stroke: #1a1e29; stroke-width: 2; opacity: 0.85; }
-        .region-has-data { fill: #cce8f4; }
-        .region-has-data:hover { fill: #0077b6; }
-        .region-active { fill: #0077b6 !important; stroke: #1a1e29 !important; stroke-width: 2.5 !important; filter: drop-shadow(0 2px 6px rgba(0,119,182,0.4)); }
-        .map-label { font-size: 8.5px; font-weight: bold; font-family: Arial, sans-serif; pointer-events: none; fill: #1a1e29; paint-order: stroke; stroke: white; stroke-width: 2.5px; }
+        /* ── SIDEBAR ── */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0;
+            height: 100vh;
+            width: var(--sidebar-w);
+            background: var(--ink);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
 
-        /* REGION CARDS */
-        .regions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.25rem; margin-top: 2rem; }
-        .region-card { background: white; border: 1px solid #e0e0e0; border-radius: 10px; padding: 1.25rem; cursor: pointer; transition: all 0.25s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
-        .region-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,119,182,0.12); border-color: var(--brand-blue); }
-        .region-card h4 { font-size: 1.1rem; color: var(--brand-dark); margin-bottom: 0.35rem; }
-        .region-card p { font-size: 0.8rem; color: #666; line-height: 1.5; }
+        .sidebar-header {
+            padding: 1.25rem 1.25rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-        /* DETAIL PANEL */
-        .detail-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 580px; height: 100vh; background: white; box-shadow: -4px 0 24px rgba(0,0,0,0.1); transition: right 0.35s ease; z-index: 1100; overflow-y: auto; padding: 2rem; }
-        .detail-panel.show { right: 0; }
-        .detail-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e0e0e0; }
-        .close-btn { background: none; border: none; font-size: 2rem; cursor: pointer; color: #666; line-height: 1; }
-        .section-title { font-size: 1.1rem; color: var(--brand-dark); margin: 1.5rem 0 0.75rem; padding-left: 0.75rem; border-left: 3px solid var(--brand-blue); }
-        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; margin: 0.75rem 0; }
-        .media-item { border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .media-item img { width: 100%; height: 110px; object-fit: cover; }
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+        }
+        .sidebar-logo img {
+            width: 36px; height: 36px;
+            border-radius: 7px;
+            object-fit: contain;
+            background: rgba(255,255,255,0.05);
+        }
+        .sidebar-logo span {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+        }
 
-        /* FOOTER */
-        .footer { border-top: 1px solid #e0e0e0; padding: 1.5rem 1rem; background: #f5f5f5; text-align: center; margin-top: 3rem; }
-        .footer p { font-size: 0.875rem; color: #666; }
+        /* close button — mobile only */
+        .sidebar-close {
+            display: none;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            font-size: 1.6rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 6px;
+        }
+        @media (max-width: 768px) { .sidebar-close { display: block; } }
 
-        /* AI CHAT */
-        .ai-btn { position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0077b6, #1a1e29); color: white; border: none; cursor: pointer; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(0,119,182,0.4); z-index: 2000; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .ai-btn:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(0,119,182,0.5); }
-        .ai-panel { position: fixed; bottom: 5.5rem; right: 2rem; width: 360px; background: white; border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); z-index: 2000; display: none; flex-direction: column; overflow: hidden; border: 1px solid #e0e0e0; max-height: 500px; }
-        .ai-panel.open { display: flex; }
-        .ai-header { background: linear-gradient(135deg, #1a1e29, #0077b6); color: white; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; }
-        .ai-header h3 { font-size: 0.95rem; font-weight: bold; }
-        .ai-header p { font-size: 0.7rem; opacity: 0.8; }
-        .ai-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; min-height: 250px; max-height: 320px; }
-        .ai-msg { max-width: 85%; padding: 0.625rem 0.875rem; border-radius: 12px; font-size: 0.85rem; line-height: 1.5; }
-        .ai-msg.bot { background: #f0f7ff; color: #1a1e29; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .ai-msg.user { background: #0077b6; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .ai-msg.typing { background: #f0f7ff; color: #999; font-style: italic; align-self: flex-start; }
-        .ai-input-area { padding: 0.875rem; border-top: 1px solid #f0f0f0; display: flex; gap: 0.5rem; }
-        .ai-input { flex: 1; padding: 0.625rem 0.875rem; border: 1.5px solid #e0e0e0; border-radius: 20px; font-size: 0.85rem; outline: none; font-family: Georgia, serif; }
-        .ai-input:focus { border-color: #0077b6; }
-        .ai-send { background: #0077b6; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
-        .ai-send:hover { background: #005a8c; }
+        /* User pill */
+        .user-pill {
+            margin: 1rem 1.25rem 0;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-av {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), #E8B84B);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; font-weight: 700; color: var(--ink);
+            flex-shrink: 0;
+        }
+        .user-info { min-width: 0; }
+        .user-name { font-size: 0.82rem; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-plan { font-size: 0.68rem; color: rgba(255,255,255,0.4); margin-top: 1px; }
 
-        /* RESPONSIVE */
+        /* Nav */
+        .sidebar-nav { flex: 1; padding: 0.75rem 0.75rem; }
+        .nav-label {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.25);
+            padding: 0.75rem 0.75rem 0.4rem;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.7rem 0.9rem;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 2px;
+            font-size: 0.88rem;
+            transition: all 0.2s;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+        .sidebar-nav a svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+        .sidebar-footer {
+            padding: 1rem 1.25rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .btn-logout {
+            width: 100%;
+            background: rgba(220,38,38,0.15);
+            border: 1px solid rgba(220,38,38,0.3);
+            color: #f87171;
+            padding: 0.7rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-logout:hover { background: rgba(220,38,38,0.3); color: #fff; }
+
+        /* ── MAIN WRAPPER ── */
+        .main-wrapper {
+            margin-left: var(--sidebar-w);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── MOBILE TOP BAR ── */
+        .mobile-bar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            background: var(--ink);
+            padding: 0.75rem 1rem;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--gold);
+        }
+        .mobile-bar-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .mobile-bar-logo img { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; }
+        .mobile-bar-logo span { font-weight: bold; color: white; font-size: 1rem; }
+        .burger {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 999;
+        }
+        .overlay.show { display: block; }
+
+        /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); }
             .main-wrapper { margin-left: 0; }
-            .menu-toggle { display: block; }
-            .ai-panel { width: calc(100vw - 2rem); right: 1rem; }
+            .mobile-bar { display: flex; }
         }
+
+        /* ── PAGE CONTENT ── */
+        .main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 3rem; flex: 1; }
+
+        /* Hero banner */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--ink) 0%, #243047 100%);
+            border-radius: 14px;
+            padding: 2rem 1.5rem;
+            margin-bottom: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-banner::before {
+            content: '🇬🇭';
+            position: absolute;
+            right: 1.5rem; top: 50%;
+            transform: translateY(-50%);
+            font-size: 4rem;
+            opacity: 0.15;
+        }
+        .hero-banner h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin-bottom: 0.4rem; }
+        .hero-banner p { font-size: 0.88rem; color: rgba(255,255,255,0.55); line-height: 1.6; max-width: 500px; }
+
+        /* Section header */
+        .section-head {
+            font-size: 1.1rem;
+            color: var(--ink);
+            margin-bottom: 1rem;
+            padding-left: 0.85rem;
+            border-left: 4px solid var(--blue);
+            font-weight: bold;
+        }
+
+        /* Map */
+        .map-wrapper {
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        svg { width: 100%; height: auto; max-height: 560px; display: block; }
+
+        .region-path {
+            transition: all 0.25s;
+            cursor: pointer;
+            stroke: #c0c0c0;
+            stroke-width: 1.5;
+            fill: #eef2f7;
+        }
+        .region-path:hover { fill: var(--blue); stroke: var(--ink); stroke-width: 2; opacity: 0.9; }
+        .region-active { fill: var(--blue)!important; stroke: var(--ink)!important; stroke-width: 2.5!important; filter: drop-shadow(0 2px 6px rgba(0,119,182,0.4)); }
+        .map-label { font-size: 8px; font-weight: bold; font-family: Arial, sans-serif; pointer-events: none; fill: var(--ink); paint-order: stroke; stroke: white; stroke-width: 2.5px; }
+
+        /* Region cards */
+        .regions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 480px) { .regions-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; } }
+
+        .region-card {
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .region-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,119,182,0.12); border-color: var(--blue); }
+        .region-card h4 { font-size: 0.95rem; color: var(--ink); margin-bottom: 0.3rem; }
+        .region-card p { font-size: 0.78rem; color: #666; line-height: 1.4; }
+
+        /* Detail panel */
+        .detail-panel {
+            position: fixed;
+            top: 0; right: -100%;
+            width: 100%; max-width: 560px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+            transition: right 0.35s ease;
+            z-index: 1100;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        .detail-panel.show { right: 0; }
+        @media (max-width: 600px) { .detail-panel { max-width: 100%; } }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        .detail-code {
+            display: inline-block;
+            background: var(--blue);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .detail-title { font-size: 1.6rem; font-weight: bold; color: var(--ink); margin-bottom: 4px; }
+        .detail-capital { font-size: 0.85rem; color: #666; font-style: italic; }
+        .close-btn { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #888; line-height: 1; padding: 0 4px; }
+        .close-btn:hover { color: var(--ink); }
+
+        .dtitle { font-size: 1rem; font-weight: bold; color: var(--ink); margin: 1.5rem 0 0.75rem; padding-left: 0.6rem; border-left: 3px solid var(--blue); }
+
+        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.75rem; margin: 0.75rem 0; }
+        .media-item { border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .media-item img { width: 100%; height: 110px; object-fit: cover; display: block; }
+
+        audio { width: 100%; margin: 0.4rem 0; border-radius: 8px; }
+
+        /* facts grid */
+        .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
+        .fact { background: #f0f9ff; padding: 0.85rem; border-radius: 8px; }
+        .fact-label { font-size: 0.75rem; color: #666; margin-bottom: 3px; }
+        .fact-val { font-size: 1.05rem; font-weight: bold; color: var(--ink); }
+
+        /* Footer */
+        .footer {
+            background: white;
+            border-top: 1px solid var(--border);
+            padding: 1.25rem 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888;
+        }
+        .footer a { color: var(--blue); text-decoration: none; margin: 0 0.5rem; }
+
+        .loading { text-align: center; padding: 2rem; color: #888; font-size: 0.95rem; }
     </style>
 </head>
 <body>
 
-<button class="menu-toggle" onclick="toggleSidebar()">
-    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-</button>
+<!-- Overlay for mobile sidebar -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
-
+<!-- ═══ SIDEBAR ═══ -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <a href="/app" class="sidebar-logo">
             <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
             <span>EchoStack</span>
         </a>
+        <button class="sidebar-close" onclick="closeSidebar()">×</button>
     </div>
+
+    <!-- User info -->
+    <div class="user-pill">
+        <div class="user-av" id="user-av">?</div>
+        <div class="user-info">
+            <div class="user-name" id="user-name">Loading…</div>
+            <div class="user-plan" id="user-plan">Free Plan</div>
+        </div>
+    </div>
+
     <nav class="sidebar-nav">
-        <a href="/app" class="active">🏠 Home</a>
-        <a href="/app#explore">🗺️ Explore</a>
-        <a href="/app#regions">📍 Regions</a>
+        <div class="nav-label">Explore</div>
+        <a href="/app" class="active">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+            Map & Regions
+        </a>
+        <a href="/dashboard">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            News Feed
+        </a>
+
+        <div class="nav-label">Account</div>
+        <a href="/user-profile">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            My Profile
+        </a>
+        <a href="/user-settings">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            Settings
+        </a>
     </nav>
+
     <div class="sidebar-footer">
-        <button onclick="logout()" class="btn-logout">🚪 Logout</button>
+        <button onclick="logout()" class="btn-logout">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign Out
+        </button>
     </div>
 </aside>
 
+<!-- ═══ MAIN WRAPPER ═══ -->
 <div class="main-wrapper">
+
+    <!-- Mobile top bar -->
+    <div class="mobile-bar">
+        <a href="/app" class="mobile-bar-logo">
+            <img src="/echostack-logo.png" alt="" onerror="this.style.display='none'">
+            <span>EchoStack</span>
+        </a>
+        <button class="burger" onclick="openSidebar()">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+    </div>
+
     <main class="main">
-        <section class="intro">
-            <h2>Ghana's Heritage Archive</h2>
-            <p>Explore 16 regions, centuries of culture, and thousands of stories. Click any region on the map or browse the cards below.</p>
-        </section>
 
-        <section class="map-section" id="explore">
-            <h3>🗺️ Interactive Map — click any region</h3>
-            <div class="map-wrapper">
-                <svg viewBox="0 0 400 620" id="ghana-map"></svg>
-            </div>
-        </section>
+        <!-- Hero -->
+        <div class="hero-banner">
+            <h2>Explore Ghana's Heritage 🗺️</h2>
+            <p>Click any region on the map or browse the cards below to discover Ghana's 16 regions.</p>
+        </div>
 
-        <section id="regions">
-            <h3 style="font-size:1.25rem;border-left:4px solid #0077b6;padding-left:1rem;margin-bottom:1.25rem;">📍 All Regions</h3>
-            <div class="regions-grid" id="regions-list">
-                <div style="text-align:center;padding:2rem;color:#999;grid-column:1/-1;">Loading regions...</div>
-            </div>
-        </section>
+        <!-- MAP -->
+        <h3 class="section-head">Interactive Map</h3>
+        <div class="map-wrapper">
+            <svg viewBox="0 0 400 620" id="ghana-map"></svg>
+        </div>
+
+        <!-- REGION CARDS -->
+        <h3 class="section-head">All Regions</h3>
+        <div class="regions-grid" id="regions-list">
+            <div class="loading">Loading regions…</div>
+        </div>
+
     </main>
 
+    <!-- Region Detail Panel -->
     <div id="detail-panel" class="detail-panel">
         <div class="detail-header">
             <div>
-                <span id="detail-code" class="bg-blue-600 text-white px-2 py-1 rounded-full text-xs mb-2 inline-block"></span>
-                <h2 id="detail-title" class="text-2xl font-bold mt-1"></h2>
-                <p id="detail-capital" class="text-gray-500 italic text-sm mt-1"></p>
+                <span class="detail-code" id="detail-code">GH-01</span>
+                <div class="detail-title" id="detail-title">Region Name</div>
+                <div class="detail-capital" id="detail-capital">Capital: —</div>
             </div>
-            <button onclick="closeDetail()" class="close-btn">×</button>
+            <button class="close-btn" onclick="closeDetail()">×</button>
         </div>
         <div id="detail-content"></div>
     </div>
 
     <footer class="footer">
-        <p>&copy; 2026 EchoStack — Preserving Ghana's Stories</p>
+        <p>© 2026 EchoStack — Preserving Ghana's Stories</p>
+        <p style="margin-top:6px">
+            <a href="/">Home</a>
+            <a href="/dashboard">Feed</a>
+            <a href="#" onclick="logout();return false">Sign Out</a>
+        </p>
     </footer>
 </div>
 
-<!-- ECHOBOT AI BUTTON -->
-<button class="ai-btn" onclick="toggleAI()" title="Ask EchoBot">🤖</button>
-
-<!-- ECHOBOT PANEL -->
-<div class="ai-panel" id="ai-panel">
-    <div class="ai-header">
-        <div>
-            <h3>🤖 EchoBot</h3>
-            <p>Your Ghana Heritage AI Guide</p>
-        </div>
-        <button onclick="toggleAI()" style="background:none;border:none;color:white;font-size:1.25rem;cursor:pointer;">×</button>
-    </div>
-    <div class="ai-messages" id="ai-messages">
-        <div class="ai-msg bot">Akwaaba! 👋 I'm EchoBot, your Ghana heritage guide. Ask me anything about Ghana's regions, culture, history, or traditions!</div>
-    </div>
-    <div class="ai-input-area">
-        <input type="text" id="ai-input" class="ai-input" placeholder="Ask about Ghana..." onkeydown="if(event.key==='Enter') sendAI()">
-        <button onclick="sendAI()" class="ai-send">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
-        </button>
-    </div>
-</div>
-
 <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW failed:', e));
-        });
+    // ── Load user from localStorage ──
+    var currentUser = {};
+    try {
+        currentUser = JSON.parse(localStorage.getItem('es_user')) || {};
+    } catch(e) {}
+
+    // Populate sidebar user info
+    if (currentUser.username) {
+        document.getElementById('user-name').textContent = currentUser.username;
+        document.getElementById('user-av').textContent = currentUser.username.charAt(0).toUpperCase();
+        document.getElementById('user-plan').textContent = currentUser.plan === 'premium' ? '⭐ Premium' : 'Free Plan';
     }
-</script>
 
-<script>
-const API_URL = '/api';
-let allRegions = [];
-let currentRegionContext = '';
+    // ── Sidebar toggle ──
+    function openSidebar() {
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('overlay').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
 
-// ============================
-// MAP PATHS & LABELS
-// ============================
-const svgPaths = {
-    'upper-west':    { d: 'M60,40 L160,50 L165,130 L100,140 L50,110 Z',              lx: 105, ly: 98  },
-    'upper-east':    { d: 'M160,50 L280,25 L290,100 L165,130 Z',                     lx: 218, ly: 78  },
-    'north-east':    { d: 'M165,130 L290,100 L350,130 L340,190 L180,195 Z',          lx: 258, ly: 155 },
-    'savannah':      { d: 'M50,110 L100,140 L165,130 L180,195 L220,260 L180,340 L80,340 L40,250 Z', lx: 118, ly: 240 },
-    'northern':      { d: 'M180,195 L340,190 L370,300 L320,320 L220,260 Z',          lx: 268, ly: 255 },
-    'bono':          { d: 'M80,340 L180,340 L160,420 L70,420 Z',                     lx: 122, ly: 390 },
-    'bono-east':     { d: 'M180,340 L220,260 L320,320 L330,410 L190,410 L160,420 Z', lx: 248, ly: 362 },
-    'ahafo':         { d: 'M70,420 L160,420 L140,470 L60,470 Z',                     lx: 108, ly: 450 },
-    'ashanti':       { d: 'M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z', lx: 238, ly: 473 },
-    'oti':           { d: 'M320,320 L370,300 L380,450 L340,450 L330,410 Z',          lx: 358, ly: 385 },
-    'volta':         { d: 'M340,450 L380,450 L400,560 L360,570 L340,510 Z',          lx: 372, ly: 522 },
-    'eastern':       { d: 'M310,510 L330,410 L340,450 L340,510 L360,570 L300,580 L280,510 Z', lx: 322, ly: 550 },
-    'western-north': { d: 'M60,470 L140,470 L130,530 L50,530 Z',                     lx: 92,  ly: 503 },
-    'western':       { d: 'M50,530 L130,530 L110,610 L40,590 Z',                     lx: 80,  ly: 575 },
-    'central':       { d: 'M130,530 L180,510 L280,510 L250,600 L110,610 Z',          lx: 198, ly: 568 },
-    'greater-accra': { d: 'M300,580 L360,570 L375,600 L290,610 Z',                   lx: 318, ly: 600 }
-};
-
-// Maps DB region names to SVG keys
-function getMapKey(regionName) {
-    if (!regionName) return null;
-    const n = regionName.toLowerCase()
-        .replace(' region', '')
-        .replace(/\s+/g, '-')
-        .trim();
-
-    const aliases = {
-        'greater-accra': 'greater-accra',
-        'upper-west': 'upper-west',
-        'upper-east': 'upper-east',
-        'north-east': 'north-east',
-        'western-north': 'western-north',
-        'bono-east': 'bono-east',
-        'western': 'western',
-        'central': 'central',
-        'eastern': 'eastern',
-        'ashanti': 'ashanti',
-        'northern': 'northern',
-        'savannah': 'savannah',
-        'bono': 'bono',
-        'ahafo': 'ahafo',
-        'oti': 'oti',
-        'volta': 'volta'
+    // ── Map data ──
+    const svgPaths = {
+        'upper-west':    'M60,40 L160,50 L165,130 L100,140 L50,110 Z',
+        'upper-east':    'M160,50 L280,25 L290,100 L165,130 Z',
+        'north-east':    'M165,130 L290,100 L350,130 L340,190 L180,195 Z',
+        'savannah':      'M50,110 L100,140 L165,130 L180,195 L220,260 L180,340 L80,340 L40,250 Z',
+        'northern':      'M180,195 L340,190 L370,300 L320,320 L220,260 Z',
+        'bono':          'M80,340 L180,340 L160,420 L70,420 Z',
+        'bono-east':     'M180,340 L220,260 L320,320 L330,410 L190,410 L160,420 Z',
+        'ahafo':         'M70,420 L160,420 L140,470 L60,470 Z',
+        'ashanti':       'M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z',
+        'oti':           'M320,320 L370,300 L380,450 L340,450 L330,410 Z',
+        'volta':         'M340,450 L380,450 L400,560 L360,570 L340,510 Z',
+        'eastern':       'M310,510 L330,410 L340,450 L340,510 L360,570 L300,580 L280,510 Z',
+        'western-north': 'M60,470 L140,470 L130,530 L50,530 Z',
+        'western':       'M50,530 L130,530 L110,610 L40,590 Z',
+        'central':       'M130,530 L180,510 L280,510 L250,600 L110,610 Z',
+        'greater-accra': 'M300,580 L360,570 L375,600 L290,610 Z'
     };
-    return aliases[n] || null;
-}
+    const regionLabels = {
+        'upper-west':{x:105,y:100},'upper-east':{x:210,y:80},'north-east':{x:255,y:155},
+        'savannah':{x:120,y:240},'northern':{x:265,y:255},'bono':{x:120,y:390},
+        'bono-east':{x:245,y:360},'ahafo':{x:105,y:455},'ashanti':{x:240,y:475},
+        'oti':{x:355,y:385},'volta':{x:370,y:525},'eastern':{x:320,y:555},
+        'western-north':{x:90,y:505},'western':{x:80,y:580},'central':{x:200,y:570},
+        'greater-accra':{x:315,y:602}
+    };
 
-// ============================
-// INIT
-// ============================
-document.addEventListener('DOMContentLoaded', async () => {
-    initMap();
-    await loadRegions();
-});
+    var allRegions = [];
 
-function initMap() {
-    const svg = document.getElementById('ghana-map');
-    let html = '';
-    for (const [key, data] of Object.entries(svgPaths)) {
-        const label = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        html += `<path id="map-${key}" d="${data.d}" class="region-path" onclick="onMapClick('${key}')" title="${label}"/>`;
-        html += `<text x="${data.lx}" y="${data.ly}" class="map-label" pointer-events="none">${label}</text>`;
-    }
-    svg.innerHTML = html;
-}
-
-async function loadRegions() {
-    try {
-        const res = await fetch(`${API_URL}/regions`);
-        allRegions = await res.json();
-        renderCards();
-        highlightMapRegions();
-    } catch(e) {
-        document.getElementById('regions-list').innerHTML = '<div style="text-align:center;color:#e00;grid-column:1/-1;padding:2rem;">Failed to load regions. Please refresh.</div>';
-    }
-}
-
-function highlightMapRegions() {
-    allRegions.forEach(r => {
-        const key = getMapKey(r.name);
-        if (key) {
-            const el = document.getElementById('map-' + key);
-            if (el) {
-                el.classList.add('region-has-data');
-                el.setAttribute('data-region-id', r.id);
-            }
-        }
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', function() {
+        initMap();
+        loadRegions();
     });
-}
 
-function renderCards() {
-    const c = document.getElementById('regions-list');
-    if (!allRegions.length) {
-        c.innerHTML = '<div style="text-align:center;color:#999;grid-column:1/-1;padding:2rem;">No regions added yet. Check back soon!</div>';
-        return;
+    function initMap() {
+        var svg = document.getElementById('ghana-map');
+        var s = '';
+        for (var key in svgPaths) {
+            var lbl = key.split('-').map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(' ');
+            s += '<path id="'+key+'" d="'+svgPaths[key]+'" class="region-path" onclick="showRegionDetail(\''+key+'\')"/>';
+            s += '<text x="'+regionLabels[key].x+'" y="'+regionLabels[key].y+'" class="map-label">'+lbl+'</text>';
+        }
+        svg.innerHTML = s;
     }
-    c.innerHTML = allRegions.map(r => `
-        <div class="region-card" onclick="showDetail(${r.id})">
-            ${r.hero_image ? `<img src="${r.hero_image}" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:0.75rem;" onerror="this.style.display='none'">` : ''}
-            <h4>${r.name}</h4>
-            <p><strong>Capital:</strong> ${r.capital || 'N/A'}</p>
-            <p style="margin-top:0.35rem;">${r.category || ''}</p>
-        </div>
-    `).join('');
-}
 
-// ============================
-// MAP CLICK
-// ============================
-function onMapClick(key) {
-    // Highlight clicked region
-    document.querySelectorAll('.region-path').forEach(p => p.classList.remove('region-active'));
-    const el = document.getElementById('map-' + key);
-    if (el) el.classList.add('region-active');
-
-    // Find matching region in DB
-    const regionId = el ? el.getAttribute('data-region-id') : null;
-
-    if (regionId) {
-        showDetail(parseInt(regionId));
-    } else {
-        // Region exists on map but not in DB yet
-        const label = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        showEmptyDetail(label);
+    async function loadRegions() {
+        try {
+            var res = await fetch('/api/regions');
+            allRegions = await res.json();
+            renderRegionsList();
+            allRegions.forEach(function(r) {
+                var k = r.name.toLowerCase().replace(/ region$/,'').replace(/ /g,'-');
+                var p = document.getElementById(k);
+                if (p) p.setAttribute('data-region-id', r.id);
+            });
+        } catch(e) {
+            document.getElementById('regions-list').innerHTML = '<div class="loading">Failed to load. Please refresh.</div>';
+        }
     }
-}
 
-function showEmptyDetail(name) {
-    document.getElementById('detail-code').textContent = '';
-    document.getElementById('detail-title').textContent = name + ' Region';
-    document.getElementById('detail-capital').textContent = 'No data added yet';
-    document.getElementById('detail-content').innerHTML = `
-        <div style="text-align:center;padding:3rem 1rem;color:#999;">
-            <div style="font-size:3rem;margin-bottom:1rem;">🗺️</div>
-            <p>Content for this region hasn't been added yet.</p>
-            <p style="margin-top:0.5rem;font-size:0.875rem;">Check back soon!</p>
-        </div>
-    `;
-    document.getElementById('detail-panel').classList.add('show');
-    currentRegionContext = name;
-}
-
-function showDetail(id) {
-    const r = allRegions.find(r => r.id === id);
-    if (!r) return;
-
-    currentRegionContext = r.name;
-
-    document.getElementById('detail-code').textContent = `GH-${String(r.id).padStart(2,'0')}`;
-    document.getElementById('detail-title').textContent = r.name;
-    document.getElementById('detail-capital').textContent = `Capital: ${r.capital || 'Not specified'}`;
-
-    const imgs = r.gallery_images ? r.gallery_images.split(',').map(s=>s.trim()).filter(s=>s) : [];
-    const auds = r.audio_files ? r.audio_files.split(',').map(s=>s.trim()).filter(s=>s) : [];
-
-    document.getElementById('detail-content').innerHTML = `
-        ${r.hero_image ? `<img src="${r.hero_image}" style="width:100%;height:200px;object-fit:cover;border-radius:10px;margin-bottom:1.5rem;" onerror="this.style.display='none'">` : ''}
-
-        <div class="section-title">📖 Heritage Description</div>
-        <p style="line-height:1.8;color:#333;">${r.description || 'No description available.'}</p>
-
-        <div class="section-title">📊 Quick Facts</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.5rem;">
-            <div style="background:#f0f9ff;padding:0.875rem;border-radius:8px;">
-                <p style="font-size:0.75rem;color:#666;">Population</p>
-                <p style="font-weight:bold;">${r.population || 'N/A'}</p>
-            </div>
-            <div style="background:#f0f9ff;padding:0.875rem;border-radius:8px;">
-                <p style="font-size:0.75rem;color:#666;">Terrain</p>
-                <p style="font-weight:bold;">${r.terrain || 'N/A'}</p>
-            </div>
-        </div>
-
-        ${imgs.length ? `
-        <div class="section-title">🏞️ Gallery</div>
-        <div class="media-grid">
-            ${imgs.map(i => `<div class="media-item"><img src="${i}" alt="Gallery" onerror="this.style.display='none'"></div>`).join('')}
-        </div>` : ''}
-
-        ${auds.length ? `
-        <div class="section-title">🎵 Audio Archives</div>
-        <div style="margin-bottom:1rem;">
-            ${auds.map(a => `<div style="margin:0.5rem 0;padding:0.875rem;background:#f8f8f8;border-radius:8px;">
-                <audio controls style="width:100%;"><source src="${a}" type="audio/mpeg"></audio>
-            </div>`).join('')}
-        </div>` : ''}
-
-        <div class="section-title">📝 Details</div>
-        <p style="font-size:0.875rem;color:#555;"><strong>Category:</strong> ${r.category || 'N/A'}</p>
-        <p style="font-size:0.875rem;color:#555;margin-top:0.25rem;"><strong>Tags:</strong> ${r.tags || 'None'}</p>
-        ${r.source ? `<p style="font-size:0.875rem;color:#555;margin-top:0.25rem;"><strong>Source:</strong> ${r.source}</p>` : ''}
-
-        <div style="margin-top:1.5rem;padding:1rem;background:#f0f7ff;border-radius:10px;border-left:3px solid #0077b6;">
-            <p style="font-size:0.875rem;color:#0077b6;font-weight:bold;">💡 Ask EchoBot about ${r.name}</p>
-            <p style="font-size:0.8rem;color:#555;margin-top:0.25rem;">Click the 🤖 button to ask our AI guide anything about this region!</p>
-        </div>
-    `;
-
-    document.getElementById('detail-panel').classList.add('show');
-
-    // Highlight map
-    document.querySelectorAll('.region-path').forEach(p => p.classList.remove('region-active'));
-    const key = getMapKey(r.name);
-    if (key) {
-        const el = document.getElementById('map-' + key);
-        if (el) el.classList.add('region-active');
+    function renderRegionsList() {
+        if (!allRegions.length) {
+            document.getElementById('regions-list').innerHTML = '<div class="loading">No regions yet.</div>';
+            return;
+        }
+        document.getElementById('regions-list').innerHTML = allRegions.map(function(r) {
+            return '<div class="region-card" onclick="showRegionDetailFromData('+JSON.stringify(r).replace(/"/g,'&quot;')+')">'
+                + '<h4>'+r.name+'</h4>'
+                + '<p><strong>Capital:</strong> '+(r.capital||'N/A')+'</p>'
+                + '<p><strong>Category:</strong> '+(r.category||'Uncategorized')+'</p>'
+                + '</div>';
+        }).join('');
     }
-}
 
-function closeDetail() {
-    document.getElementById('detail-panel').classList.remove('show');
-    document.querySelectorAll('.region-path').forEach(p => p.classList.remove('region-active'));
-    currentRegionContext = '';
-}
-
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
-
-// ============================
-// ECHOBOT AI
-// ============================
-function toggleAI() {
-    const panel = document.getElementById('ai-panel');
-    panel.classList.toggle('open');
-    if (panel.classList.contains('open')) {
-        document.getElementById('ai-input').focus();
+    function showRegionDetail(key) {
+        var name = key.split('-').map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(' ');
+        var r = allRegions.find(function(r){ return r.name.toLowerCase().includes(name.toLowerCase()) || r.name.toLowerCase().replace(/ region$/,'').replace(/ /g,'-') === key; });
+        if (!r && allRegions.length) r = allRegions[0];
+        if (r) showRegionDetailFromData(r);
     }
-}
 
-async function sendAI() {
-    const input = document.getElementById('ai-input');
-    const msg = input.value.trim();
-    if (!msg) return;
+    function showRegionDetailFromData(region) {
+        document.getElementById('detail-code').textContent = 'GH-'+String(region.id).padStart(2,'0');
+        document.getElementById('detail-title').textContent = region.name;
+        document.getElementById('detail-capital').textContent = 'Capital: '+(region.capital||'Not specified');
 
-    input.value = '';
-    addAIMessage(msg, 'user');
-    const typingId = addAIMessage('EchoBot is thinking...', 'typing');
+        var imgs = Array.isArray(region.gallery_images) ? region.gallery_images : (region.gallery_images ? region.gallery_images.split(',') : []);
+        var auds = Array.isArray(region.audio_files)   ? region.audio_files   : (region.audio_files   ? region.audio_files.split(',')   : []);
 
-    try {
-        const fd = new FormData();
-        fd.append('message', msg);
-        fd.append('region_context', currentRegionContext);
+        document.getElementById('detail-content').innerHTML =
+            '<div class="dtitle">📖 Heritage Description</div>'
+            +'<p style="line-height:1.8;color:#333;margin-bottom:1.5rem">'+(region.description||'No description available.')+'</p>'
 
-        const r = await fetch('/api/ai/chat', { method: 'POST', body: fd });
-        const d = await r.json();
+            +'<div class="dtitle">📊 Quick Facts</div>'
+            +'<div class="facts">'
+            +'<div class="fact"><div class="fact-label">Population</div><div class="fact-val">'+(region.population||'N/A')+'</div></div>'
+            +'<div class="fact"><div class="fact-label">Terrain</div><div class="fact-val">'+(region.terrain||'N/A')+'</div></div>'
+            +'</div>'
 
-        removeAIMessage(typingId);
-        addAIMessage(d.reply || "I couldn't get a response. Please try again!", 'bot');
-    } catch(e) {
-        removeAIMessage(typingId);
-        addAIMessage('Sorry, I had trouble connecting. Please try again!', 'bot');
+            +'<div class="dtitle">🏞️ Gallery</div>'
+            +(imgs.length
+                ? '<div class="media-grid">'+imgs.map(function(i){ return '<div class="media-item"><img src="'+i.trim()+'" alt="Gallery" onerror="this.src=\'https://via.placeholder.com/130x110?text=Photo\'"></div>'; }).join('')+'</div>'
+                : '<p style="color:#888;font-size:.85rem;margin-bottom:1rem">No images uploaded yet.</p>')
+
+            +'<div class="dtitle">🎵 Audio Archives</div>'
+            +(auds.length
+                ? '<div style="margin-bottom:1.5rem">'+auds.map(function(a){ return '<div style="margin:.5rem 0;padding:.75rem;background:#f8f8f8;border-radius:8px"><audio controls><source src="'+a.trim()+'" type="audio/mpeg"></audio></div>'; }).join('')+'</div>'
+                : '<p style="color:#888;font-size:.85rem;margin-bottom:1.5rem">No audio recordings yet.</p>')
+
+            +'<div class="dtitle">🎬 Documentaries</div>'
+            +'<p style="color:#888;font-size:.85rem;margin-bottom:1.5rem">Coming soon.</p>'
+
+            +'<div class="dtitle">📝 Details</div>'
+            +'<p style="font-size:.85rem;color:#555"><strong>Category:</strong> '+(region.category||'Uncategorized')+'</p>'
+            +'<p style="font-size:.85rem;color:#555"><strong>Tags:</strong> '+(Array.isArray(region.tags)?region.tags.join(', '):(region.tags||'None'))+'</p>';
+
+        document.getElementById('detail-panel').classList.add('show');
+        // On mobile scroll to top of panel
+        document.getElementById('detail-panel').scrollTop = 0;
     }
-}
 
-function addAIMessage(text, type) {
-    const c = document.getElementById('ai-messages');
-    const id = 'msg-' + Date.now();
-    const div = document.createElement('div');
-    div.className = `ai-msg ${type}`;
-    div.id = id;
-    div.textContent = text;
-    c.appendChild(div);
-    c.scrollTop = c.scrollHeight;
-    return id;
-}
+    function closeDetail() {
+        document.getElementById('detail-panel').classList.remove('show');
+    }
 
-function removeAIMessage(id) {
-    const el = document.getElementById(id);
-    if (el) el.remove();
-}
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeDetail(); });
 
-// ============================
-// SIDEBAR & AUTH
-// ============================
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.querySelector('.sidebar-overlay').classList.toggle('show');
-}
-
-function logout() {
-    fetch('/api/users/logout', { method: 'POST' }).finally(() => {
+    function logout() {
+        fetch('/api/users/logout', {method:'POST'}).catch(function(){});
+        localStorage.removeItem('es_user');
         document.cookie = 'user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
         window.location.href = '/';
-    });
-}
+    }
+
+    // SW
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').catch(function(){});
+        });
+    }
 </script>
 </body>
 </html>
