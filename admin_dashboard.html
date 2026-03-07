@@ -856,7 +856,29 @@ async function loadOverview() {
     const subs = await (await fetch(API + '/newsletter/subscribers')).json();
     document.getElementById('ov-subs').textContent = Array.isArray(subs) ? subs.length : 0;
   } catch(e) { document.getElementById('ov-subs').textContent = '—'; }
-
+  
+// Inside loadOverview() in admin_dashboard.html
+try {
+    const s = await (await fetch(API + '/stats')).json();
+    document.getElementById('ov-users').textContent = s.total_users || 0;
+    // ... other stats ...
+    
+    // Fetch subscriber count specifically for Creators/Users
+    const subRes = await fetch(API + '/newsletter/subscribers');
+    const subData = await subRes.json();
+    
+    // If subData is an object with 'count', use it (for Creators/Users)
+    // If it's an array, convert length (for Admins - though Admins call different endpoint usually)
+    let count = 0;
+    if (typeof subData === 'object' && subData.count !== undefined) {
+        count = subData.count;
+    } else if (Array.isArray(subData)) {
+        count = subData.length;
+    }
+    
+    document.getElementById('ov-subs').textContent = count || 0;
+} catch(e) { ... }
+  
   // Recent posts
   try {
     const posts = await (await fetch(API + '/posts?status=all&limit=5')).json();
