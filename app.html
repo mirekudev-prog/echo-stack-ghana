@@ -88,7 +88,6 @@
             color: white;
         }
 
-        /* close button — mobile only */
         .sidebar-close {
             display: none;
             background: none;
@@ -101,7 +100,6 @@
         }
         @media (max-width: 768px) { .sidebar-close { display: block; } }
 
-        /* User pill */
         .user-pill {
             margin: 1rem 1.25rem 0;
             background: rgba(255,255,255,0.06);
@@ -124,7 +122,6 @@
         .user-name { font-size: 0.82rem; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .user-plan { font-size: 0.68rem; color: rgba(255,255,255,0.4); margin-top: 1px; }
 
-        /* Nav */
         .sidebar-nav { flex: 1; padding: 0.75rem 0.75rem; }
         .nav-label {
             font-size: 0.62rem;
@@ -151,31 +148,17 @@
             color: white;
         }
         .sidebar-nav a svg { width: 18px; height: 18px; flex-shrink: 0; }
-        .sidebar-nav a { position: relative; }
         .nav-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 5px;
-            border-radius: 9px;
-            background: #cc2929;
-            color: white;
-            font-size: 0.62rem;
-            font-weight: 700;
-            margin-left: auto;
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 18px; height: 18px; padding: 0 5px;
+            border-radius: 9px; background: #cc2929; color: white;
+            font-size: 0.62rem; font-weight: 700; margin-left: auto;
         }
-        /* Creator badge on user pill */
         .creator-badge {
-            font-size: 0.6rem;
-            font-weight: 700;
+            font-size: 0.6rem; font-weight: 700;
             background: linear-gradient(135deg, #c9933a, #e8b45a);
-            color: #1a1e29;
-            padding: 1px 7px;
-            border-radius: 10px;
-            margin-top: 3px;
-            display: inline-block;
+            color: #1a1e29; padding: 1px 7px; border-radius: 10px;
+            margin-top: 3px; display: inline-block;
         }
 
         .sidebar-footer {
@@ -189,18 +172,14 @@
             color: #f87171;
             padding: 0.7rem 1rem;
             border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.85rem; font-weight: 600;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
             transition: all 0.2s;
         }
         .btn-logout:hover { background: rgba(220,38,38,0.3); color: #fff; }
 
-        /* ── MAIN WRAPPER ── */
+        /* ── MAIN ── */
         .main-wrapper {
             margin-left: var(--sidebar-w);
             min-height: 100vh;
@@ -208,47 +187,25 @@
             flex-direction: column;
         }
 
-        /* ── MOBILE TOP BAR ── */
         .mobile-bar {
             display: none;
-            position: sticky;
-            top: 0;
-            z-index: 900;
+            position: sticky; top: 0; z-index: 900;
             background: var(--ink);
             padding: 0.75rem 1rem;
-            align-items: center;
-            justify-content: space-between;
+            align-items: center; justify-content: space-between;
             border-bottom: 2px solid var(--gold);
         }
-        .mobile-bar-logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
+        .mobile-bar-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
         .mobile-bar-logo img { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; }
         .mobile-bar-logo span { font-weight: bold; color: white; font-size: 1rem; }
-        .burger {
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.7);
-            cursor: pointer;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-        }
+        .burger { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; padding: 4px; display: flex; align-items: center; }
 
-        /* Overlay */
         .overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.55);
-            z-index: 999;
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); z-index: 999;
         }
         .overlay.show { display: block; }
 
-        /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); }
@@ -256,117 +213,86 @@
             .mobile-bar { display: flex; }
         }
 
-        /* ── PAGE CONTENT ── */
         .main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 3rem; flex: 1; }
 
-        /* Hero banner */
         .hero-banner {
             background: linear-gradient(135deg, var(--ink) 0%, #243047 100%);
-            border-radius: 14px;
-            padding: 2rem 1.5rem;
-            margin-bottom: 2rem;
-            color: white;
-            position: relative;
-            overflow: hidden;
+            border-radius: 14px; padding: 2rem 1.5rem; margin-bottom: 2rem;
+            color: white; position: relative; overflow: hidden;
         }
         .hero-banner::before {
-            content: '🇬🇭';
-            position: absolute;
-            right: 1.5rem; top: 50%;
-            transform: translateY(-50%);
-            font-size: 4rem;
-            opacity: 0.15;
+            content: '🇬🇭'; position: absolute; right: 1.5rem; top: 50%;
+            transform: translateY(-50%); font-size: 4rem; opacity: 0.15;
         }
         .hero-banner h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); margin-bottom: 0.4rem; }
         .hero-banner p { font-size: 0.88rem; color: rgba(255,255,255,0.55); line-height: 1.6; max-width: 500px; }
 
-        /* Section header */
         .section-head {
-            font-size: 1.1rem;
-            color: var(--ink);
-            margin-bottom: 1rem;
-            padding-left: 0.85rem;
-            border-left: 4px solid var(--blue);
-            font-weight: bold;
+            font-size: 1.1rem; color: var(--ink); margin-bottom: 1rem;
+            padding-left: 0.85rem; border-left: 4px solid var(--blue); font-weight: bold;
         }
 
-        /* Map */
         .map-wrapper {
-            background: white;
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
+            background: white; border: 1.5px solid var(--border);
+            border-radius: 12px; padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05); margin-bottom: 2rem;
         }
         svg { width: 100%; height: auto; max-height: 560px; display: block; }
 
         .region-path {
-            transition: all 0.25s;
-            cursor: pointer;
-            stroke: #c0c0c0;
-            stroke-width: 1.5;
-            fill: #eef2f7;
+            transition: all 0.25s; cursor: pointer;
+            stroke: #c0c0c0; stroke-width: 1.5; fill: #eef2f7;
         }
         .region-path:hover { fill: var(--blue); stroke: var(--ink); stroke-width: 2; opacity: 0.9; }
-        .region-active { fill: var(--blue)!important; stroke: var(--ink)!important; stroke-width: 2.5!important; filter: drop-shadow(0 2px 6px rgba(0,119,182,0.4)); }
-        .map-label { font-size: 8px; font-weight: bold; font-family: Arial, sans-serif; pointer-events: none; fill: var(--ink); paint-order: stroke; stroke: white; stroke-width: 2.5px; }
+        .region-active {
+            fill: var(--blue)!important; stroke: var(--ink)!important;
+            stroke-width: 2.5!important;
+            filter: drop-shadow(0 2px 6px rgba(0,119,182,0.4));
+        }
+        .map-label {
+            font-size: 8px; font-weight: bold;
+            font-family: Arial, sans-serif; pointer-events: none;
+            fill: var(--ink); paint-order: stroke;
+            stroke: white; stroke-width: 2.5px;
+        }
 
-        /* Region cards */
         .regions-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
+            gap: 1rem; margin-bottom: 2rem;
         }
         @media (max-width: 480px) { .regions-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; } }
 
         .region-card {
-            background: white;
-            border: 1.5px solid var(--border);
-            border-radius: 10px;
-            padding: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            background: white; border: 1.5px solid var(--border);
+            border-radius: 10px; padding: 1rem; cursor: pointer;
+            transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
         }
         .region-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,119,182,0.12); border-color: var(--blue); }
         .region-card h4 { font-size: 0.95rem; color: var(--ink); margin-bottom: 0.3rem; }
         .region-card p { font-size: 0.78rem; color: #666; line-height: 1.4; }
 
-        /* Detail panel */
         .detail-panel {
-            position: fixed;
-            top: 0; right: -100%;
+            position: fixed; top: 0; right: -100%;
             width: 100%; max-width: 560px;
             height: 100vh;
             background: white;
             box-shadow: -4px 0 24px rgba(0,0,0,0.12);
             transition: right 0.35s ease;
-            z-index: 1100;
-            overflow-y: auto;
-            padding: 1.5rem;
+            z-index: 1100; overflow-y: auto; padding: 1.5rem;
         }
         .detail-panel.show { right: 0; }
         @media (max-width: 600px) { .detail-panel { max-width: 100%; } }
 
         .detail-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 1.5rem; padding-bottom: 1rem;
             border-bottom: 2px solid var(--border);
         }
         .detail-code {
-            display: inline-block;
-            background: var(--blue);
-            color: white;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            margin-bottom: 6px;
+            display: inline-block; background: var(--blue); color: white;
+            padding: 2px 10px; border-radius: 20px; font-size: 0.72rem;
+            font-weight: 700; margin-bottom: 6px;
         }
         .detail-title { font-size: 1.6rem; font-weight: bold; color: var(--ink); margin-bottom: 4px; }
         .detail-capital { font-size: 0.85rem; color: #666; font-style: italic; }
@@ -381,20 +307,15 @@
 
         audio { width: 100%; margin: 0.4rem 0; border-radius: 8px; }
 
-        /* facts grid */
         .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
         .fact { background: #f0f9ff; padding: 0.85rem; border-radius: 8px; }
         .fact-label { font-size: 0.75rem; color: #666; margin-bottom: 3px; }
         .fact-val { font-size: 1.05rem; font-weight: bold; color: var(--ink); }
 
-        /* Footer */
         .footer {
-            background: white;
-            border-top: 1px solid var(--border);
-            padding: 1.25rem 1rem;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #888;
+            background: white; border-top: 1px solid var(--border);
+            padding: 1.25rem 1rem; text-align: center;
+            font-size: 0.8rem; color: #888;
         }
         .footer a { color: var(--blue); text-decoration: none; margin: 0 0.5rem; }
 
@@ -403,24 +324,22 @@
 </head>
 <body>
 
-<!-- Overlay for mobile sidebar -->
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-<!-- ═══ SIDEBAR ═══ -->
+<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <a href="/app" class="sidebar-logo">
             <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
             <span>EchoStack</span>
         </a>
-        <button class="sidebar-close" onclick="closeSidebar()">×</button>
+        <button class="sidebar-close" onclick="closeSidebar()">&#215;</button>
     </div>
 
-    <!-- User info -->
     <div class="user-pill">
         <div class="user-av" id="user-av">?</div>
         <div class="user-info">
-            <div class="user-name" id="user-name">Loading…</div>
+            <div class="user-name" id="user-name">Loading...</div>
             <div class="user-plan" id="user-plan">Free Plan</div>
         </div>
     </div>
@@ -432,7 +351,7 @@
             Map &amp; Regions
         </a>
         <a href="/dashboard">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v12a2 2 0 01-2 2z"/><path d="M16 2v4"/><path d="M8 10h8M8 14h6"/></svg>
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v12a2 2 0 01-2 2z"/></svg>
             News Feed
         </a>
         <a href="/explore">
@@ -444,24 +363,18 @@
         <a href="/chat">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
             Community Chat
-            <span class="nav-badge" id="chat-badge" style="display:none"></span>
         </a>
         <a href="/subscriptions">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
             Subscriptions
         </a>
         <a href="/subscribers" id="nav-subscribers" style="display:none">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="23" y2="8"/><line x1="21" y1="6" x2="21" y2="10"/></svg>
             My Subscribers
-            <span class="nav-badge" id="sub-count" style="background:rgba(201,147,58,0.3);color:#c9933a;"></span>
         </a>
         <a href="/following">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><polyline points="16,11 18,13 22,9"/></svg>
             Following
-        </a>
-        <a href="/activity">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            Activity
         </a>
 
         <div class="nav-label">Account</div>
@@ -480,12 +393,11 @@
     </nav>
 
     <div class="sidebar-footer">
-        <!-- Upgrade CTA — shown only to free users -->
         <a href="/premium" id="upgrade-cta" style="display:none;text-decoration:none;margin-bottom:10px;">
-            <div style="background:linear-gradient(135deg,rgba(201,147,58,0.18),rgba(201,147,58,0.08));border:1px solid rgba(201,147,58,0.3);border-radius:10px;padding:12px 14px;text-align:center;">
-                <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#c9933a;margin-bottom:4px;">⭐ Upgrade to Premium</div>
+            <div style="background:linear-gradient(135deg,rgba(201,147,58,0.18),rgba(201,147,58,0.08));border:1px solid rgba(201,147,58,0.3);border-radius:10px;padding:12px 14px;text-align:center;margin-bottom:10px;">
+                <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#c9933a;margin-bottom:4px;">&#11088; Upgrade to Premium</div>
                 <div style="font-size:0.75rem;color:rgba(255,255,255,0.45);">EchoBot AI + Creator Studio</div>
-                <div style="font-size:0.72rem;color:#c9933a;margin-top:4px;font-weight:600;">GH₵150/month →</div>
+                <div style="font-size:0.72rem;color:#c9933a;margin-top:4px;font-weight:600;">GH&#8373;150/month &#8594;</div>
             </div>
         </a>
         <button onclick="logout()" class="btn-logout">
@@ -495,10 +407,9 @@
     </div>
 </aside>
 
-<!-- ═══ MAIN WRAPPER ═══ -->
+<!-- MAIN WRAPPER -->
 <div class="main-wrapper">
 
-    <!-- Mobile top bar -->
     <div class="mobile-bar">
         <a href="/app" class="mobile-bar-logo">
             <img src="/echostack-logo.png" alt="" onerror="this.style.display='none'">
@@ -510,28 +421,23 @@
     </div>
 
     <main class="main">
-
-        <!-- Hero -->
         <div class="hero-banner">
-            <h2>Explore Ghana's Heritage 🗺️</h2>
+            <h2>Explore Ghana's Heritage &#128506;&#65039;</h2>
             <p>Click any region on the map or browse the cards below to discover Ghana's 16 regions.</p>
         </div>
 
-        <!-- MAP -->
         <h3 class="section-head">Interactive Map</h3>
         <div class="map-wrapper">
             <svg viewBox="0 0 400 620" id="ghana-map"></svg>
         </div>
 
-        <!-- REGION CARDS -->
         <h3 class="section-head">All Regions</h3>
         <div class="regions-grid" id="regions-list">
-            <div class="loading">Loading regions…</div>
+            <div class="loading">Loading regions...</div>
         </div>
-
     </main>
 
-    <!-- Region Detail Panel -->
+    <!-- DETAIL PANEL -->
     <div id="detail-panel" class="detail-panel">
         <div class="detail-header">
             <div>
@@ -539,13 +445,13 @@
                 <div class="detail-title" id="detail-title">Region Name</div>
                 <div class="detail-capital" id="detail-capital">Capital: —</div>
             </div>
-            <button class="close-btn" onclick="closeDetail()">×</button>
+            <button class="close-btn" onclick="closeDetail()">&#215;</button>
         </div>
         <div id="detail-content"></div>
     </div>
 
     <footer class="footer">
-        <p>© 2026 EchoStack — Preserving Ghana's Stories</p>
+        <p>&#169; 2026 EchoStack — Preserving Ghana's Stories</p>
         <p style="margin-top:6px">
             <a href="/">Home</a>
             <a href="/dashboard">Feed</a>
@@ -555,473 +461,393 @@
 </div>
 
 <script>
-    // ── Load user from localStorage ──
-    var currentUser = {};
-    try {
-        currentUser = JSON.parse(localStorage.getItem('es_user')) || {};
-    } catch(e) {}
+// ── Load user from localStorage ──
+var currentUser = {};
+try { currentUser = JSON.parse(localStorage.getItem('es_user') || '{}'); } catch(e) {}
 
-    // Populate sidebar user info
-    if (currentUser.username) {
-        document.getElementById('user-name').textContent = currentUser.username;
-        document.getElementById('user-av').textContent = currentUser.username.charAt(0).toUpperCase();
-        var planLabel = currentUser.plan === 'premium' ? '⭐ Premium' : 'Free Plan';
-        document.getElementById('user-plan').textContent = planLabel;
+// Populate sidebar user info
+if (currentUser.username) {
+    document.getElementById('user-name').textContent = currentUser.username;
+    document.getElementById('user-av').textContent = currentUser.username.charAt(0).toUpperCase();
+    var planLabel = currentUser.plan === 'premium' ? '\u2B50 Premium' : 'Free Plan';
+    document.getElementById('user-plan').textContent = planLabel;
 
-        // Show creator-specific links
-        var isCreator = currentUser.role === 'creator' || currentUser.role === 'admin' || currentUser.role === 'superuser';
-        var isPremium = currentUser.is_premium == 1 || currentUser.plan === 'premium' || isCreator;
-        if (isCreator) {
-            var creatorEl = document.getElementById('nav-creator');
-            var subEl = document.getElementById('nav-subscribers');
-            if (creatorEl) creatorEl.style.display = 'flex';
-            if (subEl) subEl.style.display = 'flex';
-            // Add creator badge to user pill
-            var planEl = document.getElementById('user-plan');
-            planEl.innerHTML = planLabel + ' <span class="creator-badge">Creator</span>';
-        }
-        // Show upgrade CTA for free/non-premium users
-        if (!isPremium) {
-            var cta = document.getElementById('upgrade-cta');
-            if (cta) cta.style.display = 'block';
-        }
+    var isCreator = currentUser.role === 'creator' || currentUser.role === 'admin' || currentUser.role === 'superuser';
+    var isPremium = currentUser.is_premium == 1 || currentUser.plan === 'premium' || isCreator;
+
+    if (isCreator) {
+        var creatorEl = document.getElementById('nav-creator');
+        var subEl = document.getElementById('nav-subscribers');
+        if (creatorEl) creatorEl.style.display = 'flex';
+        if (subEl) subEl.style.display = 'flex';
     }
-
-    // ── Sidebar toggle ──
-    function openSidebar() {
-        document.getElementById('sidebar').classList.add('open');
-        document.getElementById('overlay').classList.add('show');
-        document.body.style.overflow = 'hidden';
+    if (!isPremium) {
+        var cta = document.getElementById('upgrade-cta');
+        if (cta) cta.style.display = 'block';
     }
-    function closeSidebar() {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('overlay').classList.remove('show');
-        document.body.style.overflow = '';
+}
+
+// ── Sidebar ──
+function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// ── Map data ──
+var svgPaths = {
+    'upper-west':    'M60,40 L160,50 L165,130 L100,140 L50,110 Z',
+    'upper-east':    'M160,50 L280,25 L290,100 L165,130 Z',
+    'north-east':    'M165,130 L290,100 L350,130 L340,190 L180,195 Z',
+    'savannah':      'M50,110 L100,140 L165,130 L180,195 L220,260 L180,340 L80,340 L40,250 Z',
+    'northern':      'M180,195 L340,190 L370,300 L320,320 L220,260 Z',
+    'bono':          'M80,340 L180,340 L160,420 L70,420 Z',
+    'bono-east':     'M180,340 L220,260 L320,320 L330,410 L190,410 L160,420 Z',
+    'ahafo':         'M70,420 L160,420 L140,470 L60,470 Z',
+    'ashanti':       'M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z',
+    'oti':           'M320,320 L370,300 L380,450 L340,450 L330,410 Z',
+    'volta':         'M340,450 L380,450 L400,560 L360,570 L340,510 Z',
+    'eastern':       'M310,510 L330,410 L340,450 L340,510 L360,570 L300,580 L280,510 Z',
+    'western-north': 'M60,470 L140,470 L130,530 L50,530 Z',
+    'western':       'M50,530 L130,530 L110,610 L40,590 Z',
+    'central':       'M130,530 L180,510 L280,510 L250,600 L110,610 Z',
+    'greater-accra': 'M300,580 L360,570 L375,600 L290,610 Z'
+};
+
+var regionLabels = {
+    'upper-west':    {x:105, y:100},
+    'upper-east':    {x:210, y:80},
+    'north-east':    {x:255, y:155},
+    'savannah':      {x:120, y:240},
+    'northern':      {x:265, y:255},
+    'bono':          {x:120, y:390},
+    'bono-east':     {x:245, y:360},
+    'ahafo':         {x:105, y:455},
+    'ashanti':       {x:240, y:475},
+    'oti':           {x:355, y:385},
+    'volta':         {x:370, y:525},
+    'eastern':       {x:320, y:555},
+    'western-north': {x:90,  y:505},
+    'western':       {x:80,  y:580},
+    'central':       {x:200, y:570},
+    'greater-accra': {x:315, y:602}
+};
+
+// ── FIX: proper title-case with ALL hyphens replaced ──
+function keyToLabel(key) {
+    return key.replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+}
+
+var allRegions = [];
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+    loadRegions();
+});
+
+function initMap() {
+    var svg = document.getElementById('ghana-map');
+    var s = '';
+    var keys = Object.keys(svgPaths);
+    for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var lbl = keyToLabel(key);
+        var lx = regionLabels[key].x;
+        var ly = regionLabels[key].y;
+        // NOTE: onclick uses a plain string — no arrow functions, no template literals inside attribute
+        s += '<path id="' + key + '" d="' + svgPaths[key] + '" class="region-path" onclick="showRegionDetail(\'' + key + '\')"/>';
+        s += '<text x="' + lx + '" y="' + ly + '" class="map-label">' + lbl + '</text>';
     }
+    svg.innerHTML = s;
+}
 
-    // ── Map data ──
-    const svgPaths = {
-        'upper-west':    'M60,40 L160,50 L165,130 L100,140 L50,110 Z',
-        'upper-east':    'M160,50 L280,25 L290,100 L165,130 Z',
-        'north-east':    'M165,130 L290,100 L350,130 L340,190 L180,195 Z',
-        'savannah':      'M50,110 L100,140 L165,130 L180,195 L220,260 L180,340 L80,340 L40,250 Z',
-        'northern':      'M180,195 L340,190 L370,300 L320,320 L220,260 Z',
-        'bono':          'M80,340 L180,340 L160,420 L70,420 Z',
-        'bono-east':     'M180,340 L220,260 L320,320 L330,410 L190,410 L160,420 Z',
-        'ahafo':         'M70,420 L160,420 L140,470 L60,470 Z',
-        'ashanti':       'M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z',
-        'oti':           'M320,320 L370,300 L380,450 L340,450 L330,410 Z',
-        'volta':         'M340,450 L380,450 L400,560 L360,570 L340,510 Z',
-        'eastern':       'M310,510 L330,410 L340,450 L340,510 L360,570 L300,580 L280,510 Z',
-        'western-north': 'M60,470 L140,470 L130,530 L50,530 Z',
-        'western':       'M50,530 L130,530 L110,610 L40,590 Z',
-        'central':       'M130,530 L180,510 L280,510 L250,600 L110,610 Z',
-        'greater-accra': 'M300,580 L360,570 L375,600 L290,610 Z'
-    };
-    const regionLabels = {
-        'upper-west':{x:105,y:100},'upper-east':{x:210,y:80},'north-east':{x:255,y:155},
-        'savannah':{x:120,y:240},'northern':{x:265,y:255},'bono':{x:120,y:390},
-        'bono-east':{x:245,y:360},'ahafo':{x:105,y:455},'ashanti':{x:240,y:475},
-        'oti':{x:355,y:385},'volta':{x:370,y:525},'eastern':{x:320,y:555},
-        'western-north':{x:90,y:505},'western':{x:80,y:580},'central':{x:200,y:570},
-        'greater-accra':{x:315,y:602}
-    };
-
-    var allRegions = [];
-
-    // ── Init ──
-    document.addEventListener('DOMContentLoaded', function() {
-        initMap();
-        loadRegions();
-    });
-
-    function initMap() {
-        var svg = document.getElementById('ghana-map');
-        var s = '';
-        for (var key in svgPaths) {
-            var lbl = key.split('-').map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(' ');
-            s += '<path id="'+key+'" d="'+svgPaths[key]+'" class="region-path" onclick="showRegionDetail(\''+key+'\')"/>';
-            s += '<text x="'+regionLabels[key].x+'" y="'+regionLabels[key].y+'" class="map-label">'+lbl+'</text>';
-        }
-        svg.innerHTML = s;
-    }
-
-    async function loadRegions() {
-        try {
-            var res = await fetch('/api/regions');
-            allRegions = await res.json();
+function loadRegions() {
+    fetch('/api/regions')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            allRegions = data;
             renderRegionsList();
-            allRegions.forEach(function(r) {
-                var k = r.name.toLowerCase().replace(/ region$/,'').replace(/ /g,'-');
-                var p = document.getElementById(k);
-                if (p) p.setAttribute('data-region-id', r.id);
-            });
-        } catch(e) {
-            document.getElementById('regions-list').innerHTML = '<div class="loading">Failed to load. Please refresh.</div>';
-        }
-    }
-
-    function renderRegionsList() {
-        if (!allRegions.length) {
-            document.getElementById('regions-list').innerHTML = '<div class="loading">No regions yet.</div>';
-            return;
-        }
-        document.getElementById('regions-list').innerHTML = allRegions.map(function(r) {
-            return '<div class="region-card" onclick="showRegionDetailFromData('+JSON.stringify(r).replace(/"/g,'&quot;')+')">'
-                + '<h4>'+r.name+'</h4>'
-                + '<p><strong>Capital:</strong> '+(r.capital||'N/A')+'</p>'
-                + '<p><strong>Category:</strong> '+(r.category||'Uncategorized')+'</p>'
-                + '</div>';
-        }).join('');
-    }
-
-    function showRegionDetail(key) {
-        // Exact key match: normalize region name to key format
-        var r = allRegions.find(function(reg){
-            var k = reg.name.toLowerCase().replace(/\s*region\s*$/i,'').trim().replace(/ /g,'-');
-            return k === key;
+            linkMapRegions();
+        })
+        .catch(function(e) {
+            console.error('Failed to load regions:', e);
+            document.getElementById('regions-list').innerHTML =
+                '<div class="loading">Failed to load regions. Please refresh.</div>';
         });
-        if (r) {
-            showRegionDetailFromData(r);
-        } else {
-            // Region on map has no data yet — never fall back to wrong region
-            var displayName = key.split('-').map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(' ') + ' Region';
-            showRegionNoData(displayName);
+}
+
+function renderRegionsList() {
+    var c = document.getElementById('regions-list');
+    if (!allRegions.length) {
+        c.innerHTML = '<div class="loading">No regions available yet.</div>';
+        return;
+    }
+    var html = '';
+    for (var i = 0; i < allRegions.length; i++) {
+        var r = allRegions[i];
+        html += '<div class="region-card" onclick="showRegionDetailFromData(' + r.id + ')">'
+              + '<h4>' + escHtml(r.name) + '</h4>'
+              + '<p><strong>Capital:</strong> ' + escHtml(r.capital || 'N/A') + '</p>'
+              + '<p><strong>Category:</strong> ' + escHtml(r.category || 'Uncategorized') + '</p>'
+              + '</div>';
+    }
+    c.innerHTML = html;
+}
+
+function linkMapRegions() {
+    for (var i = 0; i < allRegions.length; i++) {
+        var r = allRegions[i];
+        var k = r.name.toLowerCase()
+                      .replace(/\s*region\s*$/i, '')
+                      .trim()
+                      .replace(/\s+/g, '-');
+        var p = document.getElementById(k);
+        if (p) p.setAttribute('data-region-id', r.id);
+    }
+}
+
+// Called when clicking a map path by its key
+function showRegionDetail(key) {
+    // Normalize key to match region names
+    var r = null;
+    for (var i = 0; i < allRegions.length; i++) {
+        var regionKey = allRegions[i].name.toLowerCase()
+                                          .replace(/\s*region\s*$/i, '')
+                                          .trim()
+                                          .replace(/\s+/g, '-');
+        if (regionKey === key) { r = allRegions[i]; break; }
+    }
+
+    if (r) {
+        showRegionPanel(r);
+    } else {
+        showRegionNoData(keyToLabel(key) + ' Region');
+    }
+}
+
+// Called when clicking a region card by numeric id
+function showRegionDetailFromData(id) {
+    var r = null;
+    for (var i = 0; i < allRegions.length; i++) {
+        if (allRegions[i].id === id) { r = allRegions[i]; break; }
+    }
+    if (r) showRegionPanel(r);
+}
+
+function showRegionNoData(name) {
+    document.getElementById('detail-code').textContent = '—';
+    document.getElementById('detail-title').textContent = name;
+    document.getElementById('detail-capital').textContent = 'No data uploaded yet';
+    document.getElementById('detail-content').innerHTML =
+        '<div style="text-align:center;padding:3rem 1rem;">'
+        + '<div style="font-size:3.5rem;margin-bottom:1rem;">&#128506;&#65039;</div>'
+        + '<h3 style="color:#1a1e29;margin-bottom:0.5rem;">Coming Soon</h3>'
+        + '<p style="color:#888;font-size:0.9rem;line-height:1.7;max-width:280px;margin:0 auto;">'
+        + 'The <strong>' + escHtml(name) + '</strong> archive is being built. '
+        + 'Check back soon, or submit a story to help preserve this region\'s heritage!'
+        + '</p>'
+        + '<a href="/signup" style="display:inline-block;margin-top:1.5rem;padding:0.65rem 1.5rem;background:#0077b6;color:white;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600;">&#128221; Submit a Story</a>'
+        + '</div>';
+    document.getElementById('detail-panel').classList.add('show');
+    document.getElementById('detail-panel').scrollTop = 0;
+}
+
+function showRegionPanel(region) {
+    // Highlight active map path
+    var allPaths = document.querySelectorAll('.region-path');
+    for (var i = 0; i < allPaths.length; i++) { allPaths[i].classList.remove('region-active'); }
+    var activeKey = region.name.toLowerCase()
+                               .replace(/\s*region\s*$/i, '')
+                               .trim()
+                               .replace(/\s+/g, '-');
+    var activePath = document.getElementById(activeKey);
+    if (activePath) activePath.classList.add('region-active');
+
+    document.getElementById('detail-code').textContent = 'GH-' + String(region.id).padStart(2, '0');
+    document.getElementById('detail-title').textContent = region.name;
+    document.getElementById('detail-capital').textContent = 'Capital: ' + (region.capital || 'Not specified');
+
+    var imgs = [];
+    if (Array.isArray(region.gallery_images)) {
+        imgs = region.gallery_images;
+    } else if (region.gallery_images) {
+        imgs = region.gallery_images.split(',');
+    }
+
+    var auds = [];
+    if (Array.isArray(region.audio_files)) {
+        auds = region.audio_files;
+    } else if (region.audio_files) {
+        auds = region.audio_files.split(',');
+    }
+
+    var imgHtml = '';
+    if (imgs.length) {
+        imgHtml = '<div class="media-grid">';
+        for (var i = 0; i < imgs.length; i++) {
+            var src = imgs[i].trim();
+            if (src) imgHtml += '<div class="media-item"><img src="' + escHtml(src) + '" alt="Gallery" loading="lazy" onerror="this.src=\'https://via.placeholder.com/130x110?text=Photo\'"></div>';
         }
+        imgHtml += '</div>';
+    } else {
+        imgHtml = '<p style="color:#888;font-size:.85rem;margin-bottom:1rem">No images uploaded yet.</p>';
     }
 
-    function showRegionNoData(name) {
-        document.getElementById('detail-code').textContent = '—';
-        document.getElementById('detail-title').textContent = name;
-        document.getElementById('detail-capital').textContent = 'No data uploaded yet';
-        document.getElementById('detail-content').innerHTML =
-            '<div style="text-align:center;padding:3rem 1rem;">'
-            +'<div style="font-size:3.5rem;margin-bottom:1rem;">🗺️</div>'
-            +'<h3 style="color:#1a1e29;margin-bottom:0.5rem;">Coming Soon</h3>'
-            +'<p style="color:#888;font-size:0.9rem;line-height:1.7;max-width:280px;margin:0 auto;">'
-            +'The <strong>'+name+'</strong> archive is being built. '
-            +'Check back soon, or submit a story to help preserve this region's heritage!'
-            +'</p>'
-            +'<a href="/signup" style="display:inline-block;margin-top:1.5rem;padding:0.65rem 1.5rem;background:#0077b6;color:white;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600;">📝 Submit a Story</a>'
-            +'</div>';
-        document.getElementById('detail-panel').classList.add('show');
-        document.getElementById('detail-panel').scrollTop = 0;
+    var audHtml = '';
+    if (auds.length) {
+        for (var j = 0; j < auds.length; j++) {
+            var asrc = auds[j].trim();
+            if (asrc) audHtml += '<div style="margin:.5rem 0;padding:.75rem;background:#f8f8f8;border-radius:8px"><audio controls style="width:100%"><source src="' + escHtml(asrc) + '" type="audio/mpeg"></audio></div>';
+        }
+    } else {
+        audHtml = '<p style="color:#888;font-size:.85rem;margin-bottom:1.5rem">No audio recordings yet.</p>';
     }
 
-    function showRegionDetailFromData(region) {
-        document.getElementById('detail-code').textContent = 'GH-'+String(region.id).padStart(2,'0');
-        document.getElementById('detail-title').textContent = region.name;
-        document.getElementById('detail-capital').textContent = 'Capital: '+(region.capital||'Not specified');
+    var tagsVal = '';
+    if (Array.isArray(region.tags)) { tagsVal = region.tags.join(', '); }
+    else if (region.tags) { tagsVal = region.tags; }
+    else { tagsVal = 'None'; }
 
-        var imgs = Array.isArray(region.gallery_images) ? region.gallery_images : (region.gallery_images ? region.gallery_images.split(',') : []);
-        var auds = Array.isArray(region.audio_files)   ? region.audio_files   : (region.audio_files   ? region.audio_files.split(',')   : []);
+    document.getElementById('detail-content').innerHTML =
+        '<div class="dtitle">&#128214; Heritage Description</div>'
+        + '<p style="line-height:1.8;color:#333;margin-bottom:1.5rem">' + escHtml(region.description || 'No description available.') + '</p>'
+        + '<div class="dtitle">&#128202; Quick Facts</div>'
+        + '<div class="facts">'
+        + '<div class="fact"><div class="fact-label">Population</div><div class="fact-val">' + escHtml(region.population || 'N/A') + '</div></div>'
+        + '<div class="fact"><div class="fact-label">Terrain</div><div class="fact-val">' + escHtml(region.terrain || 'N/A') + '</div></div>'
+        + '</div>'
+        + '<div class="dtitle">&#127968; Gallery</div>' + imgHtml
+        + '<div class="dtitle">&#127925; Audio Archives</div><div style="margin-bottom:1.5rem">' + audHtml + '</div>'
+        + '<div class="dtitle">&#128221; Details</div>'
+        + '<p style="font-size:.85rem;color:#555"><strong>Category:</strong> ' + escHtml(region.category || 'Uncategorized') + '</p>'
+        + '<p style="font-size:.85rem;color:#555;margin-top:4px"><strong>Tags:</strong> ' + escHtml(tagsVal) + '</p>'
+        + (region.overview ? '<div class="dtitle">&#128196; Full Overview</div><p style="line-height:1.8;font-size:.88rem;color:#444">' + escHtml(region.overview) + '</p>' : '');
 
-        document.getElementById('detail-content').innerHTML =
-            '<div class="dtitle">📖 Heritage Description</div>'
-            +'<p style="line-height:1.8;color:#333;margin-bottom:1.5rem">'+(region.description||'No description available.')+'</p>'
+    document.getElementById('detail-panel').classList.add('show');
+    document.getElementById('detail-panel').scrollTop = 0;
+}
 
-            +'<div class="dtitle">📊 Quick Facts</div>'
-            +'<div class="facts">'
-            +'<div class="fact"><div class="fact-label">Population</div><div class="fact-val">'+(region.population||'N/A')+'</div></div>'
-            +'<div class="fact"><div class="fact-label">Terrain</div><div class="fact-val">'+(region.terrain||'N/A')+'</div></div>'
-            +'</div>'
+function closeDetail() {
+    document.getElementById('detail-panel').classList.remove('show');
+    var allPaths = document.querySelectorAll('.region-path');
+    for (var i = 0; i < allPaths.length; i++) { allPaths[i].classList.remove('region-active'); }
+}
 
-            +'<div class="dtitle">🏞️ Gallery</div>'
-            +(imgs.length
-                ? '<div class="media-grid">'+imgs.map(function(i){ return '<div class="media-item"><img src="'+i.trim()+'" alt="Gallery" onerror="this.src=\'https://via.placeholder.com/130x110?text=Photo\'"></div>'; }).join('')+'</div>'
-                : '<p style="color:#888;font-size:.85rem;margin-bottom:1rem">No images uploaded yet.</p>')
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeDetail(); });
 
-            +'<div class="dtitle">🎵 Audio Archives</div>'
-            +(auds.length
-                ? '<div style="margin-bottom:1.5rem">'+auds.map(function(a){ return '<div style="margin:.5rem 0;padding:.75rem;background:#f8f8f8;border-radius:8px"><audio controls><source src="'+a.trim()+'" type="audio/mpeg"></audio></div>'; }).join('')+'</div>'
-                : '<p style="color:#888;font-size:.85rem;margin-bottom:1.5rem">No audio recordings yet.</p>')
+function logout() {
+    fetch('/api/users/logout', {method:'POST'}).catch(function(){});
+    localStorage.removeItem('es_user');
+    document.cookie = 'user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+    window.location.href = '/';
+}
 
-            +'<div class="dtitle">🎬 Documentaries</div>'
-            +'<p style="color:#888;font-size:.85rem;margin-bottom:1.5rem">Coming soon.</p>'
+// HTML escape helper — prevents XSS and broken HTML from region data
+function escHtml(str) {
+    if (!str && str !== 0) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
 
-            +'<div class="dtitle">📝 Details</div>'
-            +'<p style="font-size:.85rem;color:#555"><strong>Category:</strong> '+(region.category||'Uncategorized')+'</p>'
-            +'<p style="font-size:.85rem;color:#555"><strong>Tags:</strong> '+(Array.isArray(region.tags)?region.tags.join(', '):(region.tags||'None'))+'</p>';
-
-        document.getElementById('detail-panel').classList.add('show');
-        // On mobile scroll to top of panel
-        document.getElementById('detail-panel').scrollTop = 0;
-    }
-
-    function closeDetail() {
-        document.getElementById('detail-panel').classList.remove('show');
-    }
-
-    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeDetail(); });
-
-    function logout() {
-        fetch('/api/users/logout', {method:'POST'}).catch(function(){});
-        localStorage.removeItem('es_user');
-        document.cookie = 'user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
-        window.location.href = '/';
-    }
-
-    // SW
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/sw.js').catch(function(){});
-        });
-    }
+// Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').catch(function(){});
+    });
+}
 </script>
 
-<!-- ═══════════════════════════════════════════════════
-     ECHOBOT FLOATING CHATBOT WIDGET
-     Works on map page — passes current region context
-════════════════════════════════════════════════════ -->
+<!-- ═══ ECHOBOT FLOATING WIDGET ═══ -->
 <style>
-/* ── FAB button ── */
 #echobot-fab {
-    position: fixed;
-    bottom: 28px;
-    right: 28px;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
+    position: fixed; bottom: 28px; right: 28px;
+    width: 58px; height: 58px; border-radius: 50%;
     background: linear-gradient(135deg, #c9933a, #e8b45a);
-    border: none;
-    cursor: pointer;
+    border: none; cursor: pointer;
     box-shadow: 0 4px 20px rgba(201,147,58,0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    transition: transform 0.2s, box-shadow 0.2s;
-    font-size: 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; transition: transform 0.2s, box-shadow 0.2s; font-size: 1.5rem;
 }
 #echobot-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(201,147,58,0.55); }
-#echobot-fab .fab-badge {
-    position: absolute;
-    top: -4px; right: -4px;
-    width: 20px; height: 20px;
-    background: #cc2929;
-    border-radius: 50%;
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #fff;
-    display: none;
-}
-
-/* ── Chat window ── */
 #echobot-window {
-    position: fixed;
-    bottom: 100px;
-    right: 28px;
-    width: 360px;
-    max-width: calc(100vw - 32px);
-    height: 500px;
-    max-height: calc(100vh - 120px);
-    background: #0d0e13;
-    border: 1px solid rgba(201,147,58,0.25);
-    border-radius: 18px;
-    box-shadow: 0 12px 48px rgba(0,0,0,0.5);
-    z-index: 999;
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    font-family: 'DM Sans', 'Inter', sans-serif;
+    position: fixed; bottom: 100px; right: 28px;
+    width: 360px; max-width: calc(100vw - 32px);
+    height: 500px; max-height: calc(100vh - 120px);
+    background: #0d0e13; border: 1px solid rgba(201,147,58,0.25);
+    border-radius: 18px; box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+    z-index: 999; display: none; flex-direction: column; overflow: hidden;
+    font-family: 'DM Sans', Arial, sans-serif;
 }
 #echobot-window.open { display: flex; animation: botSlideIn 0.25s ease; }
-@keyframes botSlideIn {
-    from { opacity: 0; transform: translateY(16px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Header */
-.bot-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 18px;
-    background: linear-gradient(135deg, #1c1f2e, #252840);
-    border-bottom: 1px solid rgba(201,147,58,0.15);
-    flex-shrink: 0;
-}
-.bot-header-left { display: flex; align-items: center; gap: 10px; }
-.bot-avatar {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #c9933a, #e8b45a);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
-.bot-name { font-weight: 700; color: #e8e4d8; font-size: 0.95rem; }
-.bot-status { font-size: 0.7rem; color: #7a7a8a; display: flex; align-items: center; gap: 4px; }
+@keyframes botSlideIn { from { opacity:0; transform:translateY(16px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+.bot-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:linear-gradient(135deg,#1c1f2e,#252840); border-bottom:1px solid rgba(201,147,58,0.15); flex-shrink:0; }
+.bot-header-left { display:flex; align-items:center; gap:10px; }
+.bot-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#c9933a,#e8b45a); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+.bot-name { font-weight:700; color:#e8e4d8; font-size:0.95rem; }
+.bot-status { font-size:0.7rem; color:#7a7a8a; display:flex; align-items:center; gap:4px; }
 .bot-status::before { content:''; width:6px; height:6px; border-radius:50%; background:#1a7a3c; display:inline-block; }
-.bot-close {
-    background: none; border: none; color: #7a7a8a; cursor: pointer;
-    font-size: 1.3rem; padding: 2px 6px; border-radius: 5px;
-    transition: color 0.15s;
-}
-.bot-close:hover { color: #e8e4d8; }
-
-/* Context strip */
-.bot-context {
-    padding: 6px 14px;
-    background: rgba(201,147,58,0.08);
-    border-bottom: 1px solid rgba(201,147,58,0.12);
-    font-size: 0.72rem;
-    color: #c9933a;
-    font-weight: 600;
-    flex-shrink: 0;
-    display: none;
-}
-.bot-context.visible { display: block; }
-
-/* Messages */
-.bot-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.bot-messages::-webkit-scrollbar { width: 4px; }
-.bot-messages::-webkit-scrollbar-track { background: transparent; }
-.bot-messages::-webkit-scrollbar-thumb { background: rgba(201,147,58,0.2); border-radius: 2px; }
-
-.bot-msg {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    max-width: 90%;
-}
-.bot-msg.user { align-self: flex-end; flex-direction: row-reverse; }
-
-.bot-msg-avatar {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: #1c1f2e;
-    border: 1px solid rgba(201,147,58,0.2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-.bot-msg-bubble {
-    padding: 10px 14px;
-    border-radius: 14px;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: #e8e4d8;
-}
-.bot-msg.bot .bot-msg-bubble {
-    background: #1c1f2e;
-    border: 1px solid rgba(201,147,58,0.12);
-    border-radius: 4px 14px 14px 14px;
-}
-.bot-msg.user .bot-msg-bubble {
-    background: linear-gradient(135deg, #c9933a, #e8b45a);
-    color: #0d0e13;
-    font-weight: 500;
-    border-radius: 14px 4px 14px 14px;
-}
-.bot-msg.locked .bot-msg-bubble {
-    background: rgba(204,41,41,0.12);
-    border-color: rgba(204,41,41,0.2);
-    color: #fca5a5;
-}
-
-/* Typing indicator */
-.typing-dots { display: flex; gap: 4px; padding: 4px 0; }
-.typing-dots span {
-    width: 6px; height: 6px;
-    background: #c9933a;
-    border-radius: 50%;
-    animation: typingBounce 1.2s infinite;
-}
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes typingBounce {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-    30% { transform: translateY(-6px); opacity: 1; }
-}
-
-/* Input area */
-.bot-input-area {
-    padding: 12px 14px;
-    background: #13151e;
-    border-top: 1px solid rgba(201,147,58,0.12);
-    flex-shrink: 0;
-}
-.bot-input-row { display: flex; gap: 8px; align-items: center; }
-.bot-input {
-    flex: 1;
-    background: #1c1f2e;
-    border: 1px solid rgba(201,147,58,0.2);
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-family: inherit;
-    font-size: 0.875rem;
-    color: #e8e4d8;
-    outline: none;
-    transition: border-color 0.15s;
-    resize: none;
-}
-.bot-input::placeholder { color: rgba(122,122,138,0.6); }
-.bot-input:focus { border-color: #c9933a; }
-.bot-send {
-    width: 38px; height: 38px;
-    background: linear-gradient(135deg, #c9933a, #e8b45a);
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    flex-shrink: 0;
-    transition: opacity 0.15s, transform 0.1s;
-}
-.bot-send:hover { opacity: 0.88; transform: scale(1.05); }
-.bot-send:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-.bot-footer-note {
-    font-size: 0.68rem;
-    color: #4a4a5a;
-    text-align: center;
-    margin-top: 6px;
-}
+.bot-close { background:none; border:none; color:#7a7a8a; cursor:pointer; font-size:1.3rem; padding:2px 6px; border-radius:5px; }
+.bot-close:hover { color:#e8e4d8; }
+.bot-context { padding:6px 14px; background:rgba(201,147,58,0.08); border-bottom:1px solid rgba(201,147,58,0.12); font-size:0.72rem; color:#c9933a; font-weight:600; flex-shrink:0; display:none; }
+.bot-context.visible { display:block; }
+.bot-messages { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px; }
+.bot-messages::-webkit-scrollbar { width:4px; }
+.bot-messages::-webkit-scrollbar-thumb { background:rgba(201,147,58,0.2); border-radius:2px; }
+.bot-msg { display:flex; gap:8px; align-items:flex-start; max-width:90%; }
+.bot-msg.user { align-self:flex-end; flex-direction:row-reverse; }
+.bot-msg-avatar { width:28px; height:28px; border-radius:50%; background:#1c1f2e; border:1px solid rgba(201,147,58,0.2); display:flex; align-items:center; justify-content:center; font-size:0.85rem; flex-shrink:0; margin-top:2px; }
+.bot-msg-bubble { padding:10px 14px; border-radius:14px; font-size:0.875rem; line-height:1.5; color:#e8e4d8; }
+.bot-msg.bot .bot-msg-bubble { background:#1c1f2e; border:1px solid rgba(201,147,58,0.12); border-radius:4px 14px 14px 14px; }
+.bot-msg.user .bot-msg-bubble { background:linear-gradient(135deg,#c9933a,#e8b45a); color:#0d0e13; font-weight:500; border-radius:14px 4px 14px 14px; }
+.bot-msg.locked .bot-msg-bubble { background:rgba(204,41,41,0.12); border:1px solid rgba(204,41,41,0.2); color:#fca5a5; }
+.typing-dots { display:flex; gap:4px; padding:4px 0; }
+.typing-dots span { width:6px; height:6px; background:#c9933a; border-radius:50%; animation:typingBounce 1.2s infinite; }
+.typing-dots span:nth-child(2) { animation-delay:0.2s; }
+.typing-dots span:nth-child(3) { animation-delay:0.4s; }
+@keyframes typingBounce { 0%,60%,100% { transform:translateY(0); opacity:0.4; } 30% { transform:translateY(-6px); opacity:1; } }
+.bot-input-area { padding:12px 14px; background:#13151e; border-top:1px solid rgba(201,147,58,0.12); flex-shrink:0; }
+.bot-input-row { display:flex; gap:8px; align-items:center; }
+.bot-input { flex:1; background:#1c1f2e; border:1px solid rgba(201,147,58,0.2); border-radius:10px; padding:10px 14px; font-family:inherit; font-size:0.875rem; color:#e8e4d8; outline:none; transition:border-color 0.15s; resize:none; }
+.bot-input::placeholder { color:rgba(122,122,138,0.6); }
+.bot-input:focus { border-color:#c9933a; }
+.bot-send { width:38px; height:38px; background:linear-gradient(135deg,#c9933a,#e8b45a); border:none; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; transition:opacity 0.15s; }
+.bot-send:hover { opacity:0.88; }
+.bot-send:disabled { opacity:0.35; cursor:not-allowed; }
+.bot-footer-note { font-size:0.68rem; color:#4a4a5a; text-align:center; margin-top:6px; }
 </style>
 
-<!-- FAB button -->
-<button id="echobot-fab" onclick="toggleBot()" title="Ask EchoBot about Ghana heritage">
-    🤖
-    <div class="fab-badge" id="fab-badge"></div>
-</button>
+<button id="echobot-fab" onclick="toggleBot()" title="Ask EchoBot about Ghana heritage">&#129302;</button>
 
-<!-- Chat window -->
 <div id="echobot-window">
     <div class="bot-header">
         <div class="bot-header-left">
-            <div class="bot-avatar">🤖</div>
+            <div class="bot-avatar">&#129302;</div>
             <div>
                 <div class="bot-name">EchoBot</div>
                 <div class="bot-status">Ghana Heritage AI</div>
             </div>
         </div>
-        <button class="bot-close" onclick="toggleBot()">×</button>
+        <button class="bot-close" onclick="toggleBot()">&#215;</button>
     </div>
     <div class="bot-context" id="bot-context"></div>
     <div class="bot-messages" id="bot-messages"></div>
     <div class="bot-input-area">
         <div class="bot-input-row">
-            <textarea class="bot-input" id="bot-input" rows="1" placeholder="Ask about Ghana's heritage…"
+            <textarea class="bot-input" id="bot-input" rows="1" placeholder="Ask about Ghana's heritage..."
                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendBotMessage();}"
                 oninput="autoResizeInput(this)"></textarea>
-            <button class="bot-send" id="bot-send" onclick="sendBotMessage()">➤</button>
+            <button class="bot-send" id="bot-send" onclick="sendBotMessage()">&#10148;</button>
         </div>
-        <div class="bot-footer-note" id="bot-footer-note">Premium feature · GH₵150/mo</div>
+        <div class="bot-footer-note" id="bot-footer-note">Premium feature &#183; GH&#8373;150/mo</div>
     </div>
 </div>
 
@@ -1031,17 +857,14 @@
     var botTyping = false;
     var currentRegionContext = '';
 
-    // Check if user is premium from localStorage
     function getUser() {
         try { return JSON.parse(localStorage.getItem('es_user') || '{}'); } catch(e) { return {}; }
     }
-
     function isPremium() {
         var u = getUser();
         return u.is_premium == 1 || u.plan === 'premium' || u.role === 'admin' || u.role === 'superuser';
     }
 
-    // Watch for active region in detail panel (app.html specific)
     function updateRegionContext() {
         var titleEl = document.getElementById('detail-title');
         var panel = document.getElementById('detail-panel');
@@ -1050,13 +873,12 @@
             if (name && name !== currentRegionContext) {
                 currentRegionContext = name;
                 var ctx = document.getElementById('bot-context');
-                ctx.textContent = '📍 Context: ' + name + ' Region';
+                ctx.textContent = '&#128205; Context: ' + name;
                 ctx.classList.add('visible');
             }
         }
     }
 
-    // Observe detail panel opening
     var observer = new MutationObserver(updateRegionContext);
     var panel = document.getElementById('detail-panel');
     if (panel) observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
@@ -1067,15 +889,14 @@
         if (botOpen) {
             win.classList.add('open');
             updateRegionContext();
-            // Show welcome message if empty
             var msgs = document.getElementById('bot-messages');
             if (msgs.children.length === 0) {
-                addBotMessage('bot', "Akwaaba! 👋 I'm EchoBot, your Ghana heritage guide.\n\nAsk me about any region's history, culture, festivals, or traditions!", false);
+                addBotMsg('bot', 'Akwaaba! &#128075; I\'m EchoBot, your Ghana heritage guide.\n\nAsk me about any region\'s history, culture, festivals, or traditions!');
                 if (!isPremium()) {
-                    addBotMessage('locked', '🔒 Full AI responses require a Premium subscription (GH₵150/mo). Try asking anyway — free users get a limited preview!');
+                    addBotMsg('locked', '&#128274; Full AI responses require a Premium subscription (GH\u20B5150/mo). Try asking anyway \u2014 free users get a limited preview!');
                 }
             }
-            document.getElementById('bot-footer-note').textContent = isPremium() ? '✨ Premium AI active' : 'Premium feature · GH₵150/mo';
+            document.getElementById('bot-footer-note').textContent = isPremium() ? '\u2728 Premium AI active' : 'Premium feature \u00B7 GH\u20B5150/mo';
             setTimeout(function() { document.getElementById('bot-input').focus(); }, 100);
         } else {
             win.classList.remove('open');
@@ -1088,10 +909,9 @@
         var msg = input.value.trim();
         if (!msg) return;
 
-        addBotMessage('user', msg);
+        addBotMsg('user', msg);
         input.value = '';
         input.style.height = '';
-
         botTyping = true;
         document.getElementById('bot-send').disabled = true;
         showTyping();
@@ -1107,73 +927,82 @@
                 botTyping = false;
                 document.getElementById('bot-send').disabled = false;
                 if (d.locked) {
-                    addBotMessage('locked', d.reply || 'EchoBot is a premium feature 🔒');
+                    addBotMsgUpgrade(d.reply || 'EchoBot is a premium feature \uD83D\uDD12');
                 } else if (d.warming) {
-                    addBotMessageWithRetry(d.reply || 'EchoBot is loading up. Click retry in a moment!', msg);
-                } else if (d.locked) {
-                    addBotMessageWithUpgrade(d.reply || 'EchoBot is a Premium feature 🔒');
-                } else if (!d.success && !d.reply) {
-                    addBotMessage('bot', '⚠️ Connection issue. Please try again!');
+                    addBotMsgRetry(d.reply || 'EchoBot is loading up. Click retry in a moment!', msg);
                 } else {
-                    addBotMessage('bot', d.reply || 'Sorry, I could not get a response. Try again!');
+                    addBotMsg('bot', d.reply || 'Sorry, I could not get a response. Try again!');
                 }
             })
             .catch(function() {
                 removeTyping();
                 botTyping = false;
                 document.getElementById('bot-send').disabled = false;
-                addBotMessage('bot', '⚠️ Connection error. Please check your internet and try again.');
+                addBotMsg('bot', '\u26A0\uFE0F Connection error. Please check your internet and try again.');
             });
     };
 
-    function addBotMessage(type, text) {
+    function addBotMsg(type, text) {
         var msgs = document.getElementById('bot-messages');
         var div = document.createElement('div');
         div.className = 'bot-msg ' + type;
-
-        var avatarDiv = document.createElement('div');
-        avatarDiv.className = 'bot-msg-avatar';
-        avatarDiv.textContent = type === 'user' ? '👤' : '🤖';
-
+        var av = document.createElement('div');
+        av.className = 'bot-msg-avatar';
+        av.textContent = type === 'user' ? '\uD83D\uDC64' : '\uD83E\uDD16';
         var bubble = document.createElement('div');
         bubble.className = 'bot-msg-bubble';
         bubble.textContent = text;
-
-        div.appendChild(avatarDiv);
+        div.appendChild(av);
         div.appendChild(bubble);
         msgs.appendChild(div);
         msgs.scrollTop = msgs.scrollHeight;
     }
 
-    function addBotMessageWithRetry(text, retryMsg) {
+    function addBotMsgRetry(text, retryMsg) {
         var msgs = document.getElementById('bot-messages');
         var div = document.createElement('div');
         div.className = 'bot-msg bot';
-
-        var avatarDiv = document.createElement('div');
-        avatarDiv.className = 'bot-msg-avatar';
-        avatarDiv.textContent = '🤖';
-
+        var av = document.createElement('div');
+        av.className = 'bot-msg-avatar';
+        av.textContent = '\uD83E\uDD16';
         var bubble = document.createElement('div');
         bubble.className = 'bot-msg-bubble';
         bubble.style.cssText = 'background:rgba(201,147,58,0.1);border-color:rgba(201,147,58,0.25);';
-
         var p = document.createElement('p');
-        p.textContent = '⏳ ' + text;
+        p.textContent = '\u23F3 ' + text;
         p.style.marginBottom = '8px';
-
         var btn = document.createElement('button');
-        btn.textContent = '🔄 Retry now';
+        btn.textContent = '\uD83D\uDD04 Retry now';
         btn.style.cssText = 'background:linear-gradient(135deg,#c9933a,#e8b45a);border:none;border-radius:7px;padding:6px 14px;font-size:0.8rem;font-weight:700;color:#0d0e13;cursor:pointer;';
-        btn.onclick = function() {
-            div.remove();
-            document.getElementById('bot-input').value = retryMsg;
-            sendBotMessage();
-        };
-
+        btn.onclick = function() { div.remove(); document.getElementById('bot-input').value = retryMsg; sendBotMessage(); };
         bubble.appendChild(p);
         bubble.appendChild(btn);
-        div.appendChild(avatarDiv);
+        div.appendChild(av);
+        div.appendChild(bubble);
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function addBotMsgUpgrade(text) {
+        var msgs = document.getElementById('bot-messages');
+        var div = document.createElement('div');
+        div.className = 'bot-msg bot';
+        var av = document.createElement('div');
+        av.className = 'bot-msg-avatar';
+        av.textContent = '\uD83E\uDD16';
+        var bubble = document.createElement('div');
+        bubble.className = 'bot-msg-bubble';
+        bubble.style.cssText = 'background:rgba(201,147,58,0.1);border-color:rgba(201,147,58,0.25);';
+        var p = document.createElement('p');
+        p.textContent = text;
+        p.style.marginBottom = '10px';
+        var btn = document.createElement('a');
+        btn.href = '/premium';
+        btn.textContent = '\u2B50 Upgrade to Premium \u2014 GH\u20B5150/mo';
+        btn.style.cssText = 'display:block;background:linear-gradient(135deg,#c9933a,#e8b45a);border:none;border-radius:8px;padding:9px 14px;font-size:0.82rem;font-weight:700;color:#0d0e13;cursor:pointer;text-align:center;text-decoration:none;';
+        bubble.appendChild(p);
+        bubble.appendChild(btn);
+        div.appendChild(av);
         div.appendChild(bubble);
         msgs.appendChild(div);
         msgs.scrollTop = msgs.scrollHeight;
@@ -1184,7 +1013,7 @@
         var div = document.createElement('div');
         div.className = 'bot-msg bot';
         div.id = 'typing-indicator';
-        div.innerHTML = '<div class="bot-msg-avatar">🤖</div><div class="bot-msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+        div.innerHTML = '<div class="bot-msg-avatar">\uD83E\uDD16</div><div class="bot-msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
         msgs.appendChild(div);
         msgs.scrollTop = msgs.scrollHeight;
     }
@@ -1194,36 +1023,12 @@
         if (el) el.remove();
     }
 
-    function addBotMessageWithUpgrade(text) {
-        var msgs = document.getElementById('bot-messages');
-        var div = document.createElement('div');
-        div.className = 'bot-msg bot';
-        var avatarDiv = document.createElement('div');
-        avatarDiv.className = 'bot-msg-avatar';
-        avatarDiv.textContent = '🤖';
-        var bubble = document.createElement('div');
-        bubble.className = 'bot-msg-bubble';
-        bubble.style.cssText = 'background:rgba(201,147,58,0.1);border-color:rgba(201,147,58,0.25);';
-        var p = document.createElement('p');
-        p.textContent = text;
-        p.style.marginBottom = '10px';
-        var btn = document.createElement('a');
-        btn.href = '/premium';
-        btn.textContent = '⭐ Upgrade to Premium — GH₵150/mo';
-        btn.style.cssText = 'display:block;background:linear-gradient(135deg,#c9933a,#e8b45a);border:none;border-radius:8px;padding:9px 14px;font-size:0.82rem;font-weight:700;color:#0d0e13;cursor:pointer;text-align:center;text-decoration:none;';
-        bubble.appendChild(p);
-        bubble.appendChild(btn);
-        div.appendChild(avatarDiv);
-        div.appendChild(bubble);
-        msgs.appendChild(div);
-        msgs.scrollTop = msgs.scrollHeight;
-    }
-
     window.autoResizeInput = function(el) {
         el.style.height = '';
         el.style.height = Math.min(el.scrollHeight, 90) + 'px';
     };
 })();
 </script>
+
 </body>
 </html>
