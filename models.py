@@ -69,7 +69,7 @@ class Post(Base):
     __tablename__ = "posts"
 
     id            = Column(Integer, primary_key=True, index=True)
-    author_id     = Column(UUID(as_uuid=True), ForeignKey("es_users.id"), nullable=True)
+    author_id = Column(SQLAlchemyUUID(as_uuid=True), ForeignKey("es_users.id"), nullable=True)  # ✅ GOOD
     title         = Column(String(300), nullable=False)
     slug          = Column(String(400))
     excerpt       = Column(Text)
