@@ -4,434 +4,680 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>EchoStack Admin Dashboard</title>
-<meta name="theme-color" content="#1a1e29">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="EchoStack">
 <link rel="icon" type="image/png" href="/echostack-logo.png">
-<link rel="apple-touch-icon" href="/echostack-logo.png">
 <link rel="manifest" href="/manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
-:root { --brand-dark: #1a1e29; --brand-blue: #0077b6; }
-body { font-family: 'Georgia', serif !important; background-color: #ffffff !important; color: var(--brand-dark) !important; }
-.btn-primary { background-color: var(--brand-blue) !important; color: white !important; border: none !important; cursor: pointer !important; }
-.btn-secondary { border: 2px solid var(--brand-dark) !important; color: var(--brand-dark) !important; background: transparent !important; cursor: pointer !important; }
-input, textarea, select { border-color: #d0d0d0 !important; color: var(--brand-dark) !important; background: white !important; }
-input:focus, textarea:focus, select:focus { outline: none !important; border-color: var(--brand-blue) !important; }
-.upload-tab { cursor: pointer; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; border: 2px solid #d0d0d0; background: white; color: #1a1e29; }
-.upload-tab.active { background: #0077b6 !important; color: white !important; border-color: #0077b6 !important; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+:root {
+  --brand: #0077b6;
+  --brand-dark: #005f92;
+  --dark: #1a1e29;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --muted: #6b7280;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --warn: #d97706;
+}
+* { box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #f4f6f9; color: var(--dark); margin: 0; }
+.sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 220px; background: var(--dark); z-index: 100; display: flex; flex-direction: column; overflow-y: auto; }
+.sidebar-logo { padding: 20px 18px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.sidebar-logo img { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; }
+.sidebar-logo span { font-size: 1.1rem; font-weight: 700; color: #fff; }
+.nav-section { padding: 12px 10px 4px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+.nav-btn { display: flex; align-items: center; gap: 10px; padding: 9px 16px; border-radius: 8px; margin: 2px 8px; cursor: pointer; color: rgba(255,255,255,0.65); font-size: 0.875rem; font-weight: 500; border: none; background: none; width: calc(100% - 16px); text-align: left; transition: all 0.15s; }
+.nav-btn:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.nav-btn.active { background: var(--brand); color: #fff; }
+.nav-btn .icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+.sidebar-footer { margin-top: auto; padding: 14px 10px; border-top: 1px solid rgba(255,255,255,0.07); }
+.main { margin-left: 220px; min-height: 100vh; }
+.topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
+.topbar h2 { font-size: 1.1rem; font-weight: 700; color: var(--dark); }
+.topbar-actions { display: flex; gap: 10px; align-items: center; }
+.content { padding: 28px; }
+/* Cards */
+.card { background: #fff; border-radius: 12px; border: 1px solid var(--border); }
+.card-header { padding: 18px 22px 0; border-bottom: 1px solid var(--border); padding-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+.card-body { padding: 22px; }
+/* Stats */
+.stat-card { background: #fff; border-radius: 12px; border: 1px solid var(--border); padding: 20px 22px; }
+.stat-card .label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 8px; }
+.stat-card .value { font-size: 2rem; font-weight: 800; color: var(--dark); }
+.stat-card .sub { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-primary { background: var(--brand); color: #fff; }
+.btn-primary:hover { background: var(--brand-dark); }
+.btn-secondary { background: #fff; color: var(--dark); border: 1.5px solid var(--border); }
+.btn-secondary:hover { border-color: #9ca3af; }
+.btn-danger { background: #fef2f2; color: var(--danger); border: 1.5px solid #fecaca; }
+.btn-danger:hover { background: #fee2e2; }
+.btn-success { background: #f0fdf4; color: var(--success); border: 1.5px solid #bbf7d0; }
+.btn-success:hover { background: #dcfce7; }
+.btn-warn { background: #fffbeb; color: var(--warn); border: 1.5px solid #fde68a; }
+.btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+/* Table */
+.table { width: 100%; border-collapse: collapse; }
+.table th { padding: 10px 14px; text-align: left; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: #f9fafb; border-bottom: 1px solid var(--border); }
+.table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.875rem; vertical-align: middle; }
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: #f9fafb; }
+/* Badge */
+.badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+.badge-green { background: #dcfce7; color: #15803d; }
+.badge-red { background: #fee2e2; color: #b91c1c; }
+.badge-blue { background: #dbeafe; color: #1d4ed8; }
+.badge-yellow { background: #fef9c3; color: #92400e; }
+.badge-gray { background: #f3f4f6; color: #374151; }
+/* Form fields */
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+.field input, .field textarea, .field select { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--dark); background: #fff; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(0,119,182,0.1); }
+/* Upload tabs */
+.upload-tab { cursor: pointer; padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; border: 1.5px solid var(--border); background: #fff; color: var(--dark); transition: all 0.15s; }
+.upload-tab.active { background: var(--brand); color: #fff; border-color: var(--brand); }
 .upload-panel { display: none; }
 .upload-panel.active { display: block; }
+/* Sections */
+.section { display: none; }
+.section.active { display: block; }
+/* Site nav links */
+.site-link { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f9fafb; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: var(--dark); font-size: 0.875rem; font-weight: 500; transition: all 0.15s; }
+.site-link:hover { background: #eff6ff; border-color: #bfdbfe; color: var(--brand); }
+.site-link .arrow { opacity: 0.4; }
+/* Notification */
+#notification { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 10px; z-index: 9999; font-size: 0.875rem; font-weight: 600; color: #fff; transform: translateY(20px); opacity: 0; transition: all 0.3s; pointer-events: none; }
+#notification.show { transform: translateY(0); opacity: 1; }
+#notification.success { background: var(--success); }
+#notification.error { background: var(--danger); }
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 14px; padding: 28px; max-width: 540px; width: 100%; max-height: 90vh; overflow-y: auto; }
+.modal h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; }
+/* Progress */
+#upload-progress-area { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; }
+/* Mobile sidebar toggle */
+.mobile-menu-btn { display: none; }
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .mobile-menu-btn { display: block; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; display: none; }
+  .overlay.open { display: block; }
+}
 </style>
 </head>
-<body class="antialiased">
+<body>
 
-<header class="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
-    <div class="flex items-center gap-3">
-      <img src="/echostack-logo.png" alt="" style="width:50px;height:50px;object-fit:contain;" onerror="this.style.display='none'">
-      <h1 class="text-2xl font-bold" style="color:#1a1e29!important;">EchoStack Admin</h1>
-    </div>
-    <nav class="flex gap-3 items-center flex-wrap">
-      <a href="/admin-preview" target="_blank" class="px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">🌍 View Site ↗</a>
-      <button onclick="showSection('dashboard')" class="px-3 py-2 rounded hover:bg-gray-100 text-sm font-medium">📊 Dashboard</button>
-      <button onclick="showSection('create')" class="btn-primary px-4 py-2 rounded font-semibold text-sm">➕ New Region</button>
-      <button onclick="logout()" class="px-3 py-2 rounded border border-red-300 text-red-600 text-sm font-medium">🚪 Logout</button>
-    </nav>
+<!-- Mobile overlay -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ═══════════════════════════════════ SIDEBAR ═══════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <img src="/echostack-logo.png" alt="" onerror="this.style.display='none'">
+    <span>EchoStack</span>
   </div>
-</header>
 
-<main class="max-w-7xl mx-auto px-4 py-8">
+  <div class="nav-section">Overview</div>
+  <button class="nav-btn active" onclick="showSection('dashboard')" id="nav-dashboard">
+    <span class="icon">📊</span> Dashboard
+  </button>
 
-  <!-- ===== DASHBOARD ===== -->
-  <section id="dashboard-section" class="space-y-8">
+  <div class="nav-section">Content</div>
+  <button class="nav-btn" onclick="showSection('regions')" id="nav-regions">
+    <span class="icon">🗺️</span> Regions
+  </button>
+  <button class="nav-btn" onclick="showSection('create')" id="nav-create">
+    <span class="icon">➕</span> New Region
+  </button>
+  <button class="nav-btn" onclick="showSection('media')" id="nav-media">
+    <span class="icon">📁</span> File Manager
+  </button>
+  <button class="nav-btn" onclick="showSection('stories')" id="nav-stories">
+    <span class="icon">📖</span> Stories
+  </button>
+  <button class="nav-btn" onclick="showSection('events')" id="nav-events">
+    <span class="icon">📅</span> Events
+  </button>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-        <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Total Regions</p>
-        <p class="text-3xl font-bold" id="stat-total">…</p>
+  <div class="nav-section">Community</div>
+  <button class="nav-btn" onclick="showSection('users')" id="nav-users">
+    <span class="icon">👥</span> Users
+  </button>
+  <button class="nav-btn" onclick="showSection('newsletter')" id="nav-newsletter">
+    <span class="icon">📬</span> Newsletter
+  </button>
+
+  <div class="nav-section">Site</div>
+  <button class="nav-btn" onclick="showSection('site-nav')" id="nav-site-nav">
+    <span class="icon">🌍</span> Browse Site
+  </button>
+  <button class="nav-btn" onclick="showSection('sections')" id="nav-sections">
+    <span class="icon">🏷️</span> Categories
+  </button>
+  <button class="nav-btn" onclick="showSection('settings')" id="nav-settings">
+    <span class="icon">⚙️</span> Settings
+  </button>
+
+  <div class="sidebar-footer">
+    <button class="nav-btn" onclick="logout()" style="color:#f87171;">
+      <span class="icon">🚪</span> Logout
+    </button>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════ MAIN ═══════════════════════════════════ -->
+<div class="main">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button class="mobile-menu-btn btn btn-secondary btn-sm" onclick="openSidebar()">☰</button>
+      <h2 id="page-title">Dashboard</h2>
+    </div>
+    <div class="topbar-actions">
+      <a href="/admin-preview" target="_blank" class="btn btn-secondary btn-sm">🌍 View Site</a>
+      <button onclick="showSection('create')" class="btn btn-primary btn-sm">➕ New Region</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══════ DASHBOARD ═══════ -->
+    <div class="section active" id="section-dashboard">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="stat-card">
+          <div class="label">Regions</div>
+          <div class="value" id="stat-regions">…</div>
+          <div class="sub">Heritage entries</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Users</div>
+          <div class="value" id="stat-users">…</div>
+          <div class="sub">Registered accounts</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Stories</div>
+          <div class="value" id="stat-stories">…</div>
+          <div class="sub">Submitted stories</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Files</div>
+          <div class="value" id="stat-files">…</div>
+          <div class="sub">Uploaded media</div>
+        </div>
       </div>
-      <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-        <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Total Users</p>
-        <p class="text-3xl font-bold" id="stat-users">…</p>
+
+      <div class="card mb-6">
+        <div class="card-header">
+          <span style="font-weight:700;">⚡ Quick Actions</span>
+        </div>
+        <div class="card-body" style="display:flex;flex-wrap:wrap;gap:10px;">
+          <button onclick="showSection('create')" class="btn btn-primary">➕ New Region</button>
+          <button onclick="exportData()" class="btn btn-secondary">📤 Export JSON</button>
+          <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">📥 Import JSON</button>
+          <button onclick="showSection('media')" class="btn btn-secondary">📁 File Manager</button>
+          <button onclick="showSection('stories')" class="btn btn-secondary">📖 Pending Stories</button>
+          <a href="/admin-preview" target="_blank" class="btn btn-secondary">🌍 Browse Site as Admin</a>
+          <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
+        </div>
       </div>
-      <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-        <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Audio Files</p>
-        <p class="text-3xl font-bold" id="stat-audio">…</p>
-      </div>
-      <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-        <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Image Files</p>
-        <p class="text-3xl font-bold" id="stat-images">…</p>
+
+      <div class="card">
+        <div class="card-header">
+          <span style="font-weight:700;">📍 Recent Regions</span>
+          <button onclick="showSection('regions')" class="btn btn-secondary btn-sm">View all</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th><th>Name</th><th>Capital</th><th>Category</th><th>Media</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-regions-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-      <h2 class="text-xl font-bold mb-4">⚡ Quick Actions</h2>
-      <div class="flex flex-wrap gap-3">
-        <button onclick="showSection('create')" class="btn-primary px-5 py-2.5 rounded-lg font-semibold">➕ New Region</button>
-        <button onclick="exportData()" class="btn-secondary px-5 py-2.5 rounded-lg font-semibold">📤 Export JSON</button>
-        <button onclick="document.getElementById('import-file').click()" class="btn-secondary px-5 py-2.5 rounded-lg font-semibold">📥 Import JSON</button>
-        <button onclick="showSection('files-manager')" class="btn-secondary px-5 py-2.5 rounded-lg font-semibold">📁 File Manager</button>
-        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
-      </div>
-    </div>
-
-    <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-      <h2 class="text-xl font-bold mb-4">🏷️ Manage Categories/Sections</h2>
-      <div class="flex gap-2 mb-4">
-        <input type="text" id="new-section-name" placeholder="New section name..." class="flex-1 p-3 border rounded-lg">
-        <button onclick="createSection()" class="btn-primary px-5 py-3 rounded-lg font-semibold">➕ Add</button>
-      </div>
-      <div id="sections-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
-    </div>
-
-    <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-      <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-        <h2 class="text-xl font-bold">📍 All Regions</h2>
-        <input type="text" id="search-regions" placeholder="Search..." class="p-2 border rounded-lg text-sm w-56">
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">#</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Capital</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Media</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="regions-table-body" class="divide-y divide-gray-200">
-            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Loading…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== CREATE / EDIT FORM ===== -->
-  <section id="create-section" class="hidden">
-    <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-4xl mx-auto">
-      <div class="flex justify-between items-start mb-6">
-        <h2 class="text-2xl font-bold" id="form-title">Add New Region</h2>
-        <button onclick="showSection('dashboard')" class="text-gray-400 hover:text-black text-2xl leading-none">×</button>
-      </div>
-      <input type="hidden" id="region-id">
-      <form id="region-form" class="space-y-6">
-
-        <!-- Basic Info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label class="block text-sm font-semibold mb-1">Region Name *</label>
-            <input type="text" id="reg-name" required class="w-full p-3 border rounded-lg" placeholder="e.g., Ashanti">
-          </div>
-          <div>
-            <label class="block text-sm font-semibold mb-1">Capital City *</label>
-            <input type="text" id="reg-capital" required class="w-full p-3 border rounded-lg" placeholder="e.g., Kumasi">
-          </div>
-          <div>
-            <label class="block text-sm font-semibold mb-1">Population</label>
-            <input type="text" id="reg-population" class="w-full p-3 border rounded-lg" placeholder="e.g., 5,440,463">
-          </div>
-          <div>
-            <label class="block text-sm font-semibold mb-1">Terrain</label>
-            <input type="text" id="reg-terrain" class="w-full p-3 border rounded-lg" placeholder="e.g., Highland">
+    <!-- ═══════ REGIONS LIST ═══════ -->
+    <div class="section" id="section-regions">
+      <div class="card">
+        <div class="card-header">
+          <span style="font-weight:700;">📍 All Regions</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="search-regions" placeholder="Search…" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;width:180px;outline:none;" oninput="filterRegions()">
+            <button onclick="showSection('create')" class="btn btn-primary btn-sm">➕ Add</button>
           </div>
         </div>
-
-        <div>
-          <label class="block text-sm font-semibold mb-1">Heritage Description *</label>
-          <textarea id="reg-description" rows="5" required class="w-full p-3 border rounded-lg" placeholder="Write about this region's heritage, culture, history..."></textarea>
+        <div style="overflow-x:auto;">
+          <table class="table">
+            <thead>
+              <tr><th>#</th><th>Name</th><th>Capital</th><th>Category</th><th>Media</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="all-regions-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Loading…</td></tr>
+            </tbody>
+          </table>
         </div>
+      </div>
+    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label class="block text-sm font-semibold mb-1">Category</label>
-            <select id="reg-category" class="w-full p-3 border rounded-lg">
-              <option value="">Select...</option>
-              <option value="Culture">Culture</option>
-              <option value="History">History</option>
-              <option value="Nature">Nature</option>
-              <option value="Tourism">Tourism</option>
-              <option value="Food">Food</option>
-              <option value="Music">Music</option>
+    <!-- ═══════ CREATE / EDIT REGION ═══════ -->
+    <div class="section" id="section-create">
+      <div class="card" style="max-width:860px;margin:0 auto;">
+        <div class="card-header">
+          <span style="font-weight:700;font-size:1.05rem;" id="form-title">Add New Region</span>
+          <button onclick="showSection('dashboard')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);">×</button>
+        </div>
+        <div class="card-body">
+          <input type="hidden" id="region-id">
+          <form id="region-form" onsubmit="handleSave(event)">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="field"><label>Region Name *</label><input type="text" id="reg-name" required placeholder="e.g., Ashanti"></div>
+              <div class="field"><label>Capital City *</label><input type="text" id="reg-capital" required placeholder="e.g., Kumasi"></div>
+              <div class="field"><label>Population</label><input type="text" id="reg-population" placeholder="e.g., 5,440,463"></div>
+              <div class="field"><label>Terrain</label><input type="text" id="reg-terrain" placeholder="e.g., Highland"></div>
+            </div>
+
+            <div class="field"><label>Heritage Description *</label><textarea id="reg-description" rows="5" required placeholder="Write about this region's heritage, culture, history…"></textarea></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="field">
+                <label>Category</label>
+                <select id="reg-category">
+                  <option value="">Select…</option>
+                  <option>Culture</option><option>History</option><option>Nature</option>
+                  <option>Tourism</option><option>Food</option><option>Music</option>
+                </select>
+              </div>
+              <div class="field"><label>Tags (comma-separated)</label><input type="text" id="reg-tags" placeholder="festivals, kings, gold"></div>
+              <div class="field"><label>Source / Credit</label><input type="text" id="reg-source" placeholder="Where did you find this?"></div>
+              <div class="field"><label>Brief Overview</label><input type="text" id="reg-overview" placeholder="One-line summary"></div>
+            </div>
+
+            <!-- MEDIA -->
+            <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:4px;">
+              <h3 style="font-weight:700;margin-bottom:4px;">📸 Media</h3>
+              <p style="font-size:0.82rem;color:var(--muted);margin-bottom:18px;">Upload from phone/computer OR paste a URL — both work!</p>
+
+              <!-- Hero Image -->
+              <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:16px;margin-bottom:14px;">
+                <label style="font-weight:700;font-size:0.85rem;display:block;margin-bottom:10px;">🖼️ Hero Image</label>
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                  <button type="button" class="upload-tab active" id="hero-tab-upload" onclick="switchTab('hero','upload')">📱 Upload</button>
+                  <button type="button" class="upload-tab" id="hero-tab-url" onclick="switchTab('hero','url')">🔗 URL</button>
+                </div>
+                <div class="upload-panel active" id="hero-panel-upload">
+                  <input type="file" id="hero-file-input" accept="image/*" capture="environment"
+                    class="block w-full text-sm" style="padding:6px;" onchange="handleFileSelect('hero',this)">
+                  <p id="hero-upload-status" style="font-size:0.8rem;color:var(--success);margin-top:4px;font-weight:600;"></p>
+                </div>
+                <div class="upload-panel" id="hero-panel-url">
+                  <input type="text" id="reg-hero-image" placeholder="https://… or /uploads/photo.jpg" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.875rem;">
+                </div>
+                <div id="hero-preview" style="display:none;margin-top:10px;">
+                  <img id="preview-img" src="" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
+                  <button type="button" onclick="removeHeroImage()" style="margin-top:6px;padding:4px 12px;background:#fee2e2;color:#b91c1c;border:none;border-radius:5px;font-size:0.78rem;cursor:pointer;">✕ Remove</button>
+                </div>
+              </div>
+
+              <!-- Gallery -->
+              <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:14px;">
+                <label style="font-weight:700;font-size:0.85rem;display:block;margin-bottom:10px;">🗃️ Gallery Images</label>
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                  <button type="button" class="upload-tab active" id="gallery-tab-upload" onclick="switchTab('gallery','upload')">📱 Upload</button>
+                  <button type="button" class="upload-tab" id="gallery-tab-url" onclick="switchTab('gallery','url')">🔗 URLs</button>
+                </div>
+                <div class="upload-panel active" id="gallery-panel-upload">
+                  <input type="file" id="gallery-file-input" accept="image/*,video/*" multiple capture="environment"
+                    class="block w-full text-sm" style="padding:6px;" onchange="handleFileSelect('gallery',this)">
+                  <p id="gallery-upload-status" style="font-size:0.8rem;color:var(--success);margin-top:4px;font-weight:600;"></p>
+                  <div id="gallery-preview-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+                </div>
+                <div class="upload-panel" id="gallery-panel-url">
+                  <textarea id="reg-gallery-images" rows="2" placeholder="/uploads/img1.jpg, /uploads/img2.jpg" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.875rem;"></textarea>
+                  <p style="font-size:0.78rem;color:var(--muted);margin-top:3px;">Separate multiple URLs with commas</p>
+                </div>
+              </div>
+
+              <!-- Audio -->
+              <div style="background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:10px;padding:16px;margin-bottom:14px;">
+                <label style="font-weight:700;font-size:0.85rem;display:block;margin-bottom:10px;">🎵 Audio Recordings</label>
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                  <button type="button" class="upload-tab active" id="audio-tab-upload" onclick="switchTab('audio','upload')">📱 Upload</button>
+                  <button type="button" class="upload-tab" id="audio-tab-url" onclick="switchTab('audio','url')">🔗 URL</button>
+                </div>
+                <div class="upload-panel active" id="audio-panel-upload">
+                  <input type="file" id="audio-file-input" accept="audio/*"
+                    class="block w-full text-sm" style="padding:6px;" onchange="handleFileSelect('audio',this)">
+                  <p id="audio-upload-status" style="font-size:0.8rem;color:var(--success);margin-top:4px;font-weight:600;"></p>
+                </div>
+                <div class="upload-panel" id="audio-panel-url">
+                  <textarea id="reg-audio-files" rows="2" placeholder="/uploads/story.mp3, https://…" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.875rem;"></textarea>
+                </div>
+              </div>
+
+              <!-- Video -->
+              <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:16px;">
+                <label style="font-weight:700;font-size:0.85rem;display:block;margin-bottom:8px;">🎬 Video Link</label>
+                <input type="text" id="reg-video-url" placeholder="https://youtube.com/watch?v=… or https://vimeo.com/…" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.875rem;">
+                <p style="font-size:0.78rem;color:#92400e;margin-top:5px;">💡 YouTube or Vimeo links recommended — large files can't be hosted on Render's free tier.</p>
+              </div>
+            </div>
+
+            <!-- Upload progress -->
+            <div id="upload-progress-area" style="display:none;margin-top:16px;">
+              <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;">
+                <p style="font-size:0.875rem;font-weight:600;color:#1d4ed8;margin-bottom:8px;">⏳ Uploading files, please wait…</p>
+                <div id="upload-progress-list" style="font-size:0.82rem;color:#3b82f6;max-height:100px;overflow-y:auto;"></div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:12px;padding-top:20px;border-top:1px solid var(--border);margin-top:20px;">
+              <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;padding:12px;" id="save-btn">💾 Save Region</button>
+              <button type="button" onclick="showSection('dashboard')" class="btn btn-secondary" style="flex:1;justify-content:center;padding:12px;">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ FILE MANAGER ═══════ -->
+    <div class="section" id="section-media">
+      <div class="card" style="max-width:1000px;margin:0 auto;">
+        <div class="card-header">
+          <span style="font-weight:700;">📁 File Manager</span>
+          <button onclick="loadAllFiles()" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+        </div>
+        <div class="card-body">
+          <!-- Quick upload -->
+          <div style="background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px;">
+            <p style="font-weight:700;font-size:0.85rem;margin-bottom:10px;">📤 Upload New File</p>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+              <input type="file" id="quick-upload-input" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx" style="font-size:0.85rem;">
+              <select id="quick-upload-category" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.85rem;">
+                <option value="general">General</option>
+                <option value="image">Image</option>
+                <option value="video">Video</option>
+                <option value="audio">Audio</option>
+                <option value="document">Document</option>
+              </select>
+              <button onclick="quickUploadFiles()" class="btn btn-primary btn-sm">Upload</button>
+            </div>
+          </div>
+          <!-- Filter -->
+          <div style="display:flex;gap:10px;margin-bottom:16px;">
+            <input type="text" id="file-search" placeholder="Search files…" style="flex:1;padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.875rem;outline:none;" oninput="filterFiles()">
+            <select id="file-filter-category" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.875rem;outline:none;" onchange="filterFiles()">
+              <option value="">All Types</option>
+              <option value="image">Images</option>
+              <option value="video">Videos</option>
+              <option value="audio">Audio</option>
+              <option value="document">Documents</option>
+              <option value="general">General</option>
             </select>
           </div>
-          <div>
-            <label class="block text-sm font-semibold mb-1">Tags (comma-separated)</label>
-            <input type="text" id="reg-tags" class="w-full p-3 border rounded-lg" placeholder="festivals, kings, gold">
+          <div id="all-files-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;max-height:600px;overflow-y:auto;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ USERS ═══════ -->
+    <div class="section" id="section-users">
+      <div class="card">
+        <div class="card-header">
+          <span style="font-weight:700;">👥 User Management</span>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="user-search" placeholder="Search users…" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;width:180px;outline:none;" oninput="filterUsers()">
+            <button onclick="loadUsers()" class="btn btn-secondary btn-sm">🔄 Refresh</button>
           </div>
         </div>
+        <div style="overflow-x:auto;">
+          <table class="table">
+            <thead>
+              <tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Plan</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted);">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-        <!-- ======================== -->
-        <!--   MEDIA SECTION — FIXED  -->
-        <!-- ======================== -->
-        <div class="border-t pt-6">
-          <h3 class="text-lg font-bold mb-1">📸 Media</h3>
-          <p class="text-sm text-gray-500 mb-5">
-            For each field you can <strong>📱 upload directly from your phone or computer</strong>
-            — camera, gallery, files — OR <strong>🔗 paste a URL</strong>. Both options work!
-          </p>
+    <!-- ═══════ STORIES ═══════ -->
+    <div class="section" id="section-stories">
+      <div class="card">
+        <div class="card-header">
+          <span style="font-weight:700;">📖 Story Submissions</span>
+          <div style="display:flex;gap:8px;">
+            <select id="story-filter" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;" onchange="loadStories()">
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="">All</option>
+            </select>
+            <button onclick="loadStories()" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="stories-list">
+            <p style="text-align:center;color:var(--muted);padding:32px;">Loading…</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-          <!-- HERO IMAGE -->
-          <div class="mb-5 p-4 rounded-lg border-2 border-blue-100 bg-blue-50">
-            <label class="block text-sm font-bold mb-2">🖼️ Hero Image <span class="font-normal text-gray-500">(main photo shown at top of region page)</span></label>
-            <div class="flex gap-2 mb-3">
-              <button type="button" class="upload-tab active" id="hero-tab-upload" onclick="switchTab('hero','upload')">📱 Upload File</button>
-              <button type="button" class="upload-tab" id="hero-tab-url" onclick="switchTab('hero','url')">🔗 Paste URL</button>
-            </div>
-            <div class="upload-panel active" id="hero-panel-upload">
-              <input type="file" id="hero-file-input" accept="image/*" capture="environment"
-                class="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-blue-700 hover:file:bg-blue-50 border border-gray-200 rounded-lg p-1 bg-white"
-                onchange="handleFileSelect('hero', this)">
-              <p class="text-xs text-gray-400 mt-1">Works from your phone camera, photo gallery, or computer files.</p>
-              <p id="hero-upload-status" class="text-sm text-green-600 mt-1 font-semibold"></p>
-            </div>
-            <div class="upload-panel" id="hero-panel-url">
-              <input type="text" id="reg-hero-image" class="w-full p-3 border rounded-lg bg-white" placeholder="https://youtube.com/... or /uploads/photo.jpg">
-              <p class="text-xs text-gray-400 mt-1">Paste any image URL — from the web or your /uploads/ folder.</p>
-            </div>
-            <div id="hero-preview" class="hidden mt-3">
-              <img id="preview-img" src="" class="w-full h-40 object-cover rounded-lg border">
-              <button type="button" onclick="removeHeroImage()" class="mt-1 px-3 py-1 bg-red-500 text-white rounded text-xs">✕ Remove</button>
-            </div>
+    <!-- ═══════ EVENTS ═══════ -->
+    <div class="section" id="section-events">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div class="card">
+          <div class="card-header"><span style="font-weight:700;">📅 All Events</span></div>
+          <div class="card-body">
+            <div id="events-list"><p style="color:var(--muted);">Loading…</p></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span style="font-weight:700;">➕ Add Event</span></div>
+          <div class="card-body">
+            <div class="field"><label>Title</label><input type="text" id="event-title" placeholder="Event name"></div>
+            <div class="field"><label>Description</label><textarea id="event-description" rows="3" placeholder="What is this event?"></textarea></div>
+            <div class="field"><label>Date</label><input type="date" id="event-date"></div>
+            <div class="field"><label>Location</label><input type="text" id="event-location" placeholder="City, Region"></div>
+            <button onclick="createEvent()" class="btn btn-primary" style="width:100%;justify-content:center;">📅 Add Event</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ NEWSLETTER ═══════ -->
+    <div class="section" id="section-newsletter">
+      <div class="card">
+        <div class="card-header">
+          <span style="font-weight:700;">📬 Newsletter Subscribers</span>
+          <button onclick="loadNewsletter()" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="table">
+            <thead>
+              <tr><th>#</th><th>Email</th><th>Subscribed</th></tr>
+            </thead>
+            <tbody id="newsletter-tbody">
+              <tr><td colspan="3" style="text-align:center;padding:32px;color:var(--muted);">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ BROWSE SITE (admin bypass) ═══════ -->
+    <div class="section" id="section-site-nav">
+      <div class="card" style="max-width:640px;margin:0 auto;">
+        <div class="card-header">
+          <span style="font-weight:700;">🌍 Browse Site as Admin</span>
+        </div>
+        <div class="card-body">
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px;margin-bottom:20px;">
+            <p style="font-size:0.875rem;color:#1d4ed8;font-weight:600;margin-bottom:6px;">✅ Admin Access — No Login Required</p>
+            <p style="font-size:0.82rem;color:#3b82f6;line-height:1.5;">
+              As a logged-in admin, clicking any link below opens the page directly — you won't see the sign-in or sign-up screens. The site recognises your admin session automatically.
+            </p>
           </div>
 
-          <!-- GALLERY -->
-          <div class="mb-5 p-4 rounded-lg border-2 border-green-100 bg-green-50">
-            <label class="block text-sm font-bold mb-2">🗃️ Gallery Images <span class="font-normal text-gray-500">(you can add multiple photos)</span></label>
-            <div class="flex gap-2 mb-3">
-              <button type="button" class="upload-tab active" id="gallery-tab-upload" onclick="switchTab('gallery','upload')">📱 Upload Files</button>
-              <button type="button" class="upload-tab" id="gallery-tab-url" onclick="switchTab('gallery','url')">🔗 Paste URLs</button>
-            </div>
-            <div class="upload-panel active" id="gallery-panel-upload">
-              <input type="file" id="gallery-file-input" accept="image/*,video/*" multiple capture="environment"
-                class="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-green-700 hover:file:bg-green-50 border border-gray-200 rounded-lg p-1 bg-white"
-                onchange="handleFileSelect('gallery', this)">
-              <p class="text-xs text-gray-400 mt-1">Select multiple images or videos. They'll all be added to the gallery.</p>
-              <p id="gallery-upload-status" class="text-sm text-green-600 mt-1 font-semibold"></p>
-              <div id="gallery-preview-list" class="flex flex-wrap gap-2 mt-2"></div>
-            </div>
-            <div class="upload-panel" id="gallery-panel-url">
-              <textarea id="reg-gallery-images" rows="2" class="w-full p-3 border rounded-lg bg-white" placeholder="/uploads/img1.jpg, /uploads/img2.jpg, https://example.com/photo.jpg"></textarea>
-              <p class="text-xs text-gray-400 mt-1">Separate multiple URLs with commas.</p>
-            </div>
+          <p style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:10px;">Main Pages</p>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+            <a href="/admin-preview" target="_blank" class="site-link">🏠 Home (set preview cookie + go) <span class="arrow">↗</span></a>
+            <a href="/app" target="_blank" class="site-link">📱 App / Explore <span class="arrow">↗</span></a>
+            <a href="/dashboard" target="_blank" class="site-link">📊 User Dashboard <span class="arrow">↗</span></a>
+            <a href="/creator" target="_blank" class="site-link">🎨 Creator Page <span class="arrow">↗</span></a>
           </div>
 
-          <!-- AUDIO -->
-          <div class="mb-5 p-4 rounded-lg border-2 border-purple-100 bg-purple-50">
-            <label class="block text-sm font-bold mb-2">🎵 Audio Recordings <span class="font-normal text-gray-500">(stories, music, narrations)</span></label>
-            <div class="flex gap-2 mb-3">
-              <button type="button" class="upload-tab active" id="audio-tab-upload" onclick="switchTab('audio','upload')">📱 Upload File</button>
-              <button type="button" class="upload-tab" id="audio-tab-url" onclick="switchTab('audio','url')">🔗 Paste URL</button>
-            </div>
-            <div class="upload-panel active" id="audio-panel-upload">
-              <input type="file" id="audio-file-input" accept="audio/*"
-                class="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-purple-700 hover:file:bg-purple-50 border border-gray-200 rounded-lg p-1 bg-white"
-                onchange="handleFileSelect('audio', this)">
-              <p class="text-xs text-gray-400 mt-1">MP3, WAV, M4A, OGG — recordings made on your phone work perfectly.</p>
-              <p id="audio-upload-status" class="text-sm text-green-600 mt-1 font-semibold"></p>
-            </div>
-            <div class="upload-panel" id="audio-panel-url">
-              <textarea id="reg-audio-files" rows="2" class="w-full p-3 border rounded-lg bg-white" placeholder="/uploads/story.mp3, https://example.com/song.wav"></textarea>
-              <p class="text-xs text-gray-400 mt-1">Separate multiple URLs with commas.</p>
-            </div>
+          <p style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:10px;">Auth Pages (view only)</p>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+            <a href="/user-login" target="_blank" class="site-link">🔑 User Login page <span class="arrow">↗</span></a>
+            <a href="/signup" target="_blank" class="site-link">📝 Sign Up page <span class="arrow">↗</span></a>
           </div>
 
-          <!-- VIDEO (URL/link only) -->
-          <div class="mb-2 p-4 rounded-lg border-2 border-yellow-100 bg-yellow-50">
-            <label class="block text-sm font-bold mb-1">🎬 Video Link <span class="font-normal text-gray-500">(YouTube, Vimeo, or any direct link)</span></label>
-            <input type="text" id="reg-video-url" class="w-full p-3 border rounded-lg bg-white" placeholder="https://youtube.com/watch?v=... or https://vimeo.com/...">
-            <p class="text-xs text-yellow-700 mt-1">
-              💡 Paste a YouTube or Vimeo URL — clicking it on the site will open the video in the browser.
-              Large video files can't be hosted directly on Render's free tier.
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">
+            <p style="font-size:0.82rem;color:#15803d;font-weight:600;margin-bottom:4px;">💡 How the bypass works</p>
+            <p style="font-size:0.8rem;color:#166534;line-height:1.6;">
+              Your <code style="background:#dcfce7;padding:1px 5px;border-radius:3px;">admin_session</code> cookie is recognised by the server on every protected page 
+              (<code>/app</code>, <code>/dashboard</code>, <code>/creator</code>, <code>/post/*</code>). 
+              You are never redirected to the user login or signup screen while this cookie is active. 
+              Clicking <strong>"Home (set preview cookie)"</strong> also sets an extra 
+              <code style="background:#dcfce7;padding:1px 5px;border-radius:3px;">admin_preview</code> cookie for the public homepage.
             </p>
           </div>
         </div>
-
-        <!-- Additional Info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label class="block text-sm font-semibold mb-1">Source / Credit</label>
-            <input type="text" id="reg-source" class="w-full p-3 border rounded-lg" placeholder="Where did you find this info?">
-          </div>
-          <div>
-            <label class="block text-sm font-semibold mb-1">Brief Overview</label>
-            <input type="text" id="reg-overview" class="w-full p-3 border rounded-lg" placeholder="Short one-line summary">
-          </div>
-        </div>
-
-        <!-- Upload Progress -->
-        <div id="upload-progress-area" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p class="text-sm font-semibold text-blue-800 mb-2">⏳ Uploading files, please wait...</p>
-          <div id="upload-progress-list" class="space-y-1 text-sm text-blue-700 max-h-32 overflow-y-auto"></div>
-        </div>
-
-        <div class="flex gap-4 pt-4 border-t">
-          <button type="submit" class="btn-primary flex-1 py-3 rounded-lg font-bold text-lg" id="save-btn">💾 Save Region</button>
-          <button type="button" onclick="showSection('dashboard')" class="btn-secondary flex-1 py-3 rounded-lg font-bold">Cancel</button>
-        </div>
-      </form>
+      </div>
     </div>
-  </section>
 
-  <!-- ===== FILE MANAGER ===== -->
-  <section id="files-manager-section" class="hidden">
-    <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm max-w-6xl mx-auto">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">📁 All Uploaded Files</h2>
-        <button onclick="loadAllFiles()" class="btn-secondary px-4 py-2 rounded-lg text-sm">🔄 Refresh</button>
-      </div>
-
-      <!-- Quick upload -->
-      <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
-        <h3 class="font-bold mb-3 text-sm">📤 Upload New File</h3>
-        <div class="flex flex-wrap gap-3 items-end">
-          <input type="file" id="quick-upload-input" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
-            class="block text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700">
-          <select id="quick-upload-category" class="p-2 border rounded-lg text-sm">
-            <option value="general">General</option>
-            <option value="image">Image</option>
-            <option value="video">Video</option>
-            <option value="audio">Audio</option>
-            <option value="document">Document</option>
-          </select>
-          <button onclick="quickUploadFiles()" class="btn-primary px-5 py-2 rounded-lg text-sm font-semibold">Upload</button>
+    <!-- ═══════ CATEGORIES / SECTIONS ═══════ -->
+    <div class="section" id="section-sections">
+      <div class="card" style="max-width:600px;margin:0 auto;">
+        <div class="card-header"><span style="font-weight:700;">🏷️ Manage Categories</span></div>
+        <div class="card-body">
+          <div style="display:flex;gap:10px;margin-bottom:16px;">
+            <input type="text" id="new-section-name" placeholder="New category name…" style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;outline:none;">
+            <button onclick="createSection()" class="btn btn-primary">➕ Add</button>
+          </div>
+          <div id="sections-list" style="display:flex;flex-direction:column;gap:8px;"></div>
         </div>
       </div>
-
-      <div class="flex gap-2 mb-4">
-        <input type="text" id="file-search" placeholder="Search files..." class="flex-1 p-3 border rounded-lg" oninput="filterFiles()">
-        <select id="file-filter-category" class="p-3 border rounded-lg" onchange="filterFiles()">
-          <option value="">All Types</option>
-          <option value="image">Images</option>
-          <option value="video">Videos</option>
-          <option value="audio">Audio</option>
-          <option value="document">Documents</option>
-          <option value="general">General</option>
-        </select>
-      </div>
-
-      <div id="all-files-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto"></div>
     </div>
-  </section>
 
-</main>
+    <!-- ═══════ SETTINGS ═══════ -->
+    <div class="section" id="section-settings">
+      <div class="card" style="max-width:600px;margin:0 auto;">
+        <div class="card-header"><span style="font-weight:700;">⚙️ Site Settings</span></div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:16px;">
+              <p style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">📤 Export All Data</p>
+              <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px;">Download all regions as a JSON backup file.</p>
+              <button onclick="exportData()" class="btn btn-secondary btn-sm">📤 Download Backup</button>
+            </div>
+            <div style="background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:16px;">
+              <p style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">📥 Import Data</p>
+              <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px;">Restore regions from a JSON backup file.</p>
+              <button onclick="document.getElementById('import-file2').click()" class="btn btn-secondary btn-sm">📥 Choose File</button>
+              <input type="file" id="import-file2" accept=".json" class="hidden" onchange="importData(this)">
+            </div>
+            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px;">
+              <p style="font-weight:700;font-size:0.9rem;color:var(--danger);margin-bottom:4px;">🚪 Admin Session</p>
+              <p style="font-size:0.82rem;color:#991b1b;margin-bottom:10px;">End your current admin session and return to login.</p>
+              <button onclick="logout()" class="btn btn-danger btn-sm">Logout Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<div id="notification" class="fixed bottom-6 right-6 hidden px-6 py-3 rounded-lg shadow-lg z-50 text-white text-sm font-semibold"></div>
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Notification -->
+<div id="notification"></div>
 
 <script>
-const API_URL = '/api';
-let allRegions = [], allFiles = [], allSections = [];
-// Files chosen by user but not yet uploaded
+const API = '/api';
+let allRegions = [], allFiles = [], allUsers = [], allSections = [];
 let pendingFiles = { hero: null, gallery: [], audio: null };
 
-document.addEventListener('DOMContentLoaded', function() {
-  loadStats(); loadRegions(); loadAllSections();
-  document.getElementById('region-form').addEventListener('submit', handleSave);
+// ── INIT ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadDashboard();
 });
 
-// ── NAV ──────────────────────────────
+// ── SIDEBAR NAV ───────────────────────────────────────────────────
+const sectionTitles = {
+  dashboard:'Dashboard', regions:'All Regions', create:'New Region',
+  media:'File Manager', users:'User Management', stories:'Story Submissions',
+  events:'Events', newsletter:'Newsletter', 'site-nav':'Browse Site',
+  sections:'Categories', settings:'Settings'
+};
+
 function showSection(id) {
-  ['dashboard','create','files-manager'].forEach(s => {
-    document.getElementById(s + '-section').classList.toggle('hidden', s !== id);
-  });
-  if (id === 'dashboard') { loadRegions(); loadStats(); }
-  if (id === 'create') resetForm();
-  if (id === 'files-manager') loadAllFiles();
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('section-' + id);
+  if (el) el.classList.add('active');
+  const nav = document.getElementById('nav-' + id);
+  if (nav) nav.classList.add('active');
+  document.getElementById('page-title').textContent = sectionTitles[id] || id;
+
+  if (id === 'dashboard')  loadDashboard();
+  if (id === 'regions')    loadRegionsTable();
+  if (id === 'create')     resetForm();
+  if (id === 'media')      loadAllFiles();
+  if (id === 'users')      loadUsers();
+  if (id === 'stories')    loadStories();
+  if (id === 'events')     loadEvents();
+  if (id === 'newsletter') loadNewsletter();
+  if (id === 'sections')   loadAllSections();
 }
 
-// ── TAB TOGGLE (Upload / URL) ─────────
-function switchTab(field, tab) {
-  document.getElementById(field+'-tab-upload').classList.toggle('active', tab==='upload');
-  document.getElementById(field+'-tab-url').classList.toggle('active', tab==='url');
-  document.getElementById(field+'-panel-upload').classList.toggle('active', tab==='upload');
-  document.getElementById(field+'-panel-url').classList.toggle('active', tab==='url');
-}
+// ── MOBILE SIDEBAR ────────────────────────────────────────────────
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
 
-// ── FILE SELECT (phone / computer) ───
-function handleFileSelect(type, input) {
-  var files = Array.from(input.files);
-  if (!files.length) return;
-
-  if (type === 'hero') {
-    pendingFiles.hero = files[0];
-    document.getElementById('hero-upload-status').textContent = '📎 ' + files[0].name + ' (will upload on Save)';
-    var reader = new FileReader();
-    reader.onload = e => showHeroPreview(e.target.result);
-    reader.readAsDataURL(files[0]);
-
-  } else if (type === 'gallery') {
-    pendingFiles.gallery = files;
-    document.getElementById('gallery-upload-status').textContent = '📎 ' + files.length + ' file(s) selected (will upload on Save)';
-    var list = document.getElementById('gallery-preview-list');
-    list.innerHTML = '';
-    files.forEach(function(f) {
-      if (f.type.startsWith('image/')) {
-        var r = new FileReader();
-        r.onload = function(e) {
-          var img = document.createElement('img');
-          img.src = e.target.result;
-          img.className = 'w-14 h-14 object-cover rounded border';
-          list.appendChild(img);
-        };
-        r.readAsDataURL(f);
-      } else {
-        var div = document.createElement('div');
-        div.className = 'w-14 h-14 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-600 text-center p-1 font-bold';
-        div.textContent = f.name.split('.').pop().toUpperCase();
-        list.appendChild(div);
-      }
-    });
-
-  } else if (type === 'audio') {
-    pendingFiles.audio = files[0];
-    document.getElementById('audio-upload-status').textContent = '📎 ' + files[0].name + ' (will upload on Save)';
-  }
-}
-
-// ── SINGLE FILE UPLOAD → URL ──────────
-async function uploadSingleFile(file, category) {
-  var fd = new FormData();
-  fd.append('file', file);
-  fd.append('filename', file.name);
-  fd.append('category', category);
-  fd.append('is_public', '1');
-  var r = await fetch('/api/upload/file', { method: 'POST', body: fd });
-  if (!r.ok) { var e = await r.json().catch(()=>({})); throw new Error(e.detail||'Upload failed'); }
-  var d = await r.json();
-  if (!d.success) throw new Error('Upload failed');
-  return d.url;
-}
-
-// ── STATS ─────────────────────────────
-async function loadStats() {
+// ── DASHBOARD ─────────────────────────────────────────────────────
+async function loadDashboard() {
   try {
-    var s = await (await fetch(API_URL+'/stats')).json();
-    document.getElementById('stat-total').textContent  = s.total_regions || 0;
-    document.getElementById('stat-users').textContent  = s.total_users   || 0;
-    document.getElementById('stat-audio').textContent  = s.with_audio    || 0;
-    document.getElementById('stat-images').textContent = s.with_images   || 0;
+    const s = await (await fetch(API+'/stats')).json();
+    document.getElementById('stat-regions').textContent = s.total_regions || 0;
+    document.getElementById('stat-users').textContent   = s.total_users   || 0;
+    document.getElementById('stat-stories').textContent = s.total_stories || 0;
+    document.getElementById('stat-files').textContent   = (s.with_audio||0) + (s.with_images||0);
   } catch(e) {}
+  await loadRegionsData();
+  renderRegionsTable(allRegions.slice(0,8), 'dashboard-regions-tbody');
 }
 
-// ── REGIONS ───────────────────────────
-async function loadRegions() {
+// ── REGIONS ───────────────────────────────────────────────────────
+async function loadRegionsData() {
   try {
-    var r = await fetch(API_URL+'/regions');
+    const r = await fetch(API+'/regions');
     if (!r.ok) throw new Error('HTTP '+r.status);
     allRegions = await r.json();
-    renderTable(allRegions);
-  } catch(e) {
-    document.getElementById('regions-table-body').innerHTML =
-      '<tr><td colspan="6" class="px-4 py-8 text-center text-red-600">Error: '+e.message+'</td></tr>';
-  }
+  } catch(e) { allRegions = []; }
+}
+
+async function loadRegionsTable() {
+  await loadRegionsData();
+  renderRegionsTable(allRegions, 'all-regions-tbody');
 }
 
 function safeSplit(v) {
@@ -440,132 +686,118 @@ function safeSplit(v) {
   return String(v).split(',').map(s=>s.trim()).filter(s=>s);
 }
 
-function renderTable(regions) {
-  var tbody = document.getElementById('regions-table-body');
+function renderRegionsTable(regions, tbodyId) {
+  const tbody = document.getElementById(tbodyId);
   if (!regions||!regions.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">No regions yet. Click ➕ New Region to start.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">No regions yet.</td></tr>';
     return;
   }
   tbody.innerHTML = '';
-  regions.forEach(function(region,i) {
-    var hasImg = safeSplit(region.gallery_images).length > 0 || !!region.hero_image;
-    var hasAudio = safeSplit(region.audio_files).length > 0;
-    var row = document.createElement('tr');
-    row.className = 'hover:bg-gray-50 transition cursor-pointer';
-    row.innerHTML =
-      '<td class="px-4 py-3 text-sm text-gray-500">'+(i+1)+'</td>'+
-      '<td class="px-4 py-3 font-semibold">'+(region.name||'?')+'</td>'+
-      '<td class="px-4 py-3 text-sm">'+(region.capital||'—')+'</td>'+
-      '<td class="px-4 py-3"><span class="px-2 py-0.5 bg-gray-100 rounded text-xs">'+(region.category||'General')+'</span></td>'+
-      '<td class="px-4 py-3 text-sm">'+(hasImg?'🖼️ ':'')+(hasAudio?'🎵':'—')+'</td>'+
-      '<td class="px-4 py-3 whitespace-nowrap">'+
-        '<button class="edit-btn mr-3 text-[#0077b6] hover:underline text-sm font-medium">✏️ Edit</button>'+
-        '<button class="delete-btn text-red-600 hover:underline text-sm">🗑️</button>'+
-      '</td>';
-    row.querySelector('.edit-btn').onclick = e => { e.stopPropagation(); editRegion(region.id); };
-    row.querySelector('.delete-btn').onclick = e => { e.stopPropagation(); deleteRegion(region.id, region.name); };
-    row.onclick = e => { if (!e.target.closest('button')) editRegion(region.id); };
-    tbody.appendChild(row);
+  regions.forEach((r,i) => {
+    const hasImg   = !!r.hero_image || safeSplit(r.gallery_images).length > 0;
+    const hasAudio = safeSplit(r.audio_files).length > 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      `<td>${i+1}</td>` +
+      `<td style="font-weight:600;">${r.name||'?'}</td>` +
+      `<td>${r.capital||'—'}</td>` +
+      `<td><span class="badge badge-blue">${r.category||'General'}</span></td>` +
+      `<td>${hasImg?'🖼️ ':''}${hasAudio?'🎵':''}</td>` +
+      `<td style="white-space:nowrap;">
+        <button onclick="editRegion(${r.id})" class="btn btn-secondary btn-sm" style="margin-right:6px;">✏️ Edit</button>
+        <button onclick="deleteRegion(${r.id},'${(r.name||'').replace(/'/g,"\\'")}' )" class="btn btn-danger btn-sm">🗑️</button>
+      </td>`;
+    tbody.appendChild(tr);
   });
 }
 
-document.getElementById('search-regions').addEventListener('input', function(e) {
-  var t = e.target.value.toLowerCase();
-  renderTable(allRegions.filter(r =>
+function filterRegions() {
+  const t = document.getElementById('search-regions').value.toLowerCase();
+  renderRegionsTable(allRegions.filter(r =>
     (r.name||'').toLowerCase().includes(t) ||
     (r.capital||'').toLowerCase().includes(t) ||
     (r.category||'').toLowerCase().includes(t)
-  ));
-});
+  ), 'all-regions-tbody');
+}
 
-// ── FORM RESET ────────────────────────
+// ── FORM ──────────────────────────────────────────────────────────
 function resetForm() {
   document.getElementById('region-form').reset();
   document.getElementById('region-id').value = '';
   document.getElementById('form-title').textContent = 'Add New Region';
   document.getElementById('save-btn').textContent = '💾 Save Region';
-  document.getElementById('hero-preview').classList.add('hidden');
+  document.getElementById('hero-preview').style.display = 'none';
   document.getElementById('gallery-preview-list').innerHTML = '';
   ['hero','gallery','audio'].forEach(f => {
-    var el = document.getElementById(f+'-upload-status');
+    const el = document.getElementById(f+'-upload-status');
     if (el) el.textContent = '';
     switchTab(f,'upload');
   });
   pendingFiles = { hero: null, gallery: [], audio: null };
 }
 
-// ── EDIT ──────────────────────────────
 function editRegion(id) {
-  var region = allRegions.find(r => r.id === id);
-  if (!region) { alert('Region not found!'); return; }
+  const r = allRegions.find(x => x.id === id);
+  if (!r) return;
   resetForm();
-  document.getElementById('form-title').textContent = 'Edit: ' + region.name;
+  document.getElementById('form-title').textContent = 'Edit: ' + r.name;
   document.getElementById('save-btn').textContent = '💾 Update Region';
-  document.getElementById('region-id').value = region.id;
-  document.getElementById('reg-name').value = region.name || '';
-  document.getElementById('reg-capital').value = region.capital || '';
-  document.getElementById('reg-population').value = region.population || '';
-  document.getElementById('reg-terrain').value = region.terrain || '';
-  document.getElementById('reg-description').value = region.description || '';
-  document.getElementById('reg-category').value = region.category || '';
-  document.getElementById('reg-tags').value = region.tags || '';
-  document.getElementById('reg-source').value = region.source || '';
-  document.getElementById('reg-overview').value = region.overview || '';
-  document.getElementById('reg-hero-image').value = region.hero_image || '';
-  document.getElementById('reg-gallery-images').value = safeSplit(region.gallery_images).join(', ');
-  document.getElementById('reg-audio-files').value = safeSplit(region.audio_files).join(', ');
-  if (region.hero_image) { switchTab('hero','url'); showHeroPreview(region.hero_image); }
-  if (region.gallery_images) switchTab('gallery','url');
-  if (region.audio_files) switchTab('audio','url');
+  document.getElementById('region-id').value  = r.id;
+  document.getElementById('reg-name').value   = r.name || '';
+  document.getElementById('reg-capital').value= r.capital || '';
+  document.getElementById('reg-population').value = r.population || '';
+  document.getElementById('reg-terrain').value= r.terrain || '';
+  document.getElementById('reg-description').value = r.description || '';
+  document.getElementById('reg-category').value = r.category || '';
+  document.getElementById('reg-tags').value   = r.tags || '';
+  document.getElementById('reg-source').value = r.source || '';
+  document.getElementById('reg-overview').value= r.overview || '';
+  document.getElementById('reg-hero-image').value = r.hero_image || '';
+  document.getElementById('reg-gallery-images').value = safeSplit(r.gallery_images).join(', ');
+  document.getElementById('reg-audio-files').value = safeSplit(r.audio_files).join(', ');
+  if (r.hero_image) { switchTab('hero','url'); showHeroPreview(r.hero_image); }
+  if (r.gallery_images) switchTab('gallery','url');
+  if (r.audio_files) switchTab('audio','url');
   showSection('create');
 }
 
-// ── SAVE ──────────────────────────────
 async function handleSave(e) {
   e.preventDefault();
-  var regionId = document.getElementById('region-id').value;
-  var btn = document.getElementById('save-btn');
-  btn.disabled = true; btn.textContent = '⏳ Saving...';
-
-  var progressArea = document.getElementById('upload-progress-area');
-  var progressList = document.getElementById('upload-progress-list');
-  progressArea.classList.add('hidden');
-  progressList.innerHTML = '';
+  const regionId = document.getElementById('region-id').value;
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = '⏳ Saving…';
+  const pArea = document.getElementById('upload-progress-area');
+  const pList = document.getElementById('upload-progress-list');
+  pArea.style.display = 'none'; pList.innerHTML = '';
 
   try {
-    var heroUrl    = document.getElementById('reg-hero-image').value.trim();
-    var galleryUrls = safeSplit(document.getElementById('reg-gallery-images').value);
-    var audioUrls  = safeSplit(document.getElementById('reg-audio-files').value);
+    let heroUrl    = document.getElementById('reg-hero-image').value.trim();
+    let galleryUrls = safeSplit(document.getElementById('reg-gallery-images').value);
+    let audioUrls  = safeSplit(document.getElementById('reg-audio-files').value);
 
-    // Upload hero
     if (pendingFiles.hero) {
-      progressArea.classList.remove('hidden');
-      progressList.innerHTML += '<div>⏳ Uploading hero image: ' + pendingFiles.hero.name + '…</div>';
+      pArea.style.display = 'block';
+      pList.innerHTML += `<div>⏳ Uploading hero: ${pendingFiles.hero.name}…</div>`;
       heroUrl = await uploadSingleFile(pendingFiles.hero, 'image');
-      progressList.innerHTML += '<div>✅ Hero image uploaded!</div>';
+      pList.innerHTML += '<div>✅ Hero uploaded!</div>';
     }
-
-    // Upload gallery files
     if (pendingFiles.gallery && pendingFiles.gallery.length) {
-      progressArea.classList.remove('hidden');
-      for (var i = 0; i < pendingFiles.gallery.length; i++) {
-        var f = pendingFiles.gallery[i];
-        progressList.innerHTML += '<div>⏳ Uploading '+(i+1)+'/'+pendingFiles.gallery.length+': ' + f.name + '…</div>';
-        var cat = f.type.startsWith('video/') ? 'video' : 'image';
-        galleryUrls.push(await uploadSingleFile(f, cat));
-        progressList.innerHTML += '<div>✅ ' + f.name + ' done</div>';
+      pArea.style.display = 'block';
+      for (let i = 0; i < pendingFiles.gallery.length; i++) {
+        const f = pendingFiles.gallery[i];
+        pList.innerHTML += `<div>⏳ Uploading ${i+1}/${pendingFiles.gallery.length}: ${f.name}…</div>`;
+        galleryUrls.push(await uploadSingleFile(f, f.type.startsWith('video/')? 'video':'image'));
+        pList.innerHTML += `<div>✅ ${f.name} done</div>`;
       }
     }
-
-    // Upload audio
     if (pendingFiles.audio) {
-      progressArea.classList.remove('hidden');
-      progressList.innerHTML += '<div>⏳ Uploading audio: ' + pendingFiles.audio.name + '…</div>';
+      pArea.style.display = 'block';
+      pList.innerHTML += `<div>⏳ Uploading audio: ${pendingFiles.audio.name}…</div>`;
       audioUrls.push(await uploadSingleFile(pendingFiles.audio, 'audio'));
-      progressList.innerHTML += '<div>✅ Audio uploaded!</div>';
+      pList.innerHTML += '<div>✅ Audio uploaded!</div>';
     }
 
-    var fd = new FormData();
+    const fd = new FormData();
     fd.append('name',          document.getElementById('reg-name').value);
     fd.append('capital',       document.getElementById('reg-capital').value);
     fd.append('population',    document.getElementById('reg-population').value);
@@ -579,21 +811,20 @@ async function handleSave(e) {
     fd.append('source',        document.getElementById('reg-source').value);
     fd.append('overview',      document.getElementById('reg-overview').value);
 
-    var method = regionId ? 'PUT' : 'POST';
-    var url    = regionId ? API_URL+'/regions/'+regionId : API_URL+'/regions';
-    var r = await fetch(url, { method, body: fd });
-    if (!r.ok) { var err = await r.json().catch(()=>({})); throw new Error(err.detail||'Server error '+r.status); }
-    var d = await r.json();
+    const method = regionId ? 'PUT' : 'POST';
+    const url    = regionId ? `${API}/regions/${regionId}` : `${API}/regions`;
+    const resp = await fetch(url, { method, body: fd });
+    if (!resp.ok) { const er = await resp.json().catch(()=>({})); throw new Error(er.detail||'Server error '+resp.status); }
+    const d = await resp.json();
     if (!d.success) throw new Error('Save failed');
 
-    showNotification('✅ Saved!', 'success');
-    progressArea.classList.add('hidden');
-    await loadRegions(); await loadStats();
+    notify('✅ Saved!', 'success');
+    pArea.style.display = 'none';
+    await loadRegionsData();
     showSection('dashboard');
-
   } catch(err) {
     console.error(err);
-    showNotification('❌ ' + err.message, 'error');
+    notify('❌ ' + err.message, 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = document.getElementById('region-id').value ? '💾 Update Region' : '💾 Save Region';
@@ -601,175 +832,395 @@ async function handleSave(e) {
 }
 
 async function deleteRegion(id, name) {
-  if (!confirm('Delete "' + name + '"? This cannot be undone.')) return;
+  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
   try {
-    var r = await fetch(API_URL+'/regions/'+id, { method:'DELETE' });
-    var d = await r.json();
-    if (r.ok && d.success) { showNotification('Deleted!','success'); loadRegions(); loadStats(); }
+    const r = await fetch(`${API}/regions/${id}`, { method:'DELETE' });
+    const d = await r.json();
+    if (r.ok && d.success) { notify('Deleted!','success'); await loadRegionsData(); renderRegionsTable(allRegions,'all-regions-tbody'); }
     else throw new Error('Delete failed');
-  } catch(e) { showNotification('❌ Delete failed','error'); }
+  } catch(e) { notify('❌ Delete failed','error'); }
 }
 
-// ── HERO PREVIEW ─────────────────────
+// ── UPLOAD HELPERS ─────────────────────────────────────────────────
+function switchTab(field, tab) {
+  ['upload','url'].forEach(t => {
+    document.getElementById(`${field}-tab-${t}`).classList.toggle('active', t===tab);
+    document.getElementById(`${field}-panel-${t}`).classList.toggle('active', t===tab);
+  });
+}
+
+function handleFileSelect(type, input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  if (type==='hero') {
+    pendingFiles.hero = files[0];
+    document.getElementById('hero-upload-status').textContent = `📎 ${files[0].name} (will upload on Save)`;
+    const reader = new FileReader();
+    reader.onload = e => showHeroPreview(e.target.result);
+    reader.readAsDataURL(files[0]);
+  } else if (type==='gallery') {
+    pendingFiles.gallery = files;
+    document.getElementById('gallery-upload-status').textContent = `📎 ${files.length} file(s) selected (will upload on Save)`;
+    const list = document.getElementById('gallery-preview-list');
+    list.innerHTML = '';
+    files.forEach(f => {
+      if (f.type.startsWith('image/')) {
+        const r = new FileReader();
+        r.onload = e => { const img = document.createElement('img'); img.src=e.target.result; img.style='width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--border);'; list.appendChild(img); };
+        r.readAsDataURL(f);
+      } else {
+        const div = document.createElement('div');
+        div.style='width:52px;height:52px;background:#f3f4f6;border-radius:6px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:var(--muted);';
+        div.textContent = f.name.split('.').pop().toUpperCase();
+        list.appendChild(div);
+      }
+    });
+  } else if (type==='audio') {
+    pendingFiles.audio = files[0];
+    document.getElementById('audio-upload-status').textContent = `📎 ${files[0].name} (will upload on Save)`;
+  }
+}
+
+async function uploadSingleFile(file, category) {
+  const fd = new FormData();
+  fd.append('file', file); fd.append('filename', file.name);
+  fd.append('category', category); fd.append('is_public','1');
+  const r = await fetch('/api/upload/file', { method:'POST', body:fd });
+  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.detail||'Upload failed'); }
+  const d = await r.json();
+  if (!d.success) throw new Error('Upload failed');
+  return d.url;
+}
+
 function showHeroPreview(url) {
   document.getElementById('preview-img').src = url;
-  document.getElementById('hero-preview').classList.remove('hidden');
+  document.getElementById('hero-preview').style.display = 'block';
 }
 function removeHeroImage() {
   document.getElementById('reg-hero-image').value = '';
   document.getElementById('hero-file-input').value = '';
-  document.getElementById('hero-preview').classList.add('hidden');
+  document.getElementById('hero-preview').style.display = 'none';
   document.getElementById('hero-upload-status').textContent = '';
   pendingFiles.hero = null;
 }
 
-// ── FILE MANAGER ──────────────────────
+// ── FILE MANAGER ───────────────────────────────────────────────────
 async function loadAllFiles() {
-  try {
-    allFiles = await (await fetch('/api/files')).json();
-    renderFilesGrid(allFiles);
-  } catch(e) { showNotification('Failed to load files','error'); }
+  try { allFiles = await (await fetch('/api/files')).json(); renderFilesGrid(allFiles); }
+  catch(e) { notify('Failed to load files','error'); }
 }
 
 function renderFilesGrid(files) {
-  var c = document.getElementById('all-files-grid');
-  if (!files||!files.length) {
-    c.innerHTML = '<p class="col-span-3 text-center text-gray-400 py-8">No files uploaded yet.</p>';
-    return;
-  }
-  var icons = { video:'🎬', audio:'🎵', image:'🖼️', document:'📄', general:'📁' };
-  c.innerHTML = files.map(function(f) {
-    var icon = icons[f.category] || '📁';
-    var isImg = f.mime_type && f.mime_type.startsWith('image/');
-    return '<div class="bg-white p-4 rounded-lg border hover:shadow-md transition">' +
-      (isImg ? '<img src="'+f.file_url+'" class="w-full h-28 object-cover rounded mb-2" onerror="this.style.display=\'none\'">' : '') +
-      '<div class="flex justify-between items-start mb-1">' +
-        '<span class="font-semibold text-sm truncate flex-1">' + icon + ' ' + f.original_name + '</span>' +
-        '<button onclick="deleteFile('+f.id+')" class="text-red-400 hover:text-red-600 text-xs ml-1 flex-shrink-0">🗑️</button>' +
-      '</div>' +
-      '<p class="text-xs text-gray-400">' + f.category.toUpperCase() + ' • ' + f.file_size_mb + ' MB</p>' +
-      '<div class="mt-2 flex gap-3">' +
-        '<a href="'+f.file_url+'" target="_blank" class="text-[#0077b6] text-xs hover:underline">🔗 Open</a>' +
-        '<button onclick="copyUrl(\''+f.file_url+'\')" class="text-gray-400 text-xs hover:underline">📋 Copy URL</button>' +
-      '</div>' +
-    '</div>';
+  const c = document.getElementById('all-files-grid');
+  if (!files||!files.length) { c.innerHTML='<p style="color:var(--muted);text-align:center;padding:32px;grid-column:1/-1;">No files uploaded yet.</p>'; return; }
+  const icons = { video:'🎬', audio:'🎵', image:'🖼️', document:'📄', general:'📁' };
+  c.innerHTML = files.map(f => {
+    const icon = icons[f.category]||'📁';
+    const isImg = f.mime_type&&f.mime_type.startsWith('image/');
+    return `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;">
+      ${isImg?`<img src="${f.file_url}" style="width:100%;height:100px;object-fit:cover;border-radius:7px;margin-bottom:8px;border:1px solid var(--border);" onerror="this.style.display='none'">`:''}
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;">
+        <span style="font-weight:600;font-size:0.82rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${icon} ${f.original_name}</span>
+        <button onclick="deleteFile(${f.id})" style="background:none;border:none;cursor:pointer;color:#f87171;font-size:0.85rem;flex-shrink:0;margin-left:4px;">🗑️</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;">${f.category.toUpperCase()} • ${f.file_size_mb} MB</p>
+      <div style="display:flex;gap:10px;">
+        <a href="${f.file_url}" target="_blank" style="font-size:0.78rem;color:var(--brand);text-decoration:none;font-weight:600;">🔗 Open</a>
+        <button onclick="copyUrl('${f.file_url}')" style="background:none;border:none;cursor:pointer;font-size:0.78rem;color:var(--muted);">📋 Copy</button>
+      </div>
+    </div>`;
   }).join('');
 }
 
 function filterFiles() {
-  var s = document.getElementById('file-search').value.toLowerCase();
-  var cat = document.getElementById('file-filter-category').value;
-  renderFilesGrid(allFiles.filter(f =>
-    (!s||f.original_name.toLowerCase().includes(s)) && (!cat||f.category===cat)
-  ));
+  const s = document.getElementById('file-search').value.toLowerCase();
+  const cat = document.getElementById('file-filter-category').value;
+  renderFilesGrid(allFiles.filter(f => (!s||f.original_name.toLowerCase().includes(s)) && (!cat||f.category===cat)));
 }
 
 async function deleteFile(id) {
   if (!confirm('Delete this file permanently?')) return;
   try {
-    var r = await fetch('/api/files/'+id, { method:'DELETE' });
-    var d = await r.json();
-    if (r.ok && d.success) { showNotification('Deleted!','success'); loadAllFiles(); }
+    const r = await fetch('/api/files/'+id, { method:'DELETE' });
+    const d = await r.json();
+    if (r.ok && d.success) { notify('Deleted!','success'); loadAllFiles(); }
     else throw new Error('Delete failed');
-  } catch(e) { showNotification('❌ Delete failed','error'); }
+  } catch(e) { notify('❌ Delete failed','error'); }
 }
 
 async function quickUploadFiles() {
-  var input = document.getElementById('quick-upload-input');
-  var cat = document.getElementById('quick-upload-category').value;
-  var files = Array.from(input.files);
-  if (!files.length) { showNotification('Please select files first','error'); return; }
-  var count = 0;
-  for (var f of files) {
+  const input = document.getElementById('quick-upload-input');
+  const cat   = document.getElementById('quick-upload-category').value;
+  const files = Array.from(input.files);
+  if (!files.length) { notify('Please select files first','error'); return; }
+  let count = 0;
+  for (const f of files) {
     try { await uploadSingleFile(f, cat); count++; }
-    catch(e) { showNotification('❌ Failed: '+f.name,'error'); }
+    catch(e) { notify('❌ Failed: '+f.name,'error'); }
   }
-  if (count) { showNotification('✅ Uploaded ' + count + ' file(s)!','success'); loadAllFiles(); }
+  if (count) { notify(`✅ Uploaded ${count} file(s)!`,'success'); loadAllFiles(); }
   input.value = '';
 }
 
 function copyUrl(url) {
   navigator.clipboard.writeText(window.location.origin + url)
-    .then(() => showNotification('URL copied!','success'))
-    .catch(() => showNotification(url,'success'));
+    .then(() => notify('URL copied!','success'))
+    .catch(() => notify(url,'success'));
 }
 
-// ── SECTIONS ──────────────────────────
+// ── USERS ─────────────────────────────────────────────────────────
+async function loadUsers() {
+  try {
+    allUsers = await (await fetch('/api/admin/users')).json();
+    renderUsersTable(allUsers);
+  } catch(e) { notify('Failed to load users','error'); }
+}
+
+function renderUsersTable(users) {
+  const tbody = document.getElementById('users-tbody');
+  if (!users||!users.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted);">No users found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = '';
+  users.forEach(u => {
+    const roleBadge = u.role==='admin'||u.role==='superuser' ? 'badge-red' : u.role==='creator' ? 'badge-blue' : 'badge-gray';
+    const activeBadge = u.is_active==1||u.is_active===true ? 'badge-green' : 'badge-red';
+    const activeText  = u.is_active==1||u.is_active===true ? 'Active' : 'Suspended';
+    const joined = u.created_at ? new Date(u.created_at).toLocaleDateString() : '—';
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      `<td>${u.id}</td>` +
+      `<td style="font-weight:600;">${u.username||'?'}</td>` +
+      `<td style="color:var(--muted);font-size:0.82rem;">${u.email||'—'}</td>` +
+      `<td><span class="badge ${roleBadge}">${u.role||'user'}</span></td>` +
+      `<td><span class="badge ${u.is_premium ? 'badge-yellow':'badge-gray'}">${u.is_premium?'Premium':'Free'}</span></td>` +
+      `<td><span class="badge ${activeBadge}">${activeText}</span></td>` +
+      `<td style="font-size:0.8rem;color:var(--muted);">${joined}</td>` +
+      `<td style="white-space:nowrap;">
+        <select onchange="changeUserRole(${u.id},this.value)" style="padding:4px 8px;border:1px solid var(--border);border-radius:5px;font-size:0.78rem;margin-right:5px;">
+          <option value="">Role…</option>
+          <option value="user">User</option>
+          <option value="creator">Creator</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button onclick="toggleSuspend(${u.id},${u.is_active})" class="btn ${u.is_active==1?'btn-warn':'btn-success'} btn-sm">${u.is_active==1?'Suspend':'Restore'}</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterUsers() {
+  const t = document.getElementById('user-search').value.toLowerCase();
+  renderUsersTable(allUsers.filter(u =>
+    (u.username||'').toLowerCase().includes(t) || (u.email||'').toLowerCase().includes(t)
+  ));
+}
+
+async function changeUserRole(id, role) {
+  if (!role) return;
+  try {
+    const fd = new FormData(); fd.append('role', role);
+    const r = await fetch(`/api/admin/users/${id}/role`, { method:'PUT', body:fd });
+    const d = await r.json();
+    if (r.ok && d.success) { notify('Role updated!','success'); loadUsers(); }
+    else throw new Error(d.detail||'Failed');
+  } catch(e) { notify('❌ '+e.message,'error'); }
+}
+
+async function toggleSuspend(id, currentActive) {
+  const action = currentActive==1 ? 'suspend' : 'restore';
+  if (!confirm(`${action.charAt(0).toUpperCase()+action.slice(1)} this user?`)) return;
+  try {
+    const fd = new FormData(); fd.append('action', action);
+    const r = await fetch(`/api/admin/users/${id}/suspend`, { method:'PUT', body:fd });
+    const d = await r.json();
+    if (r.ok && d.success) { notify('Updated!','success'); loadUsers(); }
+    else throw new Error(d.detail||'Failed');
+  } catch(e) { notify('❌ '+e.message,'error'); }
+}
+
+// ── STORIES ───────────────────────────────────────────────────────
+async function loadStories() {
+  const status = document.getElementById('story-filter').value;
+  try {
+    const url = status ? `/api/stories?status=${status}` : '/api/stories';
+    const stories = await (await fetch(url)).json();
+    const list = document.getElementById('stories-list');
+    if (!stories||!stories.length) { list.innerHTML='<p style="text-align:center;color:var(--muted);padding:32px;">No stories found.</p>'; return; }
+    list.innerHTML = stories.map(s => `
+      <div style="border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:8px;">
+          <div>
+            <p style="font-weight:700;margin-bottom:4px;">${s.title||'Untitled'}</p>
+            <p style="font-size:0.8rem;color:var(--muted);">By ${s.author_name||'Anonymous'} • ${s.region||''}</p>
+          </div>
+          <span class="badge ${s.status==='approved'?'badge-green':s.status==='rejected'?'badge-red':'badge-yellow'}">${s.status||'pending'}</span>
+        </div>
+        <p style="font-size:0.875rem;color:#374151;margin:10px 0;">${(s.content||'').slice(0,200)}${(s.content||'').length>200?'…':''}</p>
+        ${s.status==='pending' ? `
+          <div style="display:flex;gap:8px;">
+            <button onclick="approveStory(${s.id})" class="btn btn-success btn-sm">✅ Approve</button>
+            <button onclick="rejectStory(${s.id})"  class="btn btn-danger btn-sm">❌ Reject</button>
+          </div>` : ''}
+      </div>`).join('');
+  } catch(e) { notify('Failed to load stories','error'); }
+}
+
+async function approveStory(id) {
+  try {
+    const r = await fetch(`/api/stories/${id}/approve`, { method:'PUT' });
+    const d = await r.json();
+    if (r.ok && d.success) { notify('Story approved!','success'); loadStories(); }
+    else throw new Error(d.detail||'Failed');
+  } catch(e) { notify('❌ '+e.message,'error'); }
+}
+
+async function rejectStory(id) {
+  try {
+    const r = await fetch(`/api/stories/${id}/reject`, { method:'PUT' });
+    const d = await r.json();
+    if (r.ok && d.success) { notify('Story rejected','success'); loadStories(); }
+    else throw new Error(d.detail||'Failed');
+  } catch(e) { notify('❌ '+e.message,'error'); }
+}
+
+// ── EVENTS ────────────────────────────────────────────────────────
+async function loadEvents() {
+  try {
+    const events = await (await fetch('/api/events')).json();
+    const list = document.getElementById('events-list');
+    if (!events||!events.length) { list.innerHTML='<p style="color:var(--muted);">No events yet.</p>'; return; }
+    list.innerHTML = events.map(ev => `
+      <div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:start;gap:8px;">
+        <div>
+          <p style="font-weight:700;font-size:0.9rem;">${ev.title||'?'}</p>
+          <p style="font-size:0.8rem;color:var(--muted);">${ev.date||''} • ${ev.location||''}</p>
+        </div>
+        <button onclick="deleteEvent(${ev.id})" class="btn btn-danger btn-sm" style="flex-shrink:0;">🗑️</button>
+      </div>`).join('');
+  } catch(e) {}
+}
+
+async function createEvent() {
+  const title = document.getElementById('event-title').value.trim();
+  const desc  = document.getElementById('event-description').value.trim();
+  const date  = document.getElementById('event-date').value;
+  const loc   = document.getElementById('event-location').value.trim();
+  if (!title) { notify('Please enter an event title','error'); return; }
+  const fd = new FormData();
+  fd.append('title',title); fd.append('description',desc);
+  fd.append('date',date);   fd.append('location',loc);
+  try {
+    const r = await fetch('/api/events', { method:'POST', body:fd });
+    const d = await r.json();
+    if (r.ok && d.success) {
+      notify('Event created!','success');
+      ['event-title','event-description','event-date','event-location'].forEach(id => document.getElementById(id).value='');
+      loadEvents();
+    } else throw new Error(d.detail||'Failed');
+  } catch(e) { notify('❌ '+e.message,'error'); }
+}
+
+async function deleteEvent(id) {
+  if (!confirm('Delete this event?')) return;
+  try {
+    const r = await fetch('/api/events/'+id, { method:'DELETE' });
+    const d = await r.json();
+    if (r.ok && d.success) { notify('Deleted!','success'); loadEvents(); }
+    else throw new Error('Failed');
+  } catch(e) { notify('❌ Delete failed','error'); }
+}
+
+// ── NEWSLETTER ────────────────────────────────────────────────────
+async function loadNewsletter() {
+  try {
+    const subs = await (await fetch('/api/newsletter/subscribers')).json();
+    const tbody = document.getElementById('newsletter-tbody');
+    if (!subs||!subs.length) { tbody.innerHTML='<tr><td colspan="3" style="text-align:center;padding:32px;color:var(--muted);">No subscribers yet.</td></tr>'; return; }
+    tbody.innerHTML = subs.map((s,i) =>
+      `<tr><td>${i+1}</td><td>${s.email}</td><td style="font-size:0.8rem;color:var(--muted);">${s.created_at ? new Date(s.created_at).toLocaleDateString() : '—'}</td></tr>`
+    ).join('');
+  } catch(e) { notify('Failed to load newsletter','error'); }
+}
+
+// ── SECTIONS / CATEGORIES ─────────────────────────────────────────
 async function loadAllSections() {
   try {
     allSections = await (await fetch('/api/sections')).json();
-    document.getElementById('sections-list').innerHTML = allSections.map(s =>
-      '<div class="flex justify-between items-center p-3 bg-gray-50 rounded">' +
-        '<span class="font-semibold text-sm">' + s.name + '</span>' +
-        '<button onclick="deleteSection('+s.id+')" class="text-red-500 hover:text-red-700 text-xs font-bold">✕</button>' +
-      '</div>'
-    ).join('') || '<p class="text-sm text-gray-400">No sections yet.</p>';
+    const list = document.getElementById('sections-list');
+    list.innerHTML = allSections.map(s =>
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#f9fafb;border:1px solid var(--border);border-radius:8px;">
+        <span style="font-weight:600;font-size:0.875rem;">${s.name}</span>
+        <button onclick="deleteSection(${s.id})" style="background:none;border:none;cursor:pointer;color:#f87171;font-weight:700;font-size:0.85rem;">✕</button>
+      </div>`
+    ).join('') || '<p style="color:var(--muted);font-size:0.875rem;">No categories yet.</p>';
   } catch(e) {}
 }
 
 async function createSection() {
-  var name = document.getElementById('new-section-name').value.trim();
-  if (!name) { alert('Enter a section name'); return; }
-  var fd = new FormData(); fd.append('name', name);
+  const name = document.getElementById('new-section-name').value.trim();
+  if (!name) { notify('Enter a name','error'); return; }
+  const fd = new FormData(); fd.append('name', name);
   try {
-    var r = await fetch('/api/sections', { method:'POST', body:fd });
-    var d = await r.json();
-    if (r.ok && d.success) { showNotification('Section created!','success'); document.getElementById('new-section-name').value=''; loadAllSections(); }
+    const r = await fetch('/api/sections', { method:'POST', body:fd });
+    const d = await r.json();
+    if (r.ok && d.success) { notify('Created!','success'); document.getElementById('new-section-name').value=''; loadAllSections(); }
     else throw new Error(d.detail||'Failed');
-  } catch(e) { showNotification('❌ '+e.message,'error'); }
+  } catch(e) { notify('❌ '+e.message,'error'); }
 }
 
 async function deleteSection(id) {
-  if (!confirm('Delete this section?')) return;
+  if (!confirm('Delete this category?')) return;
   try {
-    var r = await fetch('/api/sections/'+id, { method:'DELETE' });
-    var d = await r.json();
-    if (r.ok && d.success) { showNotification('Deleted!','success'); loadAllSections(); }
-    else throw new Error('Delete failed');
-  } catch(e) { showNotification('❌ Delete failed','error'); }
+    const r = await fetch('/api/sections/'+id, { method:'DELETE' });
+    const d = await r.json();
+    if (r.ok && d.success) { notify('Deleted!','success'); loadAllSections(); }
+    else throw new Error('Failed');
+  } catch(e) { notify('❌ Delete failed','error'); }
 }
 
-// ── EXPORT / IMPORT ───────────────────
+// ── EXPORT / IMPORT ───────────────────────────────────────────────
 async function exportData() {
   try {
-    var data = await (await fetch(API_URL+'/regions')).json();
-    var a = document.createElement('a');
+    const data = await (await fetch(API+'/regions')).json();
+    const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type:'application/json'}));
     a.download = 'echostack-backup-' + new Date().toISOString().split('T')[0] + '.json';
     a.click();
-    showNotification('Exported!','success');
-  } catch(e) { showNotification('❌ Export failed','error'); }
+    notify('Exported!','success');
+  } catch(e) { notify('❌ Export failed','error'); }
 }
 
 async function importData(input) {
-  var file = input.files[0]; if (!file) return;
-  var reader = new FileReader();
-  reader.onload = async function(e) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
     try {
-      var data = JSON.parse(e.target.result);
+      const data = JSON.parse(e.target.result);
       await fetch('/api/import/json', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
-      showNotification('Imported!','success'); loadRegions();
-    } catch(e) { showNotification('❌ Invalid file','error'); }
+      notify('Imported!','success'); loadDashboard();
+    } catch(e) { notify('❌ Invalid file','error'); }
   };
   reader.readAsText(file); input.value = '';
 }
 
-// ── AUTH ──────────────────────────────
+// ── AUTH ──────────────────────────────────────────────────────────
 function logout() {
-  if (!confirm('Logout now?')) return;
+  if (!confirm('Log out of admin?')) return;
   fetch('/api/auth/logout', { method:'POST' });
   document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
   window.location.href = '/admin';
 }
 
-// ── NOTIFICATIONS ─────────────────────
-function showNotification(msg, type) {
-  var n = document.getElementById('notification');
-  n.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg z-50 text-white text-sm font-semibold ' +
-    (type==='success' ? 'bg-green-600' : 'bg-red-600');
+// ── NOTIFICATIONS ─────────────────────────────────────────────────
+let notifyTimer;
+function notify(msg, type) {
+  const n = document.getElementById('notification');
   n.textContent = msg;
-  n.classList.remove('hidden');
-  setTimeout(() => n.classList.add('hidden'), 3500);
+  n.className = 'show ' + type;
+  clearTimeout(notifyTimer);
+  notifyTimer = setTimeout(() => { n.className = ''; }, 3500);
 }
 </script>
 </body>
