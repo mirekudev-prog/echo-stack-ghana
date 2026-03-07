@@ -20,6 +20,27 @@ import models
 # Create tables if they don't exist
 Base.metadata.create_all(bind=engine)
 
+# STARTUP MIGRATION: safely add columns missing from older DB schemas
+def _run_migrations():
+    from sqlalchemy import text
+    migrations = [
+        "ALTER TABLE posts ADD COLUMN author_username VARCHAR DEFAULT ''",
+        "ALTER TABLE posts ADD COLUMN views INTEGER DEFAULT 0",
+        "ALTER TABLE posts ADD COLUMN likes INTEGER DEFAULT 0",
+    ]
+    with SessionLocal() as _db:
+        for sql in migrations:
+            try:
+                _db.execute(text(sql))
+                _db.commit()
+            except Exception:
+                _db.rollback()
+
+try:
+    _run_migrations()
+except Exception as _me:
+    print(f"Migration warning (non-fatal): {_me}")
+
 # ============================================
 # APP SETUP
 # ============================================
@@ -825,16 +846,39 @@ async def create_post(
     author_id = user.id if user else None
     author_name = user.username if user else "Admin"
     
-    post = models.Post(
-        author_id=author_id, author_username=author_name,
-        title=title.strip(), excerpt=excerpt.strip(), content=content.strip(),
-        cover_image=cover_image.strip(), content_type=content_type,
-        region_id=int(region_id) if region_id and region_id.isdigit() else None,
-        status=status, is_premium=bool(int(is_premium))
-    )
-    db.add(post)
-    db.commit()
-    db.refresh(post)
+    # Safe insert — handles missing author_username column in older DBs
+    import sqlalchemy
+    try:
+        post = models.Post(
+            author_id=author_id, author_username=author_name,
+            title=title.strip(), excerpt=excerpt.strip(), content=content.strip(),
+            cover_image=cover_image.strip(), content_type=content_type,
+            region_id=int(region_id) if region_id and region_id.isdigit() else None,
+            status=status, is_premium=bool(int(is_premium))
+        )
+        db.add(post)
+        db.commit()
+        db.refresh(post)
+    except Exception as col_err:
+        db.rollback()
+        if "author_username" in str(col_err):
+            try:
+                db.execute(sqlalchemy.text("ALTER TABLE posts ADD COLUMN author_username VARCHAR DEFAULT ''"))
+                db.commit()
+            except Exception:
+                db.rollback()
+            post = models.Post(
+                author_id=author_id,
+                title=title.strip(), excerpt=excerpt.strip(), content=content.strip(),
+                cover_image=cover_image.strip(), content_type=content_type,
+                region_id=int(region_id) if region_id and region_id.isdigit() else None,
+                status=status, is_premium=bool(int(is_premium))
+            )
+            db.add(post)
+            db.commit()
+            db.refresh(post)
+        else:
+            raise HTTPException(status_code=500, detail=str(col_err))
     return {"success": True, "post_id": post.id, "status": post.status}
 
 @app.put("/api/posts/{post_id}")
@@ -922,21 +966,57 @@ async def admin_publish_file(
         author_id = admin_user.id if admin_user else None
         author_name = admin_user.username if admin_user else "Admin"
         
-        # Create the post
-        post = models.Post(
-            author_id=author_id,
-            author_username=author_name,
-            title=title.strip(),
-            excerpt=excerpt.strip(),
-            content=content,
-            cover_image=cover_image,
-            content_type=content_type,
-            status=status,
-            is_premium=bool(int(is_premium))
-        )
-        db.add(post)
-        db.commit()
-        db.refresh(post)
+        # Create the post — use try/except to handle missing author_username column
+        # (column may not exist if DB was created before this field was added)
+        try:
+            post = models.Post(
+                author_id=author_id,
+                author_username=author_name,
+                title=title.strip(),
+                excerpt=excerpt.strip(),
+                content=content,
+                cover_image=cover_image,
+                content_type=content_type,
+                status=status,
+                is_premium=bool(int(is_premium))
+            )
+            db.add(post)
+            db.commit()
+            db.refresh(post)
+        except Exception as col_err:
+            db.rollback()
+            # Fallback: column doesn't exist yet — try without author_username
+            if "author_username" in str(col_err):
+                # Auto-migrate: add missing column then retry
+                try:
+                    db.execute(
+                        __import__("sqlalchemy").text(
+                            "ALTER TABLE posts ADD COLUMN author_username VARCHAR DEFAULT ''"
+                        )
+                    )
+                    db.commit()
+                except Exception:
+                    db.rollback()
+                # Retry insert without author_username if alter failed
+                try:
+                    post = models.Post(
+                        author_id=author_id,
+                        title=title.strip(),
+                        excerpt=excerpt.strip(),
+                        content=content,
+                        cover_image=cover_image,
+                        content_type=content_type,
+                        status=status,
+                        is_premium=bool(int(is_premium))
+                    )
+                    db.add(post)
+                    db.commit()
+                    db.refresh(post)
+                except Exception as e2:
+                    db.rollback()
+                    raise HTTPException(status_code=500, detail=str(e2))
+            else:
+                raise
         
         return {
             "success": True,
