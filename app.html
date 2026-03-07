@@ -1094,15 +1094,20 @@
                 document.getElementById('bot-send').disabled = false;
                 if (d.locked) {
                     addBotMessage('locked', d.reply || 'EchoBot is a premium feature 🔒');
+                } else if (d.warming) {
+                    // Model cold-starting — show retry button
+                    addBotMessageWithRetry(d.reply || 'EchoBot is loading up. Click retry in a moment!', msg);
+                } else if (!d.success && !d.reply) {
+                    addBotMessage('bot', '⚠️ Connection issue. Please try again!');
                 } else {
-                    addBotMessage('bot', d.reply || 'Sorry, I couldn\'t get a response. Try again!');
+                    addBotMessage('bot', d.reply || 'Sorry, I could not get a response. Try again!');
                 }
             })
             .catch(function() {
                 removeTyping();
                 botTyping = false;
                 document.getElementById('bot-send').disabled = false;
-                addBotMessage('bot', '⚠️ Connection error. Please try again.');
+                addBotMessage('bot', '⚠️ Connection error. Please check your internet and try again.');
             });
     };
 
@@ -1119,6 +1124,40 @@
         bubble.className = 'bot-msg-bubble';
         bubble.textContent = text;
 
+        div.appendChild(avatarDiv);
+        div.appendChild(bubble);
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function addBotMessageWithRetry(text, retryMsg) {
+        var msgs = document.getElementById('bot-messages');
+        var div = document.createElement('div');
+        div.className = 'bot-msg bot';
+
+        var avatarDiv = document.createElement('div');
+        avatarDiv.className = 'bot-msg-avatar';
+        avatarDiv.textContent = '🤖';
+
+        var bubble = document.createElement('div');
+        bubble.className = 'bot-msg-bubble';
+        bubble.style.cssText = 'background:rgba(201,147,58,0.1);border-color:rgba(201,147,58,0.25);';
+
+        var p = document.createElement('p');
+        p.textContent = '⏳ ' + text;
+        p.style.marginBottom = '8px';
+
+        var btn = document.createElement('button');
+        btn.textContent = '🔄 Retry now';
+        btn.style.cssText = 'background:linear-gradient(135deg,#c9933a,#e8b45a);border:none;border-radius:7px;padding:6px 14px;font-size:0.8rem;font-weight:700;color:#0d0e13;cursor:pointer;';
+        btn.onclick = function() {
+            div.remove();
+            document.getElementById('bot-input').value = retryMsg;
+            sendBotMessage();
+        };
+
+        bubble.appendChild(p);
+        bubble.appendChild(btn);
         div.appendChild(avatarDiv);
         div.appendChild(bubble);
         msgs.appendChild(div);
