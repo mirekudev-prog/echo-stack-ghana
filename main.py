@@ -1146,3 +1146,15 @@ Always respond in English."""
     except Exception as e:
         print(f"AI error: {e}")
         return {"reply": "EchoBot is warming up! Try again in a moment.", "success": False}
+
+# Video endpoints
+@app.get("/api/videos")
+@app.post("/api/videos")
+
+# Audio endpoints  
+@app.get("/api/audio")
+@app.post("/api/audio")
+
+# Document endpoints
+@app.get("/api/documents")
+@app.post("/api/documents")
