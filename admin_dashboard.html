@@ -3,664 +3,1201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Archive Admin — EchoStack</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-<script src="https://cdn.tiny.cloud/1/your-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<title>EchoStack Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--primary:#1e40af;--dark:#0f172a;--gold:#f59e0b;--success:#16a34a;--danger:#dc2626;--border:#e2e8f0;--bg:#f8fafc}
-body{font-family:'Inter',sans-serif;background:var(--bg);min-height:100vh;display:flex}
-.sidebar{width:280px;background:var(--dark);min-height:100vh;position:fixed;top:0;left:0;z-index:200;display:flex;flex-direction:column}
-.sb-header{padding:24px 20px;border-bottom:1px solid rgba(255,255,255,0.1)}
-.sb-header h1{font-family:'Playfair Display',serif;color:#fff;font-size:1.5rem}
-.sb-header span{color:var(--gold);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em}
-.sb-nav{padding:20px 12px;flex:1;overflow-y:auto}
-.sb-section{font-size:0.7rem;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;padding:16px 12px 8px}
-.sb-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:8px;color:#94a3b8;font-size:0.875rem;font-weight:500;cursor:pointer;transition:all 0.2s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
-.sb-item:hover{background:rgba(255,255,255,0.05);color:#fff}
-.sb-item.active{background:var(--primary);color:#fff}
-.main{margin-left:280px;flex:1;padding:32px}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
-.header h2{font-family:'Playfair Display',serif;font-size:2rem;color:var(--dark)}
-.btn{padding:10px 20px;border-radius:8px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px}
-.btn-primary{background:var(--primary);color:#fff}
-.btn-primary:hover{background:#1e3a8a}
-.btn-gold{background:var(--gold);color:#fff}
-.btn-gold:hover{background:#d97706}
-.btn-outline{background:#fff;border:1.5px solid var(--border);color:var(--dark)}
-.btn-outline:hover{background:var(--dark);color:#fff}
-.panel{display:none}
-.panel.active{display:block}
-.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
-.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
-.card-header h3{font-size:1.125rem;font-weight:600;color:var(--dark)}
-.form-group{margin-bottom:20px}
-.form-group label{display:block;font-size:0.875rem;font-weight:500;color:#374151;margin-bottom:8px}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9375rem;transition:border-color 0.2s}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary)}
-.form-group textarea{min-height:120px;resize:vertical}
-.grid{display:grid;gap:20px}
-.grid-2{grid-template-columns:repeat(2,1fr)}
-.grid-3{grid-template-columns:repeat(3,1fr)}
-.table-container{overflow-x:auto}
+:root{
+  --ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--gold-pale:rgba(200,150,46,.1);
+  --cream:#FAF6EF;--red:#DC2626;--red-pale:#FEF2F2;--green:#16A34A;--green-pale:#F0FDF4;
+  --blue:#2563EB;--blue-pale:#EFF6FF;--orange:#D97706;--purple:#7C3AED;
+  --border:#E2E8F0;--muted:#94A3B8;--muted2:#64748B;--bg:#F0F4F8;--surface:#fff;--sw:238px;
+  --r:10px;--rl:16px;--sh:0 1px 6px rgba(13,27,42,.07);--shl:0 8px 32px rgba(13,27,42,.13);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;display:flex;color:var(--ink)}
+/* SIDEBAR */
+.sidebar{width:var(--sw);background:var(--ink);min-height:100vh;position:fixed;top:0;left:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
+.sb-logo{padding:17px 15px 13px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sb-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:var(--ink);flex-shrink:0}
+.sb-name{font-family:'Playfair Display',serif;color:#fff;font-size:.97rem;display:block;line-height:1.1}
+.sb-tag{font-size:.57rem;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;display:block}
+.sb-nav{padding:9px 7px;flex:1}
+.sb-sec{font-size:.57rem;font-weight:700;color:rgba(255,255,255,.2);letter-spacing:.12em;text-transform:uppercase;padding:13px 10px 4px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;color:rgba(255,255,255,.55);font-size:.79rem;font-weight:500;cursor:pointer;transition:all .14s;margin-bottom:1px;border:none;background:none;width:100%;text-align:left;white-space:nowrap}
+.sb-item .ic{width:17px;text-align:center;font-size:.82rem;flex-shrink:0}
+.sb-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.sb-item.on{background:rgba(200,150,46,.18);color:var(--gold2);font-weight:600}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:.59rem;font-weight:700;display:none}
+.sb-badge.show{display:inline-block}
+.sb-bottom{padding:9px 7px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0}
+.sb-admin{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.05);margin-bottom:5px}
+.sb-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;color:var(--ink);flex-shrink:0}
+.sb-uname{font-size:.75rem;font-weight:600;color:#fff}
+.sb-urole{font-size:.59rem;color:var(--gold);font-weight:700;letter-spacing:.04em}
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;padding:22px 24px;min-height:100vh;overflow-x:hidden}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.tl h1{font-family:'Playfair Display',serif;font-size:1.38rem;color:var(--ink);line-height:1.2}
+.tl p{font-size:.77rem;color:var(--muted2);margin-top:3px}
+.tr{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;border:none;transition:all .17s;display:inline-flex;align-items:center;gap:5px;text-decoration:none;white-space:nowrap}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:#a97825;transform:translateY(-1px)}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#156534}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#b91c1c}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#1d4ed8}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--border)}.btn-ghost:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn-sm{padding:5px 10px;font-size:.75rem}
+/* PANELS */
+.panel{display:none}.panel.on{display:block}
+/* STAT CARDS */
+.sg5{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-bottom:18px}
+@media(max-width:1100px){.sg5{grid-template-columns:repeat(3,1fr)}}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;box-shadow:var(--sh);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.scard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ca,var(--gold))}
+.scard:hover{box-shadow:var(--shl);transform:translateY(-2px)}
+.sv{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--ink);line-height:1}
+.sl{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:3px}
+.chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:.63rem;font-weight:700;margin-top:6px}
+.cg{background:var(--green-pale);color:var(--green)}.cr{background:var(--red-pale);color:var(--red)}
+.cy{background:#FFF7ED;color:var(--orange)}.cb{background:var(--blue-pale);color:var(--blue)}
+.ck{background:#F8FAFC;color:var(--muted2)}.cgold{background:var(--gold-pale);color:var(--gold)}
+/* TABLE CARD */
+.tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh);margin-bottom:16px}
+.tc-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.tc-head h2{font-size:.87rem;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px}
+.ct{font-weight:400;color:var(--muted);font-size:.77rem}
+.tcc{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.srch{padding:6px 11px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.79rem;outline:none;transition:border-color .2s;background:#FAFBFF;min-width:160px}
+.srch:focus{border-color:var(--gold)}
+.fsel{padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.78rem;outline:none;cursor:pointer;background:#fff}
+.fsel:focus{border-color:var(--gold)}
 table{width:100%;border-collapse:collapse}
-th{padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid var(--border);background:#f1f5f9}
-td{padding:14px 16px;border-bottom:1px solid var(--border);font-size:0.9375rem}
-tr:hover td{background:#f8fafc}
-.badge{display:inline-flex;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600}
-.badge-success{background:#dcfce7;color:var(--success)}
-.badge-warning{background:#fef3c7;color:var(--gold)}
-.badge-danger{background:#fee2e2;color:var(--danger)}
-.badge-info{background:#dbeafe;color:var(--primary)}
-.file-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
-.file-card{border:1px solid var(--border);border-radius:8px;padding:16px;cursor:pointer;transition:all 0.2s}
-.file-card:hover{border-color:var(--primary);box-shadow:0 4px 12px rgba(30,64,175,0.1)}
-.file-icon{font-size:2.5rem;margin-bottom:8px}
-.file-name{font-weight:500;font-size:0.875rem;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.file-meta{font-size:0.75rem;color:#64748b}
-.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:48px;text-align:center;cursor:pointer;transition:all 0.2s}
-.upload-zone:hover{border-color:var(--primary);background:#eff6ff}
-.upload-zone.dragover{border-color:var(--primary);background:#dbeafe}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center}
-.modal.active{display:flex}
-.modal-content{background:#fff;border-radius:16px;padding:32px;max-width:800px;width:90%;max-height:90vh;overflow-y:auto}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
-.modal-header h3{font-size:1.25rem;font-weight:600}
-.toast{position:fixed;bottom:24px;right:24px;padding:14px 24px;border-radius:8px;color:#fff;font-weight:500;box-shadow:0 10px 24px rgba(0,0,0,0.2);z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.success{background:var(--success)}
-.toast.error{background:var(--danger)}
-.toast.warning{background:var(--gold)}
+th{padding:8px 13px;text-align:left;font-size:.64rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);background:#FAFBFF;white-space:nowrap}
+td{padding:9px 13px;border-bottom:1px solid var(--border);font-size:.81rem;color:var(--ink);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFBFF}
+.tov{overflow-x:auto}
+/* BADGES */
+.rb{padding:2px 8px;border-radius:20px;font-size:.62rem;font-weight:700;text-transform:uppercase;white-space:nowrap}
+.r-user{background:#F0F9FF;color:#0369A1}.r-creator{background:var(--gold-pale);color:var(--gold)}
+.r-admin{background:var(--green-pale);color:var(--green)}.r-superuser{background:var(--red-pale);color:var(--red)}
+.s-published{background:var(--green-pale);color:var(--green)}.s-draft{background:#F8FAFC;color:var(--muted2)}
+.s-pending{background:#FFF7ED;color:var(--orange)}.s-rejected{background:var(--red-pale);color:var(--red)}
+.tag{display:inline-block;padding:2px 7px;background:#F1F5F9;border-radius:12px;font-size:.7rem;color:var(--muted2);margin:1px}
+/* ROW ACTIONS */
+.acts{display:flex;gap:3px;flex-wrap:wrap}
+.ab{padding:3px 8px;border-radius:5px;font-size:.69rem;font-weight:600;cursor:pointer;border:none;transition:all .14s;white-space:nowrap}
+.ag{background:var(--green-pale);color:var(--green)}.ag:hover{background:var(--green);color:#fff}
+.ab2{background:var(--blue-pale);color:var(--blue)}.ab2:hover{background:var(--blue);color:#fff}
+.ao{background:var(--gold-pale);color:var(--gold)}.ao:hover{background:var(--gold);color:#fff}
+.ar{background:var(--red-pale);color:var(--red)}.ar:hover{background:var(--red);color:#fff}
+.ak{background:#F1F5F9;color:var(--ink)}.ak:hover{background:var(--ink);color:#fff}
+.rsel{padding:3px 8px;border:1.5px solid var(--border);border-radius:5px;font-size:.73rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
+.rsel:focus{border-color:var(--gold)}
+/* FORM CARD */
+.fcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh);margin-bottom:16px}
+.fc-head{padding:12px 18px;border-bottom:1px solid var(--border);background:var(--ink);display:flex;align-items:center;justify-content:space-between}
+.fc-head h2{font-size:.87rem;font-weight:700;color:#fff}
+.fc-body{padding:18px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.67rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s;background:#FAFAFA;color:var(--ink)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);background:#fff}
+.fg textarea{min-height:90px;resize:vertical;line-height:1.6}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:640px){.fg-row,.fg-row3{grid-template-columns:1fr}}
+.ip{width:100%;height:130px;object-fit:cover;border-radius:7px;margin-top:6px;display:none;border:1px solid var(--border)}
+.ip.vis{display:block}
+/* TABS */
+.ftabs{display:flex;gap:2px;background:#F8FAFC;border-bottom:1px solid var(--border);padding:8px 16px 0;overflow-x:auto}
+.ftab{padding:7px 14px;border-radius:7px 7px 0 0;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--muted2);transition:all .14s;border:none;background:none;white-space:nowrap}
+.ftab.on{background:var(--surface);color:var(--ink);border:1px solid var(--border);border-bottom-color:var(--surface);margin-bottom:-1px}
+.ftab-p{display:none;padding:18px}.ftab-p.on{display:block}
+/* SETTINGS GRID */
+.sg2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.sg2{grid-template-columns:1fr}}
+.sc2{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px;box-shadow:var(--sh)}
+.sc2 h3{font-size:.86rem;font-weight:700;color:var(--ink);margin-bottom:13px;padding-bottom:9px;border-bottom:1px solid var(--border)}
+/* LOGIN */
+#lo{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:9999}
+#lo.hide{display:none}
+.lbox{background:var(--surface);border-radius:20px;padding:38px 36px;max-width:400px;width:94%;text-align:center}
+.lf{font-size:2.2rem;margin-bottom:10px}
+.lt{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--ink);margin-bottom:5px}
+.ls{color:var(--muted);font-size:.82rem;margin-bottom:22px;line-height:1.5}
+.lbox input{width:100%;padding:12px 15px;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;text-align:center;transition:border-color .2s;margin-bottom:14px;background:#FAFAFA}
+.lbox input:focus{border-color:var(--gold);background:#fff}
+.lbtn{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s}
+.lbtn:hover{background:var(--gold)}
+.lerr{color:var(--red);font-size:.79rem;margin-top:10px;display:none}
+/* MODAL */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:600;align-items:center;justify-content:center;padding:16px}
+.mbg.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--rl);max-width:580px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:var(--shl);display:flex;flex-direction:column}
+.mh{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
+.mh h2{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink)}
+.mx{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:5px;line-height:1}
+.mx:hover{background:var(--red-pale);color:var(--red)}
+.mb{padding:20px;flex:1}
+.mf{margin-bottom:13px}
+.mf label{display:block;font-size:.67rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.mf input,.mf select,.mf textarea{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s;background:#FAFAFA}
+.mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--gold);background:#fff}
+.mf textarea{min-height:80px;resize:vertical}
+.mfoot{padding:13px 20px;border-top:1px solid var(--border);display:flex;gap:9px;position:sticky;bottom:0;background:var(--surface)}
+.mfoot .btn{flex:1;justify-content:center}
+/* RTE */
+.rte-bar{display:flex;gap:3px;padding:6px 10px;background:#F8FAFC;border:1.5px solid var(--border);border-bottom:none;border-radius:7px 7px 0 0;flex-wrap:wrap}
+.rte-bar button{padding:3px 8px;border:none;background:none;cursor:pointer;border-radius:4px;font-size:.77rem;font-weight:600;color:var(--ink);transition:background .14s}
+.rte-bar button:hover{background:var(--border)}
+.rte-ta{border-radius:0 0 7px 7px!important;min-height:220px!important;border-top:none!important}
+/* PREVIEW */
+.pp{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);max-width:340px}
+.pp-img{width:100%;height:115px;object-fit:cover;display:none}
+.pp-img.vis{display:block}
+.pp-body{padding:12px}
+.pp-type{font-size:.62rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.07em}
+.pp-title{font-family:'Playfair Display',serif;font-size:.98rem;color:var(--ink);margin:4px 0 5px;line-height:1.3}
+.pp-exc{font-size:.78rem;color:var(--muted2);line-height:1.6}
+/* ALERTS */
+.alert{padding:10px 14px;border-radius:8px;font-size:.81rem;margin-bottom:14px}
+.ai{background:var(--blue-pale);border:1px solid #BFDBFE;color:#1E40AF}
+.aw{background:#FFF7ED;border:1px solid #FED7AA;color:#92400E}
+.ag2{background:var(--green-pale);border:1px solid #BBF7D0;color:#166534}
+.ar2{background:var(--red-pale);border:1px solid #FECACA;color:#991B1B}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;color:#fff;padding:11px 18px;border-radius:10px;font-size:.82rem;font-weight:500;box-shadow:var(--shl);transition:all .3s;z-index:9999;transform:translateY(60px);opacity:0;pointer-events:none;max-width:340px}
+.toast.on{transform:translateY(0);opacity:1}
+.tok{background:var(--green)}.ter{background:var(--red)}.tw{background:var(--orange)}.ti{background:var(--ink)}
+/* MISC */
+.empty{text-align:center;padding:30px;color:var(--muted);font-size:.83rem}
+.ei{font-size:1.7rem;margin-bottom:7px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:800px){.two-col{grid-template-columns:1fr}}
+.url-box{font-family:'DM Mono',monospace;font-size:.72rem;background:#F1F5F9;padding:5px 9px;border-radius:5px;color:var(--muted2);word-break:break-all;margin-top:4px;cursor:pointer}
+.url-box:hover{background:var(--gold-pale);color:var(--gold)}
+code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:2px 5px;border-radius:4px;color:var(--purple)}
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
+<div id="lo">
+  <div class="lbox">
+    <div class="lf">🇬🇭</div>
+    <div class="lt">EchoStack Admin</div>
+    <div class="ls">Enter the secret key to continue</div>
+    <input type="text" id="li" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="lbtn" onclick="doLogin()">Enter Admin Portal →</button>
+    <div class="lerr" id="lerr">Wrong key. Try again.</div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
 <div class="sidebar">
-  <div class="sb-header">
-    <h1>EchoStack</h1>
-    <span>🏛️ Archive Admin</span>
+  <div class="sb-logo">
+    <div class="sb-mark">E</div>
+    <div><span class="sb-name">EchoStack</span><span class="sb-tag">⚙ Admin Portal</span></div>
   </div>
   <nav class="sb-nav">
-    <div class="sb-section">Archive Content</div>
-    <button class="sb-item active" onclick="showPanel('regions')">🗺️ Regions</button>
-    <button class="sb-item" onclick="showPanel('media')">📁 Media Library</button>
-    <button class="sb-item" onclick="showPanel('videos')">🎬 Videos</button>
-    <button class="sb-item" onclick="showPanel('audio')">🎵 Audio</button>
-    <button class="sb-item" onclick="showPanel('documents')">📄 Documents</button>
-    <div class="sb-section">Management</div>
-    <button class="sb-item" onclick="showPanel('users')">👥 Users</button>
-    <button class="sb-item" onclick="showPanel('posts')">📝 Posts</button>
-    <button class="sb-item" onclick="showPanel('settings')">⚙️ Settings</button>
+    <div class="sb-sec">Overview</div>
+    <button class="sb-item on" onclick="go('overview',this)"><span class="ic">📊</span>Dashboard</button>
+    <div class="sb-sec">Content</div>
+    <button class="sb-item" onclick="go('write',this)"><span class="ic">✏️</span>Write New Post</button>
+    <button class="sb-item" onclick="go('posts',this)"><span class="ic">📝</span>All Posts<span class="sb-badge" id="sb-pending"></span></button>
+    <button class="sb-item" onclick="go('stories',this)"><span class="ic">📖</span>Story Submissions</button>
+    <button class="sb-item" onclick="go('regions',this)"><span class="ic">🗺</span>Regions</button>
+    <button class="sb-item" onclick="go('add-region',this)"><span class="ic">➕</span>Add / Edit Region</button>
+    <div class="sb-sec">People</div>
+    <button class="sb-item" onclick="go('users',this)"><span class="ic">👥</span>All Users</button>
+    <button class="sb-item" onclick="go('creators',this)"><span class="ic">✍️</span>Creators</button>
+    <button class="sb-item" onclick="go('subs',this)"><span class="ic">📧</span>Newsletter</button>
+    <div class="sb-sec">Site</div>
+    <button class="sb-item" onclick="go('events',this)"><span class="ic">🎉</span>Events</button>
+    <button class="sb-item" onclick="go('files',this)"><span class="ic">📁</span>Files & Media</button>
+    <button class="sb-item" onclick="go('chat',this)"><span class="ic">💬</span>Chat Messages</button>
+    <button class="sb-item" onclick="go('payments',this)"><span class="ic">💳</span>Payments</button>
+    <button class="sb-item" onclick="go('settings',this)"><span class="ic">⚙️</span>Site Settings</button>
+    <div class="sb-sec">Open</div>
+    <button class="sb-item" onclick="window.open('/','_blank')"><span class="ic">🏠</span>Homepage ↗</button>
+    <button class="sb-item" onclick="window.open('/dashboard','_blank')"><span class="ic">📰</span>User Feed ↗</button>
+    <button class="sb-item" onclick="window.open('/creator','_blank')"><span class="ic">✍️</span>Creator Portal ↗</button>
+    <button class="sb-item" onclick="window.open('/app','_blank')"><span class="ic">🗺</span>Heritage Map ↗</button>
   </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin"><div class="sb-av">A</div><div><div class="sb-uname">Admin</div><div class="sb-urole">FULL ACCESS</div></div></div>
+    <button class="sb-item" onclick="doLogout()"><span class="ic">🚪</span>Sign Out</button>
+  </div>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
-  <!-- REGIONS PANEL -->
-  <div class="panel active" id="panel-regions">
-    <div class="header">
-      <div>
-        <h2>🗺️ Heritage Regions</h2>
-        <p style="color:#64748b;margin-top:4px">Manage Ghana's 16 regions with rich multimedia content</p>
-      </div>
-      <button class="btn btn-primary" onclick="openRegionModal()">+ Add Region</button>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <h3>All Regions</h3>
-        <input type="text" placeholder="Search regions..." class="form-control" style="width:300px;padding:8px 12px;border:1.5px solid var(--border);border-radius:6px" onkeyup="filterTable('regions-table',this.value)">
-      </div>
-      <div class="table-container">
-        <table id="regions-table">
-          <thead>
-            <tr><th>Region</th><th>Capital</th><th>Category</th><th>Media</th><th>Files</th><th>Actions</th></tr>
-          </thead>
-          <tbody id="regions-tbody">
-            <tr><td colspan="6" style="text-align:center;padding:40px;color:#64748b">Loading regions...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+<!-- OVERVIEW -->
+<div class="panel on" id="panel-overview">
+  <div class="topbar"><div class="tl"><h1>Dashboard</h1><p id="ov-date">EchoStack Ghana Heritage Platform</p></div>
+  <div class="tr"><button class="btn btn-ghost" onclick="loadOverview()">🔄 Refresh</button><a href="/" class="btn btn-gold" target="_blank">View Live Site →</a></div></div>
+  <div class="sg5">
+    <div class="scard" style="--ca:#2563EB" onclick="go('users',null)"><div class="sv" id="ov-users">—</div><div class="sl">Total Users</div><span class="chip cb">👥 Manage</span></div>
+    <div class="scard" style="--ca:var(--gold)" onclick="go('creators',null)"><div class="sv" id="ov-creators">—</div><div class="sl">Creators</div><span class="chip cgold">✍️ Channels</span></div>
+    <div class="scard" style="--ca:var(--green)" onclick="go('posts',null)"><div class="sv" id="ov-posts">—</div><div class="sl">Published Posts</div><span class="chip cg">📝 Manage</span></div>
+    <div class="scard" style="--ca:var(--purple)" onclick="go('regions',null)"><div class="sv" id="ov-regions">—</div><div class="sl">Regions</div><span class="chip ck">🗺 Heritage</span></div>
+    <div class="scard" style="--ca:var(--red)" onclick="go('subs',null)"><div class="sv" id="ov-subs">—</div><div class="sl">Subscribers</div><span class="chip cr">📧 Email</span></div>
   </div>
-
-  <!-- MEDIA LIBRARY PANEL -->
-  <div class="panel" id="panel-media">
-    <div class="header">
-      <div>
-        <h2>📁 Media Library</h2>
-        <p style="color:#64748b;margin-top:4px">Upload and manage all files - images, videos, audio, documents</p>
-      </div>
-      <label class="btn btn-primary" style="cursor:pointer">
-        📎 Upload Files
-        <input type="file" multiple style="display:none" onchange="uploadFiles(this)">
-      </label>
-    </div>
-
-    <div class="card">
-      <div class="upload-zone" onclick="document.querySelector('input[type=file]').click()" ondrop="handleDrop(event)" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')">
-        <div style="font-size:3rem;margin-bottom:16px">📤</div>
-        <h3 style="margin-bottom:8px">Drop files here or click to upload</h3>
-        <p style="color:#64748b">Support: Images, Videos, Audio, Documents (Max 50MB per file)</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <h3>All Files</h3>
-        <select class="form-control" onchange="filterFiles(this.value)" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:6px">
-          <option value="">All Types</option>
-          <option value="image">Images</option>
-          <option value="video">Videos</option>
-          <option value="audio">Audio</option>
-          <option value="document">Documents</option>
-        </select>
-      </div>
-      <div class="file-grid" id="files-grid">
-        <div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748b">Loading files...</div>
-      </div>
-    </div>
+  <div class="alert aw" id="ov-alert" style="display:none">⏳ <strong id="ov-pct">0</strong> posts pending review. <button class="ab ab2" style="margin-left:6px" onclick="go('posts',null);setTimeout(()=>{document.getElementById('pf2').value='pending';loadPosts()},200)">Review →</button></div>
+  <div class="two-col">
+    <div class="tcard"><div class="tc-head"><h2>📝 Recent Posts</h2><button class="btn btn-ghost btn-sm" onclick="go('posts',null)">All →</button></div>
+    <div class="tov"><table><thead><tr><th>Title</th><th>Status</th><th>Actions</th></tr></thead><tbody id="ov-ptb"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody></table></div></div>
+    <div class="tcard"><div class="tc-head"><h2>👥 Recent Users</h2><button class="btn btn-ghost btn-sm" onclick="go('users',null)">All →</button></div>
+    <div class="tov"><table><thead><tr><th>Username</th><th>Role</th><th>Joined</th></tr></thead><tbody id="ov-utb"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody></table></div></div>
   </div>
-
-  <!-- VIDEOS PANEL -->
-  <div class="panel" id="panel-videos">
-    <div class="header">
-      <div>
-        <h2>🎬 Video Archive</h2>
-        <p style="color:#64748b;margin-top:4px">Documentaries, interviews, cultural events</p>
-      </div>
-      <button class="btn btn-primary" onclick="openVideoModal()">+ Add Video</button>
-    </div>
-    <div class="file-grid" id="videos-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748b">Loading videos...</div>
-    </div>
-  </div>
-
-  <!-- AUDIO PANEL -->
-  <div class="panel" id="panel-audio">
-    <div class="header">
-      <div>
-        <h2>🎵 Audio Archive</h2>
-        <p style="color:#64748b;margin-top:4px">Oral histories, traditional music, storytelling</p>
-      </div>
-      <button class="btn btn-primary" onclick="openAudioModal()">+ Add Audio</button>
-    </div>
-    <div class="file-grid" id="audio-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748b">Loading audio...</div>
-    </div>
-  </div>
-
-  <!-- DOCUMENTS PANEL -->
-  <div class="panel" id="panel-documents">
-    <div class="header">
-      <div>
-        <h2>📄 Document Archive</h2>
-        <p style="color:#64748b;margin-top:4px">Historical documents, research papers, PDFs</p>
-      </div>
-      <label class="btn btn-primary" style="cursor:pointer">
-        📎 Upload Document
-        <input type="file" accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="uploadDocuments(this)">
-      </label>
-    </div>
-    <div class="file-grid" id="documents-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748b">Loading documents...</div>
-    </div>
-  </div>
-
-  <!-- USERS PANEL -->
-  <div class="panel" id="panel-users">
-    <div class="header">
-      <h2>👥 User Management</h2>
-    </div>
-    <div class="card">
-      <table>
-        <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
-        <tbody id="users-tbody"><tr><td colspan="6" style="text-align:center;padding:40px">Loading...</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- POSTS PANEL -->
-  <div class="panel" id="panel-posts">
-    <div class="header">
-      <h2>📝 Posts & Articles</h2>
-    </div>
-    <div class="card">
-      <table>
-        <thead><tr><th>Title</th><th>Author</th><th>Type</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead>
-        <tbody id="posts-tbody"><tr><td colspan="6" style="text-align:center;padding:40px">Loading...</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- SETTINGS PANEL -->
-  <div class="panel" id="panel-settings">
-    <div class="header">
-      <h2>⚙️ Archive Settings</h2>
-    </div>
-    <div class="card">
-      <div class="form-group">
-        <label>Archive Name</label>
-        <input type="text" value="EchoStack - Ghana Heritage Archive">
-      </div>
-      <div class="form-group">
-        <label>Contact Email</label>
-        <input type="email" placeholder="admin@echostack.com">
-      </div>
-      <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
-    </div>
-  </div>
-
+  <div class="tcard"><div class="tc-head"><h2>📖 Pending Story Submissions</h2><button class="btn btn-ghost btn-sm" onclick="go('stories',null)">All →</button></div>
+  <div class="tov"><table><thead><tr><th>Title</th><th>Author</th><th>Date</th><th>Actions</th></tr></thead><tbody id="ov-stb"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody></table></div></div>
 </div>
 
-<!-- REGION MODAL -->
-<div class="modal" id="region-modal">
-  <div class="modal-content" style="max-width:900px">
-    <div class="modal-header">
-      <h3 id="region-modal-title">Add Region</h3>
-      <button class="btn btn-outline" onclick="closeModal('region-modal')">✕</button>
+<!-- WRITE POST -->
+<div class="panel" id="panel-write">
+  <div class="topbar"><div class="tl"><h1 id="write-h">✏️ Write New Post</h1><p>Publish directly to the site</p></div>
+  <div class="tr"><button class="btn btn-ghost" onclick="clearPost()">Clear</button><button class="btn btn-ghost" onclick="savePost('draft')">💾 Draft</button><button class="btn btn-green" onclick="savePost('published')">🚀 Publish Now</button></div></div>
+  <input type="hidden" id="pf-id">
+  <div style="display:grid;grid-template-columns:1fr 330px;gap:16px">
+    <div>
+      <div class="fcard"><div class="fc-head"><h2>Content</h2></div><div class="fc-body">
+        <div class="fg"><label>Title *</label><input id="pf-title" type="text" placeholder="Enter a compelling title…" oninput="livePreview()"></div>
+        <div class="fg"><label>Excerpt (shown in feed)</label><input id="pf-excerpt" type="text" placeholder="One sentence summary…" oninput="livePreview()"></div>
+        <div class="fg"><label>Full Content</label>
+          <div class="rte-bar">
+            <button onclick="wrap('**','**')"><b>B</b></button><button onclick="wrap('*','*')"><i>I</i></button>
+            <button onclick="wrap('## ','')">H2</button><button onclick="wrap('### ','')">H3</button>
+            <button onclick="wrap('[','](url)')">🔗</button><button onclick="wrap('\n- ','')">• List</button>
+            <button onclick="wrap('\n> ','')">❝ Quote</button><button onclick="wrap('\n```\n','\n```')">Code</button>
+            <button onclick="wrap('---\n','')">— Divider</button>
+          </div>
+          <textarea id="pf-content" class="rte-ta" placeholder="Write your full article here… markdown supported"></textarea>
+        </div>
+      </div></div>
+      <div class="fcard"><div class="fc-head"><h2>Media & Type</h2></div><div class="fc-body">
+        <div class="fg-row">
+          <div class="fg"><label>Content Type</label>
+            <select id="pf-type" onchange="showMF();livePreview()">
+              <option value="article">📝 Article</option><option value="audio">🎵 Audio</option>
+              <option value="photo_essay">📷 Photo Essay</option><option value="video">🎬 Video</option>
+            </select>
+          </div>
+          <div class="fg"><label>Cover Image URL</label><input id="pf-cover" type="text" placeholder="https://…" oninput="prevImg('pf-cover','pp-img');livePreview()"></div>
+        </div>
+        <div id="f-audio" style="display:none" class="fg"><label>Audio URL</label><input id="pf-audio" type="text" placeholder="https://…/audio.mp3"></div>
+        <div id="f-video" style="display:none" class="fg"><label>YouTube/Vimeo Embed URL</label><input id="pf-video" type="text" placeholder="https://www.youtube.com/embed/…"></div>
+        <div id="f-gallery" style="display:none" class="fg"><label>Gallery Images (comma-separated)</label><textarea id="pf-gallery" style="min-height:60px" placeholder="https://img1.jpg, https://img2.jpg"></textarea></div>
+      </div></div>
+      <div class="fcard"><div class="fc-head"><h2>Settings</h2></div><div class="fc-body">
+        <div class="fg-row3">
+          <div class="fg"><label>Status</label><select id="pf-status"><option value="draft">Draft</option><option value="published">Published</option><option value="pending">Pending</option></select></div>
+          <div class="fg"><label>Region</label><select id="pf-region"><option value="">— None —</option></select></div>
+          <div class="fg"><label>Access</label><select id="pf-premium"><option value="0">Free — All</option><option value="1">Premium Only</option></select></div>
+        </div>
+        <div class="fg"><label>Tags (comma-separated)</label><input id="pf-tags" type="text" placeholder="history, culture, ashanti…"></div>
+      </div></div>
     </div>
-    <form id="region-form" onsubmit="saveRegion(event)">
-      <input type="hidden" id="region-id">
-      <div class="grid grid-2">
-        <div class="form-group">
-          <label>Region Name *</label>
-          <input type="text" id="region-name" required placeholder="e.g., Ashanti Region">
-        </div>
-        <div class="form-group">
-          <label>Capital City</label>
-          <input type="text" id="region-capital" placeholder="e.g., Kumasi">
-        </div>
+    <div>
+      <div style="position:sticky;top:16px">
+        <p style="font-size:.7rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Live Preview</p>
+        <div class="pp"><img class="pp-img" id="pp-img" alt=""><div class="pp-body"><div class="pp-type" id="pp-type">Article</div><div class="pp-title" id="pp-ttl">Title here…</div><div class="pp-exc" id="pp-exc">Excerpt here…</div></div></div>
+        <div class="url-box" id="pp-slug" style="margin-top:10px">/post/slug-preview</div>
       </div>
-      <div class="grid grid-2">
-        <div class="form-group">
-          <label>Population</label>
-          <input type="text" id="region-population" placeholder="e.g., 5,440,463">
-        </div>
-        <div class="form-group">
-          <label>Category</label>
-          <select id="region-category">
-            <option value="">Select Category</option>
-            <option value="Culture">Culture</option>
-            <option value="History">History</option>
-            <option value="Nature">Nature</option>
-            <option value="Tourism">Tourism</option>
-            <option value="Heritage">Heritage</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Rich Description *</label>
-        <textarea id="region-description" required placeholder="Detailed description with formatting..."></textarea>
-      </div>
-      <div class="form-group">
-        <label>Overview (Short Summary)</label>
-        <textarea id="region-overview" placeholder="Brief overview..."></textarea>
-      </div>
-      <div class="form-group">
-        <label>Tags (comma-separated)</label>
-        <input type="text" id="region-tags" placeholder="festivals, culture, history">
-      </div>
-      <div class="form-group">
-        <label>Hero Image URL</label>
-        <input type="text" id="region-hero-image" placeholder="/uploads/image.jpg">
-      </div>
-      <div class="form-group">
-        <label>Gallery Images (comma-separated URLs)</label>
-        <textarea id="region-gallery" placeholder="/uploads/img1.jpg, /uploads/img2.jpg"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Audio Files (comma-separated URLs)</label>
-        <textarea id="region-audio" placeholder="/uploads/audio1.mp3, /uploads/audio2.mp3"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Video Files (comma-separated URLs)</label>
-        <textarea id="region-video" placeholder="/uploads/video1.mp4, /uploads/video2.mp4"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Attached Documents (comma-separated URLs)</label>
-        <textarea id="region-documents" placeholder="/uploads/doc1.pdf, /uploads/doc2.pdf"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Source Reference</label>
-        <input type="text" id="region-source" placeholder="Source of information">
-      </div>
-      <div style="display:flex;gap:12px;margin-top:24px">
-        <button type="submit" class="btn btn-primary" style="flex:1">💾 Save Region</button>
-        <button type="button" class="btn btn-outline" onclick="closeModal('region-modal')">Cancel</button>
-      </div>
-    </form>
+    </div>
+  </div>
+  <div class="tcard" style="margin-top:4px">
+    <div class="tc-head"><h2>All Posts <span class="ct" id="ap-ct"></span></h2>
+    <div class="tcc"><select class="fsel" id="pf3" onchange="loadAllPosts()"><option value="all">All</option><option value="published">Published</option><option value="draft">Drafts</option><option value="pending">Pending</option></select>
+    <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('ap-tb',this.value)"></div></div>
+    <div class="tov"><table><thead><tr><th>Title</th><th>Author</th><th>Type</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead><tbody id="ap-tb"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody></table></div>
   </div>
 </div>
 
-<!-- VIDEO MODAL -->
-<div class="modal" id="video-modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Add Video</h3>
-      <button class="btn btn-outline" onclick="closeModal('video-modal')">✕</button>
+<!-- ALL POSTS -->
+<div class="panel" id="panel-posts">
+  <div class="topbar"><div class="tl"><h1>All Posts</h1><p>Moderate, publish, reject or delete</p></div>
+  <div class="tr"><select class="fsel" id="pf2" onchange="loadPosts()"><option value="all">All</option><option value="published">Published</option><option value="draft">Drafts</option><option value="pending">⏳ Pending</option><option value="rejected">Rejected</option></select>
+  <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('posts-tb',this.value)">
+  <button class="btn btn-ghost btn-sm" onclick="bulkPublishPending()">✓ Publish All Pending</button>
+  <button class="btn btn-ghost btn-sm" onclick="bulkRejectPending()">✗ Reject All</button>
+  <button class="btn btn-gold" onclick="go('write',null)">✏️ Write New</button></div></div>
+  <div class="tcard"><div class="tc-head"><h2>Posts <span class="ct" id="posts-ct"></span></h2></div>
+  <div class="tov"><table><thead><tr><th>Title</th><th>Author</th><th>Type</th><th>Status</th><th>Views</th><th>💬</th><th>Actions</th></tr></thead><tbody id="posts-tb"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody></table></div></div>
+</div>
+
+<!-- STORIES -->
+<div class="panel" id="panel-stories">
+  <div class="topbar"><div class="tl"><h1>Story Submissions</h1></div>
+  <select class="fsel" id="sf" onchange="loadStories()"><option value="pending">⏳ Pending</option><option value="approved">✅ Approved</option><option value="rejected">❌ Rejected</option></select></div>
+  <div class="alert ai">Stories submitted by users from the Heritage Map. Approve to publish publicly.</div>
+  <div class="tcard"><div class="tc-head"><h2>Submissions <span class="ct" id="stories-ct"></span></h2></div>
+  <div class="tov"><table><thead><tr><th>Title</th><th>Author</th><th>Region</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="stories-tb"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody></table></div></div>
+</div>
+
+<!-- ADD REGION -->
+<div class="panel" id="panel-add-region">
+  <div class="topbar"><div class="tl"><h1 id="rf-h">➕ Add New Region</h1><p>Add heritage region to the map</p></div>
+  <div class="tr"><button class="btn btn-ghost" onclick="clearRegion()">Clear</button><button class="btn btn-green" onclick="saveRegion()">💾 Save Region</button></div></div>
+  <input type="hidden" id="rf-id">
+  <div class="fcard"><div class="fc-head"><h2>Basic Information</h2></div><div class="fc-body">
+    <div class="fg-row"><div class="fg"><label>Region Name *</label><input id="rf-name" type="text" placeholder="e.g. Ashanti Region"></div><div class="fg"><label>Capital City</label><input id="rf-capital" type="text" placeholder="e.g. Kumasi"></div></div>
+    <div class="fg-row"><div class="fg"><label>Population</label><input id="rf-pop" type="text" placeholder="e.g. 5.8 million"></div><div class="fg"><label>Terrain</label><input id="rf-terrain" type="text" placeholder="e.g. Forest, Hills"></div></div>
+    <div class="fg"><label>Short Description (map card)</label><textarea id="rf-desc" placeholder="Brief description shown on map card…"></textarea></div>
+    <div class="fg"><label>Full Overview (detail page)</label><textarea id="rf-overview" style="min-height:130px" placeholder="Detailed history, culture and significance…"></textarea></div>
+  </div></div>
+  <div class="fcard"><div class="fc-head"><h2>Media</h2></div><div class="fc-body">
+    <div class="fg"><label>Hero Image URL</label><input id="rf-hero" type="text" placeholder="https://…" oninput="prevImg('rf-hero','rf-prev')"><img id="rf-prev" class="ip" alt=""></div>
+    <div class="fg"><label>Gallery Images (comma-separated URLs)</label><textarea id="rf-gallery" style="min-height:65px" placeholder="https://img1.jpg, https://img2.jpg"></textarea></div>
+    <div class="fg"><label>Audio Files (comma-separated URLs)</label><textarea id="rf-audio" style="min-height:60px" placeholder="https://audio1.mp3, https://audio2.mp3"></textarea></div>
+    <div class="fg"><label>Source / Credit</label><input id="rf-source" type="text" placeholder="e.g. Ghana Tourism Authority"></div>
+  </div></div>
+  <div class="fcard"><div class="fc-head"><h2>Category & Tags</h2></div><div class="fc-body">
+    <div class="fg-row">
+      <div class="fg"><label>Category</label><select id="rf-cat"><option value="">— Select —</option><option>Cultural Heritage</option><option>Natural Wonder</option><option>Historical Site</option><option>Traditional Kingdom</option><option>Coastal Region</option><option>Northern Heritage</option><option>Urban Centre</option></select></div>
+      <div class="fg"><label>Tags</label><input id="rf-tags" type="text" placeholder="kente, drumming, festivals"></div>
     </div>
-    <form onsubmit="saveVideo(event)">
-      <div class="form-group">
-        <label>Video Title *</label>
-        <input type="text" required placeholder="e.g., Ashanti Festival Documentary">
+  </div></div>
+</div>
+
+<!-- REGIONS -->
+<div class="panel" id="panel-regions">
+  <div class="topbar"><div class="tl"><h1>Regions</h1></div>
+  <div class="tr"><input class="srch" placeholder="🔍 Search…" oninput="filterTbl('regions-tb',this.value)"><button class="btn btn-gold" onclick="go('add-region',null)">➕ Add Region</button></div></div>
+  <div class="tcard"><div class="tc-head"><h2>Heritage Regions <span class="ct" id="regions-ct"></span></h2></div>
+  <div class="tov"><table><thead><tr><th>Name</th><th>Capital</th><th>Category</th><th>Pop.</th><th>Hero</th><th>Audio</th><th>Gallery</th><th>Actions</th></tr></thead><tbody id="regions-tb"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody></table></div></div>
+</div>
+
+<!-- USERS -->
+<div class="panel" id="panel-users">
+  <div class="topbar"><div class="tl"><h1>All Users</h1></div>
+  <div class="tr"><input class="srch" placeholder="🔍 Search…" oninput="filterTbl('users-tb',this.value)"><button class="btn btn-ghost" onclick="loadUsers()">🔄 Refresh</button><button class="btn btn-gold" onclick="openM('cu-modal')">+ Create User</button></div></div>
+  <div class="tcard"><div class="tc-head"><h2>User Management <span class="ct" id="users-ct"></span></h2></div>
+  <div class="tov"><table><thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Plan</th><th>Active</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="users-tb"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody></table></div></div>
+</div>
+
+<!-- CREATORS -->
+<div class="panel" id="panel-creators">
+  <div class="topbar"><div class="tl"><h1>Creators</h1><p>Manage creator channels and permissions</p></div></div>
+  <div class="alert ai">Creators can write and publish posts. Promote any user to Creator here, or revoke their status.</div>
+  <div class="tcard"><div class="tc-head"><h2>Creator Channels</h2></div>
+  <div class="tov"><table><thead><tr><th>Channel</th><th>Username</th><th>Followers</th><th>Posts</th><th>Actions</th></tr></thead><tbody id="creators-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div></div>
+</div>
+
+<!-- NEWSLETTER -->
+<div class="panel" id="panel-subs">
+  <div class="topbar"><div class="tl"><h1>Newsletter</h1></div><button class="btn btn-ghost" onclick="exportSubs()">⬇️ Export CSV</button></div>
+  <div class="tcard"><div class="tc-head"><h2>Subscribers <span class="ct" id="subs-ct"></span></h2></div>
+  <div class="tov"><table><thead><tr><th>Email</th><th>Name</th><th>Subscribed</th></tr></thead><tbody id="subs-tb"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody></table></div></div>
+</div>
+
+<!-- EVENTS -->
+<div class="panel" id="panel-events">
+  <div class="topbar"><div class="tl"><h1>Events</h1></div><button class="btn btn-gold" onclick="openM('ev-modal')">🎉 Add Event</button></div>
+  <div class="tcard"><div class="tc-head"><h2>All Events</h2></div>
+  <div class="tov"><table><thead><tr><th>Image</th><th>Title</th><th>Date</th><th>Location</th><th>Description</th><th>Actions</th></tr></thead><tbody id="events-tb"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody></table></div></div>
+</div>
+
+<!-- FILES -->
+<div class="panel" id="panel-files">
+  <div class="topbar"><div class="tl"><h1>Files & Media</h1></div>
+  <div class="tr"><select class="fsel" id="fc-filter" onchange="loadFiles()"><option value="">All Categories</option><option value="audio">🎵 Audio</option><option value="image">🖼 Images</option><option value="video">🎬 Video</option><option value="document">📄 Docs</option><option value="general">📦 General</option></select></div></div>
+  <div class="fcard"><div class="fc-head"><h2>Upload New File</h2></div><div class="fc-body">
+    <div class="fg-row">
+      <div class="fg"><label>Category</label><select id="up-cat"><option value="general">General</option><option value="audio">Audio</option><option value="image">Image</option><option value="video">Video</option><option value="document">Document</option></select></div>
+      <div class="fg"><label>Region (optional)</label><select id="up-region"><option value="">— None —</option></select></div>
+    </div>
+    <div class="fg"><label>Description</label><input id="up-desc" type="text" placeholder="Optional description…"></div>
+    <label class="btn btn-gold" style="cursor:pointer;margin-top:2px">📎 Choose & Upload File<input type="file" style="display:none" onchange="uploadFile(this)"></label>
+    <div id="up-prog" style="margin-top:10px;font-size:.81rem;color:var(--muted2)"></div>
+  </div></div>
+  <div class="tcard"><div class="tc-head"><h2>All Files <span class="ct" id="files-ct"></span></h2><input class="srch" placeholder="🔍 Search…" oninput="filterTbl('files-tb',this.value)"></div>
+  <div class="tov"><table><thead><tr><th>Preview</th><th>Filename</th><th>Category</th><th>Size</th><th>Date</th><th>Actions</th></tr></thead><tbody id="files-tb"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody></table></div></div>
+</div>
+
+<!-- CHAT -->
+<div class="panel" id="panel-chat">
+  <div class="topbar"><div class="tl"><h1>Chat Messages</h1></div><button class="btn btn-ghost" onclick="loadChat()">🔄 Refresh</button></div>
+  <div class="tcard"><div class="tc-head"><h2>All Messages <span class="ct" id="chat-ct"></span></h2><input class="srch" placeholder="🔍 Search…" oninput="filterTbl('chat-tb',this.value)"></div>
+  <div class="tov"><table><thead><tr><th>User</th><th>Message</th><th>Region</th><th>Time</th><th>Actions</th></tr></thead><tbody id="chat-tb"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody></table></div></div>
+</div>
+
+<!-- PAYMENTS -->
+<div class="panel" id="panel-payments">
+  <div class="topbar"><div class="tl"><h1>Payments</h1><p>Paystack GH₵150 premium upgrades</p></div></div>
+  <div class="alert ai">💳 Paystack webhook auto-upgrades users to Premium on successful payment.</div>
+  <div class="tcard"><div class="tc-head"><h2>Premium Users</h2></div>
+  <div class="tov"><table><thead><tr><th>Username</th><th>Email</th><th>Amount</th><th>Plan</th><th>Status</th><th>Since</th></tr></thead><tbody id="pay-tb"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody></table></div></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="panel" id="panel-settings">
+  <div class="topbar"><div class="tl"><h1>⚙️ Site Settings</h1><p>Full control — no coding needed</p></div></div>
+  <div class="sg2">
+    <div class="sc2"><h3>👤 Promote / Change Role</h3>
+      <div class="fg"><label>Username or Email</label><input id="s-pu" type="text" placeholder="username or email…"></div>
+      <div class="fg"><label>Set Role To</label><select id="s-pr"><option value="creator">✍️ Creator</option><option value="admin">🛡 Admin</option><option value="user">👤 Regular User</option></select></div>
+      <button class="btn btn-gold" onclick="promoteUser()">Update Role</button>
+      <div id="s-pres" style="margin-top:8px;font-size:.8rem"></div>
+    </div>
+    <div class="sc2"><h3>📢 Site Announcement</h3>
+      <div class="fg"><label>Message</label><textarea id="s-ann" style="min-height:80px" placeholder="Announcement shown on homepage…"></textarea></div>
+      <div class="fg"><label>Type</label><select id="s-at"><option value="info">ℹ️ Info</option><option value="success">✅ Success</option><option value="warning">⚠️ Warning</option><option value="error">🚨 Alert</option></select></div>
+      <button class="btn btn-gold" onclick="saveAnn()">📢 Broadcast</button>
+    </div>
+    <div class="sc2"><h3>🎨 Theme Colors</h3>
+      <div class="fg-row">
+        <div class="fg"><label>Gold Accent</label><input type="color" id="s-gold" value="#C8962E" style="width:100%;height:38px;padding:2px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer"></div>
+        <div class="fg"><label>Dark / Ink</label><input type="color" id="s-ink" value="#0D1B2A" style="width:100%;height:38px;padding:2px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer"></div>
       </div>
-      <div class="form-group">
-        <label>Video URL or Upload</label>
-        <input type="text" placeholder="/uploads/video.mp4 or YouTube/Vimeo URL">
+      <div class="fg"><label>Background</label><input type="color" id="s-bg" value="#FAF6EF" style="width:100%;height:38px;padding:2px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer"></div>
+      <button class="btn btn-gold" onclick="saveTheme()">💾 Save Theme</button>
+    </div>
+    <div class="sc2"><h3>🗑️ Bulk Actions</h3>
+      <div class="alert aw">⚠️ Permanent — cannot be undone.</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-ghost" onclick="bulkPublishPending()">✓ Publish All Pending</button>
+        <button class="btn btn-red" onclick="bulkRejectPending()">✗ Reject All Pending</button>
+        <button class="btn btn-red" onclick="bulkDeleteDrafts()">🗑️ Delete All Drafts</button>
       </div>
-      <div class="form-group">
-        <label>Description</label>
-        <textarea placeholder="Video description..."></textarea>
+    </div>
+    <div class="sc2"><h3>📊 Live Stats</h3>
+      <div id="live-stats" style="font-size:.84rem;line-height:2.3;color:var(--ink)">Loading…</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="loadLiveStats()">🔄 Refresh</button>
+    </div>
+    <div class="sc2"><h3>🔗 Quick Links</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a href="/app" target="_blank" class="btn btn-ghost">🗺 Heritage Map</a>
+        <a href="/dashboard" target="_blank" class="btn btn-ghost">📰 User Feed</a>
+        <a href="/creator" target="_blank" class="btn btn-ghost">✍️ Creator Portal</a>
+        <a href="/signup" target="_blank" class="btn btn-ghost">📝 Signup Page</a>
+        <a href="/user-login" target="_blank" class="btn btn-ghost">🔐 Login Page</a>
       </div>
-      <div class="form-group">
-        <label>Region (Optional)</label>
-        <select><option value="">Select Region</option></select>
-      </div>
-      <button type="submit" class="btn btn-primary">💾 Save Video</button>
-    </form>
+    </div>
+    <div class="sc2" style="grid-column:1/-1"><h3>📥 Import Regions from JSON</h3>
+      <div class="alert aw">Paste a JSON array of region objects for bulk import.</div>
+      <div class="fg"><label>JSON Data</label><textarea id="import-json" style="min-height:90px;font-family:'DM Mono',monospace;font-size:.77rem" placeholder='[{"name":"Volta Region","capital":"Ho","description":"…"}]'></textarea></div>
+      <button class="btn btn-gold" onclick="importJSON()">📥 Import</button>
+      <div id="import-res" style="margin-top:8px;font-size:.8rem"></div>
+    </div>
   </div>
 </div>
 
-<!-- AUDIO MODAL -->
-<div class="modal" id="audio-modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Add Audio</h3>
-      <button class="btn btn-outline" onclick="closeModal('audio-modal')">✕</button>
-    </div>
-    <form onsubmit="saveAudio(event)">
-      <div class="form-group">
-        <label>Audio Title *</label>
-        <input type="text" required placeholder="e.g., Traditional Drumming">
-      </div>
-      <div class="form-group">
-        <label>Audio File URL</label>
-        <input type="text" placeholder="/uploads/audio.mp3">
-      </div>
-      <div class="form-group">
-        <label>Description</label>
-        <textarea placeholder="Audio description..."></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary">💾 Save Audio</button>
-    </form>
+</div><!-- /.main -->
+<!-- MODALS -->
+<div class="mbg" id="ev-modal">
+  <div class="modal"><div class="mh"><h2>🎉 Add Event</h2><button class="mx" onclick="closeM('ev-modal')">✕</button></div>
+  <div class="mb">
+    <div class="mf"><label>Title *</label><input id="ev-t" type="text" placeholder="Event title…"></div>
+    <div class="mf"><label>Description</label><textarea id="ev-d" placeholder="What is this event about?"></textarea></div>
+    <div class="mf"><label>Date</label><input id="ev-dt" type="text" placeholder="e.g. 25 December 2025"></div>
+    <div class="mf"><label>Location</label><input id="ev-l" type="text" placeholder="City or venue…"></div>
+    <div class="mf"><label>Image URL</label><input id="ev-i" type="text" placeholder="https://…" oninput="prevImg('ev-i','ev-prev')"><img id="ev-prev" class="ip" alt=""></div>
   </div>
+  <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('ev-modal')">Cancel</button><button class="btn btn-gold" onclick="saveEvent()">Save Event</button></div></div>
+</div>
+
+<div class="mbg" id="view-modal">
+  <div class="modal" style="max-width:640px"><div class="mh"><h2 id="vm-t">Content</h2><button class="mx" onclick="closeM('view-modal')">✕</button></div>
+  <div class="mb"><div id="vm-b" style="font-size:.84rem;line-height:1.8;color:#374151;white-space:pre-wrap;max-height:440px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:16px;background:#FAFBFF"></div></div>
+  <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('view-modal')">Close</button></div></div>
+</div>
+
+<div class="mbg" id="cu-modal">
+  <div class="modal"><div class="mh"><h2>👤 Create New User</h2><button class="mx" onclick="closeM('cu-modal')">✕</button></div>
+  <div class="mb">
+    <div class="mf"><label>Username *</label><input id="cu-u" type="text" placeholder="username…"></div>
+    <div class="mf"><label>Email *</label><input id="cu-e" type="email" placeholder="email@example.com"></div>
+    <div class="mf"><label>Password *</label><input id="cu-p" type="password" placeholder="min 6 characters…"></div>
+    <div class="mf"><label>Role</label><select id="cu-r"><option value="user">👤 User</option><option value="creator">✍️ Creator</option><option value="admin">🛡 Admin</option></select></div>
+    <div id="cu-err" class="alert ar2" style="display:none"></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('cu-modal')">Cancel</button><button class="btn btn-gold" onclick="createUser()">Create Account</button></div></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// Initialize TinyMCE for rich text editing
-tinymce.init({
-  selector: '#region-description',
-  height: 400,
-  plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-  toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-  menubar: false
-});
+// ═══════════════════════════════════════════════════════════
+// AUTH — CORRECT_ANSWER="THE ADMIN" any case via /api/auth/login
+// main.py: cleaned = "THE ADMIN".lower().replace(" ","") = "theadmin"
+//          given   = answer.strip().lower().replace(" ","")
+// So "the admin", "THE ADMIN", "TheAdmin" all work
+// ═══════════════════════════════════════════════════════════
+const hasCookie = document.cookie.includes('admin_session=ADMIN_AUTHORIZED');
+const hasLS = localStorage.getItem('es_admin') === '1';
+if (hasCookie || hasLS) { document.getElementById('lo').classList.add('hide'); boot(); }
 
-function showPanel(panelName) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + panelName).classList.add('active');
-  event.target.classList.add('active');
-  
-  if(panelName === 'regions') loadRegions();
-  if(panelName === 'media') loadFiles();
-  if(panelName === 'videos') loadVideos();
-  if(panelName === 'audio') loadAudio();
-  if(panelName === 'documents') loadDocuments();
-  if(panelName === 'users') loadUsers();
-  if(panelName === 'posts') loadPosts();
+async function doLogin() {
+  const key = document.getElementById('li').value.trim();
+  if (!key) return;
+  const fd = new FormData(); fd.append('answer', key);
+  try {
+    const r = await fetch('/api/auth/login', {method:'POST', body:fd, credentials:'include'});
+    const d = await r.json();
+    if (r.ok && d.success) {
+      localStorage.setItem('es_admin','1');
+      document.getElementById('lo').classList.add('hide');
+      boot();
+    } else { document.getElementById('lerr').style.display='block'; }
+  } catch(e) { document.getElementById('lerr').style.display='block'; }
+}
+document.getElementById('li').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function doLogout() {
+  localStorage.removeItem('es_admin');
+  fetch('/api/auth/logout',{method:'POST',credentials:'include'}).catch(()=>{});
+  window.location.href='/';
 }
 
+function boot() {
+  document.getElementById('ov-date').textContent = 'EchoStack — '+new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  loadOverview();
+  loadRegionsIntoSelects();
+  checkPendingBadge();
+}
+
+// ═══════════════════════════════════════════════════════════
+// PANELS
+// ═══════════════════════════════════════════════════════════
+const pLoaders = {overview:loadOverview,write:loadAllPosts,posts:loadPosts,stories:loadStories,regions:loadRegions,'add-region':()=>{},users:loadUsers,creators:loadCreators,subs:loadSubs,events:loadEvents,files:loadFiles,chat:loadChat,payments:loadPayments,settings:loadLiveStats};
+
+function go(name, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
+  const p = document.getElementById('panel-'+name);
+  if (p) p.classList.add('on');
+  if (el) el.classList.add('on');
+  else document.querySelectorAll('.sb-item').forEach(b=>{if((b.getAttribute('onclick')||'').includes("'"+name+"'"))b.classList.add('on');});
+  if (pLoaders[name]) pLoaders[name]();
+}
+
+// ═══════════════════════════════════════════════════════════
+// OVERVIEW
+// ═══════════════════════════════════════════════════════════
+async function loadOverview() {
+  try {
+    const [sr, ur, pr, stor, subr, pend] = await Promise.all([
+      fetch('/api/stats'),
+      fetch('/api/admin/users',{credentials:'include'}),
+      fetch('/api/posts?status=published&limit=6'),
+      fetch('/api/stories?status=pending'),
+      fetch('/api/newsletter/subscribers',{credentials:'include'}),
+      fetch('/api/posts?status=pending&limit=100')
+    ]);
+    if (sr.ok) { const s=await sr.json(); document.getElementById('ov-regions').textContent=s.total_regions||0; }
+    if (ur.ok) {
+      const users=await ur.json();
+      document.getElementById('ov-users').textContent=users.length;
+      document.getElementById('ov-creators').textContent=users.filter(u=>u.role==='creator'||u.role==='admin').length;
+      document.getElementById('ov-utb').innerHTML=users.slice(0,6).map(u=>
+        `<tr><td><strong>${u.username}</strong></td><td><span class="rb r-${u.role||'user'}">${u.role||'user'}</span></td>
+         <td style="font-size:.75rem;color:var(--muted)">${(u.created_at||'').split('T')[0]}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">None</td></tr>';
+    } else {
+      document.getElementById('ov-users').textContent='?';
+      document.getElementById('ov-utb').innerHTML='<tr><td colspan="3" class="empty" style="color:var(--red)">⚠️ '+ur.status+' error loading users</td></tr>';
+    }
+    if (pr.ok) {
+      const posts=await pr.json();
+      document.getElementById('ov-posts').textContent=posts.length;
+      document.getElementById('ov-ptb').innerHTML=posts.length?posts.map(p=>
+        `<tr><td style="max-width:180px"><strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">${p.title}</strong></td>
+         <td><span class="rb s-${p.status}">${p.status}</span></td>
+         <td class="acts"><button class="ab ab2" onclick="editPost(${p.id})">Edit</button><button class="ab ar" onclick="delPost(${p.id})">Del</button></td></tr>`).join('')
+        :'<tr><td colspan="3" class="empty">No published posts yet</td></tr>';
+    }
+    if (subr.ok) { const s=await subr.json(); document.getElementById('ov-subs').textContent=s.length; }
+    else document.getElementById('ov-subs').textContent='?';
+    if (pend.ok) {
+      const pp=await pend.json();
+      if (pp.length) { document.getElementById('ov-pct').textContent=pp.length; document.getElementById('ov-alert').style.display='block'; const b=document.getElementById('sb-pending'); b.textContent=pp.length; b.classList.add('show'); }
+    }
+    if (stor.ok) {
+      const stories=await stor.json();
+      document.getElementById('ov-stb').innerHTML=stories.length?stories.slice(0,5).map(s=>
+        `<tr><td><strong>${s.title}</strong></td><td>${s.username}</td>
+         <td style="font-size:.75rem;color:var(--muted)">${(s.created_at||'').split('T')[0]}</td>
+         <td class="acts"><button class="ab ag" onclick="storyAct(${s.id},'approve')">✓ Approve</button><button class="ab ar" onclick="storyAct(${s.id},'reject')">✗ Reject</button></td></tr>`).join('')
+        :'<tr><td colspan="4" class="empty"><div class="ei">✅</div>No pending stories</td></tr>';
+    }
+  } catch(e) { console.warn('Overview error:',e); }
+}
+
+async function checkPendingBadge() {
+  try {
+    const r=await fetch('/api/posts?status=pending&limit=100');
+    if (r.ok) { const p=await r.json(); if(p.length){const b=document.getElementById('sb-pending');b.textContent=p.length;b.classList.add('show');} }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════
+// POSTS
+// ═══════════════════════════════════════════════════════════
+async function loadPosts() {
+  const st=document.getElementById('pf2')?.value||'all';
+  try {
+    let posts=[];
+    if(st==='all'){
+      const rs=await Promise.all(['published','draft','pending','rejected'].map(s=>fetch('/api/posts?status='+s+'&limit=60').then(r=>r.ok?r.json():[]).catch(()=>[])));
+      posts=rs.flat();
+    } else { posts=await fetch('/api/posts?status='+st+'&limit=100').then(r=>r.ok?r.json():[]).catch(()=>[]); }
+    document.getElementById('posts-ct').textContent='— '+posts.length;
+    document.getElementById('posts-tb').innerHTML=posts.length?posts.map(p=>
+      `<tr><td style="max-width:200px"><strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">${p.title}</strong></td>
+       <td style="font-size:.78rem">${p.author_username||'—'}</td>
+       <td><span class="tag" style="font-size:.62rem">${p.content_type||'article'}</span></td>
+       <td><span class="rb s-${p.status}">${p.status}</span></td>
+       <td>${p.views||p.view_count||0}</td><td>${p.comment_count||0}</td>
+       <td class="acts">
+         <button class="ab ak" onclick="viewC('${esc(p.title)}','${esc(p.excerpt||p.content||'')}')">Read</button>
+         <button class="ab ab2" onclick="editPost(${p.id})">✏️ Edit</button>
+         ${p.status!=='published'?`<button class="ab ag" onclick="setPostSt(${p.id},'published')">✓</button>`:''}
+         ${p.status!=='rejected'?`<button class="ab ar" onclick="setPostSt(${p.id},'rejected')">✗</button>`:''}
+         <button class="ab ar" onclick="delPost(${p.id})">Del</button>
+       </td></tr>`).join('')
+    :'<tr><td colspan="7" class="empty"><div class="ei">📝</div>No posts found</td></tr>';
+  } catch(e) {}
+}
+
+async function loadAllPosts() {
+  const st=document.getElementById('pf3')?.value||'all';
+  try {
+    let posts=[];
+    if(st==='all'){
+      const rs=await Promise.all(['published','draft','pending','rejected'].map(s=>fetch('/api/posts?status='+s+'&limit=40').then(r=>r.ok?r.json():[]).catch(()=>[])));
+      posts=rs.flat();
+    } else { posts=await fetch('/api/posts?status='+st+'&limit=80').then(r=>r.ok?r.json():[]).catch(()=>[]); }
+    document.getElementById('ap-ct').textContent='— '+posts.length;
+    document.getElementById('ap-tb').innerHTML=posts.length?posts.map(p=>
+      `<tr><td><strong>${p.title}</strong></td><td style="font-size:.78rem">${p.author_username||'—'}</td>
+       <td><span class="tag" style="font-size:.62rem">${p.content_type||'article'}</span></td>
+       <td><span class="rb s-${p.status}">${p.status}</span></td>
+       <td>${p.views||0}</td>
+       <td class="acts"><button class="ab ab2" onclick="editPost(${p.id})">✏️ Edit</button><button class="ab ar" onclick="delPost(${p.id})">Del</button></td></tr>`).join('')
+    :'<tr><td colspan="6" class="empty">No posts</td></tr>';
+  } catch(e) {}
+}
+
+async function editPost(id) {
+  try {
+    const rs=await Promise.all(['published','draft','pending','rejected'].map(s=>fetch('/api/posts?status='+s+'&limit=200').then(r=>r.ok?r.json():[]).catch(()=>[])));
+    const p=rs.flat().find(x=>x.id==id);
+    if(!p){toast('Post not found','er');return;}
+    document.getElementById('pf-id').value=id;
+    document.getElementById('pf-title').value=p.title||'';
+    document.getElementById('pf-excerpt').value=p.excerpt||'';
+    document.getElementById('pf-content').value=p.content||'';
+    document.getElementById('pf-cover').value=p.cover_image||'';
+    document.getElementById('pf-type').value=p.content_type||'article';
+    document.getElementById('pf-status').value=p.status||'draft';
+    document.getElementById('pf-premium').value=p.is_premium?'1':'0';
+    document.getElementById('write-h').textContent='✏️ Editing: '+p.title.slice(0,40);
+    prevImg('pf-cover','pp-img'); showMF(); livePreview();
+    go('write',null); toast('Post loaded for editing','ok');
+  } catch(e) { toast('❌ Failed to load post','er'); }
+}
+
+function clearPost() {
+  document.getElementById('pf-id').value='';
+  ['pf-title','pf-excerpt','pf-content','pf-cover','pf-audio','pf-video','pf-gallery','pf-tags'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('pf-type').value='article';
+  document.getElementById('pf-status').value='draft';
+  document.getElementById('pf-premium').value='0';
+  document.getElementById('write-h').textContent='✏️ Write New Post';
+  document.getElementById('pp-img').classList.remove('vis');
+  showMF(); livePreview();
+}
+
+async function savePost(forceStatus) {
+  const title=document.getElementById('pf-title').value.trim();
+  if(!title){toast('Title is required','er');return;}
+  const id=document.getElementById('pf-id').value;
+  const status=forceStatus||document.getElementById('pf-status').value;
+  const fd=new FormData();
+  fd.append('title',title); fd.append('excerpt',document.getElementById('pf-excerpt').value);
+  fd.append('content',document.getElementById('pf-content').value); fd.append('cover_image',document.getElementById('pf-cover').value);
+  fd.append('content_type',document.getElementById('pf-type').value); fd.append('status',status);
+  fd.append('is_premium',document.getElementById('pf-premium').value); fd.append('region_id',document.getElementById('pf-region').value);
+  try {
+    const r=await fetch(id?'/api/posts/'+id:'/api/posts',{method:id?'PUT':'POST',body:fd,credentials:'include'});
+    const d=await r.json();
+    if(r.ok){toast(status==='published'?'🚀 Published!':'💾 Draft saved','ok');if(!id)clearPost();loadAllPosts();}
+    else toast('❌ '+(d.detail||'Failed — log in as creator first'),'er');
+  } catch(e){toast('❌ Network error','er');}
+}
+
+async function setPostSt(id,st) {
+  const fd=new FormData(); fd.append('status',st);
+  try {
+    const r=await fetch('/api/posts/'+id,{method:'PUT',body:fd,credentials:'include'});
+    if(r.ok){toast('Post → '+st,'ok');loadPosts();loadOverview();}
+    else{const d=await r.json();throw new Error(d.detail);}
+  } catch(e){toast('❌ '+e.message,'er');}
+}
+
+async function delPost(id) {
+  if(!confirm('Delete this post permanently?'))return;
+  try {
+    const r=await fetch('/api/posts/'+id,{method:'DELETE',credentials:'include'});
+    if(r.ok){toast('Post deleted','ok');loadPosts();loadAllPosts();loadOverview();}
+  } catch(e){}
+}
+
+function showMF() {
+  const t=document.getElementById('pf-type').value;
+  document.getElementById('f-audio').style.display=t==='audio'?'block':'none';
+  document.getElementById('f-video').style.display=t==='video'?'block':'none';
+  document.getElementById('f-gallery').style.display=t==='photo_essay'?'block':'none';
+}
+
+function livePreview() {
+  const title=document.getElementById('pf-title').value||'Title here…';
+  const exc=document.getElementById('pf-excerpt').value||'Excerpt here…';
+  const type=document.getElementById('pf-type').value||'article';
+  document.getElementById('pp-ttl').textContent=title;
+  document.getElementById('pp-exc').textContent=exc;
+  document.getElementById('pp-type').textContent=type.replace('_',' ');
+  const slug=title.toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,'-').slice(0,50);
+  document.getElementById('pp-slug').textContent='/post/'+slug;
+}
+
+function wrap(b,a) {
+  const ta=document.getElementById('pf-content'),s=ta.selectionStart,e=ta.selectionEnd,sel=ta.value.substring(s,e);
+  ta.value=ta.value.substring(0,s)+b+sel+a+ta.value.substring(e);
+  ta.focus(); ta.selectionStart=s+b.length; ta.selectionEnd=e+b.length;
+}
+
+async function bulkPublishPending() {
+  if(!confirm('Publish ALL pending posts?'))return;
+  const posts=await fetch('/api/posts?status=pending&limit=200').then(r=>r.json()).catch(()=>[]);
+  let n=0; for(const p of posts){const fd=new FormData();fd.append('status','published');await fetch('/api/posts/'+p.id,{method:'PUT',body:fd,credentials:'include'});n++;}
+  toast('✅ Published '+n+' posts','ok'); loadPosts();
+}
+
+async function bulkRejectPending() {
+  if(!confirm('Reject ALL pending posts?'))return;
+  const posts=await fetch('/api/posts?status=pending&limit=200').then(r=>r.json()).catch(()=>[]);
+  let n=0; for(const p of posts){const fd=new FormData();fd.append('status','rejected');await fetch('/api/posts/'+p.id,{method:'PUT',body:fd,credentials:'include'});n++;}
+  toast('Rejected '+n+' posts','ok'); loadPosts();
+}
+
+async function bulkDeleteDrafts() {
+  if(!confirm('PERMANENTLY delete ALL draft posts?'))return;
+  const posts=await fetch('/api/posts?status=draft&limit=200').then(r=>r.json()).catch(()=>[]);
+  let n=0; for(const p of posts){await fetch('/api/posts/'+p.id,{method:'DELETE',credentials:'include'});n++;}
+  toast('🗑️ Deleted '+n+' drafts','ok'); loadPosts();
+}
+
+// ═══════════════════════════════════════════════════════════
+// STORIES
+// ═══════════════════════════════════════════════════════════
+async function loadStories() {
+  const st=document.getElementById('sf')?.value||'pending';
+  try {
+    const r=await fetch('/api/stories?status='+st);
+    const stories=r.ok?await r.json():[];
+    document.getElementById('stories-ct').textContent='— '+stories.length;
+    document.getElementById('stories-tb').innerHTML=stories.length?stories.map(s=>
+      `<tr><td style="max-width:200px"><strong>${s.title}</strong></td><td>${s.username}</td>
+       <td style="font-size:.77rem;color:var(--muted)">${s.region_id||'—'}</td>
+       <td><span class="rb s-${s.status}">${s.status}</span></td>
+       <td style="font-size:.75rem;color:var(--muted)">${(s.created_at||'').split('T')[0]}</td>
+       <td class="acts">
+         <button class="ab ak" onclick="viewC('${esc(s.title)}','${esc(s.content)}')">Read</button>
+         ${s.status!=='approved'?`<button class="ab ag" onclick="storyAct(${s.id},'approve')">✓ Approve</button>`:''}
+         ${s.status!=='rejected'?`<button class="ab ar" onclick="storyAct(${s.id},'reject')">✗ Reject</button>`:''}
+       </td></tr>`).join('')
+    :'<tr><td colspan="6" class="empty"><div class="ei">✅</div>None here</td></tr>';
+  } catch(e) {}
+}
+
+async function storyAct(id,action) {
+  try {
+    const r=await fetch('/api/stories/'+id+'/'+action,{method:'PUT',credentials:'include'});
+    if(r.ok){toast('Story '+action+'d ✓','ok');loadStories();loadOverview();checkPendingBadge();}
+    else toast('❌ Failed','er');
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
 // REGIONS
+// ═══════════════════════════════════════════════════════════
 async function loadRegions() {
   try {
-    const res = await fetch('/api/regions');
-    const regions = await res.json();
-    const tbody = document.getElementById('regions-tbody');
-    
-    if(regions.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#64748b">No regions yet. Click "Add Region" to create one.</td></tr>';
-      return;
-    }
-    
-    tbody.innerHTML = regions.map(r => {
-      const hasMedia = (r.gallery_images || r.audio_files || r.hero_image) ? true : false;
-      return `<tr>
-        <td><strong>${r.name}</strong></td>
-        <td>${r.capital || '—'}</td>
-        <td><span class="badge badge-info">${r.category || 'General'}</span></td>
-        <td>${hasMedia ? '✅' : '—'}</td>
-        <td>${r.description ? '📄' : '—'}</td>
-        <td>
-          <button class="btn btn-outline" onclick="editRegion(${r.id})" style="padding:6px 12px;font-size:0.875rem">✏️ Edit</button>
-          <button class="btn btn-outline" onclick="deleteRegion(${r.id})" style="padding:6px 12px;font-size:0.875rem;color:var(--danger)">🗑️ Delete</button>
-        </td>
-      </tr>`;
-    }).join('');
-  } catch(e) {
-    showToast('Failed to load regions', 'error');
-  }
-}
-
-function openRegionModal() {
-  document.getElementById('region-modal-title').textContent = 'Add Region';
-  document.getElementById('region-form').reset();
-  if(tinymce.get('region-description')) tinymce.get('region-description').setContent('');
-  document.getElementById('region-modal').classList.add('active');
-}
-
-async function saveRegion(e) {
-  e.preventDefault();
-  
-  const formData = new FormData();
-  formData.append('name', document.getElementById('region-name').value);
-  formData.append('capital', document.getElementById('region-capital').value);
-  formData.append('population', document.getElementById('region-population').value);
-  formData.append('category', document.getElementById('region-category').value);
-  formData.append('description', tinymce.get('region-description').getContent());
-  formData.append('overview', document.getElementById('region-overview').value);
-  formData.append('tags', document.getElementById('region-tags').value);
-  formData.append('hero_image', document.getElementById('region-hero-image').value);
-  formData.append('gallery_images', document.getElementById('region-gallery').value);
-  formData.append('audio_files', document.getElementById('region-audio').value);
-  formData.append('video_files', document.getElementById('region-video').value);
-  formData.append('documents', document.getElementById('region-documents').value);
-  formData.append('source', document.getElementById('region-source').value);
-  
-  try {
-    const res = await fetch('/api/regions', {method: 'POST', body: formData});
-    const data = await res.json();
-    if(res.ok) {
-      showToast('Region saved successfully!', 'success');
-      closeModal('region-modal');
-      loadRegions();
-    } else {
-      showToast(data.detail || 'Failed to save region', 'error');
-    }
-  } catch(e) {
-    showToast('Failed to save region', 'error');
-  }
+    const r=await fetch('/api/regions');
+    const regs=r.ok?await r.json():[];
+    document.getElementById('regions-ct').textContent='— '+regs.length;
+    document.getElementById('regions-tb').innerHTML=regs.length?regs.map(reg=>
+      `<tr><td><strong>${reg.name}</strong></td><td>${reg.capital||'—'}</td>
+       <td>${reg.category?`<span class="tag">${reg.category}</span>`:'—'}</td>
+       <td style="font-size:.76rem">${reg.population||'—'}</td>
+       <td>${reg.hero_image?`<img src="${reg.hero_image}" style="width:48px;height:34px;object-fit:cover;border-radius:4px">`:'—'}</td>
+       <td>${reg.audio_files?'🎵':'—'}</td><td>${reg.gallery_images?'🖼':'—'}</td>
+       <td class="acts">
+         <button class="ab ab2" onclick="editRegion(${reg.id})">✏️ Edit</button>
+         <button class="ab ak" onclick="viewC('${esc(reg.name)}','${esc(reg.overview||reg.description)}')">View</button>
+         <button class="ab ar" onclick="delRegion(${reg.id},'${esc(reg.name)}')">Del</button>
+       </td></tr>`).join('')
+    :'<tr><td colspan="8" class="empty"><div class="ei">🗺</div>No regions yet</td></tr>';
+  } catch(e) {}
 }
 
 async function editRegion(id) {
   try {
-    const res = await fetch('/api/regions/' + id);
-    const r = await res.json();
-    
-    document.getElementById('region-modal-title').textContent = 'Edit Region';
-    document.getElementById('region-id').value = r.id;
-    document.getElementById('region-name').value = r.name;
-    document.getElementById('region-capital').value = r.capital || '';
-    document.getElementById('region-population').value = r.population || '';
-    document.getElementById('region-category').value = r.category || '';
-    if(tinymce.get('region-description')) tinymce.get('region-description').setContent(r.description || '');
-    document.getElementById('region-overview').value = r.overview || '';
-    document.getElementById('region-tags').value = r.tags || '';
-    document.getElementById('region-hero-image').value = r.hero_image || '';
-    document.getElementById('region-gallery').value = r.gallery_images || '';
-    document.getElementById('region-audio').value = r.audio_files || '';
-    document.getElementById('region-video').value = r.video_files || '';
-    document.getElementById('region-documents').value = r.documents || '';
-    document.getElementById('region-source').value = r.source || '';
-    
-    document.getElementById('region-modal').classList.add('active');
-  } catch(e) {
-    showToast('Failed to load region', 'error');
-  }
+    const regs=await fetch('/api/regions').then(r=>r.json());
+    const reg=regs.find(r=>r.id==id);
+    if(!reg)return;
+    document.getElementById('rf-id').value=id;
+    ['name','capital','pop:population','terrain','desc:description','overview','hero:hero_image','gallery:gallery_images','audio:audio_files','source','tags'].forEach(pair=>{
+      const [field,key]=pair.includes(':')?pair.split(':'):[pair,pair];
+      const el=document.getElementById('rf-'+field); if(el) el.value=reg[key]||'';
+    });
+    document.getElementById('rf-cat').value=reg.category||'';
+    document.getElementById('rf-h').textContent='✏️ Editing: '+reg.name;
+    prevImg('rf-hero','rf-prev'); go('add-region',null); toast('Region loaded ✏️','ok');
+  } catch(e){toast('❌ Failed','er');}
 }
 
-async function deleteRegion(id) {
-  if(!confirm('Delete this region? This cannot be undone.')) return;
+function clearRegion() {
+  document.getElementById('rf-id').value='';
+  ['rf-name','rf-capital','rf-pop','rf-terrain','rf-desc','rf-overview','rf-hero','rf-gallery','rf-audio','rf-source','rf-tags'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('rf-cat').value=''; document.getElementById('rf-h').textContent='➕ Add New Region';
+  document.getElementById('rf-prev').classList.remove('vis');
+}
+
+async function saveRegion() {
+  const name=document.getElementById('rf-name').value.trim();
+  if(!name){toast('Region name required','er');return;}
+  const id=document.getElementById('rf-id').value;
+  const fd=new FormData();
+  const map={name:'rf-name',capital:'rf-capital',population:'rf-pop',terrain:'rf-terrain',description:'rf-desc',overview:'rf-overview',hero_image:'rf-hero',gallery_images:'rf-gallery',audio_files:'rf-audio',source:'rf-source',category:'rf-cat',tags:'rf-tags'};
+  Object.entries(map).forEach(([k,v])=>fd.append(k,document.getElementById(v)?.value||''));
   try {
-    const res = await fetch('/api/regions/' + id, {method: 'DELETE'});
-    if(res.ok) {
-      showToast('Region deleted', 'success');
-      loadRegions();
-    } else {
-      showToast('Failed to delete region', 'error');
-    }
-  } catch(e) {
-    showToast('Failed to delete region', 'error');
-  }
+    const r=await fetch(id?'/api/regions/'+id:'/api/regions',{method:id?'PUT':'POST',body:fd});
+    const d=await r.json();
+    if(r.ok){toast(id?'✅ Region updated!':'✅ Region created!','ok');if(!id)clearRegion();loadRegions();loadRegionsIntoSelects();}
+    else throw new Error(d.detail||'Failed');
+  } catch(e){toast('❌ '+e.message,'er');}
 }
 
+async function delRegion(id,name) {
+  if(!confirm('Delete region "'+name+'"?'))return;
+  try { const r=await fetch('/api/regions/'+id,{method:'DELETE'}); if(r.ok){toast('Deleted','ok');loadRegions();} } catch(e){}
+}
+
+async function loadRegionsIntoSelects() {
+  try {
+    const regs=await fetch('/api/regions').then(r=>r.json()).catch(()=>[]);
+    ['pf-region','up-region'].forEach(sid=>{
+      const sel=document.getElementById(sid); if(!sel)return;
+      const val=sel.value;
+      sel.innerHTML='<option value="">— None —</option>'+regs.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+      if(val)sel.value=val;
+    });
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// USERS
+// ═══════════════════════════════════════════════════════════
+async function loadUsers() {
+  try {
+    const r=await fetch('/api/admin/users',{credentials:'include'});
+    if(!r.ok){toast('Error '+r.status+' loading users — check Render logs','er');return;}
+    const users=await r.json();
+    document.getElementById('users-ct').textContent='— '+users.length+' total';
+    document.getElementById('users-tb').innerHTML=users.map(u=>
+      `<tr id="ur-${u.id}">
+        <td><strong>${u.username}</strong></td>
+        <td style="font-size:.76rem;color:var(--muted)">${u.email}</td>
+        <td><select class="rsel" onchange="setRole('${u.id}',this.value)">
+          <option value="user"    ${u.role==='user'   ?'selected':''}>User</option>
+          <option value="creator" ${u.role==='creator'?'selected':''}>Creator</option>
+          <option value="admin"   ${u.role==='admin'  ?'selected':''}>Admin</option>
+        </select></td>
+        <td><span class="chip ${(u.is_premium||u.plan==='premium')?'cgold':'ck'}">${(u.is_premium||u.plan==='premium')?'⭐ Premium':'Free'}</span></td>
+        <td><span class="chip ${u.is_active?'cg':'cr'}">${u.is_active?'Active':'Suspended'}</span></td>
+        <td style="font-size:.74rem;color:var(--muted)">${(u.created_at||'').split('T')[0]}</td>
+        <td class="acts">
+          <button class="ab ao" onclick="togglePremium('${u.id}')">${(u.is_premium||u.plan==='premium')?'→ Free':'→ Premium'}</button>
+          <button class="ab ${u.is_active?'ar':'ag'}" onclick="toggleSuspend('${u.id}',${u.is_active})">${u.is_active?'Suspend':'Restore'}</button>
+        </td>
+      </tr>`).join('');
+  } catch(e){console.warn(e);}
+}
+
+async function setRole(uid,role) {
+  const fd=new FormData(); fd.append('role',role);
+  try {
+    const r=await fetch('/api/admin/users/'+uid+'/role',{method:'PUT',body:fd,credentials:'include'});
+    if(r.ok)toast('✅ Role → '+role,'ok');
+    else{const d=await r.json();throw new Error(d.detail);}
+  } catch(e){toast('❌ '+e.message,'er');loadUsers();}
+}
+
+async function togglePremium(uid) {
+  try { const r=await fetch('/api/admin/users/'+uid+'/premium',{method:'PUT',credentials:'include'}); if(r.ok){toast('Premium toggled','ok');loadUsers();} } catch(e){toast('❌ Failed','er');}
+}
+
+async function toggleSuspend(uid,active) {
+  try { const r=await fetch('/api/admin/users/'+uid+'/suspend',{method:'PUT',credentials:'include'}); if(r.ok){toast(active?'User suspended':'User restored','ok');loadUsers();}else toast('❌ Suspend endpoint not available','warn'); } catch(e){}
+}
+
+async function createUser() {
+  const u=document.getElementById('cu-u').value.trim(),e=document.getElementById('cu-e').value.trim(),p=document.getElementById('cu-p').value,role=document.getElementById('cu-r').value;
+  if(!u||!e||!p){const err=document.getElementById('cu-err');err.textContent='All fields required';err.style.display='block';return;}
+  const fd=new FormData(); fd.append('username',u); fd.append('email',e); fd.append('password',p);
+  try {
+    const r=await fetch('/api/users/signup',{method:'POST',body:fd});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.detail||'Signup failed');
+    if(role!=='user'&&d.user_id){const fd2=new FormData();fd2.append('role',role);await fetch('/api/admin/users/'+d.user_id+'/role',{method:'PUT',body:fd2,credentials:'include'});}
+    closeM('cu-modal'); toast('✅ User "'+u+'" created!','ok'); loadUsers();
+    ['cu-u','cu-e','cu-p'].forEach(id=>document.getElementById(id).value='');
+  } catch(e2){const err=document.getElementById('cu-err');err.textContent=e2.message;err.style.display='block';}
+}
+
+// ═══════════════════════════════════════════════════════════
+// CREATORS
+// ═══════════════════════════════════════════════════════════
+async function loadCreators() {
+  try {
+    const r=await fetch('/api/creators');
+    const creators=r.ok?await r.json():[];
+    document.getElementById('creators-tb').innerHTML=creators.length?creators.map(c=>
+      `<tr><td><strong>${c.channel_name||c.username}</strong></td><td>${c.username}</td>
+       <td>${c.follower_count||0}</td><td>${c.post_count||0}</td>
+       <td class="acts"><button class="ab ar" onclick="setRole('${c.id}','user')">Revoke Creator</button></td></tr>`).join('')
+    :'<tr><td colspan="5" class="empty"><div class="ei">✍️</div>No creators yet</td></tr>';
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// NEWSLETTER
+// ═══════════════════════════════════════════════════════════
+async function loadSubs() {
+  try {
+    const r=await fetch('/api/newsletter/subscribers',{credentials:'include'});
+    if(!r.ok){document.getElementById('subs-tb').innerHTML='<tr><td colspan="3" class="empty">Not authorized</td></tr>';return;}
+    const subs=await r.json();
+    document.getElementById('subs-ct').textContent='— '+subs.length+' subscribers';
+    document.getElementById('subs-tb').innerHTML=subs.length?subs.map(s=>
+      `<tr><td><strong>${s.email}</strong></td><td>${s.full_name||'—'}</td>
+       <td style="font-size:.76rem;color:var(--muted)">${(s.created_at||'').split('T')[0]}</td></tr>`).join('')
+    :'<tr><td colspan="3" class="empty"><div class="ei">📧</div>No subscribers yet</td></tr>';
+  } catch(e){}
+}
+
+function exportSubs() {
+  const rows=[['Email','Name','Date']];
+  document.querySelectorAll('#subs-tb tr').forEach(tr=>{const tds=tr.querySelectorAll('td');if(tds.length>=3)rows.push([tds[0].textContent.trim(),tds[1].textContent.trim(),tds[2].textContent.trim()]);});
+  const csv=rows.map(r=>r.map(c=>'"'+c+'"').join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='subscribers.csv'; a.click();
+  toast('CSV downloaded!','ok');
+}
+
+// ═══════════════════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════════════════
+async function loadEvents() {
+  try {
+    const r=await fetch('/api/events');
+    const evs=r.ok?await r.json():[];
+    document.getElementById('events-tb').innerHTML=evs.length?evs.map(e=>
+      `<tr><td>${e.image_url?`<img src="${e.image_url}" style="width:52px;height:38px;object-fit:cover;border-radius:5px">`:'—'}</td>
+       <td><strong>${e.title}</strong></td><td>${e.event_date||'—'}</td><td>${e.location||'—'}</td>
+       <td style="font-size:.77rem;color:var(--muted);max-width:180px">${(e.description||'').slice(0,80)}</td>
+       <td><button class="ab ar" onclick="delEvent(${e.id})">Delete</button></td></tr>`).join('')
+    :'<tr><td colspan="6" class="empty"><div class="ei">🎉</div>No events yet</td></tr>';
+  } catch(e){}
+}
+
+async function saveEvent() {
+  if(!document.getElementById('ev-t').value.trim()){toast('Title required','er');return;}
+  const fd=new FormData();
+  fd.append('title',document.getElementById('ev-t').value); fd.append('description',document.getElementById('ev-d').value);
+  fd.append('event_date',document.getElementById('ev-dt').value); fd.append('location',document.getElementById('ev-l').value);
+  fd.append('image_url',document.getElementById('ev-i').value);
+  try {
+    const r=await fetch('/api/events',{method:'POST',body:fd,credentials:'include'});
+    if(r.ok){closeM('ev-modal');toast('🎉 Event created!','ok');loadEvents();['ev-t','ev-d','ev-dt','ev-l','ev-i'].forEach(id=>document.getElementById(id).value='');}
+    else{const d=await r.json();throw new Error(d.detail);}
+  } catch(e){toast('❌ '+e.message,'er');}
+}
+
+async function delEvent(id) {
+  try { const r=await fetch('/api/events/'+id,{method:'DELETE',credentials:'include'}); if(r.ok){toast('Deleted','ok');loadEvents();} } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
 // FILES
+// ═══════════════════════════════════════════════════════════
 async function loadFiles() {
+  const cat=document.getElementById('fc-filter')?.value||'';
   try {
-    const res = await fetch('/api/files');
-    const files = await res.json();
-    const grid = document.getElementById('files-grid');
-    
-    if(files.length === 0) {
-      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748b">No files uploaded yet.</div>';
-      return;
-    }
-    
-    grid.innerHTML = files.map(f => {
-      const icon = getFileIcon(f.category || f.mime_type);
-      return `<div class="file-card" onclick="viewFile('${f.file_url}')">
-        <div class="file-icon">${icon}</div>
-        <div class="file-name">${f.original_name || f.filename}</div>
-        <div class="file-meta">${(f.file_size_mb || 0).toFixed(2)} MB • ${f.category || 'File'}</div>
-        <div style="margin-top:12px;display:flex;gap:8px">
-          <button class="btn btn-outline" onclick="event.stopPropagation();downloadFile('${f.file_url}')" style="padding:4px 8px;font-size:0.75rem">⬇️ Download</button>
-          <button class="btn btn-outline" onclick="event.stopPropagation();deleteFile(${f.id})" style="padding:4px 8px;font-size:0.75rem;color:var(--danger)">🗑️</button>
-        </div>
-      </div>`;
-    }).join('');
-  } catch(e) {
-    showToast('Failed to load files', 'error');
-  }
+    const r=await fetch('/api/files'+(cat?'?category='+cat:''));
+    const files=r.ok?await r.json():[];
+    document.getElementById('files-ct').textContent='— '+files.length;
+    document.getElementById('files-tb').innerHTML=files.length?files.map(f=>{
+      const isImg=/\.(jpg|jpeg|png|gif|webp)$/i.test(f.filename||'');
+      const isAud=/\.(mp3|wav|ogg|m4a)$/i.test(f.filename||'');
+      const prev=isImg?`<img src="${f.file_url}" style="width:48px;height:36px;object-fit:cover;border-radius:4px">`:isAud?'🎵':'📄';
+      const fullUrl=window.location.origin+f.file_url;
+      return `<tr><td>${prev}</td>
+        <td><a href="${f.file_url}" target="_blank" style="color:var(--gold);font-weight:600">${f.original_name||f.filename}</a>
+        <div class="url-box" onclick="navigator.clipboard.writeText('${fullUrl}');toast('URL copied!','ok')">${fullUrl}</div></td>
+        <td><span class="tag">${f.category}</span></td><td style="font-size:.76rem">${f.file_size_mb||0} MB</td>
+        <td style="font-size:.75rem;color:var(--muted)">${(f.created_at||'').split('T')[0]}</td>
+        <td class="acts"><button class="ab ar" onclick="delFile(${f.id})">Delete</button></td></tr>`;
+    }).join(''):'<tr><td colspan="6" class="empty"><div class="ei">📁</div>No files uploaded yet</td></tr>';
+  } catch(e){}
 }
 
-function getFileIcon(mimeType) {
-  if(!mimeType) return '📄';
-  if(mimeType.includes('image')) return '🖼️';
-  if(mimeType.includes('video')) return '🎬';
-  if(mimeType.includes('audio')) return '🎵';
-  if(mimeType.includes('pdf')) return '📕';
-  if(mimeType.includes('word') || mimeType.includes('document')) return '📝';
-  return '📄';
-}
-
-async function uploadFiles(input) {
-  const files = input.files;
-  if(!files.length) return;
-  
-  for(let file of files) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('filename', file.name);
-    
-    // Determine category
-    if(file.type.includes('image')) formData.append('category', 'image');
-    else if(file.type.includes('video')) formData.append('category', 'video');
-    else if(file.type.includes('audio')) formData.append('category', 'audio');
-    else formData.append('category', 'document');
-    
-    try {
-      const res = await fetch('/api/upload/file', {method: 'POST', body: formData});
-      if(res.ok) {
-        showToast(`Uploaded: ${file.name}`, 'success');
-      }
-    } catch(e) {
-      showToast(`Failed to upload: ${file.name}`, 'error');
-    }
-  }
-  
-  loadFiles();
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  e.currentTarget.classList.remove('dragover');
-  const files = e.dataTransfer.files;
-  if(files.length) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.files = files;
-    uploadFiles(input);
-  }
-}
-
-async function deleteFile(id) {
-  if(!confirm('Delete this file?')) return;
+async function uploadFile(input) {
+  if(!input.files[0])return;
+  const file=input.files[0],fd=new FormData();
+  fd.append('file',file); fd.append('filename',file.name);
+  fd.append('category',document.getElementById('up-cat').value);
+  fd.append('region_id',document.getElementById('up-region').value||'');
+  fd.append('description',document.getElementById('up-desc').value);
+  fd.append('is_public','1');
+  const prog=document.getElementById('up-prog');
+  prog.textContent='⏳ Uploading '+file.name+'…';
   try {
-    const res = await fetch('/api/files/' + id, {method: 'DELETE'});
-    if(res.ok) {
-      showToast('File deleted', 'success');
-      loadFiles();
-    }
-  } catch(e) {
-    showToast('Failed to delete file', 'error');
-  }
+    const r=await fetch('/api/upload/file',{method:'POST',body:fd});
+    const d=await r.json();
+    if(r.ok){prog.innerHTML=`✅ Done! <a href="${d.url}" target="_blank" style="color:var(--gold)">${d.original_name}</a>`;toast('✅ Uploaded!','ok');loadFiles();}
+    else throw new Error(d.detail||'Upload failed');
+  } catch(e){prog.textContent='❌ '+e.message;toast('❌ '+e.message,'er');}
 }
 
-// VIDEOS, AUDIO, DOCUMENTS
-function loadVideos() { showToast('Video loading - implement API endpoint', 'warning'); }
-function loadAudio() { showToast('Audio loading - implement API endpoint', 'warning'); }
-function loadDocuments() { showToast('Documents loading - implement API endpoint', 'warning'); }
-
-function openVideoModal() { document.getElementById('video-modal').classList.add('active'); }
-function openAudioModal() { document.getElementById('audio-modal').classList.add('active'); }
-
-function saveVideo(e) {
-  e.preventDefault();
-  showToast('Video saved (implement API)', 'success');
-  closeModal('video-modal');
+async function delFile(id) {
+  if(!confirm('Delete this file?'))return;
+  try { const r=await fetch('/api/files/'+id,{method:'DELETE'}); if(r.ok){toast('Deleted','ok');loadFiles();} } catch(e){}
 }
 
-function saveAudio(e) {
-  e.preventDefault();
-  showToast('Audio saved (implement API)', 'success');
-  closeModal('audio-modal');
+// ═══════════════════════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════════════════════
+async function loadChat() {
+  try {
+    const r=await fetch('/api/chat');
+    const msgs=r.ok?await r.json():[];
+    document.getElementById('chat-ct').textContent='— '+msgs.length;
+    document.getElementById('chat-tb').innerHTML=msgs.length?msgs.map(m=>
+      `<tr><td><strong>${m.username}</strong></td><td style="max-width:280px">${m.message}</td>
+       <td style="font-size:.76rem;color:var(--muted)">${m.region_id||'—'}</td>
+       <td style="font-size:.74rem;color:var(--muted)">${(m.created_at||'').replace('T',' ').split('.')[0]}</td>
+       <td><button class="ab ar" onclick="delMsg(${m.id})">Delete</button></td></tr>`).join('')
+    :'<tr><td colspan="5" class="empty"><div class="ei">💬</div>No messages</td></tr>';
+  } catch(e){}
 }
 
-// USERS & POSTS
-function loadUsers() { showToast('User loading - implement API', 'warning'); }
-function loadPosts() { showToast('Posts loading - implement API', 'warning'); }
+async function delMsg(id) {
+  try { const r=await fetch('/api/chat/'+id,{method:'DELETE',credentials:'include'}); if(r.ok){toast('Deleted','ok');loadChat();} } catch(e){}
+}
 
+// ═══════════════════════════════════════════════════════════
+// PAYMENTS
+// ═══════════════════════════════════════════════════════════
+async function loadPayments() {
+  try {
+    const r=await fetch('/api/admin/users',{credentials:'include'});
+    const users=r.ok?await r.json():[];
+    const premium=users.filter(u=>u.is_premium||u.plan==='premium');
+    document.getElementById('pay-tb').innerHTML=premium.length?premium.map(u=>
+      `<tr><td><strong>${u.username}</strong></td><td style="font-size:.77rem;color:var(--muted)">${u.email}</td>
+       <td style="color:var(--green);font-weight:700">GH₵150</td>
+       <td><span class="chip cgold">⭐ Premium</span></td>
+       <td><span class="chip cg">Active</span></td>
+       <td style="font-size:.74rem;color:var(--muted)">${(u.created_at||'').split('T')[0]}</td></tr>`).join('')
+    :'<tr><td colspan="6" class="empty"><div class="ei">💳</div>No premium users yet</td></tr>';
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════════
+async function loadLiveStats() {
+  try {
+    const [sr,ur,subr]=await Promise.all([fetch('/api/stats'),fetch('/api/admin/users',{credentials:'include'}),fetch('/api/newsletter/subscribers',{credentials:'include'})]);
+    const s=sr.ok?await sr.json():{};
+    const u=ur.ok?await ur.json():[];
+    const sub=subr.ok?await subr.json():[];
+    const creators=u.filter(x=>x.role==='creator');
+    const premium=u.filter(x=>x.is_premium||x.plan==='premium');
+    document.getElementById('live-stats').innerHTML=`
+      👥 Total Users: <strong>${s.user_count||u.length||0}</strong><br>
+      ✍️ Creators: <strong>${s.total_creators||creators.length||0}</strong><br>
+      📝 Published Posts: <strong>${s.total_posts||0}</strong><br>
+      💬 Comments: <strong>${s.total_comments||0}</strong><br>
+      ❤️ Follows: <strong>${s.total_follows||0}</strong><br>
+      ⭐ Premium Members: <strong>${premium.length}</strong><br>
+      🗺 Regions: <strong>${s.total_regions||0}</strong><br>
+      🎵 Audio Files: <strong>${s.with_audio||0}</strong><br>
+      🖼 Image Files: <strong>${s.with_images||0}</strong><br>
+      📧 Subscribers: <strong>${sub.length}</strong>`;
+  } catch(e){}
+}
+
+async function promoteUser() {
+  const val=document.getElementById('s-pu').value.trim(),role=document.getElementById('s-pr').value,res=document.getElementById('s-pres');
+  if(!val){res.textContent='⚠️ Enter a username or email';res.style.color='var(--orange)';return;}
+  try {
+    const r=await fetch('/api/admin/users',{credentials:'include'});
+    const users=r.ok?await r.json():[];
+    const user=users.find(u=>u.username===val||u.email===val);
+    if(!user){res.textContent='❌ User "'+val+'" not found';res.style.color='var(--red)';return;}
+    const fd=new FormData(); fd.append('role',role);
+    const r2=await fetch('/api/admin/users/'+user.id+'/role',{method:'PUT',body:fd,credentials:'include'});
+    if(r2.ok){res.textContent='✅ '+user.username+' is now '+role;res.style.color='var(--green)';toast('Role updated!','ok');}
+  } catch(e){res.textContent='❌ '+e.message;res.style.color='var(--red)';}
+}
+
+async function saveAnn() {
+  const msg=document.getElementById('s-ann').value.trim();
+  if(!msg){toast('Enter a message first','er');return;}
+  try {
+    const existing=await fetch('/api/theme').then(r=>r.json()).catch(()=>({}));
+    existing.announcement=msg; existing.ann_type=document.getElementById('s-at').value;
+    const fd=new FormData(); fd.append('theme',JSON.stringify(existing));
+    const r=await fetch('/api/theme',{method:'POST',body:fd});
+    if(r.ok)toast('📢 Announcement saved!','ok');
+  } catch(e){toast('❌ Failed','er');}
+}
+
+async function saveTheme() {
+  const theme={gold:document.getElementById('s-gold').value,ink:document.getElementById('s-ink').value,bg:document.getElementById('s-bg').value};
+  const fd=new FormData(); fd.append('theme',JSON.stringify(theme));
+  try { const r=await fetch('/api/theme',{method:'POST',body:fd}); if(r.ok)toast('🎨 Theme saved!','ok'); } catch(e){toast('❌ Failed','er');}
+}
+
+async function importJSON() {
+  const raw=document.getElementById('import-json').value.trim(),res=document.getElementById('import-res');
+  if(!raw){res.textContent='Paste JSON first';res.style.color='var(--orange)';return;}
+  try {
+    const data=JSON.parse(raw);
+    const r=await fetch('/api/import/json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    const d=await r.json();
+    if(r.ok){res.textContent='✅ Imported '+d.imported+' regions!';res.style.color='var(--green)';toast('Import done!','ok');loadRegions();}
+    else throw new Error(d.detail);
+  } catch(e){res.textContent='❌ '+e.message;res.style.color='var(--red)';}
+}
+
+// ═══════════════════════════════════════════════════════════
 // UTILS
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-function filterTable(id, query) { /* Implement filtering */ }
-function filterFiles(type) { /* Implement filtering */ }
-function viewFile(url) { window.open(url, '_blank'); }
-function downloadFile(url) { window.open(url, '_download'); }
-function saveSettings() { showToast('Settings saved', 'success'); }
-
-function showToast(message, type = 'success') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.className = 'toast show ' + type;
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-// Initialize
-loadRegions();
+// ═══════════════════════════════════════════════════════════
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+function filterTbl(id,q){document.querySelectorAll('#'+id+' tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});}
+function prevImg(inputId,previewId){const url=document.getElementById(inputId)?.value.trim(),img=document.getElementById(previewId);if(!img)return;if(url){img.src=url;img.classList.add('vis');}else img.classList.remove('vis');}
+function viewC(title,body){document.getElementById('vm-t').textContent=title;document.getElementById('vm-b').textContent=body;openM('view-modal');}
+function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ').replace(/"/g,'').slice(0,400);}
+let _tt;
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='toast on t'+(type||'i');clearTimeout(_tt);_tt=setTimeout(()=>el.className='toast',4800);}
 </script>
-
 </body>
 </html>
