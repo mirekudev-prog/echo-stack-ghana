@@ -151,6 +151,32 @@
             color: white;
         }
         .sidebar-nav a svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .sidebar-nav a { position: relative; }
+        .nav-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 9px;
+            background: #cc2929;
+            color: white;
+            font-size: 0.62rem;
+            font-weight: 700;
+            margin-left: auto;
+        }
+        /* Creator badge on user pill */
+        .creator-badge {
+            font-size: 0.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #c9933a, #e8b45a);
+            color: #1a1e29;
+            padding: 1px 7px;
+            border-radius: 10px;
+            margin-top: 3px;
+            display: inline-block;
+        }
 
         .sidebar-footer {
             padding: 1rem 1.25rem 1.5rem;
@@ -403,17 +429,49 @@
         <div class="nav-label">Explore</div>
         <a href="/app" class="active">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
-            Map & Regions
+            Map &amp; Regions
         </a>
         <a href="/dashboard">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v12a2 2 0 01-2 2z"/><path d="M16 2v4"/><path d="M8 10h8M8 14h6"/></svg>
             News Feed
+        </a>
+        <a href="/explore">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            Explore
+        </a>
+
+        <div class="nav-label">Community</div>
+        <a href="/chat">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            Community Chat
+            <span class="nav-badge" id="chat-badge" style="display:none"></span>
+        </a>
+        <a href="/subscriptions">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            Subscriptions
+        </a>
+        <a href="/subscribers" id="nav-subscribers" style="display:none">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="23" y2="8"/><line x1="21" y1="6" x2="21" y2="10"/></svg>
+            My Subscribers
+            <span class="nav-badge" id="sub-count" style="background:rgba(201,147,58,0.3);color:#c9933a;"></span>
+        </a>
+        <a href="/following">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><polyline points="16,11 18,13 22,9"/></svg>
+            Following
+        </a>
+        <a href="/activity">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Activity
         </a>
 
         <div class="nav-label">Account</div>
         <a href="/user-profile">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             My Profile
+        </a>
+        <a href="/creator" id="nav-creator" style="display:none">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Creator Studio
         </a>
         <a href="/user-settings">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -499,7 +557,20 @@
     if (currentUser.username) {
         document.getElementById('user-name').textContent = currentUser.username;
         document.getElementById('user-av').textContent = currentUser.username.charAt(0).toUpperCase();
-        document.getElementById('user-plan').textContent = currentUser.plan === 'premium' ? '⭐ Premium' : 'Free Plan';
+        var planLabel = currentUser.plan === 'premium' ? '⭐ Premium' : 'Free Plan';
+        document.getElementById('user-plan').textContent = planLabel;
+
+        // Show creator-specific links
+        var isCreator = currentUser.role === 'creator' || currentUser.role === 'admin' || currentUser.role === 'superuser';
+        if (isCreator) {
+            var creatorEl = document.getElementById('nav-creator');
+            var subEl = document.getElementById('nav-subscribers');
+            if (creatorEl) creatorEl.style.display = 'flex';
+            if (subEl) subEl.style.display = 'flex';
+            // Add creator badge to user pill
+            var planEl = document.getElementById('user-plan');
+            planEl.innerHTML = planLabel + ' <span class="creator-badge">Creator</span>';
+        }
     }
 
     // ── Sidebar toggle ──
@@ -591,10 +662,36 @@
     }
 
     function showRegionDetail(key) {
-        var name = key.split('-').map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(' ');
-        var r = allRegions.find(function(r){ return r.name.toLowerCase().includes(name.toLowerCase()) || r.name.toLowerCase().replace(/ region$/,'').replace(/ /g,'-') === key; });
-        if (!r && allRegions.length) r = allRegions[0];
-        if (r) showRegionDetailFromData(r);
+        // Exact key match: normalize region name to key format
+        var r = allRegions.find(function(reg){
+            var k = reg.name.toLowerCase().replace(/\s*region\s*$/i,'').trim().replace(/ /g,'-');
+            return k === key;
+        });
+        if (r) {
+            showRegionDetailFromData(r);
+        } else {
+            // Region on map has no data yet — never fall back to wrong region
+            var displayName = key.split('-').map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(' ') + ' Region';
+            showRegionNoData(displayName);
+        }
+    }
+
+    function showRegionNoData(name) {
+        document.getElementById('detail-code').textContent = '—';
+        document.getElementById('detail-title').textContent = name;
+        document.getElementById('detail-capital').textContent = 'No data uploaded yet';
+        document.getElementById('detail-content').innerHTML =
+            '<div style="text-align:center;padding:3rem 1rem;">'
+            +'<div style="font-size:3.5rem;margin-bottom:1rem;">🗺️</div>'
+            +'<h3 style="color:#1a1e29;margin-bottom:0.5rem;">Coming Soon</h3>'
+            +'<p style="color:#888;font-size:0.9rem;line-height:1.7;max-width:280px;margin:0 auto;">'
+            +'The <strong>'+name+'</strong> archive is being built. '
+            +'Check back soon, or submit a story to help preserve this region's heritage!'
+            +'</p>'
+            +'<a href="/signup" style="display:inline-block;margin-top:1.5rem;padding:0.65rem 1.5rem;background:#0077b6;color:white;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600;">📝 Submit a Story</a>'
+            +'</div>';
+        document.getElementById('detail-panel').classList.add('show');
+        document.getElementById('detail-panel').scrollTop = 0;
     }
 
     function showRegionDetailFromData(region) {
