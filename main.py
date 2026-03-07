@@ -980,28 +980,151 @@ async def ai_chat(message: str = Form(...), region_context: str = Form(""),
                   request: Request = None, db: Session = Depends(get_db)):
     try:
         user = get_user_from_request(request, db)
-        if not user or (not user.is_premium and user.role not in ["superuser", "admin", "creator"]):
+        is_premium = user and (user.is_premium or user.role in ["superuser", "admin", "creator"])
+
+        if not user:
+            return {"reply": "EchoBot is a premium feature 🔒 Subscribe for GH₵150/month to unlock unlimited AI heritage assistance!", "success": False, "locked": True}
+        if not is_premium:
             return {"reply": "EchoBot is a premium feature 🔒 Subscribe for GH₵150/month to unlock unlimited AI heritage assistance!", "success": False, "locked": True}
         if not HF_TOKEN:
-            return {"reply": "EchoBot is not configured. Add HF_TOKEN to Render environment.", "success": False}
-        system_prompt = "You are EchoBot, a friendly AI heritage guide for Ghana. Keep answers concise (3-5 sentences), warm, and educational."
+            return {"reply": "EchoBot is not configured yet. Ask your admin to add HF_TOKEN to Render environment variables.", "success": False}
+
+        # Load all regions from DB to give EchoBot site knowledge
+        try:
+            regions = db.query(models.Region).all()
+            regions_summary = ""
+            for r in regions:
+                regions_summary += f"- {r.name}"
+                if r.capital: regions_summary += f" (Capital: {r.capital})"
+                if r.population: regions_summary += f", Population: {r.population}"
+                if r.terrain: regions_summary += f", Terrain: {r.terrain}"
+                if r.category: regions_summary += f", Category: {r.category}"
+                if r.description: regions_summary += f"\n  Description: {r.description[:300]}"
+                regions_summary += "\n"
+        except:
+            regions_summary = "Region data unavailable."
+
+        # Load sections/categories
+        try:
+            sections = db.query(models.Section).all()
+            sections_text = ", ".join([s.name for s in sections]) if sections else "None yet"
+        except:
+            sections_text = "Unknown"
+
+        # Load events
+        try:
+            events = db.query(models.Event).limit(5).all() if hasattr(models, "Event") else []
+            events_text = ""
+            for ev in events:
+                events_text += f"- {ev.title}"
+                if hasattr(ev, "date") and ev.date: events_text += f" ({ev.date})"
+                if hasattr(ev, "location") and ev.location: events_text += f" at {ev.location}"
+                events_text += "\n"
+            if not events_text: events_text = "No upcoming events."
+        except:
+            events_text = "Events unavailable."
+
+        user_plan = "Premium" if is_premium else "Free"
+
+        system_prompt = f"""You are EchoBot, the AI heritage guide for EchoStack — a platform dedicated to preserving and sharing Ghana's cultural heritage across all 16 regions.
+
+ABOUT ECHOSTACK:
+EchoStack is a Ghana heritage platform where users can explore the history, culture, traditions, music, festivals, and oral stories of Ghana's 16 regions. Content creators share heritage content and users can subscribe to creators, follow people, and engage with community chat.
+
+THE USER:
+- Plan: {user_plan}
+- Premium users get unlimited AI assistance. Free users have limited access.
+
+GHANA'S 16 REGIONS ON THIS PLATFORM (current site data):
+{regions_summary if regions_summary else "No regions uploaded yet."}
+
+SITE CATEGORIES: {sections_text}
+
+UPCOMING EVENTS:
+{events_text}
+
+YOUR ROLE:
+- Answer questions about Ghana's heritage, culture, history, traditions, festivals, food, music, language, and people.
+- When asked about a specific region, use the data above. If a region has no data yet, say so honestly and share your own knowledge about it.
+- You can explain how EchoStack works (exploring regions, creator subscriptions, community chat, premium features).
+- Do NOT reveal or discuss any user's personal information, usernames, or accounts.
+- Keep answers warm, educational, and concise (3-6 sentences unless more detail is needed).
+- Use occasional Ghanaian greetings like "Akwaaba!" to feel authentic.
+- If asked something unrelated to Ghana or EchoStack, gently redirect to heritage topics."""
+
         if region_context:
-            system_prompt += f"\nThe user is currently viewing the {region_context} region."
-        full_prompt = f"<s>[INST] {system_prompt}\nUser question: {message} [/INST]"
-        payload = json.dumps({"inputs": full_prompt, "parameters": {"max_new_tokens": 300, "temperature": 0.7, "do_sample": True, "return_full_text": False}}).encode("utf-8")
-        req = urllib.request.Request(
-            "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
-            data=payload,
-            headers={"Authorization": f"Bearer {HF_TOKEN}", "Content-Type": "application/json"},
-            method="POST"
-        )
-        with urllib.request.urlopen(req, timeout=30) as response:
-            result = json.loads(response.read().decode("utf-8"))
-        reply = result[0].get("generated_text", "").strip() if isinstance(result, list) and result else "I'm having trouble responding right now."
-        return {"reply": reply, "success": True, "locked": False}
+            system_prompt += f"\n\nCURRENT CONTEXT: The user is viewing the {region_context} region — prioritise information about this region."
+
+        full_prompt = f"<s>[INST] {system_prompt}\n\nUser: {message} [/INST]"
+        payload = json.dumps({
+            "inputs": full_prompt,
+            "parameters": {
+                "max_new_tokens": 400,
+                "temperature": 0.7,
+                "do_sample": True,
+                "return_full_text": False,
+                "stop": ["[INST]", "</s>"]
+            }
+        }).encode("utf-8")
+
+        # Retry up to 3 times to handle HuggingFace cold-start (503 model loading)
+        last_error = ""
+        for attempt in range(3):
+            try:
+                req = urllib.request.Request(
+                    "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+                    data=payload,
+                    headers={"Authorization": f"Bearer {HF_TOKEN}", "Content-Type": "application/json"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=45) as response:
+                    raw = response.read().decode("utf-8")
+                    result = json.loads(raw)
+
+                # Handle HuggingFace loading response
+                if isinstance(result, dict) and result.get("error", "").lower().find("loading") != -1:
+                    estimated = result.get("estimated_time", 20)
+                    if attempt < 2:
+                        import time
+                        time.sleep(min(estimated, 15))
+                        continue
+                    return {"reply": f"EchoBot is loading (model cold start). Please wait about {int(estimated)} seconds and try again!", "success": False, "warming": True}
+
+                reply = ""
+                if isinstance(result, list) and result:
+                    reply = result[0].get("generated_text", "").strip()
+                elif isinstance(result, dict):
+                    reply = result.get("generated_text", result.get("error", "")).strip()
+
+                if reply:
+                    # Clean up any leaked prompt fragments
+                    reply = reply.replace("[INST]", "").replace("[/INST]", "").replace("</s>", "").strip()
+                    return {"reply": reply, "success": True, "locked": False}
+                else:
+                    last_error = "Empty response"
+                    break
+
+            except urllib.error.HTTPError as e:
+                body = e.read().decode("utf-8") if e.fp else ""
+                print(f"HF HTTP {e.code}: {body}")
+                if e.code == 503:
+                    last_error = "Model loading"
+                    import time
+                    time.sleep(10)
+                    continue
+                last_error = f"HTTP {e.code}"
+                break
+            except Exception as ex:
+                last_error = str(ex)
+                print(f"AI attempt {attempt} error: {ex}")
+                break
+
+        print(f"AI final error: {last_error}")
+        return {"reply": "I'm having a moment — please try again! If this keeps happening, the AI model may need a minute to warm up.", "success": False}
+
     except Exception as e:
-        print(f"AI error: {e}")
-        return {"reply": "EchoBot is warming up! Please try again in a moment.", "success": False}
+        print(f"AI chat outer error: {e}")
+        return {"reply": "Something went wrong on my end. Please try again shortly!", "success": False}
 
 # ============================================
 # PAYSTACK PAYMENTS
