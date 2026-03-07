@@ -1468,6 +1468,35 @@ async def get_activity(request: Request, db: Session = Depends(get_db)):
     except:
         return []
 
+@app.get("/api/creators")
+def get_creators(db: Session = Depends(get_db)):
+    """Get all creator channels"""
+    try:
+        channels = db.query(models.CreatorChannel).filter(
+            models.CreatorChannel.is_active == 1
+        ).all()
+        
+        result = []
+        for c in channels:
+            user = db.query(models.User).filter(models.User.id == c.user_id).first()
+            post_count = db.query(models.Post).filter(
+                models.Post.author_id == c.user_id,
+                models.Post.status == "published"
+            ).count()
+            
+            result.append({
+                "id": c.id,
+                "username": user.username if user else "unknown",
+                "channel_name": c.channel_name or (user.username if user else ""),
+                "follower_count": 0,
+                "post_count": post_count,
+                "role": user.role if user else "creator"
+            })
+        return result
+    except Exception as e:
+        print(f"❌ Creators error: {e}")
+        return []
+        
 # ============================================
 # APP MOUNT FOR DEPENDENCY
 # ============================================
