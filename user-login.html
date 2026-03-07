@@ -3,141 +3,530 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - EchoStack</title>
-    <meta name="theme-color" content="#1a1e29">
+    <title>Sign In — EchoStack</title>
+    <meta name="theme-color" content="#0a0d14">
     <link rel="manifest" href="/manifest.json">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="/echostack-logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <style>
-        :root { --brand-dark: #1a1e29; --brand-blue: #0077b6; --gold: #C8962E; }
-        body {
-            font-family: Georgia, serif;
-            background: linear-gradient(135deg, #f5f0e8 0%, #ffffff 100%);
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink:    #0a0d14;
+            --ink2:   #0f1420;
+            --gold:   #C8962E;
+            --gold2:  #E8B84B;
+            --red:    #CE1126;
+            --green:  #006B3F;
+            --cream:  #FAF6EF;
+            --muted:  rgba(255,255,255,0.35);
+            --border: rgba(200,150,46,0.18);
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--ink);
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* ─── LAYOUT ─── */
+        .page {
             min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            align-items: stretch;
         }
-        .login-card {
-            background: white;
-            padding: 2.5rem;
+
+        /* ─── LEFT PANEL (desktop only) ─── */
+        .left {
+            display: none;
+            flex: 1;
+            position: relative;
+            background: #060810;
+            overflow: hidden;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 52px;
+        }
+        @media (min-width: 800px) { .left { display: flex; } }
+
+        /* Kente grid */
+        .kente {
+            position: absolute;
+            inset: 0;
+            background-image:
+                repeating-linear-gradient(0deg,   transparent, transparent 39px, rgba(200,150,46,0.06) 39px, rgba(200,150,46,0.06) 41px),
+                repeating-linear-gradient(90deg,  transparent, transparent 39px, rgba(200,150,46,0.06) 39px, rgba(200,150,46,0.06) 41px),
+                repeating-linear-gradient(45deg,  transparent, transparent 14px, rgba(0,107,63,0.04) 14px, rgba(0,107,63,0.04) 16px),
+                repeating-linear-gradient(-45deg, transparent, transparent 14px, rgba(206,17,38,0.04) 14px, rgba(206,17,38,0.04) 16px);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            pointer-events: none;
+        }
+        .orb-gold { width: 420px; height: 420px; background: rgba(200,150,46,0.1); top: -100px; left: -100px; }
+        .orb-blue { width: 280px; height: 280px; background: rgba(0,107,63,0.08); bottom: 80px; right: -60px; }
+
+        /* Floating symbols */
+        .sym {
+            position: absolute;
+            font-size: 6rem;
+            opacity: 0.035;
+            pointer-events: none;
+            animation: float 18s ease-in-out infinite alternate;
+        }
+        .sym:nth-child(1) { top: 12%; left: 8%;  animation-delay: 0s; }
+        .sym:nth-child(2) { top: 45%; right: 12%; animation-delay: -6s;  font-size: 8rem; }
+        .sym:nth-child(3) { bottom: 22%; left: 22%; animation-delay: -12s; font-size: 4.5rem; }
+        @keyframes float {
+            from { transform: translateY(0) rotate(0deg); }
+            to   { transform: translateY(-24px) rotate(8deg); }
+        }
+
+        /* Ghana flag stripes */
+        .flag {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 28px;
+        }
+        .flag span {
+            height: 3px;
+            flex: 1;
+            border-radius: 3px;
+        }
+        .flag .r { background: var(--red); }
+        .flag .g { background: var(--gold); }
+        .flag .n { background: var(--green); }
+
+        .left-quote {
+            position: relative;
+            z-index: 2;
+        }
+        .left-quote blockquote {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.65rem;
+            color: rgba(255,255,255,0.82);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .left-quote blockquote em {
+            color: var(--gold2);
+            font-style: italic;
+        }
+        .left-quote cite {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.28);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-style: normal;
+        }
+
+        /* region dots row */
+        .region-dots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 32px;
+        }
+        .region-dots span {
+            font-size: 0.62rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.22);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            padding: 3px 9px;
             border-radius: 20px;
-            box-shadow: 0 12px 40px rgba(26,30,41,0.12);
-            max-width: 420px;
+        }
+
+        /* ─── RIGHT PANEL (form) ─── */
+        .right {
             width: 100%;
+            max-width: 500px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 32px 48px;
+            background: var(--ink);
         }
-        .btn-primary {
-            background-color: var(--brand-dark) !important;
-            color: white !important;
-            transition: background .2s;
+        @media (min-width: 800px) { .right { padding: 60px 52px; } }
+
+        /* Ghana flag bar — top on mobile, left side on desktop */
+        .flag-bar {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--red) 33.3%, var(--gold) 33.3% 66.6%, var(--green) 66.6%);
         }
-        .btn-primary:hover { background-color: var(--brand-blue) !important; }
-        input { border: 1.5px solid #e2e8f0; transition: border-color .2s; }
-        input:focus { outline: none; border-color: var(--brand-blue); }
-        .logo-bar { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 6px; }
-        .logo-bar img { width: 40px; height: 40px; object-fit: contain; }
-        .logo-bar span { font-size: 1.4rem; font-weight: bold; color: var(--brand-dark); }
+
+        /* Top nav */
+        .topnav {
+            position: absolute;
+            top: 18px; left: 32px; right: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        @media (min-width: 800px) { .topnav { left: 52px; right: 52px; } }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            text-decoration: none;
+        }
+        .brand img {
+            width: 30px; height: 30px;
+            border-radius: 7px;
+            object-fit: contain;
+            background: rgba(255,255,255,0.05);
+        }
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .back-link {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color .2s;
+        }
+        .back-link:hover { color: var(--gold); }
+
+        /* ── Form content ── */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(200,150,46,0.08);
+            border: 1px solid rgba(200,150,46,0.22);
+            color: var(--gold2);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 5px 13px;
+            border-radius: 30px;
+            margin-bottom: 22px;
+        }
+        .pill-dot {
+            width: 6px; height: 6px;
+            background: var(--gold);
+            border-radius: 50%;
+            animation: blink 2s ease-in-out infinite;
+        }
+        @keyframes blink {
+            0%,100% { opacity:1; transform:scale(1); }
+            50%      { opacity:0.3; transform:scale(0.6); }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 2.6rem);
+            line-height: 1.1;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        h1 .accent { color: var(--gold); }
+
+        .sub {
+            font-size: 0.88rem;
+            color: var(--muted);
+            line-height: 1.65;
+            margin-bottom: 38px;
+        }
+
+        /* Fields */
+        .field { margin-bottom: 20px; }
+        .field label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.38);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 8px;
+        }
+        .input-wrap { position: relative; }
+        .input-icon {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.85rem;
+            opacity: 0.35;
+            pointer-events: none;
+            line-height: 1;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1.5px solid rgba(255,255,255,0.08);
+            color: #fff;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.92rem;
+            padding: 13px 16px 13px 40px;
+            border-radius: 11px;
+            outline: none;
+            transition: border-color .2s, background .2s, box-shadow .2s;
+            -webkit-appearance: none;
+        }
+        input::placeholder { color: rgba(255,255,255,0.18); }
+        input:focus {
+            border-color: var(--gold);
+            background: rgba(200,150,46,0.05);
+            box-shadow: 0 0 0 3px rgba(200,150,46,0.08);
+        }
+
+        /* Submit */
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+            color: #0a0d14;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            border: none;
+            border-radius: 11px;
+            cursor: pointer;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: transform .15s, box-shadow .2s;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18), transparent 60%);
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,150,46,0.28); }
+        .btn:active { transform: translateY(0); box-shadow: none; }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Divider */
+        .sep {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 26px 0;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.15);
+            letter-spacing: 0.08em;
+        }
+        .sep::before, .sep::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.07);
+        }
+
+        /* Footer */
+        .footer-links {
+            text-align: center;
+            font-size: 0.84rem;
+            color: rgba(255,255,255,0.32);
+        }
+        .footer-links a {
+            color: var(--gold2);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color .2s;
+        }
+        .footer-links a:hover { color: #fff; }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 28px; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #141824;
+            border: 1px solid rgba(200,150,46,0.25);
+            color: #fff;
+            padding: 13px 26px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+            transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+            z-index: 9999;
+            white-space: nowrap;
+            pointer-events: none;
+            max-width: 90vw;
+            text-align: center;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+        #toast.ok { border-color: rgba(0,107,63,0.5);  background: #0a1f16; }
+        #toast.er { border-color: rgba(206,17,38,0.5); background: #1f0a0d; }
+
+        /* Stagger animation */
+        .anim { opacity:0; transform:translateY(18px); animation: up .5s ease forwards; }
+        .anim:nth-child(1){ animation-delay:.05s }
+        .anim:nth-child(2){ animation-delay:.12s }
+        .anim:nth-child(3){ animation-delay:.18s }
+        .anim:nth-child(4){ animation-delay:.25s }
+        .anim:nth-child(5){ animation-delay:.32s }
+        .anim:nth-child(6){ animation-delay:.38s }
+        .anim:nth-child(7){ animation-delay:.44s }
+        @keyframes up { to { opacity:1; transform:translateY(0); } }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <div class="text-center mb-8">
-            <div class="logo-bar">
-                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
-                <span>EchoStack</span>
+<div class="page">
+
+    <!-- ═══ LEFT PANEL ═══ -->
+    <div class="left">
+        <div class="kente"></div>
+        <div class="orb orb-gold"></div>
+        <div class="orb orb-blue"></div>
+        <div class="sym">✦</div>
+        <div class="sym">◈</div>
+        <div class="sym">⬡</div>
+
+        <div class="left-quote">
+            <div class="flag">
+                <span class="r"></span>
+                <span class="g"></span>
+                <span class="n"></span>
             </div>
-            <h1 class="text-2xl font-bold mb-1" style="color:#1a1e29">Welcome Back</h1>
-            <p class="text-gray-500 text-sm">Sign in to continue exploring Ghana's heritage</p>
+            <blockquote>
+                "Every region holds a<br>
+                <em>story worth telling</em> —<br>
+                and a voice worth hearing."
+            </blockquote>
+            <cite>— Ghana's Living Heritage Archive</cite>
+
+            <div class="region-dots">
+                <span>Greater Accra</span><span>Ashanti</span><span>Northern</span>
+                <span>Volta</span><span>Western</span><span>Eastern</span>
+                <span>Bono</span><span>Oti</span><span>Savannah</span>
+                <span>+ 7 more</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ RIGHT PANEL ═══ -->
+    <div class="right">
+        <div class="flag-bar"></div>
+
+        <div class="topnav">
+            <a href="/" class="brand">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span class="brand-name">EchoStack</span>
+            </a>
+            <a href="/" class="back-link">← Home</a>
         </div>
 
-        <form id="login-form" class="space-y-4">
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-gray-600">Email or Username</label>
-                <input type="text" id="username" required
-                    class="w-full p-3 rounded-lg text-sm"
-                    placeholder="Enter your email or username"
-                    autocomplete="username">
+        <!-- form content with stagger animation -->
+        <div class="pill anim"><div class="pill-dot"></div>🇬🇭 Ghana Heritage Platform</div>
+
+        <h1 class="anim">Welcome<br><span class="accent">Back.</span></h1>
+        <p class="sub anim">Sign in to explore Ghana's 16 regions,<br>stories, audio, and living culture.</p>
+
+        <form id="login-form">
+            <div class="field anim">
+                <label>Email or Username</label>
+                <div class="input-wrap">
+                    <span class="input-icon">@</span>
+                    <input type="text" id="username" required
+                        placeholder="your@email.com or username"
+                        autocomplete="username">
+                </div>
             </div>
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-gray-600">Password</label>
-                <input type="password" id="pw" required
-                    class="w-full p-3 rounded-lg text-sm"
-                    placeholder="Your password"
-                    autocomplete="current-password">
+
+            <div class="field anim">
+                <label>Password</label>
+                <div class="input-wrap">
+                    <span class="input-icon">🔑</span>
+                    <input type="password" id="pw" required
+                        placeholder="Your password"
+                        autocomplete="current-password">
+                </div>
             </div>
-            <button type="submit" id="submit-btn"
-                class="w-full btn-primary py-3 rounded-lg font-bold text-sm mt-2">
+
+            <button type="submit" class="btn anim" id="submit-btn">
                 Sign In →
             </button>
         </form>
 
-        <p class="text-center text-sm text-gray-500 mt-6">
-            Don't have an account?
-            <a href="/signup" class="font-semibold hover:underline" style="color:#0077b6">Create Account</a>
-        </p>
-        <p class="text-center text-sm text-gray-400 mt-3">
-            <a href="/" class="hover:underline">← Back to Home</a>
-        </p>
-        <!-- NO admin link here — admin access is via direct URL only -->
+        <div class="sep anim">or</div>
+
+        <div class="footer-links anim">
+            New to EchoStack?
+            <a href="/signup">Create a free account</a>
+        </div>
+
+        <!-- NO admin link — admin access via /admin URL only -->
     </div>
 
-    <div id="notification" class="fixed bottom-6 right-6 hidden px-5 py-3 rounded-lg shadow-lg z-50 text-white text-sm font-semibold"></div>
+</div>
 
-    <script>
-        // If already logged in, skip straight to app
+<div id="toast"></div>
+
+<script>
+    // Already logged in? Skip to app
+    try {
+        var s = localStorage.getItem('es_user');
+        if (s) { var u = JSON.parse(s); if (u && u.loggedIn) window.location.href = '/app'; }
+    } catch(e) {}
+
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.textContent = 'Signing in…';
+
+        var fd = new FormData();
+        fd.append('username', document.getElementById('username').value.trim());
+        fd.append('password', document.getElementById('pw').value);
+
         try {
-            var stored = localStorage.getItem('es_user');
-            if (stored) {
-                var u = JSON.parse(stored);
-                if (u && u.loggedIn) window.location.href = '/app';
+            var res  = await fetch('/api/users/login', { method: 'POST', body: fd });
+            var data = await res.json();
+
+            if (res.ok && data.success) {
+                localStorage.setItem('es_user', JSON.stringify({
+                    loggedIn:   true,
+                    user_id:    data.user_id,
+                    username:   data.username,
+                    email:      data.email,
+                    role:       data.role       || 'user',
+                    plan:       data.is_premium ? 'premium' : 'free',
+                    is_premium: data.is_premium || 0
+                }));
+                toast('✅ Welcome back, ' + data.username + '!', 'ok');
+                setTimeout(function(){ window.location.href = '/app'; }, 900);
+            } else {
+                throw new Error(data.detail || 'Invalid username or password');
             }
-        } catch(e) {}
-
-        document.getElementById('login-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            var btn = document.getElementById('submit-btn');
-            btn.disabled = true;
-            btn.textContent = 'Signing in…';
-
-            var formData = new FormData();
-            formData.append('username', document.getElementById('username').value.trim());
-            formData.append('password', document.getElementById('pw').value);
-
-            try {
-                var response = await fetch('/api/users/login', { method: 'POST', body: formData });
-                var data = await response.json();
-
-                if (response.ok && data.success) {
-                    // Save user to localStorage
-                    localStorage.setItem('es_user', JSON.stringify({
-                        loggedIn: true,
-                        user_id: data.user_id,
-                        username: data.username,
-                        email: data.email,
-                        role: data.role || 'user',
-                        plan: data.is_premium ? 'premium' : 'free',
-                        is_premium: data.is_premium || 0
-                    }));
-                    showNotification('✅ Welcome back, ' + data.username + '!', 'success');
-                    setTimeout(function() { window.location.href = '/app'; }, 800);
-                } else {
-                    throw new Error(data.detail || 'Invalid username or password');
-                }
-            } catch(error) {
-                showNotification('❌ ' + error.message, 'error');
-                btn.disabled = false;
-                btn.textContent = 'Sign In →';
-            }
-        });
-
-        function showNotification(message, type) {
-            var n = document.getElementById('notification');
-            n.className = 'fixed bottom-6 right-6 px-5 py-3 rounded-lg shadow-lg z-50 text-white text-sm font-semibold ' +
-                (type === 'success' ? 'bg-green-600' : 'bg-red-600');
-            n.textContent = message;
-            n.classList.remove('hidden');
-            setTimeout(function() { n.classList.add('hidden'); }, 3500);
+        } catch(err) {
+            toast('❌ ' + err.message, 'er');
+            btn.disabled = false;
+            btn.textContent = 'Sign In →';
         }
-    </script>
+    });
+
+    function toast(msg, type) {
+        var t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'show ' + (type || '');
+        clearTimeout(t._tid);
+        t._tid = setTimeout(function(){ t.className = ''; }, 3500);
+    }
+</script>
 </body>
 </html>
