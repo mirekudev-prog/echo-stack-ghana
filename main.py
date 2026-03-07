@@ -604,13 +604,40 @@ async def create_post(
     region_id: str = Form(""), status: str = Form("draft"), is_premium: str = Form("0"),
     request: Request = None, db: Session = Depends(get_db)
 ):
+    is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
     user = get_user_from_request(request, db)
-    if not user:
+
+    # Admin can always post — use their user record or create a synthetic one
+    if is_admin_session and not user:
+        # Auto-create an admin user account if none exists
+        try:
+            admin_user = models.User(
+                username="admin",
+                email="admin@echostack.gh",
+                password_hash="ADMIN_SESSION_ONLY",
+                role="admin",
+                is_active=1,
+                is_premium=1
+            )
+            db.add(admin_user)
+            db.commit()
+            db.refresh(admin_user)
+            user = admin_user
+        except Exception as e:
+            db.rollback()
+            # Try to get any existing admin
+            user = db.query(models.User).filter(models.User.role.in_(["admin","superuser"])).first()
+
+    if not user and not is_admin_session:
         raise HTTPException(status_code=401, detail="Must be logged in")
-    if user.role not in ["creator", "superuser", "admin"]:
+    if user and user.role not in ["creator", "superuser", "admin"] and not is_admin_session:
         raise HTTPException(status_code=403, detail="Creator account required")
+
+    author_id = user.id if user else 0
+    author_name = user.username if user else "Admin"
+
     post = models.Post(
-        author_id=user.id, author_username=user.username,
+        author_id=author_id, author_username=author_name,
         title=title.strip(), excerpt=excerpt.strip(), content=content.strip(),
         cover_image=cover_image.strip(), content_type=content_type,
         region_id=int(region_id) if region_id and region_id.isdigit() else None,
@@ -705,20 +732,44 @@ async def submit_story(
     title: str = Form(...), content: str = Form(...), region_id: str = Form(""),
     request: Request = None, db: Session = Depends(get_db)
 ):
+    is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
     user = get_user_from_request(request, db)
-    if not user:
+
+    if not user and is_admin_session:
+        # Auto-create admin user if needed
+        try:
+            admin_user = models.User(
+                username="admin", email="admin@echostack.gh",
+                password_hash="ADMIN_SESSION_ONLY",
+                role="admin", is_active=1, is_premium=1
+            )
+            db.add(admin_user)
+            db.commit()
+            db.refresh(admin_user)
+            user = admin_user
+        except:
+            db.rollback()
+            user = db.query(models.User).filter(models.User.role.in_(["admin","superuser"])).first()
+
+    if not user and not is_admin_session:
         raise HTTPException(status_code=401, detail="Must be logged in to submit a story")
+
+    author_name = user.username if user else "Admin"
+    author_id = user.id if user else 0
+    # Admin stories are auto-approved
+    auto_status = "approved" if is_admin_session else "pending"
+
     try:
         story = models.StorySubmission(
-            title=title.strip(), content=content.strip(), username=user.username,
-            user_id=user.id,
+            title=title.strip(), content=content.strip(), username=author_name,
+            user_id=author_id,
             region_id=int(region_id) if region_id and region_id.isdigit() else None,
-            status="pending"
+            status=auto_status
         )
         db.add(story)
         db.commit()
         db.refresh(story)
-        return {"success": True, "story_id": story.id}
+        return {"success": True, "story_id": story.id, "status": auto_status}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
