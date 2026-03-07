@@ -1332,3 +1332,353 @@ async def get_activity(request: Request, db: Session = Depends(get_db)):
                  "cover_image": p.cover_image or "", "is_premium": p.is_premium} for p in posts]
     except:
         return []
+
+# ============================================
+# CREATORS ENDPOINT (FIXES 404 ERROR)
+# ============================================
+@app.get("/api/creators")
+def get_creators(db: Session = Depends(get_db)):
+    """Get all creator channels"""
+    try:
+        q = db.query(models.CreatorChannel).filter(
+            models.CreatorChannel.is_active == True
+        ).all()
+        
+        result = []
+        for c in q:
+            user = db.query(User).filter(User.id == c.user_id).first()
+            post_count = db.query(Post).filter(
+                Post.author_id == c.user_id, Post.status == "published"
+            ).count()
+            
+            result.append({
+                "id": c.id,
+                "username": user.username if user else "Unknown",
+                "channel_name": c.channel_name or user.username if user else "",
+                "channel_description": c.channel_description or "",
+                "channel_image": c.channel_image or "",
+                "follower_count": 0,
+                "post_count": post_count,
+                "is_active": bool(c.is_active)
+            })
+        
+        return result
+    except Exception as e:
+        print(f"❌ Creators error: {e}")
+        return []
+
+
+# ============================================
+# STORY READING FUNCTIONALITY
+# ============================================
+@app.post("/api/stories/{story_id}/read")
+async def read_story(story_id: int, request: Request, db: Session = Depends(get_db)):
+    """Mark story as read / update view count"""
+    story = db.query(StorySubmission).filter(StorySubmission.id == story_id).first()
+    if not story:
+        raise HTTPException(status_code=404, detail="Story not found")
+    
+    return {
+        "success": True,
+        "title": story.title,
+        "content": story.content,
+        "author": story.username
+    }
+
+
+# ============================================
+# POST IMAGES WITH FULL SUPPORT
+# ============================================
+@app.get("/api/posts/images")
+async def get_post_images(
+    limit: int = 20, 
+    region: str = "",
+    category: str = "",
+    db: Session = Depends(get_db)
+):
+    """Get published image posts"""
+    try:
+        q = db.query(Post).filter(Post.status == "published")
+        
+        if region:
+            q = q.filter(Post.region_id == int(region))
+        if category:
+            q = q.filter(Post.content_type == category)
+        
+        posts = q.order_by(Post.created_at.desc()).limit(limit).all()
+        
+        return [{
+            "id": p.id,
+            "title": p.title,
+            "cover_image": p.cover_image or "",
+            "excerpt": p.excerpt or "",
+            "author_username": p.author_username or "",
+            "created_at": str(p.created_at),
+            "views": p.views or 0,
+            "likes": p.likes or 0,
+            "comments_count": len([c for c in db.query(Comment).filter(Comment.post_id == p.id)])
+        } for p in posts]
+    except Exception as e:
+        print(f"❌ Images error: {e}")
+        return []
+
+
+# ============================================
+# LIKE FUNCTIONALITY FOR POSTS
+# ============================================
+@app.post("/api/posts/{post_id}/like")
+async def like_post(post_id: int, request: Request, db: Session = Depends(get_db)):
+    """Like/unlike a post"""
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Login required")
+    
+    # Check if already liked
+    existing_like = db.query(Like).filter(
+        Like.post_id == post_id,
+        Like.user_id == user.id
+    ).first()
+    
+    if existing_like:
+        # Unlike
+        db.delete(existing_like)
+        db.commit()
+        post = db.query(Post).filter(Post.id == post_id).first()
+        if post:
+            post.likes = max(0, (post.likes or 0) - 1)
+            db.commit()
+        return {"liked": False, "total_likes": post.likes if post else 0}
+    else:
+        # Like
+        new_like = Like(post_id=post_id, user_id=user.id)
+        db.add(new_like)
+        db.commit()
+        
+        post = db.query(Post).filter(Post.id == post_id).first()
+        if post:
+            post.likes = (post.likes or 0) + 1
+            db.commit()
+        
+        return {"liked": True, "total_likes": post.likes if post else 1}
+
+
+# ============================================
+# COMMENT FUNCTIONALITY FOR POSTS
+# ============================================
+@app.get("/api/posts/{post_id}/comments")
+async def get_comments(post_id: int, db: Session = Depends(get_db)):
+    """Get all comments for a post"""
+    comments = db.query(Comment).filter(
+        Comment.post_id == post_id,
+        Comment.is_approved == True
+    ).order_by(Comment.created_at.asc()).all()
+    
+    return [{
+        "id": c.id,
+        "username": c.author.username if c.author else "Anonymous",
+        "avatar_url": c.author.avatar_url if c.author else "",
+        "content": c.content,
+        "created_at": str(c.created_at)
+    } for c in comments]
+
+
+@app.post("/api/posts/{post_id}/comment")
+async def add_comment(
+    post_id: int, 
+    content: str = Form(...),
+    request: Request = None,
+    db: Session = Depends(get_db)
+):
+    """Add a comment to a post"""
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Must be logged in to comment")
+    
+    if not content.strip():
+        raise HTTPException(status_code=400, detail="Comment cannot be empty")
+    
+    # Check if post exists
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    # Only approved content by default
+    comment = Comment(
+        post_id=post_id,
+        author_id=user.id,
+        username=user.username,
+        content=content.strip(),
+        is_approved=True  # Auto-approve for admins/superusers
+    )
+    
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+    
+    return {
+        "success": True,
+        "comment_id": comment.id,
+        "username": comment.username,
+        "content": comment.content,
+        "created_at": str(comment.created_at)
+    }
+
+
+@app.delete("/api/comments/{comment_id}")
+async def delete_comment(comment_id: int, request: Request, db: Session = Depends(get_db)):
+    """Delete a comment"""
+    user = get_user_from_request(request, db)
+    admin_token = request.cookies.get("admin_session")
+    
+    if not user and admin_token != "ADMIN_AUTHORIZED":
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    
+    # Allow owner or admin to delete
+    if comment.author_id != user.id and admin_token != "ADMIN_AUTHORIZED":
+        raise HTTPException(status_code=403, detail="Cannot delete this comment")
+    
+    db.delete(comment)
+    db.commit()
+    return {"success": True}
+
+
+# ============================================
+# DIRECT MESSAGING SYSTEM
+# ============================================
+@app.get("/api/users/me/following")
+async def get_my_following(request: Request, db: Session = Depends(get_db)):
+    """Get list of users I follow (for messaging)"""
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Login required")
+    
+    follows = db.query(Follow).filter(Follow.follower_id == user.id).all()
+    
+    result = []
+    for f in follows:
+        followed_user = db.query(User).filter(User.id == f.following_id).first()
+        if followed_user:
+            result.append({
+                "id": followed_user.id,
+                "username": followed_user.username,
+                "avatar_url": followed_user.avatar_url or "",
+                "full_name": followed_user.full_name or ""
+            })
+    
+    return result
+
+
+@app.post("/api/messages/direct")
+async def send_direct_message(
+    recipient_id: str = Form(...),
+    message_content: str = Form(...),
+    request: Request = None,
+    db: Session = Depends(get_db)
+):
+    """Send direct message between users"""
+    sender = get_user_from_request(request, db)
+    if not sender:
+        raise HTTPException(status_code=401, detail="Login required")
+    
+    if not message_content.strip():
+        raise HTTPException(status_code=400, detail="Message cannot be empty")
+    
+    try:
+        recipient_id_uuid = uuid.UUID(recipient_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid recipient ID")
+    
+    recipient = db.query(User).filter(User.id == recipient_id_uuid).first()
+    if not recipient:
+        raise HTTPException(status_code=404, detail="Recipient not found")
+    
+    # Store message
+    msg = ChatMessage(
+        user_id=sender.id,
+        username=sender.username,
+        message=message_content.strip()[:500],
+        is_approved=True
+    )
+    db.add(msg)
+    db.commit()
+    db.refresh(msg)
+    
+    return {
+        "success": True,
+        "message_id": msg.id,
+        "recipient": recipient.username,
+        "content": msg.message
+    }
+
+
+@app.get("/api/messages/inbox/{user_id}")
+async def get_inbox(user_id: str, request: Request, db: Session = Depends(get_db)):
+    """Get messages for specific user"""
+    user = get_user_from_request(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Login required")
+    
+    try:
+        target_id = uuid.UUID(user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+    
+    # Get messages where either sender or recipient is our user
+    messages = db.query(ChatMessage).filter(
+        (ChatMessage.user_id == user.id) | 
+        (ChatMessage.user_id == target_id)
+    ).order_by(ChatMessage.created_at.asc()).all()
+    
+    return [{
+        "id": m.id,
+        "username": m.username,
+        "message": m.message,
+        "timestamp": str(m.created_at),
+        "is_me": m.user_id == user.id
+    } for m in messages]
+
+
+# ============================================
+# UPLOAD IMAGE TO POST
+# ============================================
+@app.post("/api/upload/post-image")
+async def upload_post_image(
+    file: UploadFile = File(...),
+    description: str = Form(""),
+    region_id: str = Form(""),
+    db: Session = Depends(get_db)
+):
+    """Upload image specifically for posts"""
+    safe_name = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}{Path(file.filename).suffix}"
+    file_path = UPLOAD_DIR / safe_name
+    
+    content = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    uf = UploadedFile(
+        filename=safe_name,
+        original_name=file.filename,
+        file_path=str(file_path),
+        file_size=len(content),
+        mime_type=file.content_type or "image/jpeg",
+        category="image",
+        description=description,
+        uploaded_by="admin",
+        is_public=True
+    )
+    db.add(uf)
+    db.commit()
+    db.refresh(uf)
+    
+    return {
+        "success": True,
+        "url": f"/uploads/{safe_name}",
+        "filename": safe_name,
+        "original_name": file.filename,
+        "file_size_mb": round(len(content) / (1024 * 1024), 2)
+    }
