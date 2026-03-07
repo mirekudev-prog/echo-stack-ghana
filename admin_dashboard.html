@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0D1B2A">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EchoStack Admin</title>
@@ -856,29 +852,7 @@ async function loadOverview() {
     const subs = await (await fetch(API + '/newsletter/subscribers')).json();
     document.getElementById('ov-subs').textContent = Array.isArray(subs) ? subs.length : 0;
   } catch(e) { document.getElementById('ov-subs').textContent = '—'; }
-  
-// Inside loadOverview() in admin_dashboard.html
-try {
-    const s = await (await fetch(API + '/stats')).json();
-    document.getElementById('ov-users').textContent = s.total_users || 0;
-    // ... other stats ...
-    
-    // Fetch subscriber count specifically for Creators/Users
-    const subRes = await fetch(API + '/newsletter/subscribers');
-    const subData = await subRes.json();
-    
-    // If subData is an object with 'count', use it (for Creators/Users)
-    // If it's an array, convert length (for Admins - though Admins call different endpoint usually)
-    let count = 0;
-    if (typeof subData === 'object' && subData.count !== undefined) {
-        count = subData.count;
-    } else if (Array.isArray(subData)) {
-        count = subData.length;
-    }
-    
-    document.getElementById('ov-subs').textContent = count || 0;
-} catch(e) { ... }
-  
+
   // Recent posts
   try {
     const posts = await (await fetch(API + '/posts?status=all&limit=5')).json();
@@ -1465,206 +1439,71 @@ async function deleteRegion(id, name) {
     else throw new Error('Delete failed');
   } catch(e) { toast('❌ ' + e.message, 'er'); }
 }
-  
-// ══════════════════════════════════════════════
-// UPLOAD HELPERS - FIXED VERSION
-// ══════════════════════════════════════════════
 
+// ══════════════════════════════════════════════
+// UPLOAD HELPERS
+// ══════════════════════════════════════════════
 function switchUT(field, tab) {
-    ['upload','url'].forEach(t => {
-        const tabEl = document.getElementById(`${field}-t${t==='upload'?'u':'u2'}`);
-        const panEl = document.getElementById(`${field}-${t}`);
-        if (tabEl) tabEl.classList.toggle('on', t===tab);
-        if (panEl) panEl.classList.toggle('on', t===tab);
-    });
+  ['upload','url'].forEach(t => {
+    const tabEl = document.getElementById(`${field}-t${t==='upload'?'u':'u2'}`);
+    const panEl = document.getElementById(`${field}-${t}`);
+    if (tabEl) tabEl.classList.toggle('on', t===tab);
+    if (panEl) panEl.classList.toggle('on', t===tab);
+  });
 }
 
 function onFileSelect(type, input) {
-    const files = Array.from(input.files);
-    if (!files.length) return;
-    
-    if (type === 'hero') {
-        pendingFiles.hero = files[0];
-        const status = document.getElementById('rh-status');
-        if (status) status.textContent = `📎 ${files[0].name} ready to upload`;
-        
-        // Preview image
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  if (type === 'hero') {
+    pendingFiles.hero = files[0];
+    document.getElementById('rh-status').textContent = `📎 ${files[0].name} selected`;
+    const rd = new FileReader();
+    rd.onload = e => { const img = document.getElementById('rf-hp'); img.src = e.target.result; img.classList.add('show'); };
+    rd.readAsDataURL(files[0]);
+  } else if (type === 'gallery') {
+    pendingFiles.gallery = files;
+    document.getElementById('rg-status').textContent = `📎 ${files.length} file(s) selected`;
+    const prev = document.getElementById('rg-prev');
+    prev.innerHTML = '';
+    files.forEach(f => {
+      if (f.type.startsWith('image/')) {
         const rd = new FileReader();
-        rd.onload = e => { 
-            const img = document.getElementById('rf-hp'); 
-            if (img) {
-                img.src = e.target.result; 
-                img.classList.add('show');
-            }
+        rd.onload = e => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style = 'width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--b1)';
+          prev.appendChild(img);
         };
-        rd.readAsDataURL(files[0]);
-    } else if (type === 'gallery') {
-        pendingFiles.gallery = files;
-        const status = document.getElementById('rg-status');
-        if (status) status.textContent = `📎 ${files.length} file(s) selected`;
-        
-        // Preview images
-        const prev = document.getElementById('rg-prev');
-        if (prev) {
-            prev.innerHTML = '';
-            files.forEach(f => {
-                if (f.type.startsWith('image/')) {
-                    const rd = new FileReader();
-                    rd.onload = e => {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.style = 'width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--b1)';
-                        prev.appendChild(img);
-                    };
-                    rd.readAsDataURL(f);
-                }
-            });
-        }
-    } else if (type === 'audio') {
-        pendingFiles.audio = files[0];
-        const status = document.getElementById('ra-status');
-        if (status) status.textContent = `📎 ${files[0].name} ready to upload`;
-    } else if (type === 'video') {
-        pendingFiles.video = files[0];
-        const status = document.getElementById('rv-status');
-        if (status) status.textContent = `📎 ${files[0].name} ready to upload`;
-    }
+        rd.readAsDataURL(f);
+      }
+    });
+  } else if (type === 'audio') {
+    pendingFiles.audio = files[0];
+    document.getElementById('ra-status').textContent = `📎 ${files[0].name} selected`;
+  }
 }
 
 async function uploadFile(file, category) {
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('filename', file.name);
-    fd.append('category', category);
-    fd.append('is_public', '1');
-    
-    const r = await fetch('/api/upload/file', { 
-        method: 'POST', 
-        body: fd 
-    });
-    
-    if (!r.ok) { 
-        const e = await r.json().catch(()=>{}); 
-        throw new Error((e&&e.detail)||'Upload failed'); 
-    }
-    
-    const d = await r.json();
-    if (!d.success) throw new Error('Upload failed');
-    return d.url;
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('filename', file.name);
+  fd.append('category', category);
+  fd.append('is_public', '1');
+  const r = await fetch('/api/upload/file', { method: 'POST', body: fd });
+  if (!r.ok) { const e = await r.json().catch(()=>{}); throw new Error((e&&e.detail)||'Upload failed'); }
+  const d = await r.json();
+  if (!d.success) throw new Error('Upload failed');
+  return d.url;
 }
 
 function prevI(srcId, imgId) {
-    const v = document.getElementById(srcId).value.trim();
-    const img = document.getElementById(imgId);
-    if (v) { 
-        img.src = v; 
-        img.classList.add('show'); 
-    } else {
-        img.classList.remove('show'); 
-    }
+  const v = document.getElementById(srcId).value.trim();
+  const img = document.getElementById(imgId);
+  if (v) { img.src = v; img.classList.add('show'); }
+  else img.classList.remove('show');
 }
 
-// ══════════════════════════════════════════════
-// SAVE REGION - FIXED VERSION
-// ══════════════════════════════════════════════
-
-async function saveRegion() {
-    const name = document.getElementById('rf-name').value.trim();
-    if (!name) { 
-        toast('Region name is required', 'er'); 
-        return; 
-    }
-    
-    const btn = document.querySelector('[onclick="saveRegion()"]');
-    const originalText = btn.textContent;
-    btn.textContent = '⏳ Saving…'; 
-    btn.disabled = true;
-    
-    const prog = document.getElementById('up-progress');
-    const list = document.getElementById('up-list');
-    if (prog) prog.style.display = 'block';
-    if (list) list.innerHTML = '';
-    
-    try {
-        // Get URL values
-        let heroUrl = document.getElementById('rf-hero').value.trim();
-        let galleryUrls = splitUrls(document.getElementById('rf-gallery').value);
-        let audioUrls = splitUrls(document.getElementById('rf-audio').value);
-        let videoUrl = document.getElementById('rf-video').value.trim();
-        
-        // Upload pending files
-        if (pendingFiles.hero) {
-            if (list) list.innerHTML += `<div>⏳ Uploading hero image: ${pendingFiles.hero.name}…</div>`;
-            heroUrl = await uploadFile(pendingFiles.hero, 'image');
-            if (list) list.innerHTML += '<div style="color:var(--green)">✅ Hero image uploaded</div>';
-        }
-        
-        for (const f of (pendingFiles.gallery||[])) {
-            if (list) list.innerHTML += `<div>⏳ Uploading: ${f.name}…</div>`;
-            const cat = f.type.startsWith('video/') ? 'video' : 'image';
-            const url = await uploadFile(f, cat);
-            galleryUrls.push(url);
-            if (list) list.innerHTML += `<div style="color:var(--green)">✅ ${f.name} uploaded</div>`;
-        }
-        
-        if (pendingFiles.audio) {
-            if (list) list.innerHTML += `<div>⏳ Uploading audio: ${pendingFiles.audio.name}…</div>`;
-            audioUrls.push(await uploadFile(pendingFiles.audio, 'audio'));
-            if (list) list.innerHTML += '<div style="color:var(--green)">✅ Audio uploaded</div>';
-        }
-        
-        if (pendingFiles.video) {
-            if (list) list.innerHTML += `<div>⏳ Uploading video: ${pendingFiles.video.name}…</div>`;
-            videoUrl = await uploadFile(pendingFiles.video, 'video');
-            if (list) list.innerHTML += '<div style="color:var(--green)">✅ Video uploaded</div>';
-        }
-        
-        // Prepare form data
-        const rid = document.getElementById('rf-id').value;
-        const fd = new FormData();
-        fd.append('name', name);
-        fd.append('capital', document.getElementById('rf-capital').value);
-        fd.append('population', document.getElementById('rf-pop').value);
-        fd.append('terrain', document.getElementById('rf-terrain').value);
-        fd.append('description', document.getElementById('rf-desc').value);
-        fd.append('overview', document.getElementById('rf-overview').value);
-        fd.append('category', document.getElementById('rf-cat').value);
-        fd.append('tags', document.getElementById('rf-tags').value);
-        fd.append('source', document.getElementById('rf-source').value);
-        fd.append('hero_image', heroUrl);
-        fd.append('gallery_images', galleryUrls.join(', '));
-        fd.append('audio_files', audioUrls.join(', '));
-        fd.append('video_url', videoUrl);
-        
-        const method = rid ? 'PUT' : 'POST';
-        const url = rid ? `${API}/regions/${rid}` : `${API}/regions`;
-        
-        const r = await fetch(url, { method, body: fd });
-        const d = await r.json();
-        
-        if (!r.ok) throw new Error(d.detail || 'Server error');
-        
-        toast('✅ Region saved!', 'ok');
-        
-        if (prog) prog.style.display = 'none';
-        
-        // Clear pending files
-        pendingFiles = { hero: null, gallery: [], audio: null, video: null };
-        
-        // Go to regions list
-        setTimeout(() => {
-            go('regions', null);
-        }, 1000);
-        
-    } catch(e) {
-        toast('❌ ' + e.message, 'er');
-        if (prog) prog.style.display = 'none';
-    } finally {
-        btn.textContent = originalText; 
-        btn.disabled = false;
-    }
-}
-  
 // ══════════════════════════════════════════════
 // FILE MANAGER
 // ══════════════════════════════════════════════
@@ -1834,7 +1673,7 @@ async function createUser() {
     const fd = new FormData();
     fd.append('username', name); fd.append('email', email);
     fd.append('password', pass); fd.append('interests', '');
-    const r = await fetch(`${API}/users/register`, { method: 'POST', body: fd });
+    const r = await fetch(`${API}/users/signup`, { method: 'POST', body: fd });
     const d = await r.json();
     if (!r.ok) throw new Error(d.detail || 'Failed');
     // If role != user, update it
