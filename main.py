@@ -848,11 +848,11 @@ async def newsletter_subscribe(email: str = Form(...), full_name: str = Form("")
 def get_newsletter_subscribers(request: Request, db: Session = Depends(get_db)):
     require_admin(request)
     try:
-        subs = db.query(models.NewsletterSubscriber).order_by(
-            models.NewsletterSubscriber.created_at.desc()).all()
+        subs = db.query(NewsletterSubscriber).order_by(
+            NewsletterSubscriber.subscribed_at.desc()).all()
         return [{
             "id": s.id, "email": s.email, "full_name": s.full_name or "",
-            "created_at": str(s.created_at) if s.created_at else ""
+            "created_at": str(s.subscribed_at) if s.subscribed_at else ""
         } for s in subs]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
