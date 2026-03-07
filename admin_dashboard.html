@@ -15,7 +15,6 @@
   --r:10px;--rl:16px;--sh:0 1px 6px rgba(13,27,42,.07);--shl:0 8px 32px rgba(13,27,42,.13);
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;display:flex;color:var(--ink)}
-/* SIDEBAR */
 .sidebar{width:var(--sw);background:var(--ink);min-height:100vh;position:fixed;top:0;left:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
 .sb-logo{padding:17px 15px 13px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;flex-shrink:0}
 .sb-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:var(--ink);flex-shrink:0}
@@ -34,13 +33,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;disp
 .sb-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;color:var(--ink);flex-shrink:0}
 .sb-uname{font-size:.75rem;font-weight:600;color:#fff}
 .sb-urole{font-size:.59rem;color:var(--gold);font-weight:700;letter-spacing:.04em}
-/* MAIN */
 .main{margin-left:var(--sw);flex:1;padding:22px 24px;min-height:100vh;overflow-x:hidden}
 .topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
 .tl h1{font-family:'Playfair Display',serif;font-size:1.38rem;color:var(--ink);line-height:1.2}
 .tl p{font-size:.77rem;color:var(--muted2);margin-top:3px}
 .tr{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
-/* BUTTONS */
 .btn{padding:7px 14px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;border:none;transition:all .17s;display:inline-flex;align-items:center;gap:5px;text-decoration:none;white-space:nowrap}
 .btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:#a97825;transform:translateY(-1px)}
 .btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#156534}
@@ -48,9 +45,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;disp
 .btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#1d4ed8}
 .btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--border)}.btn-ghost:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
 .btn-sm{padding:5px 10px;font-size:.75rem}
-/* PANELS */
 .panel{display:none}.panel.on{display:block}
-/* STAT CARDS */
 .sg5{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-bottom:18px}
 @media(max-width:1100px){.sg5{grid-template-columns:repeat(3,1fr)}}
 .scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;box-shadow:var(--sh);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
@@ -62,7 +57,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;disp
 .cg{background:var(--green-pale);color:var(--green)}.cr{background:var(--red-pale);color:var(--red)}
 .cy{background:#FFF7ED;color:var(--orange)}.cb{background:var(--blue-pale);color:var(--blue)}
 .ck{background:#F8FAFC;color:var(--muted2)}.cgold{background:var(--gold-pale);color:var(--gold)}
-/* TABLE CARD */
 .tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh);margin-bottom:16px}
 .tc-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .tc-head h2{font-size:.87rem;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px}
@@ -78,14 +72,13 @@ td{padding:9px 13px;border-bottom:1px solid var(--border);font-size:.81rem;color
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#FAFBFF}
 .tov{overflow-x:auto}
-/* BADGES */
 .rb{padding:2px 8px;border-radius:20px;font-size:.62rem;font-weight:700;text-transform:uppercase;white-space:nowrap}
 .r-user{background:#F0F9FF;color:#0369A1}.r-creator{background:var(--gold-pale);color:var(--gold)}
 .r-admin{background:var(--green-pale);color:var(--green)}.r-superuser{background:var(--red-pale);color:var(--red)}
 .s-published{background:var(--green-pale);color:var(--green)}.s-draft{background:#F8FAFC;color:var(--muted2)}
 .s-pending{background:#FFF7ED;color:var(--orange)}.s-rejected{background:var(--red-pale);color:var(--red)}
+.s-approved{background:var(--green-pale);color:var(--green)}
 .tag{display:inline-block;padding:2px 7px;background:#F1F5F9;border-radius:12px;font-size:.7rem;color:var(--muted2);margin:1px}
-/* ROW ACTIONS */
 .acts{display:flex;gap:3px;flex-wrap:wrap}
 .ab{padding:3px 8px;border-radius:5px;font-size:.69rem;font-weight:600;cursor:pointer;border:none;transition:all .14s;white-space:nowrap}
 .ag{background:var(--green-pale);color:var(--green)}.ag:hover{background:var(--green);color:#fff}
@@ -95,7 +88,6 @@ tr:hover td{background:#FAFBFF}
 .ak{background:#F1F5F9;color:var(--ink)}.ak:hover{background:var(--ink);color:#fff}
 .rsel{padding:3px 8px;border:1.5px solid var(--border);border-radius:5px;font-size:.73rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
 .rsel:focus{border-color:var(--gold)}
-/* FORM CARD */
 .fcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh);margin-bottom:16px}
 .fc-head{padding:12px 18px;border-bottom:1px solid var(--border);background:var(--ink);display:flex;align-items:center;justify-content:space-between}
 .fc-head h2{font-size:.87rem;font-weight:700;color:#fff}
@@ -110,17 +102,14 @@ tr:hover td{background:#FAFBFF}
 @media(max-width:640px){.fg-row,.fg-row3{grid-template-columns:1fr}}
 .ip{width:100%;height:130px;object-fit:cover;border-radius:7px;margin-top:6px;display:none;border:1px solid var(--border)}
 .ip.vis{display:block}
-/* TABS */
 .ftabs{display:flex;gap:2px;background:#F8FAFC;border-bottom:1px solid var(--border);padding:8px 16px 0;overflow-x:auto}
 .ftab{padding:7px 14px;border-radius:7px 7px 0 0;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--muted2);transition:all .14s;border:none;background:none;white-space:nowrap}
 .ftab.on{background:var(--surface);color:var(--ink);border:1px solid var(--border);border-bottom-color:var(--surface);margin-bottom:-1px}
 .ftab-p{display:none;padding:18px}.ftab-p.on{display:block}
-/* SETTINGS GRID */
 .sg2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:700px){.sg2{grid-template-columns:1fr}}
 .sc2{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px;box-shadow:var(--sh)}
 .sc2 h3{font-size:.86rem;font-weight:700;color:var(--ink);margin-bottom:13px;padding-bottom:9px;border-bottom:1px solid var(--border)}
-/* LOGIN */
 #lo{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:9999}
 #lo.hide{display:none}
 .lbox{background:var(--surface);border-radius:20px;padding:38px 36px;max-width:400px;width:94%;text-align:center}
@@ -132,7 +121,6 @@ tr:hover td{background:#FAFBFF}
 .lbtn{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s}
 .lbtn:hover{background:var(--gold)}
 .lerr{color:var(--red);font-size:.79rem;margin-top:10px;display:none}
-/* MODAL */
 .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:600;align-items:center;justify-content:center;padding:16px}
 .mbg.open{display:flex}
 .modal{background:var(--surface);border-radius:var(--rl);max-width:580px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:var(--shl);display:flex;flex-direction:column}
@@ -148,12 +136,10 @@ tr:hover td{background:#FAFBFF}
 .mf textarea{min-height:80px;resize:vertical}
 .mfoot{padding:13px 20px;border-top:1px solid var(--border);display:flex;gap:9px;position:sticky;bottom:0;background:var(--surface)}
 .mfoot .btn{flex:1;justify-content:center}
-/* RTE */
 .rte-bar{display:flex;gap:3px;padding:6px 10px;background:#F8FAFC;border:1.5px solid var(--border);border-bottom:none;border-radius:7px 7px 0 0;flex-wrap:wrap}
 .rte-bar button{padding:3px 8px;border:none;background:none;cursor:pointer;border-radius:4px;font-size:.77rem;font-weight:600;color:var(--ink);transition:background .14s}
 .rte-bar button:hover{background:var(--border)}
 .rte-ta{border-radius:0 0 7px 7px!important;min-height:220px!important;border-top:none!important}
-/* PREVIEW */
 .pp{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);max-width:340px}
 .pp-img{width:100%;height:115px;object-fit:cover;display:none}
 .pp-img.vis{display:block}
@@ -161,17 +147,14 @@ tr:hover td{background:#FAFBFF}
 .pp-type{font-size:.62rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.07em}
 .pp-title{font-family:'Playfair Display',serif;font-size:.98rem;color:var(--ink);margin:4px 0 5px;line-height:1.3}
 .pp-exc{font-size:.78rem;color:var(--muted2);line-height:1.6}
-/* ALERTS */
 .alert{padding:10px 14px;border-radius:8px;font-size:.81rem;margin-bottom:14px}
 .ai{background:var(--blue-pale);border:1px solid #BFDBFE;color:#1E40AF}
 .aw{background:#FFF7ED;border:1px solid #FED7AA;color:#92400E}
 .ag2{background:var(--green-pale);border:1px solid #BBF7D0;color:#166534}
 .ar2{background:var(--red-pale);border:1px solid #FECACA;color:#991B1B}
-/* TOAST */
 .toast{position:fixed;bottom:20px;right:20px;color:#fff;padding:11px 18px;border-radius:10px;font-size:.82rem;font-weight:500;box-shadow:var(--shl);transition:all .3s;z-index:9999;transform:translateY(60px);opacity:0;pointer-events:none;max-width:340px}
 .toast.on{transform:translateY(0);opacity:1}
 .tok{background:var(--green)}.ter{background:var(--red)}.tw{background:var(--orange)}.ti{background:var(--ink)}
-/* MISC */
 .empty{text-align:center;padding:30px;color:var(--muted);font-size:.83rem}
 .ei{font-size:1.7rem;margin-bottom:7px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -179,6 +162,28 @@ tr:hover td{background:#FAFBFF}
 .url-box{font-family:'DM Mono',monospace;font-size:.72rem;background:#F1F5F9;padding:5px 9px;border-radius:5px;color:var(--muted2);word-break:break-all;margin-top:4px;cursor:pointer}
 .url-box:hover{background:var(--gold-pale);color:var(--gold)}
 code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:2px 5px;border-radius:4px;color:var(--purple)}
+
+/* ANALYTICS CHART */
+.chart-wrap{padding:16px;overflow-x:auto}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:30px}
+.bar{width:100%;border-radius:4px 4px 0 0;transition:all .3s;cursor:pointer;position:relative}
+.bar:hover{filter:brightness(1.1)}
+.bar-label{font-size:.6rem;color:var(--muted2);white-space:nowrap;text-align:center}
+.bar-val{font-size:.65rem;font-weight:700;color:var(--ink)}
+
+/* ERROR STATE */
+.err-state{background:var(--red-pale);border:1px solid #FECACA;border-radius:8px;padding:14px 16px;color:#991B1B;font-size:.82rem;margin-bottom:12px}
+.err-state strong{display:block;margin-bottom:4px}
+
+/* ACTIVITY FEED */
+.feed-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.feed-item:last-child{border-bottom:none}
+.feed-ic{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.feed-body{flex:1;min-width:0}
+.feed-title{font-size:.8rem;font-weight:600;color:var(--ink)}
+.feed-sub{font-size:.72rem;color:var(--muted2);margin-top:1px}
+.feed-time{font-size:.68rem;color:var(--muted);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -189,7 +194,7 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
     <div class="lf">🇬🇭</div>
     <div class="lt">EchoStack Admin</div>
     <div class="ls">Enter the secret key to continue</div>
-    <input type="text" id="li" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="text" id="li" autocomplete="off" placeholder="Enter secret key…" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="lbtn" onclick="doLogin()">Enter Admin Portal →</button>
     <div class="lerr" id="lerr">Wrong key. Try again.</div>
   </div>
@@ -219,6 +224,7 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
     <button class="sb-item" onclick="go('files',this)"><span class="ic">📁</span>Files & Media</button>
     <button class="sb-item" onclick="go('chat',this)"><span class="ic">💬</span>Chat Messages</button>
     <button class="sb-item" onclick="go('payments',this)"><span class="ic">💳</span>Payments</button>
+    <button class="sb-item" onclick="go('analytics',this)"><span class="ic">📈</span>Analytics</button>
     <button class="sb-item" onclick="go('settings',this)"><span class="ic">⚙️</span>Site Settings</button>
     <div class="sb-sec">Open</div>
     <button class="sb-item" onclick="window.open('/','_blank')"><span class="ic">🏠</span>Homepage ↗</button>
@@ -237,10 +243,16 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
 
 <!-- OVERVIEW -->
 <div class="panel on" id="panel-overview">
-  <div class="topbar"><div class="tl"><h1>Dashboard</h1><p id="ov-date">EchoStack Ghana Heritage Platform</p></div>
-  <div class="tr"><button class="btn btn-ghost" onclick="loadOverview()">🔄 Refresh</button><a href="/" class="btn btn-gold" target="_blank">View Live Site →</a></div></div>
+  <div class="topbar">
+    <div class="tl"><h1>Dashboard</h1><p id="ov-date">EchoStack Ghana Heritage Platform</p></div>
+    <div class="tr"><button class="btn btn-ghost" onclick="loadOverview()">🔄 Refresh</button><a href="/" class="btn btn-gold" target="_blank">View Live Site →</a></div>
+  </div>
+  <div id="ov-err" class="err-state" style="display:none">
+    <strong>⚠️ Backend API Errors Detected</strong>
+    <span id="ov-err-detail">Some routes are returning 404. Check the fix instructions below.</span>
+  </div>
   <div class="sg5">
-    <div class="scard" style="--ca:#2563EB" onclick="go('users',null)"><div class="sv" id="ov-users">—</div><div class="sl">Total Users</div><span class="chip cb">👥 Manage</span></div>
+    <div class="scard" style="--ca:#2563EB" onclick="go('users',null)"><div class="sv" id="ov-users">—</div><div class="sl">Total Users</div><span class="chip cb" id="chip-users">👥 Manage</span></div>
     <div class="scard" style="--ca:var(--gold)" onclick="go('creators',null)"><div class="sv" id="ov-creators">—</div><div class="sl">Creators</div><span class="chip cgold">✍️ Channels</span></div>
     <div class="scard" style="--ca:var(--green)" onclick="go('posts',null)"><div class="sv" id="ov-posts">—</div><div class="sl">Published Posts</div><span class="chip cg">📝 Manage</span></div>
     <div class="scard" style="--ca:var(--purple)" onclick="go('regions',null)"><div class="sv" id="ov-regions">—</div><div class="sl">Regions</div><span class="chip ck">🗺 Heritage</span></div>
@@ -273,7 +285,6 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
             <button onclick="wrap('## ','')">H2</button><button onclick="wrap('### ','')">H3</button>
             <button onclick="wrap('[','](url)')">🔗</button><button onclick="wrap('\n- ','')">• List</button>
             <button onclick="wrap('\n> ','')">❝ Quote</button><button onclick="wrap('\n```\n','\n```')">Code</button>
-            <button onclick="wrap('---\n','')">— Divider</button>
           </div>
           <textarea id="pf-content" class="rte-ta" placeholder="Write your full article here… markdown supported"></textarea>
         </div>
@@ -290,7 +301,7 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
         </div>
         <div id="f-audio" style="display:none" class="fg"><label>Audio URL</label><input id="pf-audio" type="text" placeholder="https://…/audio.mp3"></div>
         <div id="f-video" style="display:none" class="fg"><label>YouTube/Vimeo Embed URL</label><input id="pf-video" type="text" placeholder="https://www.youtube.com/embed/…"></div>
-        <div id="f-gallery" style="display:none" class="fg"><label>Gallery Images (comma-separated)</label><textarea id="pf-gallery" style="min-height:60px" placeholder="https://img1.jpg, https://img2.jpg"></textarea></div>
+        <div id="f-gallery" style="display:none" class="fg"><label>Gallery Images (comma-separated)</label><textarea id="pf-gallery" style="min-height:60px"></textarea></div>
       </div></div>
       <div class="fcard"><div class="fc-head"><h2>Settings</h2></div><div class="fc-body">
         <div class="fg-row3">
@@ -309,22 +320,17 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
       </div>
     </div>
   </div>
-  <div class="tcard" style="margin-top:4px">
-    <div class="tc-head"><h2>All Posts <span class="ct" id="ap-ct"></span></h2>
-    <div class="tcc"><select class="fsel" id="pf3" onchange="loadAllPosts()"><option value="all">All</option><option value="published">Published</option><option value="draft">Drafts</option><option value="pending">Pending</option></select>
-    <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('ap-tb',this.value)"></div></div>
-    <div class="tov"><table><thead><tr><th>Title</th><th>Author</th><th>Type</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead><tbody id="ap-tb"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody></table></div>
-  </div>
 </div>
 
 <!-- ALL POSTS -->
 <div class="panel" id="panel-posts">
   <div class="topbar"><div class="tl"><h1>All Posts</h1><p>Moderate, publish, reject or delete</p></div>
-  <div class="tr"><select class="fsel" id="pf2" onchange="loadPosts()"><option value="all">All</option><option value="published">Published</option><option value="draft">Drafts</option><option value="pending">⏳ Pending</option><option value="rejected">Rejected</option></select>
-  <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('posts-tb',this.value)">
-  <button class="btn btn-ghost btn-sm" onclick="bulkPublishPending()">✓ Publish All Pending</button>
-  <button class="btn btn-ghost btn-sm" onclick="bulkRejectPending()">✗ Reject All</button>
-  <button class="btn btn-gold" onclick="go('write',null)">✏️ Write New</button></div></div>
+  <div class="tr">
+    <select class="fsel" id="pf2" onchange="loadPosts()"><option value="all">All</option><option value="published">Published</option><option value="draft">Drafts</option><option value="pending">⏳ Pending</option><option value="rejected">Rejected</option></select>
+    <input class="srch" placeholder="🔍 Search…" oninput="filterTbl('posts-tb',this.value)">
+    <button class="btn btn-ghost btn-sm" onclick="bulkPublishPending()">✓ Publish All Pending</button>
+    <button class="btn btn-gold" onclick="go('write',null)">✏️ Write New</button>
+  </div></div>
   <div class="tcard"><div class="tc-head"><h2>Posts <span class="ct" id="posts-ct"></span></h2></div>
   <div class="tov"><table><thead><tr><th>Title</th><th>Author</th><th>Type</th><th>Status</th><th>Views</th><th>💬</th><th>Actions</th></tr></thead><tbody id="posts-tb"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody></table></div></div>
 </div>
@@ -344,16 +350,16 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
   <div class="tr"><button class="btn btn-ghost" onclick="clearRegion()">Clear</button><button class="btn btn-green" onclick="saveRegion()">💾 Save Region</button></div></div>
   <input type="hidden" id="rf-id">
   <div class="fcard"><div class="fc-head"><h2>Basic Information</h2></div><div class="fc-body">
-    <div class="fg-row"><div class="fg"><label>Region Name *</label><input id="rf-name" type="text" placeholder="e.g. Ashanti Region"></div><div class="fg"><label>Capital City</label><input id="rf-capital" type="text" placeholder="e.g. Kumasi"></div></div>
-    <div class="fg-row"><div class="fg"><label>Population</label><input id="rf-pop" type="text" placeholder="e.g. 5.8 million"></div><div class="fg"><label>Terrain</label><input id="rf-terrain" type="text" placeholder="e.g. Forest, Hills"></div></div>
-    <div class="fg"><label>Short Description (map card)</label><textarea id="rf-desc" placeholder="Brief description shown on map card…"></textarea></div>
-    <div class="fg"><label>Full Overview (detail page)</label><textarea id="rf-overview" style="min-height:130px" placeholder="Detailed history, culture and significance…"></textarea></div>
+    <div class="fg-row"><div class="fg"><label>Region Name *</label><input id="rf-name" type="text"></div><div class="fg"><label>Capital City</label><input id="rf-capital" type="text"></div></div>
+    <div class="fg-row"><div class="fg"><label>Population</label><input id="rf-pop" type="text"></div><div class="fg"><label>Terrain</label><input id="rf-terrain" type="text"></div></div>
+    <div class="fg"><label>Short Description</label><textarea id="rf-desc"></textarea></div>
+    <div class="fg"><label>Full Overview</label><textarea id="rf-overview" style="min-height:130px"></textarea></div>
   </div></div>
   <div class="fcard"><div class="fc-head"><h2>Media</h2></div><div class="fc-body">
-    <div class="fg"><label>Hero Image URL</label><input id="rf-hero" type="text" placeholder="https://…" oninput="prevImg('rf-hero','rf-prev')"><img id="rf-prev" class="ip" alt=""></div>
-    <div class="fg"><label>Gallery Images (comma-separated URLs)</label><textarea id="rf-gallery" style="min-height:65px" placeholder="https://img1.jpg, https://img2.jpg"></textarea></div>
-    <div class="fg"><label>Audio Files (comma-separated URLs)</label><textarea id="rf-audio" style="min-height:60px" placeholder="https://audio1.mp3, https://audio2.mp3"></textarea></div>
-    <div class="fg"><label>Source / Credit</label><input id="rf-source" type="text" placeholder="e.g. Ghana Tourism Authority"></div>
+    <div class="fg"><label>Hero Image URL</label><input id="rf-hero" type="text" oninput="prevImg('rf-hero','rf-prev')"><img id="rf-prev" class="ip" alt=""></div>
+    <div class="fg"><label>Gallery Images (comma-separated)</label><textarea id="rf-gallery" style="min-height:65px"></textarea></div>
+    <div class="fg"><label>Audio Files (comma-separated)</label><textarea id="rf-audio" style="min-height:60px"></textarea></div>
+    <div class="fg"><label>Source / Credit</label><input id="rf-source" type="text"></div>
   </div></div>
   <div class="fcard"><div class="fc-head"><h2>Category & Tags</h2></div><div class="fc-body">
     <div class="fg-row">
@@ -375,6 +381,10 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
 <div class="panel" id="panel-users">
   <div class="topbar"><div class="tl"><h1>All Users</h1></div>
   <div class="tr"><input class="srch" placeholder="🔍 Search…" oninput="filterTbl('users-tb',this.value)"><button class="btn btn-ghost" onclick="loadUsers()">🔄 Refresh</button><button class="btn btn-gold" onclick="openM('cu-modal')">+ Create User</button></div></div>
+  <div id="users-err" class="err-state" style="display:none">
+    <strong>⚠️ /api/admin/users is returning 404</strong>
+    This route is missing from your main.py. Add the code from the fix file to your backend.
+  </div>
   <div class="tcard"><div class="tc-head"><h2>User Management <span class="ct" id="users-ct"></span></h2></div>
   <div class="tov"><table><thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Plan</th><th>Active</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="users-tb"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody></table></div></div>
 </div>
@@ -389,7 +399,12 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
 
 <!-- NEWSLETTER -->
 <div class="panel" id="panel-subs">
-  <div class="topbar"><div class="tl"><h1>Newsletter</h1></div><button class="btn btn-ghost" onclick="exportSubs()">⬇️ Export CSV</button></div>
+  <div class="topbar"><div class="tl"><h1>Newsletter</h1></div>
+  <div class="tr"><button class="btn btn-ghost" onclick="exportSubs()">⬇️ Export CSV</button></div></div>
+  <div id="subs-err" class="err-state" style="display:none">
+    <strong>⚠️ /api/newsletter/subscribers is returning 404</strong>
+    This route is missing from your main.py. Add the code from the fix file to your backend.
+  </div>
   <div class="tcard"><div class="tc-head"><h2>Subscribers <span class="ct" id="subs-ct"></span></h2></div>
   <div class="tov"><table><thead><tr><th>Email</th><th>Name</th><th>Subscribed</th></tr></thead><tbody id="subs-tb"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody></table></div></div>
 </div>
@@ -404,14 +419,14 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
 <!-- FILES -->
 <div class="panel" id="panel-files">
   <div class="topbar"><div class="tl"><h1>Files & Media</h1></div>
-  <div class="tr"><select class="fsel" id="fc-filter" onchange="loadFiles()"><option value="">All Categories</option><option value="audio">🎵 Audio</option><option value="image">🖼 Images</option><option value="video">🎬 Video</option><option value="document">📄 Docs</option><option value="general">📦 General</option></select></div></div>
+  <div class="tr"><select class="fsel" id="fc-filter" onchange="loadFiles()"><option value="">All Categories</option><option value="audio">🎵 Audio</option><option value="image">🖼 Images</option><option value="video">🎬 Video</option><option value="document">📄 Docs</option></select></div></div>
   <div class="fcard"><div class="fc-head"><h2>Upload New File</h2></div><div class="fc-body">
     <div class="fg-row">
       <div class="fg"><label>Category</label><select id="up-cat"><option value="general">General</option><option value="audio">Audio</option><option value="image">Image</option><option value="video">Video</option><option value="document">Document</option></select></div>
       <div class="fg"><label>Region (optional)</label><select id="up-region"><option value="">— None —</option></select></div>
     </div>
     <div class="fg"><label>Description</label><input id="up-desc" type="text" placeholder="Optional description…"></div>
-    <label class="btn btn-gold" style="cursor:pointer;margin-top:2px">📎 Choose & Upload File<input type="file" style="display:none" onchange="uploadFile(this)"></label>
+    <label class="btn btn-gold" style="cursor:pointer">📎 Choose & Upload File<input type="file" style="display:none" onchange="uploadFile(this)"></label>
     <div id="up-prog" style="margin-top:10px;font-size:.81rem;color:var(--muted2)"></div>
   </div></div>
   <div class="tcard"><div class="tc-head"><h2>All Files <span class="ct" id="files-ct"></span></h2><input class="srch" placeholder="🔍 Search…" oninput="filterTbl('files-tb',this.value)"></div>
@@ -431,6 +446,27 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
   <div class="alert ai">💳 Paystack webhook auto-upgrades users to Premium on successful payment.</div>
   <div class="tcard"><div class="tc-head"><h2>Premium Users</h2></div>
   <div class="tov"><table><thead><tr><th>Username</th><th>Email</th><th>Amount</th><th>Plan</th><th>Status</th><th>Since</th></tr></thead><tbody id="pay-tb"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody></table></div></div>
+</div>
+
+<!-- ANALYTICS (NEW) -->
+<div class="panel" id="panel-analytics">
+  <div class="topbar"><div class="tl"><h1>📈 Analytics</h1><p>Platform growth and engagement</p></div>
+  <button class="btn btn-ghost" onclick="loadAnalytics()">🔄 Refresh</button></div>
+  <div class="sg5" style="margin-bottom:18px">
+    <div class="scard" style="--ca:var(--green)"><div class="sv" id="an-users">—</div><div class="sl">Total Users</div><span class="chip cg">👥 All time</span></div>
+    <div class="scard" style="--ca:var(--blue)"><div class="sv" id="an-posts">—</div><div class="sl">Total Posts</div><span class="chip cb">📝 Published</span></div>
+    <div class="scard" style="--ca:var(--gold)"><div class="sv" id="an-premium">—</div><div class="sl">Premium Members</div><span class="chip cgold">⭐ Paying</span></div>
+    <div class="scard" style="--ca:var(--purple)"><div class="sv" id="an-regions">—</div><div class="sl">Heritage Regions</div><span class="chip ck">🗺 Active</span></div>
+    <div class="scard" style="--ca:var(--orange)"><div class="sv" id="an-subs">—</div><div class="sl">Subscribers</div><span class="chip cy">📧 Newsletter</span></div>
+  </div>
+  <div class="two-col">
+    <div class="tcard"><div class="tc-head"><h2>📊 Content Breakdown</h2></div>
+    <div class="chart-wrap" id="content-chart"><div class="empty">Loading…</div></div></div>
+    <div class="tcard"><div class="tc-head"><h2>👥 User Role Split</h2></div>
+    <div class="chart-wrap" id="role-chart"><div class="empty">Loading…</div></div></div>
+  </div>
+  <div class="tcard"><div class="tc-head"><h2>🕐 Recent Activity</h2></div>
+  <div style="padding:12px 16px" id="activity-feed"><div class="empty">Loading…</div></div></div>
 </div>
 
 <!-- SETTINGS -->
@@ -453,14 +489,12 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
         <div class="fg"><label>Gold Accent</label><input type="color" id="s-gold" value="#C8962E" style="width:100%;height:38px;padding:2px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer"></div>
         <div class="fg"><label>Dark / Ink</label><input type="color" id="s-ink" value="#0D1B2A" style="width:100%;height:38px;padding:2px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer"></div>
       </div>
-      <div class="fg"><label>Background</label><input type="color" id="s-bg" value="#FAF6EF" style="width:100%;height:38px;padding:2px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer"></div>
       <button class="btn btn-gold" onclick="saveTheme()">💾 Save Theme</button>
     </div>
     <div class="sc2"><h3>🗑️ Bulk Actions</h3>
       <div class="alert aw">⚠️ Permanent — cannot be undone.</div>
       <div style="display:flex;flex-direction:column;gap:8px">
         <button class="btn btn-ghost" onclick="bulkPublishPending()">✓ Publish All Pending</button>
-        <button class="btn btn-red" onclick="bulkRejectPending()">✗ Reject All Pending</button>
         <button class="btn btn-red" onclick="bulkDeleteDrafts()">🗑️ Delete All Drafts</button>
       </div>
     </div>
@@ -474,12 +508,11 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
         <a href="/dashboard" target="_blank" class="btn btn-ghost">📰 User Feed</a>
         <a href="/creator" target="_blank" class="btn btn-ghost">✍️ Creator Portal</a>
         <a href="/signup" target="_blank" class="btn btn-ghost">📝 Signup Page</a>
-        <a href="/user-login" target="_blank" class="btn btn-ghost">🔐 Login Page</a>
       </div>
     </div>
     <div class="sc2" style="grid-column:1/-1"><h3>📥 Import Regions from JSON</h3>
       <div class="alert aw">Paste a JSON array of region objects for bulk import.</div>
-      <div class="fg"><label>JSON Data</label><textarea id="import-json" style="min-height:90px;font-family:'DM Mono',monospace;font-size:.77rem" placeholder='[{"name":"Volta Region","capital":"Ho","description":"…"}]'></textarea></div>
+      <div class="fg"><label>JSON Data</label><textarea id="import-json" style="min-height:90px;font-family:'DM Mono',monospace;font-size:.77rem"></textarea></div>
       <button class="btn btn-gold" onclick="importJSON()">📥 Import</button>
       <div id="import-res" style="margin-top:8px;font-size:.8rem"></div>
     </div>
@@ -487,15 +520,16 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
 </div>
 
 </div><!-- /.main -->
+
 <!-- MODALS -->
 <div class="mbg" id="ev-modal">
   <div class="modal"><div class="mh"><h2>🎉 Add Event</h2><button class="mx" onclick="closeM('ev-modal')">✕</button></div>
   <div class="mb">
-    <div class="mf"><label>Title *</label><input id="ev-t" type="text" placeholder="Event title…"></div>
-    <div class="mf"><label>Description</label><textarea id="ev-d" placeholder="What is this event about?"></textarea></div>
+    <div class="mf"><label>Title *</label><input id="ev-t" type="text"></div>
+    <div class="mf"><label>Description</label><textarea id="ev-d"></textarea></div>
     <div class="mf"><label>Date</label><input id="ev-dt" type="text" placeholder="e.g. 25 December 2025"></div>
-    <div class="mf"><label>Location</label><input id="ev-l" type="text" placeholder="City or venue…"></div>
-    <div class="mf"><label>Image URL</label><input id="ev-i" type="text" placeholder="https://…" oninput="prevImg('ev-i','ev-prev')"><img id="ev-prev" class="ip" alt=""></div>
+    <div class="mf"><label>Location</label><input id="ev-l" type="text"></div>
+    <div class="mf"><label>Image URL</label><input id="ev-i" type="text" oninput="prevImg('ev-i','ev-prev')"><img id="ev-prev" class="ip" alt=""></div>
   </div>
   <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('ev-modal')">Cancel</button><button class="btn btn-gold" onclick="saveEvent()">Save Event</button></div></div>
 </div>
@@ -509,8 +543,8 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
 <div class="mbg" id="cu-modal">
   <div class="modal"><div class="mh"><h2>👤 Create New User</h2><button class="mx" onclick="closeM('cu-modal')">✕</button></div>
   <div class="mb">
-    <div class="mf"><label>Username *</label><input id="cu-u" type="text" placeholder="username…"></div>
-    <div class="mf"><label>Email *</label><input id="cu-e" type="email" placeholder="email@example.com"></div>
+    <div class="mf"><label>Username *</label><input id="cu-u" type="text"></div>
+    <div class="mf"><label>Email *</label><input id="cu-e" type="email"></div>
     <div class="mf"><label>Password *</label><input id="cu-p" type="password" placeholder="min 6 characters…"></div>
     <div class="mf"><label>Role</label><select id="cu-r"><option value="user">👤 User</option><option value="creator">✍️ Creator</option><option value="admin">🛡 Admin</option></select></div>
     <div id="cu-err" class="alert ar2" style="display:none"></div>
@@ -521,12 +555,9 @@ code{font-family:'DM Mono',monospace;font-size:.82em;background:#F1F5F9;padding:
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-// AUTH — CORRECT_ANSWER="THE ADMIN" any case via /api/auth/login
-// main.py: cleaned = "THE ADMIN".lower().replace(" ","") = "theadmin"
-//          given   = answer.strip().lower().replace(" ","")
-// So "the admin", "THE ADMIN", "TheAdmin" all work
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
 const hasCookie = document.cookie.includes('admin_session=ADMIN_AUTHORIZED');
 const hasLS = localStorage.getItem('es_admin') === '1';
 if (hasCookie || hasLS) { document.getElementById('lo').classList.add('hide'); boot(); }
@@ -545,7 +576,6 @@ async function doLogin() {
     } else { document.getElementById('lerr').style.display='block'; }
   } catch(e) { document.getElementById('lerr').style.display='block'; }
 }
-document.getElementById('li').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 
 function doLogout() {
   localStorage.removeItem('es_admin');
@@ -560,10 +590,15 @@ function boot() {
   checkPendingBadge();
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // PANELS
-// ═══════════════════════════════════════════════════════════
-const pLoaders = {overview:loadOverview,write:loadAllPosts,posts:loadPosts,stories:loadStories,regions:loadRegions,'add-region':()=>{},users:loadUsers,creators:loadCreators,subs:loadSubs,events:loadEvents,files:loadFiles,chat:loadChat,payments:loadPayments,settings:loadLiveStats};
+// ═══════════════════════════════════════════
+const pLoaders = {
+  overview:loadOverview, write:()=>{}, posts:loadPosts, stories:loadStories,
+  regions:loadRegions, 'add-region':()=>{}, users:loadUsers, creators:loadCreators,
+  subs:loadSubs, events:loadEvents, files:loadFiles, chat:loadChat,
+  payments:loadPayments, analytics:loadAnalytics, settings:loadLiveStats
+};
 
 function go(name, el) {
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
@@ -575,20 +610,18 @@ function go(name, el) {
   if (pLoaders[name]) pLoaders[name]();
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // OVERVIEW
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadOverview() {
+  let errors = [];
   try {
-    const [sr, ur, pr, stor, subr, pend] = await Promise.all([
-      fetch('/api/stats'),
-      fetch('/api/admin/users',{credentials:'include'}),
-      fetch('/api/posts?status=published&limit=6'),
-      fetch('/api/stories?status=pending'),
-      fetch('/api/newsletter/subscribers',{credentials:'include'}),
-      fetch('/api/posts?status=pending&limit=100')
-    ]);
+    const sr = await fetch('/api/stats');
     if (sr.ok) { const s=await sr.json(); document.getElementById('ov-regions').textContent=s.total_regions||0; }
+  } catch(e) {}
+
+  try {
+    const ur = await fetch('/api/admin/users',{credentials:'include'});
     if (ur.ok) {
       const users=await ur.json();
       document.getElementById('ov-users').textContent=users.length;
@@ -597,33 +630,61 @@ async function loadOverview() {
         `<tr><td><strong>${u.username}</strong></td><td><span class="rb r-${u.role||'user'}">${u.role||'user'}</span></td>
          <td style="font-size:.75rem;color:var(--muted)">${(u.created_at||'').split('T')[0]}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">None</td></tr>';
     } else {
+      errors.push('/api/admin/users → '+ur.status);
       document.getElementById('ov-users').textContent='?';
-      document.getElementById('ov-utb').innerHTML='<tr><td colspan="3" class="empty" style="color:var(--red)">⚠️ '+ur.status+' error loading users</td></tr>';
+      document.getElementById('ov-utb').innerHTML='<tr><td colspan="3" class="empty" style="color:var(--red)">⚠️ 404 — missing route in main.py</td></tr>';
     }
+  } catch(e) { errors.push('/api/admin/users → network error'); }
+
+  try {
+    const pr = await fetch('/api/posts?status=published&limit=6');
     if (pr.ok) {
       const posts=await pr.json();
       document.getElementById('ov-posts').textContent=posts.length;
       document.getElementById('ov-ptb').innerHTML=posts.length?posts.map(p=>
-        `<tr><td style="max-width:180px"><strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">${p.title}</strong></td>
+        `<tr><td><strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;max-width:180px">${p.title}</strong></td>
          <td><span class="rb s-${p.status}">${p.status}</span></td>
          <td class="acts"><button class="ab ab2" onclick="editPost(${p.id})">Edit</button><button class="ab ar" onclick="delPost(${p.id})">Del</button></td></tr>`).join('')
         :'<tr><td colspan="3" class="empty">No published posts yet</td></tr>';
     }
+  } catch(e) {}
+
+  try {
+    const subr = await fetch('/api/newsletter/subscribers',{credentials:'include'});
     if (subr.ok) { const s=await subr.json(); document.getElementById('ov-subs').textContent=s.length; }
-    else document.getElementById('ov-subs').textContent='?';
+    else { errors.push('/api/newsletter/subscribers → '+subr.status); document.getElementById('ov-subs').textContent='?'; }
+  } catch(e) { errors.push('/api/newsletter/subscribers → network error'); }
+
+  try {
+    const pend = await fetch('/api/posts?status=pending&limit=100');
     if (pend.ok) {
       const pp=await pend.json();
       if (pp.length) { document.getElementById('ov-pct').textContent=pp.length; document.getElementById('ov-alert').style.display='block'; const b=document.getElementById('sb-pending'); b.textContent=pp.length; b.classList.add('show'); }
     }
+  } catch(e) {}
+
+  try {
+    const stor = await fetch('/api/stories?status=pending');
     if (stor.ok) {
       const stories=await stor.json();
       document.getElementById('ov-stb').innerHTML=stories.length?stories.slice(0,5).map(s=>
-        `<tr><td><strong>${s.title}</strong></td><td>${s.username}</td>
+        `<tr><td><strong>${s.title}</strong></td><td>${s.username||s.author||'—'}</td>
          <td style="font-size:.75rem;color:var(--muted)">${(s.created_at||'').split('T')[0]}</td>
-         <td class="acts"><button class="ab ag" onclick="storyAct(${s.id},'approve')">✓ Approve</button><button class="ab ar" onclick="storyAct(${s.id},'reject')">✗ Reject</button></td></tr>`).join('')
+         <td class="acts"><button class="ab ag" onclick="storyAct(${s.id},'approve')">✓</button><button class="ab ar" onclick="storyAct(${s.id},'reject')">✗</button></td></tr>`).join('')
         :'<tr><td colspan="4" class="empty"><div class="ei">✅</div>No pending stories</td></tr>';
+    } else {
+      errors.push('/api/stories → '+stor.status);
+      document.getElementById('ov-stb').innerHTML='<tr><td colspan="4" class="empty" style="color:var(--red)">⚠️ 404 — missing route in main.py</td></tr>';
     }
-  } catch(e) { console.warn('Overview error:',e); }
+  } catch(e) {}
+
+  if (errors.length) {
+    const errEl = document.getElementById('ov-err');
+    document.getElementById('ov-err-detail').textContent = 'Missing routes: '+errors.join(' | ');
+    errEl.style.display='block';
+  } else {
+    document.getElementById('ov-err').style.display='none';
+  }
 }
 
 async function checkPendingBadge() {
@@ -633,9 +694,9 @@ async function checkPendingBadge() {
   } catch(e) {}
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // POSTS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadPosts() {
   const st=document.getElementById('pf2')?.value||'all';
   try {
@@ -648,36 +709,17 @@ async function loadPosts() {
     document.getElementById('posts-tb').innerHTML=posts.length?posts.map(p=>
       `<tr><td style="max-width:200px"><strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">${p.title}</strong></td>
        <td style="font-size:.78rem">${p.author_username||'—'}</td>
-       <td><span class="tag" style="font-size:.62rem">${p.content_type||'article'}</span></td>
+       <td><span class="tag">${p.content_type||'article'}</span></td>
        <td><span class="rb s-${p.status}">${p.status}</span></td>
-       <td>${p.views||p.view_count||0}</td><td>${p.comment_count||0}</td>
+       <td>${p.views||0}</td><td>${p.comment_count||0}</td>
        <td class="acts">
          <button class="ab ak" onclick="viewC('${esc(p.title)}','${esc(p.excerpt||p.content||'')}')">Read</button>
-         <button class="ab ab2" onclick="editPost(${p.id})">✏️ Edit</button>
+         <button class="ab ab2" onclick="editPost(${p.id})">✏️</button>
          ${p.status!=='published'?`<button class="ab ag" onclick="setPostSt(${p.id},'published')">✓</button>`:''}
          ${p.status!=='rejected'?`<button class="ab ar" onclick="setPostSt(${p.id},'rejected')">✗</button>`:''}
-         <button class="ab ar" onclick="delPost(${p.id})">Del</button>
+         <button class="ab ar" onclick="delPost(${p.id})">🗑</button>
        </td></tr>`).join('')
     :'<tr><td colspan="7" class="empty"><div class="ei">📝</div>No posts found</td></tr>';
-  } catch(e) {}
-}
-
-async function loadAllPosts() {
-  const st=document.getElementById('pf3')?.value||'all';
-  try {
-    let posts=[];
-    if(st==='all'){
-      const rs=await Promise.all(['published','draft','pending','rejected'].map(s=>fetch('/api/posts?status='+s+'&limit=40').then(r=>r.ok?r.json():[]).catch(()=>[])));
-      posts=rs.flat();
-    } else { posts=await fetch('/api/posts?status='+st+'&limit=80').then(r=>r.ok?r.json():[]).catch(()=>[]); }
-    document.getElementById('ap-ct').textContent='— '+posts.length;
-    document.getElementById('ap-tb').innerHTML=posts.length?posts.map(p=>
-      `<tr><td><strong>${p.title}</strong></td><td style="font-size:.78rem">${p.author_username||'—'}</td>
-       <td><span class="tag" style="font-size:.62rem">${p.content_type||'article'}</span></td>
-       <td><span class="rb s-${p.status}">${p.status}</span></td>
-       <td>${p.views||0}</td>
-       <td class="acts"><button class="ab ab2" onclick="editPost(${p.id})">✏️ Edit</button><button class="ab ar" onclick="delPost(${p.id})">Del</button></td></tr>`).join('')
-    :'<tr><td colspan="6" class="empty">No posts</td></tr>';
   } catch(e) {}
 }
 
@@ -705,7 +747,6 @@ function clearPost() {
   ['pf-title','pf-excerpt','pf-content','pf-cover','pf-audio','pf-video','pf-gallery','pf-tags'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('pf-type').value='article';
   document.getElementById('pf-status').value='draft';
-  document.getElementById('pf-premium').value='0';
   document.getElementById('write-h').textContent='✏️ Write New Post';
   document.getElementById('pp-img').classList.remove('vis');
   showMF(); livePreview();
@@ -718,13 +759,15 @@ async function savePost(forceStatus) {
   const status=forceStatus||document.getElementById('pf-status').value;
   const fd=new FormData();
   fd.append('title',title); fd.append('excerpt',document.getElementById('pf-excerpt').value);
-  fd.append('content',document.getElementById('pf-content').value); fd.append('cover_image',document.getElementById('pf-cover').value);
-  fd.append('content_type',document.getElementById('pf-type').value); fd.append('status',status);
-  fd.append('is_premium',document.getElementById('pf-premium').value); fd.append('region_id',document.getElementById('pf-region').value);
+  fd.append('content',document.getElementById('pf-content').value);
+  fd.append('cover_image',document.getElementById('pf-cover').value);
+  fd.append('content_type',document.getElementById('pf-type').value);
+  fd.append('status',status); fd.append('is_premium',document.getElementById('pf-premium').value);
+  fd.append('region_id',document.getElementById('pf-region').value);
   try {
     const r=await fetch(id?'/api/posts/'+id:'/api/posts',{method:id?'PUT':'POST',body:fd,credentials:'include'});
     const d=await r.json();
-    if(r.ok){toast(status==='published'?'🚀 Published!':'💾 Draft saved','ok');if(!id)clearPost();loadAllPosts();}
+    if(r.ok){toast(status==='published'?'🚀 Published!':'💾 Draft saved','ok');if(!id)clearPost();}
     else toast('❌ '+(d.detail||'Failed — log in as creator first'),'er');
   } catch(e){toast('❌ Network error','er');}
 }
@@ -742,7 +785,7 @@ async function delPost(id) {
   if(!confirm('Delete this post permanently?'))return;
   try {
     const r=await fetch('/api/posts/'+id,{method:'DELETE',credentials:'include'});
-    if(r.ok){toast('Post deleted','ok');loadPosts();loadAllPosts();loadOverview();}
+    if(r.ok){toast('Post deleted','ok');loadPosts();loadOverview();}
   } catch(e){}
 }
 
@@ -777,13 +820,6 @@ async function bulkPublishPending() {
   toast('✅ Published '+n+' posts','ok'); loadPosts();
 }
 
-async function bulkRejectPending() {
-  if(!confirm('Reject ALL pending posts?'))return;
-  const posts=await fetch('/api/posts?status=pending&limit=200').then(r=>r.json()).catch(()=>[]);
-  let n=0; for(const p of posts){const fd=new FormData();fd.append('status','rejected');await fetch('/api/posts/'+p.id,{method:'PUT',body:fd,credentials:'include'});n++;}
-  toast('Rejected '+n+' posts','ok'); loadPosts();
-}
-
 async function bulkDeleteDrafts() {
   if(!confirm('PERMANENTLY delete ALL draft posts?'))return;
   const posts=await fetch('/api/posts?status=draft&limit=200').then(r=>r.json()).catch(()=>[]);
@@ -791,19 +827,23 @@ async function bulkDeleteDrafts() {
   toast('🗑️ Deleted '+n+' drafts','ok'); loadPosts();
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // STORIES
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadStories() {
   const st=document.getElementById('sf')?.value||'pending';
   try {
     const r=await fetch('/api/stories?status='+st);
-    const stories=r.ok?await r.json():[];
+    if(!r.ok){
+      document.getElementById('stories-ct').textContent='— Error';
+      document.getElementById('stories-tb').innerHTML='<tr><td colspan="6" class="empty" style="color:var(--red)">⚠️ '+r.status+' — /api/stories missing from main.py</td></tr>';
+      return;
+    }
+    const stories=await r.json();
     document.getElementById('stories-ct').textContent='— '+stories.length;
     document.getElementById('stories-tb').innerHTML=stories.length?stories.map(s=>
-      `<tr><td style="max-width:200px"><strong>${s.title}</strong></td><td>${s.username}</td>
-       <td style="font-size:.77rem;color:var(--muted)">${s.region_id||'—'}</td>
-       <td><span class="rb s-${s.status}">${s.status}</span></td>
+      `<tr><td><strong>${s.title}</strong></td><td>${s.username||s.author||'—'}</td>
+       <td>${s.region_id||'—'}</td><td><span class="rb s-${s.status}">${s.status}</span></td>
        <td style="font-size:.75rem;color:var(--muted)">${(s.created_at||'').split('T')[0]}</td>
        <td class="acts">
          <button class="ab ak" onclick="viewC('${esc(s.title)}','${esc(s.content)}')">Read</button>
@@ -817,14 +857,14 @@ async function loadStories() {
 async function storyAct(id,action) {
   try {
     const r=await fetch('/api/stories/'+id+'/'+action,{method:'PUT',credentials:'include'});
-    if(r.ok){toast('Story '+action+'d ✓','ok');loadStories();loadOverview();checkPendingBadge();}
+    if(r.ok){toast('Story '+action+'d ✓','ok');loadStories();loadOverview();}
     else toast('❌ Failed','er');
   } catch(e){}
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // REGIONS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadRegions() {
   try {
     const r=await fetch('/api/regions');
@@ -837,7 +877,7 @@ async function loadRegions() {
        <td>${reg.hero_image?`<img src="${reg.hero_image}" style="width:48px;height:34px;object-fit:cover;border-radius:4px">`:'—'}</td>
        <td>${reg.audio_files?'🎵':'—'}</td><td>${reg.gallery_images?'🖼':'—'}</td>
        <td class="acts">
-         <button class="ab ab2" onclick="editRegion(${reg.id})">✏️ Edit</button>
+         <button class="ab ab2" onclick="editRegion(${reg.id})">✏️</button>
          <button class="ab ak" onclick="viewC('${esc(reg.name)}','${esc(reg.overview||reg.description)}')">View</button>
          <button class="ab ar" onclick="delRegion(${reg.id},'${esc(reg.name)}')">Del</button>
        </td></tr>`).join('')
@@ -848,13 +888,19 @@ async function loadRegions() {
 async function editRegion(id) {
   try {
     const regs=await fetch('/api/regions').then(r=>r.json());
-    const reg=regs.find(r=>r.id==id);
-    if(!reg)return;
+    const reg=regs.find(r=>r.id==id); if(!reg)return;
     document.getElementById('rf-id').value=id;
-    ['name','capital','pop:population','terrain','desc:description','overview','hero:hero_image','gallery:gallery_images','audio:audio_files','source','tags'].forEach(pair=>{
-      const [field,key]=pair.includes(':')?pair.split(':'):[pair,pair];
-      const el=document.getElementById('rf-'+field); if(el) el.value=reg[key]||'';
-    });
+    document.getElementById('rf-name').value=reg.name||'';
+    document.getElementById('rf-capital').value=reg.capital||'';
+    document.getElementById('rf-pop').value=reg.population||'';
+    document.getElementById('rf-terrain').value=reg.terrain||'';
+    document.getElementById('rf-desc').value=reg.description||'';
+    document.getElementById('rf-overview').value=reg.overview||'';
+    document.getElementById('rf-hero').value=reg.hero_image||'';
+    document.getElementById('rf-gallery').value=reg.gallery_images||'';
+    document.getElementById('rf-audio').value=reg.audio_files||'';
+    document.getElementById('rf-source').value=reg.source||'';
+    document.getElementById('rf-tags').value=reg.tags||'';
     document.getElementById('rf-cat').value=reg.category||'';
     document.getElementById('rf-h').textContent='✏️ Editing: '+reg.name;
     prevImg('rf-hero','rf-prev'); go('add-region',null); toast('Region loaded ✏️','ok');
@@ -864,7 +910,8 @@ async function editRegion(id) {
 function clearRegion() {
   document.getElementById('rf-id').value='';
   ['rf-name','rf-capital','rf-pop','rf-terrain','rf-desc','rf-overview','rf-hero','rf-gallery','rf-audio','rf-source','rf-tags'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('rf-cat').value=''; document.getElementById('rf-h').textContent='➕ Add New Region';
+  document.getElementById('rf-cat').value='';
+  document.getElementById('rf-h').textContent='➕ Add New Region';
   document.getElementById('rf-prev').classList.remove('vis');
 }
 
@@ -878,7 +925,7 @@ async function saveRegion() {
   try {
     const r=await fetch(id?'/api/regions/'+id:'/api/regions',{method:id?'PUT':'POST',body:fd});
     const d=await r.json();
-    if(r.ok){toast(id?'✅ Region updated!':'✅ Region created!','ok');if(!id)clearRegion();loadRegions();loadRegionsIntoSelects();}
+    if(r.ok){toast(id?'✅ Updated!':'✅ Created!','ok');if(!id)clearRegion();loadRegions();loadRegionsIntoSelects();}
     else throw new Error(d.detail||'Failed');
   } catch(e){toast('❌ '+e.message,'er');}
 }
@@ -900,13 +947,18 @@ async function loadRegionsIntoSelects() {
   } catch(e){}
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // USERS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadUsers() {
   try {
     const r=await fetch('/api/admin/users',{credentials:'include'});
-    if(!r.ok){toast('Error '+r.status+' loading users — check Render logs','er');return;}
+    if(!r.ok){
+      document.getElementById('users-err').style.display='block';
+      document.getElementById('users-tb').innerHTML='<tr><td colspan="7" class="empty" style="color:var(--red)">⚠️ '+r.status+' — Add missing routes to main.py</td></tr>';
+      return;
+    }
+    document.getElementById('users-err').style.display='none';
     const users=await r.json();
     document.getElementById('users-ct').textContent='— '+users.length+' total';
     document.getElementById('users-tb').innerHTML=users.map(u=>
@@ -914,15 +966,15 @@ async function loadUsers() {
         <td><strong>${u.username}</strong></td>
         <td style="font-size:.76rem;color:var(--muted)">${u.email}</td>
         <td><select class="rsel" onchange="setRole('${u.id}',this.value)">
-          <option value="user"    ${u.role==='user'   ?'selected':''}>User</option>
+          <option value="user" ${u.role==='user'?'selected':''}>User</option>
           <option value="creator" ${u.role==='creator'?'selected':''}>Creator</option>
-          <option value="admin"   ${u.role==='admin'  ?'selected':''}>Admin</option>
+          <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option>
         </select></td>
         <td><span class="chip ${(u.is_premium||u.plan==='premium')?'cgold':'ck'}">${(u.is_premium||u.plan==='premium')?'⭐ Premium':'Free'}</span></td>
         <td><span class="chip ${u.is_active?'cg':'cr'}">${u.is_active?'Active':'Suspended'}</span></td>
         <td style="font-size:.74rem;color:var(--muted)">${(u.created_at||'').split('T')[0]}</td>
         <td class="acts">
-          <button class="ab ao" onclick="togglePremium('${u.id}')">${(u.is_premium||u.plan==='premium')?'→ Free':'→ Premium'}</button>
+          <button class="ab ao" onclick="togglePremium('${u.id}')">${(u.is_premium||u.plan==='premium')?'→Free':'→Premium'}</button>
           <button class="ab ${u.is_active?'ar':'ag'}" onclick="toggleSuspend('${u.id}',${u.is_active})">${u.is_active?'Suspend':'Restore'}</button>
         </td>
       </tr>`).join('');
@@ -939,11 +991,11 @@ async function setRole(uid,role) {
 }
 
 async function togglePremium(uid) {
-  try { const r=await fetch('/api/admin/users/'+uid+'/premium',{method:'PUT',credentials:'include'}); if(r.ok){toast('Premium toggled','ok');loadUsers();} } catch(e){toast('❌ Failed','er');}
+  try { const r=await fetch('/api/admin/users/'+uid+'/premium',{method:'PUT',credentials:'include'}); if(r.ok){toast('Premium toggled','ok');loadUsers();}else toast('❌ Premium endpoint missing from main.py','er'); } catch(e){toast('❌ Failed','er');}
 }
 
 async function toggleSuspend(uid,active) {
-  try { const r=await fetch('/api/admin/users/'+uid+'/suspend',{method:'PUT',credentials:'include'}); if(r.ok){toast(active?'User suspended':'User restored','ok');loadUsers();}else toast('❌ Suspend endpoint not available','warn'); } catch(e){}
+  try { const r=await fetch('/api/admin/users/'+uid+'/suspend',{method:'PUT',credentials:'include'}); if(r.ok){toast(active?'User suspended':'User restored','ok');loadUsers();}else toast('❌ Suspend endpoint missing from main.py','er'); } catch(e){}
 }
 
 async function createUser() {
@@ -960,9 +1012,9 @@ async function createUser() {
   } catch(e2){const err=document.getElementById('cu-err');err.textContent=e2.message;err.style.display='block';}
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // CREATORS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadCreators() {
   try {
     const r=await fetch('/api/creators');
@@ -971,17 +1023,22 @@ async function loadCreators() {
       `<tr><td><strong>${c.channel_name||c.username}</strong></td><td>${c.username}</td>
        <td>${c.follower_count||0}</td><td>${c.post_count||0}</td>
        <td class="acts"><button class="ab ar" onclick="setRole('${c.id}','user')">Revoke Creator</button></td></tr>`).join('')
-    :'<tr><td colspan="5" class="empty"><div class="ei">✍️</div>No creators yet</td></tr>';
+    :'<tr><td colspan="5" class="empty"><div class="ei">✍️</div>No creators yet. Promote users from Users tab.</td></tr>';
   } catch(e){}
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // NEWSLETTER
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadSubs() {
   try {
     const r=await fetch('/api/newsletter/subscribers',{credentials:'include'});
-    if(!r.ok){document.getElementById('subs-tb').innerHTML='<tr><td colspan="3" class="empty">Not authorized</td></tr>';return;}
+    if(!r.ok){
+      document.getElementById('subs-err').style.display='block';
+      document.getElementById('subs-tb').innerHTML='<tr><td colspan="3" class="empty" style="color:var(--red)">⚠️ '+r.status+' — Add missing route to main.py</td></tr>';
+      return;
+    }
+    document.getElementById('subs-err').style.display='none';
     const subs=await r.json();
     document.getElementById('subs-ct').textContent='— '+subs.length+' subscribers';
     document.getElementById('subs-tb').innerHTML=subs.length?subs.map(s=>
@@ -999,9 +1056,9 @@ function exportSubs() {
   toast('CSV downloaded!','ok');
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // EVENTS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadEvents() {
   try {
     const r=await fetch('/api/events');
@@ -1009,7 +1066,7 @@ async function loadEvents() {
     document.getElementById('events-tb').innerHTML=evs.length?evs.map(e=>
       `<tr><td>${e.image_url?`<img src="${e.image_url}" style="width:52px;height:38px;object-fit:cover;border-radius:5px">`:'—'}</td>
        <td><strong>${e.title}</strong></td><td>${e.event_date||'—'}</td><td>${e.location||'—'}</td>
-       <td style="font-size:.77rem;color:var(--muted);max-width:180px">${(e.description||'').slice(0,80)}</td>
+       <td style="font-size:.77rem;max-width:180px;color:var(--muted2)">${(e.description||'').slice(0,80)}</td>
        <td><button class="ab ar" onclick="delEvent(${e.id})">Delete</button></td></tr>`).join('')
     :'<tr><td colspan="6" class="empty"><div class="ei">🎉</div>No events yet</td></tr>';
   } catch(e){}
@@ -1018,23 +1075,24 @@ async function loadEvents() {
 async function saveEvent() {
   if(!document.getElementById('ev-t').value.trim()){toast('Title required','er');return;}
   const fd=new FormData();
-  fd.append('title',document.getElementById('ev-t').value); fd.append('description',document.getElementById('ev-d').value);
-  fd.append('event_date',document.getElementById('ev-dt').value); fd.append('location',document.getElementById('ev-l').value);
+  fd.append('title',document.getElementById('ev-t').value);
+  fd.append('description',document.getElementById('ev-d').value);
+  fd.append('event_date',document.getElementById('ev-dt').value);
+  fd.append('location',document.getElementById('ev-l').value);
   fd.append('image_url',document.getElementById('ev-i').value);
   try {
     const r=await fetch('/api/events',{method:'POST',body:fd,credentials:'include'});
-    if(r.ok){closeM('ev-modal');toast('🎉 Event created!','ok');loadEvents();['ev-t','ev-d','ev-dt','ev-l','ev-i'].forEach(id=>document.getElementById(id).value='');}
-    else{const d=await r.json();throw new Error(d.detail);}
-  } catch(e){toast('❌ '+e.message,'er');}
+    if(r.ok){closeM('ev-modal');toast('🎉 Event created!','ok');loadEvents();}
+  } catch(e){toast('❌ Failed','er');}
 }
 
 async function delEvent(id) {
   try { const r=await fetch('/api/events/'+id,{method:'DELETE',credentials:'include'}); if(r.ok){toast('Deleted','ok');loadEvents();} } catch(e){}
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // FILES
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadFiles() {
   const cat=document.getElementById('fc-filter')?.value||'';
   try {
@@ -1049,9 +1107,9 @@ async function loadFiles() {
       return `<tr><td>${prev}</td>
         <td><a href="${f.file_url}" target="_blank" style="color:var(--gold);font-weight:600">${f.original_name||f.filename}</a>
         <div class="url-box" onclick="navigator.clipboard.writeText('${fullUrl}');toast('URL copied!','ok')">${fullUrl}</div></td>
-        <td><span class="tag">${f.category}</span></td><td style="font-size:.76rem">${f.file_size_mb||0} MB</td>
+        <td><span class="tag">${f.category}</span></td><td>${f.file_size_mb||0} MB</td>
         <td style="font-size:.75rem;color:var(--muted)">${(f.created_at||'').split('T')[0]}</td>
-        <td class="acts"><button class="ab ar" onclick="delFile(${f.id})">Delete</button></td></tr>`;
+        <td><button class="ab ar" onclick="delFile(${f.id})">Delete</button></td></tr>`;
     }).join(''):'<tr><td colspan="6" class="empty"><div class="ei">📁</div>No files uploaded yet</td></tr>';
   } catch(e){}
 }
@@ -1079,9 +1137,9 @@ async function delFile(id) {
   try { const r=await fetch('/api/files/'+id,{method:'DELETE'}); if(r.ok){toast('Deleted','ok');loadFiles();} } catch(e){}
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // CHAT
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadChat() {
   try {
     const r=await fetch('/api/chat');
@@ -1100,9 +1158,9 @@ async function delMsg(id) {
   try { const r=await fetch('/api/chat/'+id,{method:'DELETE',credentials:'include'}); if(r.ok){toast('Deleted','ok');loadChat();} } catch(e){}
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // PAYMENTS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadPayments() {
   try {
     const r=await fetch('/api/admin/users',{credentials:'include'});
@@ -1118,9 +1176,73 @@ async function loadPayments() {
   } catch(e){}
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// ANALYTICS (NEW)
+// ═══════════════════════════════════════════
+async function loadAnalytics() {
+  try {
+    const [sr, ur, subr, pr] = await Promise.all([
+      fetch('/api/stats').then(r=>r.ok?r.json():{}).catch(()=>({})),
+      fetch('/api/admin/users',{credentials:'include'}).then(r=>r.ok?r.json():[]).catch(()=>[]),
+      fetch('/api/newsletter/subscribers',{credentials:'include'}).then(r=>r.ok?r.json():[]).catch(()=>[]),
+      Promise.all(['published','draft','pending'].map(s=>fetch('/api/posts?status='+s+'&limit=100').then(r=>r.ok?r.json():[]).catch(()=>[]))).then(rs=>rs.flat())
+    ]);
+
+    const users = Array.isArray(ur) ? ur : [];
+    const posts = Array.isArray(pr) ? pr : [];
+    const premium = users.filter(u=>u.is_premium||u.plan==='premium');
+    const creators = users.filter(u=>u.role==='creator');
+
+    document.getElementById('an-users').textContent = users.length || sr.total_users || 0;
+    document.getElementById('an-posts').textContent = posts.filter(p=>p.status==='published').length || sr.total_posts || 0;
+    document.getElementById('an-premium').textContent = premium.length;
+    document.getElementById('an-regions').textContent = sr.total_regions || 0;
+    document.getElementById('an-subs').textContent = subr.length || 0;
+
+    // Content type chart
+    const types = {};
+    posts.forEach(p=>{ const t=p.content_type||'article'; types[t]=(types[t]||0)+1; });
+    const colors = {article:'#2563EB',audio:'#7C3AED',photo_essay:'#D97706',video:'#DC2626'};
+    const maxT = Math.max(...Object.values(types),1);
+    document.getElementById('content-chart').innerHTML = `<div class="bar-chart">${
+      Object.entries(types).map(([t,v])=>`<div class="bar-col">
+        <div class="bar-val">${v}</div>
+        <div class="bar" style="height:${Math.max(8,(v/maxT)*100)}px;background:${colors[t]||'#64748B'}" title="${t}: ${v}"></div>
+        <div class="bar-label">${t.replace('_',' ')}</div>
+      </div>`).join('') || '<div class="empty">No posts yet</div>'
+    }</div>`;
+
+    // Role split chart
+    const roles = {user: users.filter(u=>u.role==='user'||!u.role).length, creator: creators.length, admin: users.filter(u=>u.role==='admin').length};
+    const roleColors = {user:'#2563EB',creator:'#C8962E',admin:'#16A34A'};
+    const maxR = Math.max(...Object.values(roles),1);
+    document.getElementById('role-chart').innerHTML = `<div class="bar-chart">${
+      Object.entries(roles).filter(([,v])=>v>0).map(([t,v])=>`<div class="bar-col">
+        <div class="bar-val">${v}</div>
+        <div class="bar" style="height:${Math.max(8,(v/maxR)*100)}px;background:${roleColors[t]}" title="${t}: ${v}"></div>
+        <div class="bar-label">${t}</div>
+      </div>`).join('') || '<div class="empty">No users yet</div>'
+    }</div>`;
+
+    // Activity feed
+    const activities = [];
+    posts.slice(0,3).forEach(p=>activities.push({ic:'📝',bg:colors[p.content_type]||'#2563EB',title:`"${p.title.slice(0,40)}"`,sub:`Post ${p.status} by ${p.author_username||'admin'}`,time:(p.created_at||'').split('T')[0]}));
+    users.slice(0,3).forEach(u=>activities.push({ic:'👤',bg:'#16A34A',title:`${u.username} joined`,sub:`Role: ${u.role||'user'}`,time:(u.created_at||'').split('T')[0]}));
+    subr.slice(0,2).forEach(s=>activities.push({ic:'📧',bg:'#DC2626',title:`${s.email} subscribed`,sub:'Newsletter',time:(s.created_at||'').split('T')[0]}));
+
+    document.getElementById('activity-feed').innerHTML = activities.length ?
+      activities.map(a=>`<div class="feed-item">
+        <div class="feed-ic" style="background:${a.bg}22">${a.ic}</div>
+        <div class="feed-body"><div class="feed-title">${a.title}</div><div class="feed-sub">${a.sub}</div></div>
+        <div class="feed-time">${a.time}</div>
+      </div>`).join('') : '<div class="empty">No activity yet</div>';
+
+  } catch(e) { console.warn('Analytics error:', e); }
+}
+
+// ═══════════════════════════════════════════
 // SETTINGS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadLiveStats() {
   try {
     const [sr,ur,subr]=await Promise.all([fetch('/api/stats'),fetch('/api/admin/users',{credentials:'include'}),fetch('/api/newsletter/subscribers',{credentials:'include'})]);
@@ -1133,8 +1255,6 @@ async function loadLiveStats() {
       👥 Total Users: <strong>${s.user_count||u.length||0}</strong><br>
       ✍️ Creators: <strong>${s.total_creators||creators.length||0}</strong><br>
       📝 Published Posts: <strong>${s.total_posts||0}</strong><br>
-      💬 Comments: <strong>${s.total_comments||0}</strong><br>
-      ❤️ Follows: <strong>${s.total_follows||0}</strong><br>
       ⭐ Premium Members: <strong>${premium.length}</strong><br>
       🗺 Regions: <strong>${s.total_regions||0}</strong><br>
       🎵 Audio Files: <strong>${s.with_audio||0}</strong><br>
@@ -1170,7 +1290,7 @@ async function saveAnn() {
 }
 
 async function saveTheme() {
-  const theme={gold:document.getElementById('s-gold').value,ink:document.getElementById('s-ink').value,bg:document.getElementById('s-bg').value};
+  const theme={gold:document.getElementById('s-gold').value,ink:document.getElementById('s-ink').value};
   const fd=new FormData(); fd.append('theme',JSON.stringify(theme));
   try { const r=await fetch('/api/theme',{method:'POST',body:fd}); if(r.ok)toast('🎨 Theme saved!','ok'); } catch(e){toast('❌ Failed','er');}
 }
@@ -1187,9 +1307,9 @@ async function importJSON() {
   } catch(e){res.textContent='❌ '+e.message;res.style.color='var(--red)';}
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // UTILS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
 function filterTbl(id,q){document.querySelectorAll('#'+id+' tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});}
