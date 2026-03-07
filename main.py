@@ -120,7 +120,13 @@ async def dashboard_page(request: Request):
     if not request.cookies.get("user_session"):
         return RedirectResponse(url="/user-login")
     return serve_file("dashboard.html")
-
+    
+@app.get("/map")
+async def map_page(request: Request):
+    if not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    return serve_file("app.html")
+    
 @app.get("/creator")
 async def creator_page(request: Request):
     if not request.cookies.get("user_session"):
