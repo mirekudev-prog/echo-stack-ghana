@@ -64,7 +64,13 @@ class User(Base):
     created_at      = Column(DateTime, default=datetime.utcnow)
     updated_at      = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-
+# Add these lines inside the User class
+    email_verified = Column(Boolean, default=False)
+    verification_token = Column(String(255), nullable=True)
+    verification_token_expires = Column(DateTime, nullable=True)
+    reset_token = Column(String(255), nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
+    
 # ─── POST ─────────────────────────────────────────────────────────────────────
 class Post(Base):
     __tablename__ = "posts"
