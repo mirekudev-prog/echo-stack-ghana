@@ -4,10 +4,14 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 import os, uuid, re, json, httpx
-from datetime import datetime
+from datetime import datetime, timedelta   # added timedelta
+import secrets                              # for token generation
 
 # Password hashing
 from passlib.context import CryptContext
+
+# Email utilities (must exist in your project)
+from email_utils import generate_token, send_verification_email, send_password_reset_email
 
 from database import engine, get_db, Base
 import models
@@ -56,6 +60,11 @@ CREATE TABLE IF NOT EXISTS users (
     is_premium INTEGER DEFAULT 0,
     is_suspended INTEGER DEFAULT 0,
     follower_count INTEGER DEFAULT 0,
+    email_verified BOOLEAN DEFAULT FALSE,
+    verification_token VARCHAR(255),
+    verification_token_expires TIMESTAMP,
+    reset_token VARCHAR(255),
+    reset_token_expires TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -216,6 +225,11 @@ def _run_migrations():
         ("users","is_premium","INTEGER DEFAULT 0"),
         ("users","is_suspended","INTEGER DEFAULT 0"),
         ("users","follower_count","INTEGER DEFAULT 0"),
+        ("users","email_verified","BOOLEAN DEFAULT FALSE"),
+        ("users","verification_token","VARCHAR(255)"),
+        ("users","verification_token_expires","TIMESTAMP"),
+        ("users","reset_token","VARCHAR(255)"),
+        ("users","reset_token_expires","TIMESTAMP"),
         ("posts","audio_url","VARCHAR(500) DEFAULT ''"),
         ("posts","video_url","VARCHAR(500) DEFAULT ''"),
         ("posts","gallery","TEXT DEFAULT ''"),
@@ -363,6 +377,8 @@ for _route, _fn in {
     "/activity": "activity.html", "/explore": "explore.html",
     "/following": "following.html", "/community": "community_chat.html",
     "/archive": "archive.html", "/user": "user_profile.html",
+    "/verify-email": "verify-email.html",        # new page for verification
+    "/reset-password": "reset-password.html",    # new page for password reset
 }.items():
     app.get(_route)(_page(_fn))
 
@@ -453,19 +469,33 @@ async def signup(
         # Hash the password
         hashed = get_password_hash(password)
 
-        # Create user
-        uid = uuid.uuid4()   # UUID object
+        # Generate verification token (expires in 24 hours)
+        verification_token = generate_token()
+        token_expires = datetime.utcnow() + timedelta(hours=24)
+
+        # Create user (use integers for is_premium/is_suspended)
+        uid = uuid.uuid4()
         u = models.User(
-            id=uid, username=uname, email=uemail,
+            id=uid,
+            username=uname,
+            email=uemail,
             hashed_password=hashed,
             role="user",
-            is_premium=False, is_suspended=False, follower_count=0,
-            bio="", avatar_url="", channel_name=uname, channel_desc="",
+            is_premium=0,
+            is_suspended=0,
+            follower_count=0,
+            bio="",
+            avatar_url="",
+            channel_name=uname,
+            channel_desc="",
+            email_verified=False,
+            verification_token=verification_token,
+            verification_token_expires=token_expires
         )
         db.add(u)
         db.flush()
 
-        # Parse and save selected topics using raw SQL
+        # Parse and save selected topics
         selected_topics = []
         if topics:
             try:
@@ -491,13 +521,18 @@ async def signup(
         db.refresh(u)
         print(f"✅ New user: {uname} ({uemail}) id={uid} with {len(selected_topics)} topics")
 
-        resp = JSONResponse({
-            "success": True, "user_id": str(uid),
-            "username": u.username, "role": "user",
-            "is_premium": False, "message": "Account created!"
+        # Send verification email (don't fail if email fails)
+        try:
+            send_verification_email(uemail, uname, verification_token)
+        except Exception as e:
+            print(f"⚠️ Could not send verification email: {e}")
+
+        # Return success but DON'T log them in automatically
+        return JSONResponse({
+            "success": True,
+            "message": "Account created! Please check your email to verify your account.",
+            "needs_verification": True
         })
-        resp.set_cookie("user_session", str(uid), max_age=60*60*24*30, path="/", samesite="lax", httponly=False)
-        return resp
 
     except HTTPException:
         db.rollback()
@@ -527,12 +562,17 @@ async def user_login(
         if not u:
             raise HTTPException(404, "Account not found. Please sign up first.")
 
+        # Check if email is verified
+        if not getattr(u, "email_verified", False):
+            raise HTTPException(403, "Please verify your email before logging in. Check your inbox for the verification link.")
+
         if not verify_password(password, u.hashed_password):
             raise HTTPException(401, "Incorrect password. Try again.")
 
         if getattr(u, "is_suspended", 0):
             raise HTTPException(403, "Account suspended. Contact support.")
 
+        # Success response
         resp = JSONResponse({
             "success": True,
             "user_id": str(u.id),
@@ -542,6 +582,83 @@ async def user_login(
         })
         resp.set_cookie("user_session", str(u.id), max_age=60*60*24*30, path="/", samesite="lax")
         return resp
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+@app.get("/api/users/verify-email")
+async def verify_email(token: str, db: Session = Depends(get_db)):
+    try:
+        # Find user with this token and not expired
+        user = db.query(models.User).filter(
+            models.User.verification_token == token,
+            models.User.verification_token_expires > datetime.utcnow()
+        ).first()
+
+        if not user:
+            raise HTTPException(400, "Invalid or expired verification link")
+
+        # Mark as verified and clear token
+        user.email_verified = True
+        user.verification_token = None
+        user.verification_token_expires = None
+        db.commit()
+
+        return {"success": True, "message": "Email verified successfully! You can now log in."}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+@app.post("/api/users/forgot-password")
+async def forgot_password(email: str = Form(...), db: Session = Depends(get_db)):
+    try:
+        user = db.query(models.User).filter(models.User.email == email.strip()).first()
+
+        # Always return success even if email not found (security best practice)
+        if not user:
+            return {"success": True, "message": "If an account exists with that email, you will receive a password reset link."}
+
+        # Generate reset token (expires in 1 hour)
+        reset_token = generate_token()
+        token_expires = datetime.utcnow() + timedelta(hours=1)
+
+        user.reset_token = reset_token
+        user.reset_token_expires = token_expires
+        db.commit()
+
+        # Send reset email
+        send_password_reset_email(user.email, user.username, reset_token)
+
+        return {"success": True, "message": "If an account exists with that email, you will receive a password reset link."}
+
+    except Exception as e:
+        print(f"Forgot password error: {e}")
+        # Still return generic success for security
+        return {"success": True, "message": "If an account exists with that email, you will receive a password reset link."}
+
+@app.post("/api/users/reset-password")
+async def reset_password(token: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+    try:
+        # Find user with valid token
+        user = db.query(models.User).filter(
+            models.User.reset_token == token,
+            models.User.reset_token_expires > datetime.utcnow()
+        ).first()
+
+        if not user:
+            raise HTTPException(400, "Invalid or expired reset token")
+
+        # Update password
+        user.hashed_password = get_password_hash(password)
+        user.reset_token = None
+        user.reset_token_expires = None
+        db.commit()
+
+        return {"success": True, "message": "Password reset successfully! You can now log in."}
 
     except HTTPException:
         raise
@@ -606,7 +723,7 @@ async def set_premium(uid: str, request: Request, db: Session = Depends(get_db))
     if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
     u = db.query(models.User).filter(models.User.id == uid).first()
     if not u: raise HTTPException(404)
-    u.is_premium = False if getattr(u,"is_premium",0) else 1
+    u.is_premium = 0 if getattr(u,"is_premium",0) else 1
     db.commit(); return {"success": True, "is_premium": u.is_premium}
 
 @app.put("/api/admin/users/{uid}/suspend")
@@ -614,7 +731,7 @@ async def suspend(uid: str, request: Request, db: Session = Depends(get_db)):
     if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
     u = db.query(models.User).filter(models.User.id == uid).first()
     if not u: raise HTTPException(404)
-    u.is_suspended = False if getattr(u,"is_suspended",0) else 1
+    u.is_suspended = 0 if getattr(u,"is_suspended",0) else 1
     db.commit(); return {"success": True, "is_suspended": u.is_suspended}
 
 # ─── POSTS ────────────────────────────────────────────────────────────────────
@@ -702,7 +819,7 @@ async def create_post(
             except Exception:
                 pass
         if not author_id and is_admin:
-            author_id = None   # admin posts can have null author? Or use a placeholder UUID? Better to keep null or set a dummy UUID? We'll keep as None.
+            # Admin can post without a user session – set a placeholder? We'll keep None and use "Admin" as username.
             author_username = "Admin"
 
         base = slugify(title); slug = base; n = 1
