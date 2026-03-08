@@ -7,52 +7,40 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;--red:#C0392B;--green:#1A7A4A;--border:#E2E8F0;--muted:#94A3B8;--blue:#2563EB}
+:root{--ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;--red:#C0392B;--green:#1A7A4A;--border:#E2E8F0;--muted:#94A3B8}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh}
 nav{background:var(--ink);border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:100}
 .ni{max-width:1200px;margin:0 auto;padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between}
 .nl{display:flex;align-items:center;gap:10px;text-decoration:none}
 .nl img{width:30px;height:30px;border-radius:6px;object-fit:contain}
 .nl span{font-family:'Playfair Display',serif;color:#fff;font-size:1.05rem}
-.nr{display:flex;align-items:center;gap:6px}
+.nr{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .nb{background:none;border:none;color:#94A3B8;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;padding:6px 11px;border-radius:6px;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 .nb:hover{background:rgba(255,255,255,.08);color:#fff}
 .nb.new-post{background:var(--gold);color:#fff;font-weight:700}.nb.new-post:hover{background:#a97825}
 .nb.lo{border:1px solid rgba(248,113,113,.35);color:#f87171}.nb.lo:hover{background:#f87171;color:#fff}
 .creator-badge{padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;background:rgba(200,150,46,.2);color:var(--gold);border:1px solid rgba(200,150,46,.3);letter-spacing:.05em}
-
 .page{max-width:1200px;margin:0 auto;padding:28px 20px}
-
-/* Channel header */
 .channel-header{background:var(--ink);border-radius:16px;padding:28px 32px;margin-bottom:24px;position:relative;overflow:hidden;display:flex;align-items:center;gap:24px}
 .channel-header::after{content:'✦';position:absolute;right:20px;top:10px;font-size:80px;opacity:.05;color:var(--gold)}
-.ch-avatar-wrap{position:relative;flex-shrink:0}
-.ch-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:700;color:#fff;border:3px solid rgba(200,150,46,.4);overflow:hidden}
-.ch-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.ch-avatar-edit{position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--gold);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.6rem;color:#fff}
+.ch-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:700;color:#fff;flex-shrink:0;border:3px solid rgba(200,150,46,.4)}
 .ch-info h1{font-family:'Playfair Display',serif;color:#fff;font-size:1.5rem;margin-bottom:4px}
 .ch-info p{color:#94A3B8;font-size:.85rem}
 .ch-stats{margin-left:auto;display:flex;gap:24px;text-align:center}
 .ch-stat .sv{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--gold2)}
 .ch-stat .sl{font-size:.7rem;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em}
-@media(max-width:600px){.channel-header{flex-wrap:wrap}.ch-stats{margin-left:0;width:100%;justify-content:space-around}}
-
-/* Tabs */
+@media(max-width:600px){.channel-header{flex-wrap:wrap;padding:20px}.ch-stats{margin-left:0;width:100%;justify-content:space-around}}
 .tabs{display:flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:24px}
 .tab{flex:1;padding:9px;text-align:center;border-radius:7px;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s}
 .tab.active{background:var(--ink);color:#fff}
 .panel{display:none}.panel.on{display:block}
-
-/* Stats grid */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
 @media(max-width:700px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
-.stat-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 1px 6px rgba(13,27,42,.04)}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px}
 .stat-val{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--ink)}
 .stat-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
 .stat-sub{font-size:.75rem;color:var(--green);margin-top:4px;font-weight:600}
-
-/* Posts table */
-.post-table{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 8px rgba(13,27,42,.05)}
+.post-table{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .pt-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .pt-header h2{font-size:.95rem;font-weight:700;color:var(--ink)}
 .pt-row{display:grid;grid-template-columns:1fr auto auto auto;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);transition:background .15s}
@@ -65,12 +53,10 @@ nav{background:var(--ink);border-bottom:3px solid var(--gold);position:sticky;to
 .status-draft{background:#F8FAFF;color:#94A3B8}
 .pt-stats{font-size:.75rem;color:var(--muted);display:flex;gap:10px;white-space:nowrap}
 .pt-actions{display:flex;gap:6px}
-.act-btn{padding:5px 10px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.act-btn{padding:5px 10px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:'DM Sans',sans-serif}
 .act-edit{background:var(--cream);color:var(--ink);border:1px solid var(--border)}.act-edit:hover{background:var(--ink);color:#fff}
 .act-del{background:#FEF2F2;color:#DC2626;border:1px solid #FCA5A5}.act-del:hover{background:#DC2626;color:#fff}
-
-/* Form */
-.form-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 8px rgba(13,27,42,.05)}
+.form-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .form-header{padding:16px 20px;border-bottom:1px solid var(--border)}
 .form-header h2{font-size:.95rem;font-weight:700;color:var(--ink)}
 .form-body{padding:24px}
@@ -78,25 +64,28 @@ nav{background:var(--ink);border-bottom:3px solid var(--gold);position:sticky;to
 .field label{display:block;font-size:.76rem;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
 .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink);outline:none;transition:border-color .2s;background:#FAFAFA}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);background:#fff}
-.field textarea{min-height:200px;resize:vertical}
+.field textarea{min-height:200px;resize:vertical;line-height:1.7}
+.field select{cursor:pointer}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:600px){.field-row{grid-template-columns:1fr}}
 
-/* Upload+URL combo field */
-.upload-combo{border:1.5px solid var(--border);border-radius:9px;overflow:hidden;background:#FAFAFA}
-.upload-combo-tabs{display:flex;border-bottom:1px solid var(--border)}
-.uc-tab{flex:1;padding:7px;text-align:center;font-size:.75rem;font-weight:600;cursor:pointer;color:var(--muted);background:none;border:none;font-family:'DM Sans',sans-serif;transition:all .2s}
-.uc-tab.active{background:#fff;color:var(--ink);border-bottom:2px solid var(--gold);margin-bottom:-1px}
-.uc-body{padding:10px 12px}
-.uc-body input[type="text"]{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;background:#fff}
-.uc-body input[type="text"]:focus{border-color:var(--gold)}
-.upload-drop{border:2px dashed var(--border);border-radius:7px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;background:#fff}
-.upload-drop:hover{border-color:var(--gold);background:#FFFBF2}
-.upload-drop p{font-size:.8rem;color:var(--muted)}
-.upload-drop .icon{font-size:1.4rem;margin-bottom:4px}
-.preview-wrap{margin-top:8px;position:relative;display:inline-block}
-.preview-wrap img,.preview-wrap video{max-width:100%;max-height:160px;border-radius:7px;display:block}
-.remove-preview{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+/* Cover upload */
+.cover-zone{border:2px dashed var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .2s}
+.cover-zone:hover,.cover-zone.drag{border-color:var(--gold);background:#fffbf0}
+.utabs{display:flex;border-bottom:1px solid var(--border)}
+.utab{flex:1;padding:10px;text-align:center;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s;background:none;border:none;font-family:'DM Sans',sans-serif}
+.utab.active{color:var(--gold);border-bottom:2px solid var(--gold);background:#fffbf5}
+.upane{padding:16px;display:none}
+.upane.on{display:block}
+.drop-area{display:flex;flex-direction:column;align-items:center;padding:28px 20px;gap:8px;cursor:pointer}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;background:var(--gold);transition:width .3s;width:0}
+
+/* Media url row */
+.media-row{display:flex;gap:8px;align-items:center}
+.media-row input{flex:1}
+.mini-btn{padding:8px 12px;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;color:var(--ink);transition:all .2s;flex-shrink:0}
+.mini-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
 
 .toggle-row{display:flex;align-items:center;gap:12px}
 .toggle{position:relative;width:44px;height:24px}
@@ -105,32 +94,22 @@ nav{background:var(--ink);border-bottom:3px solid var(--gold);position:sticky;to
 .slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s}
 input:checked+.slider{background:var(--gold)}
 input:checked+.slider::before{transform:translateX(20px)}
-
-.form-actions{display:flex;gap:10px;margin-top:8px}
-.form-actions button{padding:12px 24px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.form-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.form-actions button{padding:12px 24px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:all .2s}
 .btn-publish{background:var(--green);color:#fff}.btn-publish:hover{background:#156534}
 .btn-draft{background:var(--ink);color:#fff}.btn-draft:hover{background:var(--gold)}
-.btn-cancel{background:var(--border);color:var(--ink)}.btn-cancel:hover{background:#cbd5e1}
-
-/* Loading */
+.btn-cancel{background:var(--border);color:var(--ink)}
+.btn-publish:disabled,.btn-draft:disabled{opacity:.6;pointer-events:none}
 #ld{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s}
 #ld.hide{opacity:0;pointer-events:none}
 .lbar{width:160px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin:8px auto 0}
 .lbi{height:100%;background:var(--gold);animation:lb 1s ease forwards}
 @keyframes lb{from{width:0}to{width:100%}}
-
-/* Toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .35s;z-index:999;white-space:nowrap}
 .toast.on{transform:translateX(-50%) translateY(0)}
 .toast.ok{background:var(--green)}.toast.er{background:var(--red)}
 .empty{text-align:center;padding:40px 20px;color:var(--muted)}
 .empty div{font-size:2rem;margin-bottom:10px}
-
-/* Avatar modal */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
-.modal-bg.open{display:flex}
-.modal{background:#fff;border-radius:16px;padding:28px;max-width:440px;width:90%;position:relative}
-.modal h2{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:18px;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -153,14 +132,8 @@ input:checked+.slider::before{transform:translateX(20px)}
 </div></nav>
 
 <div class="page">
-  <!-- Channel Header -->
   <div class="channel-header">
-    <div class="ch-avatar-wrap">
-      <div class="ch-avatar" id="ch-avatar-el">
-        <span id="ch-avatar-letter">?</span>
-      </div>
-      <div class="ch-avatar-edit" onclick="openAvatarModal()" title="Change profile picture">✏️</div>
-    </div>
+    <div class="ch-avatar" id="ch-avatar">?</div>
     <div class="ch-info">
       <h1 id="ch-name">My Channel</h1>
       <p id="ch-desc">Loading…</p>
@@ -172,15 +145,14 @@ input:checked+.slider::before{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs">
     <div class="tab active" onclick="switchTab('posts',this)">📄 My Posts</div>
     <div class="tab" onclick="switchTab('analytics',this)">📊 Analytics</div>
     <div class="tab" onclick="switchTab('new',this)">✍️ New Post</div>
-    <div class="tab" onclick="switchTab('channel',this)">⚙️ Channel Settings</div>
+    <div class="tab" onclick="switchTab('channel',this)">⚙️ Channel</div>
   </div>
 
-  <!-- Posts Tab -->
+  <!-- POSTS -->
   <div class="panel on" id="panel-posts">
     <div class="post-table">
       <div class="pt-header">
@@ -191,7 +163,7 @@ input:checked+.slider::before{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- Analytics Tab -->
+  <!-- ANALYTICS -->
   <div class="panel" id="panel-analytics">
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-val" id="an-posts">0</div><div class="stat-lbl">Total Posts</div><div class="stat-sub">Published</div></div>
@@ -201,16 +173,16 @@ input:checked+.slider::before{transform:translateX(20px)}
     </div>
     <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:28px;text-align:center;color:var(--muted)">
       <div style="font-size:2rem;margin-bottom:10px">📊</div>
-      <p>Detailed analytics coming soon!</p>
+      <p>Detailed analytics charts coming soon!</p>
     </div>
   </div>
 
-  <!-- New/Edit Post Tab -->
+  <!-- NEW/EDIT POST -->
   <div class="panel" id="panel-new">
     <div class="form-card">
       <div class="form-header"><h2 id="form-title">✍️ New Post</h2></div>
       <div class="form-body">
-        <input type="hidden" id="edit-post-id" value="">
+        <input type="hidden" id="edit-post-id">
 
         <div class="field-row">
           <div class="field">
@@ -229,687 +201,412 @@ input:checked+.slider::before{transform:translateX(20px)}
         </div>
 
         <div class="field">
-          <label>Title *</label>
+          <label>Title</label>
           <input type="text" id="f-title" placeholder="Enter a compelling title…">
         </div>
 
         <div class="field">
-          <label>Excerpt (short preview shown in feed)</label>
-          <input type="text" id="f-excerpt" placeholder="One sentence preview…">
+          <label>Excerpt <span style="font-weight:400;color:var(--muted)">(short preview in feed)</span></label>
+          <input type="text" id="f-excerpt" placeholder="One sentence that hooks the reader…">
         </div>
 
-        <!-- COVER IMAGE — upload or URL -->
+        <!-- COVER IMAGE -->
         <div class="field">
           <label>Cover Image / Thumbnail</label>
-          <div class="upload-combo" id="cover-combo">
-            <div class="upload-combo-tabs">
-              <button class="uc-tab active" onclick="switchUcTab('cover','upload',this)">📁 Upload File</button>
-              <button class="uc-tab" onclick="switchUcTab('cover','url',this)">🔗 Paste URL</button>
+          <div class="cover-zone" id="cover-zone"
+               ondragover="e=>{e.preventDefault();document.getElementById('cover-zone').classList.add('drag')}"
+               ondragleave="document.getElementById('cover-zone').classList.remove('drag')"
+               ondrop="doDrop(event)">
+            <div class="utabs">
+              <button class="utab active" onclick="switchUploadTab('file',this)">📁 Upload File</button>
+              <button class="utab" onclick="switchUploadTab('url',this)">🔗 Paste URL</button>
             </div>
-            <div class="uc-body">
-              <!-- Upload pane -->
-              <div id="cover-upload-pane">
-                <div class="upload-drop" onclick="document.getElementById('cover-file-input').click()" id="cover-drop-zone">
-                  <div class="icon">🖼️</div>
-                  <p>Click to select or drag & drop<br><span style="font-size:.72rem">JPG, PNG, GIF, WEBP, MP4</span></p>
-                  <input type="file" id="cover-file-input" accept="image/*,video/mp4,video/webm,video/mov" style="display:none" onchange="handleCoverUpload(this)">
-                </div>
-                <div id="cover-preview-wrap" style="display:none" class="preview-wrap">
-                  <img id="cover-preview-img" src="" style="display:none">
-                  <video id="cover-preview-vid" src="" controls style="display:none"></video>
-                  <button class="remove-preview" onclick="removeCoverPreview()">✕</button>
-                </div>
+            <div class="upane on" id="upane-file">
+              <div class="drop-area" onclick="document.getElementById('cover-input').click()">
+                <div style="font-size:2rem">🖼️</div>
+                <div style="font-size:.82rem;color:var(--muted);text-align:center">Click to select or drag &amp; drop<br><span style="font-size:.72rem">JPG, PNG, GIF, WEBP, MP4</span></div>
               </div>
-              <!-- URL pane -->
-              <div id="cover-url-pane" style="display:none">
-                <input type="text" id="f-cover" placeholder="https://example.com/image.jpg" oninput="syncCoverFromUrl(this.value)">
+              <input type="file" id="cover-input" accept="image/*,video/mp4" style="display:none" onchange="uploadCover(this)">
+              <div id="cover-prog" style="display:none;padding:0 0 12px">
+                <div style="font-size:.78rem;color:var(--muted)" id="cover-prog-txt">Uploading…</div>
+                <div class="progress-bar"><div class="progress-fill" id="cover-prog-fill"></div></div>
+              </div>
+            </div>
+            <div class="upane" id="upane-url">
+              <div style="padding:12px 0 4px">
+                <input type="text" id="cover-url-in" placeholder="https://example.com/image.jpg"
+                       oninput="if(this.value.match(/^https?:|^\//))setCover(this.value)"
+                       style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.88rem;outline:none;font-family:'DM Sans',sans-serif">
               </div>
             </div>
           </div>
-          <!-- Hidden field that always holds the final URL -->
-          <input type="hidden" id="f-cover-final" value="">
+          <!-- Preview -->
+          <div id="cover-preview" style="display:none;margin-top:10px;position:relative">
+            <img id="cover-img" src="" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;border:1.5px solid var(--border)">
+            <button onclick="clearCover()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem">×</button>
+          </div>
+          <input type="hidden" id="f-cover">
         </div>
 
-        <!-- Article content -->
+        <!-- ARTICLE CONTENT -->
         <div class="field" id="field-content">
           <label>Content</label>
-          <textarea id="f-content" placeholder="Write your full article here…"></textarea>
+          <textarea id="f-content" placeholder="Write your full article here…&#10;&#10;Tip: use [audio]URL[/audio] or [video]URL[/video] tags to embed media inline."></textarea>
         </div>
 
-        <!-- Audio -->
+        <!-- AUDIO -->
         <div class="field" id="field-audio" style="display:none">
           <label>Audio File</label>
-          <div class="upload-combo">
-            <div class="upload-combo-tabs">
-              <button class="uc-tab active" onclick="switchUcTab('audio','upload',this)">📁 Upload File</button>
-              <button class="uc-tab" onclick="switchUcTab('audio','url',this)">🔗 Paste URL</button>
-            </div>
-            <div class="uc-body">
-              <div id="audio-upload-pane">
-                <div class="upload-drop" onclick="document.getElementById('audio-file-input').click()">
-                  <div class="icon">🎵</div>
-                  <p>Click to select audio<br><span style="font-size:.72rem">MP3, WAV, OGG, AAC</span></p>
-                  <input type="file" id="audio-file-input" accept="audio/*" style="display:none" onchange="handleAudioUpload(this)">
-                </div>
-                <div id="audio-preview-wrap" style="display:none;margin-top:8px">
-                  <audio id="audio-preview" controls style="width:100%"></audio>
-                  <button onclick="removeAudioPreview()" style="margin-top:4px;font-size:.72rem;color:var(--red);background:none;border:none;cursor:pointer">✕ Remove</button>
-                </div>
-              </div>
-              <div id="audio-url-pane" style="display:none">
-                <input type="text" id="f-audio" placeholder="https://... (link to audio file)" oninput="document.getElementById('f-audio-final').value=this.value">
-              </div>
-            </div>
+          <div class="media-row">
+            <input type="text" id="f-audio" placeholder="https://... or upload →">
+            <button class="mini-btn" id="audio-btn" onclick="document.getElementById('audio-input').click()">📁 Upload</button>
           </div>
-          <input type="hidden" id="f-audio-final" value="">
+          <input type="file" id="audio-input" accept="audio/*" style="display:none" onchange="uploadMedia(this,'audio')">
+          <div id="audio-prog" style="display:none;margin-top:8px">
+            <div style="font-size:.75rem;color:var(--muted)" id="audio-prog-txt">Uploading…</div>
+            <div class="progress-bar"><div class="progress-fill" id="audio-prog-fill"></div></div>
+          </div>
         </div>
 
-        <!-- Video -->
+        <!-- VIDEO -->
         <div class="field" id="field-video" style="display:none">
-          <label>Video</label>
-          <div class="upload-combo">
-            <div class="upload-combo-tabs">
-              <button class="uc-tab active" onclick="switchUcTab('video','upload',this)">📁 Upload File</button>
-              <button class="uc-tab" onclick="switchUcTab('video','url',this)">🔗 YouTube/Vimeo URL</button>
-            </div>
-            <div class="uc-body">
-              <div id="video-upload-pane">
-                <div class="upload-drop" onclick="document.getElementById('video-file-input').click()">
-                  <div class="icon">🎬</div>
-                  <p>Click to select video<br><span style="font-size:.72rem">MP4, MOV, WEBM</span></p>
-                  <input type="file" id="video-file-input" accept="video/*" style="display:none" onchange="handleVideoUpload(this)">
-                </div>
-                <div id="video-preview-wrap" style="display:none;margin-top:8px">
-                  <video id="video-preview" controls style="width:100%;border-radius:8px;max-height:200px"></video>
-                  <button onclick="removeVideoPreview()" style="margin-top:4px;font-size:.72rem;color:var(--red);background:none;border:none;cursor:pointer">✕ Remove</button>
-                </div>
-              </div>
-              <div id="video-url-pane" style="display:none">
-                <input type="text" id="f-video" placeholder="https://www.youtube.com/watch?v=..." oninput="document.getElementById('f-video-final').value=this.value">
-              </div>
-            </div>
+          <label>Video File</label>
+          <div class="media-row">
+            <input type="text" id="f-video" placeholder="https://... or upload →">
+            <button class="mini-btn" id="video-btn" onclick="document.getElementById('video-input').click()">📁 Upload</button>
           </div>
-          <input type="hidden" id="f-video-final" value="">
+          <input type="file" id="video-input" accept="video/*" style="display:none" onchange="uploadMedia(this,'video')">
+          <div id="video-prog" style="display:none;margin-top:8px">
+            <div style="font-size:.75rem;color:var(--muted)" id="video-prog-txt">Uploading…</div>
+            <div class="progress-bar"><div class="progress-fill" id="video-prog-fill"></div></div>
+          </div>
+          <p style="font-size:.73rem;color:var(--muted);margin-top:6px">Uploaded videos stream from Supabase. You can also paste a YouTube/Vimeo URL.</p>
         </div>
 
-        <!-- Photo Essay Gallery -->
+        <!-- PHOTO ESSAY -->
         <div class="field" id="field-gallery" style="display:none">
-          <label>Gallery Images (comma-separated URLs or upload below)</label>
-          <textarea id="f-gallery" placeholder="https://image1.jpg, https://image2.jpg, …" style="min-height:80px" oninput="document.getElementById('f-gallery-final').value=this.value"></textarea>
-          <input type="hidden" id="f-gallery-final" value="">
-          <div style="margin-top:8px">
-            <div class="upload-drop" onclick="document.getElementById('gallery-file-input').click()">
-              <div class="icon">🖼️</div>
-              <p>Upload more images for gallery<br><span style="font-size:.72rem">JPG, PNG, WEBP</span></p>
-              <input type="file" id="gallery-file-input" accept="image/*" multiple style="display:none" onchange="handleGalleryUpload(this)">
-            </div>
-          </div>
+          <label>Images <span style="font-weight:400;color:var(--muted)">(comma-separated URLs)</span></label>
+          <textarea id="f-gallery" placeholder="https://img1.jpg, https://img2.jpg, …" style="min-height:80px"></textarea>
+          <button class="mini-btn" style="margin-top:8px" onclick="document.getElementById('gallery-input').click()">📁 Upload Images</button>
+          <input type="file" id="gallery-input" accept="image/*" multiple style="display:none" onchange="uploadGallery(this)">
         </div>
 
         <div class="field">
-          <label>Tags (comma-separated)</label>
+          <label>Tags <span style="font-weight:400;color:var(--muted)">(comma-separated)</span></label>
           <input type="text" id="f-tags" placeholder="history, ashanti, culture">
         </div>
 
-        <div class="toggle-row">
+        <div class="toggle-row" style="margin-bottom:8px">
           <label class="toggle"><input type="checkbox" id="f-premium"><span class="slider"></span></label>
-          <span style="font-size:.88rem;color:var(--ink);font-weight:500">Premium only content</span>
+          <span style="font-size:.88rem;font-weight:500">Premium only content</span>
         </div>
 
-        <div class="form-actions" style="margin-top:20px">
-          <button class="btn-publish" onclick="savePost('published')">🚀 Publish</button>
-          <button class="btn-draft" onclick="savePost('draft')">💾 Save Draft</button>
+        <div class="form-actions">
+          <button class="btn-publish" id="btn-pub" onclick="savePost('published')">🚀 Publish</button>
+          <button class="btn-draft" id="btn-dft" onclick="savePost('draft')">💾 Save Draft</button>
           <button class="btn-cancel" onclick="clearForm()">✕ Cancel</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Channel Settings Tab -->
+  <!-- CHANNEL -->
   <div class="panel" id="panel-channel">
     <div class="form-card">
       <div class="form-header"><h2>⚙️ Channel Settings</h2></div>
       <div class="form-body">
         <div class="field"><label>Channel Name</label><input type="text" id="s-name" placeholder="Your channel name"></div>
         <div class="field"><label>Channel Description</label><textarea id="s-desc" style="min-height:100px" placeholder="Tell readers what your channel is about…"></textarea></div>
-
-        <!-- Avatar upload + URL -->
-        <div class="field">
-          <label>Profile Picture</label>
-          <div class="upload-combo">
-            <div class="upload-combo-tabs">
-              <button class="uc-tab active" onclick="switchUcTab('settings-avatar','upload',this)">📁 Upload Photo</button>
-              <button class="uc-tab" onclick="switchUcTab('settings-avatar','url',this)">🔗 Paste URL</button>
-            </div>
-            <div class="uc-body">
-              <div id="settings-avatar-upload-pane">
-                <div class="upload-drop" onclick="document.getElementById('settings-avatar-input').click()">
-                  <div class="icon">👤</div>
-                  <p>Upload profile picture<br><span style="font-size:.72rem">JPG, PNG, WEBP, GIF</span></p>
-                  <input type="file" id="settings-avatar-input" accept="image/*" style="display:none" onchange="handleSettingsAvatarUpload(this)">
-                </div>
-                <div id="settings-avatar-preview" style="display:none;margin-top:8px;text-align:center">
-                  <img id="settings-avatar-img" src="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--gold)">
-                  <button onclick="removeSettingsAvatar()" style="display:block;margin:6px auto 0;font-size:.72rem;color:var(--red);background:none;border:none;cursor:pointer">✕ Remove</button>
-                </div>
-              </div>
-              <div id="settings-avatar-url-pane" style="display:none">
-                <input type="text" id="s-avatar" placeholder="https://..." oninput="document.getElementById('s-avatar-final').value=this.value;previewSettingsAvatarUrl(this.value)">
-              </div>
-            </div>
-          </div>
-          <input type="hidden" id="s-avatar-final" value="">
-        </div>
-
-        <button onclick="saveSettings()" style="padding:12px 28px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer">💾 Save Settings</button>
+        <div class="field"><label>Avatar URL (optional)</label><input type="text" id="s-avatar" placeholder="https://..."></div>
+        <button onclick="saveSettings()" style="padding:12px 28px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer">Save Settings</button>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Avatar Change Modal -->
-<div class="modal-bg" id="avatar-modal">
-  <div class="modal">
-    <h2>📸 Change Profile Picture</h2>
-    <div class="field">
-      <label>Upload from device</label>
-      <div class="upload-drop" onclick="document.getElementById('modal-avatar-input').click()">
-        <div class="icon">👤</div>
-        <p>Click to select image<br><span style="font-size:.72rem">JPG, PNG, WEBP, GIF</span></p>
-        <input type="file" id="modal-avatar-input" accept="image/*" style="display:none" onchange="handleModalAvatarUpload(this)">
-      </div>
-      <div id="modal-avatar-preview" style="display:none;margin-top:10px;text-align:center">
-        <img id="modal-avatar-img" src="" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--gold)">
-      </div>
-    </div>
-    <div class="field">
-      <label>Or paste image URL</label>
-      <input type="text" id="modal-avatar-url" placeholder="https://..." oninput="previewModalAvatarUrl(this.value)">
-    </div>
-    <div style="display:flex;gap:10px;margin-top:6px">
-      <button onclick="saveModalAvatar()" style="flex:1;padding:11px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer">Save</button>
-      <button onclick="closeAvatarModal()" style="flex:1;padding:11px;background:var(--border);color:var(--ink);border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer">Cancel</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Auth gate ──────────────────────────────────────────────────────────────
+// Auth
 const raw = localStorage.getItem('es_user');
-if (!raw) { window.location.href = '/user-login'; }
+if (!raw) location.href = '/user-login';
 let user = {};
-try { user = JSON.parse(raw); } catch(e) { window.location.href = '/user-login'; }
-if (!user.loggedIn) window.location.href = '/user-login';
-if (user.role === 'user') {
-  toast('You need to become a creator first', 'er');
-  setTimeout(() => window.location.href = '/dashboard', 1500);
-}
-
+try { user = JSON.parse(raw); } catch(e) { location.href = '/user-login'; }
+if (!user.loggedIn) location.href = '/user-login';
+if (user.role === 'user') { toast('You need a creator account first','er'); setTimeout(()=>location.href='/dashboard',1500); }
 document.getElementById('navname').textContent = user.username || '';
-if (user.role === 'admin' || user.role === 'superuser') {
-  document.getElementById('admin-btn').style.display = 'inline-flex';
-}
+if (['admin','superuser'].includes(user.role)) document.getElementById('admin-btn').style.display = 'inline-flex';
 
-// ── Channel info ───────────────────────────────────────────────────────────
+// Channel info
 async function loadChannelInfo() {
   try {
-    const r = await fetch('/api/users/me', { credentials: 'include' });
-    const d = await r.json();
+    const d = await (await fetch('/api/users/me',{credentials:'include'})).json();
     const name = d.channel_name || d.username || 'My Channel';
     document.getElementById('ch-name').textContent = name;
-    document.getElementById('ch-desc').textContent = d.channel_desc || 'No description yet — add one in Channel Settings';
+    document.getElementById('ch-desc').textContent = d.channel_desc || 'No description yet';
+    document.getElementById('ch-avatar').textContent = name[0].toUpperCase();
     document.getElementById('stat-followers').textContent = d.follower_count || 0;
-    // Set avatar
-    updateAvatarDisplay(d.avatar_url, name);
-    // Prefill settings
+    document.getElementById('an-followers').textContent = d.follower_count || 0;
     document.getElementById('s-name').value = d.channel_name || '';
     document.getElementById('s-desc').value = d.channel_desc || '';
-    document.getElementById('s-avatar-final').value = d.avatar_url || '';
-    if (d.avatar_url) {
-      document.getElementById('s-avatar').value = d.avatar_url;
-      document.getElementById('settings-avatar-img').src = d.avatar_url;
-      document.getElementById('settings-avatar-preview').style.display = 'block';
-    }
-    user.username = d.username;
-    localStorage.setItem('es_user', JSON.stringify(user));
-  } catch(e) { console.warn('loadChannelInfo error', e); }
+    document.getElementById('s-avatar').value = d.avatar_url || '';
+  } catch(e) {}
 }
 
-function updateAvatarDisplay(url, name) {
-  const el = document.getElementById('ch-avatar-el');
-  const letter = document.getElementById('ch-avatar-letter');
-  if (url) {
-    letter.style.display = 'none';
-    let img = el.querySelector('img');
-    if (!img) { img = document.createElement('img'); el.appendChild(img); }
-    img.src = url;
-    img.style.display = 'block';
-  } else {
-    letter.style.display = 'block';
-    letter.textContent = (name || '?').charAt(0).toUpperCase();
-    const img = el.querySelector('img');
-    if (img) img.style.display = 'none';
-  }
-}
-
-// ── Load posts ─────────────────────────────────────────────────────────────
+// My Posts
 async function loadMyPosts() {
   try {
-    const mr = await fetch('/api/users/me', { credentials: 'include' });
-    const me = await mr.json();
-    const r = await fetch('/api/posts?status=all&author_id=' + me.id + '&limit=50');
-    const posts = await r.json();
-    const published = posts.filter(p => p.status === 'published');
-    const totalViews = posts.reduce((s, p) => s + (p.view_count || 0), 0);
-    const totalComments = posts.reduce((s, p) => s + (p.comment_count || 0), 0);
-    document.getElementById('stat-posts').textContent = published.length;
-    document.getElementById('stat-views').textContent = totalViews;
-    document.getElementById('an-posts').textContent = published.length;
-    document.getElementById('an-views').textContent = totalViews;
-    document.getElementById('an-comments').textContent = totalComments;
-    document.getElementById('an-followers').textContent = document.getElementById('stat-followers').textContent;
+    const me = await (await fetch('/api/users/me',{credentials:'include'})).json();
+    const posts = await (await fetch('/api/posts?status=all&author_id='+me.id+'&limit=50')).json();
+    const pub = posts.filter(p=>p.status==='published');
+    const views = posts.reduce((s,p)=>s+(p.views||p.view_count||0),0);
+    const comments = posts.reduce((s,p)=>s+(p.comment_count||0),0);
+    document.getElementById('stat-posts').textContent = pub.length;
+    document.getElementById('stat-views').textContent = views;
+    document.getElementById('an-posts').textContent = pub.length;
+    document.getElementById('an-views').textContent = views;
+    document.getElementById('an-comments').textContent = comments;
     const list = document.getElementById('posts-list');
-    if (!posts.length) {
-      list.innerHTML = '<div class="empty"><div>📝</div><p>No posts yet. Create your first!</p></div>';
-      return;
-    }
-    list.innerHTML = posts.map(p => `
+    if (!posts.length) { list.innerHTML='<div class="empty"><div>📝</div><p>No posts yet. Create your first!</p></div>'; return; }
+    list.innerHTML = posts.map(p=>`
       <div class="pt-row">
-        <div>
-          <div class="pt-title">${p.title}</div>
-          <div class="pt-meta">${p.content_type} · ${p.created_at ? p.created_at.split('T')[0] : ''}</div>
-        </div>
+        <div><div class="pt-title">${esc(p.title)}</div><div class="pt-meta">${p.content_type} · ${(p.created_at||'').split('T')[0]}</div></div>
         <span class="status-badge status-${p.status}">${p.status}</span>
-        <div class="pt-stats"><span>👁 ${p.view_count || 0}</span><span>💬 ${p.comment_count || 0}</span></div>
+        <div class="pt-stats"><span>👁 ${p.views||p.view_count||0}</span><span>💬 ${p.comment_count||0}</span></div>
         <div class="pt-actions">
           <button class="act-btn act-edit" onclick="editPost(${p.id})">Edit</button>
           <button class="act-btn act-del" onclick="deletePost(${p.id})">Del</button>
         </div>
       </div>`).join('');
-  } catch(e) { console.warn('loadMyPosts error', e); }
+  } catch(e) { console.warn(e); }
 }
 
-// ── Load regions ───────────────────────────────────────────────────────────
 async function loadRegions() {
   try {
-    const r = await fetch('/api/regions');
-    const regions = await r.json();
+    const regions = await (await fetch('/api/regions')).json();
     const sel = document.getElementById('f-region');
-    regions.forEach(r => {
-      const o = document.createElement('option');
-      o.value = r.id; o.textContent = r.name;
-      sel.appendChild(o);
-    });
+    regions.forEach(r => { const o=document.createElement('option'); o.value=r.id; o.textContent=r.name; sel.appendChild(o); });
   } catch(e) {}
 }
 
-// ── Upload/URL combo tabs ──────────────────────────────────────────────────
-function switchUcTab(prefix, mode, el) {
-  const parent = el.closest('.upload-combo');
-  parent.querySelectorAll('.uc-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById(prefix + '-upload-pane').style.display = mode === 'upload' ? 'block' : 'none';
-  document.getElementById(prefix + '-url-pane').style.display = mode === 'url' ? 'block' : 'none';
-}
-
-// ── Cover image ────────────────────────────────────────────────────────────
-async function handleCoverUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
-  toast('⏳ Uploading cover…');
-  try {
-    const fd = new FormData();
-    fd.append('file', file);
-    const r = await fetch('/api/upload/cover', { method: 'POST', body: fd, credentials: 'include' });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.detail || 'Upload failed');
-    document.getElementById('f-cover-final').value = d.url;
-    // Show preview
-    const wrap = document.getElementById('cover-preview-wrap');
-    const img = document.getElementById('cover-preview-img');
-    const vid = document.getElementById('cover-preview-vid');
-    wrap.style.display = 'inline-block';
-    if (file.type.startsWith('image/')) {
-      img.src = d.url; img.style.display = 'block'; vid.style.display = 'none';
-    } else {
-      vid.src = d.url; vid.style.display = 'block'; img.style.display = 'none';
-    }
-    document.getElementById('cover-drop-zone').style.display = 'none';
-    toast('✅ Cover uploaded!', 'ok');
-  } catch(e) { toast('❌ ' + e.message, 'er'); }
-}
-
-function syncCoverFromUrl(val) {
-  document.getElementById('f-cover-final').value = val;
-}
-
-function removeCoverPreview() {
-  document.getElementById('f-cover-final').value = '';
-  document.getElementById('cover-preview-wrap').style.display = 'none';
-  document.getElementById('cover-drop-zone').style.display = 'block';
-  document.getElementById('cover-file-input').value = '';
-}
-
-// ── Audio upload ───────────────────────────────────────────────────────────
-async function handleAudioUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
-  toast('⏳ Uploading audio…');
-  try {
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('filename', file.name);
-    fd.append('category', 'audio');
-    const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.detail || 'Upload failed');
-    document.getElementById('f-audio-final').value = d.url;
-    document.getElementById('audio-preview').src = d.url;
-    document.getElementById('audio-preview-wrap').style.display = 'block';
-    toast('✅ Audio uploaded!', 'ok');
-  } catch(e) { toast('❌ ' + e.message, 'er'); }
-}
-
-function removeAudioPreview() {
-  document.getElementById('f-audio-final').value = '';
-  document.getElementById('audio-preview-wrap').style.display = 'none';
-  document.getElementById('audio-file-input').value = '';
-}
-
-// ── Video upload ───────────────────────────────────────────────────────────
-async function handleVideoUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
-  toast('⏳ Uploading video… (this may take a moment)');
-  try {
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('filename', file.name);
-    fd.append('category', 'video');
-    const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.detail || 'Upload failed');
-    document.getElementById('f-video-final').value = d.url;
-    document.getElementById('video-preview').src = d.url;
-    document.getElementById('video-preview-wrap').style.display = 'block';
-    toast('✅ Video uploaded!', 'ok');
-  } catch(e) { toast('❌ ' + e.message, 'er'); }
-}
-
-function removeVideoPreview() {
-  document.getElementById('f-video-final').value = '';
-  document.getElementById('video-preview-wrap').style.display = 'none';
-  document.getElementById('video-file-input').value = '';
-}
-
-// ── Gallery upload ─────────────────────────────────────────────────────────
-async function handleGalleryUpload(input) {
-  const files = Array.from(input.files);
-  if (!files.length) return;
-  toast('⏳ Uploading gallery images…');
-  const urls = [];
-  for (const file of files) {
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('filename', file.name);
-      fd.append('category', 'image');
-      const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
-      const d = await r.json();
-      if (d.url) urls.push(d.url);
-    } catch(e) {}
-  }
-  const existing = document.getElementById('f-gallery').value.trim();
-  const combined = [existing, ...urls].filter(Boolean).join(', ');
-  document.getElementById('f-gallery').value = combined;
-  document.getElementById('f-gallery-final').value = combined;
-  toast(`✅ ${urls.length} image(s) uploaded!`, 'ok');
-}
-
-// ── Form content fields toggle ─────────────────────────────────────────────
+// ── Form fields ───────────────────────────────────────────────────────────────
 function updateFormFields() {
-  const type = document.getElementById('f-type').value;
-  document.getElementById('field-content').style.display = type === 'article' ? 'block' : 'none';
-  document.getElementById('field-audio').style.display = type === 'audio' ? 'block' : 'none';
-  document.getElementById('field-video').style.display = type === 'video' ? 'block' : 'none';
-  document.getElementById('field-gallery').style.display = type === 'photo_essay' ? 'block' : 'none';
+  const t = document.getElementById('f-type').value;
+  document.getElementById('field-content').style.display = t==='article'?'block':'none';
+  document.getElementById('field-audio').style.display   = t==='audio'?'block':'none';
+  document.getElementById('field-video').style.display   = t==='video'?'block':'none';
+  document.getElementById('field-gallery').style.display = t==='photo_essay'?'block':'none';
 }
 updateFormFields();
 
-// ── Save Post ──────────────────────────────────────────────────────────────
+// ── Cover image ───────────────────────────────────────────────────────────────
+function switchUploadTab(name, btn) {
+  document.querySelectorAll('.utab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.upane').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('active');
+  document.getElementById('upane-'+name).classList.add('on');
+}
+
+function doDrop(e) {
+  e.preventDefault();
+  document.getElementById('cover-zone').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f) doCoverUpload(f);
+}
+
+function uploadCover(input) { if (input.files[0]) doCoverUpload(input.files[0]); }
+
+async function doCoverUpload(file) {
+  const prog = document.getElementById('cover-prog');
+  const txt  = document.getElementById('cover-prog-txt');
+  const fill = document.getElementById('cover-prog-fill');
+  prog.style.display = 'block'; txt.textContent = 'Uploading '+file.name+'…'; fill.style.width = '20%';
+  try {
+    const fd = new FormData(); fd.append('file', file);
+    const r = await fetch('/api/upload/cover', {method:'POST', body:fd, credentials:'include'});
+    const d = await r.json();
+    fill.style.width = '100%';
+    if (!r.ok || !d.success) throw new Error(d.detail||'Upload failed');
+    setCover(d.url);
+    txt.textContent = '✅ Uploaded' + (d.storage==='supabase' ? ' to Supabase' : '');
+    setTimeout(()=>{ prog.style.display='none'; }, 2500);
+    toast('Cover uploaded ✓','ok');
+  } catch(e) {
+    fill.style.width = '0'; txt.textContent = '❌ '+e.message;
+    toast('Cover upload failed: '+e.message,'er');
+  }
+}
+
+function setCover(url) {
+  document.getElementById('f-cover').value = url;
+  document.getElementById('cover-img').src = url;
+  document.getElementById('cover-preview').style.display = 'block';
+}
+
+function clearCover() {
+  document.getElementById('f-cover').value = '';
+  document.getElementById('cover-img').src = '';
+  document.getElementById('cover-preview').style.display = 'none';
+  document.getElementById('cover-input').value = '';
+  document.getElementById('cover-prog').style.display = 'none';
+  document.getElementById('cover-url-in').value = '';
+}
+
+// ── Media uploads ─────────────────────────────────────────────────────────────
+async function uploadMedia(input, type) {
+  const file = input.files[0]; if (!file) return;
+  const btn = document.getElementById(type+'-btn');
+  const prog = document.getElementById(type+'-prog');
+  const txt  = document.getElementById(type+'-prog-txt');
+  const fill = document.getElementById(type+'-prog-fill');
+  btn.textContent = '⏳'; prog.style.display = 'block';
+  txt.textContent = 'Uploading '+file.name+'…'; fill.style.width = '25%';
+  try {
+    const fd = new FormData();
+    fd.append('file', file); fd.append('filename', file.name); fd.append('category', type);
+    const r = await fetch('/api/upload/file', {method:'POST', body:fd, credentials:'include'});
+    const d = await r.json();
+    fill.style.width = '100%';
+    if (!r.ok || !d.success) throw new Error(d.detail||'Upload failed');
+    document.getElementById('f-'+type).value = d.url;
+    txt.textContent = '✅ Uploaded';
+    toast(type+' uploaded ✓','ok');
+    setTimeout(()=>{ prog.style.display='none'; }, 2000);
+  } catch(e) {
+    txt.textContent = '❌ '+e.message; toast('Upload failed: '+e.message,'er');
+  } finally { btn.textContent = '📁 Upload'; input.value = ''; }
+}
+
+async function uploadGallery(input) {
+  const files = Array.from(input.files); if (!files.length) return;
+  toast('Uploading '+files.length+' image(s)…','');
+  const urls = [];
+  for (const f of files) {
+    const fd = new FormData(); fd.append('file',f); fd.append('filename',f.name); fd.append('category','image');
+    try { const d=await (await fetch('/api/upload/file',{method:'POST',body:fd,credentials:'include'})).json(); if(d.success) urls.push(d.url); } catch(e) {}
+  }
+  const ex = document.getElementById('f-gallery').value.trim();
+  document.getElementById('f-gallery').value = ex ? ex+', '+urls.join(', ') : urls.join(', ');
+  toast('Uploaded '+urls.length+'/'+files.length+' images ✓','ok');
+  input.value = '';
+}
+
+// ── Save post ─────────────────────────────────────────────────────────────────
 async function savePost(status) {
   const title = document.getElementById('f-title').value.trim();
-  if (!title) { toast('Title is required', 'er'); return; }
-
+  if (!title) { toast('Title is required','er'); return; }
   const editId = document.getElementById('edit-post-id').value;
+  const type = document.getElementById('f-type').value;
+  let content = document.getElementById('f-content').value;
+  // Auto-wrap media in tags if not already present
+  if (type === 'audio') {
+    const au = document.getElementById('f-audio').value.trim();
+    if (au && !content.includes('[audio]')) content = `[audio]${au}[/audio]\n\n${content}`.trim();
+  }
+  if (type === 'video') {
+    const vu = document.getElementById('f-video').value.trim();
+    if (vu && !content.includes('[video]') && !vu.includes('youtube') && !vu.includes('vimeo')) {
+      content = `[video]${vu}[/video]\n\n${content}`.trim();
+    } else if (vu) { content = content || vu; }
+  }
   const fd = new FormData();
   fd.append('title', title);
-  fd.append('content', document.getElementById('f-content').value);
+  fd.append('content', content);
   fd.append('excerpt', document.getElementById('f-excerpt').value);
-  fd.append('cover_image', document.getElementById('f-cover-final').value || document.getElementById('f-cover')?.value || '');
-  fd.append('content_type', document.getElementById('f-type').value);
-  fd.append('audio_url', document.getElementById('f-audio-final').value || document.getElementById('f-audio')?.value || '');
-  fd.append('video_url', document.getElementById('f-video-final').value || document.getElementById('f-video')?.value || '');
-  fd.append('gallery', document.getElementById('f-gallery-final').value || document.getElementById('f-gallery')?.value || '');
+  fd.append('cover_image', document.getElementById('f-cover').value);
+  fd.append('content_type', type);
+  fd.append('audio_url', document.getElementById('f-audio').value);
+  fd.append('video_url', document.getElementById('f-video').value);
+  fd.append('gallery', document.getElementById('f-gallery').value);
   fd.append('tags', document.getElementById('f-tags').value);
-  fd.append('is_premium', document.getElementById('f-premium').checked ? '1' : '0');
+  fd.append('is_premium', document.getElementById('f-premium').checked?'1':'0');
   fd.append('status', status);
   fd.append('region_id', document.getElementById('f-region').value);
 
+  const bp = document.getElementById('btn-pub'), bd = document.getElementById('btn-dft');
+  bp.disabled = bd.disabled = true;
+  const op = bp.textContent, od = bd.textContent;
+  (status==='published'?bp:bd).textContent = '⏳ Saving…';
+
   try {
-    const url = editId ? '/api/posts/' + editId : '/api/posts';
-    const method = editId ? 'PUT' : 'POST';
-    const r = await fetch(url, { method, body: fd, credentials: 'include' });
+    const url = editId ? '/api/posts/'+editId : '/api/posts';
+    const r = await fetch(url, {method: editId?'PUT':'POST', body:fd, credentials:'include'});
     const d = await r.json();
-    if (!r.ok) throw new Error(d.detail || 'Failed');
-    toast(status === 'published' ? '🚀 Post published! It\'s now live in the feed.' : '💾 Draft saved', 'ok');
+    if (!r.ok) throw new Error(d.detail || 'Failed to save post');
+    toast(status==='published'?'🚀 Post published!':'💾 Draft saved','ok');
     clearForm();
-    loadMyPosts();
+    await loadMyPosts();
     switchTab('posts', document.querySelector('.tab:first-child'));
-  } catch(e) { toast('❌ ' + e.message, 'er'); }
+  } catch(e) { toast('❌ '+e.message,'er'); }
+  finally { bp.disabled=bd.disabled=false; bp.textContent=op; bd.textContent=od; }
 }
 
-// ── Edit Post ──────────────────────────────────────────────────────────────
 async function editPost(id) {
   try {
-    const r = await fetch('/api/posts/' + id);
-    const p = await r.json();
+    const p = await (await fetch('/api/posts/'+id)).json();
     document.getElementById('edit-post-id').value = id;
     document.getElementById('form-title').textContent = '✏️ Edit Post';
-    document.getElementById('f-title').value = p.title || '';
-    document.getElementById('f-excerpt').value = p.excerpt || '';
-    document.getElementById('f-cover-final').value = p.cover_image || '';
-    document.getElementById('f-content').value = p.content || '';
-    document.getElementById('f-audio-final').value = p.audio_url || '';
-    document.getElementById('f-video-final').value = p.video_url || '';
-    document.getElementById('f-gallery').value = p.gallery || '';
-    document.getElementById('f-gallery-final').value = p.gallery || '';
-    document.getElementById('f-tags').value = p.tags || '';
-    document.getElementById('f-type').value = p.content_type || 'article';
-    document.getElementById('f-premium').checked = p.is_premium || false;
-    // Show cover preview if exists
-    if (p.cover_image) {
-      document.getElementById('f-cover-final').value = p.cover_image;
-      const wrap = document.getElementById('cover-preview-wrap');
-      const img = document.getElementById('cover-preview-img');
-      img.src = p.cover_image; img.style.display = 'block';
-      wrap.style.display = 'inline-block';
-      document.getElementById('cover-drop-zone').style.display = 'none';
-    }
+    document.getElementById('f-title').value  = p.title||'';
+    document.getElementById('f-excerpt').value = p.excerpt||'';
+    document.getElementById('f-content').value = p.content||'';
+    document.getElementById('f-audio').value   = p.audio_url||'';
+    document.getElementById('f-video').value   = p.video_url||'';
+    document.getElementById('f-gallery').value = p.gallery||'';
+    document.getElementById('f-tags').value    = p.tags||'';
+    document.getElementById('f-type').value    = p.content_type||'article';
+    document.getElementById('f-premium').checked = p.is_premium||false;
+    if (p.cover_image) setCover(p.cover_image);
     updateFormFields();
     switchTab('new', document.querySelector('.tab:nth-child(3)'));
-  } catch(e) { toast('Failed to load post', 'er'); }
+  } catch(e) { toast('Failed to load post','er'); }
 }
 
-function clearForm() {
-  document.getElementById('edit-post-id').value = '';
-  document.getElementById('form-title').textContent = '✍️ New Post';
-  ['f-title', 'f-excerpt', 'f-content', 'f-tags'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  ['f-cover-final', 'f-audio-final', 'f-video-final', 'f-gallery-final'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  document.getElementById('f-premium').checked = false;
-  document.getElementById('f-type').value = 'article';
-  document.getElementById('f-gallery').value = '';
-  // Reset cover
-  document.getElementById('cover-preview-wrap').style.display = 'none';
-  document.getElementById('cover-drop-zone').style.display = 'block';
-  document.getElementById('cover-file-input').value = '';
-  // Reset audio/video
-  document.getElementById('audio-preview-wrap').style.display = 'none';
-  document.getElementById('video-preview-wrap').style.display = 'none';
-  updateFormFields();
-}
-
-// ── Delete Post ────────────────────────────────────────────────────────────
 async function deletePost(id) {
   if (!confirm('Delete this post permanently?')) return;
   try {
-    const r = await fetch('/api/posts/' + id, { method: 'DELETE', credentials: 'include' });
-    if (r.ok) { toast('Post deleted', 'ok'); loadMyPosts(); }
-    else { const d = await r.json(); throw new Error(d.detail); }
-  } catch(e) { toast('❌ ' + e.message, 'er'); }
+    const r = await fetch('/api/posts/'+id, {method:'DELETE', credentials:'include'});
+    if (r.ok) { toast('Post deleted','ok'); loadMyPosts(); }
+    else { const d=await r.json(); throw new Error(d.detail); }
+  } catch(e) { toast('❌ '+e.message,'er'); }
 }
 
-// ── Settings ───────────────────────────────────────────────────────────────
-async function handleSettingsAvatarUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
-  toast('⏳ Uploading avatar…');
-  try {
-    const fd = new FormData();
-    fd.append('file', file);
-    const r = await fetch('/api/users/avatar', { method: 'POST', body: fd, credentials: 'include' });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.detail || 'Upload failed');
-    document.getElementById('s-avatar-final').value = d.url;
-    document.getElementById('settings-avatar-img').src = d.url;
-    document.getElementById('settings-avatar-preview').style.display = 'block';
-    toast('✅ Avatar uploaded!', 'ok');
-  } catch(e) { toast('❌ ' + e.message, 'er'); }
+function clearForm() {
+  ['f-title','f-excerpt','f-content','f-audio','f-video','f-gallery','f-tags'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('edit-post-id').value='';
+  document.getElementById('f-premium').checked=false;
+  document.getElementById('f-type').value='article';
+  document.getElementById('form-title').textContent='✍️ New Post';
+  clearCover(); updateFormFields();
 }
 
-function previewSettingsAvatarUrl(url) {
-  if (url) {
-    document.getElementById('settings-avatar-img').src = url;
-    document.getElementById('settings-avatar-preview').style.display = 'block';
-  }
-}
-
-function removeSettingsAvatar() {
-  document.getElementById('s-avatar-final').value = '';
-  document.getElementById('settings-avatar-preview').style.display = 'none';
-  document.getElementById('settings-avatar-input').value = '';
-}
+function showNewPost() { clearForm(); switchTab('new',document.querySelector('.tab:nth-child(3)')); }
 
 async function saveSettings() {
   const fd = new FormData();
-  fd.append('channel_name', document.getElementById('s-name').value.trim());
-  fd.append('channel_desc', document.getElementById('s-desc').value.trim());
-  fd.append('avatar_url', document.getElementById('s-avatar-final').value);
+  fd.append('channel_name', document.getElementById('s-name').value);
+  fd.append('channel_desc', document.getElementById('s-desc').value);
+  fd.append('avatar_url', document.getElementById('s-avatar').value);
   try {
-    const r = await fetch('/api/users/me', { method: 'PUT', body: fd, credentials: 'include' });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.detail || 'Failed');
-    toast('✅ Settings saved!', 'ok');
-    user.avatar_url = document.getElementById('s-avatar-final').value;
-    localStorage.setItem('es_user', JSON.stringify(user));
-    loadChannelInfo();
-  } catch(e) { toast('❌ ' + e.message, 'er'); }
+    const r = await fetch('/api/users/me', {method:'PUT', body:fd, credentials:'include'});
+    if (!r.ok) throw new Error((await r.json()).detail||'Failed');
+    toast('Settings saved ✓','ok'); loadChannelInfo();
+  } catch(e) { toast('❌ '+e.message,'er'); }
 }
 
-// ── Avatar modal (from header pencil) ─────────────────────────────────────
-let pendingModalAvatarUrl = '';
-
-function openAvatarModal() {
-  pendingModalAvatarUrl = '';
-  document.getElementById('modal-avatar-url').value = '';
-  document.getElementById('modal-avatar-preview').style.display = 'none';
-  document.getElementById('avatar-modal').classList.add('open');
-}
-
-function closeAvatarModal() {
-  document.getElementById('avatar-modal').classList.remove('open');
-}
-
-async function handleModalAvatarUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
-  toast('⏳ Uploading…');
-  try {
-    const fd = new FormData();
-    fd.append('file', file);
-    const r = await fetch('/api/users/avatar', { method: 'POST', body: fd, credentials: 'include' });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.detail || 'Upload failed');
-    pendingModalAvatarUrl = d.url;
-    document.getElementById('modal-avatar-img').src = d.url;
-    document.getElementById('modal-avatar-preview').style.display = 'block';
-    toast('✅ Ready — click Save to apply', 'ok');
-  } catch(e) { toast('❌ ' + e.message, 'er'); }
-}
-
-function previewModalAvatarUrl(url) {
-  if (url) {
-    pendingModalAvatarUrl = url;
-    document.getElementById('modal-avatar-img').src = url;
-    document.getElementById('modal-avatar-preview').style.display = 'block';
-  }
-}
-
-async function saveModalAvatar() {
-  const url = pendingModalAvatarUrl || document.getElementById('modal-avatar-url').value.trim();
-  if (!url) { toast('Select or upload an image first', 'er'); return; }
-  try {
-    const fd = new FormData();
-    fd.append('avatar_url', url);
-    const r = await fetch('/api/users/me', { method: 'PUT', body: fd, credentials: 'include' });
-    if (!r.ok) throw new Error('Failed to save');
-    closeAvatarModal();
-    updateAvatarDisplay(url, user.username);
-    user.avatar_url = url;
-    localStorage.setItem('es_user', JSON.stringify(user));
-    toast('✅ Profile picture updated!', 'ok');
-  } catch(e) { toast('❌ ' + e.message, 'er'); }
-}
-
-// ── Tabs ───────────────────────────────────────────────────────────────────
 function switchTab(name, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
   if (el) el.classList.add('active');
-  document.getElementById('panel-' + name).classList.add('on');
+  document.getElementById('panel-'+name).classList.add('on');
 }
 
-function showNewPost() {
-  clearForm();
-  switchTab('new', document.querySelector('.tab:nth-child(3)'));
-}
-
-function logout() {
-  localStorage.removeItem('es_user');
-  fetch('/api/users/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
-  window.location.href = '/';
-}
+function logout() { localStorage.removeItem('es_user'); fetch('/api/users/logout',{method:'POST',credentials:'include'}).catch(()=>{}); location.href='/'; }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 let _t;
-function toast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast on ' + (type || '');
-  clearTimeout(_t);
-  _t = setTimeout(() => el.className = 'toast', 4000);
-}
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='toast on '+(type||'');clearTimeout(_t);_t=setTimeout(()=>el.className='toast',4000);}
 
-// ── Init ───────────────────────────────────────────────────────────────────
-loadChannelInfo();
-loadMyPosts();
-loadRegions();
-setTimeout(() => document.getElementById('ld').classList.add('hide'), 800);
+loadChannelInfo(); loadMyPosts(); loadRegions();
+setTimeout(()=>document.getElementById('ld').classList.add('hide'),800);
 </script>
 </body>
 </html>
