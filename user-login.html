@@ -17,159 +17,92 @@
             --success:#16A34A;--danger:#DC2626
         }
         html,body{min-height:100vh}
-        body{
-            font-family:'DM Sans',sans-serif;
-            background:var(--ink);color:#fff;
-            display:flex;min-height:100svh;
-        }
+        body{font-family:'DM Sans',sans-serif;background:var(--ink);color:#fff;display:flex;min-height:100svh}
 
-        /* ── LEFT PANEL ── */
         .left-panel{
             width:380px;flex-shrink:0;
             background:linear-gradient(160deg,#0a1520 0%,#0D1B2A 60%,rgba(200,150,46,.08) 100%);
             border-right:1px solid rgba(255,255,255,.06);
-            padding:40px 36px;
-            display:flex;flex-direction:column;
+            padding:40px 36px;display:flex;flex-direction:column;
             position:relative;overflow:hidden
         }
-        .left-panel::before{
-            content:'✦';position:absolute;bottom:-20px;right:-20px;
-            font-size:200px;opacity:.03;line-height:1;pointer-events:none
-        }
+        .left-panel::before{content:'✦';position:absolute;bottom:-20px;right:-20px;font-size:200px;opacity:.03;line-height:1;pointer-events:none}
         .left-logo{display:flex;align-items:center;gap:10px;margin-bottom:48px}
         .left-logo img{width:36px;height:36px;border-radius:8px}
         .left-logo span{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold)}
-        .left-badge{
-            display:inline-flex;align-items:center;gap:6px;
-            padding:5px 12px;border-radius:30px;
-            background:rgba(200,150,46,.12);border:1px solid rgba(200,150,46,.3);
-            font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-            color:var(--gold2);margin-bottom:20px
-        }
-        .left-headline{
-            font-family:'Playfair Display',serif;
-            font-size:2.2rem;font-weight:900;line-height:1.15;
-            color:#fff;margin-bottom:16px
-        }
+        .left-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:30px;background:rgba(200,150,46,.12);border:1px solid rgba(200,150,46,.3);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2);margin-bottom:20px}
+        .left-headline{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;line-height:1.15;color:#fff;margin-bottom:16px}
         .left-headline em{font-style:italic;color:var(--gold2)}
         .left-sub{font-size:.88rem;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:40px}
         .left-features{display:flex;flex-direction:column;gap:14px;margin-top:auto}
         .left-feat{display:flex;align-items:center;gap:12px}
-        .left-feat-icon{
-            width:36px;height:36px;border-radius:10px;
-            background:rgba(200,150,46,.1);border:1px solid rgba(200,150,46,.2);
-            display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0
-        }
+        .left-feat-icon{width:36px;height:36px;border-radius:10px;background:rgba(200,150,46,.1);border:1px solid rgba(200,150,46,.2);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
         .left-feat-text{font-size:.82rem;color:rgba(255,255,255,.6)}
         .left-feat-text strong{color:#fff;font-weight:600;display:block;font-size:.85rem}
 
-        /* ── RIGHT PANEL ── */
-        .right-panel{
-            flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-            padding:32px 24px;overflow-y:auto;min-height:100svh
-        }
+        .right-panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;min-height:100svh}
         .form-box{width:100%;max-width:400px}
 
-        /* Heading */
         .form-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:6px}
         .form-sub{font-size:.88rem;color:var(--muted);margin-bottom:32px}
 
-        /* Fields */
+        /* ── signup-success banner ── */
+        .signup-banner{
+            display:none;align-items:center;gap:10px;
+            background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.3);
+            border-radius:12px;padding:14px 16px;margin-bottom:22px;
+            font-size:.85rem;color:#4ade80;line-height:1.5
+        }
+        .signup-banner.show{display:flex}
+        .signup-banner span{font-size:1.3rem;flex-shrink:0}
+
         .field{margin-bottom:16px}
         .field label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-        .field input{
-            width:100%;padding:13px 16px;
-            background:rgba(255,255,255,.05);
-            border:1.5px solid rgba(255,255,255,.1);
-            border-radius:12px;color:#fff;
-            font-family:'DM Sans',sans-serif;font-size:.95rem;
-            outline:none;transition:border-color .2s;
-            -webkit-appearance:none
-        }
+        .field input{width:100%;padding:13px 16px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;-webkit-appearance:none}
         .field input:focus{border-color:var(--gold);background:rgba(200,150,46,.05)}
         .field input::placeholder{color:rgba(255,255,255,.25)}
 
-        /* Password toggle */
         .pw-wrap{position:relative}
         .pw-wrap input{padding-right:46px}
-        .pw-toggle{
-            position:absolute;right:14px;top:50%;transform:translateY(-50%);
-            background:none;border:none;color:var(--muted);cursor:pointer;
-            font-size:.85rem;padding:4px;transition:color .15s
-        }
+        .pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px;transition:color .15s}
         .pw-toggle:hover{color:#fff}
 
-        /* Forgot password link */
         .forgot-row{text-align:right;margin-top:-8px;margin-bottom:10px;font-size:.8rem}
         .forgot-row a{color:var(--muted);text-decoration:none}
         .forgot-row a:hover{color:var(--gold2)}
 
-        /* Primary button */
-        .btn-primary{
-            width:100%;padding:14px;border-radius:50px;
-            background:linear-gradient(135deg,var(--gold),var(--gold2));
-            border:none;color:var(--ink);font-family:'DM Sans',sans-serif;
-            font-size:.95rem;font-weight:700;cursor:pointer;
-            transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
-            box-shadow:0 4px 20px rgba(200,150,46,.3);margin-top:24px
-        }
+        .btn-primary{width:100%;padding:14px;border-radius:50px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(200,150,46,.3);margin-top:24px}
         .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(200,150,46,.45)}
         .btn-primary:active{transform:scale(.98)}
         .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
 
-        /* Divider */
         .divider{display:flex;align-items:center;gap:10px;margin:22px 0 4px}
         .divider span{font-size:.72rem;color:rgba(255,255,255,.2);white-space:nowrap}
         .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
 
-        /* Sign-up link */
         .bottom-row{text-align:center;margin-top:20px;font-size:.83rem;color:var(--muted)}
         .bottom-row a{color:var(--gold);text-decoration:none;font-weight:600}
         .bottom-row a:hover{color:var(--gold2)}
 
-        /* Welcome back card (shown if already logged in) */
-        .welcome-card{
-            background:rgba(200,150,46,.08);border:1px solid rgba(200,150,46,.2);
-            border-radius:16px;padding:20px;margin-bottom:20px;
-            display:none;align-items:center;gap:12px
-        }
+        .welcome-card{background:rgba(200,150,46,.08);border:1px solid rgba(200,150,46,.2);border-radius:16px;padding:20px;margin-bottom:20px;display:none;align-items:center;gap:12px}
         .welcome-card.show{display:flex}
-        .wc-av{
-            width:40px;height:40px;border-radius:50%;
-            background:linear-gradient(135deg,var(--gold),var(--gold2));
-            display:flex;align-items:center;justify-content:center;
-            font-weight:700;font-size:1rem;color:var(--ink);flex-shrink:0
-        }
+        .wc-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--ink);flex-shrink:0}
         .wc-text{font-size:.82rem;color:rgba(255,255,255,.7)}
         .wc-text strong{color:#fff;display:block;margin-bottom:2px}
 
-        /* Toast */
-        .toast{
-            position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
-            background:rgba(13,27,42,.95);color:#fff;padding:11px 20px;
-            border-radius:10px;font-size:.83rem;font-weight:500;
-            box-shadow:0 4px 20px rgba(0,0,0,.3);transition:all .25s;
-            z-index:500;opacity:0;white-space:nowrap;pointer-events:none;
-            border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(8px)
-        }
+        .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(13,27,42,.95);color:#fff;padding:11px 20px;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:all .25s;z-index:500;opacity:0;white-space:nowrap;pointer-events:none;border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(8px)}
         .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
         .toast.ok{background:rgba(22,163,74,.9)}
         .toast.er{background:rgba(220,38,38,.9)}
 
-        /* Spinner */
         .spin{width:18px;height:18px;border:2.5px solid rgba(13,27,42,.3);border-top-color:var(--ink);border-radius:50%;animation:sp .6s linear infinite;display:inline-block}
         @keyframes sp{to{transform:rotate(360deg)}}
 
-        /* Mobile */
-        @media(max-width:767px){
-            .left-panel{display:none}
-            .right-panel{padding:28px 20px}
-        }
+        @media(max-width:767px){.left-panel{display:none}.right-panel{padding:28px 20px}}
     </style>
 </head>
 <body>
 
-<!-- LEFT PANEL — identical to signup -->
 <div class="left-panel">
     <div class="left-logo">
         <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
@@ -179,32 +112,25 @@
     <h1 class="left-headline">Welcome back to <em>Ghana's story.</em></h1>
     <p class="left-sub">Your feed is waiting — new stories, photos and audio from Ghana's 16 regions, posted while you were away.</p>
     <div class="left-features">
-        <div class="left-feat">
-            <div class="left-feat-icon">📖</div>
-            <div class="left-feat-text"><strong>Explore all 16 regions of Ghana</strong>Stories, photos, audio & more</div>
-        </div>
-        <div class="left-feat">
-            <div class="left-feat-icon">🎵</div>
-            <div class="left-feat-text"><strong>Discover music, festivals & traditions</strong>From Highlife to Kente weaving</div>
-        </div>
-        <div class="left-feat">
-            <div class="left-feat-icon">✍️</div>
-            <div class="left-feat-text"><strong>Share your own heritage stories</strong>Become a creator & reach the world</div>
-        </div>
+        <div class="left-feat"><div class="left-feat-icon">📖</div><div class="left-feat-text"><strong>Explore all 16 regions of Ghana</strong>Stories, photos, audio & more</div></div>
+        <div class="left-feat"><div class="left-feat-icon">🎵</div><div class="left-feat-text"><strong>Discover music, festivals & traditions</strong>From Highlife to Kente weaving</div></div>
+        <div class="left-feat"><div class="left-feat-icon">✍️</div><div class="left-feat-text"><strong>Share your own heritage stories</strong>Become a creator & reach the world</div></div>
     </div>
 </div>
 
-<!-- RIGHT PANEL -->
 <div class="right-panel">
     <div class="form-box">
+
+        <!-- Shown after arriving from /signup -->
+        <div class="signup-banner" id="signup-banner">
+            <span>✅</span>
+            <div><strong style="color:#fff">Account created!</strong><br>Sign in below to start exploring Ghana's heritage.</div>
+        </div>
 
         <!-- Already logged in card -->
         <div class="welcome-card" id="welcome-card">
             <div class="wc-av" id="wc-av">?</div>
-            <div class="wc-text">
-                <strong id="wc-name">—</strong>
-                You're already signed in
-            </div>
+            <div class="wc-text"><strong id="wc-name">—</strong>You're already signed in</div>
         </div>
 
         <h2 class="form-title">Sign In</h2>
@@ -221,13 +147,12 @@
             <div class="pw-wrap">
                 <input type="password" id="password" placeholder="Enter your password"
                        autocomplete="current-password" onkeydown="if(event.key==='Enter')submitLogin()">
-                <button class="pw-toggle" type="button" onclick="togglePw()" id="pw-eye" title="Show/hide password">👁</button>
+                <button class="pw-toggle" type="button" onclick="togglePw()" id="pw-eye">👁</button>
             </div>
         </div>
 
-        <!-- Forgot password link (temporary alert) -->
         <div class="forgot-row">
-            <a href="#" onclick="alert('Please contact support at support@echostack.com to reset your password.')">Forgot password?</a>
+            <a href="#" onclick="alert('Please contact support@echostack.com to reset your password.')">Forgot password?</a>
         </div>
 
         <button class="btn-primary" id="login-btn" onclick="submitLogin()">
@@ -235,10 +160,7 @@
         </button>
 
         <div class="divider"><span>New to EchoStack?</span></div>
-
-        <div class="bottom-row">
-            Don't have an account? <a href="/signup">Join Free</a>
-        </div>
+        <div class="bottom-row">Don't have an account? <a href="/signup">Join Free</a></div>
         <div class="bottom-row" style="margin-top:10px">
             <a href="/" style="color:var(--muted);font-size:.78rem">← Back to Home</a>
         </div>
@@ -249,32 +171,31 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// Check if already logged in
 document.addEventListener('DOMContentLoaded', () => {
+    // Show green banner if arriving from signup page
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('verified') === 'please') {
+        document.getElementById('signup-banner').classList.add('show');
+    }
+
+    // Show "already logged in" card if cookie+localStorage present
     try {
         const saved = JSON.parse(localStorage.getItem('es_user') || '{}');
         if (saved.loggedIn && saved.username) {
             const card = document.getElementById('welcome-card');
             card.classList.add('show');
             document.getElementById('wc-name').textContent = saved.username;
-            document.getElementById('wc-av').textContent = saved.username[0].toUpperCase();
-            // Pre-fill username
-            document.getElementById('username').value = saved.username;
+            document.getElementById('wc-av').textContent   = saved.username[0].toUpperCase();
+            document.getElementById('username').value      = saved.username;
         }
     } catch(e) {}
 });
 
-// Password visibility toggle
 function togglePw() {
     const inp = document.getElementById('password');
     const btn = document.getElementById('pw-eye');
-    if (inp.type === 'password') {
-        inp.type = 'text';
-        btn.textContent = '🙈';
-    } else {
-        inp.type = 'password';
-        btn.textContent = '👁';
-    }
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    btn.textContent = inp.type === 'password' ? '👁' : '🙈';
 }
 
 async function submitLogin() {
@@ -282,7 +203,7 @@ async function submitLogin() {
     const password = document.getElementById('password').value;
 
     if (!username) { showToast('Please enter your username or email', 'er'); document.getElementById('username').focus(); return; }
-    if (!password)  { showToast('Please enter your password', 'er'); document.getElementById('password').focus(); return; }
+    if (!password) { showToast('Please enter your password', 'er'); document.getElementById('password').focus(); return; }
 
     const btn = document.getElementById('login-btn');
     btn.innerHTML = '<div class="spin"></div> Signing in…';
@@ -297,12 +218,16 @@ async function submitLogin() {
         const d = await r.json();
 
         if (r.ok && d.success) {
+            // Save to localStorage so dashboard.html can read it immediately
             localStorage.setItem('es_user', JSON.stringify({
                 loggedIn:   true,
                 user_id:    d.user_id,
                 username:   d.username,
+                email:      d.email || '',
                 role:       d.role || 'user',
-                is_premium: d.is_premium || 0
+                is_premium: d.is_premium || false,
+                avatar_url: d.avatar_url || '',
+                plan:       d.plan || 'free',
             }));
 
             showToast('✅ Welcome back, ' + d.username + '!', 'ok');
@@ -316,14 +241,7 @@ async function submitLogin() {
                 }
             }, 1200);
         } else {
-            // Handle specific errors (like unverified email)
-            if (r.status === 403 && d.detail && d.detail.includes('verify your email')) {
-                showToast('📧 ' + d.detail, 'er');
-            } else {
-                throw new Error(d.detail || 'Incorrect username or password');
-            }
-            btn.innerHTML = 'Sign In →';
-            btn.disabled = false;
+            throw new Error(d.detail || 'Incorrect username or password');
         }
     } catch(err) {
         showToast('❌ ' + err.message, 'er');
