@@ -10,15 +10,31 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --ink:#0D1B2A;--ink2:#0f1e2d;--gold:#C8962E;--gold2:#E8B84B;
-  --surface:#142030;--card:#1a2d40;--border:rgba(255,255,255,.07);
-  --muted:#64748B;--text:#e2e8f0;--danger:#ef4444;--success:#22c55e;
-  --sidebar-w:220px
+  --ink:#0D1B2A;
+  --ink2:#0f1e2d;
+  --gold:#C8962E;
+  --gold2:#E8B84B;
+  --surface:#142030;
+  --card:#1a2d40;
+  --border:rgba(255,255,255,.07);
+  --muted:#64748B;
+  --text:#e2e8f0;
+  --danger:#ef4444;
+  --success:#22c55e;
+  --sidebar-w:220px;
+
+  /* Light theme for main area */
+  --main-bg:#f8fafc;
+  --main-card:#ffffff;
+  --main-border:#e2e8f0;
+  --main-text:#1e293b;
+  --main-muted:#64748b;
+  --main-hover:#f1f5f9;
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);display:flex}
 
-/* ── SIDEBAR ── */
+/* ── SIDEBAR (unchanged, dark) ── */
 .sidebar{
   width:var(--sidebar-w);flex-shrink:0;
   background:var(--ink2);border-right:1px solid var(--border);
@@ -53,170 +69,183 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 }
 .sb-footer button:hover{background:rgba(239,68,68,.2)}
 
-/* ── MAIN ── */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;height:100vh}
+/* ── MAIN (light theme) ── */
+.main{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;height:100vh;
+  background:var(--main-bg);
+}
 .topbar{
   padding:0 24px;height:56px;flex-shrink:0;
   display:flex;align-items:center;justify-content:space-between;
-  background:var(--ink2);border-bottom:1px solid var(--border)
+  background:white;border-bottom:1px solid var(--main-border);
 }
-.topbar-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#fff}
+.topbar-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--main-text);}
 .topbar-actions{display:flex;gap:8px;align-items:center}
 .btn{
   padding:7px 14px;border-radius:8px;font-size:.78rem;font-weight:600;
   cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;border:none
 }
 .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink)}
-.btn-ghost{background:rgba(255,255,255,.07);color:var(--text);border:1px solid var(--border)}
-.btn-ghost:hover{background:rgba(255,255,255,.12)}
-.btn-danger{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.2)}
-.content{flex:1;overflow-y:auto;padding:24px}
+.btn-ghost{background:rgba(0,0,0,.05);color:var(--main-text);border:1px solid var(--main-border)}
+.btn-ghost:hover{background:rgba(0,0,0,.08);}
+.btn-danger{background:rgba(239,68,68,.15);color:#b91c1c;border:1px solid rgba(239,68,68,.2)}
+.content{
+  flex:1;overflow-y:auto;padding:24px;
+  color:var(--main-text);
+}
 
-/* ── PANELS ── */
+/* Panels */
 .panel{display:none}
 .panel.active{display:block}
 
-/* ── STATS ROW ── */
+/* Stats Cards (light) */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
 .stat-card{
-  background:var(--card);border:1px solid var(--border);border-radius:12px;
-  padding:16px 18px;position:relative;overflow:hidden
+  background:var(--main-card);border:1px solid var(--main-border);border-radius:12px;
+  padding:16px 18px;position:relative;overflow:hidden;
+  box-shadow:0 2px 6px rgba(0,0,0,.03);
 }
 .stat-card::before{
   content:'';position:absolute;top:-20px;right:-20px;
   width:80px;height:80px;border-radius:50%;
-  background:rgba(200,150,46,.06);pointer-events:none
+  background:rgba(200,150,46,.04);pointer-events:none
 }
-.stat-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.stat-val{font-size:1.8rem;font-weight:700;color:#fff;line-height:1}
-.stat-sub{font-size:.7rem;color:var(--muted);margin-top:4px}
+.stat-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--main-muted);margin-bottom:6px}
+.stat-val{font-size:1.8rem;font-weight:700;color:var(--main-text);line-height:1}
+.stat-sub{font-size:.7rem;color:var(--main-muted);margin-top:4px}
 
-/* ── FILE MANAGER ── */
+/* File manager */
 .fm-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
 .fm-search{
   flex:1;min-width:180px;padding:9px 14px;
-  background:var(--card);border:1px solid var(--border);
-  border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none
+  background:white;border:1px solid var(--main-border);
+  border-radius:8px;color:var(--main-text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none
 }
 .fm-search:focus{border-color:var(--gold)}
-.fm-search::placeholder{color:var(--muted)}
+.fm-search::placeholder{color:var(--main-muted)}
 .fm-filter{
-  padding:9px 12px;background:var(--card);border:1px solid var(--border);
-  border-radius:8px;color:#fff;font-size:.82rem;outline:none;font-family:'DM Sans',sans-serif;cursor:pointer
+  padding:9px 12px;background:white;border:1px solid var(--main-border);
+  border-radius:8px;color:var(--main-text);font-size:.82rem;outline:none;font-family:'DM Sans',sans-serif;cursor:pointer
 }
 
 /* Upload zone */
 .upload-zone{
-  border:2px dashed rgba(200,150,46,.3);border-radius:14px;
+  border:2px dashed var(--gold);border-radius:14px;
   padding:28px;text-align:center;margin-bottom:20px;
-  background:rgba(200,150,46,.03);cursor:pointer;
+  background:rgba(200,150,46,.02);cursor:pointer;
   transition:all .2s;position:relative
 }
-.upload-zone:hover,.upload-zone.drag{border-color:var(--gold);background:rgba(200,150,46,.07)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--gold2);background:rgba(200,150,46,.05)}
 .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .upload-icon{font-size:2rem;margin-bottom:8px}
-.upload-title{font-weight:700;color:#fff;margin-bottom:4px;font-size:.95rem}
-.upload-sub{font-size:.75rem;color:var(--muted)}
+.upload-title{font-weight:700;color:var(--main-text);margin-bottom:4px;font-size:.95rem}
+.upload-sub{font-size:.75rem;color:var(--main-muted)}
 .upload-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-.upload-opt label{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px}
+.upload-opt label{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main-muted);display:block;margin-bottom:4px}
 .upload-opt select,.upload-opt input{
-  width:100%;padding:8px 10px;background:var(--card);
-  border:1px solid var(--border);border-radius:8px;
-  color:#fff;font-size:.82rem;font-family:'DM Sans',sans-serif;outline:none
+  width:100%;padding:8px 10px;background:white;
+  border:1px solid var(--main-border);border-radius:8px;
+  color:var(--main-text);font-size:.82rem;font-family:'DM Sans',sans-serif;outline:none
 }
 .upload-opt select:focus,.upload-opt input:focus{border-color:var(--gold)}
 
 /* Progress bar */
 .upload-progress{
-  background:rgba(255,255,255,.06);border-radius:8px;
+  background:white;border:1px solid var(--main-border);border-radius:8px;
   padding:10px 14px;margin-bottom:8px;
   display:flex;align-items:center;gap:10px;font-size:.8rem
 }
-.progress-track{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.progress-track{flex:1;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));width:0;transition:width .3s;border-radius:2px}
 
-/* Files grid — social media style */
+/* Files grid */
 .files-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
   gap:14px
 }
 .file-card{
-  background:var(--card);border:1px solid var(--border);border-radius:12px;
-  overflow:hidden;transition:all .2s;cursor:pointer;position:relative
+  background:var(--main-card);border:1px solid var(--main-border);border-radius:12px;
+  overflow:hidden;transition:all .2s;cursor:pointer;position:relative;
+  box-shadow:0 2px 6px rgba(0,0,0,.02);
 }
-.file-card:hover{border-color:rgba(200,150,46,.3);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.file-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.06);}
 .file-thumb{
   width:100%;aspect-ratio:16/9;object-fit:cover;
-  background:var(--surface);display:flex;align-items:center;justify-content:center;
+  background:#f1f5f9;display:flex;align-items:center;justify-content:center;
   font-size:2.5rem;position:relative;overflow:hidden
 }
 .file-thumb img,.file-thumb video{width:100%;height:100%;object-fit:cover}
 .file-type-badge{
   position:absolute;top:8px;left:8px;
   padding:2px 8px;border-radius:20px;font-size:.6rem;font-weight:700;
-  text-transform:uppercase;letter-spacing:.06em;backdrop-filter:blur(4px)
+  text-transform:uppercase;letter-spacing:.06em;backdrop-filter:blur(4px);
+  background:rgba(255,255,255,.8);color:#1e293b;
 }
-.badge-video{background:rgba(239,68,68,.8);color:#fff}
-.badge-audio{background:rgba(139,92,246,.8);color:#fff}
-.badge-image{background:rgba(34,197,94,.8);color:#fff}
-.badge-document{background:rgba(59,130,246,.8);color:#fff}
-.badge-general{background:rgba(107,114,128,.8);color:#fff}
+.badge-video{background:rgba(239,68,68,.9);color:white}
+.badge-audio{background:rgba(139,92,246,.9);color:white}
+.badge-image{background:rgba(34,197,94,.9);color:white}
+.badge-document{background:rgba(59,130,246,.9);color:white}
+.badge-general{background:rgba(100,116,139,.9);color:white}
 .file-card-body{padding:10px 12px}
-.file-name{font-size:.8rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
-.file-meta{font-size:.68rem;color:var(--muted);display:flex;justify-content:space-between}
+.file-name{font-size:.8rem;font-weight:600;color:var(--main-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.file-meta{font-size:.68rem;color:var(--main-muted);display:flex;justify-content:space-between}
 .file-actions{
   display:flex;gap:6px;padding:8px 12px;
-  border-top:1px solid var(--border);background:rgba(0,0,0,.2)
+  border-top:1px solid var(--main-border);background:var(--main-hover)
 }
 .fa-btn{
   flex:1;padding:5px;border-radius:6px;border:none;
   font-size:.7rem;font-weight:600;cursor:pointer;
   font-family:'DM Sans',sans-serif;transition:all .15s
 }
-.fa-view{background:rgba(200,150,46,.15);color:var(--gold2)}
-.fa-view:hover{background:rgba(200,150,46,.3)}
-.fa-del{background:rgba(239,68,68,.12);color:#f87171}
-.fa-del:hover{background:rgba(239,68,68,.25)}
+.fa-view{background:rgba(200,150,46,.1);color:var(--gold);}
+.fa-view:hover{background:rgba(200,150,46,.2);}
+.fa-del{background:rgba(239,68,68,.1);color:#b91c1c;}
+.fa-del:hover{background:rgba(239,68,68,.2);}
 .no-files{
-  grid-column:1/-1;text-align:center;padding:48px 24px;color:var(--muted)
+  grid-column:1/-1;text-align:center;padding:48px 24px;color:var(--main-muted);
+  background:white;border-radius:12px;border:1px dashed var(--main-border);
 }
 .no-files .no-icon{font-size:3rem;margin-bottom:12px}
 .no-files p{font-size:.9rem}
 
-/* Regions table */
-.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.table-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.table-head h3{font-weight:700;color:#fff;font-size:.95rem}
+/* Tables */
+.table-wrap{background:white;border:1px solid var(--main-border);border-radius:12px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.02);}
+.table-head{padding:14px 18px;border-bottom:1px solid var(--main-border);display:flex;justify-content:space-between;align-items:center}
+.table-head h3{font-weight:700;color:var(--main-text);font-size:.95rem}
 table{width:100%;border-collapse:collapse}
-thead th{padding:10px 14px;text-align:left;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:rgba(0,0,0,.2);border-bottom:1px solid var(--border)}
-tbody tr{border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer}
-tbody tr:hover{background:rgba(255,255,255,.03)}
-tbody td{padding:11px 14px;font-size:.82rem;color:var(--text)}
+thead th{padding:10px 14px;text-align:left;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--main-muted);background:#f8fafc;border-bottom:1px solid var(--main-border)}
+tbody tr{border-bottom:1px solid var(--main-border);transition:background .1s;cursor:pointer}
+tbody tr:hover{background:var(--main-hover)}
+tbody td{padding:11px 14px;font-size:.82rem;color:var(--main-text)}
 tbody tr:last-child{border-bottom:none}
 
-/* Form */
+/* Forms */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .field{display:flex;flex-direction:column;gap:5px}
 .field.full{grid-column:1/-1}
-.field label{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field label{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main-muted)}
 .field input,.field textarea,.field select{
-  padding:10px 12px;background:var(--card);border:1.5px solid var(--border);
-  border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;
+  padding:10px 12px;background:white;border:1.5px solid var(--main-border);
+  border-radius:8px;color:var(--main-text);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;
   transition:border-color .15s
 }
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold)}
 .field textarea{resize:vertical;min-height:80px}
-.form-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
-.form-section h4{font-weight:700;font-size:.88rem;color:var(--gold2);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.form-section{background:white;border:1px solid var(--main-border);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 2px 6px rgba(0,0,0,.02);}
+.form-section h4{font-weight:700;font-size:.88rem;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:6px}
 
-/* Users table */
+/* Role badges (updated for light bg) */
 .role-badge{padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
-.role-user{background:rgba(100,116,139,.2);color:#94a3b8}
-.role-creator{background:rgba(139,92,246,.2);color:#a78bfa}
-.role-admin{background:rgba(200,150,46,.2);color:var(--gold2)}
+.role-user{background:#e2e8f0;color:#334155}
+.role-creator{background:rgba(139,92,246,.15);color:#6d28d9}
+.role-admin{background:rgba(200,150,46,.15);color:var(--gold)}
 
-/* Toast */
+/* Users table actions */
+select {background:white;color:var(--main-text);border:1px solid var(--main-border);border-radius:6px;padding:3px 6px;font-size:.72rem;cursor:pointer;outline:none;}
+
+/* Toast (unchanged, overlay) */
 .toast{
   position:fixed;bottom:20px;right:20px;
   padding:10px 18px;border-radius:10px;font-size:.82rem;font-weight:600;
@@ -228,9 +257,9 @@ tbody tr:last-child{border-bottom:none}
 .toast.er{background:rgba(239,68,68,.9);color:#fff}
 .toast.info{background:rgba(200,150,46,.9);color:var(--ink)}
 
-/* Media viewer modal */
+/* Modal */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;max-width:720px;width:90%;max-height:85vh;overflow-y:auto}
+.modal-box{background:white;border:1px solid var(--main-border);border-radius:16px;padding:20px;max-width:720px;width:90%;max-height:85vh;overflow-y:auto;color:var(--main-text);}
 .modal-box video,.modal-box audio{width:100%;border-radius:8px;margin-top:10px}
 .modal-box img{width:100%;border-radius:8px;margin-top:10px;object-fit:contain;max-height:400px}
 
@@ -241,12 +270,13 @@ tbody tr:last-child{border-bottom:none}
   .upload-opts{grid-template-columns:1fr 1fr}
   .files-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
   .form-grid{grid-template-columns:1fr}
+  #menu-btn{display:block !important;}
 }
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
+<!-- SIDEBAR (unchanged) -->
 <aside class="sidebar" id="sidebar">
   <div class="sb-brand">
     <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
@@ -318,11 +348,11 @@ tbody tr:last-child{border-bottom:none}
   </div>
 </aside>
 
-<!-- MAIN -->
+<!-- MAIN (light) -->
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:10px">
-      <button onclick="document.getElementById('sidebar').classList.toggle('open')" style="display:none;background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer" id="menu-btn">☰</button>
+      <button onclick="document.getElementById('sidebar').classList.toggle('open')" style="display:none;background:none;border:none;color:#1e293b;font-size:1.2rem;cursor:pointer" id="menu-btn">☰</button>
       <span class="topbar-title" id="topbar-title">Dashboard</span>
     </div>
     <div class="topbar-actions">
@@ -345,12 +375,12 @@ tbody tr:last-child{border-bottom:none}
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Posts</h3><button class="btn btn-ghost" onclick="show('posts')" style="font-size:.72rem;padding:5px 10px">View All</button></div>
           <table><thead><tr><th>Title</th><th>Status</th><th>Author</th></tr></thead>
-          <tbody id="recent-posts-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--muted)">Loading…</td></tr></tbody></table>
+          <tbody id="recent-posts-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></table>
         </div>
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Uploads</h3><button class="btn btn-ghost" onclick="show('files')" style="font-size:.72rem;padding:5px 10px">File Manager</button></div>
           <table><thead><tr><th>File</th><th>Type</th><th>Size</th></tr></thead>
-          <tbody id="recent-files-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--muted)">Loading…</td></tr></tbody></table>
+          <tbody id="recent-files-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></table>
         </div>
       </div>
     </div>
@@ -405,7 +435,7 @@ tbody tr:last-child{border-bottom:none}
           <option value="general">📦 General</option>
         </select>
         <button class="btn btn-ghost" onclick="loadFiles()">🔄</button>
-        <span id="files-count" style="font-size:.75rem;color:var(--muted)"></span>
+        <span id="files-count" style="font-size:.75rem;color:var(--main-muted)"></span>
       </div>
 
       <div class="files-grid" id="files-grid">
@@ -413,6 +443,7 @@ tbody tr:last-child{border-bottom:none}
       </div>
     </div>
 
+    <!-- Rest of panels (regions, users, posts, etc.) remain the same but will now inherit light styles -->
     <!-- ── REGIONS ── -->
     <div class="panel" id="panel-regions">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -426,7 +457,7 @@ tbody tr:last-child{border-bottom:none}
         </div>
         <table>
           <thead><tr><th>#</th><th>Name</th><th>Capital</th><th>Category</th><th>Media</th><th>Actions</th></tr></thead>
-          <tbody id="regions-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+          <tbody id="regions-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -479,7 +510,7 @@ tbody tr:last-child{border-bottom:none}
         <div class="table-head"><h3>All Users</h3><button class="btn btn-ghost" onclick="loadUsers()" style="font-size:.72rem;padding:5px 10px">Refresh</button></div>
         <table>
           <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Premium</th><th>Joined</th><th>Actions</th></tr></thead>
-          <tbody id="users-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+          <tbody id="users-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -490,7 +521,7 @@ tbody tr:last-child{border-bottom:none}
         <div class="table-head"><h3>Creators</h3></div>
         <table>
           <thead><tr><th>Username</th><th>Channel</th><th>Posts</th><th>Actions</th></tr></thead>
-          <tbody id="creators-tbody"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+          <tbody id="creators-tbody"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -501,7 +532,7 @@ tbody tr:last-child{border-bottom:none}
         <div class="table-head"><h3>All Posts</h3><button class="btn btn-ghost" onclick="loadPosts()" style="font-size:.72rem;padding:5px 10px">Refresh</button></div>
         <table>
           <thead><tr><th>Title</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th>Actions</th></tr></thead>
-          <tbody id="posts-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+          <tbody id="posts-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -512,7 +543,7 @@ tbody tr:last-child{border-bottom:none}
         <div class="table-head"><h3>Story Submissions</h3><button class="btn btn-ghost" onclick="loadStories()" style="font-size:.72rem;padding:5px 10px">Refresh</button></div>
         <table>
           <thead><tr><th>Title</th><th>Author</th><th>Region</th><th>Status</th><th>Date</th></tr></thead>
-          <tbody id="stories-tbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+          <tbody id="stories-tbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -523,7 +554,7 @@ tbody tr:last-child{border-bottom:none}
         <div class="table-head"><h3>Newsletter Subscribers</h3><button class="btn btn-ghost" onclick="loadNewsletter()" style="font-size:.72rem;padding:5px 10px">Refresh</button></div>
         <table>
           <thead><tr><th>#</th><th>Email</th><th>Joined</th></tr></thead>
-          <tbody id="newsletter-tbody"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+          <tbody id="newsletter-tbody"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -574,7 +605,7 @@ tbody tr:last-child{border-bottom:none}
     <div class="panel" id="panel-settings">
       <div class="form-section">
         <h4>⚙️ Site Settings</h4>
-        <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px">Coming soon — configure site name, description, and social links.</p>
+        <p style="font-size:.85rem;color:var(--main-muted);margin-bottom:12px">Coming soon — configure site name, description, and social links.</p>
         <div class="form-grid">
           <div class="field"><label>Site Name</label><input type="text" placeholder="EchoStack Ghana" disabled></div>
           <div class="field"><label>Contact Email</label><input type="text" placeholder="admin@echostack.com" disabled></div>
@@ -611,7 +642,7 @@ tbody tr:last-child{border-bottom:none}
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <strong id="modal-name" style="font-size:.9rem"></strong>
-      <button onclick="closeModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem">✕</button>
+      <button onclick="closeModal()" style="background:none;border:none;color:var(--main-muted);cursor:pointer;font-size:1.2rem">✕</button>
     </div>
     <div id="modal-content"></div>
     <div style="margin-top:12px;display:flex;gap:8px">
@@ -694,7 +725,7 @@ async function loadRecentFiles() {
     const r = await fetch('/api/files');
     const files = await r.json();
     const tbody = document.getElementById('recent-files-body');
-    if (!files.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:14px;text-align:center;color:var(--muted)">No files yet</td></tr>'; return; }
+    if (!files.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:14px;text-align:center;color:var(--main-muted)">No files yet</td></tr>'; return; }
     tbody.innerHTML = files.slice(0,6).map(f => `
       <tr><td>${icon(f.mime_type,f.category)} ${(f.original_name||'').substring(0,24)}</td>
       <td><span class="role-badge role-${f.category}">${f.category}</span></td>
@@ -743,7 +774,7 @@ function renderFiles(files) {
       <div class="file-card-body">
         <div class="file-name" title="${name}">${name}</div>
         <div class="file-meta"><span>${size}</span><span>${timeAgo(f.created_at)}</span></div>
-        ${f.description ? `<div style="font-size:.68rem;color:var(--muted);margin-top:3px">${f.description}</div>` : ''}
+        ${f.description ? `<div style="font-size:.68rem;color:var(--main-muted);margin-top:3px">${f.description}</div>` : ''}
       </div>
       <div class="file-actions">
         <button class="fa-btn fa-view" onclick="openMedia(${JSON.stringify({url,name,mime,cat}).replace(/"/g,'&quot;')})">👁 View</button>
@@ -789,7 +820,7 @@ async function handleFiles(fileList) {
       <div class="upload-progress" id="${rowId}">
         <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.78rem">${file.name}</span>
         <div class="progress-track"><div class="progress-fill" id="${rowId}-bar"></div></div>
-        <span id="${rowId}-status" style="color:var(--muted);font-size:.72rem;white-space:nowrap">0%</span>
+        <span id="${rowId}-status" style="color:var(--main-muted);font-size:.72rem;white-space:nowrap">0%</span>
       </div>`);
 
     try {
@@ -869,7 +900,7 @@ function openMedia(f) {
   } else if ((f.mime||'').startsWith('image') || f.cat === 'image') {
     html = `<img src="${f.url}" alt="${f.name}">`;
   } else {
-    html = `<p style="color:var(--muted);font-size:.85rem">Preview not available for this file type.</p>`;
+    html = `<p style="color:var(--main-muted);font-size:.85rem">Preview not available for this file type.</p>`;
   }
   document.getElementById('modal-content').innerHTML = html;
   document.getElementById('media-modal').style.display = 'flex';
@@ -894,10 +925,10 @@ async function loadRegions() {
 
 function renderRegions(regions) {
   const tbody = document.getElementById('regions-tbody');
-  if (!regions.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted)">No regions yet</td></tr>'; return; }
+  if (!regions.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No regions yet</td></tr>'; return; }
   tbody.innerHTML = regions.map((r, i) => `
     <tr>
-      <td style="color:var(--muted)">${i+1}</td>
+      <td style="color:var(--main-muted)">${i+1}</td>
       <td><strong>${r.name}</strong></td>
       <td>${r.capital || '—'}</td>
       <td><span class="role-badge role-user">${r.category || 'Uncategorized'}</span></td>
@@ -975,16 +1006,16 @@ async function loadUsers() {
     const r = await fetch('/api/admin/users');
     allUsers = await r.json();
     const tbody = document.getElementById('users-tbody');
-    if (!allUsers.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted)">No users yet</td></tr>'; return; }
+    if (!allUsers.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No users yet</td></tr>'; return; }
     tbody.innerHTML = allUsers.map(u => `
       <tr>
         <td><strong>${u.username}</strong></td>
-        <td style="font-size:.78rem;color:var(--muted)">${u.email}</td>
+        <td style="font-size:.78rem;color:var(--main-muted)">${u.email}</td>
         <td><span class="role-badge role-${u.role}">${u.role}</span></td>
-        <td>${u.is_premium ? '<span style="color:var(--gold)">✨ Yes</span>' : '<span style="color:var(--muted)">No</span>'}</td>
-        <td style="font-size:.75rem;color:var(--muted)">${timeAgo(u.created_at)}</td>
+        <td>${u.is_premium ? '<span style="color:var(--gold)">✨ Yes</span>' : '<span style="color:var(--main-muted)">No</span>'}</td>
+        <td style="font-size:.75rem;color:var(--main-muted)">${timeAgo(u.created_at)}</td>
         <td style="white-space:nowrap">
-          <select onchange="setRole('${u.id}',this.value)" style="background:var(--card);border:1px solid var(--border);color:#fff;border-radius:6px;padding:3px 6px;font-size:.72rem;cursor:pointer">
+          <select onchange="setRole('${u.id}',this.value)" style="background:white;border:1px solid var(--main-border);color:var(--main-text);border-radius:6px;padding:3px 6px;font-size:.72rem;cursor:pointer">
             ${['user','creator','admin'].map(role => `<option value="${role}" ${u.role===role?'selected':''}>${role}</option>`).join('')}
           </select>
           <button onclick="togglePremium('${u.id}',${u.is_premium})" style="margin-left:4px" class="btn ${u.is_premium ? 'btn-danger' : 'btn-ghost'}" style="font-size:.7rem;padding:3px 8px">${u.is_premium ? 'Revoke' : '✨ Premium'}</button>
@@ -1015,11 +1046,11 @@ async function loadCreators() {
     const r = await fetch('/api/creators');
     const creators = await r.json();
     const tbody = document.getElementById('creators-tbody');
-    if (!creators.length) { tbody.innerHTML = '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted)">No creators yet</td></tr>'; return; }
+    if (!creators.length) { tbody.innerHTML = '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No creators yet</td></tr>'; return; }
     tbody.innerHTML = creators.map(c => `
       <tr>
         <td><strong>${c.username}</strong></td>
-        <td style="color:var(--muted)">${c.channel_name || '—'}</td>
+        <td style="color:var(--main-muted)">${c.channel_name || '—'}</td>
         <td>${c.post_count || 0}</td>
         <td><a href="/user/${c.username}" target="_blank" class="btn btn-ghost" style="font-size:.7rem;padding:4px 8px">View</a></td>
       </tr>`).join('');
@@ -1033,14 +1064,14 @@ async function loadPosts() {
     const d = await r.json();
     allPosts = Array.isArray(d) ? d : (d.posts || []);
     const tbody = document.getElementById('posts-tbody');
-    if (!allPosts.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted)">No posts yet</td></tr>'; return; }
+    if (!allPosts.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No posts yet</td></tr>'; return; }
     tbody.innerHTML = allPosts.map(p => `
       <tr>
         <td><strong>${(p.title||'').substring(0,40)}</strong></td>
-        <td style="color:var(--muted)">${p.author_username || '—'}</td>
+        <td style="color:var(--main-muted)">${p.author_username || '—'}</td>
         <td><span class="role-badge ${p.status === 'published' ? 'role-admin' : 'role-user'}">${p.status}</span></td>
         <td>${p.views || 0}</td>
-        <td style="font-size:.75rem;color:var(--muted)">${timeAgo(p.created_at)}</td>
+        <td style="font-size:.75rem;color:var(--main-muted)">${timeAgo(p.created_at)}</td>
         <td><a href="/post/${p.id}" target="_blank" class="btn btn-ghost" style="font-size:.7rem;padding:4px 8px">View</a></td>
       </tr>`).join('');
   } catch(e) {}
@@ -1052,12 +1083,12 @@ async function loadRecentPosts() {
     const d = await r.json();
     const posts = Array.isArray(d) ? d : (d.posts || []);
     const tbody = document.getElementById('recent-posts-body');
-    if (!posts.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:14px;text-align:center;color:var(--muted)">No posts yet</td></tr>'; return; }
+    if (!posts.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:14px;text-align:center;color:var(--main-muted)">No posts yet</td></tr>'; return; }
     tbody.innerHTML = posts.slice(0,6).map(p => `
       <tr>
         <td>${(p.title||'Untitled').substring(0,30)}</td>
         <td><span class="role-badge ${p.status==='published'?'role-admin':'role-user'}">${p.status}</span></td>
-        <td style="color:var(--muted)">${p.author_username||'—'}</td>
+        <td style="color:var(--main-muted)">${p.author_username||'—'}</td>
       </tr>`).join('');
   } catch(e) {}
 }
@@ -1068,14 +1099,14 @@ async function loadStories() {
     const r = await fetch('/api/stories');
     const stories = await r.json();
     const tbody = document.getElementById('stories-tbody');
-    if (!stories.length) { tbody.innerHTML = '<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted)">No stories submitted yet</td></tr>'; return; }
+    if (!stories.length) { tbody.innerHTML = '<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">No stories submitted yet</td></tr>'; return; }
     tbody.innerHTML = stories.map(s => `
       <tr>
         <td><strong>${(s.title||'').substring(0,40)}</strong></td>
         <td>${s.author_name || '—'}</td>
         <td>${s.region || '—'}</td>
         <td><span class="role-badge ${s.status==='approved'?'role-admin':s.status==='rejected'?'role-user':'role-creator'}">${s.status}</span></td>
-        <td style="font-size:.75rem;color:var(--muted)">${timeAgo(s.created_at)}</td>
+        <td style="font-size:.75rem;color:var(--main-muted)">${timeAgo(s.created_at)}</td>
       </tr>`).join('');
   } catch(e) {}
 }
@@ -1086,12 +1117,12 @@ async function loadNewsletter() {
     const r = await fetch('/api/newsletter/subscribers');
     const subs = await r.json();
     const tbody = document.getElementById('newsletter-tbody');
-    if (!subs.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--muted)">No subscribers yet</td></tr>'; return; }
+    if (!subs.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No subscribers yet</td></tr>'; return; }
     tbody.innerHTML = subs.map((s,i) => `
       <tr>
-        <td style="color:var(--muted)">${i+1}</td>
+        <td style="color:var(--main-muted)">${i+1}</td>
         <td>${s.email}</td>
-        <td style="color:var(--muted);font-size:.75rem">${timeAgo(s.created_at)}</td>
+        <td style="color:var(--main-muted);font-size:.75rem">${timeAgo(s.created_at)}</td>
       </tr>`).join('');
   } catch(e) {}
 }
@@ -1102,7 +1133,7 @@ async function loadEvents() {
     const r = await fetch('/api/events');
     const events = await r.json();
     const tbody = document.getElementById('events-tbody');
-    if (!events.length) { tbody.innerHTML = '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted)">No events yet</td></tr>'; return; }
+    if (!events.length) { tbody.innerHTML = '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No events yet</td></tr>'; return; }
     tbody.innerHTML = events.map(e => `
       <tr>
         <td><strong>${e.title}</strong></td>
@@ -1139,9 +1170,9 @@ async function loadCategories() {
     const r = await fetch('/api/sections');
     const cats = await r.json();
     const container = document.getElementById('cats-list');
-    if (!cats.length) { container.innerHTML = '<p style="color:var(--muted);font-size:.85rem">No categories yet</p>'; return; }
+    if (!cats.length) { container.innerHTML = '<p style="color:var(--main-muted);font-size:.85rem">No categories yet</p>'; return; }
     container.innerHTML = cats.map(c => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--main-border)">
         <span style="font-size:.85rem">${c.name}</span>
         <button onclick="deleteCategory(${c.id})" class="btn btn-danger" style="font-size:.7rem;padding:3px 8px">✕</button>
       </div>`).join('');
@@ -1170,14 +1201,14 @@ async function loadChat() {
     const r = await fetch('/api/chat');
     const msgs = await r.json();
     const container = document.getElementById('chat-msgs');
-    if (!msgs.length) { container.innerHTML = '<p style="color:var(--muted);font-size:.85rem;padding:8px">No messages yet</p>'; return; }
+    if (!msgs.length) { container.innerHTML = '<p style="color:var(--main-muted);font-size:.85rem;padding:8px">No messages yet</p>'; return; }
     container.innerHTML = msgs.slice(-50).map(m => `
-      <div style="background:var(--surface);border-radius:8px;padding:8px 12px">
+      <div style="background:white;border:1px solid var(--main-border);border-radius:8px;padding:8px 12px">
         <div style="display:flex;justify-content:space-between;margin-bottom:3px">
           <strong style="font-size:.8rem">${m.username}</strong>
-          <span style="font-size:.7rem;color:var(--muted)">${timeAgo(m.created_at)}</span>
+          <span style="font-size:.7rem;color:var(--main-muted)">${timeAgo(m.created_at)}</span>
         </div>
-        <p style="font-size:.83rem;color:var(--text)">${m.content}</p>
+        <p style="font-size:.83rem;color:var(--main-text)">${m.content}</p>
       </div>`).join('');
   } catch(e) {}
 }
