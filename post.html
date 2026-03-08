@@ -1,100 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0D1B2A">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Post — EchoStack</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--ink:#0D1B2A;--gold:#C8962E;--cream:#FAF6EF;--border:#E2E8F0;--muted:#94A3B8}
+:root{--ink:#0D1B2A;--gold:#C8962E;--cream:#FAF6EF;--border:#E2E8F0;--muted:#94A3B8;--blue:#0077b6}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh}
+
+/* NAV */
 nav{background:var(--ink);border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:100}
 .ni{max-width:900px;margin:0 auto;padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between}
 .nl{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nl img{width:30px;height:30px;border-radius:6px}
+.nl img{width:30px;height:30px;border-radius:6px;object-fit:cover}
 .nl span{font-family:'Playfair Display',serif;color:#fff;font-size:1.05rem}
 .nb{background:none;border:none;color:#94A3B8;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;padding:6px 11px;border-radius:6px;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 .nb:hover{background:rgba(255,255,255,.08);color:#fff}
-.nb.lo{border:1px solid rgba(248,113,113,.35);color:#f87171}.nb.lo:hover{background:#f87171;color:#fff}
+.nb.lo{border:1px solid rgba(248,113,113,.35);color:#f87171}
+.nb.lo:hover{background:#f87171;color:#fff}
 
-.page{max-width:720px;margin:0 auto;padding:32px 20px 60px}
-
-.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.82rem;text-decoration:none;margin-bottom:24px;cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif}
+/* PAGE */
+.page{max-width:720px;margin:0 auto;padding:32px 20px 80px}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.82rem;cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;margin-bottom:24px;padding:0}
 .back-btn:hover{color:var(--ink)}
 
-.post-type-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;text-transform:uppercase;margin-bottom:12px}
+/* POST CARD */
+.post-card{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(13,27,42,.06)}
+
+/* TYPE BADGE */
+.post-type-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .type-article{background:#EFF6FF;color:#2563EB}
 .type-audio{background:#F0FDF4;color:#16A34A}
 .type-photo_essay{background:#FFF7ED;color:#D97706}
+.type-video{background:#FDF2F8;color:#9333EA}
 
-h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--ink);line-height:1.3;margin-bottom:16px}
-
-.post-meta{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
-.author-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E8B84B);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.9rem;flex-shrink:0}
+/* POST HEADER */
+.post-header{padding:24px 24px 0}
+.post-meta{display:flex;align-items:center;gap:12px;margin:16px 0 20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.author-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E8B84B);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.9rem;flex-shrink:0;overflow:hidden}
+.author-av img{width:100%;height:100%;object-fit:cover}
 .author-name{font-size:.85rem;font-weight:600;color:var(--ink)}
 .post-date{font-size:.75rem;color:var(--muted)}
 .post-views{margin-left:auto;font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:4px}
 
-.cover-img{width:100%;max-height:420px;object-fit:cover;border-radius:12px;margin-bottom:28px}
+/* COVER IMAGE */
+.cover-img{width:100%;max-height:460px;object-fit:cover;display:block}
 
-.post-content{font-size:1rem;line-height:1.85;color:#2d3748}
-.post-content p{margin-bottom:1.25rem}
-.post-content h2,.post-content h3{font-family:'Playfair Display',serif;color:var(--ink);margin:2rem 0 1rem}
-.post-content blockquote{border-left:4px solid var(--gold);padding:1rem 1.5rem;background:#fff;border-radius:0 8px 8px 0;margin:1.5rem 0;color:#475569;font-style:italic}
-.post-content img{width:100%;border-radius:8px;margin:1rem 0}
+/* MEDIA PLAYERS */
+.media-container{background:#000;position:relative;width:100%}
+.media-container video{width:100%;max-height:480px;display:block;background:#000}
+.audio-container{padding:20px 24px;background:linear-gradient(135deg,#0D1B2A,#1a2a3a)}
+.audio-container audio{width:100%;border-radius:8px}
+.audio-label{color:rgba(255,255,255,.7);font-size:.78rem;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 
-/* LOCKED CONTENT */
-.locked-wall{background:linear-gradient(180deg,rgba(250,246,239,0) 0%,var(--cream) 60%);padding:60px 20px 40px;text-align:center;margin-top:-80px;position:relative}
-.locked-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;margin:0 auto;box-shadow:0 4px 24px rgba(13,27,42,.08)}
-.locked-card h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--ink);margin-bottom:8px}
-.locked-card p{font-size:.85rem;color:var(--muted);margin-bottom:20px;line-height:1.6}
-.subscribe-btn{width:100%;padding:12px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:background .2s}
+/* GALLERY */
+.gallery-grid{display:grid;gap:3px}
+.gallery-grid.one img{width:100%;max-height:500px;object-fit:cover}
+.gallery-grid.two{grid-template-columns:1fr 1fr}
+.gallery-grid.two img{height:280px;object-fit:cover;width:100%}
+.gallery-grid.many{grid-template-columns:repeat(3,1fr)}
+.gallery-grid.many img{height:200px;object-fit:cover;width:100%}
+
+/* POST BODY */
+.post-body{padding:24px}
+h1.post-title{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--ink);line-height:1.3;margin-bottom:0}
+.post-content{font-size:.97rem;line-height:1.9;color:#374151;margin-top:20px}
+.post-content p{margin-bottom:1rem}
+.post-content p:last-child{margin-bottom:0}
+.post-excerpt{font-size:1rem;color:#64748B;line-height:1.7;margin-top:12px;font-style:italic;border-left:3px solid var(--gold);padding-left:14px}
+
+/* LOCKED WALL */
+.locked-wall{background:linear-gradient(180deg,rgba(250,246,239,0) 0%,var(--cream) 55%);padding:50px 20px 32px;text-align:center;margin-top:-60px;position:relative}
+.locked-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;max-width:380px;margin:0 auto;box-shadow:0 4px 20px rgba(13,27,42,.08)}
+.locked-card h3{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--ink);margin:8px 0 6px}
+.locked-card p{font-size:.83rem;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.subscribe-btn{width:100%;padding:12px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .2s}
 .subscribe-btn:hover{background:#a97825}
 
-/* LIKE / SHARE BAR */
-.action-bar{display:flex;align-items:center;gap:12px;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:28px 0}
-.action-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--ink);transition:all .2s}
+/* ACTION BAR */
+.action-bar{display:flex;align-items:center;gap:10px;padding:14px 24px;border-top:1px solid var(--border)}
+.action-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--ink);transition:all .2s;font-family:'DM Sans',sans-serif}
 .action-btn:hover,.action-btn.liked{background:var(--gold);color:#fff;border-color:var(--gold)}
 
 /* COMMENTS */
-.comments-section{margin-top:32px}
-.comments-section h3{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:16px;color:var(--ink)}
-.comment-item{display:flex;gap:10px;margin-bottom:16px}
-.c-av{width:32px;height:32px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0}
-.c-body{flex:1;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 14px}
-.c-name{font-size:.78rem;font-weight:700;color:var(--ink)}
-.c-text{font-size:.83rem;color:#475569;margin-top:4px;line-height:1.5}
-.c-input-row{display:flex;gap:8px;margin-top:16px}
-.c-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s}
+.comments-section{padding:20px 24px;border-top:1px solid var(--border)}
+.comments-section h3{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:14px;color:var(--ink)}
+.comment-item{display:flex;gap:10px;margin-bottom:14px}
+.c-av{width:32px;height:32px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0}
+.c-body{flex:1;background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.c-name{font-size:.76rem;font-weight:700;color:var(--ink)}
+.c-text{font-size:.83rem;color:#475569;margin-top:3px;line-height:1.5}
+.c-time{font-size:.7rem;color:var(--muted);margin-top:4px}
+.c-input-row{display:flex;gap:8px;margin-top:14px}
+.c-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s;background:#fff}
 .c-input:focus{border-color:var(--gold)}
-.c-send{padding:10px 18px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-size:.82rem;font-weight:700;cursor:pointer}
+.c-send{padding:10px 18px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.c-send:hover{background:#a97825}
 
-/* ECHOBOT on post page */
-.ai-btn{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0D1B2A,#C8962E);color:#fff;border:none;cursor:pointer;font-size:1.4rem;box-shadow:0 4px 20px rgba(0,0,0,.25);z-index:2000;display:flex;align-items:center;justify-content:center;transition:all .2s}
+/* ECHOBOT */
+.ai-btn{position:fixed;bottom:2rem;right:2rem;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#0D1B2A,#C8962E);color:#fff;border:none;cursor:pointer;font-size:1.3rem;box-shadow:0 4px 20px rgba(0,0,0,.25);z-index:2000;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .ai-btn:hover{transform:scale(1.1)}
 .ai-panel{position:fixed;bottom:5rem;right:2rem;width:340px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.15);z-index:2000;display:none;flex-direction:column;overflow:hidden;border:1px solid var(--border);max-height:480px}
 .ai-panel.open{display:flex}
 .ai-hdr{background:linear-gradient(135deg,#0D1B2A,#0077b6);color:#fff;padding:.875rem 1.25rem;display:flex;justify-content:space-between;align-items:center}
 .ai-hdr h3{font-size:.9rem;font-weight:700}
-.ai-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem;min-height:220px;max-height:300px}
-.ai-msg{max-width:85%;padding:.6rem .875rem;border-radius:12px;font-size:.83rem;line-height:1.5}
+.ai-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem;min-height:200px;max-height:280px}
+.ai-msg{max-width:85%;padding:.6rem .875rem;border-radius:12px;font-size:.82rem;line-height:1.5}
 .ai-msg.bot{background:#f0f7ff;color:#1a1e29;align-self:flex-start}
 .ai-msg.user{background:#0077b6;color:#fff;align-self:flex-end}
-.ai-msg.locked-msg{background:#fff7ed;color:#92400e;border:1px solid #fde68a;align-self:flex-start}
+.ai-msg.locked-msg{background:#fff7ed;color:#92400e;border:1px solid #fde68a}
 .ai-inp-row{padding:.75rem;border-top:1px solid #f0f0f0;display:flex;gap:.5rem}
 .ai-inp{flex:1;padding:.6rem .875rem;border:1.5px solid var(--border);border-radius:20px;font-size:.83rem;outline:none;font-family:'DM Sans',sans-serif}
 .ai-inp:focus{border-color:var(--gold)}
 .ai-send{background:var(--gold);color:#fff;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .35s;z-index:999}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .35s;z-index:3000;white-space:nowrap}
 .toast.on{transform:translateX(-50%) translateY(0)}
-.toast.ok{background:#1A7A4A}.toast.er{background:#C0392B}
-@media(max-width:600px){.ai-panel{width:calc(100vw - 2rem);right:1rem}}
+.toast.ok{background:#1A7A4A}
+.toast.er{background:#C0392B}
+
+/* LOADING SKELETON */
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;height:20px;margin-bottom:10px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+@media(max-width:600px){
+  .ai-panel{width:calc(100vw - 2rem);right:1rem}
+  .page{padding:20px 12px 80px}
+  h1.post-title{font-size:1.5rem}
+  .post-header,.post-body,.action-bar,.comments-section{padding-left:16px;padding-right:16px}
+}
 </style>
 </head>
 <body>
@@ -113,35 +153,55 @@ h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--ink);line-hei
 <div class="page">
   <button onclick="history.back()" class="back-btn">← Back to Feed</button>
 
-  <div id="post-loading" style="text-align:center;padding:60px;color:var(--muted)">Loading article...</div>
-  <div id="post-body" style="display:none">
-    <span class="post-type-badge type-article" id="post-type-badge">Article</span>
-    <h1 id="post-title"></h1>
-    <div class="post-meta">
-      <div class="author-av" id="author-av">?</div>
-      <div>
-        <div class="author-name" id="author-name"></div>
-        <div class="post-date" id="post-date"></div>
+  <div id="post-loading">
+    <div class="post-card">
+      <div style="padding:24px">
+        <div class="skeleton" style="width:80px;height:22px"></div>
+        <div class="skeleton" style="width:90%;height:36px;margin-top:14px"></div>
+        <div class="skeleton" style="width:60%;height:36px"></div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <div class="skeleton" style="width:40px;height:40px;border-radius:50%"></div>
+          <div style="flex:1"><div class="skeleton" style="width:120px"></div><div class="skeleton" style="width:80px;margin-top:6px"></div></div>
+        </div>
+        <div class="skeleton" style="height:300px;margin-top:16px"></div>
       </div>
-      <div class="post-views">👁 <span id="post-views">0</span> views</div>
     </div>
-    <img id="cover-img" class="cover-img" src="" style="display:none" onerror="this.style.display='none'">
+  </div>
 
-    <div id="content-area"></div>
+  <div id="post-body" style="display:none">
+    <div class="post-card">
+      <!-- media goes above fold -->
+      <div id="media-top"></div>
 
-    <div class="action-bar">
-      <button class="action-btn" id="like-btn" onclick="toggleLike()">
-        ❤️ <span id="like-count">0</span> Likes
-      </button>
-      <button class="action-btn" onclick="sharePost()">🔗 Share</button>
-    </div>
+      <div class="post-header">
+        <span class="post-type-badge type-article" id="post-type-badge">Article</span>
+        <h1 class="post-title" id="post-title"></h1>
+        <div class="post-meta">
+          <div class="author-av" id="author-av">?</div>
+          <div>
+            <div class="author-name" id="author-name"></div>
+            <div class="post-date" id="post-date"></div>
+          </div>
+          <div class="post-views">👁 <span id="post-views">0</span> views</div>
+        </div>
+      </div>
 
-    <div class="comments-section" id="comments-area">
-      <h3>💬 Comments</h3>
-      <div id="comments-list"></div>
-      <div class="c-input-row">
-        <input type="text" class="c-input" id="comment-input" placeholder="Add a comment...">
-        <button class="c-send" onclick="postComment()">Send</button>
+      <div class="post-body" id="post-content-area"></div>
+
+      <div class="action-bar">
+        <button class="action-btn" id="like-btn" onclick="toggleLike()">
+          ❤️ <span id="like-count">0</span> Likes
+        </button>
+        <button class="action-btn" onclick="sharePost()">🔗 Share</button>
+      </div>
+
+      <div class="comments-section" id="comments-area">
+        <h3>💬 Comments</h3>
+        <div id="comments-list"></div>
+        <div class="c-input-row">
+          <input type="text" class="c-input" id="comment-input" placeholder="Add a comment..." onkeydown="if(event.key==='Enter')postComment()">
+          <button class="c-send" onclick="postComment()">Send</button>
+        </div>
       </div>
     </div>
   </div>
@@ -158,7 +218,7 @@ h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--ink);line-hei
     <div class="ai-msg bot">Akwaaba! Ask me anything about Ghana's heritage, regions, or culture!</div>
   </div>
   <div class="ai-inp-row">
-    <input type="text" class="ai-inp" id="ai-input" placeholder="Ask about Ghana..." onkeydown="if(event.key==='Enter') sendAI()">
+    <input type="text" class="ai-inp" id="ai-input" placeholder="Ask about Ghana..." onkeydown="if(event.key==='Enter')sendAI()">
     <button onclick="sendAI()" class="ai-send">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
     </button>
@@ -181,61 +241,159 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadPost();
 });
 
+// ─────────────────────────────────────────────
+// CONTENT RENDERER — converts tags to real HTML
+// ─────────────────────────────────────────────
+function renderContent(raw, contentType) {
+  if (!raw) return '';
+
+  // 1) [video]URL[/video]
+  raw = raw.replace(/\[video\](.*?)\[\/video\]/gi, (_, url) => {
+    url = url.trim();
+    return `<div class="media-container" style="margin-bottom:0">
+      <video controls playsinline preload="metadata" style="width:100%;max-height:480px;display:block;background:#000">
+        <source src="${url}" type="video/mp4">
+        <source src="${url}">
+        Your browser does not support video.
+      </video>
+    </div>`;
+  });
+
+  // 2) [audio]URL[/audio]
+  raw = raw.replace(/\[audio\](.*?)\[\/audio\]/gi, (_, url) => {
+    url = url.trim();
+    return `<div class="audio-container">
+      <div class="audio-label">🎵 Audio Recording</div>
+      <audio controls style="width:100%;border-radius:8px">
+        <source src="${url}" type="audio/mpeg">
+        <source src="${url}">
+      </audio>
+    </div>`;
+  });
+
+  // 3) Markdown-style image ![alt](url)
+  raw = raw.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
+    return `<img src="${url.trim()}" alt="${alt}" style="width:100%;border-radius:8px;margin:8px 0;display:block" onerror="this.style.display='none'">`;
+  });
+
+  // 4) Plain URL that looks like a video file
+  raw = raw.replace(/(?<!['"(>])(https?:\/\/[^\s<>"']+\.(?:mp4|webm|mov|avi))(?!['")<])/gi, url => {
+    return `<div class="media-container"><video controls playsinline preload="metadata" style="width:100%;max-height:480px;display:block;background:#000"><source src="${url}" type="video/mp4"><source src="${url}"></video></div>`;
+  });
+
+  // 5) Plain URL that looks like an audio file
+  raw = raw.replace(/(?<!['"(>])(https?:\/\/[^\s<>"']+\.(?:mp3|wav|ogg|aac|flac))(?!['")<])/gi, url => {
+    return `<div class="audio-container"><div class="audio-label">🎵 Audio</div><audio controls style="width:100%;border-radius:8px"><source src="${url}"></audio></div>`;
+  });
+
+  // 6) Wrap remaining plain text paragraphs
+  const hasHtml = /<\w/.test(raw);
+  if (!hasHtml) {
+    return raw.split('\n').filter(p => p.trim()).map(p => `<p>${p}</p>`).join('');
+  }
+
+  // Mix of html + text — wrap bare text lines
+  return raw.split('\n').map(line => {
+    line = line.trim();
+    if (!line) return '';
+    if (/^</.test(line)) return line;
+    return `<p>${line}</p>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+// LOAD POST
+// ─────────────────────────────────────────────
 async function loadPost() {
   try {
     const r = await fetch('/api/posts/' + postId);
-    if (!r.ok) { document.getElementById('post-loading').textContent = 'Post not found.'; return; }
+    if (!r.ok) {
+      document.getElementById('post-loading').innerHTML = '<div style="text-align:center;padding:60px;color:#94A3B8">Post not found.</div>';
+      return;
+    }
     postData = await r.json();
 
     document.title = postData.title + ' — EchoStack';
     document.getElementById('post-title').textContent = postData.title;
     document.getElementById('post-views').textContent = postData.views || 0;
     document.getElementById('like-count').textContent = postData.likes || 0;
-    document.getElementById('author-name').textContent = postData.author_username || 'Creator';
-    document.getElementById('author-av').textContent = (postData.author_username || 'C')[0].toUpperCase();
+
+    const authorName = postData.author_username || 'Creator';
+    document.getElementById('author-name').textContent = authorName;
+    document.getElementById('author-av').textContent = authorName[0].toUpperCase();
     document.getElementById('post-date').textContent = new Date(postData.created_at).toLocaleDateString('en-GB', {year:'numeric',month:'long',day:'numeric'});
 
     // Badge
+    const ct = postData.content_type || 'article';
     const badge = document.getElementById('post-type-badge');
-    badge.textContent = (postData.content_type || 'article').replace('_',' ').toUpperCase();
-    badge.className = 'post-type-badge type-' + (postData.content_type || 'article');
+    badge.textContent = ct.replace(/_/g,' ').toUpperCase();
+    badge.className = 'post-type-badge type-' + ct;
 
-    // Cover image
-    if (postData.cover_image) {
-      const img = document.getElementById('cover-img');
-      img.src = postData.cover_image;
-      img.style.display = 'block';
+    // Render top media section
+    const mediaTop = document.getElementById('media-top');
+    if (ct === 'video' && postData.content && postData.content.includes('[video]')) {
+      // Video gets full-width top treatment
+      const match = postData.content.match(/\[video\](.*?)\[\/video\]/i);
+      if (match) {
+        const url = match[1].trim();
+        mediaTop.innerHTML = `<div class="media-container">
+          <video controls playsinline preload="metadata" style="width:100%;max-height:500px;display:block;background:#000">
+            <source src="${url}" type="video/mp4">
+            <source src="${url}">
+          </video>
+        </div>`;
+      }
+    } else if (postData.cover_image) {
+      mediaTop.innerHTML = `<img src="${postData.cover_image}" class="cover-img" alt="${postData.title}" onerror="this.style.display='none'">`;
+    } else if (ct === 'photo_essay' && postData.content) {
+      // Show first image as hero if photo essay
+      const imgMatch = postData.content.match(/!\[[^\]]*\]\(([^)]+)\)/);
+      if (imgMatch) {
+        mediaTop.innerHTML = `<img src="${imgMatch[1].trim()}" class="cover-img" alt="${postData.title}" onerror="this.style.display='none'">`;
+      }
     }
 
-    // Content or locked wall
-    const contentArea = document.getElementById('content-area');
-    if (postData.is_locked) {
-      // Show excerpt + paywall
+    // Content area
+    const contentArea = document.getElementById('post-content-area');
+    if (postData.is_premium && !currentUser?.is_premium) {
       contentArea.innerHTML = `
-        <div class="post-content"><p>${postData.excerpt || ''}</p></div>
+        ${postData.excerpt ? `<div class="post-excerpt">${postData.excerpt}</div>` : ''}
         <div class="locked-wall">
           <div class="locked-card">
-            <div style="font-size:2rem;margin-bottom:12px">🔒</div>
+            <div style="font-size:2rem">🔒</div>
             <h3>Premium Content</h3>
-            <p>This article is for premium subscribers. Upgrade to read the full story and unlock EchoBot AI assistance.</p>
+            <p>This is for premium subscribers. Upgrade to read the full story.</p>
             <button class="subscribe-btn" onclick="showToast('Premium subscriptions coming soon! 🚀','ok')">⭐ Subscribe — Coming Soon</button>
           </div>
         </div>`;
       document.getElementById('comments-area').style.display = 'none';
     } else {
-      // Render full content — convert newlines to paragraphs
-      const paragraphs = (postData.content || '').split('\n').filter(p => p.trim()).map(p => `<p>${p}</p>`).join('');
-      contentArea.innerHTML = `<div class="post-content">${paragraphs || '<p>No content.</p>'}</div>`;
+      const rawContent = postData.content || '';
+      // Don't re-render video in body if already shown at top
+      let bodyContent = rawContent;
+      if (ct === 'video') {
+        bodyContent = rawContent.replace(/\[video\].*?\[\/video\]/gi, '').trim();
+      }
+      const rendered = renderContent(bodyContent, ct);
+      contentArea.innerHTML = `
+        ${postData.excerpt ? `<div class="post-excerpt">${postData.excerpt}</div>` : ''}
+        ${rendered ? `<div class="post-content" style="margin-top:${postData.excerpt?'16px':'0'}">${rendered}</div>` : ''}
+      `;
       loadComments();
     }
 
     document.getElementById('post-loading').style.display = 'none';
     document.getElementById('post-body').style.display = 'block';
+
   } catch(e) {
-    document.getElementById('post-loading').textContent = 'Failed to load post.';
+    console.error(e);
+    document.getElementById('post-loading').innerHTML = '<div style="text-align:center;padding:60px;color:#94A3B8">Failed to load post.</div>';
   }
 }
 
+// ─────────────────────────────────────────────
+// COMMENTS
+// ─────────────────────────────────────────────
 async function loadComments() {
   try {
     const r = await fetch('/api/posts/' + postId + '/comments');
@@ -247,10 +405,11 @@ async function loadComments() {
     }
     list.innerHTML = comments.map(c => `
       <div class="comment-item">
-        <div class="c-av">${c.username[0].toUpperCase()}</div>
+        <div class="c-av">${(c.author_username||'?')[0].toUpperCase()}</div>
         <div class="c-body">
-          <div class="c-name">${c.username}</div>
+          <div class="c-name">${c.author_username||'User'}</div>
           <div class="c-text">${c.content}</div>
+          <div class="c-time">${c.created_at ? new Date(c.created_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''}</div>
         </div>
       </div>`).join('');
   } catch(e) {}
@@ -261,22 +420,29 @@ async function postComment() {
   const text = input.value.trim();
   if (!text) return;
   if (!currentUser) { showToast('Please log in to comment', 'er'); return; }
+  const btn = document.querySelector('.c-send');
+  btn.disabled = true;
   try {
-    const fd = new FormData(); fd.append('content', text);
+    const fd = new FormData();
+    fd.append('content', text);
     const r = await fetch('/api/posts/' + postId + '/comments', {method:'POST', body:fd});
     const d = await r.json();
-    if (d.success) { input.value = ''; loadComments(); showToast('Comment posted!', 'ok'); }
+    if (d.success) { input.value = ''; loadComments(); showToast('Comment posted! ✓', 'ok'); }
+    else showToast(d.detail || 'Failed', 'er');
   } catch(e) { showToast('Failed to post comment', 'er'); }
+  finally { btn.disabled = false; }
 }
 
+// ─────────────────────────────────────────────
+// LIKES
+// ─────────────────────────────────────────────
 async function toggleLike() {
   if (!currentUser) { showToast('Please log in to like', 'er'); return; }
   try {
     const r = await fetch('/api/posts/' + postId + '/like', {method:'POST'});
     const d = await r.json();
-    document.getElementById('like-count').textContent = d.likes || 0;
-    const btn = document.getElementById('like-btn');
-    if (d.liked) btn.classList.add('liked'); else btn.classList.remove('liked');
+    document.getElementById('like-count').textContent = d.likes ?? d.like_count ?? 0;
+    document.getElementById('like-btn').classList.toggle('liked', !!d.liked);
   } catch(e) {}
 }
 
@@ -284,15 +450,14 @@ function sharePost() {
   if (navigator.share) {
     navigator.share({title: postData?.title, url: window.location.href});
   } else {
-    navigator.clipboard.writeText(window.location.href);
-    showToast('Link copied!', 'ok');
+    navigator.clipboard?.writeText(window.location.href).then(() => showToast('Link copied! 🔗', 'ok'));
   }
 }
 
+// ─────────────────────────────────────────────
 // ECHOBOT
-function toggleAI() {
-  document.getElementById('ai-panel').classList.toggle('open');
-}
+// ─────────────────────────────────────────────
+function toggleAI() { document.getElementById('ai-panel').classList.toggle('open'); }
 
 async function sendAI() {
   const input = document.getElementById('ai-input');
@@ -309,22 +474,22 @@ async function sendAI() {
     const d = await r.json();
     removeMsg(tid);
     addMsg(d.reply, d.locked ? 'locked-msg' : 'bot');
-  } catch(e) {
-    removeMsg(tid);
-    addMsg('Connection error. Please try again.', 'bot');
-  }
+  } catch(e) { removeMsg(tid); addMsg('Connection error. Please try again.', 'bot'); }
 }
 
 function addMsg(text, type) {
   const c = document.getElementById('ai-msgs');
-  const id = 'msg-' + Date.now();
+  const id = 'msg-' + Date.now() + Math.random();
   const d = document.createElement('div');
   d.className = 'ai-msg ' + type; d.id = id; d.textContent = text;
   c.appendChild(d); c.scrollTop = c.scrollHeight;
   return id;
 }
-function removeMsg(id) { const el = document.getElementById(id); if(el) el.remove(); }
+function removeMsg(id) { document.getElementById(id)?.remove(); }
 
+// ─────────────────────────────────────────────
+// MISC
+// ─────────────────────────────────────────────
 function logout() {
   fetch('/api/users/logout', {method:'POST'}).finally(() => { window.location.href = '/'; });
 }
