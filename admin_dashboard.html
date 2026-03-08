@@ -236,6 +236,30 @@ tbody tr:last-child{border-bottom:none}
 .form-section{background:white;border:1px solid var(--main-border);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 2px 6px rgba(0,0,0,.02);}
 .form-section h4{font-weight:700;font-size:.88rem;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:6px}
 
+/* Upload buttons for media fields */
+.upload-btn{
+  margin-top:4px;
+  background:rgba(200,150,46,.1);
+  border:1px dashed var(--gold);
+  border-radius:6px;
+  padding:6px 10px;
+  font-size:.75rem;
+  color:var(--gold);
+  cursor:pointer;
+  transition:all .15s;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  width:fit-content;
+}
+.upload-btn:hover{
+  background:rgba(200,150,46,.2);
+  border-color:var(--gold2);
+}
+.upload-btn input{
+  display:none;
+}
+
 /* Role badges (updated for light bg) */
 .role-badge{padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .role-user{background:#e2e8f0;color:#334155}
@@ -443,7 +467,6 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
       </div>
     </div>
 
-    <!-- Rest of panels (regions, users, posts, etc.) remain the same but will now inherit light styles -->
     <!-- ── REGIONS ── -->
     <div class="panel" id="panel-regions">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -462,7 +485,7 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
       </div>
     </div>
 
-    <!-- ── ADD/EDIT REGION ── -->
+    <!-- ── ADD/EDIT REGION (with real file uploads) ── -->
     <div class="panel" id="panel-add-region">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div></div>
@@ -493,9 +516,33 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
       <div class="form-section">
         <h4>🖼️ Media</h4>
         <div class="form-grid">
-          <div class="field"><label>Hero Image URL</label><input type="text" id="reg-hero" placeholder="/uploads/image.jpg or Supabase URL"></div>
-          <div class="field"><label>Gallery Images (comma separated)</label><input type="text" id="reg-gallery" placeholder="/uploads/img1.jpg, /uploads/img2.jpg"></div>
-          <div class="field"><label>Audio Files (comma separated)</label><input type="text" id="reg-audio" placeholder="/uploads/story.mp3"></div>
+          <!-- Hero Image -->
+          <div class="field">
+            <label>Hero Image URL</label>
+            <input type="text" id="reg-hero" placeholder="/uploads/image.jpg or Supabase URL">
+            <div class="upload-btn" onclick="document.getElementById('hero-upload').click()">
+              <span>⬆️ Upload Image</span>
+              <input type="file" id="hero-upload" accept="image/*" onchange="uploadHero(this.files[0])" style="display:none;">
+            </div>
+          </div>
+          <!-- Gallery Images -->
+          <div class="field">
+            <label>Gallery Images (comma separated)</label>
+            <input type="text" id="reg-gallery" placeholder="/uploads/img1.jpg, /uploads/img2.jpg">
+            <div class="upload-btn" onclick="document.getElementById('gallery-upload').click()">
+              <span>⬆️ Upload Images (multiple)</span>
+              <input type="file" id="gallery-upload" accept="image/*" multiple onchange="uploadGallery(this.files)" style="display:none;">
+            </div>
+          </div>
+          <!-- Audio Files -->
+          <div class="field">
+            <label>Audio Files (comma separated)</label>
+            <input type="text" id="reg-audio" placeholder="/uploads/story.mp3">
+            <div class="upload-btn" onclick="document.getElementById('audio-upload').click()">
+              <span>⬆️ Upload Audio</span>
+              <input type="file" id="audio-upload" accept="audio/*" multiple onchange="uploadAudio(this.files)" style="display:none;">
+            </div>
+          </div>
         </div>
       </div>
       <div style="display:flex;gap:10px">
@@ -754,7 +801,6 @@ function renderFiles(files) {
     const name = f.original_name || f.filename || 'file';
     const size = f.file_size_mb > 0 ? `${f.file_size_mb} MB` : `${f.file_size_kb || 0} KB`;
 
-    // Thumbnail
     let thumb = '';
     if (mime.startsWith('image') || cat === 'image') {
       thumb = `<div class="file-thumb"><img src="${url}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='🖼️'"></div>`;
@@ -831,7 +877,6 @@ async function handleFiles(fileList) {
       fd.append('description', desc);
       fd.append('is_public', document.getElementById('up-public').value);
 
-      // Fake progress while uploading
       let prog = 0;
       const ticker = setInterval(() => {
         prog = Math.min(prog + 8, 90);
@@ -853,14 +898,12 @@ async function handleFiles(fileList) {
         if (bar) bar.style.width = '100%';
         if (status) { status.textContent = '✅ Done'; status.style.color = 'var(--success)'; }
         toast(`✅ ${file.name} uploaded!`, 'ok');
-        // Refresh files list
         await loadFiles();
         await loadStats();
       } else {
         throw new Error(d.detail || 'Upload failed');
       }
 
-      // Remove row after 3s
       setTimeout(() => { if (row) row.remove(); }, 3000);
 
     } catch(err) {
@@ -998,6 +1041,77 @@ async function deleteRegion(id, name) {
     if (r.ok && d.success) { toast('Deleted!', 'ok'); loadRegions(); }
     else throw new Error('Delete failed');
   } catch(e) { toast('❌ Delete failed', 'er'); }
+}
+
+// ── UPLOAD FUNCTIONS FOR REGION FORM ───────────────────────────────────────
+async function uploadHero(file) {
+  if (!file) return;
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const r = await fetch('/api/upload/image', { method: 'POST', body: fd });
+    const d = await r.json();
+    if (r.ok && d.success) {
+      document.getElementById('reg-hero').value = d.url;
+      toast('✅ Hero image uploaded!', 'ok');
+    } else {
+      throw new Error(d.detail || 'Upload failed');
+    }
+  } catch (e) {
+    toast('❌ Upload failed: ' + e.message, 'er');
+  }
+}
+
+async function uploadGallery(files) {
+  if (!files || !files.length) return;
+  for (const file of files) {
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const r = await fetch('/api/upload/image', { method: 'POST', body: fd });
+      const d = await r.json();
+      if (r.ok && d.success) {
+        const current = document.getElementById('reg-gallery').value;
+        const url = d.url;
+        if (current) {
+          document.getElementById('reg-gallery').value = current + ', ' + url;
+        } else {
+          document.getElementById('reg-gallery').value = url;
+        }
+        toast(`✅ Uploaded ${file.name}`, 'ok');
+      } else {
+        throw new Error(d.detail || 'Upload failed');
+      }
+    } catch (e) {
+      toast(`❌ ${file.name}: ${e.message}`, 'er');
+    }
+  }
+}
+
+async function uploadAudio(files) {
+  if (!files || !files.length) return;
+  for (const file of files) {
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const r = await fetch('/api/upload/audio', { method: 'POST', body: fd });
+      const d = await r.json();
+      if (r.ok && d.success) {
+        const current = document.getElementById('reg-audio').value;
+        const url = d.url;
+        if (current) {
+          document.getElementById('reg-audio').value = current + ', ' + url;
+        } else {
+          document.getElementById('reg-audio').value = url;
+        }
+        toast(`✅ Uploaded ${file.name}`, 'ok');
+      } else {
+        throw new Error(d.detail || 'Upload failed');
+      }
+    } catch (e) {
+      toast(`❌ ${file.name}: ${e.message}`, 'er');
+    }
+  }
 }
 
 // ── USERS ──────────────────────────────────────────────────────────────────
