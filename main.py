@@ -397,7 +397,7 @@ async def signup(
         u = models.User(
             id=uid, username=uname, email=uemail,
             hashed_password=password, role="user",
-            is_premium=0, is_suspended=0, follower_count=0,
+            is_premium=False, is_suspended=False, follower_count=0,
             bio="", avatar_url="", channel_name=uname, channel_desc="",
         )
         db.add(u); db.commit(); db.refresh(u)
@@ -405,7 +405,7 @@ async def signup(
         resp = JSONResponse({
             "success": True, "user_id": uid,
             "username": u.username, "role": "user",
-            "is_premium": 0, "message": "Account created!"
+            "is_premium": False, "message": "Account created!"
         })
         resp.set_cookie("user_session", uid, max_age=60*60*24*30, path="/", samesite="lax", httponly=False)
         return resp
@@ -490,7 +490,7 @@ async def set_premium(uid: str, request: Request, db: Session = Depends(get_db))
     if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
     u = db.query(models.User).filter(models.User.id == uid).first()
     if not u: raise HTTPException(404)
-    u.is_premium = 0 if getattr(u,"is_premium",0) else 1
+    u.is_premium = False if getattr(u,"is_premium",0) else 1
     db.commit(); return {"success": True, "is_premium": u.is_premium}
 
 @app.put("/api/admin/users/{uid}/suspend")
@@ -498,7 +498,7 @@ async def suspend(uid: str, request: Request, db: Session = Depends(get_db)):
     if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
     u = db.query(models.User).filter(models.User.id == uid).first()
     if not u: raise HTTPException(404)
-    u.is_suspended = 0 if getattr(u,"is_suspended",0) else 1
+    u.is_suspended = False if getattr(u,"is_suspended",0) else 1
     db.commit(); return {"success": True, "is_suspended": u.is_suspended}
 
 # ─── POSTS ────────────────────────────────────────────────────────────────────
@@ -1113,7 +1113,7 @@ async def payment_callback(reference: str, db: Session = Depends(get_db)):
         if d.get("status") and d["data"]["status"] == "success":
             email = d["data"]["customer"]["email"]
             u = db.query(models.User).filter(models.User.email==email).first()
-            if u: u.is_premium = 1; db.commit()
+            if u: u.is_premium = True; db.commit()
         return RedirectResponse("/dashboard?upgraded=1")
     except Exception: return RedirectResponse("/premium?error=1")
 
