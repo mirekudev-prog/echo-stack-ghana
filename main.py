@@ -4,28 +4,42 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 import os, uuid, re, json, httpx
-from datetime import datetime, timedelta   # added timedelta
-import secrets                              # for token generation
+from datetime import datetime, timedelta
+import secrets
 
 # Password hashing
 from passlib.context import CryptContext
 
-# Email utilities (must exist in your project)
-from email_utils import generate_token, send_verification_email, send_password_reset_email
-
 from database import engine, get_db, Base
 import models
 
-# ─── PASSWORD HASHING SETUP ───────────────────────────────────────────────
+# ─── PASSWORD HASHING ────────────────────────────────────────────────────────
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+def verify_password(plain, hashed):
+    try:
+        return pwd_context.verify(plain, hashed)
+    except Exception:
+        return False
 
 def get_password_hash(password):
     return pwd_context.hash(password)
 
-# ─── GUARANTEED TABLE CREATION ───────────────────────────────────────────────
+# ─── EMAIL UTILITIES (safe import — won't crash if file is missing) ──────────
+try:
+    from email_utils import generate_token, send_verification_email, send_password_reset_email
+    EMAIL_ENABLED = True
+except Exception as _e:
+    EMAIL_ENABLED = False
+    print(f"⚠️  email_utils not loaded: {_e} — email features disabled")
+    def generate_token():
+        return secrets.token_urlsafe(32)
+    def send_verification_email(email, username, token):
+        print(f"[EMAIL STUB] verify {email} token={token}")
+    def send_password_reset_email(email, username, token):
+        print(f"[EMAIL STUB] reset {email} token={token}")
+
+# ─── TABLE CREATION ──────────────────────────────────────────────────────────
 _CREATE_TABLES_SQL = """
 CREATE TABLE IF NOT EXISTS regions (
     id SERIAL PRIMARY KEY,
@@ -178,7 +192,6 @@ CREATE TABLE IF NOT EXISTS payments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- TOPICS and USER_TOPICS (with correct UUID)
 CREATE TABLE IF NOT EXISTS topics (
     id SERIAL PRIMARY KEY,
     name TEXT UNIQUE NOT NULL
@@ -191,14 +204,12 @@ CREATE TABLE IF NOT EXISTS user_topics (
 );
 """
 
-# Also SQLAlchemy's ORM create (belt + suspenders)
 try:
     Base.metadata.create_all(bind=engine)
 except Exception as e:
     print(f"SQLAlchemy create_all note: {e}")
 
 def _run_startup_sql():
-    """Run raw CREATE TABLE IF NOT EXISTS — guaranteed to work on PostgreSQL."""
     try:
         with engine.connect() as conn:
             for stmt in _CREATE_TABLES_SQL.strip().split(';'):
@@ -214,7 +225,6 @@ def _run_startup_sql():
         print(f"Startup SQL note: {e}")
 
 def _run_migrations():
-    """Safely add any missing columns to existing tables."""
     cols = [
         ("users","hashed_password","VARCHAR(255) DEFAULT ''"),
         ("users","bio","TEXT DEFAULT ''"),
@@ -262,7 +272,6 @@ def _run_migrations():
         print(f"Migration note: {e}")
 
 def _seed_topics():
-    """Insert the default Ghana‑heritage topics."""
     default_topics = [
         "Ashanti Culture","Ga Traditions","Ewe Music","Northern Heritage",
         "Gold Coast History","Slave Castles","Highlife Music","Traditional Drums",
@@ -307,12 +316,29 @@ PAYSTACK_SECRET = os.getenv("PAYSTACK_SECRET_KEY", "")
 def slugify(t: str) -> str:
     return re.sub(r'[^a-z0-9]+', '-', t.lower()).strip('-')[:80]
 
+def _is_admin(request: Request) -> bool:
+    return request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
+
+def _get_user(request: Request, db: Session):
+    """Return User row from user_session cookie, or None."""
+    sid = request.cookies.get("user_session")
+    if not sid:
+        return None
+    try:
+        return db.query(models.User).filter(models.User.id == sid).first()
+    except Exception:
+        return None
+
 async def upload_to_supabase(content: bytes, filename: str, ctype: str):
     if not SUPABASE_URL or not SUPABASE_KEY:
         return None
     try:
         url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{filename}"
-        headers = {"Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": ctype, "x-upsert": "true"}
+        headers = {
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": ctype,
+            "x-upsert": "true"
+        }
         async with httpx.AsyncClient(timeout=30) as c:
             r = await c.post(url, content=content, headers=headers)
         if r.status_code in (200, 201):
@@ -323,7 +349,7 @@ async def upload_to_supabase(content: bytes, filename: str, ctype: str):
 
 async def _do_upload(file: UploadFile, category: str, db: Session) -> dict:
     content = await file.read()
-    ext = os.path.splitext(file.filename or "file")[1].lower() or ".bin"
+    ext  = os.path.splitext(file.filename or "file")[1].lower() or ".bin"
     safe = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}{ext}"
     ctype = file.content_type or "application/octet-stream"
 
@@ -350,79 +376,148 @@ async def _do_upload(file: UploadFile, category: str, db: Session) -> dict:
 
     size_bytes = len(content)
     return {
-        "success": True,
-        "url": pub_url,
-        "file_url": pub_url,
-        "filename": safe,
-        "original_name": file.filename or safe,
-        "file_id": fid,
-        "size": size_bytes,
+        "success": True, "url": pub_url, "file_url": pub_url,
+        "filename": safe, "original_name": file.filename or safe,
+        "file_id": fid, "size": size_bytes,
         "file_size_mb": round(size_bytes / (1024*1024), 2),
         "file_size_kb": round(size_bytes / 1024, 1),
-        "category": category,
-        "mime_type": ctype,
+        "category": category, "mime_type": ctype,
     }
 
-# ─── STATIC PAGES ─────────────────────────────────────────────────────────────
-def _page(fn):
-    def handler():
-        if os.path.exists(fn): return FileResponse(fn)
-        raise HTTPException(404, f"{fn} not found")
-    return handler
+# ─── STATIC PAGE HELPER ───────────────────────────────────────────────────────
+def _serve(filename: str, request: Request = None):
+    """Serve an HTML file. Admins can always access any page."""
+    if os.path.exists(filename):
+        return FileResponse(filename)
+    raise HTTPException(404, f"{filename} not found")
 
-for _route, _fn in {
-    "/": "index.html", "/app": "app.html", "/dashboard": "dashboard.html",
-    "/creator": "creator.html", "/login": "login.html", "/signup": "signup.html",
-    "/user-login": "user-login.html", "/premium": "premium.html",
-    "/activity": "activity.html", "/explore": "explore.html",
-    "/following": "following.html", "/community": "community_chat.html",
-    "/archive": "archive.html", "/user": "user_profile.html",
-    "/verify-email": "verify-email.html",        # new page for verification
-    "/reset-password": "reset-password.html",    # new page for password reset
-}.items():
-    app.get(_route)(_page(_fn))
+# ─── PUBLIC PAGES ─────────────────────────────────────────────────────────────
+@app.get("/")
+def homepage(): return _serve("index.html")
 
-@app.get("/post/{pid}")
-def post_page(): return FileResponse("post.html") if os.path.exists("post.html") else HTTPException(404)
+@app.get("/login")
+def login_page(): return _serve("login.html")
+
+@app.get("/signup")
+def signup_page(): return _serve("signup.html")
+
+@app.get("/user-login")
+def user_login_page(): return _serve("user-login.html")
+
+@app.get("/premium")
+def premium_page(): return _serve("premium.html")
+
+@app.get("/verify-email")
+def verify_email_page(): return _serve("verify-email.html")
+
+@app.get("/reset-password")
+def reset_password_page(): return _serve("reset-password.html")
+
+@app.get("/explore")
+def explore_page(): return _serve("explore.html")
+
+@app.get("/archive")
+def archive_page(): return _serve("archive.html")
+
+@app.get("/community")
+def community_page(): return _serve("community_chat.html")
+
+# ─── PROTECTED PAGES (user OR admin can access) ───────────────────────────────
+@app.get("/app")
+async def app_page(request: Request):
+    if _is_admin(request) or request.cookies.get("user_session"):
+        return _serve("app.html")
+    return RedirectResponse("/user-login")
+
+@app.get("/dashboard")
+async def dashboard_page(request: Request):
+    if _is_admin(request) or request.cookies.get("user_session"):
+        return _serve("dashboard.html")
+    return RedirectResponse("/user-login")
+
+@app.get("/creator")
+async def creator_page(request: Request):
+    if _is_admin(request) or request.cookies.get("user_session"):
+        return _serve("creator.html")
+    return RedirectResponse("/user-login")
+
+@app.get("/activity")
+async def activity_page(request: Request):
+    if _is_admin(request) or request.cookies.get("user_session"):
+        return _serve("activity.html")
+    return RedirectResponse("/user-login")
+
+@app.get("/following")
+async def following_page(request: Request):
+    if _is_admin(request) or request.cookies.get("user_session"):
+        return _serve("following.html")
+    return RedirectResponse("/user-login")
+
+@app.get("/user")
+async def user_page(request: Request):
+    if _is_admin(request) or request.cookies.get("user_session"):
+        return _serve("user_profile.html")
+    return RedirectResponse("/user-login")
 
 @app.get("/user/{uname}")
-def user_page(): return FileResponse("user_profile.html") if os.path.exists("user_profile.html") else HTTPException(404)
+async def user_profile_page(uname: str, request: Request):
+    if _is_admin(request) or request.cookies.get("user_session"):
+        return _serve("user_profile.html")
+    return RedirectResponse("/user-login")
 
+@app.get("/post/{pid}")
+async def post_page(pid: int, request: Request):
+    # Posts are publicly viewable (locked content is handled client-side)
+    return _serve("post.html")
+
+# ─── MANIFEST / SERVICE WORKER / ASSETS ──────────────────────────────────────
 @app.get("/manifest.json")
 def manifest():
-    if os.path.exists("manifest.json"): return JSONResponse(json.load(open("manifest.json")))
+    if os.path.exists("manifest.json"):
+        return JSONResponse(json.load(open("manifest.json")))
     raise HTTPException(404)
 
 @app.get("/sw.js")
 def sw():
-    if os.path.exists("sw.js"): return FileResponse("sw.js", media_type="application/javascript")
+    if os.path.exists("sw.js"):
+        return FileResponse("sw.js", media_type="application/javascript")
     raise HTTPException(404)
 
 @app.get("/echostack-logo.png")
 def logo():
-    if os.path.exists("echostack-logo.png"): return FileResponse("echostack-logo.png")
+    if os.path.exists("echostack-logo.png"):
+        return FileResponse("echostack-logo.png")
     raise HTTPException(404)
 
 @app.get("/test")
 def test():
-    return {"status": "ok", "version": "EchoStack v2", "posts_endpoint": "POST /api/posts ✅"}
+    return {
+        "status": "ok",
+        "version": "EchoStack v2",
+        "email_enabled": EMAIL_ENABLED,
+        "supabase_configured": bool(SUPABASE_URL),
+        "paystack_configured": bool(PAYSTACK_SECRET),
+        "hf_configured": bool(HF_TOKEN),
+    }
 
-# ─── ADMIN AUTH ───────────────────────────────────────────────────────────────
+# ─── ADMIN PAGES & AUTH ───────────────────────────────────────────────────────
 @app.get("/admin")
 async def admin_page(request: Request):
-    if request.cookies.get("admin_session") == "ADMIN_AUTHORIZED":
-        if os.path.exists("admin_dashboard.html"): return FileResponse("admin_dashboard.html")
-    return FileResponse("login.html") if os.path.exists("login.html") else HTTPException(404)
+    if _is_admin(request):
+        return _serve("admin_dashboard.html")
+    return _serve("login.html")
 
 @app.get("/admin-preview")
 async def admin_preview(request: Request, db: Session = Depends(get_db)):
-    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED":
+    if not _is_admin(request):
         return JSONResponse({"error": "Unauthorized"}, status_code=401)
     try:
         posts = db.query(models.Post).order_by(models.Post.created_at.desc()).limit(20).all()
         return JSONResponse({"posts": [
-            {"id": p.id, "title": getattr(p,"title",""), "status": getattr(p,"status",""),
-             "author_username": getattr(p,"author_username",""), "created_at": str(getattr(p,"created_at",""))}
+            {"id": p.id, "title": getattr(p, "title", ""),
+             "status": getattr(p, "status", ""),
+             "author_username": getattr(p, "author_username", ""),
+             "created_at": str(getattr(p, "created_at", ""))}
             for p in posts
         ]})
     except Exception as e:
@@ -430,9 +525,10 @@ async def admin_preview(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/api/auth/login")
 async def admin_login(answer: str = Form(...)):
-    if answer.strip().lower().replace(" ","") == ADMIN_SECRET.lower().replace(" ",""):
-        r = JSONResponse({"success": True})
-        r.set_cookie("admin_session", "ADMIN_AUTHORIZED", max_age=86400, path="/")
+    if answer.strip().lower().replace(" ", "") == ADMIN_SECRET.lower().replace(" ", ""):
+        r = JSONResponse({"success": True, "role": "admin"})
+        r.set_cookie("admin_session", "ADMIN_AUTHORIZED",
+                     max_age=86400 * 7, path="/", httponly=False, samesite="lax")
         return r
     raise HTTPException(403, "Wrong password")
 
@@ -446,18 +542,24 @@ def admin_logout():
 @app.post("/api/users/signup")
 async def signup(
     username: str = Form(...),
-    email: str = Form(...),
+    email:    str = Form(...),
     password: str = Form(...),
-    topics: str = Form(""),
+    topics:   str = Form(""),
     db: Session = Depends(get_db)
 ):
     try:
         uname  = username.strip()
-        uemail = email.strip()
+        uemail = email.strip().lower()
+
         if not uname or not uemail or not password:
             raise HTTPException(400, "Username, email and password are required")
+        if len(uname) < 3:
+            raise HTTPException(400, "Username must be at least 3 characters")
+        if not re.match(r'^[a-zA-Z0-9_]+$', uname):
+            raise HTTPException(400, "Username: only letters, numbers and underscores")
+        if len(password) < 6:
+            raise HTTPException(400, "Password must be at least 6 characters")
 
-        # Check existing user
         existing = db.query(models.User).filter(
             (models.User.username == uname) | (models.User.email == uemail)
         ).first()
@@ -466,121 +568,130 @@ async def signup(
                 raise HTTPException(400, "Username already taken — choose another")
             raise HTTPException(400, "Email already registered — try signing in")
 
-        # Hash the password
         hashed = get_password_hash(password)
+        verification_token   = generate_token()
+        token_expires        = datetime.utcnow() + timedelta(hours=24)
 
-        # Generate verification token (expires in 24 hours)
-        verification_token = generate_token()
-        token_expires = datetime.utcnow() + timedelta(hours=24)
-
-        # Create user (use integers for is_premium/is_suspended)
         uid = uuid.uuid4()
         u = models.User(
-            id=uid,
-            username=uname,
-            email=uemail,
-            hashed_password=hashed,
-            role="user",
-            is_premium=0,
-            is_suspended=0,
-            follower_count=0,
-            bio="",
-            avatar_url="",
-            channel_name=uname,
-            channel_desc="",
-            email_verified=False,
+            id=uid, username=uname, email=uemail,
+            hashed_password=hashed, role="user",
+            is_premium=0, is_suspended=0, follower_count=0,
+            bio="", avatar_url="", channel_name=uname, channel_desc="",
+            # ── FIX: mark verified immediately so login works right away ──
+            # When Resend is live, flip this to False and uncomment the
+            # send_verification_email call below.
+            email_verified=True,
             verification_token=verification_token,
             verification_token_expires=token_expires
         )
         db.add(u)
         db.flush()
 
-        # Parse and save selected topics
-        selected_topics = []
-        if topics:
-            try:
-                selected_topics = json.loads(topics)
-                if not isinstance(selected_topics, list):
-                    selected_topics = []
-            except:
+        # Save topic selections
+        try:
+            selected_topics = json.loads(topics) if topics else []
+            if not isinstance(selected_topics, list):
                 selected_topics = []
-
-        for topic_name in selected_topics:
-            topic_result = db.execute(
-                text("SELECT id FROM topics WHERE name = :name"),
-                {"name": topic_name}
-            ).first()
-            if topic_result:
-                topic_id = topic_result[0]
-                db.execute(
-                    text("INSERT INTO user_topics (user_id, topic_id) VALUES (:uid, :tid) ON CONFLICT DO NOTHING"),
-                    {"uid": uid, "tid": topic_id}
-                )
+            for topic_name in selected_topics:
+                topic_name = topic_name.strip()
+                if not topic_name:
+                    continue
+                topic_result = db.execute(
+                    text("SELECT id FROM topics WHERE name = :name"),
+                    {"name": topic_name}
+                ).first()
+                if topic_result:
+                    db.execute(
+                        text("INSERT INTO user_topics (user_id, topic_id) "
+                             "VALUES (:uid, :tid) ON CONFLICT DO NOTHING"),
+                        {"uid": uid, "tid": topic_result[0]}
+                    )
+        except Exception:
+            pass  # topic failure never blocks signup
 
         db.commit()
         db.refresh(u)
-        print(f"✅ New user: {uname} ({uemail}) id={uid} with {len(selected_topics)} topics")
+        print(f"✅ New user: {uname} ({uemail}) id={uid}")
 
-        # Send verification email (don't fail if email fails)
+        # ── Attempt to send verification email (non-blocking) ──
+        # Even though email_verified=True, we still send a welcome/verify email
+        # so the flow is ready when you want to enforce verification later.
         try:
             send_verification_email(uemail, uname, verification_token)
         except Exception as e:
-            print(f"⚠️ Could not send verification email: {e}")
+            print(f"⚠️ Verification email failed (non-fatal): {e}")
 
-        # Return success but DON'T log them in automatically
-        return JSONResponse({
-            "success": True,
-            "message": "Account created! Please check your email to verify your account.",
-            "needs_verification": True
+        # ── Log user in immediately after signup ──
+        resp = JSONResponse({
+            "success":  True,
+            "message":  "Account created! Welcome to EchoStack 🇬🇭",
+            "user_id":  str(u.id),
+            "username": u.username,
+            "email":    u.email,
+            "role":     u.role,
+            "is_premium": bool(u.is_premium),
+            "avatar_url": u.avatar_url or "",
+            "plan":     "premium" if u.is_premium else "free",
+            "loggedIn": True,
         })
+        resp.set_cookie("user_session", str(u.id),
+                        max_age=86400 * 14, path="/", httponly=False, samesite="lax")
+        return resp
 
     except HTTPException:
-        db.rollback()
-        raise
+        db.rollback(); raise
     except Exception as e:
         db.rollback()
-        import traceback
-        traceback.print_exc()
+        import traceback; traceback.print_exc()
         raise HTTPException(500, f"Signup failed: {str(e)}")
+
 
 @app.post("/api/users/login")
 async def user_login(
-    username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
 ):
     try:
-        # Try to find user by username (case‑insensitive)
-        u = db.query(models.User).filter(
-            models.User.username.ilike(username.strip())
-        ).first()
+        val = username.strip()
 
+        # Try email first, then username (both case-insensitive)
+        u = db.query(models.User).filter(
+            models.User.email.ilike(val)
+        ).first()
         if not u:
-            # Try by email
             u = db.query(models.User).filter(
-                models.User.email.ilike(username.strip())
+                models.User.username.ilike(val)
             ).first()
 
         if not u:
-            raise HTTPException(404, "Account not found. Please sign up first.")
+            raise HTTPException(404, "No account found. Please sign up first.")
 
-        # Check if email is verified
-        if not getattr(u, "email_verified", False):
-            raise HTTPException(403, "Please verify your email before logging in. Check your inbox for the verification link.")
-
-        if not verify_password(password, u.hashed_password):
+        if not verify_password(password, u.hashed_password or ""):
             raise HTTPException(401, "Incorrect password. Try again.")
 
         if getattr(u, "is_suspended", 0):
             raise HTTPException(403, "Account suspended. Contact support.")
 
-        # Success response
+        # ── email_verified check: skip for admins/superusers ──
+        role = getattr(u, "role", "user") or "user"
+        if not getattr(u, "email_verified", False) and role not in ("admin", "superuser"):
+            raise HTTPException(403, "UNVERIFIED:Please verify your email before logging in. Check your inbox.")
+
         resp = JSONResponse({
-            "success": True,
-            "user_id": str(u.id),
-            "username": u.username,
-            "role": getattr(u, "role", "user"),
-            "is_premium": getattr(u, "is_premium", 0)
+            "success":    True,
+            "user_id":    str(u.id),
+            "username":   u.username,
+            "email":      u.email,
+            "role":       role,
+            "is_premium": bool(getattr(u, "is_premium", 0)),
+            "avatar_url": getattr(u, "avatar_url", "") or "",
+            "plan":       "premium" if getattr(u, "is_premium", 0) else "free",
+            "loggedIn":   True,
         })
-        resp.set_cookie("user_session", str(u.id), max_age=60*60*24*30, path="/", samesite="lax")
+        resp.set_cookie("user_session", str(u.id),
+                        max_age=86400 * 30, path="/", httponly=False, samesite="lax")
         return resp
 
     except HTTPException:
@@ -588,82 +699,92 @@ async def user_login(
     except Exception as e:
         raise HTTPException(500, str(e))
 
+
 @app.get("/api/users/verify-email")
-async def verify_email(token: str, db: Session = Depends(get_db)):
+async def verify_email_endpoint(token: str, db: Session = Depends(get_db)):
     try:
-        # Find user with this token and not expired
         user = db.query(models.User).filter(
             models.User.verification_token == token,
             models.User.verification_token_expires > datetime.utcnow()
         ).first()
-
         if not user:
             raise HTTPException(400, "Invalid or expired verification link")
-
-        # Mark as verified and clear token
         user.email_verified = True
         user.verification_token = None
         user.verification_token_expires = None
         db.commit()
-
-        return {"success": True, "message": "Email verified successfully! You can now log in."}
-
+        return {"success": True, "message": "Email verified! You can now log in."}
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(500, str(e))
+
+
+@app.post("/api/users/resend-verification")
+async def resend_verification(email: str = Form(...), db: Session = Depends(get_db)):
+    try:
+        user = db.query(models.User).filter(
+            models.User.email == email.strip().lower()
+        ).first()
+        if not user:
+            return {"success": True, "message": "If that email exists, a link was sent."}
+        if getattr(user, "email_verified", False):
+            return {"success": True, "message": "Email already verified — you can log in."}
+        token = generate_token()
+        user.verification_token = token
+        user.verification_token_expires = datetime.utcnow() + timedelta(hours=24)
+        db.commit()
+        try:
+            send_verification_email(user.email, user.username, token)
+        except Exception as e:
+            print(f"⚠️ Resend verification email failed: {e}")
+        return {"success": True, "message": "Verification email sent! Check your inbox."}
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
 
 @app.post("/api/users/forgot-password")
 async def forgot_password(email: str = Form(...), db: Session = Depends(get_db)):
     try:
-        user = db.query(models.User).filter(models.User.email == email.strip()).first()
-
-        # Always return success even if email not found (security best practice)
-        if not user:
-            return {"success": True, "message": "If an account exists with that email, you will receive a password reset link."}
-
-        # Generate reset token (expires in 1 hour)
-        reset_token = generate_token()
-        token_expires = datetime.utcnow() + timedelta(hours=1)
-
-        user.reset_token = reset_token
-        user.reset_token_expires = token_expires
-        db.commit()
-
-        # Send reset email
-        send_password_reset_email(user.email, user.username, reset_token)
-
-        return {"success": True, "message": "If an account exists with that email, you will receive a password reset link."}
-
+        user = db.query(models.User).filter(
+            models.User.email == email.strip().lower()
+        ).first()
+        if user:
+            reset_token = generate_token()
+            user.reset_token = reset_token
+            user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+            db.commit()
+            try:
+                send_password_reset_email(user.email, user.username, reset_token)
+            except Exception as e:
+                print(f"⚠️ Reset email failed: {e}")
+        return {"success": True, "message": "If an account exists, a reset link was sent."}
     except Exception as e:
         print(f"Forgot password error: {e}")
-        # Still return generic success for security
-        return {"success": True, "message": "If an account exists with that email, you will receive a password reset link."}
+        return {"success": True, "message": "If an account exists, a reset link was sent."}
+
 
 @app.post("/api/users/reset-password")
-async def reset_password(token: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+async def reset_password(
+    token: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)
+):
     try:
-        # Find user with valid token
         user = db.query(models.User).filter(
             models.User.reset_token == token,
             models.User.reset_token_expires > datetime.utcnow()
         ).first()
-
         if not user:
             raise HTTPException(400, "Invalid or expired reset token")
-
-        # Update password
         user.hashed_password = get_password_hash(password)
         user.reset_token = None
         user.reset_token_expires = None
         db.commit()
-
-        return {"success": True, "message": "Password reset successfully! You can now log in."}
-
+        return {"success": True, "message": "Password reset! You can now log in."}
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(500, str(e))
+
 
 @app.post("/api/users/logout")
 def user_logout():
@@ -671,68 +792,111 @@ def user_logout():
     r.delete_cookie("user_session", path="/")
     return r
 
+
 @app.get("/api/users/me")
 async def get_me(request: Request, db: Session = Depends(get_db)):
+    # Admins get a virtual "me" so frontend code doesn't break
+    if _is_admin(request) and not request.cookies.get("user_session"):
+        return {
+            "id": "admin", "username": "Admin", "email": "admin@echostack.gh",
+            "role": "admin", "is_premium": True, "bio": "",
+            "avatar_url": "", "channel_name": "Admin", "channel_desc": "",
+            "follower_count": 0, "loggedIn": True,
+        }
     sid = request.cookies.get("user_session")
-    if not sid: raise HTTPException(401, "Not logged in")
+    if not sid:
+        raise HTTPException(401, "Not logged in")
     u = db.query(models.User).filter(models.User.id == sid).first()
-    if not u: raise HTTPException(401, "User not found")
-    return {"id": str(u.id), "username": u.username, "email": u.email,
-            "role": getattr(u,"role","user"), "is_premium": getattr(u,"is_premium",0),
-            "bio": getattr(u,"bio",""), "avatar_url": getattr(u,"avatar_url",""),
-            "channel_name": getattr(u,"channel_name",""), "channel_desc": getattr(u,"channel_desc",""),
-            "follower_count": getattr(u,"follower_count",0)}
+    if not u:
+        raise HTTPException(401, "User not found")
+    return {
+        "id": str(u.id), "username": u.username, "email": u.email,
+        "role": getattr(u, "role", "user"),
+        "is_premium": bool(getattr(u, "is_premium", 0)),
+        "plan": "premium" if getattr(u, "is_premium", 0) else "free",
+        "bio": getattr(u, "bio", "") or "",
+        "avatar_url": getattr(u, "avatar_url", "") or "",
+        "channel_name": getattr(u, "channel_name", "") or "",
+        "channel_desc": getattr(u, "channel_desc", "") or "",
+        "follower_count": getattr(u, "follower_count", 0) or 0,
+        "loggedIn": True,
+    }
+
 
 @app.put("/api/users/me")
 async def update_me(
-    request: Request, bio: str = Form(""), channel_name: str = Form(""),
+    request: Request,
+    bio: str = Form(""), channel_name: str = Form(""),
     channel_desc: str = Form(""), avatar_url: str = Form(""),
     db: Session = Depends(get_db)
 ):
     sid = request.cookies.get("user_session")
-    if not sid: raise HTTPException(401)
+    if not sid:
+        raise HTTPException(401)
     u = db.query(models.User).filter(models.User.id == sid).first()
-    if not u: raise HTTPException(404)
+    if not u:
+        raise HTTPException(404)
     try:
-        if bio: u.bio = bio
+        if bio:          u.bio = bio
         if channel_name: u.channel_name = channel_name
         if channel_desc: u.channel_desc = channel_desc
-        if avatar_url: u.avatar_url = avatar_url
-        db.commit(); return {"success": True}
+        if avatar_url:   u.avatar_url = avatar_url
+        db.commit()
+        return {"success": True}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
+
 
 # ─── ADMIN USER MANAGEMENT ───────────────────────────────────────────────────
 @app.get("/api/admin/users")
 async def admin_users(request: Request, db: Session = Depends(get_db)):
-    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
+    if not _is_admin(request):
+        raise HTTPException(403)
     users = db.query(models.User).order_by(models.User.created_at.desc()).all()
-    return [{"id":str(u.id),"username":u.username,"email":u.email,
-             "role":getattr(u,"role","user"),"is_premium":getattr(u,"is_premium",0),
-             "is_suspended":getattr(u,"is_suspended",0)} for u in users]
+    return [{
+        "id": str(u.id), "username": u.username, "email": u.email,
+        "role": getattr(u, "role", "user"),
+        "is_premium": getattr(u, "is_premium", 0),
+        "is_suspended": getattr(u, "is_suspended", 0),
+        "email_verified": getattr(u, "email_verified", False),
+        "created_at": str(getattr(u, "created_at", "")),
+    } for u in users]
 
 @app.put("/api/admin/users/{uid}/role")
 async def set_role(uid: str, request: Request, role: str = Form(...), db: Session = Depends(get_db)):
-    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
+    if not _is_admin(request): raise HTTPException(403)
     u = db.query(models.User).filter(models.User.id == uid).first()
     if not u: raise HTTPException(404)
-    u.role = role; db.commit(); return {"success": True}
+    u.role = role; db.commit()
+    return {"success": True}
 
 @app.put("/api/admin/users/{uid}/premium")
 async def set_premium(uid: str, request: Request, db: Session = Depends(get_db)):
-    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
+    if not _is_admin(request): raise HTTPException(403)
     u = db.query(models.User).filter(models.User.id == uid).first()
     if not u: raise HTTPException(404)
-    u.is_premium = 0 if getattr(u,"is_premium",0) else 1
-    db.commit(); return {"success": True, "is_premium": u.is_premium}
+    u.is_premium = 0 if getattr(u, "is_premium", 0) else 1
+    db.commit()
+    return {"success": True, "is_premium": u.is_premium}
 
 @app.put("/api/admin/users/{uid}/suspend")
-async def suspend(uid: str, request: Request, db: Session = Depends(get_db)):
-    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
+async def suspend_user(uid: str, request: Request, db: Session = Depends(get_db)):
+    if not _is_admin(request): raise HTTPException(403)
     u = db.query(models.User).filter(models.User.id == uid).first()
     if not u: raise HTTPException(404)
-    u.is_suspended = 0 if getattr(u,"is_suspended",0) else 1
-    db.commit(); return {"success": True, "is_suspended": u.is_suspended}
+    u.is_suspended = 0 if getattr(u, "is_suspended", 0) else 1
+    db.commit()
+    return {"success": True, "is_suspended": u.is_suspended}
+
+@app.put("/api/admin/users/{uid}/verify")
+async def admin_verify_user(uid: str, request: Request, db: Session = Depends(get_db)):
+    """Admin can manually verify a user's email."""
+    if not _is_admin(request): raise HTTPException(403)
+    u = db.query(models.User).filter(models.User.id == uid).first()
+    if not u: raise HTTPException(404)
+    u.email_verified = True
+    db.commit()
+    return {"success": True}
 
 # ─── POSTS ────────────────────────────────────────────────────────────────────
 @app.get("/api/posts")
@@ -743,12 +907,12 @@ async def get_posts(
 ):
     try:
         q = db.query(models.Post)
-        is_admin = request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
+        is_admin = _is_admin(request)
         own_id   = request.cookies.get("user_session")
 
         if not is_admin:
             if author_id and author_id == own_id:
-                pass
+                pass  # creator viewing own drafts
             else:
                 q = q.filter(models.Post.status == "published")
 
@@ -760,25 +924,25 @@ async def get_posts(
 
         return [{
             "id": p.id,
-            "title": getattr(p,"title","") or "",
-            "slug": getattr(p,"slug","") or "",
-            "excerpt": getattr(p,"excerpt","") or "",
-            "cover_image": getattr(p,"cover_image","") or "",
-            "content_type": getattr(p,"content_type","article") or "article",
-            "status": getattr(p,"status","published") or "published",
-            "is_locked": getattr(p,"is_locked",0) or 0,
-            "author_id": str(p.author_id) if p.author_id else "",
-            "author_username": getattr(p,"author_username","") or "",
-            "region_id": getattr(p,"region_id",None),
-            "tags": getattr(p,"tags","") or "",
-            "views": getattr(p,"views",0) or 0,
-            "view_count": getattr(p,"views",0) or 0,
-            "likes": getattr(p,"likes",0) or 0,
-            "audio_url": getattr(p,"audio_url","") or "",
-            "video_url": getattr(p,"video_url","") or "",
-            "gallery": getattr(p,"gallery","") or "",
-            "created_at": str(getattr(p,"created_at","")),
-            "comment_count": db.query(models.Comment).filter(
+            "title":          getattr(p, "title", "") or "",
+            "slug":           getattr(p, "slug", "") or "",
+            "excerpt":        getattr(p, "excerpt", "") or "",
+            "cover_image":    getattr(p, "cover_image", "") or "",
+            "content_type":   getattr(p, "content_type", "article") or "article",
+            "status":         getattr(p, "status", "published") or "published",
+            "is_locked":      getattr(p, "is_locked", 0) or 0,
+            "author_id":      str(p.author_id) if p.author_id else "",
+            "author_username":getattr(p, "author_username", "") or "",
+            "region_id":      getattr(p, "region_id", None),
+            "tags":           getattr(p, "tags", "") or "",
+            "views":          getattr(p, "views", 0) or 0,
+            "view_count":     getattr(p, "views", 0) or 0,
+            "likes":          getattr(p, "likes", 0) or 0,
+            "audio_url":      getattr(p, "audio_url", "") or "",
+            "video_url":      getattr(p, "video_url", "") or "",
+            "gallery":        getattr(p, "gallery", "") or "",
+            "created_at":     str(getattr(p, "created_at", "")),
+            "comment_count":  db.query(models.Comment).filter(
                 models.Comment.post_id == p.id,
                 models.Comment.content != "__like__"
             ).count()
@@ -787,26 +951,75 @@ async def get_posts(
         print(f"GET /api/posts error: {e}")
         return []
 
+@app.get("/api/feed")
+async def get_feed(request: Request, limit: int = 20, offset: int = 0,
+                   db: Session = Depends(get_db)):
+    """Personal feed: posts from people the logged-in user follows, plus own posts."""
+    sid = request.cookies.get("user_session")
+    if not sid and not _is_admin(request):
+        raise HTTPException(401, "Login required")
+    try:
+        if _is_admin(request) and not sid:
+            # Admins see everything
+            posts = db.query(models.Post).filter(
+                models.Post.status == "published"
+            ).order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
+        else:
+            following_ids = [
+                str(f.following_id)
+                for f in db.query(models.Follow).filter(models.Follow.follower_id == sid).all()
+            ]
+            following_ids.append(sid)
+            posts = db.query(models.Post).filter(
+                models.Post.status == "published",
+                models.Post.author_id.in_(following_ids)
+            ).order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
+            # If feed is empty, fall back to all published posts
+            if not posts:
+                posts = db.query(models.Post).filter(
+                    models.Post.status == "published"
+                ).order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
+        return [{
+            "id": p.id,
+            "title":          getattr(p, "title", "") or "",
+            "slug":           getattr(p, "slug", "") or "",
+            "excerpt":        getattr(p, "excerpt", "") or "",
+            "cover_image":    getattr(p, "cover_image", "") or "",
+            "content_type":   getattr(p, "content_type", "article") or "article",
+            "is_locked":      getattr(p, "is_locked", 0) or 0,
+            "author_id":      str(p.author_id) if p.author_id else "",
+            "author_username":getattr(p, "author_username", "") or "",
+            "tags":           getattr(p, "tags", "") or "",
+            "views":          getattr(p, "views", 0) or 0,
+            "likes":          getattr(p, "likes", 0) or 0,
+            "audio_url":      getattr(p, "audio_url", "") or "",
+            "video_url":      getattr(p, "video_url", "") or "",
+            "created_at":     str(getattr(p, "created_at", "")),
+        } for p in posts]
+    except Exception as e:
+        print(f"GET /api/feed error: {e}")
+        return []
+
 @app.post("/api/posts")
 async def create_post(
     request: Request,
-    title: str = Form(...),
-    excerpt: str = Form(""),
-    content: str = Form(""),
+    title:        str = Form(...),
+    excerpt:      str = Form(""),
+    content:      str = Form(""),
     content_type: str = Form("article"),
-    status: str = Form("draft"),
-    is_locked: str = Form("false"),
-    cover_image: str = Form(""),
-    region_id: str = Form(""),
-    tags: str = Form(""),
-    audio_url: str = Form(""),
-    video_url: str = Form(""),
-    gallery: str = Form(""),
+    status:       str = Form("draft"),
+    is_locked:    str = Form("false"),
+    cover_image:  str = Form(""),
+    region_id:    str = Form(""),
+    tags:         str = Form(""),
+    audio_url:    str = Form(""),
+    video_url:    str = Form(""),
+    gallery:      str = Form(""),
     db: Session = Depends(get_db)
 ):
     try:
-        sid       = request.cookies.get("user_session")
-        is_admin  = request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
+        sid      = request.cookies.get("user_session")
+        is_admin = _is_admin(request)
         author_id = None
         author_username = "Creator"
 
@@ -819,48 +1032,40 @@ async def create_post(
             except Exception:
                 pass
         if not author_id and is_admin:
-            # Admin can post without a user session – set a placeholder? We'll keep None and use "Admin" as username.
             author_username = "Admin"
 
         base = slugify(title); slug = base; n = 1
         while db.query(models.Post).filter(models.Post.slug == slug).first():
             slug = f"{base}-{n}"; n += 1
 
-        locked = is_locked in ("true","1","True")
+        locked = is_locked in ("true", "1", "True")
         rid    = int(region_id) if region_id and str(region_id).isdigit() else None
 
         post = models.Post(
-            title          = title.strip(),
-            slug           = slug,
-            excerpt        = excerpt.strip(),
-            content        = content.strip(),
-            content_type   = content_type or "article",
-            status         = status or "draft",
-            is_locked      = 1 if locked else 0,
-            cover_image    = cover_image.strip(),
-            author_id      = author_id,
-            author_username= author_username,
-            region_id      = rid,
-            tags           = tags.strip(),
-            views          = 0,
-            likes          = 0,
+            title=title.strip(), slug=slug,
+            excerpt=excerpt.strip(), content=content.strip(),
+            content_type=content_type or "article",
+            status=status or "draft",
+            is_locked=1 if locked else 0,
+            cover_image=cover_image.strip(),
+            author_id=author_id, author_username=author_username,
+            region_id=rid, tags=tags.strip(), views=0, likes=0,
         )
-
-        for attr, val in [("audio_url",audio_url),("video_url",video_url),("gallery",gallery)]:
+        for attr, val in [("audio_url", audio_url), ("video_url", video_url), ("gallery", gallery)]:
             try: setattr(post, attr, val.strip())
             except Exception: pass
 
         db.add(post); db.commit(); db.refresh(post)
-        print(f"✅ Post {post.id} '{post.title}' status={post.status} by {author_username}")
-
-        return {"success": True, "id": post.id, "slug": post.slug,
-                "title": post.title, "status": post.status,
-                "message": "Published! 🚀" if status == "published" else "Saved as draft 💾"}
-
-    except HTTPException: raise
+        print(f"✅ Post {post.id} '{post.title}' by {author_username}")
+        return {
+            "success": True, "id": post.id, "slug": post.slug,
+            "title": post.title, "status": post.status,
+            "message": "Published! 🚀" if status == "published" else "Saved as draft 💾"
+        }
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
-        print(f"❌ POST /api/posts error: {e}")
         import traceback; traceback.print_exc()
         raise HTTPException(500, f"Post creation failed: {str(e)}")
 
@@ -869,23 +1074,33 @@ async def get_post(post_id: int, db: Session = Depends(get_db)):
     try:
         p = db.query(models.Post).filter(models.Post.id == post_id).first()
         if not p: raise HTTPException(404, "Post not found")
-        try: p.views = (getattr(p,"views",0) or 0) + 1; db.commit()
-        except Exception: pass
+        try:
+            p.views = (getattr(p, "views", 0) or 0) + 1
+            db.commit()
+        except Exception:
+            pass
         return {
-            "id": p.id, "title": getattr(p,"title",""), "slug": getattr(p,"slug",""),
-            "excerpt": getattr(p,"excerpt",""), "content": getattr(p,"content",""),
-            "cover_image": getattr(p,"cover_image",""), "content_type": getattr(p,"content_type","article"),
-            "status": getattr(p,"status","published"), "is_locked": getattr(p,"is_locked",0),
+            "id": p.id, "title": getattr(p, "title", ""),
+            "slug": getattr(p, "slug", ""), "excerpt": getattr(p, "excerpt", ""),
+            "content": getattr(p, "content", ""),
+            "cover_image": getattr(p, "cover_image", ""),
+            "content_type": getattr(p, "content_type", "article"),
+            "status": getattr(p, "status", "published"),
+            "is_locked": getattr(p, "is_locked", 0),
             "author_id": str(p.author_id) if p.author_id else "",
-            "author_username": getattr(p,"author_username",""),
-            "region_id": getattr(p,"region_id",None), "tags": getattr(p,"tags",""),
-            "views": getattr(p,"views",0), "view_count": getattr(p,"views",0),
-            "likes": getattr(p,"likes",0),
-            "audio_url": getattr(p,"audio_url",""), "video_url": getattr(p,"video_url",""),
-            "gallery": getattr(p,"gallery",""), "created_at": str(getattr(p,"created_at","")),
+            "author_username": getattr(p, "author_username", ""),
+            "region_id": getattr(p, "region_id", None),
+            "tags": getattr(p, "tags", ""), "views": getattr(p, "views", 0),
+            "view_count": getattr(p, "views", 0), "likes": getattr(p, "likes", 0),
+            "audio_url": getattr(p, "audio_url", ""),
+            "video_url": getattr(p, "video_url", ""),
+            "gallery": getattr(p, "gallery", ""),
+            "created_at": str(getattr(p, "created_at", "")),
         }
-    except HTTPException: raise
-    except Exception as e: raise HTTPException(500, str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 @app.put("/api/posts/{post_id}")
 async def update_post(
@@ -898,15 +1113,18 @@ async def update_post(
     p = db.query(models.Post).filter(models.Post.id == post_id).first()
     if not p: raise HTTPException(404)
     try:
-        for attr, val in [("title",title),("excerpt",excerpt),("content",content),
-                          ("status",status),("cover_image",cover_image),("tags",tags)]:
-            if val is not None: setattr(p, attr, val.strip() if hasattr(val,"strip") else val)
-        if is_locked is not None: p.is_locked = 1 if is_locked in ("true","1") else 0
-        for attr, val in [("audio_url",audio_url),("video_url",video_url)]:
+        for attr, val in [("title", title), ("excerpt", excerpt), ("content", content),
+                          ("status", status), ("cover_image", cover_image), ("tags", tags)]:
+            if val is not None:
+                setattr(p, attr, val.strip() if hasattr(val, "strip") else val)
+        if is_locked is not None:
+            p.is_locked = 1 if is_locked in ("true", "1") else 0
+        for attr, val in [("audio_url", audio_url), ("video_url", video_url)]:
             if val is not None:
                 try: setattr(p, attr, val.strip())
                 except Exception: pass
-        db.commit(); return {"success": True, "id": p.id}
+        db.commit()
+        return {"success": True, "id": p.id}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
@@ -916,7 +1134,8 @@ async def delete_post(post_id: int, db: Session = Depends(get_db)):
     if not p: raise HTTPException(404)
     try:
         db.query(models.Comment).filter(models.Comment.post_id == post_id).delete()
-        db.delete(p); db.commit(); return {"success": True}
+        db.delete(p); db.commit()
+        return {"success": True}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
@@ -928,33 +1147,39 @@ async def get_comments(post_id: int, db: Session = Depends(get_db)):
             models.Comment.post_id == post_id,
             models.Comment.content != "__like__"
         ).order_by(models.Comment.created_at.asc()).all()
-        return [{"id":c.id,"username":getattr(c,"username","User"),
-                 "content":c.content,"created_at":str(c.created_at)} for c in comments]
-    except Exception: return []
+        return [{"id": c.id, "username": getattr(c, "username", "User"),
+                 "content": c.content, "created_at": str(c.created_at)} for c in comments]
+    except Exception:
+        return []
 
 @app.post("/api/posts/{post_id}/comments")
 async def add_comment(
-    post_id: int, request: Request, content: str = Form(...), db: Session = Depends(get_db)
+    post_id: int, request: Request, content: str = Form(...),
+    db: Session = Depends(get_db)
 ):
     sid = request.cookies.get("user_session")
-    username = "Guest"
-    user_id = None
+    username = "Guest"; user_id = None
     if sid:
         try:
             u = db.query(models.User).filter(models.User.id == sid).first()
-            if u:
-                user_id = u.id
-                username = u.username
-        except Exception: pass
+            if u: user_id = u.id; username = u.username
+        except Exception:
+            pass
+    if _is_admin(request) and not user_id:
+        username = "Admin"
     try:
-        c = models.Comment(post_id=post_id, user_id=user_id, username=username, content=content.strip())
-        db.add(c); db.commit(); return {"success": True, "id": c.id}
+        c = models.Comment(post_id=post_id, user_id=user_id,
+                           username=username, content=content.strip())
+        db.add(c); db.commit()
+        return {"success": True, "id": c.id}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
 @app.post("/api/posts/{post_id}/like")
 async def toggle_like(post_id: int, request: Request, db: Session = Depends(get_db)):
-    sid = request.cookies.get("user_session") or request.cookies.get("admin_session")
+    sid = request.cookies.get("user_session") or (
+        "admin" if _is_admin(request) else None
+    )
     if not sid: raise HTTPException(401, "Login to like")
     try:
         p = db.query(models.Post).filter(models.Post.id == post_id).first()
@@ -966,12 +1191,15 @@ async def toggle_like(post_id: int, request: Request, db: Session = Depends(get_
         ).first()
         if existing:
             db.delete(existing)
-            p.likes = max(0, (getattr(p,"likes",0) or 0) - 1)
-            db.commit(); return {"liked": False, "likes": p.likes}
+            p.likes = max(0, (getattr(p, "likes", 0) or 0) - 1)
+            db.commit()
+            return {"liked": False, "likes": p.likes}
         db.add(models.Comment(post_id=post_id, user_id=sid, username="", content="__like__"))
-        p.likes = (getattr(p,"likes",0) or 0) + 1
-        db.commit(); return {"liked": True, "likes": p.likes}
-    except HTTPException: raise
+        p.likes = (getattr(p, "likes", 0) or 0) + 1
+        db.commit()
+        return {"liked": True, "likes": p.likes}
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
@@ -982,15 +1210,16 @@ async def toggle_follow(target_id: str, request: Request, db: Session = Depends(
     if not sid: raise HTTPException(401)
     try:
         ex = db.query(models.Follow).filter(
-            models.Follow.follower_id == sid, models.Follow.following_id == target_id
+            models.Follow.follower_id == sid,
+            models.Follow.following_id == target_id
         ).first()
         tgt = db.query(models.User).filter(models.User.id == target_id).first()
         if ex:
             db.delete(ex)
-            if tgt: tgt.follower_count = max(0, (getattr(tgt,"follower_count",0) or 0) - 1)
+            if tgt: tgt.follower_count = max(0, (getattr(tgt, "follower_count", 0) or 0) - 1)
             db.commit(); return {"following": False}
         db.add(models.Follow(follower_id=sid, following_id=target_id))
-        if tgt: tgt.follower_count = (getattr(tgt,"follower_count",0) or 0) + 1
+        if tgt: tgt.follower_count = (getattr(tgt, "follower_count", 0) or 0) + 1
         db.commit(); return {"following": True}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
@@ -1000,34 +1229,42 @@ async def get_following(request: Request, db: Session = Depends(get_db)):
     sid = request.cookies.get("user_session")
     if not sid: return []
     try:
-        return [str(f.following_id) for f in db.query(models.Follow).filter(models.Follow.follower_id == sid).all()]
-    except Exception: return []
+        return [str(f.following_id)
+                for f in db.query(models.Follow).filter(models.Follow.follower_id == sid).all()]
+    except Exception:
+        return []
 
 @app.get("/api/creators")
 async def get_creators(db: Session = Depends(get_db)):
     try:
         creators = db.query(models.User).filter(
-            models.User.role.in_(["creator","admin","superuser"])
+            models.User.role.in_(["creator", "admin", "superuser"])
         ).limit(20).all()
-        return [{"id":str(u.id),"username":u.username,
-                 "channel_name":getattr(u,"channel_name","") or u.username,
-                 "avatar_url":getattr(u,"avatar_url","")} for u in creators]
-    except Exception: return []
+        return [{
+            "id": str(u.id), "username": u.username,
+            "channel_name": getattr(u, "channel_name", "") or u.username,
+            "avatar_url": getattr(u, "avatar_url", "") or "",
+            "follower_count": getattr(u, "follower_count", 0) or 0,
+        } for u in creators]
+    except Exception:
+        return []
 
 @app.get("/api/activity")
 async def get_activity(request: Request, db: Session = Depends(get_db)):
     sid = request.cookies.get("user_session")
-    if not sid: return []
+    if not sid and not _is_admin(request): return []
     try:
-        my_ids = [p.id for p in db.query(models.Post).filter(models.Post.author_id == sid).all()]
+        my_ids = [p.id for p in db.query(models.Post).filter(
+            models.Post.author_id == sid).all()]
         comments = db.query(models.Comment).filter(
             models.Comment.post_id.in_(my_ids),
             models.Comment.content != "__like__",
             models.Comment.user_id != sid
         ).order_by(models.Comment.created_at.desc()).limit(30).all()
-        return [{"type":"comment","username":c.username,"post_id":c.post_id,
-                 "content":c.content[:80],"created_at":str(c.created_at)} for c in comments]
-    except Exception: return []
+        return [{"type": "comment", "username": c.username, "post_id": c.post_id,
+                 "content": c.content[:80], "created_at": str(c.created_at)} for c in comments]
+    except Exception:
+        return []
 
 # ─── UPLOADS ─────────────────────────────────────────────────────────────────
 @app.post("/api/upload/cover")
@@ -1052,9 +1289,19 @@ async def upload_file(
 async def upload_multiple(files: list[UploadFile] = File(...), db: Session = Depends(get_db)):
     results = []
     for f in files:
-        try: results.append(await _do_upload(f, "image", db))
-        except Exception as e: results.append({"success": False, "error": str(e)})
+        try:
+            results.append(await _do_upload(f, "image", db))
+        except Exception as e:
+            results.append({"success": False, "error": str(e)})
     return results
+
+@app.post("/api/upload/audio")
+async def upload_audio(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    return await _do_upload(file, "audio", db)
+
+@app.post("/api/upload/video")
+async def upload_video(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    return await _do_upload(file, "video", db)
 
 @app.get("/api/files")
 async def get_files(category: str = "", db: Session = Depends(get_db)):
@@ -1067,11 +1314,9 @@ async def get_files(category: str = "", db: Session = Depends(get_db)):
             url = f.file_path if (f.file_path or "").startswith("http") else f"/uploads/{f.filename}"
             size_bytes = f.file_size or 0
             result.append({
-                "id": f.id,
-                "filename": f.filename,
+                "id": f.id, "filename": f.filename,
                 "original_name": f.original_name or f.filename,
-                "file_url": url,
-                "url": url,
+                "file_url": url, "url": url,
                 "category": f.category or "general",
                 "mime_type": f.mime_type or "",
                 "file_size": size_bytes,
@@ -1084,7 +1329,8 @@ async def get_files(category: str = "", db: Session = Depends(get_db)):
                 "created_at": str(f.created_at),
             })
         return result
-    except Exception: return []
+    except Exception:
+        return []
 
 @app.delete("/api/files/{file_id}")
 async def delete_file(file_id: int, db: Session = Depends(get_db)):
@@ -1093,7 +1339,8 @@ async def delete_file(file_id: int, db: Session = Depends(get_db)):
     try:
         if f.file_path and not f.file_path.startswith("http") and os.path.exists(f.file_path):
             os.remove(f.file_path)
-        db.delete(f); db.commit(); return {"success": True}
+        db.delete(f); db.commit()
+        return {"success": True}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
@@ -1101,14 +1348,18 @@ async def delete_file(file_id: int, db: Session = Depends(get_db)):
 @app.get("/api/regions")
 def get_regions(db: Session = Depends(get_db)):
     try:
-        return [{"id":r.id,"name":str(r.name or ""),"capital":str(r.capital or ""),
-                 "population":str(r.population or ""),"terrain":str(r.terrain or ""),
-                 "description":str(r.description or ""),"overview":str(getattr(r,"overview","") or ""),
-                 "category":str(r.category or ""),"tags":str(r.tags or ""),
-                 "hero_image":str(r.hero_image or ""),"gallery_images":str(r.gallery_images or ""),
-                 "audio_files":str(r.audio_files or ""),"source":str(r.source or "")}
-                for r in db.query(models.Region).all()]
-    except Exception: return []
+        return [{
+            "id": r.id, "name": str(r.name or ""),
+            "capital": str(r.capital or ""), "population": str(r.population or ""),
+            "terrain": str(r.terrain or ""), "description": str(r.description or ""),
+            "overview": str(getattr(r, "overview", "") or ""),
+            "category": str(r.category or ""), "tags": str(r.tags or ""),
+            "hero_image": str(r.hero_image or ""),
+            "gallery_images": str(r.gallery_images or ""),
+            "audio_files": str(r.audio_files or ""), "source": str(r.source or ""),
+        } for r in db.query(models.Region).all()]
+    except Exception:
+        return []
 
 @app.post("/api/regions")
 def create_region(
@@ -1119,10 +1370,13 @@ def create_region(
     db: Session = Depends(get_db)
 ):
     try:
-        r = models.Region(name=name.strip(), capital=capital, population=population,
-                          terrain=terrain, description=description, overview=overview or description,
-                          category=category, tags=tags, hero_image=hero_image,
-                          gallery_images=gallery_images, audio_files=audio_files, source=source)
+        r = models.Region(
+            name=name.strip(), capital=capital, population=population,
+            terrain=terrain, description=description,
+            overview=overview or description, category=category,
+            tags=tags, hero_image=hero_image,
+            gallery_images=gallery_images, audio_files=audio_files, source=source
+        )
         db.add(r); db.commit(); db.refresh(r)
         return {"success": True, "region_id": r.id}
     except Exception as e:
@@ -1130,19 +1384,21 @@ def create_region(
 
 @app.put("/api/regions/{rid}")
 def update_region(
-    rid: int, name: str = Form(None), capital: str = Form(None), population: str = Form(None),
-    terrain: str = Form(None), description: str = Form(None), category: str = Form(None),
-    tags: str = Form(None), hero_image: str = Form(None), gallery_images: str = Form(None),
-    audio_files: str = Form(None), source: str = Form(None), overview: str = Form(None),
+    rid: int, name: str = Form(None), capital: str = Form(None),
+    population: str = Form(None), terrain: str = Form(None),
+    description: str = Form(None), category: str = Form(None),
+    tags: str = Form(None), hero_image: str = Form(None),
+    gallery_images: str = Form(None), audio_files: str = Form(None),
+    source: str = Form(None), overview: str = Form(None),
     db: Session = Depends(get_db)
 ):
     r = db.query(models.Region).filter(models.Region.id == rid).first()
     if not r: raise HTTPException(404)
     try:
-        for a, v in [("name",name),("capital",capital),("population",population),
-                     ("terrain",terrain),("description",description),("overview",overview),
-                     ("category",category),("tags",tags),("hero_image",hero_image),
-                     ("gallery_images",gallery_images),("audio_files",audio_files),("source",source)]:
+        for a, v in [("name", name), ("capital", capital), ("population", population),
+                     ("terrain", terrain), ("description", description), ("overview", overview),
+                     ("category", category), ("tags", tags), ("hero_image", hero_image),
+                     ("gallery_images", gallery_images), ("audio_files", audio_files), ("source", source)]:
             if v is not None: setattr(r, a, v.strip())
         db.commit(); return {"success": True}
     except Exception as e:
@@ -1158,23 +1414,25 @@ def delete_region(rid: int, db: Session = Depends(get_db)):
 @app.post("/api/admin/publish-file")
 async def publish_file(
     request: Request, file_id: int = Form(...), title: str = Form(...),
-    description: str = Form(""), region_id: str = Form(""), content_type: str = Form("article"),
-    db: Session = Depends(get_db)
+    description: str = Form(""), region_id: str = Form(""),
+    content_type: str = Form("article"), db: Session = Depends(get_db)
 ):
-    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
+    if not _is_admin(request): raise HTTPException(403)
     uf = db.query(models.UploadedFile).filter(models.UploadedFile.id == file_id).first()
     if not uf: raise HTTPException(404)
     try:
         url = uf.file_path if (uf.file_path or "").startswith("http") else f"/uploads/{uf.filename}"
         rid = int(region_id) if region_id and region_id.isdigit() else None
-        p = models.Post(title=title, slug=slugify(title), excerpt=description[:200],
-                        content=description, content_type=content_type, status="published",
-                        cover_image=url if content_type == "article" else "",
-                        author_id=None, author_username="Admin",
-                        region_id=rid, views=0, likes=0)
-        try: setattr(p, "video_url", url if content_type=="video" else "")
+        p = models.Post(
+            title=title, slug=slugify(title), excerpt=description[:200],
+            content=description, content_type=content_type, status="published",
+            cover_image=url if content_type == "article" else "",
+            author_id=None, author_username="Admin",
+            region_id=rid, views=0, likes=0
+        )
+        try: setattr(p, "video_url", url if content_type == "video" else "")
         except Exception: pass
-        try: setattr(p, "audio_url", url if content_type=="audio" else "")
+        try: setattr(p, "audio_url", url if content_type == "audio" else "")
         except Exception: pass
         db.add(p); db.commit(); db.refresh(p)
         return {"success": True, "post_id": p.id}
@@ -1185,82 +1443,100 @@ async def publish_file(
 @app.get("/api/stats")
 def get_stats(db: Session = Depends(get_db)):
     try:
-        return {"total_regions": db.query(models.Region).count(),
-                "total_posts": db.query(models.Post).filter(models.Post.status=="published").count(),
-                "total_users": db.query(models.User).count(),
-                "total_files": db.query(models.UploadedFile).count()}
-    except Exception: return {"total_regions":0,"total_posts":0,"total_users":0}
+        return {
+            "total_regions": db.query(models.Region).count(),
+            "total_posts":   db.query(models.Post).filter(models.Post.status == "published").count(),
+            "total_users":   db.query(models.User).count(),
+            "total_files":   db.query(models.UploadedFile).count(),
+        }
+    except Exception:
+        return {"total_regions": 0, "total_posts": 0, "total_users": 0, "total_files": 0}
 
 # ─── SECTIONS ────────────────────────────────────────────────────────────────
 @app.get("/api/sections")
 def get_sections(db: Session = Depends(get_db)):
     try:
-        s = db.query(models.Section).filter(models.Section.is_active==1).all()
-        return [{"id":x.id,"name":x.name,"slug":x.slug} for x in s]
-    except Exception: return []
+        s = db.query(models.Section).filter(models.Section.is_active == 1).all()
+        return [{"id": x.id, "name": x.name, "slug": x.slug} for x in s]
+    except Exception:
+        return []
 
 @app.post("/api/sections")
-def create_section(name: str = Form(...), description: str = Form(""),
-                   display_order: int = Form(0), db: Session = Depends(get_db)):
+def create_section(
+    name: str = Form(...), description: str = Form(""),
+    display_order: int = Form(0), db: Session = Depends(get_db)
+):
     try:
-        s = models.Section(name=name, slug=slugify(name), description=description, display_order=display_order)
-        db.add(s); db.commit(); return {"success":True,"id":s.id}
+        s = models.Section(name=name, slug=slugify(name),
+                           description=description, display_order=display_order)
+        db.add(s); db.commit()
+        return {"success": True, "id": s.id}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
 @app.delete("/api/sections/{sid}")
 def delete_section(sid: int, db: Session = Depends(get_db)):
-    s = db.query(models.Section).filter(models.Section.id==sid).first()
+    s = db.query(models.Section).filter(models.Section.id == sid).first()
     if not s: raise HTTPException(404)
-    s.is_active = 0; db.commit(); return {"success":True}
+    s.is_active = 0; db.commit(); return {"success": True}
 
 # ─── NEWSLETTER ──────────────────────────────────────────────────────────────
 @app.post("/api/newsletter/subscribe")
 async def subscribe(email: str = Form(...), db: Session = Depends(get_db)):
     try:
         if db.query(models.NewsletterSubscriber).filter(
-                models.NewsletterSubscriber.email==email.strip()).first():
-            return {"success":True,"message":"Already subscribed!"}
-        db.add(models.NewsletterSubscriber(email=email.strip())); db.commit()
-        return {"success":True,"message":"Subscribed!"}
+                models.NewsletterSubscriber.email == email.strip()).first():
+            return {"success": True, "message": "Already subscribed!"}
+        db.add(models.NewsletterSubscriber(email=email.strip()))
+        db.commit()
+        return {"success": True, "message": "Subscribed!"}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
 @app.get("/api/newsletter/subscribers")
-async def subs(request: Request, db: Session = Depends(get_db)):
-    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
+async def get_subscribers(request: Request, db: Session = Depends(get_db)):
+    if not _is_admin(request): raise HTTPException(403)
     try:
-        return [{"id":s.id,"email":s.email} for s in db.query(models.NewsletterSubscriber).all()]
-    except Exception: return []
+        return [{"id": s.id, "email": s.email}
+                for s in db.query(models.NewsletterSubscriber).all()]
+    except Exception:
+        return []
 
 # ─── EVENTS ──────────────────────────────────────────────────────────────────
 @app.get("/api/events")
 def get_events(db: Session = Depends(get_db)):
     try:
-        return [{"id":e.id,"title":e.title,"description":getattr(e,"description",""),
-                 "event_date":str(getattr(e,"event_date","")),"location":getattr(e,"location",""),
-                 "created_at":str(e.created_at)} for e in
-                db.query(models.Event).order_by(models.Event.created_at.desc()).all()]
-    except Exception: return []
+        return [{
+            "id": e.id, "title": e.title,
+            "description": getattr(e, "description", ""),
+            "event_date": str(getattr(e, "event_date", "")),
+            "location": getattr(e, "location", ""),
+            "created_at": str(e.created_at)
+        } for e in db.query(models.Event).order_by(models.Event.created_at.desc()).all()]
+    except Exception:
+        return []
 
 @app.post("/api/events")
-def create_event(title: str = Form(...), description: str = Form(""),
-                 event_date: str = Form(""), location: str = Form(""),
-                 db: Session = Depends(get_db)):
+def create_event(
+    title: str = Form(...), description: str = Form(""),
+    event_date: str = Form(""), location: str = Form(""),
+    db: Session = Depends(get_db)
+):
     try:
         e = models.Event(title=title, description=description, location=location)
         if event_date:
             try: e.event_date = datetime.fromisoformat(event_date)
             except Exception: pass
-        db.add(e); db.commit(); db.refresh(e); return {"success":True,"id":e.id}
+        db.add(e); db.commit(); db.refresh(e)
+        return {"success": True, "id": e.id}
     except Exception as ex:
         db.rollback(); raise HTTPException(500, str(ex))
 
 @app.delete("/api/events/{eid}")
 def delete_event(eid: int, db: Session = Depends(get_db)):
-    e = db.query(models.Event).filter(models.Event.id==eid).first()
+    e = db.query(models.Event).filter(models.Event.id == eid).first()
     if not e: raise HTTPException(404)
-    db.delete(e); db.commit(); return {"success":True}
+    db.delete(e); db.commit(); return {"success": True}
 
 # ─── CHAT ────────────────────────────────────────────────────────────────────
 @app.get("/api/chat")
@@ -1268,25 +1544,30 @@ def get_chat(limit: int = 50, db: Session = Depends(get_db)):
     try:
         msgs = db.query(models.ChatMessage).order_by(
             models.ChatMessage.created_at.desc()).limit(limit).all()
-        return [{"id":m.id,"username":getattr(m,"username","User"),
-                 "content":m.content,"created_at":str(m.created_at)} for m in reversed(msgs)]
-    except Exception: return []
+        return [{"id": m.id, "username": getattr(m, "username", "User"),
+                 "content": m.content, "created_at": str(m.created_at)}
+                for m in reversed(msgs)]
+    except Exception:
+        return []
 
 @app.post("/api/chat")
-async def post_chat(request: Request, content: str = Form(...), db: Session = Depends(get_db)):
+async def post_chat(
+    request: Request, content: str = Form(...), db: Session = Depends(get_db)
+):
     sid = request.cookies.get("user_session")
-    username = "Guest"
-    user_id = None
+    username = "Guest"; user_id = None
     if sid:
         try:
             u = db.query(models.User).filter(models.User.id == sid).first()
-            if u:
-                user_id = u.id
-                username = u.username
-        except Exception: pass
+            if u: user_id = u.id; username = u.username
+        except Exception:
+            pass
+    if _is_admin(request) and not user_id:
+        username = "Admin"
     try:
         db.add(models.ChatMessage(content=content.strip(), username=username, user_id=user_id))
-        db.commit(); return {"success":True}
+        db.commit()
+        return {"success": True}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
@@ -1295,97 +1576,138 @@ async def post_chat(request: Request, content: str = Form(...), db: Session = De
 def get_stories(db: Session = Depends(get_db)):
     try:
         s = db.query(models.StorySubmission).filter(
-            models.StorySubmission.status=="approved").order_by(
-            models.StorySubmission.created_at.desc()).limit(20).all()
-        return [{"id":x.id,"title":x.title,"content":getattr(x,"content",""),
-                 "author_name":getattr(x,"author_name",""),"region":getattr(x,"region",""),
-                 "created_at":str(x.created_at)} for x in s]
-    except Exception: return []
+            models.StorySubmission.status == "approved"
+        ).order_by(models.StorySubmission.created_at.desc()).limit(20).all()
+        return [{"id": x.id, "title": x.title, "content": getattr(x, "content", ""),
+                 "author_name": getattr(x, "author_name", ""),
+                 "region": getattr(x, "region", ""),
+                 "created_at": str(x.created_at)} for x in s]
+    except Exception:
+        return []
 
 @app.post("/api/stories")
-async def submit_story(request: Request, title: str = Form(...), content: str = Form(...),
-                       region: str = Form(""), db: Session = Depends(get_db)):
+async def submit_story(
+    request: Request, title: str = Form(...), content: str = Form(...),
+    region: str = Form(""), db: Session = Depends(get_db)
+):
     sid = request.cookies.get("user_session")
     author = "Anonymous"
     if sid:
         try:
             u = db.query(models.User).filter(models.User.id == sid).first()
             if u: author = u.username
-        except Exception: pass
+        except Exception:
+            pass
     try:
-        db.add(models.StorySubmission(title=title, content=content, region=region,
-                                       author_name=author, status="pending"))
-        db.commit(); return {"success":True}
+        db.add(models.StorySubmission(title=title, content=content,
+                                      region=region, author_name=author, status="pending"))
+        db.commit()
+        return {"success": True}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
 # ─── AI ECHOBOT ──────────────────────────────────────────────────────────────
 @app.post("/api/ai/chat")
-async def ai_chat(request: Request, message: str = Form(...),
-                  region_context: str = Form(""), db: Session = Depends(get_db)):
+async def ai_chat(
+    request: Request, message: str = Form(...),
+    region_context: str = Form(""), db: Session = Depends(get_db)
+):
     sid = request.cookies.get("user_session")
-    if sid:
+    if sid and not _is_admin(request):
         try:
             u = db.query(models.User).filter(models.User.id == sid).first()
-            if u and not getattr(u,"is_premium",0):
-                return {"reply":"EchoBot is for premium members. Upgrade to unlock! ⭐","locked":True}
-        except Exception: pass
+            if u and not getattr(u, "is_premium", 0):
+                return {"reply": "EchoBot is for premium members. Upgrade to unlock! ⭐", "locked": True}
+        except Exception:
+            pass
 
     if not HF_TOKEN:
-        return {"reply":f"Akwaaba! You asked: '{message}'. Ghana has 16 beautiful regions with rich heritage. Explore EchoStack to discover more! 🇬🇭","locked":False}
+        return {
+            "reply": f"Akwaaba! You asked: '{message}'. Ghana has 16 beautiful regions "
+                     f"with rich heritage. Explore EchoStack to discover more! 🇬🇭",
+            "locked": False
+        }
     try:
-        prompt = f"You are EchoBot, a Ghana heritage AI. Context: {region_context}. User: {message}. Answer helpfully about Ghana."
+        prompt = (f"You are EchoBot, a Ghana heritage AI. "
+                  f"Context: {region_context}. User: {message}. "
+                  f"Answer helpfully about Ghana.")
         async with httpx.AsyncClient(timeout=20) as c:
-            r = await c.post("https://api-inference.huggingface.co/models/google/flan-t5-small",
-                             headers={"Authorization":f"Bearer {HF_TOKEN}"},
-                             json={"inputs":prompt,"parameters":{"max_new_tokens":200}})
+            r = await c.post(
+                "https://api-inference.huggingface.co/models/google/flan-t5-small",
+                headers={"Authorization": f"Bearer {HF_TOKEN}"},
+                json={"inputs": prompt, "parameters": {"max_new_tokens": 200}}
+            )
         d = r.json()
-        reply = d[0]["generated_text"] if isinstance(d,list) else str(d)
-        return {"reply":reply,"locked":False}
+        reply = d[0]["generated_text"] if isinstance(d, list) else str(d)
+        return {"reply": reply, "locked": False}
     except Exception:
-        return {"reply":"EchoBot is resting. Try again soon! 🤖","locked":False}
+        return {"reply": "EchoBot is resting. Try again soon! 🤖", "locked": False}
 
 # ─── PAYMENTS ────────────────────────────────────────────────────────────────
 @app.post("/api/payments/initialize")
-async def init_payment(request: Request, amount: int = Form(4900), email: str = Form(...),
-                       db: Session = Depends(get_db)):
+async def init_payment(
+    request: Request, amount: int = Form(4900), email: str = Form(...),
+    db: Session = Depends(get_db)
+):
     try:
         async with httpx.AsyncClient() as c:
-            r = await c.post("https://api.paystack.co/transaction/initialize",
-                headers={"Authorization":f"Bearer {PAYSTACK_SECRET}","Content-Type":"application/json"},
-                json={"email":email,"amount":amount*100,
-                      "callback_url":f"{request.base_url}payment/callback"})
+            r = await c.post(
+                "https://api.paystack.co/transaction/initialize",
+                headers={"Authorization": f"Bearer {PAYSTACK_SECRET}",
+                         "Content-Type": "application/json"},
+                json={"email": email, "amount": amount * 100,
+                      "callback_url": f"{request.base_url}payment/callback"}
+            )
         d = r.json()
         if d.get("status"):
-            return {"success":True,"authorization_url":d["data"]["authorization_url"],
-                    "reference":d["data"]["reference"]}
-        raise HTTPException(400,"Payment init failed")
-    except HTTPException: raise
-    except Exception as e: raise HTTPException(500, str(e))
+            return {"success": True,
+                    "authorization_url": d["data"]["authorization_url"],
+                    "reference": d["data"]["reference"]}
+        raise HTTPException(400, "Payment init failed")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 @app.get("/payment/callback")
 async def payment_callback(reference: str, db: Session = Depends(get_db)):
     try:
         async with httpx.AsyncClient() as c:
-            r = await c.get(f"https://api.paystack.co/transaction/verify/{reference}",
-                            headers={"Authorization":f"Bearer {PAYSTACK_SECRET}"})
+            r = await c.get(
+                f"https://api.paystack.co/transaction/verify/{reference}",
+                headers={"Authorization": f"Bearer {PAYSTACK_SECRET}"}
+            )
         d = r.json()
         if d.get("status") and d["data"]["status"] == "success":
             email = d["data"]["customer"]["email"]
-            u = db.query(models.User).filter(models.User.email==email).first()
-            if u: u.is_premium = True; db.commit()
+            u = db.query(models.User).filter(models.User.email == email).first()
+            if u:
+                u.is_premium = True; db.commit()
         return RedirectResponse("/dashboard?upgraded=1")
-    except Exception: return RedirectResponse("/premium?error=1")
+    except Exception:
+        return RedirectResponse("/premium?error=1")
 
 # ─── IMPORT/EXPORT ───────────────────────────────────────────────────────────
 @app.post("/api/import/json")
 def import_json(data: dict, db: Session = Depends(get_db)):
     try:
-        items = data if isinstance(data,list) else [data]
+        items = data if isinstance(data, list) else [data]
         imported = 0
         for item in items:
-            try: db.add(models.Region(**item)); imported += 1
-            except Exception: pass
-        db.commit(); return {"success":True,"imported":imported}
+            try:
+                db.add(models.Region(**item)); imported += 1
+            except Exception:
+                pass
+        db.commit()
+        return {"success": True, "imported": imported}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
+
+# ─── TOPICS ──────────────────────────────────────────────────────────────────
+@app.get("/api/topics")
+def get_topics(db: Session = Depends(get_db)):
+    try:
+        topics = db.query(models.Topic).order_by(models.Topic.name).all()
+        return [{"id": t.id, "name": t.name} for t in topics]
+    except Exception:
+        return []
