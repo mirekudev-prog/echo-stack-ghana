@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from database import Base
@@ -40,8 +40,8 @@ class User(Base):
     channel_name    = Column(String(200), default="")
     channel_desc    = Column(Text, default="")
     role            = Column(String(50), default="user")
-    is_premium      = Column(Integer, default=0)
-    is_suspended    = Column(Integer, default=0)
+    is_premium      = Column(Boolean, default=False)
+    is_suspended    = Column(Boolean, default=False)
     follower_count  = Column(Integer, default=0)
     created_at      = Column(DateTime, default=datetime.utcnow)
     updated_at      = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
