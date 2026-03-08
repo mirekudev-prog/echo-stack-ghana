@@ -145,13 +145,41 @@ def require_admin(request: Request):
     if not token or token != "ADMIN_AUTHORIZED":
         raise HTTPException(status_code=403, detail="Not authorized")
 
-async def save_upload(file: UploadFile) -> str:
+async def save_upload(file: UploadFile) -> tuple[str, str]:
+    """Save a file. Returns (public_url, safe_filename).
+    Tries Supabase Storage first; falls back to local disk."""
+    import io
     content = await file.read()
     safe = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{file.filename.replace(' ', '_')}"
+
+    # ── Try Supabase first ──────────────────────────────────────────
+    supabase_url_env = os.getenv("SUPABASE_URL")
+    supabase_key_env = os.getenv("SUPABASE_SERVICE_KEY")
+    supabase_bucket  = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
+    if supabase_url_env and supabase_key_env:
+        try:
+            import httpx
+            upload_url = f"{supabase_url_env}/storage/v1/object/{supabase_bucket}/{safe}"
+            headers = {
+                "Authorization": f"Bearer {supabase_key_env}",
+                "Content-Type": file.content_type or "application/octet-stream",
+                "x-upsert": "true",
+            }
+            async with httpx.AsyncClient(timeout=60) as client:
+                resp = await client.post(upload_url, content=content, headers=headers)
+            if resp.status_code in (200, 201):
+                public_url = f"{supabase_url_env}/storage/v1/object/public/{supabase_bucket}/{safe}"
+                return public_url, safe
+            else:
+                print(f"Supabase upload failed ({resp.status_code}): {resp.text[:200]}")
+        except Exception as sup_err:
+            print(f"Supabase upload error: {sup_err}")
+
+    # ── Fallback: local disk ────────────────────────────────────────
     path = UPLOAD_DIR / safe
     with open(path, "wb") as f:
         f.write(content)
-    return f"/uploads/{safe}"
+    return f"/uploads/{safe}", safe
 
 def get_db_knowledge(db: Session) -> str:
     try:
@@ -688,17 +716,50 @@ async def upload_file(
     db: Session = Depends(get_db)
 ):
     try:
-        content = await file.read()
+        # Read content size first for validation
+        content_bytes = await file.read()
+        await file.seek(0)          # reset so save_upload can re-read
         MAX_SIZE = 50 * 1024 * 1024
-        if len(content) > MAX_SIZE:
+        if len(content_bytes) > MAX_SIZE:
             raise HTTPException(status_code=413, detail="File too large. Maximum 50MB.")
+
+        # Sanitise filename
         safe_name = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{filename.replace(' ', '_')}"
-        file_path = UPLOAD_DIR / safe_name
-        with open(file_path, "wb") as f:
-            f.write(content)
+
+        # ── Try Supabase first ──────────────────────────────────────
+        public_url = None
+        supabase_url_env = os.getenv("SUPABASE_URL")
+        supabase_key_env = os.getenv("SUPABASE_SERVICE_KEY")
+        supabase_bucket  = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
+        if supabase_url_env and supabase_key_env:
+            try:
+                import httpx
+                upload_url = f"{supabase_url_env}/storage/v1/object/{supabase_bucket}/{safe_name}"
+                headers = {
+                    "Authorization": f"Bearer {supabase_key_env}",
+                    "Content-Type": file.content_type or "application/octet-stream",
+                    "x-upsert": "true",
+                }
+                async with httpx.AsyncClient(timeout=60) as client:
+                    resp = await client.post(upload_url, content=content_bytes, headers=headers)
+                if resp.status_code in (200, 201):
+                    public_url = f"{supabase_url_env}/storage/v1/object/public/{supabase_bucket}/{safe_name}"
+                    print(f"✅ Supabase upload: {safe_name}")
+                else:
+                    print(f"⚠️  Supabase upload failed ({resp.status_code}): {resp.text[:200]}")
+            except Exception as sup_err:
+                print(f"⚠️  Supabase error: {sup_err}")
+
+        # ── Fallback to local disk ──────────────────────────────────
+        if not public_url:
+            file_path = UPLOAD_DIR / safe_name
+            with open(file_path, "wb") as fh:
+                fh.write(content_bytes)
+            public_url = f"/uploads/{safe_name}"
+
         uf = models.UploadedFile(
-            filename=safe_name, original_name=filename, file_path=str(file_path),
-            file_size=len(content), mime_type=file.content_type or "application/octet-stream",
+            filename=safe_name, original_name=filename, file_path=public_url,
+            file_size=len(content_bytes), mime_type=file.content_type or "application/octet-stream",
             category=category,
             region_id=int(region_id) if region_id and region_id.isdigit() else None,
             description=description, uploaded_by="admin",
@@ -709,11 +770,12 @@ async def upload_file(
         db.refresh(uf)
         return {
             "success": True, "file_id": uf.id,
-            "url": f"/uploads/{safe_name}", "filename": safe_name,
+            "url": public_url, "filename": safe_name,
             "original_name": filename, "category": category,
-            "size_bytes": len(content),
-            "file_size_mb": round(len(content) / (1024*1024), 2),
-            "mime_type": file.content_type
+            "size_bytes": len(content_bytes),
+            "file_size_mb": round(len(content_bytes) / (1024*1024), 2),
+            "mime_type": file.content_type,
+            "storage": "supabase" if "supabase" in public_url else "local"
         }
     except HTTPException:
         raise
@@ -731,6 +793,9 @@ async def upload_multiple_files(
     if not files:
         raise HTTPException(status_code=400, detail="No files provided")
     MAX_SIZE = 50 * 1024 * 1024
+    supabase_url_env = os.getenv("SUPABASE_URL")
+    supabase_key_env = os.getenv("SUPABASE_SERVICE_KEY")
+    supabase_bucket  = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
     results = []
     for file in files:
         try:
@@ -739,11 +804,32 @@ async def upload_multiple_files(
                 results.append({"success": False, "filename": file.filename, "error": "Exceeds 50MB"})
                 continue
             safe_name = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{file.filename.replace(' ', '_')}"
-            file_path = UPLOAD_DIR / safe_name
-            with open(file_path, "wb") as f:
-                f.write(content)
+
+            public_url = None
+            if supabase_url_env and supabase_key_env:
+                try:
+                    import httpx
+                    upload_url = f"{supabase_url_env}/storage/v1/object/{supabase_bucket}/{safe_name}"
+                    headers = {
+                        "Authorization": f"Bearer {supabase_key_env}",
+                        "Content-Type": file.content_type or "application/octet-stream",
+                        "x-upsert": "true",
+                    }
+                    async with httpx.AsyncClient(timeout=60) as client:
+                        resp = await client.post(upload_url, content=content, headers=headers)
+                    if resp.status_code in (200, 201):
+                        public_url = f"{supabase_url_env}/storage/v1/object/public/{supabase_bucket}/{safe_name}"
+                except Exception as sup_err:
+                    print(f"Supabase multi-upload error: {sup_err}")
+
+            if not public_url:
+                file_path = UPLOAD_DIR / safe_name
+                with open(file_path, "wb") as fh:
+                    fh.write(content)
+                public_url = f"/uploads/{safe_name}"
+
             uf = models.UploadedFile(
-                filename=safe_name, original_name=file.filename, file_path=str(file_path),
+                filename=safe_name, original_name=file.filename, file_path=public_url,
                 file_size=len(content), mime_type=file.content_type or "application/octet-stream",
                 category=category,
                 region_id=int(region_id) if region_id and region_id.isdigit() else None,
@@ -753,10 +839,11 @@ async def upload_multiple_files(
             db.commit()
             db.refresh(uf)
             results.append({
-                "success": True, "file_id": uf.id, "url": f"/uploads/{safe_name}",
+                "success": True, "file_id": uf.id, "url": public_url,
                 "filename": safe_name, "original_name": file.filename,
                 "file_size_mb": round(len(content) / (1024*1024), 2),
-                "mime_type": file.content_type
+                "mime_type": file.content_type,
+                "storage": "supabase" if "supabase" in public_url else "local"
             })
         except Exception as e:
             results.append({"success": False, "filename": getattr(file, "filename", "unknown"), "error": str(e)})
@@ -771,7 +858,7 @@ def get_files(category: str = "", region_id: str = "", db: Session = Depends(get
         if region_id: q = q.filter(models.UploadedFile.region_id == int(region_id))
         return [{
             "id": f.id, "filename": f.filename, "original_name": f.original_name,
-            "file_url": f"/uploads/{f.filename}",
+            "file_url": f.file_path if f.file_path and (f.file_path.startswith("http") or f.file_path.startswith("/")) else f"/uploads/{f.filename}",
             "file_size": f.file_size,
             "file_size_mb": round((f.file_size or 0) / (1024*1024), 2),
             "mime_type": f.mime_type, "category": f.category,
@@ -788,8 +875,25 @@ def delete_file(file_id: int, db: Session = Depends(get_db)):
         f = db.query(models.UploadedFile).filter(models.UploadedFile.id == file_id).first()
         if not f:
             raise HTTPException(status_code=404, detail="File not found")
-        if f.file_path and os.path.exists(f.file_path):
-            os.remove(f.file_path)
+        # Remove from Supabase if applicable
+        if f.file_path and "supabase" in (f.file_path or ""):
+            try:
+                import httpx, asyncio
+                supabase_url_env = os.getenv("SUPABASE_URL")
+                supabase_key_env = os.getenv("SUPABASE_SERVICE_KEY")
+                supabase_bucket  = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
+                del_url = f"{supabase_url_env}/storage/v1/object/{supabase_bucket}/{f.filename}"
+                headers = {"Authorization": f"Bearer {supabase_key_env}"}
+                # Fire-and-forget; don't block DB delete on this
+                asyncio.get_event_loop().run_until_complete(
+                    httpx.AsyncClient().delete(del_url, headers=headers)
+                )
+            except Exception:
+                pass
+        # Remove from local disk if applicable
+        elif f.file_path and os.path.exists(f.file_path):
+            try: os.remove(f.file_path)
+            except Exception: pass
         db.delete(f)
         db.commit()
         return {"success": True}
@@ -980,7 +1084,7 @@ async def admin_publish_file(
         elif mime.startswith("image/"): content_type = "photo_essay"
         else: content_type = "article"
 
-        file_url = f"/uploads/{file_record.filename}"
+        file_url = file_record.file_path if file_record.file_path and (file_record.file_path.startswith("http") or file_record.file_path.startswith("/")) else f"/uploads/{file_record.filename}"
         if content_type == "video": content = f"[video]{file_url}[/video]"
         elif content_type == "audio": content = f"[audio]{file_url}[/audio]"
         elif content_type == "photo_essay": content = f"![{title}]({file_url})"
