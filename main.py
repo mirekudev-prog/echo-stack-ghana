@@ -539,9 +539,6 @@ async def user_login(
         if not verify_password(password, u.hashed_password):
             raise HTTPException(401, "Incorrect password. Try again.")
             
-<div style="text-align: right; margin-bottom: 10px;">
-    <a href="#" onclick="alert('Please contact support at support@echostack.com to reset your password.')" style="color: var(--muted); font-size: 0.8rem;">Forgot password?</a>
-</div>
         # Check if account is suspended
         if getattr(u, "is_suspended", 0):
             raise HTTPException(403, "Account suspended. Contact support.")
