@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification - EchoStack</title>
+    <style>
+        body { background: #0D1B2A; color: #fff; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(200,150,46,0.3); border-radius: 24px; padding: 40px; max-width: 400px; text-align: center; }
+        h1 { color: #C8962E; font-family: 'Playfair Display', serif; }
+        p { color: #94A3B8; line-height: 1.6; }
+        a { color: #C8962E; }
+    </style>
+</head>
+<body>
+    <div class="card" id="card">
+        <h1>EchoStack</h1>
+        <div id="message">Verifying your email...</div>
+    </div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+        if (!token) {
+            document.getElementById('message').innerHTML = '❌ No verification token provided.';
+        } else {
+            fetch(`/api/users/verify-email?token=${token}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('message').innerHTML = '✅ Email verified! You can now <a href="/user-login">log in</a>.';
+                    } else {
+                        document.getElementById('message').innerHTML = '❌ ' + (data.detail || 'Verification failed.');
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('message').innerHTML = '❌ An error occurred.';
+                });
+        }
+    </script>
+</body>
+</html>
