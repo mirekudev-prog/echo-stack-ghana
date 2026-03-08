@@ -485,6 +485,27 @@ async def user_settings_page(request: Request):
         return FileResponse("user_settings.html")
     raise HTTPException(404, "user_settings.html not found")
     
+@app.post("/api/users/change-password")
+async def change_password(
+  request: Request,
+  current_password: str = Form(...),
+  new_password: str = Form(...),
+  db: Session = Depends(get_db)
+):
+  sid = request.cookies.get("user_session")
+  u = db.query(models.User).filter(models.User.id == sid).first()
+  if not u: raise HTTPException(401, "Not authenticated")
+  
+  if not pwd_context.verify(current_password, u.hashed_password):
+    raise HTTPException(403, "Incorrect current password")
+  
+  if len(new_password) < 6:
+    raise HTTPException(400, "Password too short")
+  
+  u.hashed_password = get_password_hash(new_password)
+  db.commit()
+  return {"success": True, "message": "Password changed successfully"}
+
 @app.get("/post/{pid}")
 async def post_page(pid: int, request: Request):
     # Posts are publicly viewable (locked content is handled client-side)
