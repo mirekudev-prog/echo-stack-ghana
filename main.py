@@ -452,7 +452,13 @@ async def following_page(request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("following.html")
     return RedirectResponse("/user-login")
-
+    
+@app.get("/subscriptions")
+async def subscriptions_page(request: Request):
+    if _is_admin(request) or request.cookies.get("user_session"):
+        return _serve("subscriptions.html")
+    return RedirectResponse("/user-login")
+    
 @app.get("/user")
 async def user_page(request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
