@@ -19,13 +19,7 @@
         html,body{min-height:100vh}
         body{font-family:'DM Sans',sans-serif;background:var(--ink);color:#fff;display:flex;min-height:100svh}
 
-        .left-panel{
-            width:380px;flex-shrink:0;
-            background:linear-gradient(160deg,#0a1520 0%,#0D1B2A 60%,rgba(200,150,46,.08) 100%);
-            border-right:1px solid rgba(255,255,255,.06);
-            padding:40px 36px;display:flex;flex-direction:column;
-            position:relative;overflow:hidden
-        }
+        .left-panel{width:380px;flex-shrink:0;background:linear-gradient(160deg,#0a1520 0%,#0D1B2A 60%,rgba(200,150,46,.08) 100%);border-right:1px solid rgba(255,255,255,.06);padding:40px 36px;display:flex;flex-direction:column;position:relative;overflow:hidden}
         .left-panel::before{content:'✦';position:absolute;bottom:-20px;right:-20px;font-size:200px;opacity:.03;line-height:1;pointer-events:none}
         .left-logo{display:flex;align-items:center;gap:10px;margin-bottom:48px}
         .left-logo img{width:36px;height:36px;border-radius:8px}
@@ -46,15 +40,29 @@
         .form-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:6px}
         .form-sub{font-size:.88rem;color:var(--muted);margin-bottom:32px}
 
-        /* ── signup-success banner ── */
-        .signup-banner{
-            display:none;align-items:center;gap:10px;
-            background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.3);
-            border-radius:12px;padding:14px 16px;margin-bottom:22px;
-            font-size:.85rem;color:#4ade80;line-height:1.5
-        }
-        .signup-banner.show{display:flex}
-        .signup-banner span{font-size:1.3rem;flex-shrink:0}
+        /* Banners */
+        .banner{display:none;align-items:center;gap:10px;border-radius:12px;padding:14px 16px;margin-bottom:22px;font-size:.85rem;line-height:1.5}
+        .banner.show{display:flex}
+        .banner span{font-size:1.3rem;flex-shrink:0}
+        .banner-green{background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.3);color:#4ade80}
+        .banner-yellow{background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);color:#fde047}
+        .banner-yellow a{color:#fde047;font-weight:700;cursor:pointer;text-decoration:underline}
+
+        /* Forgot password modal overlay */
+        .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+        .modal-bg.show{display:flex}
+        .modal{background:#0f1e2d;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:32px;width:100%;max-width:380px;margin:20px}
+        .modal h3{font-family:'Playfair Display',serif;font-size:1.2rem;color:#fff;margin-bottom:8px}
+        .modal p{font-size:.83rem;color:var(--muted);margin-bottom:20px;line-height:1.6}
+        .modal input{width:100%;padding:13px 16px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;-webkit-appearance:none;margin-bottom:14px}
+        .modal input:focus{border-color:var(--gold)}
+        .modal input::placeholder{color:rgba(255,255,255,.25)}
+        .modal-btns{display:flex;gap:10px}
+        .btn-modal-cancel{flex:1;padding:12px;border-radius:50px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s}
+        .btn-modal-cancel:hover{background:rgba(255,255,255,.1);color:#fff}
+        .btn-modal-send{flex:2;padding:12px;border-radius:50px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .15s}
+        .btn-modal-send:hover{opacity:.9}
+        .btn-modal-send:disabled{opacity:.5;cursor:not-allowed}
 
         .field{margin-bottom:16px}
         .field label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
@@ -68,7 +76,7 @@
         .pw-toggle:hover{color:#fff}
 
         .forgot-row{text-align:right;margin-top:-8px;margin-bottom:10px;font-size:.8rem}
-        .forgot-row a{color:var(--muted);text-decoration:none}
+        .forgot-row a{color:var(--muted);text-decoration:none;cursor:pointer}
         .forgot-row a:hover{color:var(--gold2)}
 
         .btn-primary{width:100%;padding:14px;border-radius:50px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(200,150,46,.3);margin-top:24px}
@@ -103,6 +111,7 @@
 </head>
 <body>
 
+<!-- LEFT PANEL -->
 <div class="left-panel">
     <div class="left-logo">
         <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
@@ -118,13 +127,24 @@
     </div>
 </div>
 
+<!-- RIGHT PANEL -->
 <div class="right-panel">
     <div class="form-box">
 
-        <!-- Shown after arriving from /signup -->
-        <div class="signup-banner" id="signup-banner">
+        <!-- Post-signup green banner -->
+        <div class="banner banner-green" id="signup-banner">
             <span>✅</span>
             <div><strong style="color:#fff">Account created!</strong><br>Sign in below to start exploring Ghana's heritage.</div>
+        </div>
+
+        <!-- Unverified account warning banner -->
+        <div class="banner banner-yellow" id="unverified-banner">
+            <span>✉️</span>
+            <div>
+                <strong style="color:#fff">Email not verified</strong><br>
+                Check your inbox for the verification link, or
+                <a onclick="resendVerification()">resend it</a>.
+            </div>
         </div>
 
         <!-- Already logged in card -->
@@ -152,7 +172,7 @@
         </div>
 
         <div class="forgot-row">
-            <a href="#" onclick="alert('Please contact support@echostack.com to reset your password.')">Forgot password?</a>
+            <a onclick="openForgot()">Forgot password?</a>
         </div>
 
         <button class="btn-primary" id="login-btn" onclick="submitLogin()">
@@ -168,17 +188,33 @@
     </div>
 </div>
 
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-bg" id="forgot-modal" onclick="closeForgotOutside(event)">
+    <div class="modal" id="forgot-modal-box">
+        <h3>Reset your password</h3>
+        <p>Enter the email address on your account and we'll send you a reset link.</p>
+        <input type="email" id="forgot-email" placeholder="your@email.com"
+               onkeydown="if(event.key==='Enter')sendReset()">
+        <div class="modal-btns">
+            <button class="btn-modal-cancel" onclick="closeForgot()">Cancel</button>
+            <button class="btn-modal-send" id="reset-btn" onclick="sendReset()">Send Reset Link</button>
+        </div>
+    </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
+// ── On load ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    // Show green banner if arriving from signup page
     const params = new URLSearchParams(window.location.search);
+
+    // Coming from signup page
     if (params.get('verified') === 'please') {
         document.getElementById('signup-banner').classList.add('show');
     }
 
-    // Show "already logged in" card if cookie+localStorage present
+    // Already logged in?
     try {
         const saved = JSON.parse(localStorage.getItem('es_user') || '{}');
         if (saved.loggedIn && saved.username) {
@@ -191,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e) {}
 });
 
+// ── Password toggle ───────────────────────────────────────────────────────────
 function togglePw() {
     const inp = document.getElementById('password');
     const btn = document.getElementById('pw-eye');
@@ -198,6 +235,7 @@ function togglePw() {
     btn.textContent = inp.type === 'password' ? '👁' : '🙈';
 }
 
+// ── Login ─────────────────────────────────────────────────────────────────────
 async function submitLogin() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
@@ -209,6 +247,9 @@ async function submitLogin() {
     btn.innerHTML = '<div class="spin"></div> Signing in…';
     btn.disabled = true;
 
+    // Hide any previous unverified banner
+    document.getElementById('unverified-banner').classList.remove('show');
+
     const fd = new FormData();
     fd.append('username', username);
     fd.append('password', password);
@@ -218,30 +259,43 @@ async function submitLogin() {
         const d = await r.json();
 
         if (r.ok && d.success) {
-            // Save to localStorage so dashboard.html can read it immediately
             localStorage.setItem('es_user', JSON.stringify({
                 loggedIn:   true,
                 user_id:    d.user_id,
                 username:   d.username,
-                email:      d.email || '',
-                role:       d.role || 'user',
+                email:      d.email      || '',
+                role:       d.role       || 'user',
                 is_premium: d.is_premium || false,
                 avatar_url: d.avatar_url || '',
-                plan:       d.plan || 'free',
+                plan:       d.plan       || 'free',
             }));
 
-            showToast('✅ Welcome back, ' + d.username + '!', 'ok');
+            showToast('✅ Welcome back, ' + d.username + '! 🇬🇭', 'ok');
 
             setTimeout(() => {
-                const role = d.role || 'user';
+                const role = (d.role || 'user').toLowerCase();
                 if (role === 'admin' || role === 'superuser') {
                     window.location.href = '/admin';
                 } else {
                     window.location.href = '/dashboard';
                 }
             }, 1200);
+
         } else {
-            throw new Error(d.detail || 'Incorrect username or password');
+            const msg = d.detail || 'Incorrect username or password';
+
+            // Backend sends "UNVERIFIED:..." for unverified accounts
+            if (msg.startsWith('UNVERIFIED:')) {
+                // Store email so resend can use it without user re-typing
+                window._unverifiedEmail = username;
+                document.getElementById('unverified-banner').classList.add('show');
+                showToast('❌ Please verify your email first', 'er');
+            } else {
+                showToast('❌ ' + msg, 'er');
+            }
+
+            btn.innerHTML = 'Sign In →';
+            btn.disabled = false;
         }
     } catch(err) {
         showToast('❌ ' + err.message, 'er');
@@ -250,13 +304,74 @@ async function submitLogin() {
     }
 }
 
+// ── Resend verification ───────────────────────────────────────────────────────
+async function resendVerification() {
+    const email = window._unverifiedEmail || document.getElementById('username').value.trim();
+    if (!email) { showToast('Enter your email above first', 'er'); return; }
+
+    showToast('Sending…', '');
+    try {
+        const fd = new FormData();
+        fd.append('email', email);
+        const r = await fetch('/api/users/resend-verification', { method: 'POST', body: fd });
+        const d = await r.json();
+        showToast(d.message || 'Verification email sent!', 'ok');
+    } catch(e) {
+        showToast('Could not send — try again shortly', 'er');
+    }
+}
+
+// ── Forgot password modal ─────────────────────────────────────────────────────
+function openForgot() {
+    // Pre-fill email if the username field looks like an email
+    const val = document.getElementById('username').value.trim();
+    if (val.includes('@')) {
+        document.getElementById('forgot-email').value = val;
+    }
+    document.getElementById('forgot-modal').classList.add('show');
+    setTimeout(() => document.getElementById('forgot-email').focus(), 100);
+}
+
+function closeForgot() {
+    document.getElementById('forgot-modal').classList.remove('show');
+}
+
+function closeForgotOutside(e) {
+    if (e.target === document.getElementById('forgot-modal')) closeForgot();
+}
+
+async function sendReset() {
+    const email = document.getElementById('forgot-email').value.trim();
+    if (!email || !email.includes('@')) { showToast('Enter a valid email address', 'er'); return; }
+
+    const btn = document.getElementById('reset-btn');
+    btn.innerHTML = '<div class="spin"></div>';
+    btn.disabled = true;
+
+    try {
+        const fd = new FormData();
+        fd.append('email', email);
+        const r = await fetch('/api/users/forgot-password', { method: 'POST', body: fd });
+        const d = await r.json();
+
+        closeForgot();
+        showToast(d.message || 'Reset link sent — check your inbox', 'ok');
+    } catch(e) {
+        showToast('Could not send reset email — try again', 'er');
+    } finally {
+        btn.innerHTML = 'Send Reset Link';
+        btn.disabled = false;
+    }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
 let _t;
 function showToast(msg, type) {
     const el = document.getElementById('toast');
     el.textContent = msg;
     el.className = 'toast on' + (type ? ' ' + type : '');
     clearTimeout(_t);
-    _t = setTimeout(() => el.className = 'toast', 3200);
+    _t = setTimeout(() => { el.className = 'toast'; }, 3200);
 }
 </script>
 </body>
