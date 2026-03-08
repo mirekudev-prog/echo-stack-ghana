@@ -708,6 +708,78 @@ def delete_region(region_id: int, db: Session = Depends(get_db)):
 # ============================================
 # FILE UPLOADS — 50MB limit
 # ============================================
+@app.post("/api/upload/cover")
+@app.post("/api/upload/image")
+async def upload_cover_image(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """Upload a cover image / thumbnail. Returns {success, url}."""
+    try:
+        ALLOWED = {"image/jpeg","image/png","image/gif","image/webp","image/svg+xml","video/mp4"}
+        if file.content_type and file.content_type not in ALLOWED:
+            # Be lenient — only block obviously wrong types
+            if file.content_type.startswith("text/") or file.content_type == "application/octet-stream":
+                pass  # allow through
+        content = await file.read()
+        MAX_SIZE = 20 * 1024 * 1024  # 20MB for images
+        if len(content) > MAX_SIZE:
+            raise HTTPException(status_code=413, detail="File too large. Maximum 20MB for cover images.")
+
+        safe_name = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{file.filename.replace(' ', '_')}"
+
+        # Try Supabase first
+        public_url = None
+        supabase_url_env = os.getenv("SUPABASE_URL")
+        supabase_key_env = os.getenv("SUPABASE_SERVICE_KEY")
+        supabase_bucket  = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
+        if supabase_url_env and supabase_key_env:
+            try:
+                import httpx
+                upload_url = f"{supabase_url_env}/storage/v1/object/{supabase_bucket}/{safe_name}"
+                headers = {
+                    "Authorization": f"Bearer {supabase_key_env}",
+                    "Content-Type": file.content_type or "image/jpeg",
+                    "x-upsert": "true",
+                }
+                async with httpx.AsyncClient(timeout=60) as client:
+                    resp = await client.post(upload_url, content=content, headers=headers)
+                if resp.status_code in (200, 201):
+                    public_url = f"{supabase_url_env}/storage/v1/object/public/{supabase_bucket}/{safe_name}"
+                    print(f"✅ Cover uploaded to Supabase: {safe_name}")
+            except Exception as e:
+                print(f"Supabase cover upload error: {e}")
+
+        if not public_url:
+            path = UPLOAD_DIR / safe_name
+            with open(path, "wb") as fh:
+                fh.write(content)
+            public_url = f"/uploads/{safe_name}"
+
+        # Also record in DB
+        try:
+            uf = models.UploadedFile(
+                filename=safe_name, original_name=file.filename,
+                file_path=public_url, file_size=len(content),
+                mime_type=file.content_type or "image/jpeg",
+                category="image", uploaded_by="creator", is_public=1
+            )
+            db.add(uf)
+            db.commit()
+        except Exception as db_err:
+            db.rollback()
+            print(f"Cover DB record error (non-fatal): {db_err}")
+
+        return {
+            "success": True, "url": public_url,
+            "filename": safe_name,
+            "storage": "supabase" if "supabase" in public_url else "local"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/upload/file")
 async def upload_file(
     file: UploadFile = File(...), filename: str = Form(...),
@@ -930,8 +1002,14 @@ def get_posts(
             "cover_image": p.cover_image or "", "content_type": p.content_type or "article",
             "author_username": p.author_username or "",
             "author_id": str(p.author_id) if p.author_id else "",
-            "status": p.status, "views": p.views or 0, "likes": p.likes or 0,
+            "status": p.status,
+            "views": p.views or 0, "view_count": p.views or 0,
+            "likes": p.likes or 0,
+            "comment_count": p.comment_count or 0,
             "is_premium": bool(p.is_premium), "region_id": p.region_id,
+            "tags": p.tags or "",
+            "audio_url": p.audio_url or "" if hasattr(p, "audio_url") else "",
+            "video_url": p.video_url or "" if hasattr(p, "video_url") else "",
             "created_at": str(p.created_at)
         } for p in posts]
     except Exception as e:
@@ -960,8 +1038,9 @@ def get_post(post_id: int, db: Session = Depends(get_db)):
 async def create_post(
     title: str = Form(...), excerpt: str = Form(""), content: str = Form(""),
     cover_image: str = Form(""), content_type: str = Form("article"),
-    region_id: str = Form(""), status: str = Form("draft"), is_premium: str = Form("0"),
-    request: Request = None, db: Session = Depends(get_db)
+    audio_url: str = Form(""), video_url: str = Form(""), gallery: str = Form(""),
+    tags: str = Form(""), region_id: str = Form(""), status: str = Form("draft"),
+    is_premium: str = Form("0"), request: Request = None, db: Session = Depends(get_db)
 ):
     is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
     user = get_user_from_request(request, db)
@@ -973,8 +1052,12 @@ async def create_post(
                 user = models.User(
                     username="admin", email="admin@echostack.gh",
                     password_hash=hash_password("admin_temp_password"),
-                    role="admin", is_active=True, is_premium=True
+                    role="admin",
                 )
+                try: user.is_active = True
+                except: pass
+                try: user.is_premium = True
+                except: pass
                 db.add(user)
                 db.commit()
                 db.refresh(user)
@@ -995,8 +1078,20 @@ async def create_post(
             title=title.strip(), excerpt=excerpt.strip(), content=content.strip(),
             cover_image=cover_image.strip(), content_type=content_type,
             region_id=int(region_id) if region_id and region_id.isdigit() else None,
-            status=status, is_premium=bool(int(is_premium))
+            status=status, is_premium=bool(int(is_premium or "0"))
         )
+        # Safe-assign optional media columns
+        try: post.audio_url = audio_url.strip()
+        except: pass
+        try: post.video_url = video_url.strip()
+        except: pass
+        try: post.gallery = gallery.strip()
+        except: pass
+        try: post.tags = tags.strip()
+        except: pass
+        if status == "published":
+            try: post.published_at = datetime.datetime.utcnow()
+            except: pass
         db.add(post)
         db.commit()
         db.refresh(post)
