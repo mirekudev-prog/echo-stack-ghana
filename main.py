@@ -285,15 +285,27 @@ async def _do_upload(file: UploadFile, category: str, db: Session) -> dict:
             filename=safe, original_name=file.filename or safe,
             file_path=fpath, file_size=len(content),
             mime_type=ctype, category=category,
-            uploaded_by="user", is_public=1
+            uploaded_by="user", is_public=True
         )
         db.add(rec); db.commit(); db.refresh(rec)
         fid = rec.id
     except Exception:
         fid = None
 
-    return {"success": True, "url": pub_url, "file_url": pub_url,
-            "filename": safe, "file_id": fid, "size": len(content)}
+    size_bytes = len(content)
+    return {
+        "success": True,
+        "url": pub_url,
+        "file_url": pub_url,
+        "filename": safe,
+        "original_name": file.filename or safe,
+        "file_id": fid,
+        "size": size_bytes,
+        "file_size_mb": round(size_bytes / (1024*1024), 2),
+        "file_size_kb": round(size_bytes / 1024, 1),
+        "category": category,
+        "mime_type": ctype,
+    }
 
 # ─── STATIC PAGES ─────────────────────────────────────────────────────────────
 def _page(fn):
@@ -826,9 +838,28 @@ async def get_files(category: str = "", db: Session = Depends(get_db)):
         q = db.query(models.UploadedFile)
         if category: q = q.filter(models.UploadedFile.category == category)
         files = q.order_by(models.UploadedFile.created_at.desc()).all()
-        return [{"id":f.id,"filename":f.filename,"original_name":f.original_name,
-                 "file_url": f.file_path if (f.file_path or "").startswith("http") else f"/uploads/{f.filename}",
-                 "category":f.category,"file_size":f.file_size,"created_at":str(f.created_at)} for f in files]
+        result = []
+        for f in files:
+            url = f.file_path if (f.file_path or "").startswith("http") else f"/uploads/{f.filename}"
+            size_bytes = f.file_size or 0
+            result.append({
+                "id": f.id,
+                "filename": f.filename,
+                "original_name": f.original_name or f.filename,
+                "file_url": url,
+                "url": url,
+                "category": f.category or "general",
+                "mime_type": f.mime_type or "",
+                "file_size": size_bytes,
+                "file_size_mb": round(size_bytes / (1024*1024), 2) if size_bytes else 0,
+                "file_size_kb": round(size_bytes / 1024, 1) if size_bytes else 0,
+                "description": f.description or "",
+                "is_public": bool(f.is_public),
+                "region_id": f.region_id,
+                "uploaded_by": f.uploaded_by or "admin",
+                "created_at": str(f.created_at),
+            })
+        return result
     except Exception: return []
 
 @app.delete("/api/files/{file_id}")
