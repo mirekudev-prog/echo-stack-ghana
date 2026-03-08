@@ -6,8 +6,20 @@ from sqlalchemy import text
 import os, uuid, re, json, httpx
 from datetime import datetime
 
+# NEW: password hashing
+from passlib.context import CryptContext
+
 from database import engine, get_db, Base
 import models
+
+# ─── PASSWORD HASHING SETUP ───────────────────────────────────────────────
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
 
 # ─── GUARANTEED TABLE CREATION ───────────────────────────────────────────────
 # Uses raw SQL CREATE TABLE IF NOT EXISTS so it ALWAYS works, even if
@@ -159,7 +171,8 @@ CREATE TABLE IF NOT EXISTS payments (
     status VARCHAR(50) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-"""
+
+-- NEW TABLES FOR TOPICS
 CREATE TABLE IF NOT EXISTS topics (
     id SERIAL PRIMARY KEY,
     name TEXT UNIQUE NOT NULL
@@ -170,6 +183,7 @@ CREATE TABLE IF NOT EXISTS user_topics (
     topic_id INTEGER REFERENCES topics(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, topic_id)
 );
+"""
 
 # Also SQLAlchemy's ORM create (belt + suspenders)
 try:
@@ -237,9 +251,6 @@ def _run_migrations():
     except Exception as e:
         print(f"Migration note: {e}")
 
-_run_startup_sql()
-_run_migrations()
-
 def _seed_topics():
     """Insert the default Ghana‑heritage topics if they don't already exist."""
     default_topics = [
@@ -261,11 +272,10 @@ def _seed_topics():
     except Exception as e:
         print(f"Topics seeding note: {e}")
 
-# Call it after migrations
 _run_startup_sql()
 _run_migrations()
 _seed_topics()
-        
+
 # ─── APP ──────────────────────────────────────────────────────────────────────
 app = FastAPI(title="EchoStack API")
 
@@ -434,6 +444,8 @@ async def signup(
         uemail = email.strip()
         if not uname or not uemail or not password:
             raise HTTPException(400, "Username, email and password are required")
+
+        # Check existing user
         existing = db.query(models.User).filter(
             (models.User.username == uname) | (models.User.email == uemail)
         ).first()
@@ -441,15 +453,44 @@ async def signup(
             if getattr(existing, "username", "") == uname:
                 raise HTTPException(400, "Username already taken — choose another")
             raise HTTPException(400, "Email already registered — try signing in")
+
+        # Hash the password
+        hashed = get_password_hash(password)
+
+        # Create user
         uid = str(uuid.uuid4())
         u = models.User(
             id=uid, username=uname, email=uemail,
-            hashed_password=password, role="user",
+            hashed_password=hashed,
+            role="user",
             is_premium=False, is_suspended=False, follower_count=0,
             bio="", avatar_url="", channel_name=uname, channel_desc="",
         )
-        db.add(u); db.commit(); db.refresh(u)
-        print(f"New user: {uname} ({uemail}) id={uid}")
+        db.add(u)
+        db.flush()
+
+        # Parse and save selected topics
+        selected_topics = []
+        if topics:
+            try:
+                selected_topics = json.loads(topics)
+                if not isinstance(selected_topics, list):
+                    selected_topics = []
+            except:
+                selected_topics = []
+
+        for topic_name in selected_topics:
+            topic = db.query(models.Topic).filter(models.Topic.name == topic_name).first()
+            if topic:
+                db.execute(
+                    text("INSERT INTO user_topics (user_id, topic_id) VALUES (:uid, :tid) ON CONFLICT DO NOTHING"),
+                    {"uid": uid, "tid": topic.id}
+                )
+
+        db.commit()
+        db.refresh(u)
+        print(f"✅ New user: {uname} ({uemail}) id={uid} with {len(selected_topics)} topics")
+
         resp = JSONResponse({
             "success": True, "user_id": uid,
             "username": u.username, "role": "user",
@@ -457,10 +498,14 @@ async def signup(
         })
         resp.set_cookie("user_session", uid, max_age=60*60*24*30, path="/", samesite="lax", httponly=False)
         return resp
-    except HTTPException: raise
+
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
-        import traceback; traceback.print_exc()
+        import traceback
+        traceback.print_exc()
         raise HTTPException(500, f"Signup failed: {str(e)}")
 
 @app.post("/api/users/login")
@@ -468,26 +513,26 @@ async def user_login(
     username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)
 ):
     try:
-        # 1. Try to find user by username (case‑insensitive)
+        # Try to find user by username (case‑insensitive)
         u = db.query(models.User).filter(
             models.User.username.ilike(username.strip())
         ).first()
 
-        # 2. If not found, try by email (case‑insensitive)
+        # If not found, try by email (case‑insensitive)
         if not u:
             u = db.query(models.User).filter(
                 models.User.email.ilike(username.strip())
             ).first()
 
-        # 3. If still not found, or password doesn't match → error
-        if not u or u.hashed_password != password:
+        # If still not found, or password doesn't match → error
+        if not u or not verify_password(password, u.hashed_password):
             raise HTTPException(401, "Invalid username/email or password")
 
-        # 4. Check if account is suspended
+        # Check if account is suspended
         if getattr(u, "is_suspended", 0):
             raise HTTPException(403, "Account suspended")
 
-        # 5. Success – create response
+        # Success – create response
         resp = JSONResponse({
             "success": True,
             "user_id": u.id,
