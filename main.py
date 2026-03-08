@@ -6,7 +6,7 @@ from sqlalchemy import text
 import os, uuid, re, json, httpx
 from datetime import datetime
 
-# NEW: password hashing
+# Password hashing
 from passlib.context import CryptContext
 
 from database import engine, get_db, Base
@@ -22,9 +22,6 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 # ─── GUARANTEED TABLE CREATION ───────────────────────────────────────────────
-# Uses raw SQL CREATE TABLE IF NOT EXISTS so it ALWAYS works, even if
-# SQLAlchemy's create_all missed tables from a previous broken models.py
-
 _CREATE_TABLES_SQL = """
 CREATE TABLE IF NOT EXISTS regions (
     id SERIAL PRIMARY KEY,
@@ -47,7 +44,7 @@ CREATE TABLE IF NOT EXISTS regions (
 );
 
 CREATE TABLE IF NOT EXISTS users (
-    id VARCHAR(36) PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username VARCHAR(100) UNIQUE NOT NULL,
     email VARCHAR(200) UNIQUE NOT NULL,
     hashed_password VARCHAR(255) DEFAULT '',
@@ -73,7 +70,7 @@ CREATE TABLE IF NOT EXISTS posts (
     content_type VARCHAR(50) DEFAULT 'article',
     status VARCHAR(50) DEFAULT 'draft',
     is_locked INTEGER DEFAULT 0,
-    author_id VARCHAR(36) DEFAULT '',
+    author_id UUID REFERENCES users(id),
     author_username VARCHAR(200) DEFAULT '',
     region_id INTEGER DEFAULT NULL,
     tags TEXT DEFAULT '',
@@ -88,8 +85,8 @@ CREATE TABLE IF NOT EXISTS posts (
 
 CREATE TABLE IF NOT EXISTS comments (
     id SERIAL PRIMARY KEY,
-    post_id INTEGER DEFAULT NULL,
-    user_id VARCHAR(36) DEFAULT '',
+    post_id INTEGER REFERENCES posts(id),
+    user_id UUID REFERENCES users(id),
     username VARCHAR(200) DEFAULT '',
     content TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -97,8 +94,8 @@ CREATE TABLE IF NOT EXISTS comments (
 
 CREATE TABLE IF NOT EXISTS follows (
     id SERIAL PRIMARY KEY,
-    follower_id VARCHAR(36) DEFAULT '',
-    following_id VARCHAR(36) DEFAULT '',
+    follower_id UUID REFERENCES users(id),
+    following_id UUID REFERENCES users(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -146,7 +143,7 @@ CREATE TABLE IF NOT EXISTS events (
 
 CREATE TABLE IF NOT EXISTS chat_messages (
     id SERIAL PRIMARY KEY,
-    user_id VARCHAR(36) DEFAULT 'guest',
+    user_id UUID REFERENCES users(id),
     username VARCHAR(200) DEFAULT 'Guest',
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -164,7 +161,7 @@ CREATE TABLE IF NOT EXISTS story_submissions (
 
 CREATE TABLE IF NOT EXISTS payments (
     id SERIAL PRIMARY KEY,
-    user_id VARCHAR(36) DEFAULT '',
+    user_id UUID REFERENCES users(id),
     email VARCHAR(200),
     amount INTEGER DEFAULT 0,
     reference VARCHAR(200),
@@ -172,14 +169,14 @@ CREATE TABLE IF NOT EXISTS payments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- NEW TABLES FOR TOPICS
+-- TOPICS and USER_TOPICS (with correct UUID)
 CREATE TABLE IF NOT EXISTS topics (
     id SERIAL PRIMARY KEY,
     name TEXT UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_topics (
-    user_id VARCHAR(36) REFERENCES users(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     topic_id INTEGER REFERENCES topics(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, topic_id)
 );
@@ -195,7 +192,6 @@ def _run_startup_sql():
     """Run raw CREATE TABLE IF NOT EXISTS — guaranteed to work on PostgreSQL."""
     try:
         with engine.connect() as conn:
-            # Split and run each statement
             for stmt in _CREATE_TABLES_SQL.strip().split(';'):
                 stmt = stmt.strip()
                 if stmt:
@@ -252,7 +248,7 @@ def _run_migrations():
         print(f"Migration note: {e}")
 
 def _seed_topics():
-    """Insert the default Ghana‑heritage topics if they don't already exist."""
+    """Insert the default Ghana‑heritage topics."""
     default_topics = [
         "Ashanti Culture","Ga Traditions","Ewe Music","Northern Heritage",
         "Gold Coast History","Slave Castles","Highlife Music","Traditional Drums",
@@ -458,7 +454,7 @@ async def signup(
         hashed = get_password_hash(password)
 
         # Create user
-        uid = str(uuid.uuid4())
+        uid = uuid.uuid4()   # UUID object
         u = models.User(
             id=uid, username=uname, email=uemail,
             hashed_password=hashed,
@@ -467,9 +463,9 @@ async def signup(
             bio="", avatar_url="", channel_name=uname, channel_desc="",
         )
         db.add(u)
-        db.flush()   # Get the user ID without committing yet
+        db.flush()
 
-        # Parse and save selected topics using raw SQL (more reliable)
+        # Parse and save selected topics using raw SQL
         selected_topics = []
         if topics:
             try:
@@ -479,16 +475,13 @@ async def signup(
             except:
                 selected_topics = []
 
-        # Use raw SQL to insert into user_topics
         for topic_name in selected_topics:
-            # First get the topic id from the topics table
             topic_result = db.execute(
                 text("SELECT id FROM topics WHERE name = :name"),
                 {"name": topic_name}
             ).first()
             if topic_result:
                 topic_id = topic_result[0]
-                # Insert into user_topics
                 db.execute(
                     text("INSERT INTO user_topics (user_id, topic_id) VALUES (:uid, :tid) ON CONFLICT DO NOTHING"),
                     {"uid": uid, "tid": topic_id}
@@ -499,11 +492,11 @@ async def signup(
         print(f"✅ New user: {uname} ({uemail}) id={uid} with {len(selected_topics)} topics")
 
         resp = JSONResponse({
-            "success": True, "user_id": uid,
+            "success": True, "user_id": str(uid),
             "username": u.username, "role": "user",
             "is_premium": False, "message": "Account created!"
         })
-        resp.set_cookie("user_session", uid, max_age=60*60*24*30, path="/", samesite="lax", httponly=False)
+        resp.set_cookie("user_session", str(uid), max_age=60*60*24*30, path="/", samesite="lax", httponly=False)
         return resp
 
     except HTTPException:
@@ -525,33 +518,29 @@ async def user_login(
             models.User.username.ilike(username.strip())
         ).first()
 
-        # If not found, try by email (case‑insensitive)
         if not u:
+            # Try by email
             u = db.query(models.User).filter(
                 models.User.email.ilike(username.strip())
             ).first()
 
-        # If user not found
         if not u:
             raise HTTPException(404, "Account not found. Please sign up first.")
 
-        # Check password
         if not verify_password(password, u.hashed_password):
             raise HTTPException(401, "Incorrect password. Try again.")
-            
-        # Check if account is suspended
+
         if getattr(u, "is_suspended", 0):
             raise HTTPException(403, "Account suspended. Contact support.")
 
-        # Success – create response
         resp = JSONResponse({
             "success": True,
-            "user_id": u.id,
+            "user_id": str(u.id),
             "username": u.username,
             "role": getattr(u, "role", "user"),
             "is_premium": getattr(u, "is_premium", 0)
         })
-        resp.set_cookie("user_session", u.id, max_age=60*60*24*30, path="/", samesite="lax")
+        resp.set_cookie("user_session", str(u.id), max_age=60*60*24*30, path="/", samesite="lax")
         return resp
 
     except HTTPException:
@@ -571,7 +560,7 @@ async def get_me(request: Request, db: Session = Depends(get_db)):
     if not sid: raise HTTPException(401, "Not logged in")
     u = db.query(models.User).filter(models.User.id == sid).first()
     if not u: raise HTTPException(401, "User not found")
-    return {"id": u.id, "username": u.username, "email": u.email,
+    return {"id": str(u.id), "username": u.username, "email": u.email,
             "role": getattr(u,"role","user"), "is_premium": getattr(u,"is_premium",0),
             "bio": getattr(u,"bio",""), "avatar_url": getattr(u,"avatar_url",""),
             "channel_name": getattr(u,"channel_name",""), "channel_desc": getattr(u,"channel_desc",""),
@@ -601,7 +590,7 @@ async def update_me(
 async def admin_users(request: Request, db: Session = Depends(get_db)):
     if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
     users = db.query(models.User).order_by(models.User.created_at.desc()).all()
-    return [{"id":u.id,"username":u.username,"email":u.email,
+    return [{"id":str(u.id),"username":u.username,"email":u.email,
              "role":getattr(u,"role","user"),"is_premium":getattr(u,"is_premium",0),
              "is_suspended":getattr(u,"is_suspended",0)} for u in users]
 
@@ -661,7 +650,7 @@ async def get_posts(
             "content_type": getattr(p,"content_type","article") or "article",
             "status": getattr(p,"status","published") or "published",
             "is_locked": getattr(p,"is_locked",0) or 0,
-            "author_id": getattr(p,"author_id","") or "",
+            "author_id": str(p.author_id) if p.author_id else "",
             "author_username": getattr(p,"author_username","") or "",
             "region_id": getattr(p,"region_id",None),
             "tags": getattr(p,"tags","") or "",
@@ -699,10 +688,10 @@ async def create_post(
     db: Session = Depends(get_db)
 ):
     try:
-        # ── Identify author ──────────────────────────────────────────────────
         sid       = request.cookies.get("user_session")
         is_admin  = request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
-        author_id = ""; author_username = "Creator"
+        author_id = None
+        author_username = "Creator"
 
         if sid:
             try:
@@ -713,14 +702,13 @@ async def create_post(
             except Exception:
                 pass
         if not author_id and is_admin:
-            author_id = "admin"; author_username = "Admin"
+            author_id = None   # admin posts can have null author? Or use a placeholder UUID? Better to keep null or set a dummy UUID? We'll keep as None.
+            author_username = "Admin"
 
-        # ── Build slug (unique) ──────────────────────────────────────────────
         base = slugify(title); slug = base; n = 1
         while db.query(models.Post).filter(models.Post.slug == slug).first():
             slug = f"{base}-{n}"; n += 1
 
-        # ── Create post ──────────────────────────────────────────────────────
         locked = is_locked in ("true","1","True")
         rid    = int(region_id) if region_id and str(region_id).isdigit() else None
 
@@ -741,7 +729,6 @@ async def create_post(
             likes          = 0,
         )
 
-        # Optional columns — safe set
         for attr, val in [("audio_url",audio_url),("video_url",video_url),("gallery",gallery)]:
             try: setattr(post, attr, val.strip())
             except Exception: pass
@@ -772,7 +759,8 @@ async def get_post(post_id: int, db: Session = Depends(get_db)):
             "excerpt": getattr(p,"excerpt",""), "content": getattr(p,"content",""),
             "cover_image": getattr(p,"cover_image",""), "content_type": getattr(p,"content_type","article"),
             "status": getattr(p,"status","published"), "is_locked": getattr(p,"is_locked",0),
-            "author_id": getattr(p,"author_id",""), "author_username": getattr(p,"author_username",""),
+            "author_id": str(p.author_id) if p.author_id else "",
+            "author_username": getattr(p,"author_username",""),
             "region_id": getattr(p,"region_id",None), "tags": getattr(p,"tags",""),
             "views": getattr(p,"views",0), "view_count": getattr(p,"views",0),
             "likes": getattr(p,"likes",0),
@@ -831,14 +819,18 @@ async def get_comments(post_id: int, db: Session = Depends(get_db)):
 async def add_comment(
     post_id: int, request: Request, content: str = Form(...), db: Session = Depends(get_db)
 ):
-    sid = request.cookies.get("user_session"); username = "Guest"; uid = sid or "guest"
+    sid = request.cookies.get("user_session")
+    username = "Guest"
+    user_id = None
     if sid:
         try:
             u = db.query(models.User).filter(models.User.id == sid).first()
-            if u: username = u.username
+            if u:
+                user_id = u.id
+                username = u.username
         except Exception: pass
     try:
-        c = models.Comment(post_id=post_id, user_id=uid, username=username, content=content.strip())
+        c = models.Comment(post_id=post_id, user_id=user_id, username=username, content=content.strip())
         db.add(c); db.commit(); return {"success": True, "id": c.id}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
@@ -891,7 +883,7 @@ async def get_following(request: Request, db: Session = Depends(get_db)):
     sid = request.cookies.get("user_session")
     if not sid: return []
     try:
-        return [f.following_id for f in db.query(models.Follow).filter(models.Follow.follower_id == sid).all()]
+        return [str(f.following_id) for f in db.query(models.Follow).filter(models.Follow.follower_id == sid).all()]
     except Exception: return []
 
 @app.get("/api/creators")
@@ -900,7 +892,7 @@ async def get_creators(db: Session = Depends(get_db)):
         creators = db.query(models.User).filter(
             models.User.role.in_(["creator","admin","superuser"])
         ).limit(20).all()
-        return [{"id":u.id,"username":u.username,
+        return [{"id":str(u.id),"username":u.username,
                  "channel_name":getattr(u,"channel_name","") or u.username,
                  "avatar_url":getattr(u,"avatar_url","")} for u in creators]
     except Exception: return []
@@ -1061,7 +1053,7 @@ async def publish_file(
         p = models.Post(title=title, slug=slugify(title), excerpt=description[:200],
                         content=description, content_type=content_type, status="published",
                         cover_image=url if content_type == "article" else "",
-                        author_id="admin", author_username="Admin",
+                        author_id=None, author_username="Admin",
                         region_id=rid, views=0, likes=0)
         try: setattr(p, "video_url", url if content_type=="video" else "")
         except Exception: pass
@@ -1165,14 +1157,18 @@ def get_chat(limit: int = 50, db: Session = Depends(get_db)):
 
 @app.post("/api/chat")
 async def post_chat(request: Request, content: str = Form(...), db: Session = Depends(get_db)):
-    sid = request.cookies.get("user_session"); username = "Guest"
+    sid = request.cookies.get("user_session")
+    username = "Guest"
+    user_id = None
     if sid:
         try:
-            u = db.query(models.User).filter(models.User.id==sid).first()
-            if u: username = u.username
+            u = db.query(models.User).filter(models.User.id == sid).first()
+            if u:
+                user_id = u.id
+                username = u.username
         except Exception: pass
     try:
-        db.add(models.ChatMessage(content=content.strip(), username=username, user_id=sid or "guest"))
+        db.add(models.ChatMessage(content=content.strip(), username=username, user_id=user_id))
         db.commit(); return {"success":True}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
@@ -1192,10 +1188,11 @@ def get_stories(db: Session = Depends(get_db)):
 @app.post("/api/stories")
 async def submit_story(request: Request, title: str = Form(...), content: str = Form(...),
                        region: str = Form(""), db: Session = Depends(get_db)):
-    sid = request.cookies.get("user_session"); author = "Anonymous"
+    sid = request.cookies.get("user_session")
+    author = "Anonymous"
     if sid:
         try:
-            u = db.query(models.User).filter(models.User.id==sid).first()
+            u = db.query(models.User).filter(models.User.id == sid).first()
             if u: author = u.username
         except Exception: pass
     try:
@@ -1212,7 +1209,7 @@ async def ai_chat(request: Request, message: str = Form(...),
     sid = request.cookies.get("user_session")
     if sid:
         try:
-            u = db.query(models.User).filter(models.User.id==sid).first()
+            u = db.query(models.User).filter(models.User.id == sid).first()
             if u and not getattr(u,"is_premium",0):
                 return {"reply":"EchoBot is for premium members. Upgrade to unlock! ⭐","locked":True}
         except Exception: pass
