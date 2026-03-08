@@ -436,9 +436,8 @@ footer{background:rgba(0,0,0,.4);border-top:1px solid rgba(255,255,255,.06);padd
     <a href="/app">Explore</a>
     <a href="/signup">Sign Up</a>
     <a href="/user-login">Sign In</a>
-    <a href="/login">Admin</a>
   </div>
-  <p class="footer-copy">© 2026 EchoStack Ghana. Made with ❤️ for Africa.</p>
+  <p class="footer-copy">© 2026 EchoStack Ghana. Built by <a href="#" style="color:var(--gold);text-decoration:none;font-weight:600">Mireku Development</a></p>
 </footer>
 
 <!-- REGION MODAL -->
@@ -475,13 +474,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderRegions(allRegions);
 
     // Update stats
-    const statEl = document.getElementById('stat-stories');
-    if (statsResp && statsResp.ok) {
-      const stats = await statsResp.json();
-      statEl.textContent = stats.total_posts || allRegions.length + '+';
-    } else {
-      statEl.textContent = allRegions.length + '+';
-    }
+    document.getElementById('stat-stories').textContent = '1,000+';
   } catch(e) {
     document.getElementById('regions-grid').innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:.85rem;grid-column:1/-1;text-align:center;padding:20px">Failed to load regions. Please refresh.</p>';
   }
