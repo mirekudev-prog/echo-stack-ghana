@@ -486,7 +486,14 @@ async def user_settings_page(request: Request):
 async def post_page(pid: int, request: Request):
     # Posts are publicly viewable (locked content is handled client-side)
     return _serve("post.html")
-
+    
+@app.get("/logout")
+async def logout_redirect():
+    """Clear user session and redirect to home."""
+    r = RedirectResponse(url="/")
+    r.delete_cookie("user_session", path="/")
+    return r
+    
 # ─── MANIFEST / SERVICE WORKER / ASSETS ──────────────────────────────────────
 @app.get("/manifest.json")
 def manifest():
