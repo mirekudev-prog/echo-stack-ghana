@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, File, Cookie
+from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
@@ -418,13 +418,12 @@ def explore_page(): return _serve("explore.html")
 
 @app.get("/archive")
 def archive_page(): return _serve("archive.html")
-    
-@app.get("/chat")
-def chat_page(): 
-    return _serve("community_chat.html") 
-    
-    @app.get("/community")
+
+@app.get("/community")
 def community_page(): return _serve("community_chat.html")
+
+@app.get("/chat")
+def chat_page(): return _serve("community_chat.html")
 
 # ─── PROTECTED PAGES (user OR admin can access) ───────────────────────────────
 @app.get("/app")
@@ -456,13 +455,13 @@ async def following_page(request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("following.html")
     return RedirectResponse("/user-login")
-    
+
 @app.get("/subscriptions")
 async def subscriptions_page(request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("subscriptions.html")
     return RedirectResponse("/user-login")
-    
+
 @app.get("/user")
 async def user_page(request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
@@ -474,37 +473,14 @@ async def user_profile_page(uname: str, request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("user_profile.html")
     return RedirectResponse("/user-login")
-    
-# ─── USER SETTINGS PAGE (NEW ROUTE) ────────────────────────────────────────
+
 @app.get("/user-settings")
 async def user_settings_page(request: Request):
-    """User Settings page - requires login"""
-    if not _is_admin(request) and not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    if os.path.exists("user_settings.html"):
-        return FileResponse("user_settings.html")
-    raise HTTPException(404, "user_settings.html not found")
-    
-@app.post("/api/users/change-password")
-async def change_password(
-  request: Request,
-  current_password: str = Form(...),
-  new_password: str = Form(...),
-  db: Session = Depends(get_db)
-):
-  sid = request.cookies.get("user_session")
-  u = db.query(models.User).filter(models.User.id == sid).first()
-  if not u: raise HTTPException(401, "Not authenticated")
-  
-  if not pwd_context.verify(current_password, u.hashed_password):
-    raise HTTPException(403, "Incorrect current password")
-  
-  if len(new_password) < 6:
-    raise HTTPException(400, "Password too short")
-  
-  u.hashed_password = get_password_hash(new_password)
-  db.commit()
-  return {"success": True, "message": "Password changed successfully"}
+    if _is_admin(request) or request.cookies.get("user_session"):
+        if os.path.exists("user_settings.html"):
+            return FileResponse("user_settings.html")
+        raise HTTPException(404, "user_settings.html not found")
+    return RedirectResponse("/user-login")
 
 @app.get("/post/{pid}")
 async def post_page(pid: int, request: Request):
@@ -619,10 +595,8 @@ async def signup(
             hashed_password=hashed, role="user",
             is_premium=0, is_suspended=0, follower_count=0,
             bio="", avatar_url="", channel_name=uname, channel_desc="",
-            # ── FIX: mark verified immediately so login works right away ──
-            # When Resend is live, flip this to False and uncomment the
-            # send_verification_email call below.
-            email_verified=True,
+            # Email verification enabled: user must verify before login
+            email_verified=False,
             verification_token=verification_token,
             verification_token_expires=token_expires
         )
@@ -655,30 +629,18 @@ async def signup(
         db.refresh(u)
         print(f"✅ New user: {uname} ({uemail}) id={uid}")
 
-        # ── Attempt to send verification email (non-blocking) ──
-        # Even though email_verified=True, we still send a welcome/verify email
-        # so the flow is ready when you want to enforce verification later.
+        # Send verification email (non-blocking)
         try:
             send_verification_email(uemail, uname, verification_token)
         except Exception as e:
             print(f"⚠️ Verification email failed (non-fatal): {e}")
 
-        # ── Log user in immediately after signup ──
-        resp = JSONResponse({
+        # Do NOT log the user in immediately; they must verify first
+        return JSONResponse({
             "success":  True,
-            "message":  "Account created! Welcome to EchoStack 🇬🇭",
-            "user_id":  str(u.id),
-            "username": u.username,
-            "email":    u.email,
-            "role":     u.role,
-            "is_premium": bool(u.is_premium),
-            "avatar_url": u.avatar_url or "",
-            "plan":     "premium" if u.is_premium else "free",
-            "loggedIn": True,
+            "message":  "Account created! Please check your email to verify your account.",
+            "needs_verification": True
         })
-        resp.set_cookie("user_session", str(u.id),
-                        max_age=86400 * 14, path="/", httponly=False, samesite="lax")
-        return resp
 
     except HTTPException:
         db.rollback(); raise
@@ -686,7 +648,6 @@ async def signup(
         db.rollback()
         import traceback; traceback.print_exc()
         raise HTTPException(500, f"Signup failed: {str(e)}")
-
 
 @app.post("/api/users/login")
 async def user_login(
@@ -715,7 +676,7 @@ async def user_login(
         if getattr(u, "is_suspended", 0):
             raise HTTPException(403, "Account suspended. Contact support.")
 
-        # ── email_verified check: skip for admins/superusers ──
+        # Check email verification (skip for admins/superusers)
         role = getattr(u, "role", "user") or "user"
         if not getattr(u, "email_verified", False) and role not in ("admin", "superuser"):
             raise HTTPException(403, "UNVERIFIED:Please verify your email before logging in. Check your inbox.")
@@ -740,7 +701,6 @@ async def user_login(
     except Exception as e:
         raise HTTPException(500, str(e))
 
-
 @app.get("/api/users/verify-email")
 async def verify_email_endpoint(token: str, db: Session = Depends(get_db)):
     try:
@@ -759,7 +719,6 @@ async def verify_email_endpoint(token: str, db: Session = Depends(get_db)):
         raise
     except Exception as e:
         raise HTTPException(500, str(e))
-
 
 @app.post("/api/users/resend-verification")
 async def resend_verification(email: str = Form(...), db: Session = Depends(get_db)):
@@ -783,7 +742,6 @@ async def resend_verification(email: str = Form(...), db: Session = Depends(get_
     except Exception as e:
         raise HTTPException(500, str(e))
 
-
 @app.post("/api/users/forgot-password")
 async def forgot_password(email: str = Form(...), db: Session = Depends(get_db)):
     try:
@@ -803,7 +761,6 @@ async def forgot_password(email: str = Form(...), db: Session = Depends(get_db))
     except Exception as e:
         print(f"Forgot password error: {e}")
         return {"success": True, "message": "If an account exists, a reset link was sent."}
-
 
 @app.post("/api/users/reset-password")
 async def reset_password(
@@ -826,13 +783,11 @@ async def reset_password(
     except Exception as e:
         raise HTTPException(500, str(e))
 
-
 @app.post("/api/users/logout")
 def user_logout():
     r = JSONResponse({"success": True})
     r.delete_cookie("user_session", path="/")
     return r
-
 
 @app.get("/api/users/me")
 async def get_me(request: Request, db: Session = Depends(get_db)):
@@ -863,7 +818,6 @@ async def get_me(request: Request, db: Session = Depends(get_db)):
         "loggedIn": True,
     }
 
-
 @app.put("/api/users/me")
 async def update_me(
     request: Request,
@@ -887,6 +841,26 @@ async def update_me(
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
+@app.post("/api/users/change-password")
+async def change_password(
+    request: Request,
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    sid = request.cookies.get("user_session")
+    u = db.query(models.User).filter(models.User.id == sid).first()
+    if not u: raise HTTPException(401, "Not authenticated")
+
+    if not pwd_context.verify(current_password, u.hashed_password):
+        raise HTTPException(403, "Incorrect current password")
+
+    if len(new_password) < 6:
+        raise HTTPException(400, "Password too short")
+
+    u.hashed_password = get_password_hash(new_password)
+    db.commit()
+    return {"success": True, "message": "Password changed successfully"}
 
 # ─── ADMIN USER MANAGEMENT ───────────────────────────────────────────────────
 @app.get("/api/admin/users")
@@ -1585,7 +1559,7 @@ def delete_event(eid: int, db: Session = Depends(get_db)):
     if not e: raise HTTPException(404)
     db.delete(e); db.commit(); return {"success": True}
 
-# ─── CHAT ────────────────────────────────────────────────────────────────────
+# ─── CHAT (UPDATED: uses 'message' form field to match frontend) ─────────────
 @app.get("/api/chat")
 def get_chat(limit: int = 50, db: Session = Depends(get_db)):
     try:
@@ -1599,7 +1573,7 @@ def get_chat(limit: int = 50, db: Session = Depends(get_db)):
 
 @app.post("/api/chat")
 async def post_chat(
-    request: Request, content: str = Form(...), db: Session = Depends(get_db)
+    request: Request, message: str = Form(...), db: Session = Depends(get_db)
 ):
     sid = request.cookies.get("user_session")
     username = "Guest"; user_id = None
@@ -1612,7 +1586,7 @@ async def post_chat(
     if _is_admin(request) and not user_id:
         username = "Admin"
     try:
-        db.add(models.ChatMessage(content=content.strip(), username=username, user_id=user_id))
+        db.add(models.ChatMessage(content=message.strip(), username=username, user_id=user_id))
         db.commit()
         return {"success": True}
     except Exception as e:
