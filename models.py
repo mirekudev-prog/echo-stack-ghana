@@ -1,10 +1,11 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from database import Base
 
 
-# ─── TOPIC (moved to the top) ─────────────────────────────────────────────────
+# ─── TOPIC (must be first) ───────────────────────────────────────────────────
 class Topic(Base):
     __tablename__ = "topics"
 
@@ -16,7 +17,7 @@ class Topic(Base):
 class UserTopic(Base):
     __tablename__ = "user_topics"
 
-    user_id  = Column(String(36), ForeignKey("users.id"), primary_key=True)
+    user_id  = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
     topic_id = Column(Integer, ForeignKey("topics.id"), primary_key=True)
 
 
@@ -47,7 +48,7 @@ class Region(Base):
 class User(Base):
     __tablename__ = "users"
 
-    id              = Column(String(36), primary_key=True, index=True)
+    id              = Column(UUID(as_uuid=True), primary_key=True, index=True)
     username        = Column(String(100), unique=True, nullable=False)
     email           = Column(String(200), unique=True, nullable=False)
     hashed_password = Column(String(255), default="")
@@ -76,7 +77,7 @@ class Post(Base):
     content_type    = Column(String(50), default="article")
     status          = Column(String(50), default="draft")
     is_locked       = Column(Integer, default=0)
-    author_id       = Column(String(36), default="")
+    author_id       = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     author_username = Column(String(200), default="")
     region_id       = Column(Integer, ForeignKey("regions.id"), nullable=True)
     tags            = Column(Text, default="")
@@ -95,7 +96,7 @@ class Comment(Base):
 
     id         = Column(Integer, primary_key=True, index=True)
     post_id    = Column(Integer, ForeignKey("posts.id"), nullable=True)
-    user_id    = Column(String(36), default="")
+    user_id    = Column(UUID(as_uuid=True), nullable=True)
     username   = Column(String(200), default="")
     content    = Column(Text, default="")
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -106,8 +107,8 @@ class Follow(Base):
     __tablename__ = "follows"
 
     id           = Column(Integer, primary_key=True, index=True)
-    follower_id  = Column(String(36), default="")
-    following_id = Column(String(36), default="")
+    follower_id  = Column(UUID(as_uuid=True), nullable=True)
+    following_id = Column(UUID(as_uuid=True), nullable=True)
     created_at   = Column(DateTime, default=datetime.utcnow)
 
 
@@ -170,7 +171,7 @@ class ChatMessage(Base):
     __tablename__ = "chat_messages"
 
     id         = Column(Integer, primary_key=True, index=True)
-    user_id    = Column(String(36), default="guest")
+    user_id    = Column(UUID(as_uuid=True), nullable=True)
     username   = Column(String(200), default="Guest")
     content    = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -194,7 +195,7 @@ class Payment(Base):
     __tablename__ = "payments"
 
     id         = Column(Integer, primary_key=True, index=True)
-    user_id    = Column(String(36), default="")
+    user_id    = Column(UUID(as_uuid=True), nullable=True)
     email      = Column(String(200))
     amount     = Column(Integer, default=0)
     reference  = Column(String(200))
