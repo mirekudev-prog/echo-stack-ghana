@@ -20,11 +20,10 @@ def send_verification_email(email, username, token):
     
     try:
         app_url = os.getenv("SITE_URL", "https://echostackgh.onrender.com")
-        
-        # Link to verify
         verify_link = f"{app_url}/verify-email?token={token}"
         
-        resend.Email.send({
+        # ✅ FIX: use resend.Emails.send (plural) instead of resend.Email.send
+        resend.Emails.send({
             "from": os.getenv("RESEND_FROM_EMAIL", "EchoStack <onboarding@resend.dev>"),
             "to": [email],
             "subject": "Welcome to EchoStack Ghana - Verify Your Email",
@@ -58,7 +57,7 @@ def send_password_reset_email(email, username, token):
         app_url = os.getenv("SITE_URL", "https://echostackgh.onrender.com")
         reset_link = f"{app_url}/reset-password?token={token}"
         
-        resend.Email.send({
+        resend.Emails.send({
             "from": os.getenv("RESEND_FROM_EMAIL", "EchoStack <onboarding@resend.dev>"),
             "to": [email],
             "subject": "Password Reset Request - EchoStack",
