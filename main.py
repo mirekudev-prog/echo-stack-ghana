@@ -1627,7 +1627,7 @@ async def submit_story(
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
-# ─── AI ECHOBOT ──────────────────────────────────────────────────────────────
+# ─── AI ECHOBOT (updated with future‑proof endpoint) ─────────────────────
 @app.post("/api/ai/chat")
 async def ai_chat(
     request: Request, message: str = Form(...),
@@ -1648,21 +1648,30 @@ async def ai_chat(
                      f"with rich heritage. Explore EchoStack to discover more! 🇬🇭",
             "locked": False
         }
+
+    # Use the modern inference endpoint recommended by Hugging Face
+    inference_url = "https://router.huggingface.co/hf-inference/models/google/flan-t5-small"
+    # Fallback to classic endpoint (still works in many cases)
+    # inference_url = "https://api-inference.huggingface.co/models/google/flan-t5-small"
+
     try:
         prompt = (f"You are EchoBot, a Ghana heritage AI. "
                   f"Context: {region_context}. User: {message}. "
                   f"Answer helpfully about Ghana.")
         async with httpx.AsyncClient(timeout=20) as c:
             r = await c.post(
-                "https://api-inference.huggingface.co/models/google/flan-t5-small",
+                inference_url,
                 headers={"Authorization": f"Bearer {HF_TOKEN}"},
                 json={"inputs": prompt, "parameters": {"max_new_tokens": 200}}
             )
         d = r.json()
         reply = d[0]["generated_text"] if isinstance(d, list) else str(d)
         return {"reply": reply, "locked": False}
-    except Exception:
+    except Exception as e:
+        print(f"EchoBot error: {e}")
+        # Graceful fallback
         return {"reply": "EchoBot is resting. Try again soon! 🤖", "locked": False}
+  
 
 # ─── PAYMENTS ────────────────────────────────────────────────────────────────
 @app.post("/api/payments/initialize")
