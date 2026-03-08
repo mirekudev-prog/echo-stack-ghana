@@ -240,6 +240,32 @@ def _run_migrations():
 _run_startup_sql()
 _run_migrations()
 
+def _seed_topics():
+    """Insert the default Ghana‑heritage topics if they don't already exist."""
+    default_topics = [
+        "Ashanti Culture","Ga Traditions","Ewe Music","Northern Heritage",
+        "Gold Coast History","Slave Castles","Highlife Music","Traditional Drums",
+        "Kente Cloth","Fante Language","Mole National Park","Kakum Forest",
+        "Lake Volta","Twi Language","Dagomba Stories","Chieftaincy",
+        "Oral Histories","Modern Ghana Art","Afrobeats History","Festivals & Ceremonies"
+    ]
+    try:
+        with engine.connect() as conn:
+            for topic in default_topics:
+                conn.execute(
+                    text("INSERT INTO topics (name) VALUES (:name) ON CONFLICT (name) DO NOTHING"),
+                    {"name": topic}
+                )
+            conn.commit()
+        print("✅ Topics seeded")
+    except Exception as e:
+        print(f"Topics seeding note: {e}")
+
+# Call it after migrations
+_run_startup_sql()
+_run_migrations()
+_seed_topics()
+        
 # ─── APP ──────────────────────────────────────────────────────────────────────
 app = FastAPI(title="EchoStack API")
 
