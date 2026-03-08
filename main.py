@@ -418,8 +418,12 @@ def explore_page(): return _serve("explore.html")
 
 @app.get("/archive")
 def archive_page(): return _serve("archive.html")
-
-@app.get("/community")
+    
+@app.get("/chat")
+def chat_page(): 
+    return _serve("community_chat.html") 
+    
+    @app.get("/community")
 def community_page(): return _serve("community_chat.html")
 
 # ─── PROTECTED PAGES (user OR admin can access) ───────────────────────────────
