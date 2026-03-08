@@ -7,4 +7,4 @@ aiofiles==23.2.1
 passlib==1.7.4
 bcrypt==3.2.2
 httpx==0.25.2
-resend>=2.0.0
+resend==3.6.0
