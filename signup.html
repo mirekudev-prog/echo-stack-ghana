@@ -17,77 +17,40 @@
             --success:#16A34A;--danger:#DC2626
         }
         html,body{min-height:100vh}
-        body{
-            font-family:'DM Sans',sans-serif;
-            background:var(--ink);color:#fff;
-            display:flex;min-height:100svh;
-        }
+        body{font-family:'DM Sans',sans-serif;background:var(--ink);color:#fff;display:flex;min-height:100svh}
 
-        /* ── LEFT PANEL (desktop only) ── */
         .left-panel{
             width:380px;flex-shrink:0;
             background:linear-gradient(160deg,#0a1520 0%,#0D1B2A 60%,rgba(200,150,46,.08) 100%);
             border-right:1px solid rgba(255,255,255,.06);
-            padding:40px 36px;
-            display:flex;flex-direction:column;
-            position:relative;overflow:hidden
+            padding:40px 36px;display:flex;flex-direction:column;position:relative;overflow:hidden
         }
-        .left-panel::before{
-            content:'✦';position:absolute;bottom:-20px;right:-20px;
-            font-size:200px;opacity:.03;line-height:1;pointer-events:none
-        }
+        .left-panel::before{content:'✦';position:absolute;bottom:-20px;right:-20px;font-size:200px;opacity:.03;line-height:1;pointer-events:none}
         .left-logo{display:flex;align-items:center;gap:10px;margin-bottom:48px}
         .left-logo img{width:36px;height:36px;border-radius:8px}
         .left-logo span{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold)}
-        .left-badge{
-            display:inline-flex;align-items:center;gap:6px;
-            padding:5px 12px;border-radius:30px;
-            background:rgba(200,150,46,.12);border:1px solid rgba(200,150,46,.3);
-            font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-            color:var(--gold2);margin-bottom:20px
-        }
-        .left-headline{
-            font-family:'Playfair Display',serif;
-            font-size:2.2rem;font-weight:900;line-height:1.15;
-            color:#fff;margin-bottom:16px
-        }
+        .left-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:30px;background:rgba(200,150,46,.12);border:1px solid rgba(200,150,46,.3);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2);margin-bottom:20px}
+        .left-headline{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;line-height:1.15;color:#fff;margin-bottom:16px}
         .left-headline em{font-style:italic;color:var(--gold2)}
         .left-sub{font-size:.88rem;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:40px}
         .left-features{display:flex;flex-direction:column;gap:14px;margin-top:auto}
         .left-feat{display:flex;align-items:center;gap:12px}
-        .left-feat-icon{
-            width:36px;height:36px;border-radius:10px;
-            background:rgba(200,150,46,.1);border:1px solid rgba(200,150,46,.2);
-            display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0
-        }
+        .left-feat-icon{width:36px;height:36px;border-radius:10px;background:rgba(200,150,46,.1);border:1px solid rgba(200,150,46,.2);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
         .left-feat-text{font-size:.82rem;color:rgba(255,255,255,.6)}
         .left-feat-text strong{color:#fff;font-weight:600;display:block;font-size:.85rem}
 
-        /* ── RIGHT PANEL ── */
-        .right-panel{
-            flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-            padding:32px 24px;overflow-y:auto;min-height:100svh
-        }
+        .right-panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;min-height:100svh}
         .form-box{width:100%;max-width:440px}
 
-        /* Steps */
         .step{display:none}
         .step.active{display:block}
 
-        /* Progress */
         .progress-wrap{margin-bottom:28px}
         .progress-steps{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-        .prog-step{
-            display:flex;align-items:center;gap:6px;
-            font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)
-        }
+        .prog-step{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
         .prog-step.done{color:var(--success)}
         .prog-step.active{color:var(--gold)}
-        .prog-circle{
-            width:22px;height:22px;border-radius:50%;
-            background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);
-            display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700
-        }
+        .prog-circle{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700}
         .prog-step.done .prog-circle{background:var(--success);border-color:var(--success);color:#fff}
         .prog-step.active .prog-circle{background:var(--gold);border-color:var(--gold);color:var(--ink)}
         .prog-line{flex:1;height:2px;background:rgba(255,255,255,.08);border-radius:1px}
@@ -95,102 +58,49 @@
         .progress-bar{height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
         .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .4s ease;border-radius:2px}
 
-        /* Step title */
         .step-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:6px}
         .step-sub{font-size:.85rem;color:var(--muted);margin-bottom:24px}
 
-        /* Form fields */
         .field{margin-bottom:16px}
         .field label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-        .field input{
-            width:100%;padding:13px 16px;
-            background:rgba(255,255,255,.05);
-            border:1.5px solid rgba(255,255,255,.1);
-            border-radius:12px;color:#fff;
-            font-family:'DM Sans',sans-serif;font-size:.95rem;
-            outline:none;transition:border-color .2s;
-            -webkit-appearance:none
-        }
+        .field input{width:100%;padding:13px 16px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;-webkit-appearance:none}
         .field input:focus{border-color:var(--gold);background:rgba(200,150,46,.05)}
         .field input::placeholder{color:rgba(255,255,255,.25)}
         .field-hint{font-size:.7rem;color:var(--muted);margin-top:4px}
 
-        /* Password strength & toggle */
         .pw-wrap{position:relative}
         .pw-wrap input{padding-right:46px}
-        .pw-toggle{
-            position:absolute;right:14px;top:50%;transform:translateY(-50%);
-            background:none;border:none;color:var(--muted);cursor:pointer;
-            font-size:.85rem;padding:4px;transition:color .15s
-        }
+        .pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px;transition:color .15s}
         .pw-toggle:hover{color:#fff}
         .pw-strength{height:3px;border-radius:2px;background:rgba(255,255,255,.08);margin-top:6px;overflow:hidden}
         .pw-fill{height:100%;border-radius:2px;width:0;transition:all .3s}
 
-        /* Primary button */
-        .btn-primary{
-            width:100%;padding:14px;border-radius:50px;
-            background:linear-gradient(135deg,var(--gold),var(--gold2));
-            border:none;color:var(--ink);font-family:'DM Sans',sans-serif;
-            font-size:.95rem;font-weight:700;cursor:pointer;
-            transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
-            box-shadow:0 4px 20px rgba(200,150,46,.3)
-        }
+        .btn-primary{width:100%;padding:14px;border-radius:50px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(200,150,46,.3)}
         .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(200,150,46,.45)}
         .btn-primary:active{transform:scale(.98)}
         .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
-        .btn-ghost-link{
-            background:none;border:none;color:var(--muted);font-size:.82rem;
-            cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;transition:color .15s
-        }
+        .btn-ghost-link{background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;transition:color .15s}
         .btn-ghost-link:hover{color:#fff}
 
-        /* Topics grid */
         .topics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px}
         @media(min-width:400px){.topics-grid{grid-template-columns:repeat(3,1fr)}}
-        .topic-chip{
-            padding:9px 10px;border-radius:10px;text-align:center;
-            border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);
-            cursor:pointer;transition:all .15s;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.7)
-        }
+        .topic-chip{padding:9px 10px;border-radius:10px;text-align:center;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);cursor:pointer;transition:all .15s;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.7)}
         .topic-chip:hover{border-color:rgba(200,150,46,.5);color:#fff}
-        .topic-chip.sel{
-            border-color:var(--gold);background:rgba(200,150,46,.15);
-            color:var(--gold2);box-shadow:0 0 0 1px rgba(200,150,46,.3)
-        }
-        .sel-count{
-            font-size:.78rem;font-weight:600;color:var(--gold);margin-bottom:14px;
-            display:flex;align-items:center;justify-content:space-between
-        }
+        .topic-chip.sel{border-color:var(--gold);background:rgba(200,150,46,.15);color:var(--gold2);box-shadow:0 0 0 1px rgba(200,150,46,.3)}
+        .sel-count{font-size:.78rem;font-weight:600;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
 
-        /* Divider */
-        .divider{display:flex;align-items:center;gap:10px;margin:16px 0}
-        .divider span{font-size:.72rem;color:rgba(255,255,255,.25);white-space:nowrap}
-        .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
-
-        /* Toast */
-        .toast{
-            position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
-            background:rgba(13,27,42,.95);color:#fff;padding:11px 20px;
-            border-radius:10px;font-size:.83rem;font-weight:500;
-            box-shadow:0 4px 20px rgba(0,0,0,.3);transition:all .25s;
-            z-index:500;opacity:0;white-space:nowrap;pointer-events:none;
-            border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(8px)
-        }
+        .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(13,27,42,.95);color:#fff;padding:11px 20px;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:all .25s;z-index:500;opacity:0;white-space:nowrap;pointer-events:none;border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(8px)}
         .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
         .toast.ok{background:rgba(22,163,74,.9)}
         .toast.er{background:rgba(220,38,38,.9)}
 
-        /* Spinner */
         .spin{width:18px;height:18px;border:2.5px solid rgba(13,27,42,.3);border-top-color:var(--ink);border-radius:50%;animation:sp .6s linear infinite;display:inline-block}
         @keyframes sp{to{transform:rotate(360deg)}}
 
-        /* Sign-in link */
         .signin-row{text-align:center;margin-top:20px;font-size:.83rem;color:var(--muted)}
         .signin-row a{color:var(--gold);text-decoration:none;font-weight:600}
         .signin-row a:hover{color:var(--gold2)}
 
-        /* Mobile: hide left panel */
         @media(max-width:767px){
             .left-panel{display:none}
             .right-panel{padding:28px 20px}
@@ -199,7 +109,6 @@
 </head>
 <body>
 
-<!-- LEFT PANEL -->
 <div class="left-panel">
     <div class="left-logo">
         <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
@@ -224,11 +133,9 @@
     </div>
 </div>
 
-<!-- RIGHT PANEL -->
 <div class="right-panel">
     <div class="form-box">
 
-        <!-- Progress -->
         <div class="progress-wrap">
             <div class="progress-steps">
                 <div class="prog-step active" id="prog1">
@@ -244,7 +151,7 @@
             <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:50%"></div></div>
         </div>
 
-        <!-- STEP 1: Account details -->
+        <!-- STEP 1 -->
         <div class="step active" id="step-1">
             <h2 class="step-title">Create Your Account</h2>
             <p class="step-sub">Free forever — no credit card needed</p>
@@ -261,7 +168,7 @@
                 <label>Password <span style="color:var(--danger)">*</span></label>
                 <div class="pw-wrap">
                     <input type="password" id="password" placeholder="Minimum 6 characters" autocomplete="new-password" oninput="checkPwStrength(this.value)">
-                    <button class="pw-toggle" type="button" onclick="togglePw()" id="pw-eye" title="Show/hide password">👁</button>
+                    <button class="pw-toggle" type="button" onclick="togglePw()" id="pw-eye">👁</button>
                 </div>
                 <div class="pw-strength"><div class="pw-fill" id="pw-fill"></div></div>
                 <div class="field-hint" id="pw-hint">Enter a password</div>
@@ -270,16 +177,11 @@
             <div style="margin-top:24px">
                 <button class="btn-primary" onclick="goToStep2()">Continue →</button>
             </div>
-
-            <div class="signin-row">
-                Already have an account? <a href="/user-login">Sign In</a>
-            </div>
-            <div class="signin-row" style="margin-top:8px">
-                <a href="/" style="color:var(--muted);font-size:.78rem">← Back to Home</a>
-            </div>
+            <div class="signin-row">Already have an account? <a href="/user-login">Sign In</a></div>
+            <div class="signin-row" style="margin-top:8px"><a href="/" style="color:var(--muted);font-size:.78rem">← Back to Home</a></div>
         </div>
 
-        <!-- STEP 2: Interests -->
+        <!-- STEP 2 -->
         <div class="step" id="step-2">
             <h2 class="step-title">Pick your interests</h2>
             <p class="step-sub">Select <strong style="color:var(--gold)">3 topics</strong> — we'll tailor your feed</p>
@@ -294,10 +196,7 @@
             <button class="btn-primary" id="create-btn" disabled onclick="completeSignup()">
                 ✨ Create Free Account
             </button>
-
-            <div class="signin-row" style="margin-top:16px">
-                <a href="/" style="color:var(--muted);font-size:.78rem">← Back to Home</a>
-            </div>
+            <div class="signin-row" style="margin-top:16px"><a href="/" style="color:var(--muted);font-size:.78rem">← Back to Home</a></div>
         </div>
 
     </div>
@@ -316,7 +215,6 @@ const TOPICS = [
 const MAX = 3;
 let selected = [];
 
-// Render topics
 document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('topics-grid');
     TOPICS.forEach(t => {
@@ -331,30 +229,27 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleTopic(topic, el) {
     const idx = selected.indexOf(topic);
     if (idx === -1) {
-        if (selected.length >= MAX) { showToast(`Max ${MAX} topics`, 'er'); return; }
+        if (selected.length >= MAX) { showToast('Max ' + MAX + ' topics', 'er'); return; }
         selected.push(topic);
         el.classList.add('sel');
     } else {
         selected.splice(idx, 1);
         el.classList.remove('sel');
     }
-    document.getElementById('sel-count-text').textContent = `${selected.length} / ${MAX} selected`;
-    const btn = document.getElementById('create-btn');
-    btn.disabled = selected.length !== MAX;
+    document.getElementById('sel-count-text').textContent = selected.length + ' / ' + MAX + ' selected';
+    document.getElementById('create-btn').disabled = selected.length !== MAX;
 }
 
 function goToStep2() {
     const username = document.getElementById('username').value.trim();
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-
-    if (!username) { showToast('Please enter a username', 'er'); document.getElementById('username').focus(); return; }
-    if (username.length < 3) { showToast('Username must be at least 3 characters', 'er'); return; }
+    if (!username)                          { showToast('Please enter a username', 'er'); return; }
+    if (username.length < 3)               { showToast('Username: at least 3 characters', 'er'); return; }
     if (!/^[a-zA-Z0-9_]+$/.test(username)) { showToast('Username: only letters, numbers, underscores', 'er'); return; }
-    if (!email || !email.includes('@')) { showToast('Please enter a valid email', 'er'); document.getElementById('email').focus(); return; }
-    if (!password || password.length < 6) { showToast('Password must be at least 6 characters', 'er'); document.getElementById('password').focus(); return; }
+    if (!email || !email.includes('@'))     { showToast('Please enter a valid email', 'er'); return; }
+    if (!password || password.length < 6)  { showToast('Password: at least 6 characters', 'er'); return; }
 
-    // Activate step 2
     document.getElementById('step-1').classList.remove('active');
     document.getElementById('step-2').classList.add('active');
     document.getElementById('progress-fill').style.width = '100%';
@@ -376,21 +271,15 @@ function goToStep1() {
     document.getElementById('prog-line').classList.remove('done');
 }
 
-// Password visibility toggle
 function togglePw() {
     const inp = document.getElementById('password');
     const btn = document.getElementById('pw-eye');
-    if (inp.type === 'password') {
-        inp.type = 'text';
-        btn.textContent = '🙈';
-    } else {
-        inp.type = 'password';
-        btn.textContent = '👁';
-    }
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    btn.textContent = inp.type === 'password' ? '👁' : '🙈';
 }
 
 async function completeSignup() {
-    if (selected.length !== MAX) { showToast(`Please select exactly ${MAX} topics`, 'er'); return; }
+    if (selected.length !== MAX) { showToast('Please select exactly ' + MAX + ' topics', 'er'); return; }
 
     const btn = document.getElementById('create-btn');
     btn.innerHTML = '<div class="spin"></div> Creating Account…';
@@ -407,11 +296,20 @@ async function completeSignup() {
         const d = await r.json();
 
         if (r.ok && d.success) {
-            showToast('✅ ' + d.message, 'ok');
-            // After a short delay, redirect to login page
-            setTimeout(() => {
-                window.location.href = '/user-login?verified=please';
-            }, 3000);
+            // Save to localStorage — cookie is set by server automatically
+            localStorage.setItem('es_user', JSON.stringify({
+                loggedIn:   true,
+                user_id:    d.user_id,
+                username:   d.username,
+                email:      d.email,
+                role:       d.role       || 'user',
+                is_premium: d.is_premium || false,
+                avatar_url: d.avatar_url || '',
+                plan:       d.plan       || 'free',
+            }));
+            showToast('✅ Welcome to EchoStack, ' + d.username + '! 🇬🇭', 'ok');
+            // Server set the user_session cookie — go straight to dashboard
+            setTimeout(() => { window.location.href = '/dashboard'; }, 1200);
         } else {
             throw new Error(d.detail || 'Registration failed. Try a different username or email.');
         }
@@ -422,11 +320,10 @@ async function completeSignup() {
     }
 }
 
-// Password strength indicator
 function checkPwStrength(pw) {
     const fill = document.getElementById('pw-fill');
     const hint = document.getElementById('pw-hint');
-    if (!pw) { fill.style.width='0'; fill.style.background=''; hint.textContent='Enter a password'; return; }
+    if (!pw) { fill.style.width='0'; fill.style.background=''; hint.textContent='Enter a password'; hint.style.color=''; return; }
     let score = 0;
     if (pw.length >= 6)  score++;
     if (pw.length >= 10) score++;
@@ -434,11 +331,11 @@ function checkPwStrength(pw) {
     if (/[0-9]/.test(pw)) score++;
     if (/[^a-zA-Z0-9]/.test(pw)) score++;
     const levels = [
-        {w:'20%', c:'#DC2626', t:'Too short'},
-        {w:'40%', c:'#F97316', t:'Weak'},
-        {w:'60%', c:'#EAB308', t:'Fair'},
-        {w:'80%', c:'#84CC16', t:'Good'},
-        {w:'100%',c:'#16A34A', t:'Strong 💪'},
+        {w:'20%',c:'#DC2626',t:'Too short'},
+        {w:'40%',c:'#F97316',t:'Weak'},
+        {w:'60%',c:'#EAB308',t:'Fair'},
+        {w:'80%',c:'#84CC16',t:'Good'},
+        {w:'100%',c:'#16A34A',t:'Strong 💪'},
     ];
     const l = levels[Math.min(score, 4)];
     fill.style.width = l.w; fill.style.background = l.c;
@@ -451,9 +348,9 @@ let _t;
 function showToast(msg, type) {
     const el = document.getElementById('toast');
     el.textContent = msg;
-    el.className = 'toast on' + (type ? ' '+type : '');
+    el.className = 'toast on' + (type ? ' ' + type : '');
     clearTimeout(_t);
-    _t = setTimeout(() => el.className = 'toast', 3200);
+    _t = setTimeout(() => { el.className = 'toast'; }, 3200);
 }
 </script>
 </body>
