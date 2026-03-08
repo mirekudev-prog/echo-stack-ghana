@@ -432,17 +432,40 @@ async def user_login(
     username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)
 ):
     try:
-        u = db.query(models.User).filter(models.User.username == username.strip()).first()
+        # 1. Try to find user by username (case‑insensitive)
+        u = db.query(models.User).filter(
+            models.User.username.ilike(username.strip())
+        ).first()
+
+        # 2. If not found, try by email (case‑insensitive)
+        if not u:
+            u = db.query(models.User).filter(
+                models.User.email.ilike(username.strip())
+            ).first()
+
+        # 3. If still not found, or password doesn't match → error
         if not u or u.hashed_password != password:
-            raise HTTPException(401, "Invalid username or password")
+            raise HTTPException(401, "Invalid username/email or password")
+
+        # 4. Check if account is suspended
         if getattr(u, "is_suspended", 0):
             raise HTTPException(403, "Account suspended")
-        resp = JSONResponse({"success": True, "user_id": u.id, "username": u.username,
-                              "role": getattr(u,"role","user"), "is_premium": getattr(u,"is_premium",0)})
+
+        # 5. Success – create response
+        resp = JSONResponse({
+            "success": True,
+            "user_id": u.id,
+            "username": u.username,
+            "role": getattr(u, "role", "user"),
+            "is_premium": getattr(u, "is_premium", 0)
+        })
         resp.set_cookie("user_session", u.id, max_age=60*60*24*30, path="/", samesite="lax")
         return resp
-    except HTTPException: raise
-    except Exception as e: raise HTTPException(500, str(e))
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 @app.post("/api/users/logout")
 def user_logout():
