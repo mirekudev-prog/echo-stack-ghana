@@ -474,7 +474,17 @@ async def user_profile_page(uname: str, request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("user_profile.html")
     return RedirectResponse("/user-login")
-
+    
+# ─── USER SETTINGS PAGE (NEW ROUTE) ────────────────────────────────────────
+@app.get("/user-settings")
+async def user_settings_page(request: Request):
+    """User Settings page - requires login"""
+    if not _is_admin(request) and not request.cookies.get("user_session"):
+        return RedirectResponse(url="/user-login")
+    if os.path.exists("user_settings.html"):
+        return FileResponse("user_settings.html")
+    raise HTTPException(404, "user_settings.html not found")
+    
 @app.get("/post/{pid}")
 async def post_page(pid: int, request: Request):
     # Posts are publicly viewable (locked content is handled client-side)
