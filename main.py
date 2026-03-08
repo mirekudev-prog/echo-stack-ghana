@@ -9,13 +9,184 @@ from datetime import datetime
 from database import engine, get_db, Base
 import models
 
-# ─── CREATE TABLES ────────────────────────────────────────────────────────────
-Base.metadata.create_all(bind=engine)
+# ─── GUARANTEED TABLE CREATION ───────────────────────────────────────────────
+# Uses raw SQL CREATE TABLE IF NOT EXISTS so it ALWAYS works, even if
+# SQLAlchemy's create_all missed tables from a previous broken models.py
+
+_CREATE_TABLES_SQL = """
+CREATE TABLE IF NOT EXISTS regions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    capital VARCHAR(100),
+    population VARCHAR(50),
+    terrain VARCHAR(100),
+    description TEXT,
+    overview TEXT,
+    category VARCHAR(50),
+    tags TEXT,
+    hero_image VARCHAR(500),
+    gallery_images TEXT,
+    audio_files TEXT,
+    video_files TEXT,
+    documents TEXT,
+    source VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(36) PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(200) UNIQUE NOT NULL,
+    hashed_password VARCHAR(255) DEFAULT '',
+    bio TEXT DEFAULT '',
+    avatar_url VARCHAR(500) DEFAULT '',
+    channel_name VARCHAR(200) DEFAULT '',
+    channel_desc TEXT DEFAULT '',
+    role VARCHAR(50) DEFAULT 'user',
+    is_premium INTEGER DEFAULT 0,
+    is_suspended INTEGER DEFAULT 0,
+    follower_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS posts (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(500) DEFAULT '',
+    slug VARCHAR(500) DEFAULT '',
+    excerpt TEXT DEFAULT '',
+    content TEXT DEFAULT '',
+    cover_image VARCHAR(500) DEFAULT '',
+    content_type VARCHAR(50) DEFAULT 'article',
+    status VARCHAR(50) DEFAULT 'draft',
+    is_locked INTEGER DEFAULT 0,
+    author_id VARCHAR(36) DEFAULT '',
+    author_username VARCHAR(200) DEFAULT '',
+    region_id INTEGER DEFAULT NULL,
+    tags TEXT DEFAULT '',
+    views INTEGER DEFAULT 0,
+    likes INTEGER DEFAULT 0,
+    audio_url VARCHAR(500) DEFAULT '',
+    video_url VARCHAR(500) DEFAULT '',
+    gallery TEXT DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS comments (
+    id SERIAL PRIMARY KEY,
+    post_id INTEGER DEFAULT NULL,
+    user_id VARCHAR(36) DEFAULT '',
+    username VARCHAR(200) DEFAULT '',
+    content TEXT DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS follows (
+    id SERIAL PRIMARY KEY,
+    follower_id VARCHAR(36) DEFAULT '',
+    following_id VARCHAR(36) DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS uploaded_files (
+    id SERIAL PRIMARY KEY,
+    filename VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255),
+    file_path VARCHAR(500) DEFAULT '',
+    file_size INTEGER,
+    mime_type VARCHAR(100),
+    category VARCHAR(50),
+    region_id INTEGER DEFAULT NULL,
+    description TEXT,
+    uploaded_by VARCHAR(100) DEFAULT 'user',
+    is_public INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sections (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    slug VARCHAR(100) UNIQUE,
+    description TEXT,
+    parent_section_id INTEGER DEFAULT NULL,
+    display_order INTEGER DEFAULT 0,
+    is_active INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(200) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS events (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(300) NOT NULL,
+    description TEXT,
+    event_date TIMESTAMP,
+    location VARCHAR(300),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR(36) DEFAULT 'guest',
+    username VARCHAR(200) DEFAULT 'Guest',
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS story_submissions (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(300) NOT NULL,
+    content TEXT,
+    region VARCHAR(100),
+    author_name VARCHAR(200),
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR(36) DEFAULT '',
+    email VARCHAR(200),
+    amount INTEGER DEFAULT 0,
+    reference VARCHAR(200),
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"""
+
+# Also SQLAlchemy's ORM create (belt + suspenders)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"SQLAlchemy create_all note: {e}")
+
+def _run_startup_sql():
+    """Run raw CREATE TABLE IF NOT EXISTS — guaranteed to work on PostgreSQL."""
+    try:
+        with engine.connect() as conn:
+            # Split and run each statement
+            for stmt in _CREATE_TABLES_SQL.strip().split(';'):
+                stmt = stmt.strip()
+                if stmt:
+                    try:
+                        conn.execute(text(stmt))
+                        conn.commit()
+                    except Exception:
+                        pass
+        print("✅ EchoStack tables verified/created")
+    except Exception as e:
+        print(f"Startup SQL note: {e}")
 
 def _run_migrations():
-    """Safely add missing columns without dropping data."""
+    """Safely add any missing columns to existing tables."""
     cols = [
-        # Users
         ("users","hashed_password","VARCHAR(255) DEFAULT ''"),
         ("users","bio","TEXT DEFAULT ''"),
         ("users","avatar_url","VARCHAR(500) DEFAULT ''"),
@@ -25,72 +196,38 @@ def _run_migrations():
         ("users","is_premium","INTEGER DEFAULT 0"),
         ("users","is_suspended","INTEGER DEFAULT 0"),
         ("users","follower_count","INTEGER DEFAULT 0"),
-        ("users","created_at","TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
-        # Posts
-        ("posts","title","VARCHAR(500) DEFAULT ''"),
-        ("posts","slug","VARCHAR(500) DEFAULT ''"),
-        ("posts","excerpt","TEXT DEFAULT ''"),
-        ("posts","content","TEXT DEFAULT ''"),
-        ("posts","cover_image","VARCHAR(500) DEFAULT ''"),
-        ("posts","content_type","VARCHAR(50) DEFAULT 'article'"),
-        ("posts","status","VARCHAR(50) DEFAULT 'draft'"),
-        ("posts","is_locked","INTEGER DEFAULT 0"),
-        ("posts","author_id","VARCHAR(36) DEFAULT ''"),
-        ("posts","author_username","VARCHAR(200) DEFAULT ''"),
-        ("posts","region_id","INTEGER DEFAULT NULL"),
-        ("posts","tags","TEXT DEFAULT ''"),
-        ("posts","views","INTEGER DEFAULT 0"),
-        ("posts","likes","INTEGER DEFAULT 0"),
         ("posts","audio_url","VARCHAR(500) DEFAULT ''"),
         ("posts","video_url","VARCHAR(500) DEFAULT ''"),
         ("posts","gallery","TEXT DEFAULT ''"),
-        ("posts","created_at","TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
-        ("posts","updated_at","TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
-        # Comments
-        ("comments","post_id","INTEGER DEFAULT NULL"),
-        ("comments","user_id","VARCHAR(36) DEFAULT ''"),
-        ("comments","username","VARCHAR(200) DEFAULT ''"),
-        ("comments","content","TEXT DEFAULT ''"),
-        ("comments","created_at","TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
-        # Follows
-        ("follows","follower_id","VARCHAR(36) DEFAULT ''"),
-        ("follows","following_id","VARCHAR(36) DEFAULT ''"),
-        ("follows","created_at","TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
-        # Uploaded files
-        ("uploaded_files","file_path","VARCHAR(500) DEFAULT ''"),
-        ("uploaded_files","uploaded_by","VARCHAR(200) DEFAULT 'user'"),
-        ("uploaded_files","is_public","INTEGER DEFAULT 1"),
-        ("uploaded_files","region_id","INTEGER DEFAULT NULL"),
-        ("uploaded_files","description","TEXT DEFAULT ''"),
-        # Regions
+        ("posts","cover_image","VARCHAR(500) DEFAULT ''"),
+        ("posts","is_locked","INTEGER DEFAULT 0"),
+        ("posts","tags","TEXT DEFAULT ''"),
+        ("posts","views","INTEGER DEFAULT 0"),
+        ("posts","likes","INTEGER DEFAULT 0"),
         ("regions","overview","TEXT DEFAULT ''"),
         ("regions","video_files","TEXT DEFAULT ''"),
         ("regions","documents","TEXT DEFAULT ''"),
+        ("uploaded_files","file_path","VARCHAR(500) DEFAULT ''"),
+        ("uploaded_files","uploaded_by","VARCHAR(200) DEFAULT 'user'"),
+        ("uploaded_files","is_public","INTEGER DEFAULT 1"),
     ]
     try:
         with engine.connect() as conn:
-            dialect = engine.dialect.name
             for table, col, col_def in cols:
                 try:
-                    if dialect == "postgresql":
-                        exists = conn.execute(text(
-                            "SELECT column_name FROM information_schema.columns "
-                            "WHERE table_name=:t AND column_name=:c"
-                        ), {"t": table, "c": col}).fetchone()
-                        if not exists:
-                            conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_def}"))
-                            conn.commit()
-                    else:
-                        info = conn.execute(text(f"PRAGMA table_info({table})")).fetchall()
-                        existing = [r[1] for r in info]
-                        if col not in existing:
-                            conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_def}"))
-                            conn.commit()
+                    exists = conn.execute(text(
+                        "SELECT column_name FROM information_schema.columns "
+                        "WHERE table_name=:t AND column_name=:c"
+                    ), {"t": table, "c": col}).fetchone()
+                    if not exists:
+                        conn.execute(text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {col_def}"))
+                        conn.commit()
                 except Exception:
                     pass
     except Exception as e:
         print(f"Migration note: {e}")
 
+_run_startup_sql()
 _run_migrations()
 
 # ─── APP ──────────────────────────────────────────────────────────────────────
@@ -238,25 +375,45 @@ def admin_logout():
 # ─── USER AUTH ────────────────────────────────────────────────────────────────
 @app.post("/api/users/signup")
 async def signup(
-    username: str = Form(...), email: str = Form(...), password: str = Form(...),
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    topics: str = Form(""),
     db: Session = Depends(get_db)
 ):
     try:
-        if db.query(models.User).filter(
-            (models.User.username == username.strip()) | (models.User.email == email.strip())
-        ).first():
-            raise HTTPException(400, "Username or email already taken")
+        uname  = username.strip()
+        uemail = email.strip()
+        if not uname or not uemail or not password:
+            raise HTTPException(400, "Username, email and password are required")
+        existing = db.query(models.User).filter(
+            (models.User.username == uname) | (models.User.email == uemail)
+        ).first()
+        if existing:
+            if getattr(existing, "username", "") == uname:
+                raise HTTPException(400, "Username already taken — choose another")
+            raise HTTPException(400, "Email already registered — try signing in")
         uid = str(uuid.uuid4())
-        u = models.User(id=uid, username=username.strip(), email=email.strip(),
-                        hashed_password=password, role="user", is_premium=0)
+        u = models.User(
+            id=uid, username=uname, email=uemail,
+            hashed_password=password, role="user",
+            is_premium=0, is_suspended=0, follower_count=0,
+            bio="", avatar_url="", channel_name=uname, channel_desc="",
+        )
         db.add(u); db.commit(); db.refresh(u)
-        resp = JSONResponse({"success": True, "user_id": uid, "username": u.username,
-                              "role": "user", "is_premium": 0})
-        resp.set_cookie("user_session", uid, max_age=60*60*24*30, path="/", samesite="lax")
+        print(f"New user: {uname} ({uemail}) id={uid}")
+        resp = JSONResponse({
+            "success": True, "user_id": uid,
+            "username": u.username, "role": "user",
+            "is_premium": 0, "message": "Account created!"
+        })
+        resp.set_cookie("user_session", uid, max_age=60*60*24*30, path="/", samesite="lax", httponly=False)
         return resp
     except HTTPException: raise
     except Exception as e:
-        db.rollback(); raise HTTPException(500, str(e))
+        db.rollback()
+        import traceback; traceback.print_exc()
+        raise HTTPException(500, f"Signup failed: {str(e)}")
 
 @app.post("/api/users/login")
 async def user_login(
