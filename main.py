@@ -1,1837 +1,974 @@
-# ============================================
-# ECHOSTACK GHANA - COMPLETE BACKEND (main.py)
-# ============================================
-from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, File, Response
+from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, File, Cookie
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, HTMLResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
-import os, json, re, hashlib, datetime, urllib.request, uuid
-from pathlib import Path
+from sqlalchemy import text
+import os, uuid, re, json, httpx
+from datetime import datetime
 
-# ============================================
-# DATABASE SETUP
-# ============================================
-from database import engine, get_db, Base, SessionLocal
+from database import engine, get_db, Base
 import models
 
-# ── Step 1: create brand-new tables ──────────────────────────
+# ─── CREATE TABLES ────────────────────────────────────────────────────────────
 Base.metadata.create_all(bind=engine)
 
-# ── Step 2: safe ALTER TABLE migrations for existing tables ──
 def _run_migrations():
-    """Add missing columns to existing PostgreSQL tables without data loss."""
-    from sqlalchemy import text
-
-    def col_exists(conn, tbl, col):
-        r = conn.execute(text(
-            "SELECT 1 FROM information_schema.columns "
-            "WHERE table_name=:t AND column_name=:c"
-        ), {"t": tbl, "c": col})
-        return r.fetchone() is not None
-
-    def tbl_exists(conn, tbl):
-        r = conn.execute(text(
-            "SELECT 1 FROM information_schema.tables WHERE table_name=:t"
-        ), {"t": tbl})
-        return r.fetchone() is not None
-
-    def add(conn, tbl, col, typ, default=None):
-        if tbl_exists(conn, tbl) and not col_exists(conn, tbl, col):
-            dflt = f" DEFAULT {default}" if default is not None else ""
-            conn.execute(text(f"ALTER TABLE {tbl} ADD COLUMN {col} {typ}{dflt}"))
-            print(f"  migration: added {tbl}.{col}")
-
-    migrations = [
-        # regions
-        ("regions", "video_files",  "TEXT",         None),
-        ("regions", "documents",    "TEXT",         None),
-        ("regions", "overview",     "TEXT",         None),
-        # users
-        ("users", "full_name",      "VARCHAR(200)", None),
-        ("users", "bio",            "TEXT",         None),
-        ("users", "interests",      "TEXT",         None),
-        ("users", "avatar_url",     "VARCHAR(500)", None),
-        ("users", "role",           "VARCHAR(20)",  "'user'"),
-        ("users", "is_premium",     "BOOLEAN",      "FALSE"),
-        ("users", "is_active",      "BOOLEAN",      "TRUE"),
-        ("users", "updated_at",     "TIMESTAMP",    "NOW()"),
-        # posts
-        ("posts", "author_username","VARCHAR(80)",  "''"),
-        ("posts", "audio_url",      "VARCHAR(500)", None),
-        ("posts", "video_url",      "VARCHAR(500)", None),
-        ("posts", "gallery",        "TEXT",         None),
-        ("posts", "tags",           "VARCHAR",      None),
-        ("posts", "views",          "INTEGER",      "0"),
-        ("posts", "likes",          "INTEGER",      "0"),
-        ("posts", "comment_count",  "INTEGER",      "0"),
-        ("posts", "published_at",   "TIMESTAMP",    None),
-        ("posts", "updated_at",     "TIMESTAMP",    "NOW()"),
-        # story_submissions
-        ("story_submissions", "user_id",    "VARCHAR(36)", None),
-        ("story_submissions", "updated_at", "TIMESTAMP",   "NOW()"),
-        # uploaded_files
-        ("uploaded_files", "updated_at", "TIMESTAMP", "NOW()"),
-        # creator_channels
-        ("creator_channels", "channel_desc", "TEXT",         None),
-        ("creator_channels", "cover_image",  "VARCHAR(500)", None),
-        ("creator_channels", "avatar_url",   "VARCHAR(500)", None),
-        ("creator_channels", "updated_at",   "TIMESTAMP",    "NOW()"),
-        # comments
-        ("comments", "author_username", "VARCHAR(80)", "''"),
-        ("comments", "is_approved",     "INTEGER",     "1"),
-        # events
-        ("events", "updated_at", "TIMESTAMP", "NOW()"),
-        ("events", "is_active",  "BOOLEAN",   "TRUE"),
-        # payments
-        ("payments", "updated_at", "TIMESTAMP", "NOW()"),
+    """Safely add missing columns without dropping data."""
+    cols = [
+        # Users
+        ("users","hashed_password","VARCHAR(255) DEFAULT ''"),
+        ("users","bio","TEXT DEFAULT ''"),
+        ("users","avatar_url","VARCHAR(500) DEFAULT ''"),
+        ("users","channel_name","VARCHAR(200) DEFAULT ''"),
+        ("users","channel_desc","TEXT DEFAULT ''"),
+        ("users","role","VARCHAR(50) DEFAULT 'user'"),
+        ("users","is_premium","INTEGER DEFAULT 0"),
+        ("users","is_suspended","INTEGER DEFAULT 0"),
+        ("users","follower_count","INTEGER DEFAULT 0"),
+        ("users","created_at","TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
+        # Posts
+        ("posts","title","VARCHAR(500) DEFAULT ''"),
+        ("posts","slug","VARCHAR(500) DEFAULT ''"),
+        ("posts","excerpt","TEXT DEFAULT ''"),
+        ("posts","content","TEXT DEFAULT ''"),
+        ("posts","cover_image","VARCHAR(500) DEFAULT ''"),
+        ("posts","content_type","VARCHAR(50) DEFAULT 'article'"),
+        ("posts","status","VARCHAR(50) DEFAULT 'draft'"),
+        ("posts","is_locked","INTEGER DEFAULT 0"),
+        ("posts","author_id","VARCHAR(36) DEFAULT ''"),
+        ("posts","author_username","VARCHAR(200) DEFAULT ''"),
+        ("posts","region_id","INTEGER DEFAULT NULL"),
+        ("posts","tags","TEXT DEFAULT ''"),
+        ("posts","views","INTEGER DEFAULT 0"),
+        ("posts","likes","INTEGER DEFAULT 0"),
+        ("posts","audio_url","VARCHAR(500) DEFAULT ''"),
+        ("posts","video_url","VARCHAR(500) DEFAULT ''"),
+        ("posts","gallery","TEXT DEFAULT ''"),
+        ("posts","created_at","TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
+        ("posts","updated_at","TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
+        # Comments
+        ("comments","post_id","INTEGER DEFAULT NULL"),
+        ("comments","user_id","VARCHAR(36) DEFAULT ''"),
+        ("comments","username","VARCHAR(200) DEFAULT ''"),
+        ("comments","content","TEXT DEFAULT ''"),
+        ("comments","created_at","TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
+        # Follows
+        ("follows","follower_id","VARCHAR(36) DEFAULT ''"),
+        ("follows","following_id","VARCHAR(36) DEFAULT ''"),
+        ("follows","created_at","TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
+        # Uploaded files
+        ("uploaded_files","file_path","VARCHAR(500) DEFAULT ''"),
+        ("uploaded_files","uploaded_by","VARCHAR(200) DEFAULT 'user'"),
+        ("uploaded_files","is_public","INTEGER DEFAULT 1"),
+        ("uploaded_files","region_id","INTEGER DEFAULT NULL"),
+        ("uploaded_files","description","TEXT DEFAULT ''"),
+        # Regions
+        ("regions","overview","TEXT DEFAULT ''"),
+        ("regions","video_files","TEXT DEFAULT ''"),
+        ("regions","documents","TEXT DEFAULT ''"),
     ]
+    try:
+        with engine.connect() as conn:
+            dialect = engine.dialect.name
+            for table, col, col_def in cols:
+                try:
+                    if dialect == "postgresql":
+                        exists = conn.execute(text(
+                            "SELECT column_name FROM information_schema.columns "
+                            "WHERE table_name=:t AND column_name=:c"
+                        ), {"t": table, "c": col}).fetchone()
+                        if not exists:
+                            conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_def}"))
+                            conn.commit()
+                    else:
+                        info = conn.execute(text(f"PRAGMA table_info({table})")).fetchall()
+                        existing = [r[1] for r in info]
+                        if col not in existing:
+                            conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_def}"))
+                            conn.commit()
+                except Exception:
+                    pass
+    except Exception as e:
+        print(f"Migration note: {e}")
 
-    with engine.connect() as conn:
-        for tbl, col, typ, dflt in migrations:
-            try:
-                add(conn, tbl, col, typ, dflt)
-            except Exception as e:
-                print(f"  migration warning ({tbl}.{col}): {e}")
-        conn.commit()
+_run_migrations()
 
-try:
-    _run_migrations()
-    print("✅ Migrations complete")
-except Exception as _me:
-    print(f"Migration warning (non-fatal): {_me}")
-
-# ============================================
-# APP SETUP
-# ============================================
+# ─── APP ──────────────────────────────────────────────────────────────────────
 app = FastAPI(title="EchoStack API")
 
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
-
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 try:
-    app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
-except Exception as e:
-    print(f"Warning: Could not mount uploads: {e}")
+    app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+except Exception:
+    pass
 
-# Config
-ADMIN_SECRET = os.getenv("ADMIN_SECRET", "THE ADMIN")
-PAYSTACK_SECRET = os.environ.get("PAYSTACK_SECRET_KEY", "")
-HF_TOKEN = os.environ.get("HF_TOKEN", "")
+ADMIN_SECRET    = os.getenv("ADMIN_SECRET", "THE ADMIN")
+SUPABASE_URL    = os.getenv("SUPABASE_URL", "")
+SUPABASE_KEY    = os.getenv("SUPABASE_SERVICE_KEY", "")
+SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
+HF_TOKEN        = os.getenv("HF_TOKEN", "")
+PAYSTACK_SECRET = os.getenv("PAYSTACK_SECRET_KEY", "")
 
-# ============================================
-# HELPERS
-# ============================================
-def hash_password(p: str) -> str:
-    return hashlib.sha256(p.encode()).hexdigest()
+# ─── HELPERS ──────────────────────────────────────────────────────────────────
+def slugify(t: str) -> str:
+    return re.sub(r'[^a-z0-9]+', '-', t.lower()).strip('-')[:80]
 
-def verify_password(p: str, h: str) -> bool:
-    return hash_password(p) == h
-
-def get_user_from_request(request: Request, db: Session):
-    user_id = request.cookies.get("user_session")
-    if not user_id:
+async def upload_to_supabase(content: bytes, filename: str, ctype: str):
+    if not SUPABASE_URL or not SUPABASE_KEY:
         return None
     try:
-        uid = uuid.UUID(str(user_id))
-        return db.query(models.User).filter(models.User.id == uid).first()
-    except (ValueError, AttributeError, TypeError):
-        try:
-            return db.query(models.User).filter(models.User.id == int(user_id)).first()
-        except:
-            return None
+        url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{filename}"
+        headers = {"Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": ctype, "x-upsert": "true"}
+        async with httpx.AsyncClient(timeout=30) as c:
+            r = await c.post(url, content=content, headers=headers)
+        if r.status_code in (200, 201):
+            return f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
+    except Exception as e:
+        print(f"Supabase error: {e}")
+    return None
 
-def require_admin(request: Request):
-    token = request.cookies.get("admin_session")
-    if not token or token != "ADMIN_AUTHORIZED":
-        raise HTTPException(status_code=403, detail="Not authorized")
-
-async def save_upload(file: UploadFile) -> tuple[str, str]:
-    """Save a file. Returns (public_url, safe_filename).
-    Tries Supabase Storage first; falls back to local disk."""
-    import io
+async def _do_upload(file: UploadFile, category: str, db: Session) -> dict:
     content = await file.read()
-    safe = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{file.filename.replace(' ', '_')}"
+    ext = os.path.splitext(file.filename or "file")[1].lower() or ".bin"
+    safe = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}{ext}"
+    ctype = file.content_type or "application/octet-stream"
 
-    # ── Try Supabase first ──────────────────────────────────────────
-    supabase_url_env = os.getenv("SUPABASE_URL")
-    supabase_key_env = os.getenv("SUPABASE_SERVICE_KEY")
-    supabase_bucket  = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
-    if supabase_url_env and supabase_key_env:
-        try:
-            import httpx
-            upload_url = f"{supabase_url_env}/storage/v1/object/{supabase_bucket}/{safe}"
-            headers = {
-                "Authorization": f"Bearer {supabase_key_env}",
-                "Content-Type": file.content_type or "application/octet-stream",
-                "x-upsert": "true",
-            }
-            async with httpx.AsyncClient(timeout=60) as client:
-                resp = await client.post(upload_url, content=content, headers=headers)
-            if resp.status_code in (200, 201):
-                public_url = f"{supabase_url_env}/storage/v1/object/public/{supabase_bucket}/{safe}"
-                return public_url, safe
-            else:
-                print(f"Supabase upload failed ({resp.status_code}): {resp.text[:200]}")
-        except Exception as sup_err:
-            print(f"Supabase upload error: {sup_err}")
+    pub_url = await upload_to_supabase(content, safe, ctype)
+    if pub_url:
+        fpath = pub_url
+    else:
+        fpath = os.path.join(UPLOAD_DIR, safe)
+        with open(fpath, "wb") as f:
+            f.write(content)
+        pub_url = f"/uploads/{safe}"
 
-    # ── Fallback: local disk ────────────────────────────────────────
-    path = UPLOAD_DIR / safe
-    with open(path, "wb") as f:
-        f.write(content)
-    return f"/uploads/{safe}", safe
-
-def get_db_knowledge(db: Session) -> str:
     try:
-        regions = db.query(models.Region).all()
-        knowledge = "GHANA REGIONS DATABASE:\n"
-        for r in regions:
-            knowledge += f"- {r.name}"
-            if r.capital: knowledge += f" (Capital: {r.capital})"
-            if r.population: knowledge += f", Pop: {r.population}"
-            if r.terrain: knowledge += f", Terrain: {r.terrain}"
-            if r.category: knowledge += f", Category: {r.category}"
-            if r.description:
-                desc = r.description[:200].replace("\n", " ")
-                knowledge += f"\n  Info: {desc}"
-            knowledge += "\n"
-        return knowledge[:3000]
-    except:
-        return "Region data unavailable."
+        rec = models.UploadedFile(
+            filename=safe, original_name=file.filename or safe,
+            file_path=fpath, file_size=len(content),
+            mime_type=ctype, category=category,
+            uploaded_by="user", is_public=1
+        )
+        db.add(rec); db.commit(); db.refresh(rec)
+        fid = rec.id
+    except Exception:
+        fid = None
 
-# ============================================
-# STATIC PAGE HELPER
-# ============================================
-def serve_file(filename: str):
-    if os.path.exists(filename):
-        return FileResponse(filename)
-    raise HTTPException(status_code=404, detail=f"{filename} not found")
+    return {"success": True, "url": pub_url, "file_url": pub_url,
+            "filename": safe, "file_id": fid, "size": len(content)}
 
-# ============================================
-# PUBLIC PAGES
-# ============================================
-@app.get("/")
-def homepage(): return serve_file("index.html")
+# ─── STATIC PAGES ─────────────────────────────────────────────────────────────
+def _page(fn):
+    def handler():
+        if os.path.exists(fn): return FileResponse(fn)
+        raise HTTPException(404, f"{fn} not found")
+    return handler
 
-@app.get("/signup")
-def signup_page(): return serve_file("signup.html")
+for _route, _fn in {
+    "/": "index.html", "/app": "app.html", "/dashboard": "dashboard.html",
+    "/creator": "creator.html", "/login": "login.html", "/signup": "signup.html",
+    "/user-login": "user-login.html", "/premium": "premium.html",
+    "/activity": "activity.html", "/explore": "explore.html",
+    "/following": "following.html", "/community": "community_chat.html",
+    "/archive": "archive.html", "/user": "user_profile.html",
+}.items():
+    app.get(_route)(_page(_fn))
 
-@app.get("/user-login")
-def user_login_page(): return serve_file("user-login.html")
+@app.get("/post/{pid}")
+def post_page(): return FileResponse("post.html") if os.path.exists("post.html") else HTTPException(404)
 
-@app.get("/dashboard")
-async def dashboard_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("dashboard.html")
+@app.get("/user/{uname}")
+def user_page(): return FileResponse("user_profile.html") if os.path.exists("user_profile.html") else HTTPException(404)
 
-@app.get("/creator")
-async def creator_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("creator.html")
+@app.get("/manifest.json")
+def manifest():
+    if os.path.exists("manifest.json"): return JSONResponse(json.load(open("manifest.json")))
+    raise HTTPException(404)
 
-@app.get("/post/{post_id}")
-async def post_page(post_id: int, request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("post.html")
+@app.get("/sw.js")
+def sw():
+    if os.path.exists("sw.js"): return FileResponse("sw.js", media_type="application/javascript")
+    raise HTTPException(404)
 
-@app.get("/app")
-async def app_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("app.html")
+@app.get("/echostack-logo.png")
+def logo():
+    if os.path.exists("echostack-logo.png"): return FileResponse("echostack-logo.png")
+    raise HTTPException(404)
 
+@app.get("/test")
+def test():
+    return {"status": "ok", "version": "EchoStack v2", "posts_endpoint": "POST /api/posts ✅"}
+
+# ─── ADMIN AUTH ───────────────────────────────────────────────────────────────
 @app.get("/admin")
 async def admin_page(request: Request):
-    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED":
-        return serve_file("login.html")
-    return serve_file("admin_dashboard.html")
+    if request.cookies.get("admin_session") == "ADMIN_AUTHORIZED":
+        if os.path.exists("admin_dashboard.html"): return FileResponse("admin_dashboard.html")
+    return FileResponse("login.html") if os.path.exists("login.html") else HTTPException(404)
 
 @app.get("/admin-preview")
 async def admin_preview(request: Request, db: Session = Depends(get_db)):
     if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED":
-        return RedirectResponse(url="/admin")
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
     try:
-        admin_user = db.query(models.User).filter(
-            models.User.role.in_(["superuser", "admin"])
-        ).first()
-        if not admin_user:
-            # Try to create admin user
-            try:
-                admin_user = models.User(
-                    username="admin",
-                    email="admin@echostack.gh",
-                    password_hash=hash_password("admin_temp_password"),
-                    role="superuser",
-                )
-                # Set optional fields safely
-                try: admin_user.is_premium = True
-                except: pass
-                try: admin_user.is_active = True
-                except: pass
-                db.add(admin_user)
-                db.commit()
-                db.refresh(admin_user)
-            except Exception as create_err:
-                db.rollback()
-                print(f"Admin preview create error: {create_err}")
-                # Fall through with a fake ID so at least the redirect works
-                fake_html = """<!DOCTYPE html><html><head><title>EchoStack</title></head><body>
-<script>
-localStorage.setItem('es_user', JSON.stringify({loggedIn:true,username:'admin',role:'superuser',is_premium:1}));
-window.location.href = '/app';
-</script><p>Redirecting to app...</p></body></html>"""
-                return HTMLResponse(content=fake_html)
-
-        user_id = str(admin_user.id)
-        username = str(admin_user.username)
+        posts = db.query(models.Post).order_by(models.Post.created_at.desc()).limit(20).all()
+        return JSONResponse({"posts": [
+            {"id": p.id, "title": getattr(p,"title",""), "status": getattr(p,"status",""),
+             "author_username": getattr(p,"author_username",""), "created_at": str(getattr(p,"created_at",""))}
+            for p in posts
+        ]})
     except Exception as e:
-        print(f"Admin preview error: {e}")
-        fallback = """<!DOCTYPE html><html><head><title>EchoStack</title></head><body>
-<script>
-localStorage.setItem('es_user', JSON.stringify({loggedIn:true,username:'admin',role:'superuser',is_premium:1}));
-window.location.href = '/app';
-</script><p>Redirecting...</p></body></html>"""
-        return HTMLResponse(content=fallback)
+        return JSONResponse({"posts": [], "error": str(e)})
 
-    html = f"""<!DOCTYPE html><html><head><title>Loading EchoStack...</title></head><body>
-<script>
-localStorage.setItem('es_user', JSON.stringify({{
-    loggedIn: true, user_id: "{user_id}", username: "{username}",
-    role: "superuser", is_premium: 1
-}}));
-document.cookie = "user_session={user_id}; path=/; max-age=604800";
-window.location.href = '/app';
-</script><p>Redirecting...</p></body></html>"""
-    resp = HTMLResponse(content=html)
-    resp.set_cookie(key="user_session", value=user_id, max_age=3600, path="/")
-    return resp
-
-@app.get("/test")
-def test_endpoint(): return {"status": "ok", "backend": "working"}
-
-@app.get("/echostack-logo.png")
-def serve_logo(): return serve_file("echostack-logo.png")
-
-@app.get("/sw.js")
-def serve_sw():
-    if os.path.exists("sw.js"):
-        return FileResponse("sw.js", media_type="application/javascript",
-                            headers={"Service-Worker-Allowed": "/"})
-    raise HTTPException(status_code=404)
-
-@app.get("/manifest.json")
-def manifest_route():
-    if os.path.exists("manifest.json"):
-        with open("manifest.json", "r") as f:
-            return JSONResponse(content=json.load(f))
-    raise HTTPException(status_code=404)
-
-@app.get("/map")
-async def map_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return RedirectResponse(url="/app")
-
-@app.get("/archive")
-async def archive_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("archive.html") if os.path.exists("archive.html") else RedirectResponse(url="/explore")
-
-@app.get("/subscriptions")
-async def subscriptions_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("subscriptions.html") if os.path.exists("subscriptions.html") else RedirectResponse(url="/app")
-
-@app.get("/subscribers")
-async def subscribers_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("subscribers.html") if os.path.exists("subscribers.html") else RedirectResponse(url="/following")
-
-@app.get("/user-settings")
-async def user_settings_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    if os.path.exists("user_settings.html"):
-        return serve_file("user_settings.html")
-    html = """<!DOCTYPE html><html><head><title>Settings — EchoStack</title>
-<style>body{font-family:sans-serif;padding:40px;background:#f9fafb;max-width:600px;margin:0 auto;}
-h1{color:#0D1B2A;}a.btn{display:inline-block;padding:10px 20px;background:#C8962E;color:white;
-border-radius:8px;margin-top:20px;text-decoration:none;}</style></head>
-<body><h1>⚙️ User Settings</h1>
-<p style="color:#666;margin-top:12px;">Settings page coming soon.</p>
-<a class="btn" href="/user-profile">Go to My Profile</a>
-<a class="btn" style="background:#0077b6;margin-left:10px;" href="/app">Back to Home</a>
-</body></html>"""
-    return HTMLResponse(content=html)
-
-@app.get("/chat")
-async def chat_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("community_chat.html")
-
-@app.get("/activity")
-async def activity_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("activity.html")
-
-@app.get("/explore")
-async def explore_page(request: Request):
-    return serve_file("explore.html")
-
-@app.get("/following")
-async def following_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("following.html")
-
-@app.get("/user-profile")
-async def user_profile_page(request: Request):
-    if not request.cookies.get("user_session"):
-        return RedirectResponse(url="/user-login")
-    return serve_file("user_profile.html")
-
-@app.get("/premium")
-async def premium_page(request: Request):
-    return serve_file("premium.html")
-
-# ============================================
-# ADMIN AUTH
-# ============================================
 @app.post("/api/auth/login")
 async def admin_login(answer: str = Form(...)):
-    cleaned = ADMIN_SECRET.lower().replace(" ", "")
-    given = answer.strip().lower().replace(" ", "")
-    if cleaned == given:
-        resp = JSONResponse(content={"success": True})
-        resp.set_cookie(key="admin_session", value="ADMIN_AUTHORIZED",
-                        max_age=86400, path="/", httponly=False)
-        return resp
-    raise HTTPException(status_code=403, detail="Incorrect answer")
+    if answer.strip().lower().replace(" ","") == ADMIN_SECRET.lower().replace(" ",""):
+        r = JSONResponse({"success": True})
+        r.set_cookie("admin_session", "ADMIN_AUTHORIZED", max_age=86400, path="/")
+        return r
+    raise HTTPException(403, "Wrong password")
 
 @app.post("/api/auth/logout")
 def admin_logout():
-    resp = JSONResponse(content={"success": True})
-    resp.delete_cookie(key="admin_session", path="/")
-    return resp
+    r = JSONResponse({"success": True})
+    r.delete_cookie("admin_session", path="/")
+    return r
 
-# ============================================
-# USER AUTH
-# ============================================
+# ─── USER AUTH ────────────────────────────────────────────────────────────────
 @app.post("/api/users/signup")
-async def user_signup(
-    username: str = Form(...), email: str = Form(...),
-    password: str = Form(...), interests: str = Form(""),
+async def signup(
+    username: str = Form(...), email: str = Form(...), password: str = Form(...),
     db: Session = Depends(get_db)
 ):
     try:
-        username = username.strip()
-        email = email.lower().strip()
-        if len(password) < 6:
-            raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
-        if db.query(models.User).filter(models.User.email == email).first():
-            raise HTTPException(status_code=400, detail="Email already registered")
-        if db.query(models.User).filter(models.User.username == username).first():
-            raise HTTPException(status_code=400, detail="Username already taken")
-        new_user = models.User(
-            username=username, email=email,
-            password_hash=hash_password(password),
-            interests=interests or "", role="user", is_active=True
-        )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        resp = JSONResponse(content={
-            "success": True, "user_id": str(new_user.id),
-            "username": new_user.username, "email": new_user.email,
-            "role": new_user.role, "is_premium": bool(new_user.is_premium)
-        })
-        resp.set_cookie(key="user_session", value=str(new_user.id), max_age=86400*7, path="/")
+        if db.query(models.User).filter(
+            (models.User.username == username.strip()) | (models.User.email == email.strip())
+        ).first():
+            raise HTTPException(400, "Username or email already taken")
+        uid = str(uuid.uuid4())
+        u = models.User(id=uid, username=username.strip(), email=email.strip(),
+                        hashed_password=password, role="user", is_premium=0)
+        db.add(u); db.commit(); db.refresh(u)
+        resp = JSONResponse({"success": True, "user_id": uid, "username": u.username,
+                              "role": "user", "is_premium": 0})
+        resp.set_cookie("user_session", uid, max_age=60*60*24*30, path="/", samesite="lax")
         return resp
-    except HTTPException:
-        raise
+    except HTTPException: raise
     except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        db.rollback(); raise HTTPException(500, str(e))
 
 @app.post("/api/users/login")
 async def user_login(
-    username: str = Form(...), password: str = Form(...),
-    db: Session = Depends(get_db)
+    username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)
 ):
     try:
-        login_val = username.lower().strip()
-        user = db.query(models.User).filter(
-            (models.User.email == login_val) | (models.User.username == login_val)
-        ).first()
-        if not user or not verify_password(password, user.password_hash):
-            raise HTTPException(status_code=401, detail="Invalid credentials")
-        if not user.is_active:
-            raise HTTPException(status_code=403, detail="Account suspended")
-        resp = JSONResponse(content={
-            "success": True, "user_id": str(user.id),
-            "username": user.username, "email": user.email,
-            "role": user.role or "user", "is_premium": bool(user.is_premium)
-        })
-        resp.set_cookie(key="user_session", value=str(user.id), max_age=86400*7, path="/")
+        u = db.query(models.User).filter(models.User.username == username.strip()).first()
+        if not u or u.hashed_password != password:
+            raise HTTPException(401, "Invalid username or password")
+        if getattr(u, "is_suspended", 0):
+            raise HTTPException(403, "Account suspended")
+        resp = JSONResponse({"success": True, "user_id": u.id, "username": u.username,
+                              "role": getattr(u,"role","user"), "is_premium": getattr(u,"is_premium",0)})
+        resp.set_cookie("user_session", u.id, max_age=60*60*24*30, path="/", samesite="lax")
         return resp
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except HTTPException: raise
+    except Exception as e: raise HTTPException(500, str(e))
 
 @app.post("/api/users/logout")
 def user_logout():
-    resp = JSONResponse(content={"success": True})
-    resp.delete_cookie(key="user_session", path="/")
-    return resp
+    r = JSONResponse({"success": True})
+    r.delete_cookie("user_session", path="/")
+    return r
 
 @app.get("/api/users/me")
-async def get_current_user_api(request: Request, db: Session = Depends(get_db)):
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Not logged in")
-    return {
-        "id": str(user.id), "username": user.username, "email": user.email,
-        "full_name": user.full_name or "", "bio": user.bio or "",
-        "interests": user.interests or "", "avatar_url": user.avatar_url or "",
-        "role": user.role or "user", "is_premium": bool(user.is_premium),
-        "created_at": str(user.created_at)
-    }
+async def get_me(request: Request, db: Session = Depends(get_db)):
+    sid = request.cookies.get("user_session")
+    if not sid: raise HTTPException(401, "Not logged in")
+    u = db.query(models.User).filter(models.User.id == sid).first()
+    if not u: raise HTTPException(401, "User not found")
+    return {"id": u.id, "username": u.username, "email": u.email,
+            "role": getattr(u,"role","user"), "is_premium": getattr(u,"is_premium",0),
+            "bio": getattr(u,"bio",""), "avatar_url": getattr(u,"avatar_url",""),
+            "channel_name": getattr(u,"channel_name",""), "channel_desc": getattr(u,"channel_desc",""),
+            "follower_count": getattr(u,"follower_count",0)}
 
 @app.put("/api/users/me")
-async def update_current_user(
-    request: Request,
-    full_name: str = Form(None), bio: str = Form(None),
-    interests: str = Form(None), avatar_url: str = Form(None),
+async def update_me(
+    request: Request, bio: str = Form(""), channel_name: str = Form(""),
+    channel_desc: str = Form(""), avatar_url: str = Form(""),
     db: Session = Depends(get_db)
 ):
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Not logged in")
-    if full_name is not None: user.full_name = full_name.strip()
-    if bio is not None: user.bio = bio.strip()
-    if interests is not None: user.interests = interests.strip()
-    if avatar_url is not None: user.avatar_url = avatar_url.strip()
-    db.commit()
-    return {"success": True}
+    sid = request.cookies.get("user_session")
+    if not sid: raise HTTPException(401)
+    u = db.query(models.User).filter(models.User.id == sid).first()
+    if not u: raise HTTPException(404)
+    try:
+        if bio: u.bio = bio
+        if channel_name: u.channel_name = channel_name
+        if channel_desc: u.channel_desc = channel_desc
+        if avatar_url: u.avatar_url = avatar_url
+        db.commit(); return {"success": True}
+    except Exception as e:
+        db.rollback(); raise HTTPException(500, str(e))
 
-# ============================================
-# ADMIN USER MANAGEMENT
-# ============================================
+# ─── ADMIN USER MANAGEMENT ───────────────────────────────────────────────────
 @app.get("/api/admin/users")
-def get_all_users(request: Request, db: Session = Depends(get_db)):
-    require_admin(request)
+async def admin_users(request: Request, db: Session = Depends(get_db)):
+    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
+    users = db.query(models.User).order_by(models.User.created_at.desc()).all()
+    return [{"id":u.id,"username":u.username,"email":u.email,
+             "role":getattr(u,"role","user"),"is_premium":getattr(u,"is_premium",0),
+             "is_suspended":getattr(u,"is_suspended",0)} for u in users]
+
+@app.put("/api/admin/users/{uid}/role")
+async def set_role(uid: str, request: Request, role: str = Form(...), db: Session = Depends(get_db)):
+    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
+    u = db.query(models.User).filter(models.User.id == uid).first()
+    if not u: raise HTTPException(404)
+    u.role = role; db.commit(); return {"success": True}
+
+@app.put("/api/admin/users/{uid}/premium")
+async def set_premium(uid: str, request: Request, db: Session = Depends(get_db)):
+    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
+    u = db.query(models.User).filter(models.User.id == uid).first()
+    if not u: raise HTTPException(404)
+    u.is_premium = 0 if getattr(u,"is_premium",0) else 1
+    db.commit(); return {"success": True, "is_premium": u.is_premium}
+
+@app.put("/api/admin/users/{uid}/suspend")
+async def suspend(uid: str, request: Request, db: Session = Depends(get_db)):
+    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
+    u = db.query(models.User).filter(models.User.id == uid).first()
+    if not u: raise HTTPException(404)
+    u.is_suspended = 0 if getattr(u,"is_suspended",0) else 1
+    db.commit(); return {"success": True, "is_suspended": u.is_suspended}
+
+# ─── POSTS ────────────────────────────────────────────────────────────────────
+@app.get("/api/posts")
+async def get_posts(
+    request: Request, limit: int = 20, offset: int = 0,
+    content_type: str = "", region_id: str = "", author_id: str = "",
+    db: Session = Depends(get_db)
+):
     try:
-        users = db.query(models.User).order_by(models.User.created_at.desc()).all()
+        q = db.query(models.Post)
+        is_admin = request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
+        own_id   = request.cookies.get("user_session")
+
+        if not is_admin:
+            if author_id and author_id == own_id:
+                pass
+            else:
+                q = q.filter(models.Post.status == "published")
+
+        if content_type: q = q.filter(models.Post.content_type == content_type)
+        if region_id and region_id.isdigit(): q = q.filter(models.Post.region_id == int(region_id))
+        if author_id: q = q.filter(models.Post.author_id == author_id)
+
+        posts = q.order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
+
         return [{
-            "id": str(u.id), "username": u.username, "email": u.email,
-            "role": u.role or "user", "is_premium": bool(u.is_premium),
-            "plan": "premium" if u.is_premium else "free",
-            "is_active": bool(u.is_active) if u.is_active is not None else True,
-            "created_at": str(u.created_at) if u.created_at else ""
-        } for u in users]
+            "id": p.id,
+            "title": getattr(p,"title","") or "",
+            "slug": getattr(p,"slug","") or "",
+            "excerpt": getattr(p,"excerpt","") or "",
+            "cover_image": getattr(p,"cover_image","") or "",
+            "content_type": getattr(p,"content_type","article") or "article",
+            "status": getattr(p,"status","published") or "published",
+            "is_locked": getattr(p,"is_locked",0) or 0,
+            "author_id": getattr(p,"author_id","") or "",
+            "author_username": getattr(p,"author_username","") or "",
+            "region_id": getattr(p,"region_id",None),
+            "tags": getattr(p,"tags","") or "",
+            "views": getattr(p,"views",0) or 0,
+            "view_count": getattr(p,"views",0) or 0,
+            "likes": getattr(p,"likes",0) or 0,
+            "audio_url": getattr(p,"audio_url","") or "",
+            "video_url": getattr(p,"video_url","") or "",
+            "gallery": getattr(p,"gallery","") or "",
+            "created_at": str(getattr(p,"created_at","")),
+            "comment_count": db.query(models.Comment).filter(
+                models.Comment.post_id == p.id,
+                models.Comment.content != "__like__"
+            ).count()
+        } for p in posts]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.put("/api/admin/users/{user_id}/role")
-def set_user_role(user_id: str, request: Request, role: str = Form(...), db: Session = Depends(get_db)):
-    require_admin(request)
-    try:
-        user = db.query(models.User).filter(models.User.id == uuid.UUID(user_id)).first()
-    except:
-        raise HTTPException(status_code=404, detail="User not found")
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if role not in ["user", "creator", "admin", "superuser"]:
-        raise HTTPException(status_code=400, detail="Invalid role")
-    user.role = role
-    db.commit()
-    return {"success": True, "role": role}
-
-@app.put("/api/admin/users/{user_id}/premium")
-def toggle_premium(user_id: str, request: Request, db: Session = Depends(get_db)):
-    require_admin(request)
-    try:
-        user = db.query(models.User).filter(models.User.id == uuid.UUID(user_id)).first()
-    except:
-        raise HTTPException(status_code=404, detail="User not found")
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    user.is_premium = not bool(user.is_premium)
-    db.commit()
-    return {"success": True, "is_premium": user.is_premium}
-
-@app.put("/api/admin/users/{user_id}/suspend")
-def toggle_suspend(user_id: str, request: Request, db: Session = Depends(get_db)):
-    require_admin(request)
-    try:
-        user = db.query(models.User).filter(models.User.id == uuid.UUID(user_id)).first()
-    except:
-        raise HTTPException(status_code=404, detail="User not found")
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    user.is_active = not bool(user.is_active)
-    db.commit()
-    return {"success": True, "is_active": user.is_active}
-
-# ============================================
-# REGIONS
-# ============================================
-@app.get("/api/regions")
-def get_regions(db: Session = Depends(get_db)):
-    try:
-        regions = db.query(models.Region).all()
-        return [{
-            "id": int(r.id), "name": str(r.name) if r.name else "",
-            "capital": str(r.capital) if r.capital else "",
-            "population": str(r.population) if r.population else "",
-            "terrain": str(r.terrain) if r.terrain else "",
-            "description": str(r.description) if r.description else "",
-            "overview": str(r.overview) if r.overview else "",
-            "category": str(r.category) if r.category else "",
-            "tags": str(r.tags) if r.tags else "",
-            "hero_image": str(r.hero_image) if r.hero_image else "",
-            "gallery_images": str(r.gallery_images) if r.gallery_images else "",
-            "audio_files": str(r.audio_files) if r.audio_files else "",
-            "video_files": str(r.video_files) if r.video_files else "",
-            "documents": str(r.documents) if r.documents else "",
-            "source": str(r.source) if r.source else ""
-        } for r in regions]
-    except Exception as e:
-        print(f"Error getting regions: {e}")
+        print(f"GET /api/posts error: {e}")
         return []
 
-@app.get("/api/regions/{region_id}")
-def get_region(region_id: int, db: Session = Depends(get_db)):
-    r = db.query(models.Region).filter(models.Region.id == region_id).first()
-    if not r:
-        raise HTTPException(status_code=404, detail="Region not found")
-    return {
-        "id": r.id, "name": r.name, "capital": r.capital or "",
-        "description": r.description or "", "overview": r.overview or "",
-        "hero_image": r.hero_image or "", "gallery_images": r.gallery_images or "",
-        "audio_files": r.audio_files or "", "video_files": r.video_files or "",
-        "documents": r.documents or "", "tags": r.tags or ""
-    }
-
-@app.post("/api/regions")
-async def create_region(
-    name: str = Form(...), capital: str = Form(""), population: str = Form(""),
-    terrain: str = Form(""), description: str = Form(""), category: str = Form(""),
-    tags: str = Form(""), hero_image: str = Form(""), gallery_images: str = Form(""),
-    audio_files: str = Form(""), video_files: str = Form(""), documents: str = Form(""),
-    source: str = Form(""), overview: str = Form(""),
+@app.post("/api/posts")
+async def create_post(
+    request: Request,
+    title: str = Form(...),
+    excerpt: str = Form(""),
+    content: str = Form(""),
+    content_type: str = Form("article"),
+    status: str = Form("draft"),
+    is_locked: str = Form("false"),
+    cover_image: str = Form(""),
+    region_id: str = Form(""),
+    tags: str = Form(""),
+    audio_url: str = Form(""),
+    video_url: str = Form(""),
+    gallery: str = Form(""),
     db: Session = Depends(get_db)
 ):
     try:
-        if not name.strip():
-            raise HTTPException(status_code=400, detail="Region name required")
-        r = models.Region(
-            name=name.strip(), capital=capital.strip(), population=population.strip(),
-            terrain=terrain.strip(), description=description.strip(),
-            overview=overview.strip() or description.strip(), category=category.strip(),
-            tags=tags.strip(), hero_image=hero_image.strip(),
-            gallery_images=gallery_images.strip(), audio_files=audio_files.strip(),
-            video_files=video_files.strip(), documents=documents.strip(),
-            source=source.strip()
-        )
-        db.add(r)
-        db.commit()
-        db.refresh(r)
-        return {"success": True, "region_id": r.id}
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        # ── Identify author ──────────────────────────────────────────────────
+        sid       = request.cookies.get("user_session")
+        is_admin  = request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
+        author_id = ""; author_username = "Creator"
 
-@app.put("/api/regions/{region_id}")
-async def update_region(
-    region_id: int, name: str = Form(None), capital: str = Form(None),
-    population: str = Form(None), terrain: str = Form(None), description: str = Form(None),
-    category: str = Form(None), tags: str = Form(None), hero_image: str = Form(None),
-    gallery_images: str = Form(None), audio_files: str = Form(None),
-    video_files: str = Form(None), documents: str = Form(None),
-    source: str = Form(None), overview: str = Form(None),
-    db: Session = Depends(get_db)
-):
-    try:
-        r = db.query(models.Region).filter(models.Region.id == region_id).first()
-        if not r:
-            raise HTTPException(status_code=404, detail="Region not found")
-        if name is not None and name.strip(): r.name = name.strip()
-        if capital is not None: r.capital = capital.strip()
-        if population is not None: r.population = population.strip()
-        if terrain is not None: r.terrain = terrain.strip()
-        if description is not None: r.description = description.strip()
-        if overview is not None and overview.strip(): r.overview = overview.strip()
-        if category is not None: r.category = category.strip()
-        if tags is not None: r.tags = tags.strip()
-        if hero_image is not None: r.hero_image = hero_image.strip()
-        if gallery_images is not None: r.gallery_images = gallery_images.strip()
-        if audio_files is not None: r.audio_files = audio_files.strip()
-        if video_files is not None: r.video_files = video_files.strip()
-        if documents is not None: r.documents = documents.strip()
-        if source is not None: r.source = source.strip()
-        db.commit()
-        db.refresh(r)
-        return {"success": True}
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/api/regions/{region_id}")
-def delete_region(region_id: int, db: Session = Depends(get_db)):
-    try:
-        r = db.query(models.Region).filter(models.Region.id == region_id).first()
-        if not r:
-            raise HTTPException(status_code=404, detail="Region not found")
-        db.delete(r)
-        db.commit()
-        return {"success": True}
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ============================================
-# FILE UPLOADS — 50MB limit
-# ============================================
-@app.post("/api/upload/cover")
-@app.post("/api/upload/image")
-async def upload_cover_image(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db)
-):
-    """Upload a cover image / thumbnail. Returns {success, url}."""
-    try:
-        ALLOWED = {"image/jpeg","image/png","image/gif","image/webp","image/svg+xml","video/mp4"}
-        if file.content_type and file.content_type not in ALLOWED:
-            # Be lenient — only block obviously wrong types
-            if file.content_type.startswith("text/") or file.content_type == "application/octet-stream":
-                pass  # allow through
-        content = await file.read()
-        MAX_SIZE = 20 * 1024 * 1024  # 20MB for images
-        if len(content) > MAX_SIZE:
-            raise HTTPException(status_code=413, detail="File too large. Maximum 20MB for cover images.")
-
-        safe_name = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{file.filename.replace(' ', '_')}"
-
-        # Try Supabase first
-        public_url = None
-        supabase_url_env = os.getenv("SUPABASE_URL")
-        supabase_key_env = os.getenv("SUPABASE_SERVICE_KEY")
-        supabase_bucket  = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
-        if supabase_url_env and supabase_key_env:
+        if sid:
             try:
-                import httpx
-                upload_url = f"{supabase_url_env}/storage/v1/object/{supabase_bucket}/{safe_name}"
-                headers = {
-                    "Authorization": f"Bearer {supabase_key_env}",
-                    "Content-Type": file.content_type or "image/jpeg",
-                    "x-upsert": "true",
-                }
-                async with httpx.AsyncClient(timeout=60) as client:
-                    resp = await client.post(upload_url, content=content, headers=headers)
-                if resp.status_code in (200, 201):
-                    public_url = f"{supabase_url_env}/storage/v1/object/public/{supabase_bucket}/{safe_name}"
-                    print(f"✅ Cover uploaded to Supabase: {safe_name}")
-            except Exception as e:
-                print(f"Supabase cover upload error: {e}")
+                u = db.query(models.User).filter(models.User.id == sid).first()
+                if u:
+                    author_id = u.id
+                    author_username = u.username
+            except Exception:
+                pass
+        if not author_id and is_admin:
+            author_id = "admin"; author_username = "Admin"
 
-        if not public_url:
-            path = UPLOAD_DIR / safe_name
-            with open(path, "wb") as fh:
-                fh.write(content)
-            public_url = f"/uploads/{safe_name}"
+        # ── Build slug (unique) ──────────────────────────────────────────────
+        base = slugify(title); slug = base; n = 1
+        while db.query(models.Post).filter(models.Post.slug == slug).first():
+            slug = f"{base}-{n}"; n += 1
 
-        # Also record in DB
-        try:
-            uf = models.UploadedFile(
-                filename=safe_name, original_name=file.filename,
-                file_path=public_url, file_size=len(content),
-                mime_type=file.content_type or "image/jpeg",
-                category="image", uploaded_by="creator", is_public=1
-            )
-            db.add(uf)
-            db.commit()
-        except Exception as db_err:
-            db.rollback()
-            print(f"Cover DB record error (non-fatal): {db_err}")
+        # ── Create post ──────────────────────────────────────────────────────
+        locked = is_locked in ("true","1","True")
+        rid    = int(region_id) if region_id and str(region_id).isdigit() else None
 
-        return {
-            "success": True, "url": public_url,
-            "filename": safe_name,
-            "storage": "supabase" if "supabase" in public_url else "local"
-        }
-    except HTTPException:
-        raise
+        post = models.Post(
+            title          = title.strip(),
+            slug           = slug,
+            excerpt        = excerpt.strip(),
+            content        = content.strip(),
+            content_type   = content_type or "article",
+            status         = status or "draft",
+            is_locked      = 1 if locked else 0,
+            cover_image    = cover_image.strip(),
+            author_id      = author_id,
+            author_username= author_username,
+            region_id      = rid,
+            tags           = tags.strip(),
+            views          = 0,
+            likes          = 0,
+        )
+
+        # Optional columns — safe set
+        for attr, val in [("audio_url",audio_url),("video_url",video_url),("gallery",gallery)]:
+            try: setattr(post, attr, val.strip())
+            except Exception: pass
+
+        db.add(post); db.commit(); db.refresh(post)
+        print(f"✅ Post {post.id} '{post.title}' status={post.status} by {author_username}")
+
+        return {"success": True, "id": post.id, "slug": post.slug,
+                "title": post.title, "status": post.status,
+                "message": "Published! 🚀" if status == "published" else "Saved as draft 💾"}
+
+    except HTTPException: raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        db.rollback()
+        print(f"❌ POST /api/posts error: {e}")
+        import traceback; traceback.print_exc()
+        raise HTTPException(500, f"Post creation failed: {str(e)}")
+
+@app.get("/api/posts/{post_id}")
+async def get_post(post_id: int, db: Session = Depends(get_db)):
+    try:
+        p = db.query(models.Post).filter(models.Post.id == post_id).first()
+        if not p: raise HTTPException(404, "Post not found")
+        try: p.views = (getattr(p,"views",0) or 0) + 1; db.commit()
+        except Exception: pass
+        return {
+            "id": p.id, "title": getattr(p,"title",""), "slug": getattr(p,"slug",""),
+            "excerpt": getattr(p,"excerpt",""), "content": getattr(p,"content",""),
+            "cover_image": getattr(p,"cover_image",""), "content_type": getattr(p,"content_type","article"),
+            "status": getattr(p,"status","published"), "is_locked": getattr(p,"is_locked",0),
+            "author_id": getattr(p,"author_id",""), "author_username": getattr(p,"author_username",""),
+            "region_id": getattr(p,"region_id",None), "tags": getattr(p,"tags",""),
+            "views": getattr(p,"views",0), "view_count": getattr(p,"views",0),
+            "likes": getattr(p,"likes",0),
+            "audio_url": getattr(p,"audio_url",""), "video_url": getattr(p,"video_url",""),
+            "gallery": getattr(p,"gallery",""), "created_at": str(getattr(p,"created_at","")),
+        }
+    except HTTPException: raise
+    except Exception as e: raise HTTPException(500, str(e))
+
+@app.put("/api/posts/{post_id}")
+async def update_post(
+    post_id: int, request: Request,
+    title: str = Form(None), excerpt: str = Form(None), content: str = Form(None),
+    status: str = Form(None), cover_image: str = Form(None), tags: str = Form(None),
+    is_locked: str = Form(None), audio_url: str = Form(None), video_url: str = Form(None),
+    db: Session = Depends(get_db)
+):
+    p = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not p: raise HTTPException(404)
+    try:
+        for attr, val in [("title",title),("excerpt",excerpt),("content",content),
+                          ("status",status),("cover_image",cover_image),("tags",tags)]:
+            if val is not None: setattr(p, attr, val.strip() if hasattr(val,"strip") else val)
+        if is_locked is not None: p.is_locked = 1 if is_locked in ("true","1") else 0
+        for attr, val in [("audio_url",audio_url),("video_url",video_url)]:
+            if val is not None:
+                try: setattr(p, attr, val.strip())
+                except Exception: pass
+        db.commit(); return {"success": True, "id": p.id}
+    except Exception as e:
+        db.rollback(); raise HTTPException(500, str(e))
+
+@app.delete("/api/posts/{post_id}")
+async def delete_post(post_id: int, db: Session = Depends(get_db)):
+    p = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not p: raise HTTPException(404)
+    try:
+        db.query(models.Comment).filter(models.Comment.post_id == post_id).delete()
+        db.delete(p); db.commit(); return {"success": True}
+    except Exception as e:
+        db.rollback(); raise HTTPException(500, str(e))
+
+# ─── COMMENTS ────────────────────────────────────────────────────────────────
+@app.get("/api/posts/{post_id}/comments")
+async def get_comments(post_id: int, db: Session = Depends(get_db)):
+    try:
+        comments = db.query(models.Comment).filter(
+            models.Comment.post_id == post_id,
+            models.Comment.content != "__like__"
+        ).order_by(models.Comment.created_at.asc()).all()
+        return [{"id":c.id,"username":getattr(c,"username","User"),
+                 "content":c.content,"created_at":str(c.created_at)} for c in comments]
+    except Exception: return []
+
+@app.post("/api/posts/{post_id}/comments")
+async def add_comment(
+    post_id: int, request: Request, content: str = Form(...), db: Session = Depends(get_db)
+):
+    sid = request.cookies.get("user_session"); username = "Guest"; uid = sid or "guest"
+    if sid:
+        try:
+            u = db.query(models.User).filter(models.User.id == sid).first()
+            if u: username = u.username
+        except Exception: pass
+    try:
+        c = models.Comment(post_id=post_id, user_id=uid, username=username, content=content.strip())
+        db.add(c); db.commit(); return {"success": True, "id": c.id}
+    except Exception as e:
+        db.rollback(); raise HTTPException(500, str(e))
+
+@app.post("/api/posts/{post_id}/like")
+async def toggle_like(post_id: int, request: Request, db: Session = Depends(get_db)):
+    sid = request.cookies.get("user_session") or request.cookies.get("admin_session")
+    if not sid: raise HTTPException(401, "Login to like")
+    try:
+        p = db.query(models.Post).filter(models.Post.id == post_id).first()
+        if not p: raise HTTPException(404)
+        existing = db.query(models.Comment).filter(
+            models.Comment.post_id == post_id,
+            models.Comment.user_id == sid,
+            models.Comment.content == "__like__"
+        ).first()
+        if existing:
+            db.delete(existing)
+            p.likes = max(0, (getattr(p,"likes",0) or 0) - 1)
+            db.commit(); return {"liked": False, "likes": p.likes}
+        db.add(models.Comment(post_id=post_id, user_id=sid, username="", content="__like__"))
+        p.likes = (getattr(p,"likes",0) or 0) + 1
+        db.commit(); return {"liked": True, "likes": p.likes}
+    except HTTPException: raise
+    except Exception as e:
+        db.rollback(); raise HTTPException(500, str(e))
+
+# ─── SOCIAL ──────────────────────────────────────────────────────────────────
+@app.post("/api/follow/{target_id}")
+async def toggle_follow(target_id: str, request: Request, db: Session = Depends(get_db)):
+    sid = request.cookies.get("user_session")
+    if not sid: raise HTTPException(401)
+    try:
+        ex = db.query(models.Follow).filter(
+            models.Follow.follower_id == sid, models.Follow.following_id == target_id
+        ).first()
+        tgt = db.query(models.User).filter(models.User.id == target_id).first()
+        if ex:
+            db.delete(ex)
+            if tgt: tgt.follower_count = max(0, (getattr(tgt,"follower_count",0) or 0) - 1)
+            db.commit(); return {"following": False}
+        db.add(models.Follow(follower_id=sid, following_id=target_id))
+        if tgt: tgt.follower_count = (getattr(tgt,"follower_count",0) or 0) + 1
+        db.commit(); return {"following": True}
+    except Exception as e:
+        db.rollback(); raise HTTPException(500, str(e))
+
+@app.get("/api/following")
+async def get_following(request: Request, db: Session = Depends(get_db)):
+    sid = request.cookies.get("user_session")
+    if not sid: return []
+    try:
+        return [f.following_id for f in db.query(models.Follow).filter(models.Follow.follower_id == sid).all()]
+    except Exception: return []
+
+@app.get("/api/creators")
+async def get_creators(db: Session = Depends(get_db)):
+    try:
+        creators = db.query(models.User).filter(
+            models.User.role.in_(["creator","admin","superuser"])
+        ).limit(20).all()
+        return [{"id":u.id,"username":u.username,
+                 "channel_name":getattr(u,"channel_name","") or u.username,
+                 "avatar_url":getattr(u,"avatar_url","")} for u in creators]
+    except Exception: return []
+
+@app.get("/api/activity")
+async def get_activity(request: Request, db: Session = Depends(get_db)):
+    sid = request.cookies.get("user_session")
+    if not sid: return []
+    try:
+        my_ids = [p.id for p in db.query(models.Post).filter(models.Post.author_id == sid).all()]
+        comments = db.query(models.Comment).filter(
+            models.Comment.post_id.in_(my_ids),
+            models.Comment.content != "__like__",
+            models.Comment.user_id != sid
+        ).order_by(models.Comment.created_at.desc()).limit(30).all()
+        return [{"type":"comment","username":c.username,"post_id":c.post_id,
+                 "content":c.content[:80],"created_at":str(c.created_at)} for c in comments]
+    except Exception: return []
+
+# ─── UPLOADS ─────────────────────────────────────────────────────────────────
+@app.post("/api/upload/cover")
+async def upload_cover(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    return await _do_upload(file, "cover", db)
+
+@app.post("/api/upload/image")
+async def upload_image(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    return await _do_upload(file, "image", db)
 
 @app.post("/api/upload/file")
 async def upload_file(
-    file: UploadFile = File(...), filename: str = Form(...),
+    file: UploadFile = File(...), filename: str = Form(""),
     category: str = Form("general"), description: str = Form(""),
     region_id: str = Form(""), is_public: str = Form("1"),
     db: Session = Depends(get_db)
 ):
-    try:
-        # Read content size first for validation
-        content_bytes = await file.read()
-        await file.seek(0)          # reset so save_upload can re-read
-        MAX_SIZE = 50 * 1024 * 1024
-        if len(content_bytes) > MAX_SIZE:
-            raise HTTPException(status_code=413, detail="File too large. Maximum 50MB.")
-
-        # Sanitise filename
-        safe_name = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{filename.replace(' ', '_')}"
-
-        # ── Try Supabase first ──────────────────────────────────────
-        public_url = None
-        supabase_url_env = os.getenv("SUPABASE_URL")
-        supabase_key_env = os.getenv("SUPABASE_SERVICE_KEY")
-        supabase_bucket  = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
-        if supabase_url_env and supabase_key_env:
-            try:
-                import httpx
-                upload_url = f"{supabase_url_env}/storage/v1/object/{supabase_bucket}/{safe_name}"
-                headers = {
-                    "Authorization": f"Bearer {supabase_key_env}",
-                    "Content-Type": file.content_type or "application/octet-stream",
-                    "x-upsert": "true",
-                }
-                async with httpx.AsyncClient(timeout=60) as client:
-                    resp = await client.post(upload_url, content=content_bytes, headers=headers)
-                if resp.status_code in (200, 201):
-                    public_url = f"{supabase_url_env}/storage/v1/object/public/{supabase_bucket}/{safe_name}"
-                    print(f"✅ Supabase upload: {safe_name}")
-                else:
-                    print(f"⚠️  Supabase upload failed ({resp.status_code}): {resp.text[:200]}")
-            except Exception as sup_err:
-                print(f"⚠️  Supabase error: {sup_err}")
-
-        # ── Fallback to local disk ──────────────────────────────────
-        if not public_url:
-            file_path = UPLOAD_DIR / safe_name
-            with open(file_path, "wb") as fh:
-                fh.write(content_bytes)
-            public_url = f"/uploads/{safe_name}"
-
-        uf = models.UploadedFile(
-            filename=safe_name, original_name=filename, file_path=public_url,
-            file_size=len(content_bytes), mime_type=file.content_type or "application/octet-stream",
-            category=category,
-            region_id=int(region_id) if region_id and region_id.isdigit() else None,
-            description=description, uploaded_by="admin",
-            is_public=int(is_public) if is_public else 1
-        )
-        db.add(uf)
-        db.commit()
-        db.refresh(uf)
-        return {
-            "success": True, "file_id": uf.id,
-            "url": public_url, "filename": safe_name,
-            "original_name": filename, "category": category,
-            "size_bytes": len(content_bytes),
-            "file_size_mb": round(len(content_bytes) / (1024*1024), 2),
-            "mime_type": file.content_type,
-            "storage": "supabase" if "supabase" in public_url else "local"
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    if filename: file.filename = filename
+    return await _do_upload(file, category, db)
 
 @app.post("/api/upload/multiple")
-async def upload_multiple_files(
-    request: Request, category: str = Form("general"),
-    description: str = Form(""), region_id: str = Form(""),
-    is_public: str = Form("1"), db: Session = Depends(get_db)
-):
-    form = await request.form()
-    files = form.getlist("files")
-    if not files:
-        raise HTTPException(status_code=400, detail="No files provided")
-    MAX_SIZE = 50 * 1024 * 1024
-    supabase_url_env = os.getenv("SUPABASE_URL")
-    supabase_key_env = os.getenv("SUPABASE_SERVICE_KEY")
-    supabase_bucket  = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
+async def upload_multiple(files: list[UploadFile] = File(...), db: Session = Depends(get_db)):
     results = []
-    for file in files:
-        try:
-            content = await file.read()
-            if len(content) > MAX_SIZE:
-                results.append({"success": False, "filename": file.filename, "error": "Exceeds 50MB"})
-                continue
-            safe_name = f"{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{file.filename.replace(' ', '_')}"
-
-            public_url = None
-            if supabase_url_env and supabase_key_env:
-                try:
-                    import httpx
-                    upload_url = f"{supabase_url_env}/storage/v1/object/{supabase_bucket}/{safe_name}"
-                    headers = {
-                        "Authorization": f"Bearer {supabase_key_env}",
-                        "Content-Type": file.content_type or "application/octet-stream",
-                        "x-upsert": "true",
-                    }
-                    async with httpx.AsyncClient(timeout=60) as client:
-                        resp = await client.post(upload_url, content=content, headers=headers)
-                    if resp.status_code in (200, 201):
-                        public_url = f"{supabase_url_env}/storage/v1/object/public/{supabase_bucket}/{safe_name}"
-                except Exception as sup_err:
-                    print(f"Supabase multi-upload error: {sup_err}")
-
-            if not public_url:
-                file_path = UPLOAD_DIR / safe_name
-                with open(file_path, "wb") as fh:
-                    fh.write(content)
-                public_url = f"/uploads/{safe_name}"
-
-            uf = models.UploadedFile(
-                filename=safe_name, original_name=file.filename, file_path=public_url,
-                file_size=len(content), mime_type=file.content_type or "application/octet-stream",
-                category=category,
-                region_id=int(region_id) if region_id and region_id.isdigit() else None,
-                description=description, uploaded_by="admin", is_public=int(is_public) if is_public else 1
-            )
-            db.add(uf)
-            db.commit()
-            db.refresh(uf)
-            results.append({
-                "success": True, "file_id": uf.id, "url": public_url,
-                "filename": safe_name, "original_name": file.filename,
-                "file_size_mb": round(len(content) / (1024*1024), 2),
-                "mime_type": file.content_type,
-                "storage": "supabase" if "supabase" in public_url else "local"
-            })
-        except Exception as e:
-            results.append({"success": False, "filename": getattr(file, "filename", "unknown"), "error": str(e)})
-    return {"success": True, "uploaded": sum(1 for r in results if r.get("success")),
-            "total": len(files), "results": results}
+    for f in files:
+        try: results.append(await _do_upload(f, "image", db))
+        except Exception as e: results.append({"success": False, "error": str(e)})
+    return results
 
 @app.get("/api/files")
-def get_files(category: str = "", region_id: str = "", db: Session = Depends(get_db)):
+async def get_files(category: str = "", db: Session = Depends(get_db)):
     try:
         q = db.query(models.UploadedFile)
         if category: q = q.filter(models.UploadedFile.category == category)
-        if region_id: q = q.filter(models.UploadedFile.region_id == int(region_id))
-        return [{
-            "id": f.id, "filename": f.filename, "original_name": f.original_name,
-            "file_url": f.file_path if f.file_path and (f.file_path.startswith("http") or f.file_path.startswith("/")) else f"/uploads/{f.filename}",
-            "file_size": f.file_size,
-            "file_size_mb": round((f.file_size or 0) / (1024*1024), 2),
-            "mime_type": f.mime_type, "category": f.category,
-            "region_id": f.region_id, "description": f.description,
-            "created_at": str(f.created_at)
-        } for f in q.order_by(models.UploadedFile.created_at.desc()).all()]
-    except Exception as e:
-        print(f"Error getting files: {e}")
-        return []
+        files = q.order_by(models.UploadedFile.created_at.desc()).all()
+        return [{"id":f.id,"filename":f.filename,"original_name":f.original_name,
+                 "file_url": f.file_path if (f.file_path or "").startswith("http") else f"/uploads/{f.filename}",
+                 "category":f.category,"file_size":f.file_size,"created_at":str(f.created_at)} for f in files]
+    except Exception: return []
 
 @app.delete("/api/files/{file_id}")
-def delete_file(file_id: int, db: Session = Depends(get_db)):
+async def delete_file(file_id: int, db: Session = Depends(get_db)):
+    f = db.query(models.UploadedFile).filter(models.UploadedFile.id == file_id).first()
+    if not f: raise HTTPException(404)
     try:
-        f = db.query(models.UploadedFile).filter(models.UploadedFile.id == file_id).first()
-        if not f:
-            raise HTTPException(status_code=404, detail="File not found")
-        # Remove from Supabase if applicable
-        if f.file_path and "supabase" in (f.file_path or ""):
-            try:
-                import httpx, asyncio
-                supabase_url_env = os.getenv("SUPABASE_URL")
-                supabase_key_env = os.getenv("SUPABASE_SERVICE_KEY")
-                supabase_bucket  = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
-                del_url = f"{supabase_url_env}/storage/v1/object/{supabase_bucket}/{f.filename}"
-                headers = {"Authorization": f"Bearer {supabase_key_env}"}
-                # Fire-and-forget; don't block DB delete on this
-                asyncio.get_event_loop().run_until_complete(
-                    httpx.AsyncClient().delete(del_url, headers=headers)
-                )
-            except Exception:
-                pass
-        # Remove from local disk if applicable
-        elif f.file_path and os.path.exists(f.file_path):
-            try: os.remove(f.file_path)
-            except Exception: pass
-        db.delete(f)
-        db.commit()
-        return {"success": True}
-    except HTTPException:
-        raise
+        if f.file_path and not f.file_path.startswith("http") and os.path.exists(f.file_path):
+            os.remove(f.file_path)
+        db.delete(f); db.commit(); return {"success": True}
     except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        db.rollback(); raise HTTPException(500, str(e))
 
-# ============================================
-# POSTS
-# ============================================
-@app.get("/api/posts")
-def get_posts(
-    status: str = "published", content_type: str = "", limit: int = 50,
-    author_id: str = "", is_premium: int = -1, db: Session = Depends(get_db)
+# ─── REGIONS ─────────────────────────────────────────────────────────────────
+@app.get("/api/regions")
+def get_regions(db: Session = Depends(get_db)):
+    try:
+        return [{"id":r.id,"name":str(r.name or ""),"capital":str(r.capital or ""),
+                 "population":str(r.population or ""),"terrain":str(r.terrain or ""),
+                 "description":str(r.description or ""),"overview":str(getattr(r,"overview","") or ""),
+                 "category":str(r.category or ""),"tags":str(r.tags or ""),
+                 "hero_image":str(r.hero_image or ""),"gallery_images":str(r.gallery_images or ""),
+                 "audio_files":str(r.audio_files or ""),"source":str(r.source or "")}
+                for r in db.query(models.Region).all()]
+    except Exception: return []
+
+@app.post("/api/regions")
+def create_region(
+    name: str = Form(...), capital: str = Form(""), population: str = Form(""),
+    terrain: str = Form(""), description: str = Form(""), category: str = Form(""),
+    tags: str = Form(""), hero_image: str = Form(""), gallery_images: str = Form(""),
+    audio_files: str = Form(""), source: str = Form(""), overview: str = Form(""),
+    db: Session = Depends(get_db)
 ):
     try:
-        q = db.query(models.Post)
-        if status and status != "all":
-            q = q.filter(models.Post.status == status)
-        if content_type:
-            q = q.filter(models.Post.content_type == content_type)
-        if author_id:
-            try:
-                q = q.filter(models.Post.author_id == uuid.UUID(author_id))
-            except:
-                pass
-        if is_premium >= 0:
-            q = q.filter(models.Post.is_premium == bool(is_premium))
-        posts = q.order_by(models.Post.created_at.desc()).limit(limit).all()
-        return [{
-            "id": p.id, "title": p.title, "excerpt": p.excerpt or "",
-            "cover_image": p.cover_image or "", "content_type": p.content_type or "article",
-            "author_username": p.author_username or "",
-            "author_id": str(p.author_id) if p.author_id else "",
-            "status": p.status,
-            "views": p.views or 0, "view_count": p.views or 0,
-            "likes": p.likes or 0,
-            "comment_count": p.comment_count or 0,
-            "is_premium": bool(p.is_premium), "region_id": p.region_id,
-            "tags": p.tags or "",
-            "audio_url": p.audio_url or "" if hasattr(p, "audio_url") else "",
-            "video_url": p.video_url or "" if hasattr(p, "video_url") else "",
-            "created_at": str(p.created_at)
-        } for p in posts]
+        r = models.Region(name=name.strip(), capital=capital, population=population,
+                          terrain=terrain, description=description, overview=overview or description,
+                          category=category, tags=tags, hero_image=hero_image,
+                          gallery_images=gallery_images, audio_files=audio_files, source=source)
+        db.add(r); db.commit(); db.refresh(r)
+        return {"success": True, "region_id": r.id}
     except Exception as e:
-        print(f"Error getting posts: {e}")
-        return []
+        db.rollback(); raise HTTPException(500, str(e))
 
-@app.get("/api/posts/{post_id}")
-def get_post(post_id: int, db: Session = Depends(get_db)):
-    p = db.query(models.Post).filter(models.Post.id == post_id).first()
-    if not p:
-        raise HTTPException(status_code=404, detail="Post not found")
-    p.views = (p.views or 0) + 1
-    db.commit()
-    return {
-        "id": p.id, "title": p.title, "excerpt": p.excerpt or "",
-        "content": p.content or "", "cover_image": p.cover_image or "",
-        "content_type": p.content_type or "article", "audio_url": p.audio_url or "",
-        "video_url": p.video_url or "", "gallery": p.gallery or "",
-        "author_username": p.author_username or "",
-        "author_id": str(p.author_id) if p.author_id else "",
-        "status": p.status, "views": p.views or 0, "likes": p.likes or 0,
-        "is_premium": bool(p.is_premium), "created_at": str(p.created_at)
-    }
-
-@app.post("/api/posts")
-async def create_post(
-    title: str = Form(...), excerpt: str = Form(""), content: str = Form(""),
-    cover_image: str = Form(""), content_type: str = Form("article"),
-    audio_url: str = Form(""), video_url: str = Form(""), gallery: str = Form(""),
-    tags: str = Form(""), region_id: str = Form(""), status: str = Form("draft"),
-    is_premium: str = Form("0"), request: Request = None, db: Session = Depends(get_db)
+@app.put("/api/regions/{rid}")
+def update_region(
+    rid: int, name: str = Form(None), capital: str = Form(None), population: str = Form(None),
+    terrain: str = Form(None), description: str = Form(None), category: str = Form(None),
+    tags: str = Form(None), hero_image: str = Form(None), gallery_images: str = Form(None),
+    audio_files: str = Form(None), source: str = Form(None), overview: str = Form(None),
+    db: Session = Depends(get_db)
 ):
-    is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
-    user = get_user_from_request(request, db)
-
-    if is_admin_session and not user:
-        user = db.query(models.User).filter(models.User.role.in_(["admin","superuser"])).first()
-        if not user:
-            try:
-                user = models.User(
-                    username="admin", email="admin@echostack.gh",
-                    password_hash=hash_password("admin_temp_password"),
-                    role="admin",
-                )
-                try: user.is_active = True
-                except: pass
-                try: user.is_premium = True
-                except: pass
-                db.add(user)
-                db.commit()
-                db.refresh(user)
-            except:
-                db.rollback()
-
-    if not user and not is_admin_session:
-        raise HTTPException(status_code=401, detail="Must be logged in")
-    if user and user.role not in ["creator","superuser","admin"] and not is_admin_session:
-        raise HTTPException(status_code=403, detail="Creator account required")
-
-    author_id = user.id if user else None
-    author_name = user.username if user else "Admin"
-
+    r = db.query(models.Region).filter(models.Region.id == rid).first()
+    if not r: raise HTTPException(404)
     try:
-        post = models.Post(
-            author_id=author_id, author_username=author_name,
-            title=title.strip(), excerpt=excerpt.strip(), content=content.strip(),
-            cover_image=cover_image.strip(), content_type=content_type,
-            region_id=int(region_id) if region_id and region_id.isdigit() else None,
-            status=status, is_premium=bool(int(is_premium or "0"))
-        )
-        # Safe-assign optional media columns
-        try: post.audio_url = audio_url.strip()
-        except: pass
-        try: post.video_url = video_url.strip()
-        except: pass
-        try: post.gallery = gallery.strip()
-        except: pass
-        try: post.tags = tags.strip()
-        except: pass
-        if status == "published":
-            try: post.published_at = datetime.datetime.utcnow()
-            except: pass
-        db.add(post)
-        db.commit()
-        db.refresh(post)
-        return {"success": True, "post_id": post.id, "status": post.status}
+        for a, v in [("name",name),("capital",capital),("population",population),
+                     ("terrain",terrain),("description",description),("overview",overview),
+                     ("category",category),("tags",tags),("hero_image",hero_image),
+                     ("gallery_images",gallery_images),("audio_files",audio_files),("source",source)]:
+            if v is not None: setattr(r, a, v.strip())
+        db.commit(); return {"success": True}
     except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        db.rollback(); raise HTTPException(500, str(e))
 
-@app.put("/api/posts/{post_id}")
-async def update_post(
-    post_id: int, status: str = Form(None), title: str = Form(None),
-    request: Request = None, db: Session = Depends(get_db)
-):
-    require_admin(request)
-    post = db.query(models.Post).filter(models.Post.id == post_id).first()
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-    if status is not None: post.status = status
-    if title is not None: post.title = title.strip()
-    db.commit()
-    return {"success": True}
+@app.delete("/api/regions/{rid}")
+def delete_region(rid: int, db: Session = Depends(get_db)):
+    r = db.query(models.Region).filter(models.Region.id == rid).first()
+    if not r: raise HTTPException(404)
+    db.delete(r); db.commit(); return {"success": True}
 
-@app.post("/api/posts/{post_id}/like")
-async def like_post(post_id: int, request: Request, db: Session = Depends(get_db)):
-    """Toggle like on a post. Returns updated like count + liked state."""
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Must be logged in to like")
-    post = db.query(models.Post).filter(models.Post.id == post_id).first()
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-    # Check if already liked (simple: use Comment table pattern with a Like tracker)
-    # We store likes as a simple count — toggle by checking session
-    # Use a lightweight approach: store liked post IDs in a pseudo-table via Comment with type='like'
-    existing = db.query(models.Comment).filter(
-        models.Comment.post_id == post_id,
-        models.Comment.author_id == user.id,
-        models.Comment.content == "__like__"
-    ).first()
-    if existing:
-        db.delete(existing)
-        post.likes = max(0, (post.likes or 0) - 1)
-        db.commit()
-        return {"success": True, "liked": False, "likes": post.likes}
-    else:
-        like_marker = models.Comment(
-            post_id=post_id, author_id=user.id,
-            author_username=user.username, content="__like__", is_approved=0
-        )
-        db.add(like_marker)
-        post.likes = (post.likes or 0) + 1
-        db.commit()
-        return {"success": True, "liked": True, "likes": post.likes}
-
-@app.delete("/api/posts/{post_id}")
-async def delete_post(post_id: int, request: Request, db: Session = Depends(get_db)):
-    require_admin(request)
-    post = db.query(models.Post).filter(models.Post.id == post_id).first()
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-    db.delete(post)
-    db.commit()
-    return {"success": True}
-
-# ============================================
-# ADMIN PUBLISH FILE TO FEED
-# ============================================
+# ─── ADMIN PUBLISH FILE ───────────────────────────────────────────────────────
 @app.post("/api/admin/publish-file")
-async def admin_publish_file(
-    request: Request, file_id: str = Form(...), title: str = Form(...),
-    excerpt: str = Form(""), status: str = Form("published"),
-    is_premium: str = Form("0"), db: Session = Depends(get_db)
+async def publish_file(
+    request: Request, file_id: int = Form(...), title: str = Form(...),
+    description: str = Form(""), region_id: str = Form(""), content_type: str = Form("article"),
+    db: Session = Depends(get_db)
 ):
-    require_admin(request)
+    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
+    uf = db.query(models.UploadedFile).filter(models.UploadedFile.id == file_id).first()
+    if not uf: raise HTTPException(404)
     try:
-        file_record = db.query(models.UploadedFile).filter(
-            models.UploadedFile.id == int(file_id)
-        ).first()
-        if not file_record:
-            raise HTTPException(status_code=404, detail="File not found")
-
-        mime = file_record.mime_type or ""
-        if mime.startswith("video/"): content_type = "video"
-        elif mime.startswith("audio/"): content_type = "audio"
-        elif mime.startswith("image/"): content_type = "photo_essay"
-        else: content_type = "article"
-
-        file_url = file_record.file_path if file_record.file_path and (file_record.file_path.startswith("http") or file_record.file_path.startswith("/")) else f"/uploads/{file_record.filename}"
-        if content_type == "video": content = f"[video]{file_url}[/video]"
-        elif content_type == "audio": content = f"[audio]{file_url}[/audio]"
-        elif content_type == "photo_essay": content = f"![{title}]({file_url})"
-        else: content = f"[{file_record.original_name}]({file_url})"
-
-        cover_image = file_url if content_type == "photo_essay" else ""
-
-        admin_user = db.query(models.User).filter(
-            models.User.role.in_(["admin","superuser"])
-        ).first()
-        author_id = admin_user.id if admin_user else None
-        author_name = admin_user.username if admin_user else "Admin"
-
-        post = models.Post(
-            author_id=author_id, author_username=author_name,
-            title=title.strip(), excerpt=excerpt.strip(), content=content,
-            cover_image=cover_image, content_type=content_type,
-            status=status, is_premium=bool(int(is_premium))
-        )
-        db.add(post)
-        db.commit()
-        db.refresh(post)
-        return {"success": True, "post_id": post.id, "status": post.status,
-                "content_type": content_type, "file_url": file_url}
-    except HTTPException:
-        raise
+        url = uf.file_path if (uf.file_path or "").startswith("http") else f"/uploads/{uf.filename}"
+        rid = int(region_id) if region_id and region_id.isdigit() else None
+        p = models.Post(title=title, slug=slugify(title), excerpt=description[:200],
+                        content=description, content_type=content_type, status="published",
+                        cover_image=url if content_type == "article" else "",
+                        author_id="admin", author_username="Admin",
+                        region_id=rid, views=0, likes=0)
+        try: setattr(p, "video_url", url if content_type=="video" else "")
+        except Exception: pass
+        try: setattr(p, "audio_url", url if content_type=="audio" else "")
+        except Exception: pass
+        db.add(p); db.commit(); db.refresh(p)
+        return {"success": True, "post_id": p.id}
     except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        db.rollback(); raise HTTPException(500, str(e))
 
-# ============================================
-# STATS
-# ============================================
+# ─── STATS ───────────────────────────────────────────────────────────────────
 @app.get("/api/stats")
 def get_stats(db: Session = Depends(get_db)):
     try:
-        return {
-            "total_regions": db.query(models.Region).count(),
-            "total_users": db.query(models.User).count(),
-            "total_posts": db.query(models.Post).filter(models.Post.status == "published").count(),
-            "total_creators": db.query(models.User).filter(models.User.role == "creator").count(),
-            "total_comments": db.query(models.Comment).count(),
-            "with_audio": db.query(models.UploadedFile).filter(models.UploadedFile.category == "audio").count(),
-            "with_images": db.query(models.UploadedFile).filter(models.UploadedFile.category == "image").count(),
-        }
-    except Exception as e:
-        print(f"Stats error: {e}")
-        return {"total_regions": 0, "total_users": 0, "total_posts": 0,
-                "total_creators": 0, "total_comments": 0, "with_audio": 0, "with_images": 0}
+        return {"total_regions": db.query(models.Region).count(),
+                "total_posts": db.query(models.Post).filter(models.Post.status=="published").count(),
+                "total_users": db.query(models.User).count(),
+                "total_files": db.query(models.UploadedFile).count()}
+    except Exception: return {"total_regions":0,"total_posts":0,"total_users":0}
 
-# ============================================
-# STORIES
-# ============================================
-@app.get("/api/stories")
-def get_stories(status: str = "pending", db: Session = Depends(get_db)):
+# ─── SECTIONS ────────────────────────────────────────────────────────────────
+@app.get("/api/sections")
+def get_sections(db: Session = Depends(get_db)):
     try:
-        stories = db.query(models.StorySubmission).filter(
-            models.StorySubmission.status == status
-        ).order_by(models.StorySubmission.created_at.desc()).all()
-        return [{
-            "id": s.id, "title": s.title, "content": s.content or "",
-            "username": s.username or "", "author": s.username or "",
-            "region_id": s.region_id, "status": s.status,
-            "created_at": str(s.created_at) if s.created_at else ""
-        } for s in stories]
-    except Exception as e:
-        print(f"Stories error: {e}")
-        return []
+        s = db.query(models.Section).filter(models.Section.is_active==1).all()
+        return [{"id":x.id,"name":x.name,"slug":x.slug} for x in s]
+    except Exception: return []
 
-@app.post("/api/stories")
-async def submit_story(
-    title: str = Form(...), content: str = Form(...), region_id: str = Form(""),
-    request: Request = None, db: Session = Depends(get_db)
-):
-    is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
-    user = get_user_from_request(request, db)
-    if not user and not is_admin_session:
-        raise HTTPException(status_code=401, detail="Must be logged in to submit a story")
-    author_name = user.username if user else "Admin"
-    author_id = user.id if user else None
-    auto_status = "approved" if is_admin_session else "pending"
+@app.post("/api/sections")
+def create_section(name: str = Form(...), description: str = Form(""),
+                   display_order: int = Form(0), db: Session = Depends(get_db)):
     try:
-        story = models.StorySubmission(
-            title=title.strip(), content=content.strip(), username=author_name,
-            user_id=str(author_id) if author_id else None,
-            region_id=int(region_id) if region_id and region_id.isdigit() else None,
-            status=auto_status
-        )
-        db.add(story)
-        db.commit()
-        db.refresh(story)
-        return {"success": True, "story_id": story.id, "status": auto_status}
+        s = models.Section(name=name, slug=slugify(name), description=description, display_order=display_order)
+        db.add(s); db.commit(); return {"success":True,"id":s.id}
     except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        db.rollback(); raise HTTPException(500, str(e))
 
-@app.put("/api/stories/{story_id}/approve")
-def approve_story(story_id: int, request: Request, db: Session = Depends(get_db)):
-    require_admin(request)
-    story = db.query(models.StorySubmission).filter(models.StorySubmission.id == story_id).first()
-    if not story:
-        raise HTTPException(status_code=404, detail="Story not found")
-    story.status = "approved"
-    db.commit()
-    return {"success": True}
+@app.delete("/api/sections/{sid}")
+def delete_section(sid: int, db: Session = Depends(get_db)):
+    s = db.query(models.Section).filter(models.Section.id==sid).first()
+    if not s: raise HTTPException(404)
+    s.is_active = 0; db.commit(); return {"success":True}
 
-@app.put("/api/stories/{story_id}/reject")
-def reject_story(story_id: int, request: Request, db: Session = Depends(get_db)):
-    require_admin(request)
-    story = db.query(models.StorySubmission).filter(models.StorySubmission.id == story_id).first()
-    if not story:
-        raise HTTPException(status_code=404, detail="Story not found")
-    story.status = "rejected"
-    db.commit()
-    return {"success": True}
-
-# ============================================
-# NEWSLETTER
-# ============================================
+# ─── NEWSLETTER ──────────────────────────────────────────────────────────────
 @app.post("/api/newsletter/subscribe")
-async def newsletter_subscribe(
-    email: str = Form(...), full_name: str = Form(""), db: Session = Depends(get_db)
-):
+async def subscribe(email: str = Form(...), db: Session = Depends(get_db)):
     try:
-        existing = db.query(models.NewsletterSubscriber).filter(
-            models.NewsletterSubscriber.email == email.lower()
-        ).first()
-        if existing:
-            return {"success": True, "message": "Already subscribed!"}
-        sub = models.NewsletterSubscriber(email=email.lower(), full_name=full_name)
-        db.add(sub)
-        db.commit()
-        return {"success": True, "message": "Subscribed successfully!"}
+        if db.query(models.NewsletterSubscriber).filter(
+                models.NewsletterSubscriber.email==email.strip()).first():
+            return {"success":True,"message":"Already subscribed!"}
+        db.add(models.NewsletterSubscriber(email=email.strip())); db.commit()
+        return {"success":True,"message":"Subscribed!"}
     except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        db.rollback(); raise HTTPException(500, str(e))
 
 @app.get("/api/newsletter/subscribers")
-def get_newsletter_subscribers(request: Request, db: Session = Depends(get_db)):
+async def subs(request: Request, db: Session = Depends(get_db)):
+    if request.cookies.get("admin_session") != "ADMIN_AUTHORIZED": raise HTTPException(403)
     try:
-        total_count = db.query(models.NewsletterSubscriber).count()
-        is_admin = request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
-        user = get_user_from_request(request, db)
-        if is_admin or (user and user.role in ["admin","superuser"]):
-            subs = db.query(models.NewsletterSubscriber).order_by(
-                models.NewsletterSubscriber.subscribed_at.desc()
-            ).all()
-            return [{
-                "id": s.id, "email": s.email, "full_name": s.full_name or "",
-                "subscribed_at": str(s.subscribed_at) if s.subscribed_at else "",
-                "created_at": str(s.subscribed_at) if s.subscribed_at else ""
-            } for s in subs]
-        return {"count": total_count}
-    except Exception as e:
-        print(f"Newsletter error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return [{"id":s.id,"email":s.email} for s in db.query(models.NewsletterSubscriber).all()]
+    except Exception: return []
 
-# ============================================
-# EVENTS
-# ============================================
+# ─── EVENTS ──────────────────────────────────────────────────────────────────
 @app.get("/api/events")
 def get_events(db: Session = Depends(get_db)):
     try:
-        events = db.query(models.Event).filter(models.Event.is_active == True).all()
-        return [{"id": e.id, "title": e.title, "description": e.description or "",
-                 "event_date": e.event_date or "", "location": e.location or "",
-                 "image_url": e.image_url or ""} for e in events]
-    except Exception as e:
-        print(f"Events error: {e}")
-        return []
+        return [{"id":e.id,"title":e.title,"description":getattr(e,"description",""),
+                 "event_date":str(getattr(e,"event_date","")),"location":getattr(e,"location",""),
+                 "created_at":str(e.created_at)} for e in
+                db.query(models.Event).order_by(models.Event.created_at.desc()).all()]
+    except Exception: return []
 
 @app.post("/api/events")
-async def create_event(
-    title: str = Form(...), description: str = Form(""), event_date: str = Form(""),
-    location: str = Form(""), image_url: str = Form(""),
-    request: Request = None, db: Session = Depends(get_db)
-):
-    require_admin(request)
+def create_event(title: str = Form(...), description: str = Form(""),
+                 event_date: str = Form(""), location: str = Form(""),
+                 db: Session = Depends(get_db)):
     try:
-        event = models.Event(title=title, description=description, event_date=event_date,
-                             location=location, image_url=image_url, is_active=True)
-        db.add(event)
-        db.commit()
-        db.refresh(event)
-        return {"success": True, "event_id": event.id}
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        e = models.Event(title=title, description=description, location=location)
+        if event_date:
+            try: e.event_date = datetime.fromisoformat(event_date)
+            except Exception: pass
+        db.add(e); db.commit(); db.refresh(e); return {"success":True,"id":e.id}
+    except Exception as ex:
+        db.rollback(); raise HTTPException(500, str(ex))
 
-@app.delete("/api/events/{event_id}")
-async def delete_event(event_id: int, request: Request, db: Session = Depends(get_db)):
-    require_admin(request)
-    event = db.query(models.Event).filter(models.Event.id == event_id).first()
-    if not event:
-        raise HTTPException(status_code=404)
-    event.is_active = False
-    db.commit()
-    return {"success": True}
+@app.delete("/api/events/{eid}")
+def delete_event(eid: int, db: Session = Depends(get_db)):
+    e = db.query(models.Event).filter(models.Event.id==eid).first()
+    if not e: raise HTTPException(404)
+    db.delete(e); db.commit(); return {"success":True}
 
-# ============================================
-# CHAT
-# ============================================
+# ─── CHAT ────────────────────────────────────────────────────────────────────
 @app.get("/api/chat")
-def get_messages(region_id: str = "", db: Session = Depends(get_db)):
+def get_chat(limit: int = 50, db: Session = Depends(get_db)):
     try:
-        q = db.query(models.ChatMessage).filter(models.ChatMessage.is_approved == 1)
-        if region_id:
-            q = q.filter(models.ChatMessage.region_id == int(region_id))
-        msgs = q.order_by(models.ChatMessage.created_at.desc()).limit(50).all()
-        return [{"id": m.id, "username": m.username, "message": m.message,
-                 "region_id": m.region_id, "created_at": str(m.created_at)} for m in msgs]
-    except Exception as e:
-        print(f"Chat error: {e}")
-        return []
+        msgs = db.query(models.ChatMessage).order_by(
+            models.ChatMessage.created_at.desc()).limit(limit).all()
+        return [{"id":m.id,"username":getattr(m,"username","User"),
+                 "content":m.content,"created_at":str(m.created_at)} for m in reversed(msgs)]
+    except Exception: return []
 
 @app.post("/api/chat")
-async def post_message(
-    message: str = Form(...), region_id: str = Form(""),
-    request: Request = None, db: Session = Depends(get_db)
-):
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Must be logged in to chat")
-    if not message.strip():
-        raise HTTPException(status_code=400, detail="Message cannot be empty")
-    msg = models.ChatMessage(
-        user_id=user.id, username=user.username, message=message.strip()[:500],
-        region_id=int(region_id) if region_id and region_id.isdigit() else None
-    )
-    db.add(msg)
-    db.commit()
-    db.refresh(msg)
-    return {"success": True, "id": msg.id, "username": msg.username, "message": msg.message}
-
-@app.delete("/api/chat/{message_id}")
-async def delete_chat_message(message_id: int, request: Request, db: Session = Depends(get_db)):
-    require_admin(request)
-    msg = db.query(models.ChatMessage).filter(models.ChatMessage.id == message_id).first()
-    if not msg:
-        raise HTTPException(status_code=404, detail="Message not found")
-    db.delete(msg)
-    db.commit()
-    return {"success": True}
-
-# ============================================
-# SECTIONS
-# ============================================
-@app.get("/api/sections")
-def get_sections(active_only: int = 1, db: Session = Depends(get_db)):
-    try:
-        q = db.query(models.Section)
-        if active_only:
-            q = q.filter(models.Section.is_active == 1).order_by(models.Section.display_order)
-        return [{"id": s.id, "name": s.name, "slug": s.slug, "description": s.description}
-                for s in q.all()]
-    except Exception as e:
-        print(f"Sections error: {e}")
-        return []
-
-@app.post("/api/sections")
-def create_section(
-    name: str = Form(...), description: str = Form(""),
-    display_order: int = Form(0), db: Session = Depends(get_db)
-):
-    try:
-        slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
-        if db.query(models.Section).filter(models.Section.slug == slug).first():
-            raise HTTPException(status_code=400, detail="Already exists")
-        s = models.Section(name=name, slug=slug, description=description, display_order=display_order)
-        db.add(s)
-        db.commit()
-        db.refresh(s)
-        return {"success": True, "section_id": s.id}
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/api/sections/{section_id}")
-def delete_section(section_id: int, db: Session = Depends(get_db)):
-    try:
-        s = db.query(models.Section).filter(models.Section.id == section_id).first()
-        if not s:
-            raise HTTPException(status_code=404)
-        s.is_active = False
-        db.commit()
-        return {"success": True}
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ============================================
-# FOLLOW / SOCIAL
-# ============================================
-@app.post("/api/follow/{user_id}")
-async def follow_user(user_id: str, request: Request, db: Session = Depends(get_db)):
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Login required")
-    try:
-        target_id = uuid.UUID(user_id)
-    except:
-        raise HTTPException(status_code=400, detail="Invalid user ID")
-    if user.id == target_id:
-        raise HTTPException(status_code=400, detail="Cannot follow yourself")
-    try:
-        existing = db.query(models.Follow).filter(
-            models.Follow.follower_id == user.id,
-            models.Follow.following_id == target_id
-        ).first()
-        if existing:
-            db.delete(existing)
-            db.commit()
-            return {"success": True, "action": "unfollowed"}
-        db.add(models.Follow(follower_id=user.id, following_id=target_id))
-        db.commit()
-        return {"success": True, "action": "followed"}
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/following")
-async def get_following(request: Request, db: Session = Depends(get_db)):
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Login required")
-    try:
-        follows = db.query(models.Follow).filter(models.Follow.follower_id == user.id).all()
-        result = []
-        for f in follows:
-            followed = db.query(models.User).filter(models.User.id == f.following_id).first()
-            if followed:
-                post_count = db.query(models.Post).filter(
-                    models.Post.author_id == followed.id, models.Post.status == "published"
-                ).count()
-                result.append({
-                    "id": str(followed.id), "username": followed.username,
-                    "full_name": followed.full_name or "", "role": followed.role,
-                    "avatar_url": followed.avatar_url or "", "post_count": post_count
-                })
-        return result
-    except Exception as e:
-        print(f"Following error: {e}")
-        return []
-
-@app.get("/api/subscribers")
-async def get_subscribers(request: Request, db: Session = Depends(get_db)):
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Login required")
-    try:
-        follows = db.query(models.Follow).filter(models.Follow.following_id == user.id).all()
-        return [{
-            "id": str(f2.id), "username": f2.username,
-            "full_name": f2.full_name or "", "role": f2.role,
-            "avatar_url": f2.avatar_url or ""
-        } for f in follows
-          for f2 in [db.query(models.User).filter(models.User.id == f.follower_id).first()]
-          if f2]
-    except Exception as e:
-        return []
-
-@app.get("/api/activity")
-async def get_activity(request: Request, db: Session = Depends(get_db)):
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Login required")
-    try:
-        follow_ids = [f.following_id for f in db.query(models.Follow).filter(
-            models.Follow.follower_id == user.id).all()]
-        posts = db.query(models.Post).filter(
-            models.Post.author_id.in_(follow_ids),
-            models.Post.status == "published"
-        ).order_by(models.Post.created_at.desc()).limit(30).all()
-        return [{"id": p.id, "title": p.title, "author_username": p.author_username or "",
-                 "content_type": p.content_type, "created_at": str(p.created_at),
-                 "cover_image": p.cover_image or "", "is_premium": bool(p.is_premium)} for p in posts]
-    except Exception as e:
-        return []
-
-# ============================================
-# CREATORS
-# ============================================
-@app.get("/api/creators")
-def get_creators(db: Session = Depends(get_db)):
-    try:
-        channels = db.query(models.CreatorChannel).filter(
-            models.CreatorChannel.is_active == 1
-        ).all()
-        result = []
-        for c in channels:
-            user = db.query(models.User).filter(models.User.id == c.user_id).first()
-            post_count = db.query(models.Post).filter(
-                models.Post.author_id == c.user_id, models.Post.status == "published"
-            ).count()
-            result.append({
-                "id": c.id,
-                "username": user.username if user else "unknown",
-                "channel_name": c.channel_name or (user.username if user else ""),
-                "follower_count": 0, "post_count": post_count,
-                "role": user.role if user else "creator"
-            })
-        return result
-    except Exception as e:
-        print(f"Creators error: {e}")
-        return []
-
-# ============================================
-# COMMENTS
-# ============================================
-@app.get("/api/posts/{post_id}/comments")
-def get_comments(post_id: int, db: Session = Depends(get_db)):
-    try:
-        comments = db.query(models.Comment).filter(
-            models.Comment.post_id == post_id,
-            models.Comment.is_approved == 1,
-            models.Comment.content != "__like__"
-        ).order_by(models.Comment.created_at.asc()).all()
-        return [{"id": c.id, "content": c.content, "author_username": c.author_username or "",
-                 "created_at": str(c.created_at)} for c in comments]
-    except Exception as e:
-        return []
-
-@app.post("/api/posts/{post_id}/comments")
-async def add_comment(
-    post_id: int, content: str = Form(...),
-    request: Request = None, db: Session = Depends(get_db)
-):
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Must be logged in")
-    if not content.strip():
-        raise HTTPException(status_code=400, detail="Comment cannot be empty")
-    comment = models.Comment(
-        post_id=post_id, author_id=user.id,
-        author_username=user.username, content=content.strip()
-    )
-    db.add(comment)
-    # Increment comment count
-    post = db.query(models.Post).filter(models.Post.id == post_id).first()
-    if post:
-        post.comment_count = (post.comment_count or 0) + 1
-    db.commit()
-    db.refresh(comment)
-    return {"success": True, "comment_id": comment.id}
-
-# ============================================
-# THEME & CONFIG
-# ============================================
-@app.get("/api/theme")
-def get_theme():
-    try:
-        if os.path.exists("theme.json"):
-            with open("theme.json", "r") as f:
-                return json.load(f)
-        return {}
-    except:
-        return {}
-
-@app.post("/api/theme")
-async def save_theme(request: Request):
-    try:
-        body = await request.json()
-        with open("theme.json", "w") as f:
-            json.dump(body, f)
-        return {"success": True}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/site-config")
-async def get_site_config(request: Request):
-    require_admin(request)
-    try:
-        if os.path.exists("site_config.json"):
-            with open("site_config.json", "r") as f:
-                return json.load(f)
-        return {}
-    except:
-        return {}
-
-@app.post("/api/site-config")
-async def save_site_config(request: Request):
-    require_admin(request)
-    try:
-        config = await request.json()
-        with open("site_config.json", "w") as f:
-            json.dump(config, f, indent=2)
-        return {"success": True}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ============================================
-# JSON IMPORT
-# ============================================
-@app.post("/api/import/json")
-def import_json(data: list, db: Session = Depends(get_db)):
-    try:
-        imported = 0
-        for rd in data:
-            try:
-                db.add(models.Region(**rd))
-                imported += 1
-            except:
-                continue
-        db.commit()
-        return {"success": True, "imported": imported}
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ============================================
-# AI CHAT (EchoBot)
-# ============================================
-@app.post("/api/ai/chat")
-async def ai_chat(
-    message: str = Form(...), region_context: str = Form(""),
-    request: Request = None, db: Session = Depends(get_db)
-):
-    try:
-        user = get_user_from_request(request, db)
-        is_admin_session = request and request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
-        is_premium = (user and (bool(user.is_premium) or user.role in ["superuser","admin","creator"])) or is_admin_session
-
-        if not user and not is_admin_session:
-            return {"reply": "Please log in to use EchoBot!", "success": False, "locked": True}
-        if not is_premium:
-            return {"reply": "🔒 EchoBot is a Premium feature. Subscribe for GH₵150/month!",
-                    "success": False, "locked": True, "upgrade_url": "/premium"}
-        if not HF_TOKEN:
-            return {"reply": "EchoBot is currently unavailable. Please configure HF_TOKEN.",
-                    "success": False, "locked": False}
-
-        db_knowledge = get_db_knowledge(db)
-        system_prompt = f"""You are EchoBot, an AI guide for EchoStack Ghana Heritage Archive.
-ONLY answer using the Ghana region data below. If not in data, say you don't have that info yet.
-
-GHANA HERITAGE DATABASE:
-{db_knowledge}
-
-RULES:
-- Answer ONLY based on the database above
-- Keep answers short (2-4 sentences)
-- If info not in database: "I don't have that information yet in our archive."
-- Be warm and educational"""
-        if region_context:
-            system_prompt += f"\n\nUser is viewing: {region_context} region."
-
-        full_prompt = f"{system_prompt}\n\nQuestion: {message}\n\nAnswer:"
-        payload = json.dumps({
-            "inputs": full_prompt,
-            "parameters": {"max_new_tokens": 150, "temperature": 0.3,
-                           "do_sample": False, "return_full_text": False}
-        }).encode("utf-8")
-
-        req = urllib.request.Request(
-            "https://api-inference.huggingface.co/models/google/flan-t5-small",
-            data=payload,
-            headers={"Content-Type": "application/json", "Authorization": f"Bearer {HF_TOKEN}"},
-            method="POST"
-        )
+async def post_chat(request: Request, content: str = Form(...), db: Session = Depends(get_db)):
+    sid = request.cookies.get("user_session"); username = "Guest"
+    if sid:
         try:
-            with urllib.request.urlopen(req, timeout=20) as response:
-                result = json.loads(response.read().decode("utf-8"))
-                if isinstance(result, list) and result:
-                    reply = result[0].get("generated_text", "").strip()
-                elif isinstance(result, dict):
-                    reply = result.get("generated_text", "Try again!").strip()
-                else:
-                    reply = "I'm thinking... please try again!"
-                reply = reply.replace("[INST]", "").replace("[/INST]", "").replace("</s>", "").strip()
-                if not reply:
-                    reply = "I don't have that information in our Ghana heritage archive yet."
-                return {"reply": reply, "success": True, "locked": False}
-        except urllib.error.HTTPError as e:
-            if e.code == 503:
-                return {"reply": "EchoBot is warming up! Try again in 15 seconds.",
-                        "success": False, "warming": True, "locked": False}
-            return {"reply": "I'm having a moment — please try again!", "success": False, "locked": False}
-    except Exception as e:
-        print(f"AI chat error: {e}")
-        return {"reply": "Something went wrong. Please try again!", "success": False, "locked": False}
-
-# ============================================
-# PAYSTACK PAYMENTS
-# ============================================
-@app.post("/api/payments/initialize")
-async def initialize_payment(request: Request, db: Session = Depends(get_db)):
-    user = get_user_from_request(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Please log in first")
-    if not PAYSTACK_SECRET:
-        raise HTTPException(status_code=500, detail="Paystack not configured.")
-    payload = json.dumps({
-        "email": user.email, "amount": 15000, "currency": "GHS",
-        "callback_url": "https://echostack.onrender.com/payment/callback",
-        "metadata": {"user_id": str(user.id), "plan": "premium"}
-    }).encode("utf-8")
-    req = urllib.request.Request(
-        "https://api.paystack.co/transaction/initialize", data=payload,
-        headers={"Authorization": f"Bearer {PAYSTACK_SECRET}", "Content-Type": "application/json"},
-        method="POST"
-    )
+            u = db.query(models.User).filter(models.User.id==sid).first()
+            if u: username = u.username
+        except Exception: pass
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
+        db.add(models.ChatMessage(content=content.strip(), username=username, user_id=sid or "guest"))
+        db.commit(); return {"success":True}
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Paystack error: {str(e)}")
-    if not result.get("status"):
-        raise HTTPException(status_code=400, detail="Payment initialization failed")
-    ref = result["data"]["reference"]
-    db.add(models.Payment(user_id=user.id, email=user.email, amount=15000,
-                          reference=ref, status="pending", plan="premium"))
-    db.commit()
-    return {"success": True, "authorization_url": result["data"]["authorization_url"], "reference": ref}
+        db.rollback(); raise HTTPException(500, str(e))
+
+# ─── STORIES ─────────────────────────────────────────────────────────────────
+@app.get("/api/stories")
+def get_stories(db: Session = Depends(get_db)):
+    try:
+        s = db.query(models.StorySubmission).filter(
+            models.StorySubmission.status=="approved").order_by(
+            models.StorySubmission.created_at.desc()).limit(20).all()
+        return [{"id":x.id,"title":x.title,"content":getattr(x,"content",""),
+                 "author_name":getattr(x,"author_name",""),"region":getattr(x,"region",""),
+                 "created_at":str(x.created_at)} for x in s]
+    except Exception: return []
+
+@app.post("/api/stories")
+async def submit_story(request: Request, title: str = Form(...), content: str = Form(...),
+                       region: str = Form(""), db: Session = Depends(get_db)):
+    sid = request.cookies.get("user_session"); author = "Anonymous"
+    if sid:
+        try:
+            u = db.query(models.User).filter(models.User.id==sid).first()
+            if u: author = u.username
+        except Exception: pass
+    try:
+        db.add(models.StorySubmission(title=title, content=content, region=region,
+                                       author_name=author, status="pending"))
+        db.commit(); return {"success":True}
+    except Exception as e:
+        db.rollback(); raise HTTPException(500, str(e))
+
+# ─── AI ECHOBOT ──────────────────────────────────────────────────────────────
+@app.post("/api/ai/chat")
+async def ai_chat(request: Request, message: str = Form(...),
+                  region_context: str = Form(""), db: Session = Depends(get_db)):
+    sid = request.cookies.get("user_session")
+    if sid:
+        try:
+            u = db.query(models.User).filter(models.User.id==sid).first()
+            if u and not getattr(u,"is_premium",0):
+                return {"reply":"EchoBot is for premium members. Upgrade to unlock! ⭐","locked":True}
+        except Exception: pass
+
+    if not HF_TOKEN:
+        return {"reply":f"Akwaaba! You asked: '{message}'. Ghana has 16 beautiful regions with rich heritage. Explore EchoStack to discover more! 🇬🇭","locked":False}
+    try:
+        prompt = f"You are EchoBot, a Ghana heritage AI. Context: {region_context}. User: {message}. Answer helpfully about Ghana."
+        async with httpx.AsyncClient(timeout=20) as c:
+            r = await c.post("https://api-inference.huggingface.co/models/google/flan-t5-small",
+                             headers={"Authorization":f"Bearer {HF_TOKEN}"},
+                             json={"inputs":prompt,"parameters":{"max_new_tokens":200}})
+        d = r.json()
+        reply = d[0]["generated_text"] if isinstance(d,list) else str(d)
+        return {"reply":reply,"locked":False}
+    except Exception:
+        return {"reply":"EchoBot is resting. Try again soon! 🤖","locked":False}
+
+# ─── PAYMENTS ────────────────────────────────────────────────────────────────
+@app.post("/api/payments/initialize")
+async def init_payment(request: Request, amount: int = Form(4900), email: str = Form(...),
+                       db: Session = Depends(get_db)):
+    try:
+        async with httpx.AsyncClient() as c:
+            r = await c.post("https://api.paystack.co/transaction/initialize",
+                headers={"Authorization":f"Bearer {PAYSTACK_SECRET}","Content-Type":"application/json"},
+                json={"email":email,"amount":amount*100,
+                      "callback_url":f"{request.base_url}payment/callback"})
+        d = r.json()
+        if d.get("status"):
+            return {"success":True,"authorization_url":d["data"]["authorization_url"],
+                    "reference":d["data"]["reference"]}
+        raise HTTPException(400,"Payment init failed")
+    except HTTPException: raise
+    except Exception as e: raise HTTPException(500, str(e))
 
 @app.get("/payment/callback")
-async def payment_callback(reference: str, request: Request, db: Session = Depends(get_db)):
-    if not PAYSTACK_SECRET:
-        return RedirectResponse("/dashboard?payment=error")
-    req = urllib.request.Request(
-        f"https://api.paystack.co/transaction/verify/{reference}",
-        headers={"Authorization": f"Bearer {PAYSTACK_SECRET}"}, method="GET"
-    )
+async def payment_callback(reference: str, db: Session = Depends(get_db)):
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
-    except:
-        return RedirectResponse("/dashboard?payment=error")
-    if result.get("status") and result["data"].get("status") == "success":
-        user_id = result["data"].get("metadata", {}).get("user_id")
-        if user_id:
-            try:
-                user = db.query(models.User).filter(models.User.id == uuid.UUID(user_id)).first()
-                if user:
-                    user.is_premium = True
-                    payment = db.query(models.Payment).filter(
-                        models.Payment.reference == reference).first()
-                    if payment:
-                        payment.status = "success"
-                    db.commit()
-            except:
-                pass
+        async with httpx.AsyncClient() as c:
+            r = await c.get(f"https://api.paystack.co/transaction/verify/{reference}",
+                            headers={"Authorization":f"Bearer {PAYSTACK_SECRET}"})
+        d = r.json()
+        if d.get("status") and d["data"]["status"] == "success":
+            email = d["data"]["customer"]["email"]
+            u = db.query(models.User).filter(models.User.email==email).first()
+            if u: u.is_premium = 1; db.commit()
         return RedirectResponse("/dashboard?upgraded=1")
-    return RedirectResponse("/dashboard?payment=failed")
+    except Exception: return RedirectResponse("/premium?error=1")
 
-# ============================================
-# PORT CONFIG FOR RENDER
-# ============================================
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+# ─── IMPORT/EXPORT ───────────────────────────────────────────────────────────
+@app.post("/api/import/json")
+def import_json(data: dict, db: Session = Depends(get_db)):
+    try:
+        items = data if isinstance(data,list) else [data]
+        imported = 0
+        for item in items:
+            try: db.add(models.Region(**item)); imported += 1
+            except Exception: pass
+        db.commit(); return {"success":True,"imported":imported}
+    except Exception as e:
+        db.rollback(); raise HTTPException(500, str(e))
