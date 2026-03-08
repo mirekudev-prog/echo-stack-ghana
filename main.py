@@ -467,9 +467,9 @@ async def signup(
             bio="", avatar_url="", channel_name=uname, channel_desc="",
         )
         db.add(u)
-        db.flush()
+        db.flush()   # Get the user ID without committing yet
 
-        # Parse and save selected topics
+        # Parse and save selected topics using raw SQL (more reliable)
         selected_topics = []
         if topics:
             try:
@@ -479,12 +479,19 @@ async def signup(
             except:
                 selected_topics = []
 
+        # Use raw SQL to insert into user_topics
         for topic_name in selected_topics:
-            topic = db.query(models.Topic).filter(models.Topic.name == topic_name).first()
-            if topic:
+            # First get the topic id from the topics table
+            topic_result = db.execute(
+                text("SELECT id FROM topics WHERE name = :name"),
+                {"name": topic_name}
+            ).first()
+            if topic_result:
+                topic_id = topic_result[0]
+                # Insert into user_topics
                 db.execute(
                     text("INSERT INTO user_topics (user_id, topic_id) VALUES (:uid, :tid) ON CONFLICT DO NOTHING"),
-                    {"uid": uid, "tid": topic.id}
+                    {"uid": uid, "tid": topic_id}
                 )
 
         db.commit()
@@ -524,13 +531,20 @@ async def user_login(
                 models.User.email.ilike(username.strip())
             ).first()
 
-        # If still not found, or password doesn't match → error
-        if not u or not verify_password(password, u.hashed_password):
-            raise HTTPException(401, "Invalid username/email or password")
+        # If user not found
+        if not u:
+            raise HTTPException(404, "Account not found. Please sign up first.")
 
+        # Check password
+        if not verify_password(password, u.hashed_password):
+            raise HTTPException(401, "Incorrect password. Try again.")
+            
+<div style="text-align: right; margin-bottom: 10px;">
+    <a href="#" onclick="alert('Please contact support at support@echostack.com to reset your password.')" style="color: var(--muted); font-size: 0.8rem;">Forgot password?</a>
+</div>
         # Check if account is suspended
         if getattr(u, "is_suspended", 0):
-            raise HTTPException(403, "Account suspended")
+            raise HTTPException(403, "Account suspended. Contact support.")
 
         # Success – create response
         resp = JSONResponse({
