@@ -172,7 +172,21 @@ class StorySubmission(Base):
     status      = Column(String(50), default="pending")
     created_at  = Column(DateTime, default=datetime.utcnow)
 
+# ─── TOPIC ────────────────────────────────────────────────────────────────────
+class Topic(Base):
+    __tablename__ = "topics"
 
+    id   = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+
+
+# ─── USER TOPIC (junction table) ─────────────────────────────────────────────
+class UserTopic(Base):
+    __tablename__ = "user_topics"
+
+    user_id  = Column(String(36), ForeignKey("users.id"), primary_key=True)
+    topic_id = Column(Integer, ForeignKey("topics.id"), primary_key=True)
+    
 # ─── PAYMENT ─────────────────────────────────────────────────────────────────
 class Payment(Base):
     __tablename__ = "payments"
