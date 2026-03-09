@@ -1176,15 +1176,22 @@ async def update_post(
         db.rollback(); raise HTTPException(500, str(e))
 
 @app.delete("/api/posts/{post_id}")
-async def delete_post(post_id: int, db: Session = Depends(get_db)):
+async def delete_post(post_id: int, request: Request, db: Session = Depends(get_db)):
+    # Only admins can delete posts
+    if not _is_admin(request):
+        raise HTTPException(403, "Admin access required")
     p = db.query(models.Post).filter(models.Post.id == post_id).first()
-    if not p: raise HTTPException(404)
+    if not p:
+        raise HTTPException(404, "Post not found")
     try:
+        # Delete associated comments first
         db.query(models.Comment).filter(models.Comment.post_id == post_id).delete()
-        db.delete(p); db.commit()
+        db.delete(p)
+        db.commit()
         return {"success": True}
     except Exception as e:
-        db.rollback(); raise HTTPException(500, str(e))
+        db.rollback()
+        raise HTTPException(500, str(e))
 
 # ─── COMMENTS ────────────────────────────────────────────────────────────────
 @app.get("/api/posts/{post_id}/comments")
