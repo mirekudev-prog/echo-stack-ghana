@@ -6,7 +6,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EchoStack — My Profile</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -284,7 +283,8 @@ async function loadMyPosts() {
       container.innerHTML = `<p style="color:var(--muted);font-size:14px;">You haven't posted anything yet. <a href="/creator" style="color:var(--gold);">Start creating →</a></p>`;
       return;
     }
-    const typeIcons = {article:'📄',video:'🎬',audio:'🎵',photo_essay:'📸'};
+    // Updated icon mapping to include reels
+    const typeIcons = { article:'📄', video:'🎬', reel:'📱', audio:'🎵', photo_essay:'📸' };
     container.innerHTML = posts.map(p => `
       <div class="mini-post">
         <div class="mini-post-title">${typeIcons[p.content_type]||'📝'} ${p.title}</div>
