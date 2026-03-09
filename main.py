@@ -6,7 +6,7 @@ from sqlalchemy import text, or_
 import os, uuid, re, json, httpx
 from datetime import datetime, timedelta
 import secrets
-import google.generativeai as genai
+import google.genai as genai
 import os
 
 # Password hashing
