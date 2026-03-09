@@ -1040,7 +1040,8 @@ async def create_post(
     gallery:      str = Form(""),
     db: Session = Depends(get_db)
 ):
-            sid      = request.cookies.get("user_session")
+    try:
+        sid      = request.cookies.get("user_session")
         is_admin = _is_admin(request)
         author_id = None
         author_username = "Creator"
@@ -1060,7 +1061,7 @@ async def create_post(
         elif is_admin:
             author_id = None
             author_username = "Admin"
-        # if neither, author_id remains None and author_username remains "Creator"
+        # else: author_id remains None, author_username remains "Creator"
 
         base = slugify(title); slug = base; n = 1
         while db.query(models.Post).filter(models.Post.slug == slug).first():
