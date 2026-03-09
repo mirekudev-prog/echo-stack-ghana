@@ -206,6 +206,15 @@ CREATE TABLE IF NOT EXISTS user_topics (
 );
 """
 
+CREATE TABLE IF NOT EXISTS creator_chat_messages (
+    id SERIAL PRIMARY KEY,
+    creator_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    username VARCHAR(200) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 try:
     Base.metadata.create_all(bind=engine)
 except Exception as e:
