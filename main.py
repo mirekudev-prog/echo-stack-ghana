@@ -1450,9 +1450,23 @@ async def toggle_comment_like(
 @app.post("/api/posts/{post_id}/like")
 async def toggle_like(post_id: int, request: Request, db: Session = Depends(get_db)):
     sid = request.cookies.get("user_session")
+
+    # --- STALE SESSION CHECK ---
+    if sid:
+        user = db.query(models.User).filter(models.User.id == sid).first()
+        if not user:
+            resp = JSONResponse(
+                {"detail": "Session expired or invalid. Please log in again."},
+                status_code=401
+            )
+            resp.delete_cookie("user_session", path="/")
+            return resp
+    # ---------------------------
+
     # Admin without user session cannot like (prevents "admin" string from being inserted)
     if not sid:
         raise HTTPException(401, "Login to like")
+
     try:
         p = db.query(models.Post).filter(models.Post.id == post_id).first()
         if not p:
@@ -1477,12 +1491,27 @@ async def toggle_like(post_id: int, request: Request, db: Session = Depends(get_
         db.rollback()
         print(f"Like error: {e}")
         raise HTTPException(500, str(e))
-
+         
 # ─── SOCIAL ──────────────────────────────────────────────────────────────────
 @app.post("/api/follow/{target_id}")
 async def toggle_follow(target_id: str, request: Request, db: Session = Depends(get_db)):
     sid = request.cookies.get("user_session")
-    if not sid: raise HTTPException(401)
+
+    # --- STALE SESSION CHECK ---
+    if sid:
+        user = db.query(models.User).filter(models.User.id == sid).first()
+        if not user:
+            resp = JSONResponse(
+                {"detail": "Session expired or invalid. Please log in again."},
+                status_code=401
+            )
+            resp.delete_cookie("user_session", path="/")
+            return resp
+    # ---------------------------
+
+    if not sid:
+        raise HTTPException(401)
+
     try:
         ex = db.query(models.Follow).filter(
             models.Follow.follower_id == sid,
@@ -1491,23 +1520,18 @@ async def toggle_follow(target_id: str, request: Request, db: Session = Depends(
         tgt = db.query(models.User).filter(models.User.id == target_id).first()
         if ex:
             db.delete(ex)
-            if tgt: tgt.follower_count = max(0, (getattr(tgt, "follower_count", 0) or 0) - 1)
-            db.commit(); return {"following": False}
+            if tgt:
+                tgt.follower_count = max(0, (getattr(tgt, "follower_count", 0) or 0) - 1)
+            db.commit()
+            return {"following": False}
         db.add(models.Follow(follower_id=sid, following_id=target_id))
-        if tgt: tgt.follower_count = (getattr(tgt, "follower_count", 0) or 0) + 1
-        db.commit(); return {"following": True}
+        if tgt:
+            tgt.follower_count = (getattr(tgt, "follower_count", 0) or 0) + 1
+        db.commit()
+        return {"following": True}
     except Exception as e:
-        db.rollback(); raise HTTPException(500, str(e))
-
-@app.get("/api/following")
-async def get_following(request: Request, db: Session = Depends(get_db)):
-    sid = request.cookies.get("user_session")
-    if not sid: return []
-    try:
-        return [str(f.following_id)
-                for f in db.query(models.Follow).filter(models.Follow.follower_id == sid).all()]
-    except Exception:
-        return []
+        db.rollback()
+        raise HTTPException(500, str(e))
 
 @app.get("/api/creators")
 async def get_creators(db: Session = Depends(get_db)):
