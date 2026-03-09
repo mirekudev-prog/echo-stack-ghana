@@ -773,7 +773,7 @@ select{
       </div>
     </div>
 
-    <!-- ── WRITE POST ── -->
+    <!-- ── WRITE POST ── (UPDATED with Reel option) -->
     <div class="panel" id="panel-write-post">
       <div class="form-section" style="max-height:70vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:80px;">
         <h4>✍️ Write New Post</h4>
@@ -782,7 +782,13 @@ select{
           <div class="field full"><label>Excerpt</label><input type="text" id="wp-excerpt" placeholder="Short summary…"></div>
           <div class="field full"><label>Content</label><textarea id="wp-content" rows="8" placeholder="Write your content here… supports markdown and [video]URL[/video] tags"></textarea></div>
           <div class="field"><label>Content Type</label>
-            <select id="wp-type"><option value="article">Article</option><option value="video">Video</option><option value="audio">Audio</option><option value="story">Story</option></select>
+            <select id="wp-type">
+              <option value="article">📝 Article</option>
+              <option value="video">🎬 Video</option>
+              <option value="reel">📱 Short Reel</option>
+              <option value="audio">🎵 Audio</option>
+              <option value="story">📖 Story</option>
+            </select>
           </div>
           <div class="field"><label>Status</label>
             <select id="wp-status"><option value="published">Published</option><option value="draft">Draft</option></select>
