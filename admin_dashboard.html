@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="theme-color" content="#0D1B2A">
 <title>EchoStack Admin</title>
@@ -34,7 +34,7 @@
 html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);display:flex}
 
-/* ── SIDEBAR (unchanged, dark) ── */
+/* ── SIDEBAR (dark) ── */
 .sidebar{
   width:var(--sidebar-w);flex-shrink:0;
   background:var(--ink2);border-right:1px solid var(--border);
@@ -75,14 +75,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
   background:var(--main-bg);
 }
 .topbar{
-  padding:0 24px;height:56px;flex-shrink:0;
+  padding:0 16px;height:56px;flex-shrink:0;
   display:flex;align-items:center;justify-content:space-between;
   background:white;border-bottom:1px solid var(--main-border);
 }
-.topbar-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--main-text);}
-.topbar-actions{display:flex;gap:8px;align-items:center}
+.topbar-left{
+  display:flex;align-items:center;gap:8px;
+}
+.menu-btn{
+  display:none;
+  background:none;border:none;color:var(--main-text);font-size:1.4rem;
+  cursor:pointer;padding:0;line-height:1;width:32px;height:32px;
+  border-radius:4px;transition:background .15s;
+}
+.menu-btn:hover{background:var(--main-hover);}
+.topbar-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--main-text);}
+.topbar-actions{display:flex;gap:6px;align-items:center}
 .btn{
-  padding:7px 14px;border-radius:8px;font-size:.78rem;font-weight:600;
+  padding:6px 12px;border-radius:6px;font-size:.75rem;font-weight:600;
   cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;border:none
 }
 .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink)}
@@ -90,7 +100,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .btn-ghost:hover{background:rgba(0,0,0,.08);}
 .btn-danger{background:rgba(239,68,68,.15);color:#b91c1c;border:1px solid rgba(239,68,68,.2)}
 .content{
-  flex:1;overflow-y:auto;padding:24px;
+  flex:1;overflow-y:auto;padding:16px;
   color:var(--main-text);
 }
 
@@ -99,61 +109,63 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .panel.active{display:block}
 
 /* Stats Cards (light) */
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr)}}
 .stat-card{
-  background:var(--main-card);border:1px solid var(--main-border);border-radius:12px;
-  padding:16px 18px;position:relative;overflow:hidden;
+  background:var(--main-card);border:1px solid var(--main-border);border-radius:10px;
+  padding:14px 12px;position:relative;overflow:hidden;
   box-shadow:0 2px 6px rgba(0,0,0,.03);
 }
 .stat-card::before{
-  content:'';position:absolute;top:-20px;right:-20px;
-  width:80px;height:80px;border-radius:50%;
+  content:'';position:absolute;top:-15px;right:-15px;
+  width:60px;height:60px;border-radius:50%;
   background:rgba(200,150,46,.04);pointer-events:none
 }
-.stat-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--main-muted);margin-bottom:6px}
-.stat-val{font-size:1.8rem;font-weight:700;color:var(--main-text);line-height:1}
-.stat-sub{font-size:.7rem;color:var(--main-muted);margin-top:4px}
+.stat-label{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--main-muted);margin-bottom:4px}
+.stat-val{font-size:1.5rem;font-weight:700;color:var(--main-text);line-height:1}
+.stat-sub{font-size:.65rem;color:var(--main-muted);margin-top:4px}
 
 /* File manager */
-.fm-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.fm-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
 .fm-search{
-  flex:1;min-width:180px;padding:9px 14px;
+  flex:1;min-width:160px;padding:8px 12px;
   background:white;border:1px solid var(--main-border);
-  border-radius:8px;color:var(--main-text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none
+  border-radius:6px;color:var(--main-text);font-size:.82rem;outline:none
 }
 .fm-search:focus{border-color:var(--gold)}
 .fm-search::placeholder{color:var(--main-muted)}
 .fm-filter{
-  padding:9px 12px;background:white;border:1px solid var(--main-border);
-  border-radius:8px;color:var(--main-text);font-size:.82rem;outline:none;font-family:'DM Sans',sans-serif;cursor:pointer
+  padding:8px 10px;background:white;border:1px solid var(--main-border);
+  border-radius:6px;color:var(--main-text);font-size:.78rem;outline:none;cursor:pointer
 }
 
 /* Upload zone */
 .upload-zone{
-  border:2px dashed var(--gold);border-radius:14px;
-  padding:28px;text-align:center;margin-bottom:20px;
+  border:2px dashed var(--gold);border-radius:12px;
+  padding:20px;text-align:center;margin-bottom:16px;
   background:rgba(200,150,46,.02);cursor:pointer;
   transition:all .2s;position:relative
 }
 .upload-zone:hover,.upload-zone.drag{border-color:var(--gold2);background:rgba(200,150,46,.05)}
 .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.upload-icon{font-size:2rem;margin-bottom:8px}
-.upload-title{font-weight:700;color:var(--main-text);margin-bottom:4px;font-size:.95rem}
-.upload-sub{font-size:.75rem;color:var(--main-muted)}
-.upload-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-.upload-opt label{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main-muted);display:block;margin-bottom:4px}
+.upload-icon{font-size:1.8rem;margin-bottom:6px}
+.upload-title{font-weight:700;color:var(--main-text);margin-bottom:2px;font-size:.9rem}
+.upload-sub{font-size:.72rem;color:var(--main-muted)}
+.upload-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:500px){.upload-opts{grid-template-columns:1fr 1fr}}
+.upload-opt label{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main-muted);display:block;margin-bottom:2px}
 .upload-opt select,.upload-opt input{
-  width:100%;padding:8px 10px;background:white;
-  border:1px solid var(--main-border);border-radius:8px;
-  color:var(--main-text);font-size:.82rem;font-family:'DM Sans',sans-serif;outline:none
+  width:100%;padding:7px 8px;background:white;
+  border:1px solid var(--main-border);border-radius:6px;
+  color:var(--main-text);font-size:.78rem;outline:none
 }
 .upload-opt select:focus,.upload-opt input:focus{border-color:var(--gold)}
 
 /* Progress bar */
 .upload-progress{
-  background:white;border:1px solid var(--main-border);border-radius:8px;
-  padding:10px 14px;margin-bottom:8px;
-  display:flex;align-items:center;gap:10px;font-size:.8rem
+  background:white;border:1px solid var(--main-border);border-radius:6px;
+  padding:8px 12px;margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;font-size:.78rem
 }
 .progress-track{flex:1;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));width:0;transition:width .3s;border-radius:2px}
@@ -161,25 +173,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 /* Files grid */
 .files-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-  gap:14px
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:12px
 }
 .file-card{
-  background:var(--main-card);border:1px solid var(--main-border);border-radius:12px;
+  background:var(--main-card);border:1px solid var(--main-border);border-radius:10px;
   overflow:hidden;transition:all .2s;cursor:pointer;position:relative;
-  box-shadow:0 2px 6px rgba(0,0,0,.02);
+  box-shadow:0 1px 3px rgba(0,0,0,.02);
 }
-.file-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.06);}
+.file-card:hover{border-color:var(--gold);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.05);}
 .file-thumb{
   width:100%;aspect-ratio:16/9;object-fit:cover;
   background:#f1f5f9;display:flex;align-items:center;justify-content:center;
-  font-size:2.5rem;position:relative;overflow:hidden
+  font-size:2rem;position:relative;overflow:hidden
 }
 .file-thumb img,.file-thumb video{width:100%;height:100%;object-fit:cover}
 .file-type-badge{
-  position:absolute;top:8px;left:8px;
-  padding:2px 8px;border-radius:20px;font-size:.6rem;font-weight:700;
-  text-transform:uppercase;letter-spacing:.06em;backdrop-filter:blur(4px);
+  position:absolute;top:6px;left:6px;
+  padding:2px 6px;border-radius:12px;font-size:.55rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;backdrop-filter:blur(4px);
   background:rgba(255,255,255,.8);color:#1e293b;
 }
 .badge-video{background:rgba(239,68,68,.9);color:white}
@@ -187,57 +199,74 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .badge-image{background:rgba(34,197,94,.9);color:white}
 .badge-document{background:rgba(59,130,246,.9);color:white}
 .badge-general{background:rgba(100,116,139,.9);color:white}
-.file-card-body{padding:10px 12px}
-.file-name{font-size:.8rem;font-weight:600;color:var(--main-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
-.file-meta{font-size:.68rem;color:var(--main-muted);display:flex;justify-content:space-between}
+.file-card-body{padding:8px 10px}
+.file-name{font-size:.75rem;font-weight:600;color:var(--main-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.file-meta{font-size:.65rem;color:var(--main-muted);display:flex;justify-content:space-between}
 .file-actions{
-  display:flex;gap:6px;padding:8px 12px;
+  display:flex;gap:4px;padding:6px 8px;
   border-top:1px solid var(--main-border);background:var(--main-hover)
 }
 .fa-btn{
-  flex:1;padding:5px;border-radius:6px;border:none;
-  font-size:.7rem;font-weight:600;cursor:pointer;
+  flex:1;padding:4px;border-radius:4px;border:none;
+  font-size:.65rem;font-weight:600;cursor:pointer;
   font-family:'DM Sans',sans-serif;transition:all .15s
 }
 .fa-view{background:rgba(200,150,46,.1);color:var(--gold);}
 .fa-view:hover{background:rgba(200,150,46,.2);}
 .fa-del{background:rgba(239,68,68,.1);color:#b91c1c;}
 .fa-del:hover{background:rgba(239,68,68,.2);}
-/* NEW publish button style */
 .fa-publish{background:rgba(34,197,94,.1);color:#15803d;}
 .fa-publish:hover{background:rgba(34,197,94,.2);}
 .no-files{
-  grid-column:1/-1;text-align:center;padding:48px 24px;color:var(--main-muted);
-  background:white;border-radius:12px;border:1px dashed var(--main-border);
+  grid-column:1/-1;text-align:center;padding:32px 16px;color:var(--main-muted);
+  background:white;border-radius:10px;border:1px dashed var(--main-border);
 }
-.no-files .no-icon{font-size:3rem;margin-bottom:12px}
-.no-files p{font-size:.9rem}
+.no-files .no-icon{font-size:2.5rem;margin-bottom:8px}
+.no-files p{font-size:.85rem}
 
-/* Tables */
-.table-wrap{background:white;border:1px solid var(--main-border);border-radius:12px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.02);}
-.table-head{padding:14px 18px;border-bottom:1px solid var(--main-border);display:flex;justify-content:space-between;align-items:center}
-.table-head h3{font-weight:700;color:var(--main-text);font-size:.95rem}
-table{width:100%;border-collapse:collapse}
-thead th{padding:10px 14px;text-align:left;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--main-muted);background:#f8fafc;border-bottom:1px solid var(--main-border)}
-tbody tr{border-bottom:1px solid var(--main-border);transition:background .1s;cursor:pointer}
+/* Tables – make scrollable on mobile */
+.table-wrap{
+  background:white;border:1px solid var(--main-border);border-radius:10px;
+  overflow-x:auto;  /* ← allows horizontal scroll */
+  box-shadow:0 1px 3px rgba(0,0,0,.02);
+}
+.table-head{
+  padding:12px 16px;border-bottom:1px solid var(--main-border);
+  display:flex;justify-content:space-between;align-items:center
+}
+.table-head h3{font-weight:700;color:var(--main-text);font-size:.9rem}
+table{
+  width:100%;border-collapse:collapse;
+  min-width:600px; /* forces scroll on mobile if needed */
+}
+thead th{
+  padding:8px 12px;text-align:left;font-size:.6rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;color:var(--main-muted);
+  background:#f8fafc;border-bottom:1px solid var(--main-border)
+}
+tbody tr{border-bottom:1px solid var(--main-border);transition:background .1s}
 tbody tr:hover{background:var(--main-hover)}
-tbody td{padding:11px 14px;font-size:.82rem;color:var(--main-text)}
+tbody td{padding:8px 12px;font-size:.78rem;color:var(--main-text)}
 tbody tr:last-child{border-bottom:none}
 
 /* Forms */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.field{display:flex;flex-direction:column;gap:5px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px}
 .field.full{grid-column:1/-1}
-.field label{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main-muted)}
+.field label{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main-muted)}
 .field input,.field textarea,.field select{
-  padding:10px 12px;background:white;border:1.5px solid var(--main-border);
-  border-radius:8px;color:var(--main-text);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;
+  padding:8px 10px;background:white;border:1.5px solid var(--main-border);
+  border-radius:6px;color:var(--main-text);font-size:.85rem;outline:none;
   transition:border-color .15s
 }
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold)}
-.field textarea{resize:vertical;min-height:80px}
-.form-section{background:white;border:1px solid var(--main-border);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 2px 6px rgba(0,0,0,.02);}
-.form-section h4{font-weight:700;font-size:.88rem;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.field textarea{resize:vertical;min-height:70px}
+.form-section{
+  background:white;border:1px solid var(--main-border);border-radius:10px;
+  padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.02);
+}
+.form-section h4{font-weight:700;font-size:.85rem;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:5px}
 
 /* Upload buttons for media fields */
 .upload-btn{
@@ -245,37 +274,41 @@ tbody tr:last-child{border-bottom:none}
   background:rgba(200,150,46,.1);
   border:1px dashed var(--gold);
   border-radius:6px;
-  padding:6px 10px;
-  font-size:.75rem;
+  padding:5px 8px;
+  font-size:.7rem;
   color:var(--gold);
   cursor:pointer;
   transition:all .15s;
   display:inline-flex;
   align-items:center;
-  gap:6px;
+  gap:5px;
   width:fit-content;
 }
 .upload-btn:hover{
   background:rgba(200,150,46,.2);
   border-color:var(--gold2);
 }
-.upload-btn input{
-  display:none;
-}
+.upload-btn input{display:none;}
 
-/* Role badges (updated for light bg) */
-.role-badge{padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+/* Role badges */
+.role-badge{
+  padding:2px 6px;border-radius:12px;font-size:.6rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.04em
+}
 .role-user{background:#e2e8f0;color:#334155}
 .role-creator{background:rgba(139,92,246,.15);color:#6d28d9}
 .role-admin{background:rgba(200,150,46,.15);color:var(--gold)}
 
 /* Users table actions */
-select {background:white;color:var(--main-text);border:1px solid var(--main-border);border-radius:6px;padding:3px 6px;font-size:.72rem;cursor:pointer;outline:none;}
+select{
+  background:white;color:var(--main-text);border:1px solid var(--main-border);
+  border-radius:4px;padding:3px 5px;font-size:.7rem;cursor:pointer;outline:none;
+}
 
-/* Toast (unchanged, overlay) */
+/* Toast */
 .toast{
   position:fixed;bottom:20px;right:20px;
-  padding:10px 18px;border-radius:10px;font-size:.82rem;font-weight:600;
+  padding:8px 16px;border-radius:8px;font-size:.78rem;font-weight:600;
   z-index:999;transition:all .25s;opacity:0;transform:translateY(8px);
   pointer-events:none;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1)
 }
@@ -285,23 +318,41 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
 .toast.info{background:rgba(200,150,46,.9);color:var(--ink)}
 
 /* Modal */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.modal-box{background:white;border:1px solid var(--main-border);border-radius:16px;padding:20px;max-width:720px;width:90%;max-height:85vh;overflow-y:auto;color:var(--main-text);}
-.modal-box video,.modal-box audio{width:100%;border-radius:8px;margin-top:10px}
-.modal-box img{width:100%;border-radius:8px;margin-top:10px;object-fit:contain;max-height:400px}
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)
+}
+.modal-box{
+  background:white;border:1px solid var(--main-border);border-radius:14px;
+  padding:16px;max-width:90vw;width:500px;max-height:85vh;overflow-y:auto;
+  color:var(--main-text);
+}
+.modal-box video,.modal-box audio{width:100%;border-radius:6px;margin-top:8px}
+.modal-box img{width:100%;border-radius:6px;margin-top:8px;object-fit:contain;max-height:300px}
+
+/* Mobile sidebar overlay and toggle */
+.sidebar-overlay{
+  display:none;
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:199;backdrop-filter:blur(2px);
+}
+.sidebar-overlay.show{display:block}
 
 @media(max-width:768px){
-  .sidebar{position:fixed;left:-var(--sidebar-w);width:var(--sidebar-w);z-index:100;transition:left .2s}
+  .menu-btn{display:block}
+  .sidebar{
+    position:fixed;left:-220px;top:0;height:100vh;z-index:200;
+    transition:left .2s;
+  }
   .sidebar.open{left:0}
-  .stats-row{grid-template-columns:1fr 1fr}
-  .upload-opts{grid-template-columns:1fr 1fr}
-  .files-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
-  .form-grid{grid-template-columns:1fr}
-  #menu-btn{display:block !important;}
+  .main-col{margin-left:0}
 }
 </style>
 </head>
 <body>
+
+<!-- SIDEBAR OVERLAY (for mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <!-- SIDEBAR (unchanged) -->
 <aside class="sidebar" id="sidebar">
@@ -377,9 +428,10 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
 
 <!-- MAIN (light) -->
 <div class="main">
+  <!-- TOPBAR with hamburger menu button -->
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px">
-      <button onclick="document.getElementById('sidebar').classList.toggle('open')" style="display:none;background:none;border:none;color:#1e293b;font-size:1.2rem;cursor:pointer" id="menu-btn">☰</button>
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
       <span class="topbar-title" id="topbar-title">Dashboard</span>
     </div>
     <div class="topbar-actions">
@@ -412,10 +464,8 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
       </div>
     </div>
 
-    <!-- ── FILE MANAGER (with new Publish button) ── -->
+    <!-- ── FILE MANAGER (with Publish button) ── -->
     <div class="panel" id="panel-files">
-
-      <!-- Upload Zone -->
       <div class="form-section" style="margin-bottom:20px">
         <h4>⬆️ Upload Files</h4>
         <div class="upload-opts">
@@ -449,8 +499,6 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
         </div>
         <div id="upload-queue"></div>
       </div>
-
-      <!-- Toolbar -->
       <div class="fm-toolbar">
         <input type="text" class="fm-search" placeholder="🔍 Search files…" oninput="filterFiles(this.value)" id="fm-search">
         <select class="fm-filter" onchange="filterFiles()" id="fm-cat-filter">
@@ -464,10 +512,7 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
         <button class="btn btn-ghost" onclick="loadFiles()">🔄</button>
         <span id="files-count" style="font-size:.75rem;color:var(--main-muted)"></span>
       </div>
-
-      <div class="files-grid" id="files-grid">
-        <div class="no-files"><div class="no-icon">📂</div><p>Loading files…</p></div>
-      </div>
+      <div class="files-grid" id="files-grid"><div class="no-files"><div class="no-icon">📂</div><p>Loading files…</p></div></div>
     </div>
 
     <!-- ── REGIONS ── -->
@@ -488,7 +533,7 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
       </div>
     </div>
 
-    <!-- ── ADD/EDIT REGION (with real file uploads) ── -->
+    <!-- ── ADD/EDIT REGION ── -->
     <div class="panel" id="panel-add-region">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div></div>
@@ -502,8 +547,7 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
           <div class="field"><label>Capital City *</label><input type="text" id="reg-capital" placeholder="e.g. Kumasi"></div>
           <div class="field"><label>Population</label><input type="text" id="reg-population" placeholder="e.g. 5,440,463"></div>
           <div class="field"><label>Terrain</label><input type="text" id="reg-terrain" placeholder="e.g. Highland"></div>
-          <div class="field">
-            <label>Category</label>
+          <div class="field"><label>Category</label>
             <select id="reg-category">
               <option value="">Select…</option>
               <option>Culture</option><option>History</option><option>Nature</option>
@@ -519,7 +563,6 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
       <div class="form-section">
         <h4>🖼️ Media</h4>
         <div class="form-grid">
-          <!-- Hero Image -->
           <div class="field">
             <label>Hero Image URL</label>
             <input type="text" id="reg-hero" placeholder="/uploads/image.jpg or Supabase URL">
@@ -528,7 +571,6 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
               <input type="file" id="hero-upload" accept="image/*" onchange="uploadHero(this.files[0])" style="display:none;">
             </div>
           </div>
-          <!-- Gallery Images -->
           <div class="field">
             <label>Gallery Images (comma separated)</label>
             <input type="text" id="reg-gallery" placeholder="/uploads/img1.jpg, /uploads/img2.jpg">
@@ -537,7 +579,6 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
               <input type="file" id="gallery-upload" accept="image/*" multiple onchange="uploadGallery(this.files)" style="display:none;">
             </div>
           </div>
-          <!-- Audio Files -->
           <div class="field">
             <label>Audio Files (comma separated)</label>
             <input type="text" id="reg-audio" placeholder="/uploads/story.mp3">
@@ -663,7 +704,7 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
       </div>
     </div>
 
-    <!-- ── WRITE POST (with cover image upload) ── -->
+    <!-- ── WRITE POST ── -->
     <div class="panel" id="panel-write-post">
       <div class="form-section">
         <h4>✍️ Write New Post</h4>
@@ -712,11 +753,22 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──────────────────────────────────────────────────────────────────
+// ── SIDEBAR TOGGLE FUNCTIONS (new) ───────────────────────────────
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
+// ── ALL YOUR EXISTING JAVASCRIPT (unchanged) ─────────────────────
 let allFiles = [], allRegions = [], allUsers = [], allPosts = [];
 let currentPanel = 'overview';
 
-// ── NAVIGATION ─────────────────────────────────────────────────────────────
 function show(panel) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
@@ -733,7 +785,6 @@ function show(panel) {
   };
   document.getElementById('topbar-title').textContent = titles[panel] || panel;
   currentPanel = panel;
-  // Lazy load
   if (panel === 'files' && allFiles.length === 0) loadFiles();
   if (panel === 'regions' && allRegions.length === 0) loadRegions();
   if (panel === 'users') loadUsers();
@@ -746,7 +797,6 @@ function show(panel) {
   if (panel === 'chat') loadChat();
 }
 
-// ── INIT ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadStats();
   loadRecentPosts();
@@ -765,7 +815,6 @@ async function loadStats() {
   } catch(e) {}
 }
 
-// ── FILE MANAGER ───────────────────────────────────────────────────────────
 async function loadFiles() {
   try {
     const r = await fetch('/api/files');
@@ -853,7 +902,6 @@ function filterFiles() {
   document.getElementById('files-count').textContent = `${filtered.length} / ${allFiles.length} files`;
 }
 
-// ── UPLOAD ─────────────────────────────────────────────────────────────────
 function setupDragDrop() {
   const zone = document.getElementById('upload-zone');
   if (!zone) return;
@@ -941,19 +989,15 @@ async function deleteFile(id) {
   } catch(e) { toast('❌ Delete failed', 'er'); }
 }
 
-// NEW: Publish a file as a post
 async function publishFile(fileId, fileName, category) {
-  // Determine content type based on category
   let contentType = 'article';
   if (category === 'video') contentType = 'video';
   else if (category === 'audio') contentType = 'audio';
-  // For image or general, we keep article (cover image will be used)
 
   const title = prompt('Enter a title for the post:', fileName || 'Untitled');
-  if (title === null) return; // cancelled
+  if (title === null) return;
 
   const description = prompt('Enter a short description (optional):', '');
-  // user can cancel, but we'll proceed with empty description
 
   const fd = new FormData();
   fd.append('file_id', fileId);
@@ -962,14 +1006,10 @@ async function publishFile(fileId, fileName, category) {
   fd.append('content_type', contentType);
 
   try {
-    const res = await fetch('/api/admin/publish-file', {
-      method: 'POST',
-      body: fd
-    });
+    const res = await fetch('/api/admin/publish-file', { method: 'POST', body: fd });
     const data = await res.json();
     if (res.ok && data.success) {
       toast('✅ Post published!', 'ok');
-      // Optionally refresh file list or switch to posts panel
       setTimeout(() => show('posts'), 1000);
     } else {
       toast('❌ ' + (data.detail || 'Publish failed'), 'er');
@@ -979,7 +1019,6 @@ async function publishFile(fileId, fileName, category) {
   }
 }
 
-// ── MEDIA VIEWER ───────────────────────────────────────────────────────────
 function openMedia(f) {
   document.getElementById('modal-name').textContent = f.name;
   document.getElementById('modal-link').href = f.url;
@@ -1006,7 +1045,6 @@ function copyUrl() {
   toast('URL copied to clipboard!', 'info');
 }
 
-// ── REGIONS ────────────────────────────────────────────────────────────────
 async function loadRegions() {
   try {
     const r = await fetch('/api/regions');
@@ -1092,7 +1130,6 @@ async function deleteRegion(id, name) {
   } catch(e) { toast('❌ Delete failed', 'er'); }
 }
 
-// ── UPLOAD FUNCTIONS FOR REGION FORM ───────────────────────────────────────
 async function uploadHero(file) {
   if (!file) return;
   try {
@@ -1163,7 +1200,6 @@ async function uploadAudio(files) {
   }
 }
 
-// ── UPLOAD FUNCTION FOR WRITE POST COVER IMAGE ─────────────────────────
 async function uploadCover(file) {
   if (!file) return;
   try {
@@ -1182,7 +1218,6 @@ async function uploadCover(file) {
   }
 }
 
-// ── USERS ──────────────────────────────────────────────────────────────────
 async function loadUsers() {
   try {
     const r = await fetch('/api/admin/users');
@@ -1222,7 +1257,6 @@ async function togglePremium(uid, current) {
   } catch(e) {}
 }
 
-// ── CREATORS ───────────────────────────────────────────────────────────────
 async function loadCreators() {
   try {
     const r = await fetch('/api/creators');
@@ -1239,7 +1273,6 @@ async function loadCreators() {
   } catch(e) {}
 }
 
-// ── POSTS ──────────────────────────────────────────────────────────────────
 async function loadPosts() {
   try {
     const r = await fetch('/api/posts?limit=50');
@@ -1275,7 +1308,6 @@ async function loadRecentPosts() {
   } catch(e) {}
 }
 
-// ── STORIES ────────────────────────────────────────────────────────────────
 async function loadStories() {
   try {
     const r = await fetch('/api/stories');
@@ -1293,7 +1325,6 @@ async function loadStories() {
   } catch(e) {}
 }
 
-// ── NEWSLETTER ─────────────────────────────────────────────────────────────
 async function loadNewsletter() {
   try {
     const r = await fetch('/api/newsletter/subscribers');
@@ -1309,7 +1340,6 @@ async function loadNewsletter() {
   } catch(e) {}
 }
 
-// ── EVENTS ─────────────────────────────────────────────────────────────────
 async function loadEvents() {
   try {
     const r = await fetch('/api/events');
@@ -1346,7 +1376,6 @@ async function deleteEvent(id) {
   toast('Deleted', 'ok'); loadEvents();
 }
 
-// ── CATEGORIES ─────────────────────────────────────────────────────────────
 async function loadCategories() {
   try {
     const r = await fetch('/api/sections');
@@ -1377,7 +1406,6 @@ async function deleteCategory(id) {
   toast('Deleted', 'ok'); loadCategories();
 }
 
-// ── CHAT ───────────────────────────────────────────────────────────────────
 async function loadChat() {
   try {
     const r = await fetch('/api/chat');
@@ -1395,20 +1423,11 @@ async function loadChat() {
   } catch(e) {}
 }
 
-// ── WRITE POST (with validation) ─────────────────────────────────────────────
 async function savePost() {
-  // Validate required fields
   const title = document.getElementById('wp-title').value.trim();
   const content = document.getElementById('wp-content').value.trim();
-
-  if (!title) {
-    toast('❌ Title is required', 'er');
-    return;
-  }
-  if (!content) {
-    toast('❌ Content is required', 'er');
-    return;
-  }
+  if (!title) { toast('❌ Title is required', 'er'); return; }
+  if (!content) { toast('❌ Content is required', 'er'); return; }
 
   const fd = new FormData();
   fd.append('title',        title);
@@ -1419,7 +1438,6 @@ async function savePost() {
   fd.append('cover_image',  document.getElementById('wp-cover').value.trim());
   fd.append('tags',         document.getElementById('wp-tags').value.trim());
 
-  // Disable button during request
   const btn = document.querySelector('#panel-write-post .btn-gold');
   const originalText = btn.textContent;
   btn.disabled = true;
@@ -1428,13 +1446,10 @@ async function savePost() {
   try {
     const r = await fetch('/api/posts', { method: 'POST', body: fd });
     const d = await r.json();
-
     if (r.ok && d.success) {
       toast('✅ Post published!', 'ok');
-      // Optionally clear form
       show('posts');
     } else {
-      // Show detailed error from server
       const errorMsg = d.detail || 'Failed to create post';
       toast(`❌ ${errorMsg}`, 'er');
       console.error('Post error:', d);
@@ -1447,7 +1462,6 @@ async function savePost() {
   }
 }
 
-// ── LOGOUT ──────────────────────────────────────────────────────────────────
 function logout() {
   if (!confirm('Logout?')) return;
   fetch('/api/auth/logout', { method: 'POST' });
@@ -1455,7 +1469,6 @@ function logout() {
   window.location.href = '/login';
 }
 
-// ── UTILS ──────────────────────────────────────────────────────────────────
 function timeAgo(str) {
   if (!str) return '—';
   try {
