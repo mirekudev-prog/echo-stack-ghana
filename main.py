@@ -2050,74 +2050,95 @@ def search_database(query: str, db: Session) -> str:
         return "Relevant information from our archive:\n" + "\n".join(context_parts)
     return ""
 
-# ─── AI ECHOBOT (Gemini 2.5 Flash) with Database Context ────────────────── =  ==
-        
+# ─── AI ECHOBOT (Gemini 2.5 Flash) with Database Context ────────────────── =
 @app.post("/api/ai/chat")
 async def ai_chat(
-    request: Request, message: str = Form(...),
-    region_context: str = Form(""), db: Session = Depends(get_db)
+    request: Request, 
+    message: str = Form(...),
+    region_context: str = Form(""), 
+    db: Session = Depends(get_db)
 ):
+    # 1. AUTHENTICATION & LOCK CHECK
     sid = request.cookies.get("user_session")
-    is_admin = _is_admin(request)
-
-    # Check user role (premium/creator/admin get full access)
+    is_authorized = False
+    
     if sid:
-        try:
-            u = db.query(models.User).filter(models.User.id == sid).first()
-            if u:
-                allowed_roles = ["admin", "superuser", "creator"]
-                if u.role in allowed_roles or getattr(u, "is_premium", 0):
-                    pass  # allowed
-                else:
-                    return {"reply": "EchoBot is for premium members. Upgrade to unlock! ⭐", "locked": True}
-        except Exception:
-            pass
+        u = db.query(models.User).filter(models.User.id == sid).first()
+        if u:
+            # Grant access to Admins, Creators, and Premium users
+            if u.role in ["admin", "superuser", "creator"] or getattr(u, "is_premium", 0):
+                is_authorized = True
+    
+    if not is_authorized:
+        return {
+            "reply": "EchoBot is a Premium feature. Upgrade your plan to chat with our Heritage AI! ⭐", 
+            "locked": True
+        }
 
-    db_context = search_database(message, db)
+    # 2. DATABASE SEARCH (The "Context Injection")
+    # This pulls data from your regions/posts tables to give the AI "local" memory
+    db_context = ""
+    try:
+        from main import search_database 
+        db_context = search_database(message, db)
+    except Exception as e:
+        print(f"⚠️ Context search failed: {e}")
 
+    # 3. API CONFIGURATION
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     if not GOOGLE_API_KEY:
-        return {
-            "reply": f"Akwaaba! You asked: '{message}'. Ghana has 16 beautiful regions with rich heritage. 🇬🇭",
-            "locked": False
-        }
+        return {"reply": "API Key missing in environment.", "locked": False}
 
+    # Use the 2.5 Flash-Lite model for better reasoning and reliability on Free Tier
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key={GOOGLE_API_KEY}"
+
+    # 4. SYSTEM PROMPT (The "Brain" of EchoBot)
+    system_instruction = (
+        "You are EchoBot, the official AI guide for EchoStack Ghana. "
+        "Your goal is to promote Ghanian culture, history, and regions. "
+        "INSTRUCTIONS:\n"
+        "1. PRIORITY: Use the 'DATABASE CONTEXT' provided below to answer. "
+        "If the answer is in the context, treat it as the absolute truth.\n"
+        "2. BLEND: If the database context is empty or insufficient, use your general "
+        "knowledge about Ghana to provide a helpful, warm, and professional response.\n"
+        "3. STYLE: Use a touch of Ghanian hospitality (e.g., Akwaaba). Keep answers concise."
+    )
+
+    full_prompt = f"{system_instruction}\n\nDATABASE CONTEXT:\n{db_context}\n\nUSER QUESTION: {message}"
+
+    payload = {
+        "contents": [{"parts": [{"text": full_prompt}]}],
+        "generationConfig": {
+            "temperature": 0.7,
+            "topP": 0.8,
+            "maxOutputTokens": 500,
+        }
+    }
+
+    # 5. EXECUTION & LOGGING
     try:
-        # Build prompt
-        if db_context:
-            prompt = f"""You are EchoBot, a friendly Ghana heritage AI. Use the following information from our database to answer the user's question if relevant. If the information doesn't help, rely on your own knowledge.
-
-{db_context}
-
-User question: {message}"""
-        else:
-            prompt = f"You are EchoBot, a friendly Ghana heritage AI. User question: {message}. Answer helpfully and concisely about Ghana's culture, history, or regions."
-
-        # Direct HTTP call to Gemini API
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}"
-        payload = {
-            "contents": [{
-                "parts": [{"text": prompt}]
-            }]
-        }
-
         async with httpx.AsyncClient(timeout=30) as client:
             response = await client.post(url, json=payload)
-            data = response.json()
-            print("Gemini API response:", data) 
-        # Extract reply
-        try:
-            reply = data["candidates"][0]["content"]["parts"][0]["text"]
-        except (KeyError, IndexError):
-            reply = "I couldn't generate a response right now."
+            
+            # This will show up in your Render logs if it fails
+            if response.status_code != 200:
+                print(f"❌ Gemini Error {response.status_code}: {response.text}")
+                return {"reply": "I'm having trouble connecting to my heritage database. Try again soon!", "locked": False}
 
-        return {"reply": reply, "locked": False}
+            data = response.json()
+            
+            # Safe extraction
+            try:
+                reply = data["candidates"][0]["content"]["parts"][0]["text"]
+            except (KeyError, IndexError):
+                print(f"⚠️ Unexpected API structure: {data}")
+                reply = "I'm here, but I couldn't process that question. Ask me something else about Ghana!"
+
+            return {"reply": reply, "locked": False}
 
     except Exception as e:
-        print(f"EchoBot error: {e}")
-        import traceback
-        traceback.print_exc()
-        return {"reply": "EchoBot is resting. Try again soon! 🤖", "locked": False}
+        print(f"🚨 Critical EchoBot Failure: {e}")
+        return {"reply": "EchoBot is currently resting. Please try again in a few minutes.", "locked": False}
 
 # ─── PAYMENTS ────────────────────────────────────────────────────────────────
 @app.post("/api/payments/initialize")
