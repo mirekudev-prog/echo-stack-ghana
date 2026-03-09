@@ -2104,7 +2104,7 @@ User question: {message}"""
         async with httpx.AsyncClient(timeout=30) as client:
             response = await client.post(url, json=payload)
             data = response.json()
-
+            print("Gemini API response:", data) 
         # Extract reply
         try:
             reply = data["candidates"][0]["content"]["parts"][0]["text"]
