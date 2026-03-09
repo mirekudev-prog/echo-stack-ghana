@@ -1956,8 +1956,7 @@ def search_database(query: str, db: Session) -> str:
         return "Relevant information from our archive:\n" + "\n".join(context_parts)
     return ""
 
-# ─── AI ECHOBOT (Gemini 2.5 Flash) with Database Context ──────────────────
-@app.post("/api/ai/chat")
+# ─── AI ECHOBOT (Gemini 2.5 Flash) with Database Context ──────────────────@app.post("/api/ai/chat")
 async def ai_chat(
     request: Request, message: str = Form(...),
     region_context: str = Form(""), db: Session = Depends(get_db)
@@ -1990,8 +1989,11 @@ async def ai_chat(
         }
 
     try:
-        genai.configure(api_key=GOOGLE_API_KEY)
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        # Create a client
+        client = genai.Client(api_key=GOOGLE_API_KEY)
+
+        # Choose the model – update to a current model name if needed
+        model_name = "gemini-2.0-flash"  # or gemini-1.5-pro, etc.
 
         if db_context:
             prompt = f"""You are EchoBot, a friendly Ghana heritage AI. Use the following information from our database to answer the user's question if relevant. If the information doesn't help, rely on your own knowledge.
@@ -2002,7 +2004,11 @@ User question: {message}"""
         else:
             prompt = f"You are EchoBot, a friendly Ghana heritage AI. User question: {message}. Answer helpfully and concisely about Ghana's culture, history, or regions."
 
-        response = model.generate_content(prompt)
+        # Generate content
+        response = client.models.generate_content(
+            model=model_name,
+            contents=prompt
+        )
         reply = response.text
 
         return {"reply": reply, "locked": False}
@@ -2010,7 +2016,7 @@ User question: {message}"""
     except Exception as e:
         print(f"EchoBot error: {e}")
         return {"reply": "EchoBot is resting. Try again soon! 🤖", "locked": False}
-
+        
 # ─── PAYMENTS ────────────────────────────────────────────────────────────────
 @app.post("/api/payments/initialize")
 async def init_payment(
