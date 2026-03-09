@@ -1,3 +1,4 @@
+<!-- Replace your entire admin_dashboard.html with this -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1353,22 +1354,56 @@ async function loadChat() {
   } catch(e) {}
 }
 
-// ── WRITE POST ─────────────────────────────────────────────────────────────
+// ── WRITE POST (with validation and error handling) ───────────────────────
 async function savePost() {
+  // Validate required fields
+  const title = document.getElementById('wp-title').value.trim();
+  const content = document.getElementById('wp-content').value.trim();
+
+  if (!title) {
+    toast('❌ Title is required', 'er');
+    return;
+  }
+  if (!content) {
+    toast('❌ Content is required', 'er');
+    return;
+  }
+
   const fd = new FormData();
-  fd.append('title',        document.getElementById('wp-title').value);
-  fd.append('excerpt',      document.getElementById('wp-excerpt').value);
-  fd.append('content',      document.getElementById('wp-content').value);
+  fd.append('title',        title);
+  fd.append('excerpt',      document.getElementById('wp-excerpt').value.trim());
+  fd.append('content',      content);
   fd.append('content_type', document.getElementById('wp-type').value);
   fd.append('status',       document.getElementById('wp-status').value);
-  fd.append('cover_image',  document.getElementById('wp-cover').value);
-  fd.append('tags',         document.getElementById('wp-tags').value);
+  fd.append('cover_image',  document.getElementById('wp-cover').value.trim());
+  fd.append('tags',         document.getElementById('wp-tags').value.trim());
+
+  // Disable button during request
+  const btn = document.querySelector('#panel-write-post .btn-gold');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Publishing...';
+
   try {
     const r = await fetch('/api/posts', { method: 'POST', body: fd });
     const d = await r.json();
-    if (r.ok && d.success) { toast('✅ Post published!', 'ok'); show('posts'); }
-    else throw new Error(d.detail || 'Failed');
-  } catch(e) { toast('❌ ' + e.message, 'er'); }
+
+    if (r.ok && d.success) {
+      toast('✅ Post published!', 'ok');
+      // Optionally clear form
+      show('posts');
+    } else {
+      // Show detailed error from server
+      const errorMsg = d.detail || 'Failed to create post';
+      toast(`❌ ${errorMsg}`, 'er');
+      console.error('Post error:', d);
+    }
+  } catch(e) {
+    toast('❌ Network error: ' + e.message, 'er');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
 }
 
 // ── LOGOUT ──────────────────────────────────────────────────────────────────
