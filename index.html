@@ -250,37 +250,6 @@ footer{background:rgba(0,0,0,.4);border-top:1px solid rgba(255,255,255,.06);padd
 .footer-links a:hover{color:var(--gold)}
 .footer-copy{font-size:.72rem;color:rgba(255,255,255,.2)}
 
-/* ── REGION MODAL ── */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;
-  display:none;align-items:flex-end;justify-content:center;
-  backdrop-filter:blur(4px)
-}
-.modal-overlay.open{display:flex;animation:fadeIn .2s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal-sheet{
-  background:#0f1d2c;border-radius:24px 24px 0 0;
-  width:100%;max-width:600px;max-height:88svh;
-  overflow-y:auto;padding:0 0 40px;
-  animation:slideUp .3s ease
-}
-@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);margin:12px auto 20px}
-.modal-header{padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
-.modal-code{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
-.modal-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#fff;margin-bottom:4px}
-.modal-capital{font-size:.8rem;color:rgba(255,255,255,.45)}
-.modal-close{position:sticky;top:12px;float:right;background:rgba(255,255,255,.1);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;margin:0 16px 0 auto;z-index:1}
-.modal-body{padding:20px}
-.modal-section-lbl{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:20px 0 10px}
-.modal-text{font-size:.88rem;color:rgba(255,255,255,.7);line-height:1.8}
-.fact-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
-.fact-box{background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px}
-.fact-label{font-size:.65rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
-.fact-val{font-size:.92rem;font-weight:600;color:#fff}
-.img-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.img-grid img{width:100%;height:110px;object-fit:cover;border-radius:10px}
-
 /* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(13,27,42,.95);color:#fff;padding:11px 20px;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:transform .3s;z-index:300;white-space:nowrap;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1)}
 .toast.on{transform:translateX(-50%) translateY(0)}
@@ -288,8 +257,6 @@ footer{background:rgba(0,0,0,.4);border-top:1px solid rgba(255,255,255,.06);padd
 @media(min-width:768px){
   .hero-btns{flex-direction:row;max-width:400px}
   .hero-btn-primary,.hero-btn-secondary{width:auto;flex:1}
-  .modal-sheet{border-radius:24px;margin:20px;max-height:80svh}
-  .modal-overlay{align-items:center}
 }
 </style>
 </head>
@@ -378,7 +345,7 @@ footer{background:rgba(0,0,0,.4);border-top:1px solid rgba(255,255,255,.06);padd
   <div class="regions-intro">
     <span class="section-label">🗺️ Explore</span>
     <h2 class="section-title">Ghana's 16 Regions</h2>
-    <p class="section-sub">Tap any region to discover its heritage, history, and people.</p>
+    <p class="section-sub">Tap any region to start your journey.</p>
   </div>
   <div class="regions-grid" id="regions-grid">
     <!-- Skeleton placeholders -->
@@ -440,20 +407,6 @@ footer{background:rgba(0,0,0,.4);border-top:1px solid rgba(255,255,255,.06);padd
   <p class="footer-copy">© 2026 EchoStack Ghana. Built by <a href="#" style="color:var(--gold);text-decoration:none;font-weight:600">Mireku Development</a></p>
 </footer>
 
-<!-- REGION MODAL -->
-<div class="modal-overlay" id="modal" onclick="closeModal(event)">
-  <div class="modal-sheet" id="modal-sheet">
-    <div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeModal()">×</button>
-    <div class="modal-header">
-      <div class="modal-code" id="m-code">GH-01</div>
-      <div class="modal-title" id="m-title">Region Name</div>
-      <div class="modal-capital" id="m-capital">Capital: —</div>
-    </div>
-    <div class="modal-body" id="m-body"></div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -487,54 +440,13 @@ function renderRegions(regions) {
     return;
   }
   grid.innerHTML = regions.map((r, i) => `
-    <div class="region-card" onclick="openRegion(${r.id})" role="button" tabindex="0">
+    <div class="region-card" onclick="window.location.href='/signup'" role="button" tabindex="0">
       <div class="region-num">GH-${String(i+1).padStart(2,'0')}</div>
       <div class="region-name">${r.name}</div>
       <div class="region-capital">${r.capital || ''}</div>
       <span class="region-arrow">→</span>
     </div>`).join('');
 }
-
-function openRegion(id) {
-  const r = allRegions.find(x => x.id === id);
-  if (!r) return;
-  const idx = allRegions.indexOf(r);
-  document.getElementById('m-code').textContent = 'GH-' + String(idx+1).padStart(2,'0');
-  document.getElementById('m-title').textContent = r.name;
-  document.getElementById('m-capital').textContent = 'Capital: ' + (r.capital || 'N/A');
-
-  const imgs = r.gallery_images ? (Array.isArray(r.gallery_images) ? r.gallery_images : r.gallery_images.split(',').map(s=>s.trim()).filter(Boolean)) : [];
-  const auds = r.audio_files ? (Array.isArray(r.audio_files) ? r.audio_files : r.audio_files.split(',').map(s=>s.trim()).filter(Boolean)) : [];
-
-  document.getElementById('m-body').innerHTML = `
-    <div class="fact-grid">
-      <div class="fact-box"><div class="fact-label">Population</div><div class="fact-val">${r.population||'N/A'}</div></div>
-      <div class="fact-box"><div class="fact-label">Terrain</div><div class="fact-val">${r.terrain||'N/A'}</div></div>
-    </div>
-    ${r.description ? `<div class="modal-section-lbl">About</div><p class="modal-text">${r.description}</p>` : ''}
-    ${imgs.length ? `<div class="modal-section-lbl">Gallery</div><div class="img-grid">${imgs.slice(0,4).map(u=>`<img src="${u}" onerror="this.style.display='none'">`).join('')}</div>` : ''}
-    ${auds.length ? `<div class="modal-section-lbl">🎵 Audio</div>${auds.map(u=>`<div style="padding:10px;background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:8px"><audio controls style="width:100%;height:36px"><source src="${u}"></audio></div>`).join('')}` : ''}
-    <div style="margin-top:24px">
-      <a href="/app" style="display:block;text-align:center;padding:13px;background:var(--gold);color:#0D1B2A;border-radius:14px;font-weight:700;font-size:.88rem;text-decoration:none">Explore Full Archive →</a>
-    </div>`;
-
-  document.getElementById('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal(e) {
-  if (e && e.target !== document.getElementById('modal') && !e.target.classList.contains('modal-close')) return;
-  document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-// Swipe down to close modal
-let touchStartY = 0;
-document.getElementById('modal-sheet').addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, {passive:true});
-document.getElementById('modal-sheet').addEventListener('touchmove', e => {
-  const dy = e.touches[0].clientY - touchStartY;
-  if (dy > 80) { document.getElementById('modal').classList.remove('open'); document.body.style.overflow = ''; }
-}, {passive:true});
 
 // Service worker
 if ('serviceWorker' in navigator) {
