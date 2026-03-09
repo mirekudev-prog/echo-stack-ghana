@@ -6,122 +6,386 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Following — EchoStack</title>
+<title>Explore — EchoStack</title>
 <link rel="icon" type="image/png" href="/echostack-logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--ink:#1a1e29;--blue:#0077b6;--gold:#C8962E;--cream:#f5f5f5;--border:#e0e0e0;}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex}
-.sidebar{position:fixed;left:0;top:0;height:100vh;width:240px;background:var(--ink);color:white;display:flex;flex-direction:column;z-index:1000;padding:20px;overflow-y:auto}
-.logo{margin-bottom:20px;font-size:1.4rem;font-weight:bold;color:white;font-family:'Playfair Display',serif}
-.nav-item{display:block;padding:12px;border-radius:8px;margin-bottom:4px;text-decoration:none;color:rgba(255,255,255,.7);transition:all .2s}
-.nav-item:hover,.nav-item.active{background:rgba(255,255,255,.1);color:white}
-.main{margin-left:260px;padding:40px;max-width:800px;flex:1}
-.page-title{font-size:2rem;font-weight:bold;margin-bottom:10px;color:var(--ink)}
-.subtitle{color:var(--muted);margin-bottom:30px}
-.card{background:white;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
-.post-meta{font-size:.85rem;color:#666;margin-bottom:10px;display:flex;gap:10px}
-.empty-state{text-align:center;padding:60px;color:#888}
-.btn{padding:10px 20px;background:var(--blue);color:white;border:none;border-radius:6px;cursor:pointer;text-decoration:none;font-size:.9rem}
-.loading{display:inline-block;width:20px;height:20px;border:3px solid #ccc;border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#0D1B2A;
+  --gold:#C8962E;
+  --gold2:#E8B84B;
+  --border:#E2E8F0;
+  --muted:#94A3B8;
+  --blue:#0077b6;
+  --cream:#F8FAFC;
+  --sidebar-w:260px;
+}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── TOP BAR (mobile only) ── */
+.topbar{
+  display:none;
+  position:fixed;
+  top:0; left:0; right:0;
+  height:60px;
+  background:var(--ink);
+  border-bottom:2px solid var(--gold);
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  z-index:300;
+}
+.topbar-logo{
+  font-family:'Playfair Display',serif;
+  color:#fff;
+  font-size:1.1rem;
+  font-weight:700;
+}
+.menu-btn{
+  background:none;
+  border:none;
+  color:rgba(255,255,255,.8);
+  font-size:1.5rem;
+  cursor:pointer;
+  padding:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.menu-btn:hover{color:#fff;}
+
+/* ── SIDEBAR (dark) ── */
+.sidebar{
+  position:fixed;
+  left:0; top:0;
+  width:var(--sidebar-w);
+  height:100vh;
+  background:var(--ink);
+  display:flex;
+  flex-direction:column;
+  z-index:200;
+  padding:20px 0;
+  overflow-y:auto;
+  transition:transform .3s ease;
+}
+.sidebar-logo{
+  font-family:'Playfair Display',serif;
+  font-size:1.4rem;
+  font-weight:700;
+  color:#fff;
+  padding:0 20px 20px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.sidebar-nav{
+  flex:1;
+  padding:12px 0;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 20px;
+  color:rgba(255,255,255,.7);
+  text-decoration:none;
+  font-size:.95rem;
+  font-weight:500;
+  transition:all .15s;
+}
+.nav-item:hover,
+.nav-item.active{
+  background:rgba(255,255,255,.1);
+  color:#fff;
+}
+.nav-item .icon{font-size:1.1rem; width:24px; text-align:center;}
+.sidebar-footer{
+  padding:20px;
+  border-top:1px solid rgba(255,255,255,.1);
+}
+.logout-btn{
+  width:100%;
+  padding:10px;
+  background:rgba(239,68,68,.15);
+  border:1px solid rgba(239,68,68,.3);
+  color:#fca5a5;
+  border-radius:8px;
+  font-size:.85rem;
+  font-weight:600;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition:all .2s;
+}
+.logout-btn:hover{
+  background:rgba(239,68,68,.3);
+  color:#fff;
+}
+
+/* ── SIDEBAR OVERLAY (mobile) ── */
+.sidebar-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:199;
+  backdrop-filter:blur(2px);
+}
+.sidebar-overlay.show{display:block;}
+
+/* ── MAIN CONTENT ── */
+.main{
+  margin-left:var(--sidebar-w);
+  padding:40px 24px;
+  max-width:900px;
+  min-height:100vh;
+  transition:margin .3s;
+}
+
+/* ── PAGE HEADER ── */
+.page-title{
+  font-family:'Playfair Display',serif;
+  font-size:2rem;
+  font-weight:900;
+  color:var(--ink);
+  margin-bottom:6px;
+}
+.subtitle{
+  font-size:.95rem;
+  color:var(--muted);
+  margin-bottom:32px;
+}
+
+/* ── POST CARDS (same as feed) ── */
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  transition:box-shadow .2s;
+}
+.card:hover{
+  box-shadow:0 4px 16px rgba(13,27,42,.08);
+}
+.post-meta{
+  display:flex;
+  gap:12px;
+  font-size:.82rem;
+  color:var(--muted);
+  margin-bottom:10px;
+}
+.post-meta strong{color:var(--ink);}
+.post-title{
+  font-size:1.2rem;
+  font-weight:600;
+  color:var(--ink);
+  margin-bottom:8px;
+  line-height:1.4;
+}
+.post-excerpt{
+  font-size:.9rem;
+  color:#334155;
+  line-height:1.6;
+  margin-bottom:16px;
+}
+.btn{
+  display:inline-block;
+  padding:8px 20px;
+  background:var(--gold);
+  color:var(--ink);
+  border:none;
+  border-radius:30px;
+  font-size:.85rem;
+  font-weight:600;
+  text-decoration:none;
+  cursor:pointer;
+  transition:background .2s;
+}
+.btn:hover{
+  background:var(--gold2);
+}
+.empty-state{
+  text-align:center;
+  padding:60px 20px;
+  color:var(--muted);
+  background:#fff;
+  border-radius:14px;
+  border:1px solid var(--border);
+}
+.loading{
+  text-align:center;
+  padding:40px;
+  color:var(--muted);
+}
+.spinner{
+  display:inline-block;
+  width:24px;
+  height:24px;
+  border:3px solid #e2e8f0;
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── MOBILE STYLES ── */
+@media(max-width:768px){
+  .topbar{display:flex;}
+  .sidebar{
+    transform:translateX(-100%);
+    width:260px;
+  }
+  .sidebar.open{transform:translateX(0);}
+  .main{
+    margin-left:0;
+    padding:80px 16px 24px;
+  }
+  .page-title{font-size:1.8rem;}
+}
 </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="logo">EchoStack</div>
-    <nav>
-        <a href="/app" class="nav-item">🏠 Home</a>
-        <a href="/explore" class="nav-item active">🔍 Explore</a>
-        <a href="/chat" class="nav-item">💬 Chat</a>
-        <a href="/dashboard" class="nav-item">📊 Dashboard</a>
-        <a href="/logout" class="nav-item">🚪 Sign Out</a>
-    </nav>
+<!-- MOBILE TOP BAR -->
+<div class="topbar">
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  <span class="topbar-logo">EchoStack</span>
+  <div style="width:24px;"></div>
 </div>
 
-<div class="main">
-    <h1 class="page-title">Following</h1>
-    <p class="subtitle">Creators and heritage keepers you follow on EchoStack.</p>
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-    <!-- Loading State -->
-    <div id="loading-state" style="text-align:center;padding:40px;">
-        <span class="loading"></span> Loading...
-    </div>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">EchoStack</div>
+  <nav class="sidebar-nav">
+    <a href="/app" class="nav-item"><span class="icon">🏠</span> Home</a>
+    <a href="/explore" class="nav-item active"><span class="icon">🔍</span> Explore</a>
+    <a href="/chat" class="nav-item"><span class="icon">💬</span> Chat</a>
+    <a href="/dashboard" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+    <a href="/activity" class="nav-item"><span class="icon">⚡</span> Activity</a>
+    <a href="/following" class="nav-item"><span class="icon">👥</span> Following</a>
+  </nav>
+  <div class="sidebar-footer">
+    <button onclick="logout()" class="logout-btn">
+      <span>🚪</span> Sign Out
+    </button>
+  </div>
+</aside>
 
-    <!-- Content Container -->
-    <div id="content-container" style="display:none;">
-        <!-- Posts will load here -->
-    </div>
-</div>
+<!-- MAIN CONTENT -->
+<main class="main" id="main">
+  <h1 class="page-title">Explore</h1>
+  <p class="subtitle">Discover new stories, creators and heritage from all 16 regions.</p>
+
+  <!-- Loading State -->
+  <div id="loading-state" class="loading">
+    <div class="spinner"></div>
+    <p style="margin-top:10px;">Loading posts…</p>
+  </div>
+
+  <!-- Posts Container -->
+  <div id="content-container" style="display:none;"></div>
+</main>
 
 <script>
-// Constants and Global Variables
 const API_BASE = '/api';
 
-// Check login on load
+// Check login
 document.addEventListener('DOMContentLoaded', function() {
-    // Verify user session
-    if(!localStorage.getItem('es_user')) {
-        window.location.href = '/user-login';
-        return;
+  const user = localStorage.getItem('es_user');
+  if (!user) {
+    window.location.href = '/user-login';
+    return;
+  }
+  loadPosts();
+});
+
+// Sidebar functions
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+// Auto‑close sidebar on mobile after clicking a nav link
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+  link.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768) {
+      setTimeout(closeSidebar, 100);
     }
-    
-    // Load following posts
-    loadPosts();
+  });
 });
 
 async function loadPosts() {
-    try {
-        const res = await fetch(`${API_BASE}/posts?status=published&limit=20`);
-        const posts = await res.json();
-        
-        if(posts && Array.isArray(posts) && posts.length > 0) {
-            renderPosts(posts);
-        } else {
-            document.getElementById('loading-state').innerHTML = '<div class="empty-state"><h3>No posts yet 😢</h3><p>Follow some creators to see their stories here!</p></div>';
-        }
-    } catch(err) {
-        document.getElementById('loading-state').innerHTML = `<div class="empty-state"><h3>Error 😞</h3><p>${err.message}</p></div>`;
+  try {
+    const res = await fetch(`${API_BASE}/posts?status=published&limit=30`);
+    const posts = await res.json();
+
+    if (posts && Array.isArray(posts) && posts.length > 0) {
+      renderPosts(posts);
+    } else {
+      document.getElementById('loading-state').innerHTML = '<div class="empty-state"><h3>No posts yet 😢</h3><p>Check back soon for new stories!</p></div>';
     }
+  } catch (err) {
+    document.getElementById('loading-state').innerHTML = `<div class="empty-state"><h3>Error 😞</h3><p>${escapeHtml(err.message)}</p></div>`;
+  }
 }
 
 function renderPosts(posts) {
-    const container = document.getElementById('content-container');
-    let html = '';
-    
-    posts.forEach(post => {
-        const date = new Date(post.created_at || post.published_at).toLocaleDateString();
-        html += `
-            <div class="card">
-                <div class="post-meta">
-                    <strong>@${escapeHtml(post.author_username)}</strong> • ${date}
-                </div>
-                <h3 style="margin:0 0 10px">${escapeHtml(post.title)}</h3>
-                <p style="line-height:1.6;color:#333;">${escapeHtml(post.excerpt || 'Read more on the homepage')}</p>
-                <a href="/post/${post.id}" class="btn" style="display:inline-block;margin-top:15px">Read Article →</a>
-            </div>
-        `;
-    });
-    
-    document.getElementById('loading-state').style.display = 'none';
-    container.innerHTML = html;
-    container.style.display = 'block';
+  const container = document.getElementById('content-container');
+  let html = '';
+
+  posts.forEach(post => {
+    const date = new Date(post.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    html += `
+      <div class="card">
+        <div class="post-meta">
+          <strong>@${escapeHtml(post.author_username || 'creator')}</strong>
+          <span>•</span>
+          <span>${date}</span>
+        </div>
+        <h3 class="post-title">${escapeHtml(post.title)}</h3>
+        <p class="post-excerpt">${escapeHtml(post.excerpt || post.content?.substring(0,120) || 'Read more...')}</p>
+        <a href="/post/${post.id}" class="btn">Read Article →</a>
+      </div>
+    `;
+  });
+
+  document.getElementById('loading-state').style.display = 'none';
+  container.innerHTML = html;
+  container.style.display = 'block';
 }
 
-// Helper: Escape HTML to prevent XSS
+function logout() {
+  fetch('/api/users/logout', { method:'POST' }).finally(() => {
+    localStorage.removeItem('es_user');
+    document.cookie = 'user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+    window.location.href = '/';
+  });
+}
+
 function escapeHtml(text) {
-    if (!text) return '';
-    return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 </script>
-
 </body>
 </html>
