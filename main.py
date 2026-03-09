@@ -6,7 +6,7 @@ from sqlalchemy import text, or_
 import os, uuid, re, json, httpx, random
 from datetime import datetime, timedelta
 import secrets
-import google.genai as genai
+import google.generativeai as genai
 import os
 
 # Password hashing
@@ -2073,21 +2073,20 @@ async def ai_chat(
         except Exception:
             pass
 
+    # Search database for relevant content
     db_context = search_database(message, db)
 
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     if not GOOGLE_API_KEY:
+        # Fallback if no API key
         return {
             "reply": f"Akwaaba! You asked: '{message}'. Ghana has 16 beautiful regions with rich heritage. 🇬🇭",
             "locked": False
         }
 
     try:
-        # Force API version v1 – this avoids the v1beta model issue
-        client = genai.Client(api_key=GOOGLE_API_KEY, version="v1")
-
-        # Use simple model name (no "models/" prefix)
-        model_name = "gemini-1.5-flash"   # or "gemini-1.5-pro"
+        genai.configure(api_key=GOOGLE_API_KEY)
+        model = genai.GenerativeModel('gemini-1.5-flash')
 
         if db_context:
             prompt = f"""You are EchoBot, a friendly Ghana heritage AI. Use the following information from our database to answer the user's question if relevant. If the information doesn't help, rely on your own knowledge.
@@ -2098,11 +2097,9 @@ User question: {message}"""
         else:
             prompt = f"You are EchoBot, a friendly Ghana heritage AI. User question: {message}. Answer helpfully and concisely about Ghana's culture, history, or regions."
 
-        response = client.models.generate_content(
-            model=model_name,
-            contents=prompt
-        )
+        response = model.generate_content(prompt)
         reply = response.text
+
         return {"reply": reply, "locked": False}
 
     except Exception as e:
