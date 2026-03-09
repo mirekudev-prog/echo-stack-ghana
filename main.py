@@ -474,6 +474,14 @@ async def user_profile_page(uname: str, request: Request):
         return _serve("user_profile.html")
     return RedirectResponse("/user-login")
 
+# ===== FIXED: Added missing /user-profile route =====
+@app.get("/user-profile")
+async def user_profile_redirect(request: Request):
+    if _is_admin(request) or request.cookies.get("user_session"):
+        return _serve("user_profile.html")
+    return RedirectResponse("/user-login")
+# ====================================================
+
 @app.get("/user-settings")
 async def user_settings_page(request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
@@ -811,7 +819,11 @@ async def get_me(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(401, "Not logged in")
     u = db.query(models.User).filter(models.User.id == sid).first()
     if not u:
-        raise HTTPException(401, "User not found")
+        # ===== FIX: Delete stale cookie if user not found =====
+        resp = JSONResponse({"detail": "User not found"}, status_code=401)
+        resp.delete_cookie("user_session", path="/")
+        return resp
+        # =====================================================
     return {
         "id": str(u.id), "username": u.username, "email": u.email,
         "role": getattr(u, "role", "user"),
@@ -1204,15 +1216,18 @@ async def add_comment(
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
+# ===== FIXED: Only allow actual user sessions to like =====
 @app.post("/api/posts/{post_id}/like")
 async def toggle_like(post_id: int, request: Request, db: Session = Depends(get_db)):
-    sid = request.cookies.get("user_session") or (
-        "admin" if _is_admin(request) else None
-    )
-    if not sid: raise HTTPException(401, "Login to like")
+    sid = request.cookies.get("user_session")
+    # Admin without user session cannot like (prevents "admin" string from being inserted)
+    if not sid:
+        raise HTTPException(401, "Login to like")
     try:
         p = db.query(models.Post).filter(models.Post.id == post_id).first()
-        if not p: raise HTTPException(404)
+        if not p:
+            raise HTTPException(404)
+
         existing = db.query(models.Comment).filter(
             models.Comment.post_id == post_id,
             models.Comment.user_id == sid,
@@ -1223,14 +1238,16 @@ async def toggle_like(post_id: int, request: Request, db: Session = Depends(get_
             p.likes = max(0, (getattr(p, "likes", 0) or 0) - 1)
             db.commit()
             return {"liked": False, "likes": p.likes}
-        db.add(models.Comment(post_id=post_id, user_id=sid, username="", content="__like__"))
-        p.likes = (getattr(p, "likes", 0) or 0) + 1
-        db.commit()
-        return {"liked": True, "likes": p.likes}
-    except HTTPException:
-        raise
+        else:
+            db.add(models.Comment(post_id=post_id, user_id=sid, username="", content="__like__"))
+            p.likes = (getattr(p, "likes", 0) or 0) + 1
+            db.commit()
+            return {"liked": True, "likes": p.likes}
     except Exception as e:
-        db.rollback(); raise HTTPException(500, str(e))
+        db.rollback()
+        print(f"Like error: {e}")
+        raise HTTPException(500, str(e))
+# ========================================================
 
 # ─── SOCIAL ──────────────────────────────────────────────────────────────────
 @app.post("/api/follow/{target_id}")
