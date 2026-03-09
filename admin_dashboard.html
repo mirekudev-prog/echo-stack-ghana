@@ -617,7 +617,7 @@ select{
       </div>
     </div>
 
-    <!-- ── POSTS ── -->
+    <!-- ── POSTS (with Delete button) ── -->
     <div class="panel" id="panel-posts">
       <div class="table-wrap">
         <div class="table-head"><h3>All Posts</h3><button class="btn btn-ghost" onclick="loadPosts()" style="font-size:.72rem;padding:5px 10px">Refresh</button></div>
@@ -753,7 +753,7 @@ select{
 <div class="toast" id="toast"></div>
 
 <script>
-// ── SIDEBAR TOGGLE FUNCTIONS (new) ───────────────────────────────
+// ── SIDEBAR TOGGLE FUNCTIONS ───────────────────────────────
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
@@ -765,10 +765,11 @@ function closeSidebar() {
   document.getElementById('sidebar-overlay').classList.remove('show');
 }
 
-// ── ALL YOUR EXISTING JAVASCRIPT (unchanged) ─────────────────────
+// ── STATE ──────────────────────────────────────────────────
 let allFiles = [], allRegions = [], allUsers = [], allPosts = [];
 let currentPanel = 'overview';
 
+// ── SHOW (with auto‑close sidebar on mobile) ───────────────
 function show(panel) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
@@ -785,6 +786,8 @@ function show(panel) {
   };
   document.getElementById('topbar-title').textContent = titles[panel] || panel;
   currentPanel = panel;
+
+  // Lazy load
   if (panel === 'files' && allFiles.length === 0) loadFiles();
   if (panel === 'regions' && allRegions.length === 0) loadRegions();
   if (panel === 'users') loadUsers();
@@ -795,8 +798,14 @@ function show(panel) {
   if (panel === 'events') loadEvents();
   if (panel === 'categories') loadCategories();
   if (panel === 'chat') loadChat();
+
+  // Auto‑close sidebar on mobile after navigation
+  if (window.innerWidth <= 768) {
+    closeSidebar();
+  }
 }
 
+// ── INIT ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadStats();
   loadRecentPosts();
@@ -815,6 +824,7 @@ async function loadStats() {
   } catch(e) {}
 }
 
+// ── FILE MANAGER (unchanged) ───────────────────────────────
 async function loadFiles() {
   try {
     const r = await fetch('/api/files');
@@ -1045,6 +1055,7 @@ function copyUrl() {
   toast('URL copied to clipboard!', 'info');
 }
 
+// ── REGIONS (unchanged) ────────────────────────────────────
 async function loadRegions() {
   try {
     const r = await fetch('/api/regions');
@@ -1130,6 +1141,7 @@ async function deleteRegion(id, name) {
   } catch(e) { toast('❌ Delete failed', 'er'); }
 }
 
+// ── UPLOAD FUNCTIONS (unchanged) ───────────────────────────
 async function uploadHero(file) {
   if (!file) return;
   try {
@@ -1218,6 +1230,7 @@ async function uploadCover(file) {
   }
 }
 
+// ── USERS (unchanged) ──────────────────────────────────────
 async function loadUsers() {
   try {
     const r = await fetch('/api/admin/users');
@@ -1257,6 +1270,7 @@ async function togglePremium(uid, current) {
   } catch(e) {}
 }
 
+// ── CREATORS (unchanged) ───────────────────────────────────
 async function loadCreators() {
   try {
     const r = await fetch('/api/creators');
@@ -1273,6 +1287,7 @@ async function loadCreators() {
   } catch(e) {}
 }
 
+// ── POSTS (with Delete button) ─────────────────────────────
 async function loadPosts() {
   try {
     const r = await fetch('/api/posts?limit=50');
@@ -1287,9 +1302,30 @@ async function loadPosts() {
         <td><span class="role-badge ${p.status === 'published' ? 'role-admin' : 'role-user'}">${p.status}</span></td>
         <td>${p.views || 0}</td>
         <td style="font-size:.75rem;color:var(--main-muted)">${timeAgo(p.created_at)}</td>
-        <td><a href="/post/${p.id}" target="_blank" class="btn btn-ghost" style="font-size:.7rem;padding:4px 8px">View</a></td>
+        <td style="white-space:nowrap">
+          <a href="/post/${p.id}" target="_blank" class="btn btn-ghost" style="font-size:.7rem;padding:4px 8px;display:inline-block;margin-right:4px;">View</a>
+          <button class="btn btn-danger" style="font-size:.7rem;padding:4px 8px;" onclick="deletePost(${p.id})">🗑 Delete</button>
+        </td>
       </tr>`).join('');
   } catch(e) {}
+}
+
+// NEW: Delete a post
+async function deletePost(postId) {
+  if (!confirm('Are you sure you want to permanently delete this post?')) return;
+  try {
+    const res = await fetch(`/api/posts/${postId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      toast('✅ Post deleted', 'ok');
+      loadPosts(); // refresh list
+      loadRecentPosts(); // also refresh recent posts
+    } else {
+      toast('❌ ' + (data.detail || 'Delete failed'), 'er');
+    }
+  } catch (err) {
+    toast('❌ ' + err.message, 'er');
+  }
 }
 
 async function loadRecentPosts() {
@@ -1308,6 +1344,7 @@ async function loadRecentPosts() {
   } catch(e) {}
 }
 
+// ── STORIES (unchanged) ────────────────────────────────────
 async function loadStories() {
   try {
     const r = await fetch('/api/stories');
@@ -1325,6 +1362,7 @@ async function loadStories() {
   } catch(e) {}
 }
 
+// ── NEWSLETTER (unchanged) ─────────────────────────────────
 async function loadNewsletter() {
   try {
     const r = await fetch('/api/newsletter/subscribers');
@@ -1340,6 +1378,7 @@ async function loadNewsletter() {
   } catch(e) {}
 }
 
+// ── EVENTS (unchanged) ─────────────────────────────────────
 async function loadEvents() {
   try {
     const r = await fetch('/api/events');
@@ -1376,6 +1415,7 @@ async function deleteEvent(id) {
   toast('Deleted', 'ok'); loadEvents();
 }
 
+// ── CATEGORIES (unchanged) ─────────────────────────────────
 async function loadCategories() {
   try {
     const r = await fetch('/api/sections');
@@ -1406,6 +1446,7 @@ async function deleteCategory(id) {
   toast('Deleted', 'ok'); loadCategories();
 }
 
+// ── CHAT (unchanged) ───────────────────────────────────────
 async function loadChat() {
   try {
     const r = await fetch('/api/chat');
@@ -1423,6 +1464,7 @@ async function loadChat() {
   } catch(e) {}
 }
 
+// ── WRITE POST (unchanged) ─────────────────────────────────
 async function savePost() {
   const title = document.getElementById('wp-title').value.trim();
   const content = document.getElementById('wp-content').value.trim();
@@ -1462,6 +1504,7 @@ async function savePost() {
   }
 }
 
+// ── LOGOUT ──────────────────────────────────────────────────
 function logout() {
   if (!confirm('Logout?')) return;
   fetch('/api/auth/logout', { method: 'POST' });
@@ -1469,6 +1512,7 @@ function logout() {
   window.location.href = '/login';
 }
 
+// ── UTILS ──────────────────────────────────────────────────
 function timeAgo(str) {
   if (!str) return '—';
   try {
