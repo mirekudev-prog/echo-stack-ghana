@@ -163,12 +163,42 @@ body{
   margin-bottom:32px;
 }
 
-/* ── POST CARDS (same as feed) ── */
+/* ── FILTER TABS (copied from dashboard) ── */
+.filter-tabs{
+  display:flex;
+  gap:6px;
+  margin-bottom:24px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  padding-bottom:2px;
+}
+.filter-tabs::-webkit-scrollbar{display:none;}
+.tab{
+  padding:7px 16px;
+  border-radius:24px;
+  font-size:.8rem;
+  font-weight:600;
+  cursor:pointer;
+  border:1.5px solid var(--border);
+  background:#fff;
+  color:var(--muted);
+  transition:all .15s;
+  white-space:nowrap;
+  font-family:'DM Sans',sans-serif;
+}
+.tab.active,
+.tab:hover{
+  background:var(--ink);
+  color:#fff;
+  border-color:var(--ink);
+}
+
+/* ── POST CARDS (enhanced with media previews) ── */
 .card{
   background:#fff;
   border:1px solid var(--border);
   border-radius:14px;
-  padding:20px;
+  overflow:hidden;
   margin-bottom:20px;
   box-shadow:0 2px 8px rgba(0,0,0,.05);
   transition:box-shadow .2s;
@@ -176,43 +206,194 @@ body{
 .card:hover{
   box-shadow:0 4px 16px rgba(13,27,42,.08);
 }
-.post-meta{
+.post-header{
   display:flex;
-  gap:12px;
-  font-size:.82rem;
-  color:var(--muted);
-  margin-bottom:10px;
+  align-items:center;
+  gap:10px;
+  padding:14px 16px 0;
 }
-.post-meta strong{color:var(--ink);}
-.post-title{
-  font-size:1.2rem;
+.p-av{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:#fff;
+  font-size:.82rem;
+  flex-shrink:0;
+  overflow:hidden;
+}
+.p-info{flex:1;}
+.p-name{
+  font-size:.84rem;
   font-weight:600;
   color:var(--ink);
-  margin-bottom:8px;
+}
+.p-time{
+  font-size:.72rem;
+  color:var(--muted);
+}
+.post-type{
+  padding:2px 9px;
+  border-radius:12px;
+  font-size:.64rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+.type-article{background:#EFF6FF;color:#2563EB;}
+.type-story{background:#F0FDF4;color:#16A34A;}
+.type-video{background:#FDF2F8;color:#9333EA;}
+.type-reel{background:#FCE7F3;color:#B21E6C;}
+.type-premium{background:rgba(201,147,58,.15);color:#c9933a;}
+
+.post-title{
+  padding:6px 16px 2px;
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;
+  color:var(--ink);
   line-height:1.4;
+  text-decoration:none;
+  display:block;
 }
 .post-excerpt{
-  font-size:.9rem;
-  color:#334155;
+  padding:0 16px 8px;
+  font-size:.83rem;
+  color:#64748B;
   line-height:1.6;
-  margin-bottom:16px;
 }
-.btn{
-  display:inline-block;
-  padding:8px 20px;
-  background:var(--gold);
-  color:var(--ink);
-  border:none;
-  border-radius:30px;
-  font-size:.85rem;
-  font-weight:600;
-  text-decoration:none;
+
+/* MEDIA PREVIEW */
+.card-media{
+  width:100%;
+  background:#000;
+  position:relative;
+  overflow:hidden;
+}
+.card-media img{
+  width:100%;
+  max-height:300px;
+  object-fit:cover;
+  display:block;
+}
+.card-media video{
+  width:100%;
+  max-height:300px;
+  display:block;
+  background:#000;
+}
+.card-media.reel video{
+  max-height:480px;
+  aspect-ratio:9/16;
+  object-fit:cover;
+  margin:0 auto;
+}
+.play-overlay{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(0,0,0,.55);
+  border-radius:50%;
+  width:52px;
+  height:52px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.4rem;
+  box-shadow:0 2px 12px rgba(0,0,0,.4);
   cursor:pointer;
-  transition:background .2s;
+  z-index:10;
 }
-.btn:hover{
-  background:var(--gold2);
+.reel-watermark{
+  position:absolute;
+  bottom:8px;
+  right:8px;
+  background:rgba(0,0,0,.65);
+  border-radius:20px;
+  padding:4px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:15;
+  pointer-events:none;
+  backdrop-filter:blur(2px);
+  border:1px solid rgba(255,255,255,.15);
 }
+.reel-watermark img{
+  height:18px;
+  width:auto;
+  display:block;
+}
+.reel-watermark span{
+  color:white;
+  font-size:0.7rem;
+  font-weight:600;
+  margin-left:4px;
+  letter-spacing:0.5px;
+}
+.premium-banner{
+  background:linear-gradient(135deg,var(--gold),#a97825);
+  padding:10px 16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:.78rem;
+  font-weight:600;
+  color:#fff;
+}
+
+.post-actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px;
+  padding:10px 16px;
+  border-top:1px solid var(--border);
+}
+.act-btn{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:7px 12px;
+  border-radius:8px;
+  font-size:.79rem;
+  font-weight:500;
+  cursor:pointer;
+  border:none;
+  background:none;
+  color:var(--muted);
+  transition:all .15s;
+  font-family:'DM Sans',sans-serif;
+  white-space:nowrap;
+}
+.act-btn:hover{background:#F8FAFC;color:var(--ink);}
+.act-read{
+  margin-left:auto;
+  background:var(--gold);
+  color:#fff;
+  border-radius:8px;
+  padding:7px 16px;
+  font-size:.78rem;
+  font-weight:700;
+  cursor:pointer;
+  border:none;
+  font-family:'DM Sans',sans-serif;
+  text-decoration:none;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.act-read:hover{background:#a97825;}
+
+@media (max-width:480px){
+  .post-actions{gap:4px;padding:8px 10px;}
+  .act-btn{padding:6px 8px;font-size:.7rem;}
+  .act-read{padding:6px 10px;font-size:.7rem;margin-left:0;}
+}
+
 .empty-state{
   text-align:center;
   padding:60px 20px;
@@ -288,6 +469,16 @@ body{
   <h1 class="page-title">Explore</h1>
   <p class="subtitle">Discover new stories, creators and heritage from all 16 regions.</p>
 
+  <!-- Filter tabs -->
+  <div class="filter-tabs">
+    <button class="tab active" onclick="filterByType('', this)">🌍 All</button>
+    <button class="tab" onclick="filterByType('article', this)">📰 Articles</button>
+    <button class="tab" onclick="filterByType('story', this)">📖 Stories</button>
+    <button class="tab" onclick="filterByType('video', this)">🎬 Videos</button>
+    <button class="tab" onclick="filterByType('reel', this)">📱 Reels</button>
+    <button class="tab" onclick="filterByType('premium', this)">⭐ Premium</button>
+  </div>
+
   <!-- Loading State -->
   <div id="loading-state" class="loading">
     <div class="spinner"></div>
@@ -300,6 +491,8 @@ body{
 
 <script>
 const API_BASE = '/api';
+let allPosts = [];
+let currentFilter = ''; // '' = all, article, story, video, reel, premium
 
 // Check login
 document.addEventListener('DOMContentLoaded', function() {
@@ -331,35 +524,106 @@ document.querySelectorAll('.sidebar-nav a').forEach(link => {
 
 async function loadPosts() {
   try {
-    const res = await fetch(`${API_BASE}/posts?status=published&limit=30`);
+    const res = await fetch(`${API_BASE}/posts?status=published&limit=50`);
     const posts = await res.json();
-
-    if (posts && Array.isArray(posts) && posts.length > 0) {
-      renderPosts(posts);
+    if (posts && Array.isArray(posts)) {
+      allPosts = posts;
+      renderPosts(allPosts);
     } else {
-      document.getElementById('loading-state').innerHTML = '<div class="empty-state"><h3>No posts yet 😢</h3><p>Check back soon for new stories!</p></div>';
+      showEmpty('No posts yet 😢', 'Check back soon for new stories!');
     }
   } catch (err) {
-    document.getElementById('loading-state').innerHTML = `<div class="empty-state"><h3>Error 😞</h3><p>${escapeHtml(err.message)}</p></div>`;
+    showError(err.message);
+  }
+}
+
+function filterByType(type, btn) {
+  document.querySelectorAll('.filter-tabs .tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = type;
+
+  if (type === 'premium') {
+    const filtered = allPosts.filter(p => p.is_premium == 1);
+    renderPosts(filtered);
+  } else if (type === '') {
+    renderPosts(allPosts);
+  } else {
+    const filtered = allPosts.filter(p => p.content_type === type);
+    renderPosts(filtered);
   }
 }
 
 function renderPosts(posts) {
   const container = document.getElementById('content-container');
-  let html = '';
+  if (!posts || posts.length === 0) {
+    document.getElementById('loading-state').style.display = 'none';
+    container.innerHTML = '<div class="empty-state"><h3>No posts found</h3><p>Try a different filter.</p></div>';
+    container.style.display = 'block';
+    return;
+  }
 
-  posts.forEach(post => {
-    const date = new Date(post.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  let html = '';
+  posts.forEach(p => {
+    const date = new Date(p.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    const authorInitial = (p.author_username || 'C')[0].toUpperCase();
+    const typeClass = p.is_premium ? 'type-premium' : ('type-' + (p.content_type || 'article'));
+    const typeLabel = p.is_premium ? 'Premium' : (p.content_type || 'article');
+
+    // Media preview
+    let mediaHtml = '';
+    if (p.content_type === 'reel') {
+      const videoUrl = p.video_url || '';
+      if (videoUrl) {
+        mediaHtml = `<div class="card-media reel" style="position:relative">
+          <video preload="none" style="width:100%;display:block;background:#000;" poster="${p.cover_image||''}">
+            <source src="${videoUrl}" type="video/mp4">
+          </video>
+          <div class="play-overlay" onclick="goPost(${p.id})">▶️</div>
+          <div class="reel-watermark">
+            <img src="/echostack-logo.png" onerror="this.style.display='none'">
+            <span>EchoStack</span>
+          </div>
+        </div>`;
+      }
+    } else if (p.content_type === 'video') {
+      const videoUrl = p.video_url || '';
+      if (videoUrl) {
+        mediaHtml = `<div class="card-media" style="position:relative">
+          <video preload="none" style="width:100%;max-height:300px;display:block;background:#000;" poster="${p.cover_image||''}">
+            <source src="${videoUrl}" type="video/mp4">
+          </video>
+          <div class="play-overlay" onclick="goPost(${p.id})">▶️</div>
+        </div>`;
+      } else if (p.cover_image) {
+        mediaHtml = `<div class="card-media"><img src="${p.cover_image}" alt="" onclick="goPost(${p.id})" style="cursor:pointer"></div>`;
+      }
+    } else if (p.cover_image) {
+      mediaHtml = `<div class="card-media"><img src="${p.cover_image}" alt="" onclick="goPost(${p.id})" style="cursor:pointer"></div>`;
+    }
+
+    const premiumBadge = p.is_locked ? `<div class="premium-banner">⭐ Premium Content — Subscribe to read</div>` : '';
+
     html += `
       <div class="card">
-        <div class="post-meta">
-          <strong>@${escapeHtml(post.author_username || 'creator')}</strong>
-          <span>•</span>
-          <span>${date}</span>
+        <div class="post-header">
+          <div class="p-av">${authorInitial}</div>
+          <div class="p-info">
+            <div class="p-name">${escapeHtml(p.author_username || 'Creator')}</div>
+            <div class="p-time">${date}</div>
+          </div>
+          <span class="post-type ${typeClass}">${typeLabel}</span>
         </div>
-        <h3 class="post-title">${escapeHtml(post.title)}</h3>
-        <p class="post-excerpt">${escapeHtml(post.excerpt || post.content?.substring(0,120) || 'Read more...')}</p>
-        <a href="/post/${post.id}" class="btn">Read Article →</a>
+
+        <a href="/post/${p.id}" class="post-title">${escapeHtml(p.title)}</a>
+        ${p.excerpt ? `<div class="post-excerpt">${escapeHtml(p.excerpt)}</div>` : ''}
+
+        ${mediaHtml}
+        ${premiumBadge}
+
+        <div class="post-actions">
+          <button class="act-btn" onclick="quickLike(${p.id}, this)">❤️ <span class="lc">${p.likes||0}</span></button>
+          <a href="/post/${p.id}" class="act-read">Read →</a>
+        </div>
       </div>
     `;
   });
@@ -367,6 +631,21 @@ function renderPosts(posts) {
   document.getElementById('loading-state').style.display = 'none';
   container.innerHTML = html;
   container.style.display = 'block';
+}
+
+function goPost(id) {
+  window.location.href = '/post/' + id;
+}
+
+async function quickLike(postId, btn) {
+  // Quick like without reload
+  try {
+    const r = await fetch(`${API_BASE}/posts/${postId}/like`, { method: 'POST' });
+    const d = await r.json();
+    const countEl = btn.querySelector('.lc');
+    if (countEl) countEl.textContent = d.likes ?? 0;
+    btn.classList.toggle('liked', !!d.liked);
+  } catch (e) {}
 }
 
 function logout() {
@@ -385,6 +664,13 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function showEmpty(title, msg) {
+  document.getElementById('loading-state').innerHTML = `<div class="empty-state"><h3>${title}</h3><p>${msg}</p></div>`;
+}
+function showError(msg) {
+  document.getElementById('loading-state').innerHTML = `<div class="empty-state"><h3>Error 😞</h3><p>${escapeHtml(msg)}</p></div>`;
 }
 </script>
 </body>
