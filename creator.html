@@ -177,7 +177,7 @@ input:checked+.slider::before{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- NEW/EDIT POST -->
+  <!-- NEW/EDIT POST (UPDATED with Reel option) -->
   <div class="panel" id="panel-new">
     <div class="form-card">
       <div class="form-header"><h2 id="form-title">✍️ New Post</h2></div>
@@ -192,6 +192,7 @@ input:checked+.slider::before{transform:translateX(20px)}
               <option value="audio">🎵 Audio Recording</option>
               <option value="photo_essay">📷 Photo Essay</option>
               <option value="video">🎬 Video</option>
+              <option value="reel">📱 Short Reel (vertical)</option> <!-- NEW -->
             </select>
           </div>
           <div class="field">
@@ -268,7 +269,7 @@ input:checked+.slider::before{transform:translateX(20px)}
           </div>
         </div>
 
-        <!-- VIDEO -->
+        <!-- VIDEO (shared for video & reel) -->
         <div class="field" id="field-video" style="display:none">
           <label>Video File</label>
           <div class="media-row">
@@ -388,12 +389,13 @@ async function loadRegions() {
   } catch(e) {}
 }
 
-// ── Form fields ───────────────────────────────────────────────────────────────
+// ── Form fields ── UPDATED to show video field for both video and reel
 function updateFormFields() {
   const t = document.getElementById('f-type').value;
   document.getElementById('field-content').style.display = t==='article'?'block':'none';
   document.getElementById('field-audio').style.display   = t==='audio'?'block':'none';
-  document.getElementById('field-video').style.display   = t==='video'?'block':'none';
+  // Show video field for both 'video' and 'reel'
+  document.getElementById('field-video').style.display   = (t==='video' || t==='reel') ? 'block' : 'none';
   document.getElementById('field-gallery').style.display = t==='photo_essay'?'block':'none';
 }
 updateFormFields();
@@ -502,7 +504,7 @@ async function savePost(status) {
     const au = document.getElementById('f-audio').value.trim();
     if (au && !content.includes('[audio]')) content = `[audio]${au}[/audio]\n\n${content}`.trim();
   }
-  if (type === 'video') {
+  if (type === 'video' || type === 'reel') {  // Reel uses same video field
     const vu = document.getElementById('f-video').value.trim();
     if (vu && !content.includes('[video]') && !vu.includes('youtube') && !vu.includes('vimeo')) {
       content = `[video]${vu}[/video]\n\n${content}`.trim();
