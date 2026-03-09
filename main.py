@@ -1010,7 +1010,48 @@ async def get_posts(
     except Exception as e:
         print(f"GET /api/posts error: {e}")
         return []
+@app.get("/api/reels")
 
+async def get_reels(
+    request: Request,
+    limit: int = 10,
+    offset: int = 0,
+    db: Session = Depends(get_db)
+):
+    """
+    Return a list of published reels (content_type='reel').
+    Ordered by newest first.
+    """
+    try:
+        q = db.query(models.Post).filter(
+            models.Post.status == "published",
+            models.Post.content_type == "reel"
+        ).order_by(models.Post.created_at.desc())
+        total = q.count()
+        reels = q.offset(offset).limit(limit).all()
+
+        return {
+            "total": total,
+            "offset": offset,
+            "limit": limit,
+            "reels": [
+                {
+                    "id": p.id,
+                    "title": p.title,
+                    "video_url": p.video_url or "",  # ensure video_url is stored
+                    "author_username": p.author_username,
+                    "author_avatar": "",  # you can fetch from user table if needed
+                    "likes": p.likes,
+                    "views": p.views,
+                    "created_at": p.created_at.isoformat()
+                }
+                for p in reels
+            ]
+        }
+    except Exception as e:
+        print(f"GET /api/reels error: {e}")
+        return {"total": 0, "reels": []}
+        
 @app.get("/api/feed")
 async def get_feed(request: Request, limit: int = 20, offset: int = 0,
                    db: Session = Depends(get_db)):
