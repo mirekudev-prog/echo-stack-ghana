@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>EchoStack — Post</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'DM Sans',sans-serif;background:#F0F2F5;color:#1e293b}
+        .container{max-width:720px;margin:0 auto;padding:20px 16px 40px}
+        .post-header{margin-bottom:24px}
+        .post-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#0D1B2A;margin-bottom:8px;line-height:1.2}
+        .post-meta{display:flex;align-items:center;gap:10px;color:#64748b;font-size:.85rem;margin-bottom:16px}
+        .post-cover{width:100%;border-radius:16px;margin-bottom:24px;max-height:400px;object-fit:cover}
+        .post-content{font-size:.95rem;line-height:1.8;color:#334155}
+        .post-content p{margin-bottom:1.2rem}
+        .post-content h2{font-family:'Playfair Display',serif;font-size:1.4rem;margin:2rem 0 .8rem}
+        .post-content h3{font-size:1.1rem;margin:1.5rem 0 .6rem;font-weight:700}
+        .post-content img{max-width:100%;border-radius:12px;margin:1rem 0}
+        .post-content video,.post-content audio{width:100%;border-radius:8px;margin:1rem 0}
+        .post-content blockquote{border-left:4px solid #C8962E;background:#f9f5eb;padding:.8rem 1.2rem;border-radius:0 8px 8px 0;font-style:italic;margin:1rem 0}
+        .post-content pre{background:#1e293b;color:#e2e8f0;padding:1rem;border-radius:10px;overflow-x:auto}
+        .post-content code{background:#e2e8f0;padding:2px 6px;border-radius:4px;font-size:.85rem}
+        .back-btn{display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;color:#C8962E;text-decoration:none;font-weight:600}
+        .loading{text-align:center;padding:40px;color:#94a3b8}
+        .error{text-align:center;padding:40px;color:#dc2626}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="container" id="app">
+        <a href="javascript:history.back()" class="back-btn">← Back</a>
+        <div v-if="loading" class="loading">Loading post…</div>
+        <div v-if="error" class="error">{{ error }}</div>
+        <template v-if="post">
+            <div class="post-header">
+                <h1 class="post-title">{{ post.title }}</h1>
+                <div class="post-meta">
+                    <span>By {{ post.author_username || 'Creator' }}</span>
+                    <span>•</span>
+                    <span>{{ formatDate(post.created_at) }}</span>
+                </div>
+            </div>
+            <img v-if="post.cover_image" :src="post.cover_image" class="post-cover" alt="">
+            <div class="post-content" v-html="renderedContent"></div>
+        </template>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                post: null,
+                loading: true,
+                error: null
+            },
+            computed: {
+                renderedContent() {
+                    if (!this.post || !this.post.content) return '';
+                    // Convert BBCode [video] and [audio] to HTML
+                    let html = this.post.content
+                        .replace(/\[video\](.*?)\[\/video\]/gi, '<video controls style="max-width:100%"><source src="$1"></video>')
+                        .replace(/\[audio\](.*?)\[\/audio\]/gi, '<audio controls style="max-width:100%"><source src="$1"></audio>');
+                    return marked.parse(html);
+                }
+            },
+            methods: {
+                formatDate(dateStr) {
+                    if (!dateStr) return '';
+                    const d = new Date(dateStr);
+                    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                }
+            },
+            async created() {
+                const postId = window.location.pathname.split('/').pop();
+                try {
+                    const res = await fetch(`/api/posts/${postId}`);
+                    if (!res.ok) throw new Error('Post not found');
+                    this.post = await res.json();
+                } catch (e) {
+                    this.error = e.message;
+                } finally {
+                    this.loading = false;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
