@@ -1040,26 +1040,27 @@ async def create_post(
     gallery:      str = Form(""),
     db: Session = Depends(get_db)
 ):
-    try:
-        sid      = request.cookies.get("user_session")
+            sid      = request.cookies.get("user_session")
         is_admin = _is_admin(request)
         author_id = None
         author_username = "Creator"
 
         if sid:
-            # Logged-in user – use their real ID
             try:
                 u = db.query(models.User).filter(models.User.id == sid).first()
                 if u:
                     author_id = u.id
                     author_username = u.username
+                else:
+                    # Cookie points to a deleted user – treat as anonymous
+                    author_id = None
+                    author_username = "Anonymous"
             except Exception:
                 pass
         elif is_admin:
-            # Admin without user session – set author_id to NULL (allowed) and username to "Admin"
             author_id = None
             author_username = "Admin"
-        # If neither, author_id remains None and author_username remains "Creator" (should not happen)
+        # if neither, author_id remains None and author_username remains "Creator"
 
         base = slugify(title); slug = base; n = 1
         while db.query(models.Post).filter(models.Post.slug == slug).first():
