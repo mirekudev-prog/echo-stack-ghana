@@ -1,8 +1,18 @@
-// EchoStack Service Worker — works for BOTH the public site AND admin dashboard
-const CACHE_NAME = 'echostack-v4';
+// EchoStack Service Worker — enhanced for performance and reliability
+const CACHE_NAME = 'echostack-v5';
+const STATIC_CACHE = 'echostack-static-v5';
+const OFFLINE_URL = '/offline.html';   // Create this simple page (see note below)
 
-// Pages to cache so both site and admin work offline/as PWA
-const STATIC_CACHE = [
+// Assets that rarely change – cache them aggressively
+const ASSETS_TO_CACHE = [
+    '/echostack-logo.png',
+    '/manifest.json',
+    '/sw.js',
+    // Add any other static assets (CSS, JS, fonts) if you have them
+];
+
+// Pages to cache on install – these will be available offline
+const PAGES_TO_CACHE = [
     '/',
     '/index.html',
     '/user-login',
@@ -10,29 +20,28 @@ const STATIC_CACHE = [
     '/app',
     '/dashboard',
     '/admin',
-    '/echostack-logo.png',
-    '/manifest.json'
 ];
 
-// Install: cache all static pages immediately
+// Install: cache all static assets and pages
 self.addEventListener('install', event => {
-    self.skipWaiting(); // don't wait — activate right away
+    self.skipWaiting();
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
-            return cache.addAll(STATIC_CACHE).catch(err => {
+        Promise.all([
+            caches.open(STATIC_CACHE).then(cache => cache.addAll(ASSETS_TO_CACHE)),
+            caches.open(CACHE_NAME).then(cache => cache.addAll(PAGES_TO_CACHE).catch(err => {
                 console.warn('SW: some pages failed to cache:', err);
-            });
-        })
+            }))
+        ])
     );
 });
 
-// Activate: delete old caches, take control immediately
+// Activate: delete old caches and take control immediately
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(keys =>
             Promise.all(
                 keys.map(key => {
-                    if (key !== CACHE_NAME) {
+                    if (key !== CACHE_NAME && key !== STATIC_CACHE) {
                         console.log('SW: deleting old cache:', key);
                         return caches.delete(key);
                     }
@@ -42,17 +51,23 @@ self.addEventListener('activate', event => {
     );
 });
 
-// Fetch strategy:
-// - API calls → always network (never cache — data must be fresh)
-// - Everything else → network first, cache as fallback
-self.addEventListener('fetch', event => {
-    var url = event.request.url;
+// Helper: determine if request is for a static asset (image, font, etc.)
+function isStaticAsset(url) {
+    const extensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico', '.css', '.js', '.woff', '.woff2', '.ttf'];
+    return extensions.some(ext => url.endsWith(ext));
+}
 
-    // Always go to network for API calls — never serve stale data
+// Fetch strategy
+self.addEventListener('fetch', event => {
+    const url = event.request.url;
+    const request = event.request;
+
+    // 1. API calls → always network (never cache)
     if (url.includes('/api/')) {
         event.respondWith(
-            fetch(event.request).catch(() => {
-                return new Response(JSON.stringify({ error: 'Offline' }), {
+            fetch(request).catch(() => {
+                return new Response(JSON.stringify({ error: 'You are offline. Please check your connection.' }), {
+                    status: 503,
                     headers: { 'Content-Type': 'application/json' }
                 });
             })
@@ -60,23 +75,38 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // For all pages (including /admin) — network first, cache fallback
+    // 2. Static assets (images, fonts, CSS, JS) → cache-first, network fallback
+    if (isStaticAsset(url)) {
+        event.respondWith(
+            caches.match(request).then(cached => {
+                if (cached) return cached;
+                return fetch(request).then(response => {
+                    if (response && response.status === 200) {
+                        const clone = response.clone();
+                        caches.open(STATIC_CACHE).then(cache => cache.put(request, clone));
+                    }
+                    return response;
+                });
+            })
+        );
+        return;
+    }
+
+    // 3. All other requests (pages, etc.) → network-first, cache fallback
     event.respondWith(
-        fetch(event.request)
+        fetch(request)
             .then(response => {
-                // Only cache successful GET responses
-                if (event.request.method === 'GET' && response.status === 200) {
-                    var clone = response.clone();
-                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                if (request.method === 'GET' && response.status === 200) {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
                 }
                 return response;
             })
             .catch(() => {
-                // Offline: serve from cache
-                return caches.match(event.request).then(cached => {
+                return caches.match(request).then(cached => {
                     if (cached) return cached;
-                    // If nothing cached, serve homepage as fallback
-                    return caches.match('/');
+                    // If all else fails, show offline page
+                    return caches.match(OFFLINE_URL);
                 });
             })
     );
