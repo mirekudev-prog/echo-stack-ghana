@@ -6,6 +6,8 @@ from sqlalchemy import text
 import os, uuid, re, json, httpx
 from datetime import datetime, timedelta
 import secrets
+import google.generativeai as genai
+import os
 
 # Password hashing
 from passlib.context import CryptContext
@@ -1786,7 +1788,8 @@ async def submit_story(
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
-# ─── AI ECHOBOT (updated with role‑based access) ─────────────────────
+
+# ─── AI ECHOBOT (Gemini 2.5 Flash) ──────────────────────────────
 @app.post("/api/ai/chat")
 async def ai_chat(
     request: Request, message: str = Form(...),
@@ -1795,46 +1798,40 @@ async def ai_chat(
     sid = request.cookies.get("user_session")
     is_admin = _is_admin(request)
 
+    # Check user role (premium/creator/admin get full access)
     if sid:
         try:
             u = db.query(models.User).filter(models.User.id == sid).first()
             if u:
-                # Allow if user is admin, superuser, creator, or premium
                 allowed_roles = ["admin", "superuser", "creator"]
                 if u.role in allowed_roles or getattr(u, "is_premium", 0):
-                    pass  # proceed to answer
+                    pass  # allowed
                 else:
                     return {"reply": "EchoBot is for premium members. Upgrade to unlock! ⭐", "locked": True}
         except Exception:
             pass
 
-    # If not logged in or user is allowed, try to answer
-    if not HF_TOKEN:
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    if not GOOGLE_API_KEY:
+        # Fallback if no API key
         return {
-            "reply": f"Akwaaba! You asked: '{message}'. Ghana has 16 beautiful regions "
-                     f"with rich heritage. Explore EchoStack to discover more! 🇬🇭",
+            "reply": f"Akwaaba! You asked: '{message}'. Ghana has 16 beautiful regions with rich heritage. 🇬🇭",
             "locked": False
         }
 
-    # Use the modern inference endpoint recommended by Hugging Face
-    inference_url = "https://router.huggingface.co/hf-inference/models/google/flan-t5-small"
-
     try:
-        prompt = (f"You are EchoBot, a Ghana heritage AI. "
-                  f"Context: {region_context}. User: {message}. "
-                  f"Answer helpfully about Ghana.")
-        async with httpx.AsyncClient(timeout=20) as c:
-            r = await c.post(
-                inference_url,
-                headers={"Authorization": f"Bearer {HF_TOKEN}"},
-                json={"inputs": prompt, "parameters": {"max_new_tokens": 200}}
-            )
-        d = r.json()
-        reply = d[0]["generated_text"] if isinstance(d, list) else str(d)
+        genai.configure(api_key=GOOGLE_API_KEY)
+        model = genai.GenerativeModel('gemini-2.5-flash')
+
+        prompt = f"You are EchoBot, a friendly Ghana heritage AI. Context: {region_context}. User question: {message}. Answer helpfully and concisely about Ghana's culture, history, or regions."
+
+        response = model.generate_content(prompt)
+        reply = response.text
+
         return {"reply": reply, "locked": False}
+
     except Exception as e:
         print(f"EchoBot error: {e}")
-        # Graceful fallback
         return {"reply": "EchoBot is resting. Try again soon! 🤖", "locked": False}
   
 
