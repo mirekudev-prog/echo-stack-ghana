@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Subscribers Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .chat-messages { height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 1rem; }
+        .message { margin-bottom: 0.5rem; }
+        .message .username { font-weight: bold; }
+        .message .time { font-size: 0.75rem; color: gray; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4 max-w-4xl">
+        <h1 class="text-2xl font-bold mb-4">Creator Subscribers Chat</h1>
+        
+        <!-- Creator selector (list of followed creators) -->
+        <div class="mb-4">
+            <label for="creator" class="block text-sm font-medium text-gray-700">Select a creator</label>
+            <select id="creator" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                <option value="">-- Choose a creator --</option>
+            </select>
+        </div>
+
+        <!-- Chat area (hidden until creator selected) -->
+        <div id="chat-area" class="hidden">
+            <div class="bg-white p-4 rounded shadow">
+                <h2 id="current-creator" class="text-xl font-semibold mb-2"></h2>
+                <div id="messages" class="chat-messages bg-gray-50 rounded"></div>
+                
+                <!-- Message input form -->
+                <form id="message-form" class="mt-4 flex">
+                    <input type="text" id="message-input" placeholder="Type your message..." 
+                           class="flex-1 border rounded-l px-3 py-2 focus:outline-none">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700">
+                        Send
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper: get cookie
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        // Global variables
+        let currentCreatorId = null;
+        let pollingInterval = null;
+
+        // Check login status
+        const userSession = getCookie('user_session');
+        if (!userSession) {
+            alert('Please log in first.');
+            window.location.href = '/user-login';
+        }
+
+        // Fetch creators the current user follows
+        async function loadFollowedCreators() {
+            try {
+                const response = await fetch('/api/following');  // returns list of user IDs you follow
+                const following = await response.json();  // e.g., ["uuid1", "uuid2"]
+                const select = document.getElementById('creator');
+                // For each followed ID, fetch user info to get username
+                for (const uid of following) {
+                    const userRes = await fetch(`/api/users/${uid}`); // you need an endpoint to get user by ID
+                    if (userRes.ok) {
+                        const user = await userRes.json();
+                        const option = document.createElement('option');
+                        option.value = uid;
+                        option.textContent = user.username;
+                        select.appendChild(option);
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load followed creators:', e);
+            }
+        }
+
+        // Fetch user by ID (you may need to implement /api/users/{id} endpoint)
+        // If you don't have it, you can use the existing /api/creators list and filter.
+        // For simplicity, let's assume you add a public endpoint to get a user's basic info.
+        // You can create a quick endpoint: GET /api/users/{id} -> {id, username, avatar_url}
+
+        // Load messages for a creator
+        async function loadMessages(creatorId) {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '<p class="text-gray-500">Loading messages...</p>';
+            try {
+                const response = await fetch(`/api/creator-chat/${creatorId}`);
+                if (!response.ok) {
+                    const err = await response.json();
+                    messagesDiv.innerHTML = `<p class="text-red-500">Error: ${err.detail}</p>`;
+                    return;
+                }
+                const messages = await response.json();
+                renderMessages(messages);
+            } catch (e) {
+                messagesDiv.innerHTML = '<p class="text-red-500">Failed to load messages.</p>';
+            }
+        }
+
+        function renderMessages(messages) {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+            if (messages.length === 0) {
+                messagesDiv.innerHTML = '<p class="text-gray-500">No messages yet. Start the conversation!</p>';
+                return;
+            }
+            messages.forEach(msg => {
+                const msgEl = document.createElement('div');
+                msgEl.className = 'message';
+                msgEl.innerHTML = `
+                    <span class="username">${escapeHtml(msg.username)}</span>
+                    <span class="time">${new Date(msg.created_at).toLocaleTimeString()}</span>
+                    <div class="text-gray-800">${escapeHtml(msg.content)}</div>
+                `;
+                messagesDiv.appendChild(msgEl);
+            });
+            // Auto-scroll to bottom
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Simple escape to prevent XSS
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/[&<>"']/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                if (m === '"') return '&quot;';
+                return '&#039;';
+            });
+        }
+
+        // Send a new message
+        document.getElementById('message-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('message-input');
+            const content = input.value.trim();
+            if (!content || !currentCreatorId) return;
+
+            const formData = new FormData();
+            formData.append('content', content);
+
+            try {
+                const response = await fetch(`/api/creator-chat/${currentCreatorId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (response.ok) {
+                    input.value = '';
+                    // Immediately refresh messages to show the new one
+                    await loadMessages(currentCreatorId);
+                } else {
+                    const err = await response.json();
+                    alert(`Error: ${err.detail || 'Could not send message'}`);
+                }
+            } catch (e) {
+                alert('Network error');
+            }
+        });
+
+        // Handle creator selection change
+        document.getElementById('creator').addEventListener('change', async (e) => {
+            const creatorId = e.target.value;
+            if (!creatorId) {
+                document.getElementById('chat-area').classList.add('hidden');
+                if (pollingInterval) clearInterval(pollingInterval);
+                return;
+            }
+            currentCreatorId = creatorId;
+            // Get creator username (maybe from selected option text)
+            const creatorName = e.target.options[e.target.selectedIndex].text;
+            document.getElementById('current-creator').textContent = `Chat with ${creatorName}`;
+            document.getElementById('chat-area').classList.remove('hidden');
+
+            // Load messages immediately
+            await loadMessages(creatorId);
+
+            // Start polling every 5 seconds
+            if (pollingInterval) clearInterval(pollingInterval);
+            pollingInterval = setInterval(() => loadMessages(creatorId), 5000);
+        });
+
+        // Initial load
+        loadFollowedCreators();
+    </script>
+</body>
+</html>
