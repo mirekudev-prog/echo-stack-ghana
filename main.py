@@ -486,14 +486,14 @@ async def user_settings_page(request: Request):
 async def post_page(pid: int, request: Request):
     # Posts are publicly viewable (locked content is handled client-side)
     return _serve("post.html")
-    
+
 @app.get("/logout")
 async def logout_redirect():
     """Clear user session and redirect to home."""
     r = RedirectResponse(url="/")
     r.delete_cookie("user_session", path="/")
     return r
-    
+
 # ─── MANIFEST / SERVICE WORKER / ASSETS ──────────────────────────────────────
 @app.get("/manifest.json")
 def manifest():
@@ -1022,6 +1022,7 @@ async def get_feed(request: Request, limit: int = 20, offset: int = 0,
         print(f"GET /api/feed error: {e}")
         return []
 
+# ─── POST CREATION (FIXED FOR ADMIN) ──────────────────────────────────────────
 @app.post("/api/posts")
 async def create_post(
     request: Request,
@@ -1046,6 +1047,7 @@ async def create_post(
         author_username = "Creator"
 
         if sid:
+            # Logged-in user – use their real ID
             try:
                 u = db.query(models.User).filter(models.User.id == sid).first()
                 if u:
@@ -1053,8 +1055,11 @@ async def create_post(
                     author_username = u.username
             except Exception:
                 pass
-        if not author_id and is_admin:
+        elif is_admin:
+            # Admin without user session – set author_id to NULL (allowed) and username to "Admin"
+            author_id = None
             author_username = "Admin"
+        # If neither, author_id remains None and author_username remains "Creator" (should not happen)
 
         base = slugify(title); slug = base; n = 1
         while db.query(models.Post).filter(models.Post.slug == slug).first():
