@@ -473,6 +473,14 @@ async def subscriptions_page(request: Request):
         return _serve("subscriptions.html")
     return RedirectResponse("/user-login")
 
+# ===== NEW SUBSCRIBERS ROUTE ADDED HERE =====
+@app.get("/subscribers")
+async def subscribers_page(request: Request):
+    if _is_admin(request) or request.cookies.get("user_session"):
+        return _serve("subscribers.html")
+    return RedirectResponse("/user-login")
+# ============================================
+
 @app.get("/user")
 async def user_page(request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
