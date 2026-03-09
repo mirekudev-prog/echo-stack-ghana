@@ -170,7 +170,15 @@ class ChatMessage(Base):
     content    = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-
+class CreatorChatMessage(Base):
+    __tablename__ = "creator_chat_messages"
+    id = Column(Integer, primary_key=True, index=True)
+    creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    username = Column(String(200), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
 # ─── STORY SUBMISSION ─────────────────────────────────────────────────────────
 class StorySubmission(Base):
     __tablename__ = "story_submissions"
