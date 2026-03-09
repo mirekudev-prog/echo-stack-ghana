@@ -1,55 +1,296 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 <meta name="theme-color" content="#0D1B2A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Following — EchoStack</title>
 <link rel="icon" type="image/png" href="/echostack-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#1a1e29;--blue:#0077b6;--gold:#C8962E;--cream:#f5f5f5;}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;}
-.sidebar{width:240px;background:var(--ink);color:white;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;padding:20px;}
-.main{margin-left:240px;padding:40px;max-width:800px;}
-.page-title{font-size:1.6rem;font-weight:700;margin-bottom:16px;color:var(--ink);}
-.card{background:white;border-radius:10px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
-.user-info{display:flex;align-items:center;gap:12px;}
-.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E8B84B);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--ink);font-size:1rem;}
-.name{font-weight:600;}
-.meta{font-size:0.8rem;color:#666;}
-.btn{padding:6px 14px;background:var(--blue);color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;}
-.empty{text-align:center;padding:60px;color:#888;}
-.loading{display:inline-block;width:20px;height:20px;border:2px solid #ccc;border-top:2px solid var(--gold);border-radius:50%;animation:spin 1s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
+:root {
+  --ink: #1a1e29;
+  --blue: #0077b6;
+  --gold: #C8962E;
+  --cream: #f5f5f5;
+  --sidebar-width: 260px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top bar */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+.menu-btn {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--ink);
+  transition: background 0.2s;
+}
+.menu-btn:active { background: rgba(0,0,0,0.05); }
+.page-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  flex: 1;
+}
+.top-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Sidebar overlay */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  backdrop-filter: blur(2px);
+  display: none;
+}
+.sidebar-overlay.show { display: block; }
+
+/* Sidebar (off‑canvas) */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -260px;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--ink);
+  color: white;
+  padding: 24px 16px;
+  overflow-y: auto;
+  z-index: 201;
+  transition: left 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar.open { left: 0; }
+.sidebar-logo {
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.sidebar a {
+  display: block;
+  padding: 14px 16px;
+  color: #aaa;
+  text-decoration: none;
+  border-radius: 10px;
+  margin: 2px 0;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+  font-size: 1rem;
+}
+.sidebar a:active { background: rgba(255,255,255,0.1); }
+.sidebar a.active {
+  background: rgba(200,150,46,0.15);
+  color: var(--gold);
+  font-weight: 600;
+}
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  font-size: 0.85rem;
+  color: #666;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Main content */
+.main {
+  flex: 1;
+  padding: 24px 16px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  transition: transform 0.1s;
+}
+.card:active { transform: scale(0.99); }
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), #E8B84B);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.user-details {
+  flex: 1;
+}
+.name {
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+.meta {
+  font-size: 0.9rem;
+  color: #666;
+}
+.unfollow-btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 14px;
+  background: rgba(0,119,182,0.1);
+  color: var(--blue);
+  border: 1px solid rgba(0,119,182,0.3);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.unfollow-btn:active {
+  background: rgba(0,119,182,0.2);
+}
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #888;
+}
+.empty-state .icon {
+  font-size: 3.5rem;
+  margin-bottom: 16px;
+}
+.empty-state h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.empty-state p {
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+.btn {
+  display: inline-block;
+  padding: 14px 28px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  min-width: 44px;
+  min-height: 44px;
+  line-height: 1;
+}
+.btn:active { background: #005f8c; }
+.loading {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid #ddd;
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
-<div class="sidebar">
-  <div style="margin-bottom:24px;"><strong>EchoStack</strong></div>
-  <a href="/app" style="display:block;padding:10px;color:#aaa;text-decoration:none;">🏠 Home</a>
-  <a href="/explore" style="display:block;padding:10px;color:#aaa;text-decoration:none;">🔍 Explore</a>
-  <a href="/chat" style="display:block;padding:10px;color:#aaa;text-decoration:none;">💬 Chat</a>
-  <a href="/dashboard" style="display:block;padding:10px;color:#aaa;text-decoration:none;">📊 Dashboard</a>
-  <a href="/subscriptions" style="display:block;padding:10px;color:#aaa;text-decoration:none;">🔔 Subscriptions</a>
-  <a href="/following" style="display:block;padding:10px;color:white;font-weight:600;">👥 Following</a>
-  <a href="/activity" style="display:block;padding:10px;color:#aaa;text-decoration:none;">📈 Activity</a>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  <div class="page-title">Following</div>
+  <div class="top-actions">
+    <button class="menu-btn" onclick="location.reload()">↻</button>
+  </div>
 </div>
 
-<div class="main">
-  <h1 class="page-title">Following</h1>
-  <p style="color:#666;margin-bottom:24px;">Creators and heritage keepers you follow on EchoStack.</p>
+<!-- Sidebar Overlay (closes sidebar when tapped) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-  <div id="following-container" class="empty">
+<!-- Sidebar (off‑canvas) -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">EchoStack</div>
+  <a href="/app">🏠 Home</a>
+  <a href="/explore">🔍 Explore</a>
+  <a href="/chat">💬 Chat</a>
+  <a href="/dashboard">📊 Dashboard</a>
+  <a href="/subscriptions">🔔 Subscriptions</a>
+  <a href="/following" class="active">👥 Following</a>
+  <a href="/activity">📈 Activity</a>
+  <div class="sidebar-footer">
+    <div style="padding:8px 16px;">© EchoStack Ghana</div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main" id="main">
+  <div id="following-container" class="empty-state">
     <div class="loading"></div>
     <p>Loading your following list...</p>
   </div>
 </div>
 
 <script>
+// Sidebar toggle functions
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
+// Close sidebar when clicking a link (on mobile)
+document.querySelectorAll('.sidebar a').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 768) closeSidebar();
+  });
+});
+
+// Following list logic
 document.addEventListener('DOMContentLoaded', async () => {
   const user = localStorage.getItem('es_user');
   if (!user) {
@@ -65,11 +306,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('following-container');
     if (!data || data.length === 0) {
       container.innerHTML = `
-        <div class="empty">
-          <div style="font-size:2.5rem;color:#ccc;">🔍</div>
+        <div class="empty-state">
+          <div class="icon">🔍</div>
           <h3>You're not following anyone yet</h3>
           <p>Discover Ghana heritage creators and follow them to stay updated.</p>
-          <a href="/explore" class="btn" style="margin-top:12px;">Find Creators</a>
+          <a href="/explore" class="btn">Find Creators</a>
         </div>`;
       return;
     }
@@ -77,15 +318,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     let html = '';
     data.forEach(u => {
       html += `
-        <div class="card">
+        <div class="card" data-id="${u.id}">
           <div class="user-info">
             <div class="avatar">${u.username?.charAt(0)?.toUpperCase() || '?'}</div>
-            <div>
+            <div class="user-details">
               <div class="name">@${u.username}</div>
-              <div class="meta">${u.role} • ${u.post_count || 0} posts</div>
+              <div class="meta">${u.role || 'creator'} • ${u.post_count || 0} posts</div>
             </div>
           </div>
-          <button onclick="toggleFollow('${u.id}')" class="btn" style="margin-top:12px;">
+          <button onclick="toggleFollow('${u.id}')" class="unfollow-btn">
             Unfollow
           </button>
         </div>
@@ -96,8 +337,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     console.error('Following load error:', err);
     document.getElementById('following-container').innerHTML = `
-      <div class="empty">
-        <div style="font-size:2.5rem;color:#f87171;">⚠️</div>
+      <div class="empty-state">
+        <div class="icon" style="color:#f87171;">⚠️</div>
         <h3>Couldn't load following list</h3>
         <p>${err.message}</p>
         <button onclick="location.reload()" class="btn">Retry</button>
@@ -109,9 +350,12 @@ async function toggleFollow(id) {
   try {
     const res = await fetch(`/api/follow/${id}`, { method: 'POST' });
     const data = await res.json();
-    if (data.success && data.action === 'unfollowed') {
+    // Assuming the endpoint returns { following: false } when unfollowed
+    if (data.following === false) {
       alert('You unfollowed this creator.');
       location.reload();
+    } else {
+      alert('Something went wrong.');
     }
   } catch (e) {
     alert('Error: ' + e.message);
