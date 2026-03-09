@@ -1779,21 +1779,29 @@ async def submit_story(
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
-# ─── AI ECHOBOT (updated with future‑proof endpoint) ─────────────────────
+# ─── AI ECHOBOT (updated with role‑based access) ─────────────────────
 @app.post("/api/ai/chat")
 async def ai_chat(
     request: Request, message: str = Form(...),
     region_context: str = Form(""), db: Session = Depends(get_db)
 ):
     sid = request.cookies.get("user_session")
-    if sid and not _is_admin(request):
+    is_admin = _is_admin(request)
+
+    if sid:
         try:
             u = db.query(models.User).filter(models.User.id == sid).first()
-            if u and not getattr(u, "is_premium", 0):
-                return {"reply": "EchoBot is for premium members. Upgrade to unlock! ⭐", "locked": True}
+            if u:
+                # Allow if user is admin, superuser, creator, or premium
+                allowed_roles = ["admin", "superuser", "creator"]
+                if u.role in allowed_roles or getattr(u, "is_premium", 0):
+                    pass  # proceed to answer
+                else:
+                    return {"reply": "EchoBot is for premium members. Upgrade to unlock! ⭐", "locked": True}
         except Exception:
             pass
 
+    # If not logged in or user is allowed, try to answer
     if not HF_TOKEN:
         return {
             "reply": f"Akwaaba! You asked: '{message}'. Ghana has 16 beautiful regions "
@@ -1803,8 +1811,6 @@ async def ai_chat(
 
     # Use the modern inference endpoint recommended by Hugging Face
     inference_url = "https://router.huggingface.co/hf-inference/models/google/flan-t5-small"
-    # Fallback to classic endpoint (still works in many cases)
-    # inference_url = "https://api-inference.huggingface.co/models/google/flan-t5-small"
 
     try:
         prompt = (f"You are EchoBot, a Ghana heritage AI. "
