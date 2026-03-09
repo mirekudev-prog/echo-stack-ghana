@@ -1,4 +1,3 @@
-<!-- Replace your entire admin_dashboard.html with this -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -204,6 +203,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .fa-view:hover{background:rgba(200,150,46,.2);}
 .fa-del{background:rgba(239,68,68,.1);color:#b91c1c;}
 .fa-del:hover{background:rgba(239,68,68,.2);}
+/* NEW publish button style */
+.fa-publish{background:rgba(34,197,94,.1);color:#15803d;}
+.fa-publish:hover{background:rgba(34,197,94,.2);}
 .no-files{
   grid-column:1/-1;text-align:center;padding:48px 24px;color:var(--main-muted);
   background:white;border-radius:12px;border:1px dashed var(--main-border);
@@ -410,7 +412,7 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
       </div>
     </div>
 
-    <!-- ── FILE MANAGER ── -->
+    <!-- ── FILE MANAGER (with new Publish button) ── -->
     <div class="panel" id="panel-files">
 
       <!-- Upload Zone -->
@@ -832,6 +834,7 @@ function renderFiles(files) {
       </div>
       <div class="file-actions">
         <button class="fa-btn fa-view" onclick="openMedia(${JSON.stringify({url,name,mime,cat}).replace(/"/g,'&quot;')})">👁 View</button>
+        <button class="fa-btn fa-publish" onclick="publishFile(${f.id}, '${f.original_name || f.filename}', '${f.category}')">📰 Publish</button>
         <button class="fa-btn fa-del" onclick="deleteFile(${f.id})">🗑 Delete</button>
       </div>
     </div>`;
@@ -936,6 +939,44 @@ async function deleteFile(id) {
       loadFiles();
     } else throw new Error('Delete failed');
   } catch(e) { toast('❌ Delete failed', 'er'); }
+}
+
+// NEW: Publish a file as a post
+async function publishFile(fileId, fileName, category) {
+  // Determine content type based on category
+  let contentType = 'article';
+  if (category === 'video') contentType = 'video';
+  else if (category === 'audio') contentType = 'audio';
+  // For image or general, we keep article (cover image will be used)
+
+  const title = prompt('Enter a title for the post:', fileName || 'Untitled');
+  if (title === null) return; // cancelled
+
+  const description = prompt('Enter a short description (optional):', '');
+  // user can cancel, but we'll proceed with empty description
+
+  const fd = new FormData();
+  fd.append('file_id', fileId);
+  fd.append('title', title.trim() || 'Untitled');
+  fd.append('description', (description || '').trim());
+  fd.append('content_type', contentType);
+
+  try {
+    const res = await fetch('/api/admin/publish-file', {
+      method: 'POST',
+      body: fd
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      toast('✅ Post published!', 'ok');
+      // Optionally refresh file list or switch to posts panel
+      setTimeout(() => show('posts'), 1000);
+    } else {
+      toast('❌ ' + (data.detail || 'Publish failed'), 'er');
+    }
+  } catch (err) {
+    toast('❌ ' + err.message, 'er');
+  }
 }
 
 // ── MEDIA VIEWER ───────────────────────────────────────────────────────────
@@ -1122,7 +1163,7 @@ async function uploadAudio(files) {
   }
 }
 
-// ── NEW UPLOAD FUNCTION FOR WRITE POST COVER IMAGE ─────────────────────────
+// ── UPLOAD FUNCTION FOR WRITE POST COVER IMAGE ─────────────────────────
 async function uploadCover(file) {
   if (!file) return;
   try {
@@ -1354,7 +1395,7 @@ async function loadChat() {
   } catch(e) {}
 }
 
-// ── WRITE POST (with validation and error handling) ───────────────────────
+// ── WRITE POST (with validation) ─────────────────────────────────────────────
 async function savePost() {
   // Validate required fields
   const title = document.getElementById('wp-title').value.trim();
