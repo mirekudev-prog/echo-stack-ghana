@@ -20,18 +20,38 @@ const PAGES_TO_CACHE = [
     '/app',
     '/dashboard',
     '/admin',
+    OFFLINE_URL, // ensure offline page is cached
 ];
 
-// Install: cache all static assets and pages
+// Install: cache all static assets and pages individually,
+// so that one failure doesn't break the whole installation
 self.addEventListener('install', event => {
     self.skipWaiting();
     event.waitUntil(
         Promise.all([
-            caches.open(STATIC_CACHE).then(cache => cache.addAll(ASSETS_TO_CACHE)),
-            caches.open(CACHE_NAME).then(cache => cache.addAll(PAGES_TO_CACHE).catch(err => {
-                console.warn('SW: some pages failed to cache:', err);
-            }))
-        ])
+            // Static assets cache: try to cache each asset individually
+            caches.open(STATIC_CACHE).then(cache => 
+                Promise.allSettled(
+                    ASSETS_TO_CACHE.map(url =>
+                        cache.add(url).catch(err => {
+                            console.warn(`SW: failed to cache static asset ${url}:`, err);
+                        })
+                    )
+                )
+            ),
+            // Pages cache: try to cache each page individually
+            caches.open(CACHE_NAME).then(cache => 
+                Promise.allSettled(
+                    PAGES_TO_CACHE.map(url =>
+                        cache.add(url).catch(err => {
+                            console.warn(`SW: failed to cache page ${url}:`, err);
+                        })
+                    )
+                )
+            )
+        ]).then(() => {
+            console.log('SW: installation completed (some items may not be cached)');
+        })
     );
 });
 
