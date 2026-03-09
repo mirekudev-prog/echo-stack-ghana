@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text, or_
-import os, uuid, re, json, httpx
+import os, uuid, re, json, httpx, random
 from datetime import datetime, timedelta
 import secrets
 import google.genai as genai
@@ -81,6 +81,8 @@ CREATE TABLE IF NOT EXISTS users (
     verification_token_expires TIMESTAMP,
     reset_token VARCHAR(255),
     reset_token_expires TIMESTAMP,
+    reset_code VARCHAR(6),
+    reset_code_expires TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -252,6 +254,9 @@ def _run_migrations():
         ("users","verification_token_expires","TIMESTAMP"),
         ("users","reset_token","VARCHAR(255)"),
         ("users","reset_token_expires","TIMESTAMP"),
+        # NEW columns for 6‑digit reset code
+        ("users","reset_code","VARCHAR(6)"),
+        ("users","reset_code_expires","TIMESTAMP"),
         ("posts","audio_url","VARCHAR(500) DEFAULT ''"),
         ("posts","video_url","VARCHAR(500) DEFAULT ''"),
         ("posts","gallery","TEXT DEFAULT ''"),
@@ -819,6 +824,71 @@ async def reset_password(
         raise
     except Exception as e:
         raise HTTPException(500, str(e))
+
+# ==================== NEW 6‑DIGIT CODE RESET ENDPOINTS ====================
+@app.post("/api/users/request-reset-code")
+async def request_reset_code(
+    username_or_email: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Generate a 6-digit numeric code and store it with a 10-minute expiry.
+    Returns the code in the response (for demo purposes – in production you'd send it via email).
+    """
+    # Find user by username or email
+    user = db.query(models.User).filter(
+        (models.User.username == username_or_email) |
+        (models.User.email == username_or_email)
+    ).first()
+    if not user:
+        # Return success anyway to avoid user enumeration
+        return {"success": True, "message": "If that account exists, a reset code has been generated."}
+
+    # Generate a 6-digit code
+    code = f"{random.randint(0, 999999):06d}"
+    user.reset_code = code
+    user.reset_code_expires = datetime.utcnow() + timedelta(minutes=10)
+    db.commit()
+
+    # ⚠️ Insecure: return the code directly for demo purposes
+    return {
+        "success": True,
+        "message": "Reset code generated (for demo: check response)",
+        "reset_code": code  # remove this in production
+    }
+
+@app.post("/api/users/verify-reset-code")
+async def verify_reset_code(
+    username_or_email: str = Form(...),
+    code: str = Form(...),
+    new_password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Verify the 6-digit code and set a new password.
+    """
+    if len(new_password) < 6:
+        raise HTTPException(400, "Password must be at least 6 characters")
+
+    user = db.query(models.User).filter(
+        (models.User.username == username_or_email) |
+        (models.User.email == username_or_email)
+    ).first()
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    if user.reset_code != code or user.reset_code_expires < datetime.utcnow():
+        raise HTTPException(400, "Invalid or expired code")
+
+    # Set new password
+    user.hashed_password = get_password_hash(new_password)
+    user.reset_code = None
+    user.reset_code_expires = None
+    db.commit()
+
+    return {"success": True, "message": "Password reset successfully. You can now log in."}
+
+# ==================== END OF NEW ENDPOINTS ====================
 
 @app.post("/api/users/logout")
 def user_logout():
@@ -1956,7 +2026,8 @@ def search_database(query: str, db: Session) -> str:
         return "Relevant information from our archive:\n" + "\n".join(context_parts)
     return ""
 
-# ─── AI ECHOBOT (Gemini 2.5 Flash) with Database Context ──────────────────@app.post("/api/ai/chat")
+# ─── AI ECHOBOT (Gemini 2.5 Flash) with Database Context ──────────────────
+@app.post("/api/ai/chat")
 async def ai_chat(
     request: Request, message: str = Form(...),
     region_context: str = Form(""), db: Session = Depends(get_db)
@@ -2016,7 +2087,7 @@ User question: {message}"""
     except Exception as e:
         print(f"EchoBot error: {e}")
         return {"reply": "EchoBot is resting. Try again soon! 🤖", "locked": False}
-        
+
 # ─── PAYMENTS ────────────────────────────────────────────────────────────────
 @app.post("/api/payments/initialize")
 async def init_payment(
