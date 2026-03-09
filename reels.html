@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Reels - EchoStack</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: black;
+      font-family: 'DM Sans', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: pan-y; /* vertical scroll only */
+    }
+    #reels-container {
+      height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .reel {
+      height: 100vh;
+      width: 100%;
+      scroll-snap-align: start;
+      position: relative;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+    .reel-info {
+      position: relative;
+      z-index: 10;
+      padding: 20px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .reel-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #C8962E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    .reel-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-right: 10px;
+    }
+    .action-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.8rem;
+      cursor: pointer;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+      min-width: 44px;
+      min-height: 44px;
+    }
+    .action-count {
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: -8px;
+    }
+    .loading, .error {
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #888;
+      border-top-color: #C8962E;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="reels-container"></div>
+  <script>
+    let reels = [];
+    let currentIndex = 0;
+    let isLoading = false;
+    let hasMore = true;
+    const container = document.getElementById('reels-container');
+
+    // Load initial reels
+    loadReels();
+
+    async function loadReels(offset = 0) {
+      if (isLoading || !hasMore) return;
+      isLoading = true;
+      showLoader();
+
+      try {
+        const res = await fetch(`/api/reels?limit=5&offset=${offset}`);
+        const data = await res.json();
+        if (data.reels && data.reels.length) {
+          reels = reels.concat(data.reels);
+          renderReels(data.reels, offset === 0);
+          if (data.reels.length < 5) hasMore = false;
+        } else {
+          hasMore = false;
+          if (offset === 0) container.innerHTML = '<div class="error">No reels yet</div>';
+        }
+      } catch (e) {
+        container.innerHTML = '<div class="error">Failed to load reels</div>';
+      } finally {
+        isLoading = false;
+        removeLoader();
+      }
+    }
+
+    function renderReels(newReels, clear = false) {
+      if (clear) container.innerHTML = '';
+      newReels.forEach((reel, i) => {
+        const reelDiv = document.createElement('div');
+        reelDiv.className = 'reel';
+        reelDiv.dataset.id = reel.id;
+        reelDiv.dataset.index = reels.length - newReels.length + i;
+        reelDiv.innerHTML = `
+          <video src="${reel.video_url}" loop playsinline muted preload="metadata"></video>
+          <div class="reel-info">
+            <div class="reel-user">
+              <div class="avatar">${reel.author_username?.charAt(0) || 'U'}</div>
+              <div>
+                <strong>@${reel.author_username}</strong>
+                <div style="font-size:0.8rem; margin-top:4px;">${reel.title || ''}</div>
+              </div>
+            </div>
+            <div class="reel-actions">
+              <button class="action-btn" onclick="likeReel('${reel.id}')">❤️</button>
+              <span class="action-count">${reel.likes || 0}</span>
+              <button class="action-btn" onclick="commentReel('${reel.id}')">💬</button>
+              <button class="action-btn" onclick="shareReel('${reel.id}')">↗️</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(reelDiv);
+      });
+
+      // After rendering, attach intersection observer to play/pause
+      observeVideos();
+    }
+
+    // Intersection Observer to auto‑play when visible
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const video = entry.target.querySelector('video');
+        if (entry.isIntersecting) {
+          video.play().catch(e => {}); // autoplay may be blocked
+          video.muted = false; // unmute after user interaction
+        } else {
+          video.pause();
+        }
+      });
+    }, { threshold: 0.6 });
+
+    function observeVideos() {
+      document.querySelectorAll('.reel').forEach(reel => observer.observe(reel));
+    }
+
+    // Infinite scroll: load more when reaching the last reel
+    container.addEventListener('scroll', () => {
+      const scrollTop = container.scrollTop;
+      const scrollHeight = container.scrollHeight;
+      const clientHeight = container.clientHeight;
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        loadReels(reels.length);
+      }
+
+      // Update current index for potential preloading
+      const reelHeight = clientHeight;
+      currentIndex = Math.round(scrollTop / reelHeight);
+    });
+
+    // Helpers
+    function showLoader() {
+      if (!document.getElementById('loader') && hasMore) {
+        const loader = document.createElement('div');
+        loader.id = 'loader';
+        loader.className = 'reel';
+        loader.innerHTML = '<div class="spinner"></div>';
+        container.appendChild(loader);
+      }
+    }
+    function removeLoader() {
+      const loader = document.getElementById('loader');
+      if (loader) loader.remove();
+    }
+
+    // Action stubs (connect to your backend)
+    async function likeReel(id) {
+      // Call your like endpoint, e.g., POST /api/posts/{id}/like
+      const res = await fetch(`/api/posts/${id}/like`, { method: 'POST' });
+      if (res.ok) {
+        // update like count in UI
+        location.reload(); // quick hack – better to update dynamically
+      }
+    }
+    function commentReel(id) {
+      window.location.href = `/post/${id}`; // go to post detail with comments
+    }
+    function shareReel(id) {
+      navigator.share?.({ url: window.location.origin + `/post/${id}` }) ||
+      prompt('Copy link:', window.location.origin + `/post/${id}`);
+    }
+
+    // Ensure videos play when user taps (unmute after first interaction)
+    document.addEventListener('click', () => {
+      document.querySelectorAll('video').forEach(v => { v.muted = false; });
+    }, { once: true });
+  </script>
+</body>
+</html>
