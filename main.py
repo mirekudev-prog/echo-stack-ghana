@@ -2050,7 +2050,8 @@ def search_database(query: str, db: Session) -> str:
         return "Relevant information from our archive:\n" + "\n".join(context_parts)
     return ""
 
-# ─── AI ECHOBOT (Gemini 2.5 Flash) with Database Context ──────────────────
+# ─── AI ECHOBOT (Gemini 2.5 Flash) with Database Context ────────────────── =  ==
+        
 @app.post("/api/ai/chat")
 async def ai_chat(
     request: Request, message: str = Form(...),
@@ -2072,23 +2073,21 @@ async def ai_chat(
         except Exception:
             pass
 
-    # Search database for relevant content
     db_context = search_database(message, db)
 
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     if not GOOGLE_API_KEY:
-        # Fallback if no API key
         return {
             "reply": f"Akwaaba! You asked: '{message}'. Ghana has 16 beautiful regions with rich heritage. 🇬🇭",
             "locked": False
         }
 
     try:
-        # Create a client
-        client = genai.Client(api_key=GOOGLE_API_KEY)
+        # Force API version v1 – this avoids the v1beta model issue
+        client = genai.Client(api_key=GOOGLE_API_KEY, version="v1")
 
-        # Choose the model – update to a current model name if needed
-        model_name = "gemini-1.5-flash"  # or gemini-1.5-pro, etc.
+        # Use simple model name (no "models/" prefix)
+        model_name = "gemini-1.5-flash"   # or "gemini-1.5-pro"
 
         if db_context:
             prompt = f"""You are EchoBot, a friendly Ghana heritage AI. Use the following information from our database to answer the user's question if relevant. If the information doesn't help, rely on your own knowledge.
@@ -2099,17 +2098,17 @@ User question: {message}"""
         else:
             prompt = f"You are EchoBot, a friendly Ghana heritage AI. User question: {message}. Answer helpfully and concisely about Ghana's culture, history, or regions."
 
-        # Generate content
         response = client.models.generate_content(
             model=model_name,
             contents=prompt
         )
         reply = response.text
-
         return {"reply": reply, "locked": False}
 
     except Exception as e:
         print(f"EchoBot error: {e}")
+        import traceback
+        traceback.print_exc()
         return {"reply": "EchoBot is resting. Try again soon! 🤖", "locked": False}
 
 # ─── PAYMENTS ────────────────────────────────────────────────────────────────
