@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+from sqlalchemy import text, or_
 import os, uuid, re, json, httpx
 from datetime import datetime, timedelta
 import secrets
@@ -204,8 +204,8 @@ CREATE TABLE IF NOT EXISTS user_topics (
     topic_id INTEGER REFERENCES topics(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, topic_id)
 );
-"""
 
+-- ADDED: creator_chat_messages table (now inside the SQL string)
 CREATE TABLE IF NOT EXISTS creator_chat_messages (
     id SERIAL PRIMARY KEY,
     creator_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -214,6 +214,7 @@ CREATE TABLE IF NOT EXISTS creator_chat_messages (
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+"""
 
 try:
     Base.metadata.create_all(bind=engine)
@@ -1770,6 +1771,56 @@ async def post_chat(
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
+def is_following(follower_id: str, creator_id: str, db: Session) -> bool:
+    return db.query(models.Follow).filter(
+        models.Follow.follower_id == follower_id,
+        models.Follow.following_id == creator_id
+    ).first() is not None
+
+@app.get("/api/creator-chat/{creator_id}")
+async def get_creator_chat(
+    creator_id: str,
+    request: Request,
+    limit: int = 50,
+    db: Session = Depends(get_db)
+):
+    # Who is requesting?
+    sid = request.cookies.get("user_session")
+    if not sid and not _is_admin(request):
+        raise HTTPException(401, "Login required")
+
+    # Verify the creator exists
+    creator = db.query(models.User).filter(models.User.id == creator_id).first()
+    if not creator:
+        raise HTTPException(404, "Creator not found")
+
+    # Check permission: only the creator themself, an admin, or a follower can view
+    if sid:
+        if sid == creator_id or _is_admin(request) or is_following(sid, creator_id, db):
+            pass  # allowed
+        else:
+            raise HTTPException(403, "You must follow this creator to see their chat")
+    elif _is_admin(request):
+        pass  # admin without session is also allowed (if you want)
+    else:
+        raise HTTPException(403, "Not authorized")
+
+    # Fetch messages
+    messages = db.query(models.CreatorChatMessage).filter(
+        models.CreatorChatMessage.creator_id == creator_id
+    ).order_by(models.CreatorChatMessage.created_at.desc()).limit(limit).all()
+    # Return in chronological order
+    return [
+        {
+            "id": m.id,
+            "user_id": str(m.user_id) if m.user_id else None,
+            "username": m.username,
+            "content": m.content,
+            "created_at": m.created_at.isoformat()
+        }
+        for m in reversed(messages)
+    ]
+
 @app.post("/api/creator-chat/{creator_id}")
 async def post_creator_chat(
     creator_id: str,
@@ -1857,8 +1908,44 @@ async def submit_story(
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
+# ─── SEARCH FUNCTION FOR ECHOBOT ────────────────────────────────────────────
+def search_database(query: str, db: Session) -> str:
+    """Search posts and regions for keywords and return a context string."""
+    # simple keyword extraction: split and keep words longer than 3 characters
+    keywords = [word.lower() for word in query.split() if len(word) > 3]
+    if not keywords:
+        return ""
+    
+    # Build conditions for posts (title, content, excerpt)
+    from sqlalchemy import or_
+    post_conditions = []
+    for kw in keywords:
+        post_conditions.append(models.Post.title.ilike(f"%{kw}%"))
+        post_conditions.append(models.Post.content.ilike(f"%{kw}%"))
+        post_conditions.append(models.Post.excerpt.ilike(f"%{kw}%"))
+    posts = db.query(models.Post).filter(or_(*post_conditions)).limit(3).all()
+    
+    # Build conditions for regions (name, description, overview)
+    region_conditions = []
+    for kw in keywords:
+        region_conditions.append(models.Region.name.ilike(f"%{kw}%"))
+        region_conditions.append(models.Region.description.ilike(f"%{kw}%"))
+        region_conditions.append(models.Region.overview.ilike(f"%{kw}%"))
+    regions = db.query(models.Region).filter(or_(*region_conditions)).limit(3).all()
+    
+    context_parts = []
+    for p in posts:
+        snippet = (p.title + ": " + p.content)[:200] + "..."
+        context_parts.append(f"Post: {snippet}")
+    for r in regions:
+        snippet = (r.name + ": " + (r.description or r.overview or ""))[:200] + "..."
+        context_parts.append(f"Region: {snippet}")
+    
+    if context_parts:
+        return "Relevant information from our archive:\n" + "\n".join(context_parts)
+    return ""
 
-# ─── AI ECHOBOT (Gemini 2.5 Flash) ──────────────────────────────
+# ─── AI ECHOBOT (Gemini 2.5 Flash) with Database Context ──────────────────
 @app.post("/api/ai/chat")
 async def ai_chat(
     request: Request, message: str = Form(...),
@@ -1880,6 +1967,9 @@ async def ai_chat(
         except Exception:
             pass
 
+    # Search database for relevant content
+    db_context = search_database(message, db)
+    
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     if not GOOGLE_API_KEY:
         # Fallback if no API key
@@ -1892,7 +1982,14 @@ async def ai_chat(
         genai.configure(api_key=GOOGLE_API_KEY)
         model = genai.GenerativeModel('gemini-2.5-flash')
 
-        prompt = f"You are EchoBot, a friendly Ghana heritage AI. Context: {region_context}. User question: {message}. Answer helpfully and concisely about Ghana's culture, history, or regions."
+        if db_context:
+            prompt = f"""You are EchoBot, a friendly Ghana heritage AI. Use the following information from our database to answer the user's question if relevant. If the information doesn't help, rely on your own knowledge.
+
+{db_context}
+
+User question: {message}"""
+        else:
+            prompt = f"You are EchoBot, a friendly Ghana heritage AI. User question: {message}. Answer helpfully and concisely about Ghana's culture, history, or regions."
 
         response = model.generate_content(prompt)
         reply = response.text
