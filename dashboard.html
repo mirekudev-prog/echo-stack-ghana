@@ -83,7 +83,7 @@ nav.side-nav{flex:1;padding:12px 10px}
 .tab{padding:7px 16px;border-radius:24px;font-size:.8rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--muted);transition:all .15s;white-space:nowrap;font-family:'DM Sans',sans-serif}
 .tab.active,.tab:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
 
-/* ── POST CARD (fully responsive) ── */
+/* ── POST CARD (including reel) ── */
 .post-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;transition:box-shadow .2s}
 .post-card:hover{box-shadow:0 4px 24px rgba(13,27,42,.09)}
 
@@ -98,22 +98,54 @@ nav.side-nav{flex:1;padding:12px 10px}
 .pt-audio{background:#F0FDF4;color:#16A34A}
 .pt-photo_essay{background:#FFF7ED;color:#D97706}
 .pt-video{background:#FDF2F8;color:#9333EA}
+.pt-reel{background:#FCE7F3;color:#B21E6C}
 
 .post-title-link{display:block;padding:10px 16px 2px;text-decoration:none}
 .post-title-link h2{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink);line-height:1.4;transition:color .15s}
 .post-title-link:hover h2{color:var(--blue)}
 .post-excerpt{padding:0 16px 10px;font-size:.83rem;color:#64748B;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-/* MEDIA IN CARD */
+/* MEDIA IN CARD – includes reel watermark */
 .card-media{width:100%;background:#000;position:relative;overflow:hidden}
 .card-media img{width:100%;max-height:340px;object-fit:cover;display:block}
 .card-media video{width:100%;max-height:340px;display:block;background:#000}
+.card-media.reel video{max-height:480px;aspect-ratio:9/16;object-fit:cover;margin:0 auto}
+
+/* Watermark for reels */
+.reel-watermark {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.65);
+    border-radius: 20px;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 15;
+    pointer-events: none;
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255,255,255,0.15);
+}
+.reel-watermark img {
+    height: 18px;
+    width: auto;
+    display: block;
+}
+.reel-watermark span {
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 4px;
+    letter-spacing: 0.5px;
+}
+
 .card-audio{padding:12px 16px;background:linear-gradient(135deg,#0D1B2A,#1a2a3a)}
 .card-audio audio{width:100%;border-radius:8px}
 .card-audio-label{color:rgba(255,255,255,.7);font-size:.72rem;margin-bottom:8px;display:flex;align-items:center;gap:5px}
 .premium-banner{background:linear-gradient(135deg,var(--gold),#a97825);padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:#fff}
 
-/* POST ACTIONS – now wraps perfectly on mobile */
+/* POST ACTIONS – responsive */
 .post-actions{
   display:flex;
   flex-wrap:wrap;
@@ -281,6 +313,7 @@ nav.side-nav{flex:1;padding:12px 10px}
           <button class="tab active" onclick="filterFeed('all',this)">🌍 All</button>
           <button class="tab" onclick="filterFeed('article',this)">📝 Articles</button>
           <button class="tab" onclick="filterFeed('video',this)">🎬 Videos</button>
+          <button class="tab" onclick="filterFeed('reel',this)">📱 Reels</button>
           <button class="tab" onclick="filterFeed('audio',this)">🎵 Audio</button>
           <button class="tab" onclick="filterFeed('photo_essay',this)">📸 Photos</button>
         </div>
@@ -433,7 +466,27 @@ function buildPostCard(p) {
 
   // Media preview
   let mediaHtml = '';
-  if (ct === 'video') {
+  if (ct === 'reel') {
+    const match = (p.content || '').match(/\[video\](.*?)\[\/video\]/i);
+    const url = match ? match[1].trim() : (p.video_url || '');
+    if (url) {
+      mediaHtml = `<div class="card-media reel" style="position:relative">
+        <video preload="none" style="width:100%;display:block;background:#000;cursor:pointer"
+               onclick="goPost(${p.id})" poster="${p.cover_image||''}">
+          <source src="${url}" type="video/mp4">
+        </video>
+        <div onclick="goPost(${p.id})" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+             background:rgba(0,0,0,.55);border-radius:50%;width:52px;height:52px;cursor:pointer;
+             display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+             box-shadow:0 2px 12px rgba(0,0,0,.4);z-index:10">▶️</div>
+        <!-- WATERMARK for reel -->
+        <div class="reel-watermark">
+          <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+          <span>EchoStack</span>
+        </div>
+      </div>`;
+    }
+  } else if (ct === 'video') {
     const match = (p.content || '').match(/\[video\](.*?)\[\/video\]/i);
     const url = match ? match[1].trim() : (p.video_url || '');
     if (url) {
@@ -441,12 +494,11 @@ function buildPostCard(p) {
         <video preload="none" style="width:100%;max-height:300px;display:block;background:#000;cursor:pointer"
                onclick="goPost(${p.id})" poster="${p.cover_image||''}">
           <source src="${url}" type="video/mp4">
-          <source src="${url}">
         </video>
         <div onclick="goPost(${p.id})" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
              background:rgba(0,0,0,.55);border-radius:50%;width:52px;height:52px;cursor:pointer;
              display:flex;align-items:center;justify-content:center;font-size:1.4rem;
-             box-shadow:0 2px 12px rgba(0,0,0,.4)">▶️</div>
+             box-shadow:0 2px 12px rgba(0,0,0,.4);z-index:10">▶️</div>
       </div>`;
     }
   } else if (ct === 'audio') {
@@ -457,7 +509,6 @@ function buildPostCard(p) {
         <div class="card-audio-label">🎵 Audio Recording</div>
         <audio controls style="width:100%;border-radius:8px">
           <source src="${url}" type="audio/mpeg">
-          <source src="${url}">
         </audio>
       </div>`;
     }
