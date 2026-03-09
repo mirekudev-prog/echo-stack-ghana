@@ -474,13 +474,11 @@ async def subscriptions_page(request: Request):
         return _serve("subscriptions.html")
     return RedirectResponse("/user-login")
 
-# ===== NEW SUBSCRIBERS ROUTE ADDED HERE =====
 @app.get("/subscribers")
 async def subscribers_page(request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("subscribers.html")
     return RedirectResponse("/user-login")
-# ============================================
 
 @app.get("/user")
 async def user_page(request: Request):
@@ -494,13 +492,11 @@ async def user_profile_page(uname: str, request: Request):
         return _serve("user_profile.html")
     return RedirectResponse("/user-login")
 
-# ===== FIXED: Added missing /user-profile route =====
 @app.get("/user-profile")
 async def user_profile_redirect(request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("user_profile.html")
     return RedirectResponse("/user-login")
-# ====================================================
 
 @app.get("/user-settings")
 async def user_settings_page(request: Request):
@@ -584,8 +580,8 @@ async def admin_login(answer: str = Form(...)):
             max_age=86400 * 7,
             path="/",
             httponly=False,
-            samesite="none",      # ← changed from "lax"
-            secure=True            # ← added (required for samesite=none)
+            samesite="none",
+            secure=True
         )
         return r
     raise HTTPException(403, "Wrong password")
@@ -959,6 +955,7 @@ async def admin_verify_user(uid: str, request: Request, db: Session = Depends(ge
     return {"success": True}
 
 # ─── POSTS ────────────────────────────────────────────────────────────────────
+
 @app.get("/api/posts")
 async def get_posts(
     request: Request, limit: int = 20, offset: int = 0,
@@ -1010,8 +1007,8 @@ async def get_posts(
     except Exception as e:
         print(f"GET /api/posts error: {e}")
         return []
-@app.get("/api/reels")
 
+@app.get("/api/reels")
 async def get_reels(
     request: Request,
     limit: int = 10,
@@ -1038,9 +1035,9 @@ async def get_reels(
                 {
                     "id": p.id,
                     "title": p.title,
-                    "video_url": p.video_url or "",  # ensure video_url is stored
+                    "video_url": p.video_url or "",
                     "author_username": p.author_username,
-                    "author_avatar": "",  # you can fetch from user table if needed
+                    "author_avatar": "",
                     "likes": p.likes,
                     "views": p.views,
                     "created_at": p.created_at.isoformat()
@@ -1051,57 +1048,7 @@ async def get_reels(
     except Exception as e:
         print(f"GET /api/reels error: {e}")
         return {"total": 0, "reels": []}
-        
-@app.get("/api/feed")
-async def get_feed(request: Request, limit: int = 20, offset: int = 0,
-                   db: Session = Depends(get_db)):
-    """Personal feed: posts from people the logged-in user follows, plus own posts."""
-    sid = request.cookies.get("user_session")
-    if not sid and not _is_admin(request):
-        raise HTTPException(401, "Login required")
-    try:
-        if _is_admin(request) and not sid:
-            # Admins see everything
-            posts = db.query(models.Post).filter(
-                models.Post.status == "published"
-            ).order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
-        else:
-            following_ids = [
-                str(f.following_id)
-                for f in db.query(models.Follow).filter(models.Follow.follower_id == sid).all()
-            ]
-            following_ids.append(sid)
-            posts = db.query(models.Post).filter(
-                models.Post.status == "published",
-                models.Post.author_id.in_(following_ids)
-            ).order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
-            # If feed is empty, fall back to all published posts
-            if not posts:
-                posts = db.query(models.Post).filter(
-                    models.Post.status == "published"
-                ).order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
-        return [{
-            "id": p.id,
-            "title":          getattr(p, "title", "") or "",
-            "slug":           getattr(p, "slug", "") or "",
-            "excerpt":        getattr(p, "excerpt", "") or "",
-            "cover_image":    getattr(p, "cover_image", "") or "",
-            "content_type":   getattr(p, "content_type", "article") or "article",
-            "is_locked":      getattr(p, "is_locked", 0) or 0,
-            "author_id":      str(p.author_id) if p.author_id else "",
-            "author_username":getattr(p, "author_username", "") or "",
-            "tags":           getattr(p, "tags", "") or "",
-            "views":          getattr(p, "views", 0) or 0,
-            "likes":          getattr(p, "likes", 0) or 0,
-            "audio_url":      getattr(p, "audio_url", "") or "",
-            "video_url":      getattr(p, "video_url", "") or "",
-            "created_at":     str(getattr(p, "created_at", "")),
-        } for p in posts]
-    except Exception as e:
-        print(f"GET /api/feed error: {e}")
-        return []
 
-# ─── POST CREATION (FIXED FOR ADMIN) ──────────────────────────────────────────
 @app.post("/api/posts")
 async def create_post(
     request: Request,
@@ -1125,6 +1072,19 @@ async def create_post(
         author_id = None
         author_username = "Creator"
 
+        # --- STALE SESSION CHECK ---
+        if sid:
+            user = db.query(models.User).filter(models.User.id == sid).first()
+            if not user:
+                # Cookie points to a deleted/nonexistent user – clear it and return 401
+                resp = JSONResponse(
+                    {"detail": "Session expired or invalid. Please log in again."},
+                    status_code=401
+                )
+                resp.delete_cookie("user_session", path="/")
+                return resp
+        # ---------------------------
+
         if sid:
             try:
                 u = db.query(models.User).filter(models.User.id == sid).first()
@@ -1132,7 +1092,6 @@ async def create_post(
                     author_id = u.id
                     author_username = u.username
                 else:
-                    # Cookie points to a deleted user – treat as anonymous
                     author_id = None
                     author_username = "Anonymous"
             except Exception:
@@ -1171,7 +1130,7 @@ async def create_post(
             "message": "Published! 🚀" if status == "published" else "Saved as draft 💾"
         }
     except HTTPException:
-        raise
+        db.rollback(); raise
     except Exception as e:
         db.rollback()
         import traceback; traceback.print_exc()
@@ -1218,6 +1177,19 @@ async def update_post(
     is_locked: str = Form(None), audio_url: str = Form(None), video_url: str = Form(None),
     db: Session = Depends(get_db)
 ):
+    # --- STALE SESSION CHECK ---
+    sid = request.cookies.get("user_session")
+    if sid:
+        user = db.query(models.User).filter(models.User.id == sid).first()
+        if not user:
+            resp = JSONResponse(
+                {"detail": "Session expired or invalid. Please log in again."},
+                status_code=401
+            )
+            resp.delete_cookie("user_session", path="/")
+            return resp
+    # ---------------------------
+
     p = db.query(models.Post).filter(models.Post.id == post_id).first()
     if not p: raise HTTPException(404)
     try:
@@ -1289,7 +1261,7 @@ async def add_comment(
         return {"success": True, "id": c.id}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
-# ─── COMMENTS ────────────────────────────────────────────────────────────────
+
 @app.get("/api/posts/{post_id}/comments")
 async def get_comments(post_id: int, db: Session = Depends(get_db)):
     try:
@@ -1404,8 +1376,7 @@ async def toggle_comment_like(
         return {"liked": True, "likes": c.likes}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
-        
-# ===== FIXED: Only allow actual user sessions to like =====
+
 @app.post("/api/posts/{post_id}/like")
 async def toggle_like(post_id: int, request: Request, db: Session = Depends(get_db)):
     sid = request.cookies.get("user_session")
@@ -1436,7 +1407,6 @@ async def toggle_like(post_id: int, request: Request, db: Session = Depends(get_
         db.rollback()
         print(f"Like error: {e}")
         raise HTTPException(500, str(e))
-# ========================================================
 
 # ─── SOCIAL ──────────────────────────────────────────────────────────────────
 @app.post("/api/follow/{target_id}")
@@ -1913,7 +1883,7 @@ async def post_creator_chat(
     db.commit()
     db.refresh(msg)
     return {"success": True, "id": msg.id}
-    
+
 # ─── STORIES ─────────────────────────────────────────────────────────────────
 @app.get("/api/stories")
 def get_stories(db: Session = Depends(get_db)):
@@ -1956,7 +1926,7 @@ def search_database(query: str, db: Session) -> str:
     keywords = [word.lower() for word in query.split() if len(word) > 3]
     if not keywords:
         return ""
-    
+
     # Build conditions for posts (title, content, excerpt)
     from sqlalchemy import or_
     post_conditions = []
@@ -1965,7 +1935,7 @@ def search_database(query: str, db: Session) -> str:
         post_conditions.append(models.Post.content.ilike(f"%{kw}%"))
         post_conditions.append(models.Post.excerpt.ilike(f"%{kw}%"))
     posts = db.query(models.Post).filter(or_(*post_conditions)).limit(3).all()
-    
+
     # Build conditions for regions (name, description, overview)
     region_conditions = []
     for kw in keywords:
@@ -1973,7 +1943,7 @@ def search_database(query: str, db: Session) -> str:
         region_conditions.append(models.Region.description.ilike(f"%{kw}%"))
         region_conditions.append(models.Region.overview.ilike(f"%{kw}%"))
     regions = db.query(models.Region).filter(or_(*region_conditions)).limit(3).all()
-    
+
     context_parts = []
     for p in posts:
         snippet = (p.title + ": " + p.content)[:200] + "..."
@@ -1981,7 +1951,7 @@ def search_database(query: str, db: Session) -> str:
     for r in regions:
         snippet = (r.name + ": " + (r.description or r.overview or ""))[:200] + "..."
         context_parts.append(f"Region: {snippet}")
-    
+
     if context_parts:
         return "Relevant information from our archive:\n" + "\n".join(context_parts)
     return ""
@@ -2010,7 +1980,7 @@ async def ai_chat(
 
     # Search database for relevant content
     db_context = search_database(message, db)
-    
+
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     if not GOOGLE_API_KEY:
         # Fallback if no API key
@@ -2040,7 +2010,6 @@ User question: {message}"""
     except Exception as e:
         print(f"EchoBot error: {e}")
         return {"reply": "EchoBot is resting. Try again soon! 🤖", "locked": False}
-  
 
 # ─── PAYMENTS ────────────────────────────────────────────────────────────────
 @app.post("/api/payments/initialize")
