@@ -660,7 +660,7 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
       </div>
     </div>
 
-    <!-- ── WRITE POST ── -->
+    <!-- ── WRITE POST (with cover image upload) ── -->
     <div class="panel" id="panel-write-post">
       <div class="form-section">
         <h4>✍️ Write New Post</h4>
@@ -674,8 +674,15 @@ select {background:white;color:var(--main-text);border:1px solid var(--main-bord
           <div class="field"><label>Status</label>
             <select id="wp-status"><option value="published">Published</option><option value="draft">Draft</option></select>
           </div>
-          <div class="field"><label>Cover Image URL</label><input type="text" id="wp-cover" placeholder="Paste URL or upload via File Manager"></div>
-          <div class="field"><label>Tags</label><input type="text" id="wp-tags" placeholder="heritage, culture, ghana"></div>
+          <div class="field full">
+            <label>Cover Image URL</label>
+            <input type="text" id="wp-cover" placeholder="Paste URL or upload via File Manager">
+            <div class="upload-btn" onclick="document.getElementById('cover-upload').click()">
+              <span>⬆️ Upload Cover Image</span>
+              <input type="file" id="cover-upload" accept="image/*" onchange="uploadCover(this.files[0])" style="display:none;">
+            </div>
+          </div>
+          <div class="field full"><label>Tags (comma separated)</label><input type="text" id="wp-tags" placeholder="heritage, culture, ghana"></div>
         </div>
         <button class="btn btn-gold" onclick="savePost()" style="margin-top:12px;width:100%;padding:12px">Publish Post</button>
       </div>
@@ -1111,6 +1118,25 @@ async function uploadAudio(files) {
     } catch (e) {
       toast(`❌ ${file.name}: ${e.message}`, 'er');
     }
+  }
+}
+
+// ── NEW UPLOAD FUNCTION FOR WRITE POST COVER IMAGE ─────────────────────────
+async function uploadCover(file) {
+  if (!file) return;
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const r = await fetch('/api/upload/image', { method: 'POST', body: fd });
+    const d = await r.json();
+    if (r.ok && d.success) {
+      document.getElementById('wp-cover').value = d.url;
+      toast('✅ Cover image uploaded!', 'ok');
+    } else {
+      throw new Error(d.detail || 'Upload failed');
+    }
+  } catch (e) {
+    toast('❌ Upload failed: ' + e.message, 'er');
   }
 }
 
