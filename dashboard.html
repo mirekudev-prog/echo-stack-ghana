@@ -9,10 +9,6 @@
 <link rel="manifest" href="/manifest.json">
 <title>Feed — EchoStack Ghana</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<script>
-// Auth guard
-if (!document.cookie.includes('user_session')) window.location.href = '/user-login';
-</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -35,7 +31,7 @@ body{font-family:'DM Sans',sans-serif;background:#F0F2F5;min-height:100vh;color:
 .sidebar-logo span{font-family:'Playfair Display',serif;color:#fff;font-size:1.1rem;font-weight:700}
 .sidebar-badge{font-size:.6rem;background:var(--gold);color:#fff;padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle}
 
-.sidebar-user{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar-user{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center}
 .user-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E8B84B);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.9rem;flex-shrink:0;overflow:hidden}
 .user-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .user-info{margin-left:10px}
@@ -182,7 +178,7 @@ nav.side-nav{flex:1;padding:12px 10px}
     <span>EchoStack <span class="sidebar-badge">GH</span></span>
   </a>
 
-  <div class="sidebar-user" style="display:flex;align-items:center">
+  <div class="sidebar-user">
     <div class="user-av" id="sb-av">?</div>
     <div class="user-info">
       <strong id="sb-name">Loading...</strong>
@@ -239,7 +235,6 @@ nav.side-nav{flex:1;padding:12px 10px}
         <!-- FEED -->
         <div id="feed-container">
           <!-- Skeleton loaders -->
-          ${[1,2,3].map(()=>`
           <div class="skel-card">
             <div class="skel-row">
               <div class="skeleton skel-circle" style="width:38px;height:38px"></div>
@@ -248,7 +243,25 @@ nav.side-nav{flex:1;padding:12px 10px}
             <div class="skeleton" style="width:85%;height:18px;margin-bottom:8px"></div>
             <div class="skeleton" style="width:60%;height:18px;margin-bottom:12px"></div>
             <div class="skeleton" style="height:180px;border-radius:10px"></div>
-          </div>`).join('')}
+          </div>
+          <div class="skel-card">
+            <div class="skel-row">
+              <div class="skeleton skel-circle" style="width:38px;height:38px"></div>
+              <div style="flex:1"><div class="skeleton" style="width:120px;height:13px"></div><div class="skeleton" style="width:80px;height:11px;margin-top:6px"></div></div>
+            </div>
+            <div class="skeleton" style="width:85%;height:18px;margin-bottom:8px"></div>
+            <div class="skeleton" style="width:60%;height:18px;margin-bottom:12px"></div>
+            <div class="skeleton" style="height:180px;border-radius:10px"></div>
+          </div>
+          <div class="skel-card">
+            <div class="skel-row">
+              <div class="skeleton skel-circle" style="width:38px;height:38px"></div>
+              <div style="flex:1"><div class="skeleton" style="width:120px;height:13px"></div><div class="skeleton" style="width:80px;height:11px;margin-top:6px"></div></div>
+            </div>
+            <div class="skeleton" style="width:85%;height:18px;margin-bottom:8px"></div>
+            <div class="skeleton" style="width:60%;height:18px;margin-bottom:12px"></div>
+            <div class="skeleton" style="height:180px;border-radius:10px"></div>
+          </div>
         </div>
 
       </div><!-- /feed-col -->
@@ -274,30 +287,50 @@ let allPosts = [];
 let activeFilter = 'all';
 
 // ────────────────────────────
+// AUTH CHECK – Universal (handles both user and admin)
+// ────────────────────────────
+async function checkAuth() {
+  try {
+    const res = await fetch('/api/users/me');
+    if (!res.ok) throw new Error('Not authenticated');
+    currentUser = await res.json();
+
+    // Save to localStorage for other pages if needed (optional)
+    localStorage.setItem('es_user', JSON.stringify(currentUser));
+
+    // Update UI with user info
+    const initials = (currentUser.username || 'U')[0].toUpperCase();
+    document.getElementById('sb-av').textContent = initials;
+    document.getElementById('sb-name').textContent = currentUser.username;
+    let roleText = 'Member';
+    if (currentUser.role === 'creator') roleText = 'Creator ✍️';
+    else if (currentUser.role === 'admin' || currentUser.role === 'superuser') roleText = 'Admin 🛡️';
+    else if (currentUser.is_premium) roleText = 'Premium ⭐';
+    document.getElementById('sb-role').textContent = roleText;
+    document.getElementById('create-av').textContent = initials;
+
+    // Show creator link if applicable
+    if (['creator','admin','superuser'].includes(currentUser.role)) {
+      document.getElementById('creator-link').style.display = 'flex';
+    }
+
+    return true;
+  } catch (e) {
+    // Not authenticated – redirect to login
+    window.location.href = '/user-login';
+    return false;
+  }
+}
+
+// ────────────────────────────
 // INIT
 // ────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadCurrentUser();
-  await Promise.all([loadFeed(), loadCreatorsBar(), loadRegionPanel()]);
+  const authed = await checkAuth();
+  if (authed) {
+    await Promise.all([loadFeed(), loadCreatorsBar(), loadRegionPanel()]);
+  }
 });
-
-async function loadCurrentUser() {
-  try {
-    const r = await fetch('/api/users/me');
-    if (r.ok) {
-      currentUser = await r.json();
-      const initials = (currentUser.username || 'U')[0].toUpperCase();
-      document.getElementById('sb-av').textContent = initials;
-      document.getElementById('sb-name').textContent = currentUser.username;
-      document.getElementById('sb-role').textContent = currentUser.role === 'creator' ? 'Creator ✍️' : currentUser.role === 'superuser' ? 'Admin 🛡️' : currentUser.is_premium ? 'Premium ⭐' : 'Member';
-      document.getElementById('create-av').textContent = initials;
-      // Show creator link
-      if (['creator','admin','superuser'].includes(currentUser.role)) {
-        document.getElementById('creator-link').style.display = 'flex';
-      }
-    }
-  } catch(e) {}
-}
 
 // ────────────────────────────
 // FEED
@@ -352,17 +385,6 @@ function buildPostCard(p) {
     const match = (p.content || '').match(/\[video\](.*?)\[\/video\]/i);
     const url = match ? match[1].trim() : (p.video_url || '');
     if (url) {
-      mediaHtml = `<div class="card-media">
-        <video preload="none" onclick="goPost(${p.id})" style="cursor:pointer;width:100%;max-height:300px;display:block;background:#000"
-               poster="${p.cover_image||''}">
-          <source src="${url}" type="video/mp4">
-          <source src="${url}">
-        </video>
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-             background:rgba(0,0,0,.6);border-radius:50%;width:52px;height:52px;
-             display:flex;align-items:center;justify-content:center;pointer-events:none;font-size:1.3rem">▶️</div>
-      </div>`;
-      // Make video container relative for overlay
       mediaHtml = `<div class="card-media" style="position:relative">
         <video preload="none" style="width:100%;max-height:300px;display:block;background:#000;cursor:pointer"
                onclick="goPost(${p.id})" poster="${p.cover_image||''}">
@@ -397,7 +419,7 @@ function buildPostCard(p) {
     }
   }
 
-  const premiumBadge = p.is_premium ? `<div class="premium-banner">⭐ Premium Content — Subscribe to read full article</div>` : '';
+  const premiumBadge = p.is_locked ? `<div class="premium-banner">⭐ Premium Content — Subscribe to read full article</div>` : '';
 
   return `<div class="post-card">
     <div class="post-header">
