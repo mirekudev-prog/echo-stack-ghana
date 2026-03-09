@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0D1B2A">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="/manifest.json">
 <title>Feed — EchoStack Ghana</title>
@@ -112,14 +113,72 @@ nav.side-nav{flex:1;padding:12px 10px}
 .card-audio-label{color:rgba(255,255,255,.7);font-size:.72rem;margin-bottom:8px;display:flex;align-items:center;gap:5px}
 .premium-banner{background:linear-gradient(135deg,var(--gold),#a97825);padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:#fff}
 
-/* POST ACTIONS */
-.post-actions{display:flex;align-items:center;gap:6px;padding:10px 12px;border-top:1px solid var(--border)}
-.act-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;font-size:.79rem;font-weight:500;cursor:pointer;border:none;background:none;color:var(--muted);transition:all .15s;font-family:'DM Sans',sans-serif}
+/* POST ACTIONS (mobile‑friendly) */
+.post-actions{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;        /* allows wrapping on small screens */
+  gap:6px;
+  padding:10px 12px;
+  border-top:1px solid var(--border)
+}
+.act-btn{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:7px 12px;
+  border-radius:8px;
+  font-size:.79rem;
+  font-weight:500;
+  cursor:pointer;
+  border:none;
+  background:none;
+  color:var(--muted);
+  transition:all .15s;
+  font-family:'DM Sans',sans-serif;
+  white-space:nowrap;    /* prevent breaking inside button */
+}
 .act-btn:hover{background:#F8FAFC;color:var(--ink)}
 .act-btn.liked{color:#ef4444}
 .act-btn.liked:hover{background:#FEF2F2}
-.act-read{margin-left:auto;background:var(--gold);color:#fff;border-radius:8px;padding:7px 16px;font-size:.78rem;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;text-decoration:none;transition:background .15s}
+.act-read{
+  margin-left:auto;
+  background:var(--gold);
+  color:#fff;
+  border-radius:8px;
+  padding:7px 16px;
+  font-size:.78rem;
+  font-weight:700;
+  cursor:pointer;
+  border:none;
+  font-family:'DM Sans',sans-serif;
+  text-decoration:none;
+  transition:background .15s;
+  white-space:nowrap;
+  flex-shrink:0;         /* prevent shrinking */
+}
 .act-read:hover{background:#a97825}
+
+/* Mobile improvements for post actions */
+@media (max-width: 480px) {
+  .post-actions {
+    gap:4px;
+    padding:8px 10px;
+  }
+  .act-btn {
+    padding:6px 8px;
+    font-size:.7rem;
+  }
+  .act-read {
+    padding:6px 10px;
+    font-size:.7rem;
+    margin-left:0;        /* remove auto margin on very small screens */
+  }
+  /* If buttons still overflow, allow them to stack */
+  .post-actions {
+    justify-content: flex-start;
+  }
+}
 
 /* EMPTY / LOADING */
 .feed-empty{text-align:center;padding:60px 20px;color:var(--muted)}
@@ -381,7 +440,6 @@ function buildPostCard(p) {
   // Media preview
   let mediaHtml = '';
   if (ct === 'video') {
-    // Try to extract video URL from content
     const match = (p.content || '').match(/\[video\](.*?)\[\/video\]/i);
     const url = match ? match[1].trim() : (p.video_url || '');
     if (url) {
@@ -412,7 +470,6 @@ function buildPostCard(p) {
   } else if (p.cover_image) {
     mediaHtml = `<div class="card-media"><img src="${p.cover_image}" alt="${p.title}" onclick="goPost(${p.id})" style="cursor:pointer" onerror="this.closest('.card-media').style.display='none'"></div>`;
   } else if (ct === 'photo_essay') {
-    // Try to get first image from content
     const match = (p.content || '').match(/!\[[^\]]*\]\(([^)]+)\)/);
     if (match) {
       mediaHtml = `<div class="card-media"><img src="${match[1].trim()}" alt="${p.title}" onclick="goPost(${p.id})" style="cursor:pointer" onerror="this.closest('.card-media').style.display='none'"></div>`;
@@ -572,7 +629,7 @@ function showToast(msg, type) {
   setTimeout(() => t.className = 'toast', 3000);
 }
 
-// Service Worker
+// Service Worker (PWA)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
