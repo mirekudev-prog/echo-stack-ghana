@@ -1762,6 +1762,58 @@ async def post_chat(
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
+@app.post("/api/creator-chat/{creator_id}")
+async def post_creator_chat(
+    creator_id: str,
+    request: Request,
+    content: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    sid = request.cookies.get("user_session")
+    if not sid and not _is_admin(request):
+        raise HTTPException(401, "Login required")
+
+    creator = db.query(models.User).filter(models.User.id == creator_id).first()
+    if not creator:
+        raise HTTPException(404, "Creator not found")
+
+    # Determine username
+    username = "Guest"
+    user_id = None
+    if sid:
+        try:
+            u = db.query(models.User).filter(models.User.id == sid).first()
+            if u:
+                user_id = u.id
+                username = u.username
+        except Exception:
+            pass
+    if _is_admin(request) and not user_id:
+        username = "Admin"
+
+    # Permission: creator themself, admin, or follower can post
+    if sid:
+        if sid == creator_id or _is_admin(request) or is_following(sid, creator_id, db):
+            pass  # allowed
+        else:
+            raise HTTPException(403, "You must follow this creator to chat")
+    elif _is_admin(request):
+        pass
+    else:
+        raise HTTPException(403, "Not authorized")
+
+    # Create message
+    msg = models.CreatorChatMessage(
+        creator_id=creator_id,
+        user_id=user_id,
+        username=username,
+        content=content.strip()
+    )
+    db.add(msg)
+    db.commit()
+    db.refresh(msg)
+    return {"success": True, "id": msg.id}
+    
 # ─── STORIES ─────────────────────────────────────────────────────────────────
 @app.get("/api/stories")
 def get_stories(db: Session = Depends(get_db)):
