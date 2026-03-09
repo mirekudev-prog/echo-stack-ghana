@@ -52,7 +52,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .sb-section{padding:16px 10px 4px;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .sb-item{
   display:flex;align-items:center;gap:10px;
-  padding:9px 12px;margin:1px 6px;border-radius:8px;
+  padding:12px 12px;margin:1px 6px;border-radius:8px;
   cursor:pointer;transition:all .15s;
   font-size:.8rem;font-weight:500;color:rgba(255,255,255,.6);
   text-decoration:none;border:none;background:none;width:calc(100% - 12px);text-align:left
@@ -62,7 +62,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .sb-item .icon{width:18px;text-align:center;font-size:.9rem;flex-shrink:0}
 .sb-footer{margin-top:auto;padding:12px;border-top:1px solid var(--border)}
 .sb-footer button{
-  width:100%;padding:8px;border-radius:8px;
+  width:100%;padding:12px;border-radius:8px;
   background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);
   color:#f87171;font-size:.78rem;font-weight:600;cursor:pointer;
   font-family:'DM Sans',sans-serif;transition:all .15s
@@ -84,16 +84,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 }
 .menu-btn{
   display:none;
-  background:none;border:none;color:var(--main-text);font-size:1.4rem;
-  cursor:pointer;padding:0;line-height:1;width:32px;height:32px;
+  background:none;border:none;color:var(--main-text);font-size:1.6rem;
+  cursor:pointer;padding:8px 4px;line-height:1;min-width:44px;min-height:44px;
   border-radius:4px;transition:background .15s;
 }
 .menu-btn:hover{background:var(--main-hover);}
 .topbar-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--main-text);}
-.topbar-actions{display:flex;gap:6px;align-items:center}
+.topbar-actions{display:flex;gap:8px;align-items:center}
 .btn{
-  padding:6px 12px;border-radius:6px;font-size:.75rem;font-weight:600;
-  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;border:none
+  padding:10px 16px;border-radius:8px;font-size:.85rem;font-weight:600;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;border:none;
+  min-height:44px;display:inline-flex;align-items:center;justify-content:center;
 }
 .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink)}
 .btn-ghost{background:rgba(0,0,0,.05);color:var(--main-text);border:1px solid var(--main-border)}
@@ -102,6 +103,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .content{
   flex:1;overflow-y:auto;padding:16px;
   color:var(--main-text);
+  -webkit-overflow-scrolling:touch;
 }
 
 /* Panels */
@@ -128,47 +130,48 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 /* File manager */
 .fm-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
 .fm-search{
-  flex:1;min-width:160px;padding:8px 12px;
-  background:white;border:1px solid var(--main-border);
-  border-radius:6px;color:var(--main-text);font-size:.82rem;outline:none
+  flex:1;min-width:160px;padding:12px;background:white;border:1px solid var(--main-border);
+  border-radius:8px;color:var(--main-text);font-size:.9rem;outline:none;min-height:44px;
 }
 .fm-search:focus{border-color:var(--gold)}
 .fm-search::placeholder{color:var(--main-muted)}
 .fm-filter{
-  padding:8px 10px;background:white;border:1px solid var(--main-border);
-  border-radius:6px;color:var(--main-text);font-size:.78rem;outline:none;cursor:pointer
+  padding:10px 12px;background:white;border:1px solid var(--main-border);
+  border-radius:8px;color:var(--main-text);font-size:.9rem;outline:none;cursor:pointer;
+  min-height:44px;
 }
 
 /* Upload zone */
 .upload-zone{
   border:2px dashed var(--gold);border-radius:12px;
-  padding:20px;text-align:center;margin-bottom:16px;
+  padding:24px;text-align:center;margin-bottom:16px;
   background:rgba(200,150,46,.02);cursor:pointer;
   transition:all .2s;position:relative
 }
 .upload-zone:hover,.upload-zone.drag{border-color:var(--gold2);background:rgba(200,150,46,.05)}
 .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.upload-icon{font-size:1.8rem;margin-bottom:6px}
-.upload-title{font-weight:700;color:var(--main-text);margin-bottom:2px;font-size:.9rem}
-.upload-sub{font-size:.72rem;color:var(--main-muted)}
-.upload-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.upload-icon{font-size:2.2rem;margin-bottom:8px}
+.upload-title{font-weight:700;color:var(--main-text);margin-bottom:4px;font-size:1rem}
+.upload-sub{font-size:.85rem;color:var(--main-muted)}
+.upload-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
 @media(max-width:500px){.upload-opts{grid-template-columns:1fr 1fr}}
-.upload-opt label{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main-muted);display:block;margin-bottom:2px}
+.upload-opt label{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main-muted);display:block;margin-bottom:4px}
 .upload-opt select,.upload-opt input{
-  width:100%;padding:7px 8px;background:white;
-  border:1px solid var(--main-border);border-radius:6px;
-  color:var(--main-text);font-size:.78rem;outline:none
+  width:100%;padding:10px 8px;background:white;
+  border:1px solid var(--main-border);border-radius:8px;
+  color:var(--main-text);font-size:.85rem;outline:none;min-height:44px;
 }
 .upload-opt select:focus,.upload-opt input:focus{border-color:var(--gold)}
 
 /* Progress bar */
 .upload-progress{
-  background:white;border:1px solid var(--main-border);border-radius:6px;
-  padding:8px 12px;margin-bottom:8px;
-  display:flex;align-items:center;gap:8px;font-size:.78rem
+  background:white;border:1px solid var(--main-border);border-radius:8px;
+  padding:12px;margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;font-size:.85rem;flex-wrap:wrap;
 }
-.progress-track{flex:1;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));width:0;transition:width .3s;border-radius:2px}
+@media(max-width:500px){.upload-progress{flex-direction:column;align-items:stretch;}}
+.progress-track{flex:1;height:6px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));width:0;transition:width .3s;border-radius:3px}
 
 /* Files grid */
 .files-grid{
@@ -190,7 +193,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .file-thumb img,.file-thumb video{width:100%;height:100%;object-fit:cover}
 .file-type-badge{
   position:absolute;top:6px;left:6px;
-  padding:2px 6px;border-radius:12px;font-size:.55rem;font-weight:700;
+  padding:4px 8px;border-radius:16px;font-size:.65rem;font-weight:700;
   text-transform:uppercase;letter-spacing:.05em;backdrop-filter:blur(4px);
   background:rgba(255,255,255,.8);color:#1e293b;
 }
@@ -199,16 +202,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .badge-image{background:rgba(34,197,94,.9);color:white}
 .badge-document{background:rgba(59,130,246,.9);color:white}
 .badge-general{background:rgba(100,116,139,.9);color:white}
-.file-card-body{padding:8px 10px}
-.file-name{font-size:.75rem;font-weight:600;color:var(--main-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
-.file-meta{font-size:.65rem;color:var(--main-muted);display:flex;justify-content:space-between}
+.file-card-body{padding:10px 10px}
+.file-name{font-size:.85rem;font-weight:600;color:var(--main-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.file-meta{font-size:.7rem;color:var(--main-muted);display:flex;justify-content:space-between}
 .file-actions{
-  display:flex;gap:4px;padding:6px 8px;
+  display:flex;gap:4px;padding:8px;
   border-top:1px solid var(--main-border);background:var(--main-hover)
 }
 .fa-btn{
-  flex:1;padding:4px;border-radius:4px;border:none;
-  font-size:.65rem;font-weight:600;cursor:pointer;
+  flex:1;padding:8px 4px;border-radius:6px;border:none;
+  font-size:.7rem;font-weight:600;cursor:pointer;min-height:40px;
   font-family:'DM Sans',sans-serif;transition:all .15s
 }
 .fa-view{background:rgba(200,150,46,.1);color:var(--gold);}
@@ -221,67 +224,70 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
   grid-column:1/-1;text-align:center;padding:32px 16px;color:var(--main-muted);
   background:white;border-radius:10px;border:1px dashed var(--main-border);
 }
-.no-files .no-icon{font-size:2.5rem;margin-bottom:8px}
-.no-files p{font-size:.85rem}
+.no-files .no-icon{font-size:3rem;margin-bottom:12px}
+.no-files p{font-size:.9rem}
 
 /* Tables – scrollable on mobile */
 .table-wrap{
   background:white;border:1px solid var(--main-border);border-radius:10px;
   overflow-x:auto;box-shadow:0 1px 3px rgba(0,0,0,.02);
+  -webkit-overflow-scrolling:touch;
 }
 .table-head{
   padding:12px 16px;border-bottom:1px solid var(--main-border);
-  display:flex;justify-content:space-between;align-items:center
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
 }
-.table-head h3{font-weight:700;color:var(--main-text);font-size:.9rem}
+.table-head h3{font-weight:700;color:var(--main-text);font-size:1rem}
 table{
   width:100%;border-collapse:collapse;
   min-width:600px; /* forces scroll on mobile if needed */
 }
 thead th{
-  padding:8px 12px;text-align:left;font-size:.6rem;font-weight:700;
+  padding:10px 12px;text-align:left;font-size:.7rem;font-weight:700;
   text-transform:uppercase;letter-spacing:.05em;color:var(--main-muted);
   background:#f8fafc;border-bottom:1px solid var(--main-border)
 }
 tbody tr{border-bottom:1px solid var(--main-border);transition:background .1s}
 tbody tr:hover{background:var(--main-hover)}
-tbody td{padding:8px 12px;font-size:.78rem;color:var(--main-text)}
+tbody td{padding:10px 12px;font-size:.85rem;color:var(--main-text)}
 tbody tr:last-child{border-bottom:none}
 
-/* Forms */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+/* Forms – enhanced for mobile */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:600px){.form-grid{grid-template-columns:1fr}}
-.field{display:flex;flex-direction:column;gap:4px}
+.field{display:flex;flex-direction:column;gap:6px}
 .field.full{grid-column:1/-1}
-.field label{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main-muted)}
+.field label{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main-muted)}
 .field input,.field textarea,.field select{
-  padding:8px 10px;background:white;border:1.5px solid var(--main-border);
-  border-radius:6px;color:var(--main-text);font-size:.85rem;outline:none;
-  transition:border-color .15s
+  padding:12px 12px;background:white;border:1.5px solid var(--main-border);
+  border-radius:10px;color:var(--main-text);font-size:1rem;outline:none;
+  transition:border-color .15s;min-height:48px;
 }
+.field textarea{resize:vertical;min-height:100px}
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold)}
-.field textarea{resize:vertical;min-height:70px}
-.form-section{
-  background:white;border:1px solid var(--main-border);border-radius:10px;
-  padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.02);
-}
-.form-section h4{font-weight:700;font-size:.85rem;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:5px}
 
-/* Upload buttons */
+.form-section{
+  background:white;border:1px solid var(--main-border);border-radius:12px;
+  padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.02);
+}
+.form-section h4{font-weight:700;font-size:1rem;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:6px}
+
+/* Upload buttons inside forms */
 .upload-btn{
-  margin-top:4px;
+  margin-top:6px;
   background:rgba(200,150,46,.1);
   border:1px dashed var(--gold);
-  border-radius:6px;
-  padding:5px 8px;
-  font-size:.7rem;
+  border-radius:8px;
+  padding:10px 12px;
+  font-size:.85rem;
   color:var(--gold);
   cursor:pointer;
   transition:all .15s;
   display:inline-flex;
   align-items:center;
-  gap:5px;
+  gap:6px;
   width:fit-content;
+  min-height:44px;
 }
 .upload-btn:hover{
   background:rgba(200,150,46,.2);
@@ -291,7 +297,7 @@ tbody tr:last-child{border-bottom:none}
 
 /* Role badges */
 .role-badge{
-  padding:2px 6px;border-radius:12px;font-size:.6rem;font-weight:700;
+  padding:4px 8px;border-radius:16px;font-size:.7rem;font-weight:700;
   text-transform:uppercase;letter-spacing:.04em
 }
 .role-user{background:#e2e8f0;color:#334155}
@@ -301,33 +307,36 @@ tbody tr:last-child{border-bottom:none}
 /* Users table actions */
 select{
   background:white;color:var(--main-text);border:1px solid var(--main-border);
-  border-radius:4px;padding:3px 5px;font-size:.7rem;cursor:pointer;outline:none;
+  border-radius:6px;padding:6px 8px;font-size:.8rem;cursor:pointer;outline:none;
 }
 
 /* Toast */
 .toast{
-  position:fixed;bottom:20px;right:20px;
-  padding:8px 16px;border-radius:8px;font-size:.78rem;font-weight:600;
+  position:fixed;bottom:20px;right:20px;left:20px;max-width:400px;margin:0 auto;
+  padding:12px 20px;border-radius:30px;font-size:.9rem;font-weight:600;
   z-index:999;transition:all .25s;opacity:0;transform:translateY(8px);
-  pointer-events:none;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1)
+  pointer-events:none;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);
+  text-align:center;
 }
+@media(min-width:768px){.toast{left:auto;right:20px;}}
 .toast.show{opacity:1;transform:translateY(0)}
-.toast.ok{background:rgba(22,197,94,.9);color:#fff}
-.toast.er{background:rgba(239,68,68,.9);color:#fff}
-.toast.info{background:rgba(200,150,46,.9);color:var(--ink)}
+.toast.ok{background:rgba(22,197,94,.95);color:#fff}
+.toast.er{background:rgba(239,68,68,.95);color:#fff}
+.toast.info{background:rgba(200,150,46,.95);color:var(--ink)}
 
 /* Modal */
 .modal-bg{
   position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;
-  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);
+  padding:16px;
 }
 .modal-box{
   background:white;border:1px solid var(--main-border);border-radius:14px;
-  padding:16px;max-width:90vw;width:500px;max-height:85vh;overflow-y:auto;
+  padding:20px;max-width:95vw;width:500px;max-height:85vh;overflow-y:auto;
   color:var(--main-text);
 }
-.modal-box video,.modal-box audio{width:100%;border-radius:6px;margin-top:8px}
-.modal-box img{width:100%;border-radius:6px;margin-top:8px;object-fit:contain;max-height:300px}
+.modal-box video,.modal-box audio{width:100%;border-radius:8px;margin-top:8px}
+.modal-box img{width:100%;border-radius:8px;margin-top:8px;object-fit:contain;max-height:300px}
 
 /* Mobile sidebar overlay and toggle */
 .sidebar-overlay{
@@ -344,7 +353,6 @@ select{
     transition:left .2s;
   }
   .sidebar.open{left:0}
-  .main-col{margin-left:0}
 }
 </style>
 </head>
@@ -435,7 +443,6 @@ select{
     </div>
     <div class="topbar-actions">
       <button class="btn btn-ghost" onclick="location.reload()">🔄 Refresh</button>
-      <!-- UPDATED: now goes directly to the user dashboard (feed) -->
       <a href="/dashboard" target="_blank" class="btn btn-gold">View Site →</a>
     </div>
   </div>
@@ -452,12 +459,12 @@ select{
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div class="table-wrap">
-          <div class="table-head"><h3>Recent Posts</h3><button class="btn btn-ghost" onclick="show('posts')" style="font-size:.72rem;padding:5px 10px">View All</button></div>
+          <div class="table-head"><h3>Recent Posts</h3><button class="btn btn-ghost" onclick="show('posts')" style="font-size:.85rem;padding:8px 14px">View All</button></div>
           <table><thead><tr><th>Title</th><th>Status</th><th>Author</th></tr></thead>
           <tbody id="recent-posts-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></table>
         </div>
         <div class="table-wrap">
-          <div class="table-head"><h3>Recent Uploads</h3><button class="btn btn-ghost" onclick="show('files')" style="font-size:.72rem;padding:5px 10px">File Manager</button></div>
+          <div class="table-head"><h3>Recent Uploads</h3><button class="btn btn-ghost" onclick="show('files')" style="font-size:.85rem;padding:8px 14px">File Manager</button></div>
           <table><thead><tr><th>File</th><th>Type</th><th>Size</th></tr></thead>
           <tbody id="recent-files-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></table>
         </div>
@@ -510,7 +517,7 @@ select{
           <option value="general">📦 General</option>
         </select>
         <button class="btn btn-ghost" onclick="loadFiles()">🔄</button>
-        <span id="files-count" style="font-size:.75rem;color:var(--main-muted)"></span>
+        <span id="files-count" style="font-size:.85rem;color:var(--main-muted)"></span>
       </div>
       <div class="files-grid" id="files-grid"><div class="no-files"><div class="no-icon">📂</div><p>Loading files…</p></div></div>
     </div>
@@ -520,7 +527,7 @@ select{
       <div class="table-wrap">
         <div class="table-head">
           <h3>All Regions</h3>
-          <div style="display:flex; gap:8px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button class="btn btn-gold" onclick="showNewRegionForm()">➕ Create Region</button>
             <button class="btn btn-ghost" onclick="loadRegions()">🔄 Refresh</button>
           </div>
@@ -534,8 +541,8 @@ select{
       <!-- New Region Form (hidden by default) -->
       <div id="new-region-form" style="display:none; background:white; border:1px solid var(--main-border); border-radius:12px; padding:24px; margin-top:20px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <h3 style="font-weight:700; font-size:1.1rem; color:var(--main-text);">➕ Create New Region</h3>
-          <button onclick="hideNewRegionForm()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--main-muted);">×</button>
+          <h3 style="font-weight:700; font-size:1.2rem; color:var(--main-text);">➕ Create New Region</h3>
+          <button onclick="hideNewRegionForm()" style="background:none; border:none; font-size:2rem; cursor:pointer; color:var(--main-muted); min-width:44px; min-height:44px;">×</button>
         </div>
 
         <input type="hidden" id="new-reg-id">
@@ -559,8 +566,8 @@ select{
         </div>
 
         <!-- Media uploads -->
-        <div style="margin-top:20px;">
-          <h4 style="font-weight:700; font-size:.9rem; color:var(--gold); margin-bottom:12px;">🖼️ Media</h4>
+        <div style="margin-top:24px;">
+          <h4 style="font-weight:700; font-size:1rem; color:var(--gold); margin-bottom:16px;">🖼️ Media</h4>
           <div class="form-grid">
             <div class="field">
               <label>Hero Image URL</label>
@@ -589,21 +596,22 @@ select{
           </div>
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:24px;">
-          <button class="btn btn-gold" onclick="saveNewRegion()" style="flex:1; padding:12px;">💾 Save New Region</button>
-          <button class="btn btn-ghost" onclick="hideNewRegionForm()" style="padding:12px 20px;">Cancel</button>
+        <div style="display:flex; gap:12px; margin-top:28px;">
+          <button class="btn btn-gold" onclick="saveNewRegion()" style="flex:1; padding:14px;">💾 Save New Region</button>
+          <button class="btn btn-ghost" onclick="hideNewRegionForm()" style="padding:14px 24px;">Cancel</button>
         </div>
       </div>
     </div>
 
-    <!-- ── ADD/EDIT REGION ── -->
+    <!-- ── ADD/EDIT REGION ── (enhanced for mobile) -->
     <div class="panel" id="panel-add-region">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div></div>
-        <button class="btn btn-ghost" onclick="show('regions')">← Back</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px; flex-wrap:wrap; gap:8px;">
+        <h3 style="font-size:1.1rem;">Edit Region</h3>
+        <button class="btn btn-ghost" onclick="show('regions')" style="padding:10px 16px;">← Back</button>
       </div>
-      <input type="hidden" id="reg-id">
-      <div class="form-section">
+      <div class="form-section" style="max-height:70vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:80px;">
+        <!-- Added bottom padding to ensure last elements are reachable -->
+        <input type="hidden" id="reg-id">
         <h4>📍 Basic Info</h4>
         <div class="form-grid">
           <div class="field"><label>Region Name *</label><input type="text" id="reg-name" placeholder="e.g. Ashanti"></div>
@@ -622,9 +630,7 @@ select{
           <div class="field"><label>Brief Overview</label><input type="text" id="reg-overview" placeholder="Short summary"></div>
           <div class="field"><label>Source Reference</label><input type="text" id="reg-source" placeholder="Where did you find this info?"></div>
         </div>
-      </div>
-      <div class="form-section">
-        <h4>🖼️ Media</h4>
+        <h4 style="margin-top:24px;">🖼️ Media</h4>
         <div class="form-grid">
           <div class="field">
             <label>Hero Image URL</label>
@@ -651,17 +657,17 @@ select{
             </div>
           </div>
         </div>
-      </div>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-gold" onclick="saveRegion()" style="flex:1;padding:12px">💾 Save Region</button>
-        <button class="btn btn-ghost" onclick="show('regions')" style="padding:12px 20px">Cancel</button>
+        <!-- Save button inside scrollable container, but sticky at bottom -->
+        <div style="position:sticky; bottom:0; background:white; padding:16px 0 0; margin-top:20px;">
+          <button class="btn btn-gold" onclick="saveRegion()" style="width:100%; padding:14px;">💾 Save Region</button>
+        </div>
       </div>
     </div>
 
     <!-- ── USERS ── -->
     <div class="panel" id="panel-users">
       <div class="table-wrap">
-        <div class="table-head"><h3>All Users</h3><button class="btn btn-ghost" onclick="loadUsers()" style="font-size:.72rem;padding:5px 10px">Refresh</button></div>
+        <div class="table-head"><h3>All Users</h3><button class="btn btn-ghost" onclick="loadUsers()">Refresh</button></div>
         <table>
           <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Premium</th><th>Joined</th><th>Actions</th></tr></thead>
           <tbody id="users-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
@@ -683,7 +689,7 @@ select{
     <!-- ── POSTS ── -->
     <div class="panel" id="panel-posts">
       <div class="table-wrap">
-        <div class="table-head"><h3>All Posts</h3><button class="btn btn-ghost" onclick="loadPosts()" style="font-size:.72rem;padding:5px 10px">Refresh</button></div>
+        <div class="table-head"><h3>All Posts</h3><button class="btn btn-ghost" onclick="loadPosts()">Refresh</button></div>
         <table>
           <thead><tr><th>Title</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th>Actions</th></tr></thead>
           <tbody id="posts-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
@@ -694,7 +700,7 @@ select{
     <!-- ── STORIES ── -->
     <div class="panel" id="panel-stories">
       <div class="table-wrap">
-        <div class="table-head"><h3>Story Submissions</h3><button class="btn btn-ghost" onclick="loadStories()" style="font-size:.72rem;padding:5px 10px">Refresh</button></div>
+        <div class="table-head"><h3>Story Submissions</h3><button class="btn btn-ghost" onclick="loadStories()">Refresh</button></div>
         <table>
           <thead><tr><th>Title</th><th>Author</th><th>Region</th><th>Status</th><th>Date</th></tr></thead>
           <tbody id="stories-tbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
@@ -705,7 +711,7 @@ select{
     <!-- ── NEWSLETTER ── -->
     <div class="panel" id="panel-newsletter">
       <div class="table-wrap">
-        <div class="table-head"><h3>Newsletter Subscribers</h3><button class="btn btn-ghost" onclick="loadNewsletter()" style="font-size:.72rem;padding:5px 10px">Refresh</button></div>
+        <div class="table-head"><h3>Newsletter Subscribers</h3><button class="btn btn-ghost" onclick="loadNewsletter()">Refresh</button></div>
         <table>
           <thead><tr><th>#</th><th>Email</th><th>Joined</th></tr></thead>
           <tbody id="newsletter-tbody"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
@@ -723,7 +729,7 @@ select{
           <div class="field"><label>Date</label><input type="datetime-local" id="ev-date"></div>
           <div class="field"><label>Description</label><input type="text" id="ev-desc" placeholder="About the event"></div>
         </div>
-        <button class="btn btn-gold" onclick="addEvent()" style="margin-top:10px">Add Event</button>
+        <button class="btn btn-gold" onclick="addEvent()" style="margin-top:10px; width:100%;">Add Event</button>
       </div>
       <div class="table-wrap">
         <div class="table-head"><h3>Events</h3></div>
@@ -736,9 +742,9 @@ select{
     <div class="panel" id="panel-categories">
       <div class="form-section" style="margin-bottom:16px">
         <h4>🏷️ Add Category</h4>
-        <div style="display:flex;gap:8px">
-          <div class="field" style="flex:1"><input type="text" id="cat-name" placeholder="Category name…"></div>
-          <button class="btn btn-gold" onclick="addCategory()">Add</button>
+        <div style="display:flex;gap:8px; flex-wrap:wrap;">
+          <div class="field" style="flex:1;"><input type="text" id="cat-name" placeholder="Category name…"></div>
+          <button class="btn btn-gold" onclick="addCategory()" style="min-width:100px;">Add</button>
         </div>
       </div>
       <div class="table-wrap">
@@ -750,7 +756,7 @@ select{
     <!-- ── CHAT ── -->
     <div class="panel" id="panel-chat">
       <div class="table-wrap" style="max-height:500px;overflow-y:auto">
-        <div class="table-head"><h3>Community Chat</h3><button class="btn btn-ghost" onclick="loadChat()" style="font-size:.72rem;padding:5px 10px">Refresh</button></div>
+        <div class="table-head"><h3>Community Chat</h3><button class="btn btn-ghost" onclick="loadChat()">Refresh</button></div>
         <div id="chat-msgs" style="padding:12px;display:flex;flex-direction:column;gap:8px"></div>
       </div>
     </div>
@@ -759,7 +765,7 @@ select{
     <div class="panel" id="panel-settings">
       <div class="form-section">
         <h4>⚙️ Site Settings</h4>
-        <p style="font-size:.85rem;color:var(--main-muted);margin-bottom:12px">Coming soon — configure site name, description, and social links.</p>
+        <p style="font-size:.9rem;color:var(--main-muted);margin-bottom:12px">Coming soon — configure site name, description, and social links.</p>
         <div class="form-grid">
           <div class="field"><label>Site Name</label><input type="text" placeholder="EchoStack Ghana" disabled></div>
           <div class="field"><label>Contact Email</label><input type="text" placeholder="admin@echostack.com" disabled></div>
@@ -769,7 +775,7 @@ select{
 
     <!-- ── WRITE POST ── -->
     <div class="panel" id="panel-write-post">
-      <div class="form-section">
+      <div class="form-section" style="max-height:70vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:80px;">
         <h4>✍️ Write New Post</h4>
         <div class="form-grid">
           <div class="field full"><label>Title</label><input type="text" id="wp-title" placeholder="Post title…"></div>
@@ -791,7 +797,9 @@ select{
           </div>
           <div class="field full"><label>Tags (comma separated)</label><input type="text" id="wp-tags" placeholder="heritage, culture, ghana"></div>
         </div>
-        <button class="btn btn-gold" onclick="savePost()" style="margin-top:12px;width:100%;padding:12px">Publish Post</button>
+        <div style="position:sticky; bottom:0; background:white; padding:16px 0 0;">
+          <button class="btn btn-gold" onclick="savePost()" style="width:100%; padding:14px;">Publish Post</button>
+        </div>
       </div>
     </div>
 
@@ -803,12 +811,12 @@ select{
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <strong id="modal-name" style="font-size:.9rem"></strong>
-      <button onclick="closeModal()" style="background:none;border:none;color:var(--main-muted);cursor:pointer;font-size:1.2rem">✕</button>
+      <button onclick="closeModal()" style="background:none;border:none;color:var(--main-muted);cursor:pointer;font-size:1.5rem;min-width:44px;min-height:44px;">✕</button>
     </div>
     <div id="modal-content"></div>
-    <div style="margin-top:12px;display:flex;gap:8px">
-      <a id="modal-link" href="#" target="_blank" class="btn btn-gold" style="font-size:.78rem;padding:7px 14px">🔗 Open in New Tab</a>
-      <button id="modal-copy" onclick="copyUrl()" class="btn btn-ghost" style="font-size:.78rem;padding:7px 14px">📋 Copy URL</button>
+    <div style="margin-top:16px;display:flex;gap:8px; flex-wrap:wrap;">
+      <a id="modal-link" href="#" target="_blank" class="btn btn-gold" style="font-size:.85rem;padding:10px 16px;">🔗 Open in New Tab</a>
+      <button id="modal-copy" onclick="copyUrl()" class="btn btn-ghost" style="font-size:.85rem;padding:10px 16px;">📋 Copy URL</button>
     </div>
   </div>
 </div>
@@ -948,7 +956,7 @@ function renderFiles(files) {
       <div class="file-card-body">
         <div class="file-name" title="${name}">${name}</div>
         <div class="file-meta"><span>${size}</span><span>${timeAgo(f.created_at)}</span></div>
-        ${f.description ? `<div style="font-size:.68rem;color:var(--main-muted);margin-top:3px">${f.description}</div>` : ''}
+        ${f.description ? `<div style="font-size:.75rem;color:var(--main-muted);margin-top:4px">${f.description}</div>` : ''}
       </div>
       <div class="file-actions">
         <button class="fa-btn fa-view" onclick="openMedia(${JSON.stringify({url,name,mime,cat}).replace(/"/g,'&quot;')})">👁 View</button>
@@ -992,9 +1000,9 @@ async function handleFiles(fileList) {
     const rowId = 'up-' + Date.now() + Math.random().toString(36).slice(2,6);
     queue.insertAdjacentHTML('beforeend', `
       <div class="upload-progress" id="${rowId}">
-        <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.78rem">${file.name}</span>
+        <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.85rem">${file.name}</span>
         <div class="progress-track"><div class="progress-fill" id="${rowId}-bar"></div></div>
-        <span id="${rowId}-status" style="color:var(--main-muted);font-size:.72rem;white-space:nowrap">0%</span>
+        <span id="${rowId}-status" style="color:var(--main-muted);font-size:.8rem;white-space:nowrap">0%</span>
       </div>`);
 
     try {
@@ -1100,7 +1108,7 @@ function openMedia(f) {
   } else if ((f.mime||'').startsWith('image') || f.cat === 'image') {
     html = `<img src="${f.url}" alt="${f.name}">`;
   } else {
-    html = `<p style="color:var(--main-muted);font-size:.85rem">Preview not available for this file type.</p>`;
+    html = `<p style="color:var(--main-muted);font-size:.9rem">Preview not available for this file type.</p>`;
   }
   document.getElementById('modal-content').innerHTML = html;
   document.getElementById('media-modal').style.display = 'flex';
@@ -1134,8 +1142,8 @@ function renderRegions(regions) {
       <td><span class="role-badge role-user">${r.category || 'Uncategorized'}</span></td>
       <td>${r.gallery_images ? '🖼️' : ''} ${r.audio_files ? '🎵' : ''}</td>
       <td style="white-space:nowrap">
-        <button class="btn btn-ghost" style="font-size:.7rem;padding:4px 8px" onclick="editRegion(${r.id})">✏️ Edit</button>
-        <button class="btn btn-danger" style="font-size:.7rem;padding:4px 8px;margin-left:4px" onclick="deleteRegion(${r.id},'${r.name}')">🗑</button>
+        <button class="btn btn-ghost" style="font-size:.8rem;padding:8px 12px; min-height:44px;" onclick="editRegion(${r.id})">✏️ Edit</button>
+        <button class="btn btn-danger" style="font-size:.8rem;padding:8px 12px; margin-left:4px; min-height:44px;" onclick="deleteRegion(${r.id},'${r.name}')">🗑</button>
       </td>
     </tr>`).join('');
 }
@@ -1345,15 +1353,15 @@ async function loadUsers() {
     tbody.innerHTML = allUsers.map(u => `
       <tr>
         <td><strong>${u.username}</strong></td>
-        <td style="font-size:.78rem;color:var(--main-muted)">${u.email}</td>
+        <td style="font-size:.85rem;color:var(--main-muted)">${u.email}</td>
         <td><span class="role-badge role-${u.role}">${u.role}</span></td>
         <td>${u.is_premium ? '<span style="color:var(--gold)">✨ Yes</span>' : '<span style="color:var(--main-muted)">No</span>'}</td>
-        <td style="font-size:.75rem;color:var(--main-muted)">${timeAgo(u.created_at)}</td>
+        <td style="font-size:.8rem;color:var(--main-muted)">${timeAgo(u.created_at)}</td>
         <td style="white-space:nowrap">
-          <select onchange="setRole('${u.id}',this.value)" style="background:white;border:1px solid var(--main-border);color:var(--main-text);border-radius:6px;padding:3px 6px;font-size:.72rem;cursor:pointer">
+          <select onchange="setRole('${u.id}',this.value)" style="background:white;border:1px solid var(--main-border);color:var(--main-text);border-radius:8px;padding:8px;font-size:.85rem;cursor:pointer">
             ${['user','creator','admin'].map(role => `<option value="${role}" ${u.role===role?'selected':''}>${role}</option>`).join('')}
           </select>
-          <button onclick="togglePremium('${u.id}',${u.is_premium})" style="margin-left:4px" class="btn ${u.is_premium ? 'btn-danger' : 'btn-ghost'}" style="font-size:.7rem;padding:3px 8px">${u.is_premium ? 'Revoke' : '✨ Premium'}</button>
+          <button onclick="togglePremium('${u.id}',${u.is_premium})" style="margin-left:4px" class="btn ${u.is_premium ? 'btn-danger' : 'btn-ghost'}" style="padding:8px 12px;">${u.is_premium ? 'Revoke' : '✨ Premium'}</button>
         </td>
       </tr>`).join('');
   } catch(e) { toast('Failed to load users', 'er'); }
@@ -1387,7 +1395,7 @@ async function loadCreators() {
         <td><strong>${c.username}</strong></td>
         <td style="color:var(--main-muted)">${c.channel_name || '—'}</td>
         <td>${c.post_count || 0}</td>
-        <td><a href="/user/${c.username}" target="_blank" class="btn btn-ghost" style="font-size:.7rem;padding:4px 8px">View</a></td>
+        <td><a href="/user/${c.username}" target="_blank" class="btn btn-ghost" style="font-size:.85rem;padding:8px 12px;">View</a></td>
       </tr>`).join('');
   } catch(e) {}
 }
@@ -1406,8 +1414,8 @@ async function loadPosts() {
         <td style="color:var(--main-muted)">${p.author_username || '—'}</td>
         <td><span class="role-badge ${p.status === 'published' ? 'role-admin' : 'role-user'}">${p.status}</span></td>
         <td>${p.views || 0}</td>
-        <td style="font-size:.75rem;color:var(--main-muted)">${timeAgo(p.created_at)}</td>
-        <td><a href="/post/${p.id}" target="_blank" class="btn btn-ghost" style="font-size:.7rem;padding:4px 8px">View</a></td>
+        <td style="font-size:.8rem;color:var(--main-muted)">${timeAgo(p.created_at)}</td>
+        <td><a href="/post/${p.id}" target="_blank" class="btn btn-ghost" style="font-size:.85rem;padding:8px 12px;">View</a></td>
       </tr>`).join('');
   } catch(e) {}
 }
@@ -1441,7 +1449,7 @@ async function loadStories() {
         <td>${s.author_name || '—'}</td>
         <td>${s.region || '—'}</td>
         <td><span class="role-badge ${s.status==='approved'?'role-admin':s.status==='rejected'?'role-user':'role-creator'}">${s.status}</span></td>
-        <td style="font-size:.75rem;color:var(--main-muted)">${timeAgo(s.created_at)}</td>
+        <td style="font-size:.8rem;color:var(--main-muted)">${timeAgo(s.created_at)}</td>
       </tr>`).join('');
   } catch(e) {}
 }
@@ -1457,7 +1465,7 @@ async function loadNewsletter() {
       <tr>
         <td style="color:var(--main-muted)">${i+1}</td>
         <td>${s.email}</td>
-        <td style="color:var(--main-muted);font-size:.75rem">${timeAgo(s.created_at)}</td>
+        <td style="color:var(--main-muted);font-size:.8rem">${timeAgo(s.created_at)}</td>
       </tr>`).join('');
   } catch(e) {}
 }
@@ -1473,8 +1481,8 @@ async function loadEvents() {
       <tr>
         <td><strong>${e.title}</strong></td>
         <td>${e.location || '—'}</td>
-        <td style="font-size:.78rem">${e.event_date ? new Date(e.event_date).toLocaleDateString() : '—'}</td>
-        <td><button onclick="deleteEvent(${e.id})" class="btn btn-danger" style="font-size:.7rem;padding:4px 8px">🗑 Delete</button></td>
+        <td style="font-size:.85rem">${e.event_date ? new Date(e.event_date).toLocaleDateString() : '—'}</td>
+        <td><button onclick="deleteEvent(${e.id})" class="btn btn-danger" style="font-size:.85rem;padding:8px 12px;">🗑 Delete</button></td>
       </tr>`).join('');
   } catch(e) {}
 }
@@ -1505,11 +1513,11 @@ async function loadCategories() {
     const r = await fetch('/api/sections');
     const cats = await r.json();
     const container = document.getElementById('cats-list');
-    if (!cats.length) { container.innerHTML = '<p style="color:var(--main-muted);font-size:.85rem">No categories yet</p>'; return; }
+    if (!cats.length) { container.innerHTML = '<p style="color:var(--main-muted);font-size:.9rem">No categories yet</p>'; return; }
     container.innerHTML = cats.map(c => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--main-border)">
-        <span style="font-size:.85rem">${c.name}</span>
-        <button onclick="deleteCategory(${c.id})" class="btn btn-danger" style="font-size:.7rem;padding:3px 8px">✕</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--main-border)">
+        <span style="font-size:.9rem">${c.name}</span>
+        <button onclick="deleteCategory(${c.id})" class="btn btn-danger" style="font-size:.8rem;padding:6px 12px; min-height:44px;">✕</button>
       </div>`).join('');
   } catch(e) {}
 }
@@ -1536,14 +1544,14 @@ async function loadChat() {
     const r = await fetch('/api/chat');
     const msgs = await r.json();
     const container = document.getElementById('chat-msgs');
-    if (!msgs.length) { container.innerHTML = '<p style="color:var(--main-muted);font-size:.85rem;padding:8px">No messages yet</p>'; return; }
+    if (!msgs.length) { container.innerHTML = '<p style="color:var(--main-muted);font-size:.9rem;padding:8px">No messages yet</p>'; return; }
     container.innerHTML = msgs.slice(-50).map(m => `
-      <div style="background:white;border:1px solid var(--main-border);border-radius:8px;padding:8px 12px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-          <strong style="font-size:.8rem">${m.username}</strong>
-          <span style="font-size:.7rem;color:var(--main-muted)">${timeAgo(m.created_at)}</span>
+      <div style="background:white;border:1px solid var(--main-border);border-radius:8px;padding:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <strong style="font-size:.9rem">${m.username}</strong>
+          <span style="font-size:.8rem;color:var(--main-muted)">${timeAgo(m.created_at)}</span>
         </div>
-        <p style="font-size:.83rem;color:var(--main-text)">${m.content}</p>
+        <p style="font-size:.95rem;color:var(--main-text)">${m.content}</p>
       </div>`).join('');
   } catch(e) {}
 }
