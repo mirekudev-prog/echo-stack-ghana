@@ -559,8 +559,14 @@ async def admin_preview(request: Request, db: Session = Depends(get_db)):
 async def admin_login(answer: str = Form(...)):
     if answer.strip().lower().replace(" ", "") == ADMIN_SECRET.lower().replace(" ", ""):
         r = JSONResponse({"success": True, "role": "admin"})
-        r.set_cookie("admin_session", "ADMIN_AUTHORIZED",
-                     max_age=86400 * 7, path="/", httponly=False, samesite="lax")
+        r.set_cookie(
+            "admin_session", "ADMIN_AUTHORIZED",
+            max_age=86400 * 7,
+            path="/",
+            httponly=False,
+            samesite="none",      # ← changed from "lax"
+            secure=True            # ← added (required for samesite=none)
+        )
         return r
     raise HTTPException(403, "Wrong password")
 
