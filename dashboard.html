@@ -83,7 +83,7 @@ nav.side-nav{flex:1;padding:12px 10px}
 .tab{padding:7px 16px;border-radius:24px;font-size:.8rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--muted);transition:all .15s;white-space:nowrap;font-family:'DM Sans',sans-serif}
 .tab.active,.tab:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
 
-/* ── POST CARD ── */
+/* ── POST CARD (fully responsive) ── */
 .post-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;transition:box-shadow .2s}
 .post-card:hover{box-shadow:0 4px 24px rgba(13,27,42,.09)}
 
@@ -113,11 +113,11 @@ nav.side-nav{flex:1;padding:12px 10px}
 .card-audio-label{color:rgba(255,255,255,.7);font-size:.72rem;margin-bottom:8px;display:flex;align-items:center;gap:5px}
 .premium-banner{background:linear-gradient(135deg,var(--gold),#a97825);padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:#fff}
 
-/* POST ACTIONS (mobile‑friendly) */
+/* POST ACTIONS – now wraps perfectly on mobile */
 .post-actions{
   display:flex;
+  flex-wrap:wrap;
   align-items:center;
-  flex-wrap:wrap;        /* allows wrapping on small screens */
   gap:6px;
   padding:10px 12px;
   border-top:1px solid var(--border)
@@ -136,7 +136,7 @@ nav.side-nav{flex:1;padding:12px 10px}
   color:var(--muted);
   transition:all .15s;
   font-family:'DM Sans',sans-serif;
-  white-space:nowrap;    /* prevent breaking inside button */
+  white-space:nowrap
 }
 .act-btn:hover{background:#F8FAFC;color:var(--ink)}
 .act-btn.liked{color:#ef4444}
@@ -153,13 +153,11 @@ nav.side-nav{flex:1;padding:12px 10px}
   border:none;
   font-family:'DM Sans',sans-serif;
   text-decoration:none;
-  transition:background .15s;
   white-space:nowrap;
-  flex-shrink:0;         /* prevent shrinking */
+  flex-shrink:0
 }
 .act-read:hover{background:#a97825}
 
-/* Mobile improvements for post actions */
 @media (max-width: 480px) {
   .post-actions {
     gap:4px;
@@ -172,11 +170,7 @@ nav.side-nav{flex:1;padding:12px 10px}
   .act-read {
     padding:6px 10px;
     font-size:.7rem;
-    margin-left:0;        /* remove auto margin on very small screens */
-  }
-  /* If buttons still overflow, allow them to stack */
-  .post-actions {
-    justify-content: flex-start;
+    margin-left:0;
   }
 }
 
@@ -293,7 +287,7 @@ nav.side-nav{flex:1;padding:12px 10px}
 
         <!-- FEED -->
         <div id="feed-container">
-          <!-- Skeleton loaders -->
+          <!-- Skeleton loaders (will be replaced by JS) -->
           <div class="skel-card">
             <div class="skel-row">
               <div class="skeleton skel-circle" style="width:38px;height:38px"></div>
@@ -496,7 +490,7 @@ function buildPostCard(p) {
 
     <div class="post-actions">
       <button class="act-btn" onclick="quickLike(${p.id}, this)">❤️ <span class="lc">${p.likes||0}</span></button>
-      <button class="act-btn" onclick="goPost(${p.id})">💬 ${p.views||0}</button>
+      <button class="act-btn" onclick="goPost(${p.id})">💬 ${p.comment_count||0}</button>
       <button class="act-btn" onclick="sharePost(${p.id}, '${escHtml(p.title).replace(/'/g,"\\'")}')">🔗</button>
       <a href="/post/${p.id}" class="act-read">Read →</a>
     </div>
