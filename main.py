@@ -2088,7 +2088,7 @@ async def ai_chat(
         client = genai.Client(api_key=GOOGLE_API_KEY)
 
         # Choose the model – update to a current model name if needed
-        model_name = "gemini-2.0-flash"  # or gemini-1.5-pro, etc.
+        model_name = "gemini-1.5-flash"  # or gemini-1.5-pro, etc.
 
         if db_context:
             prompt = f"""You are EchoBot, a friendly Ghana heritage AI. Use the following information from our database to answer the user's question if relevant. If the information doesn't help, rely on your own knowledge.
