@@ -2073,21 +2073,17 @@ async def ai_chat(
         except Exception:
             pass
 
-    # Search database for relevant content
     db_context = search_database(message, db)
 
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     if not GOOGLE_API_KEY:
-        # Fallback if no API key
         return {
             "reply": f"Akwaaba! You asked: '{message}'. Ghana has 16 beautiful regions with rich heritage. 🇬🇭",
             "locked": False
         }
 
     try:
-        genai.configure(api_key=GOOGLE_API_KEY)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-
+        # Build prompt
         if db_context:
             prompt = f"""You are EchoBot, a friendly Ghana heritage AI. Use the following information from our database to answer the user's question if relevant. If the information doesn't help, rely on your own knowledge.
 
@@ -2097,8 +2093,23 @@ User question: {message}"""
         else:
             prompt = f"You are EchoBot, a friendly Ghana heritage AI. User question: {message}. Answer helpfully and concisely about Ghana's culture, history, or regions."
 
-        response = model.generate_content(prompt)
-        reply = response.text
+        # Direct HTTP call to Gemini API
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}"
+        payload = {
+            "contents": [{
+                "parts": [{"text": prompt}]
+            }]
+        }
+
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(url, json=payload)
+            data = response.json()
+
+        # Extract reply
+        try:
+            reply = data["candidates"][0]["content"]["parts"][0]["text"]
+        except (KeyError, IndexError):
+            reply = "I couldn't generate a response right now."
 
         return {"reply": reply, "locked": False}
 
