@@ -10,10 +10,80 @@
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:'DM Sans',sans-serif;background:#F0F2F5;color:#1e293b}
         .container{max-width:720px;margin:0 auto;padding:20px 16px 40px}
+        .back-btn{display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;color:#C8962E;text-decoration:none;font-weight:600}
+
+        /* Post header */
         .post-header{margin-bottom:24px}
         .post-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#0D1B2A;margin-bottom:8px;line-height:1.2}
-        .post-meta{display:flex;align-items:center;gap:10px;color:#64748b;font-size:.85rem;margin-bottom:16px}
+        .post-meta{display:flex;align-items:center;gap:10px;color:#64748b;font-size:.85rem;margin-bottom:8px;flex-wrap:wrap}
+        .post-type-badge{
+            padding:4px 10px;
+            border-radius:20px;
+            font-size:.7rem;
+            font-weight:700;
+            text-transform:uppercase;
+            letter-spacing:.03em;
+            background:#EFF6FF;
+            color:#2563EB;
+            display:inline-block;
+        }
+        .post-type-badge.video{background:#FDF2F8;color:#9333EA;}
+        .post-type-badge.reel{background:#FCE7F3;color:#B21E6C;}
+        .post-type-badge.audio{background:#F0FDF4;color:#16A34A;}
+        .post-type-badge.premium{background:rgba(201,147,58,.15);color:#c9933a;}
+
+        /* Cover image */
         .post-cover{width:100%;border-radius:16px;margin-bottom:24px;max-height:400px;object-fit:cover}
+
+        /* Video player (for video/reel) */
+        .video-container{
+            width:100%;
+            background:#000;
+            border-radius:16px;
+            overflow:hidden;
+            margin-bottom:24px;
+            position:relative;
+        }
+        .video-container video{
+            width:100%;
+            display:block;
+            max-height:70vh;
+            object-fit:contain;
+            background:#000;
+        }
+        .video-container.reel video{
+            max-height:80vh;
+            aspect-ratio:9/16;
+            object-fit:cover;
+            margin:0 auto;
+        }
+        .reel-watermark{
+            position:absolute;
+            bottom:12px;
+            right:12px;
+            background:rgba(0,0,0,.65);
+            border-radius:20px;
+            padding:5px 12px;
+            display:flex;
+            align-items:center;
+            gap:6px;
+            z-index:20;
+            pointer-events:none;
+            backdrop-filter:blur(2px);
+            border:1px solid rgba(255,255,255,.15);
+        }
+        .reel-watermark img{
+            height:18px;
+            width:auto;
+        }
+        .reel-watermark span{
+            color:white;
+            font-size:0.7rem;
+            font-weight:600;
+            letter-spacing:0.5px;
+        }
+
+        /* Post content (markdown) */
         .post-content{font-size:.95rem;line-height:1.8;color:#334155;margin-bottom:32px}
         .post-content p{margin-bottom:1.2rem}
         .post-content h2{font-family:'Playfair Display',serif;font-size:1.4rem;margin:2rem 0 .8rem}
@@ -23,7 +93,7 @@
         .post-content blockquote{border-left:4px solid #C8962E;background:#f9f5eb;padding:.8rem 1.2rem;border-radius:0 8px 8px 0;font-style:italic;margin:1rem 0}
         .post-content pre{background:#1e293b;color:#e2e8f0;padding:1rem;border-radius:10px;overflow-x:auto}
         .post-content code{background:#e2e8f0;padding:2px 6px;border-radius:4px;font-size:.85rem}
-        .back-btn{display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;color:#C8962E;text-decoration:none;font-weight:600}
+
         .loading{text-align:center;padding:40px;color:#94a3b8}
         .error{text-align:center;padding:40px;color:#dc2626}
 
@@ -70,9 +140,38 @@
                     <span>By {{ post.author_username || 'Creator' }}</span>
                     <span>•</span>
                     <span>{{ formatDate(post.created_at) }}</span>
+                    <!-- Type badge -->
+                    <span :class="['post-type-badge', post.content_type]" v-if="post.content_type">
+                        {{ post.content_type === 'reel' ? '📱 Reel' : (post.content_type === 'video' ? '🎬 Video' : (post.content_type === 'audio' ? '🎵 Audio' : (post.content_type === 'story' ? '📖 Story' : '📰 Article'))) }}
+                    </span>
+                    <span class="post-type-badge premium" v-if="post.is_premium">⭐ Premium</span>
                 </div>
             </div>
-            <img v-if="post.cover_image" :src="post.cover_image" class="post-cover" alt="">
+
+            <!-- Video player for reel/video posts (using video_url if available) -->
+            <div v-if="(post.content_type === 'video' || post.content_type === 'reel') && post.video_url" 
+                 :class="['video-container', post.content_type === 'reel' ? 'reel' : '']">
+                <video controls preload="metadata" poster="post.cover_image">
+                    <source :src="post.video_url" type="video/mp4">
+                </video>
+                <!-- Watermark only for reels -->
+                <div v-if="post.content_type === 'reel'" class="reel-watermark">
+                    <img src="/echostack-logo.png" alt="" onerror="this.style.display='none'">
+                    <span>EchoStack</span>
+                </div>
+            </div>
+
+            <!-- Cover image (if no video) -->
+            <img v-else-if="post.cover_image" :src="post.cover_image" class="post-cover" alt="">
+
+            <!-- Audio player for audio posts -->
+            <div v-if="post.content_type === 'audio' && post.audio_url" style="margin-bottom:20px">
+                <audio controls style="width:100%;border-radius:8px">
+                    <source :src="post.audio_url" type="audio/mpeg">
+                </audio>
+            </div>
+
+            <!-- Main content (markdown) -->
             <div class="post-content" v-html="renderedContent"></div>
 
             <!-- Comments Section -->
@@ -146,7 +245,7 @@
                     if (!this.post || !this.post.content) return '';
                     let html = this.post.content
                         .replace(/\[video\](.*?)\[\/video\]/gi, '<video controls style="max-width:100%"><source src="$1"></video>')
-                        .replace(/\[audio\](.*?)\/audio\]/gi, '<audio controls style="max-width:100%"><source src="$1"></audio>');
+                        .replace(/\[audio\](.*?)\[\/audio\]/gi, '<audio controls style="max-width:100%"><source src="$1"></audio>');
                     return marked.parse(html);
                 }
             },
@@ -249,7 +348,7 @@
                     this.loading = false;
                 }
                 await this.fetchComments();
-                // Get current user
+                // Get current user (for like status, not implemented)
                 try {
                     const me = await fetch('/api/users/me');
                     if (me.ok) this.currentUser = await me.json();
