@@ -1115,7 +1115,7 @@ async def get_reels(
             # Comment count (excluding "__like__" entries)
             comment_count = db.query(models.Comment).filter(
                 models.Comment.post_id == p.id,
-                models.Comment.content != "__like__
+                models.Comment.content != "__like__"   # <-- fixed quote
             ).count()
 
             # Check if current user follows the author
@@ -1160,7 +1160,7 @@ async def get_reels(
         }
     except Exception as e:
         print(f"GET /api/reels error: {e}")
-        return {"total": 0, "reels": []}
+        return {"total": 0, "reels": []}        
 
 @app.post("/api/posts")
 async def create_post(
