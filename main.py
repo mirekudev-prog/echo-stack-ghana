@@ -454,6 +454,12 @@ async def dashboard_page(request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("dashboard.html")
     return RedirectResponse("/user-login")
+    
+@app.get("/reels")
+async def reels_page(request: Request):
+    if _is_admin(request) or request.cookies.get("user_session"):
+        return _serve("reels.html")
+    return RedirectResponse("/user-login")
 
 @app.get("/creator")
 async def creator_page(request: Request):
