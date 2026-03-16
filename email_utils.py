@@ -10,8 +10,6 @@ FROM_DOMAIN = "test-r83ql3pyydmgzw1j.mlsender.net"  # your exact test domain
 FROM_EMAIL = f"noreply@{FROM_DOMAIN}"
 FROM_NAME = "EchoStack"
 
-mailer = emails.NewEmail(MAILERSEND_API_KEY)
-
 def generate_token() -> str:
     return secrets.token_urlsafe(32)
 
@@ -42,19 +40,18 @@ def send_password_reset_email(to_email: str, username: str, token: str):
     _send_email(to_email, subject, html)
 
 def _send_email(to_email: str, subject: str, html_content: str):
-    mail_from = {"name": FROM_NAME, "email": FROM_EMAIL}
-    recipients = [{"email": to_email}]
+    # Create a new mailer instance for each email
+    mailer = emails.NewEmail(MAILERSEND_API_KEY)
+
+    # Build the email step by step
+    mailer.set_mail_from({"name": FROM_NAME, "email": FROM_EMAIL})
+    mailer.set_mail_to([{"email": to_email}])
+    mailer.set_subject(subject)
+    mailer.set_html_content(html_content)
+
     try:
-        # MailerSend expects content as a dictionary, not as keyword 'html'
-        response = mailer.send(
-            mail_from,
-            recipients,
-            subject,
-            content={
-                "html": html_content
-            }
-        )
-        print(f"✅ Email sent to {to_email}")
+        response = mailer.send()
+        print(f"✅ Email sent to {to_email} (response: {response})")
     except Exception as e:
         print(f"❌ Failed to send email to {to_email}: {e}")
         # Optionally re-raise if you want the caller to know
