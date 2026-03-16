@@ -18,6 +18,10 @@
       overflow-y: scroll;
       scroll-snap-type: y mandatory;
       -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* hide scrollbar */
+    }
+    #reels-container::-webkit-scrollbar {
+      display: none;
     }
     .reel {
       height: 100vh;
@@ -37,23 +41,36 @@
       height: 100%;
       object-fit: cover;
       pointer-events: none;
+      z-index: 1;
     }
+    /* Overlay gradient to make text readable */
+    .reel-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(0deg, rgba(0,0,0,0.5) 0%, transparent 50%, rgba(0,0,0,0.2) 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+    /* Bottom left info */
     .reel-info {
-      position: relative;
-      z-index: 10;
-      padding: 20px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      position: absolute;
+      bottom: 24px;
+      left: 16px;
+      z-index: 3;
       color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      max-width: 70%;
     }
-    .reel-user {
+    .reel-info .author {
       display: flex;
       align-items: center;
       gap: 10px;
+      margin-bottom: 8px;
     }
-    .avatar {
+    .reel-info .author-avatar {
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -62,28 +79,106 @@
       align-items: center;
       justify-content: center;
       font-weight: bold;
+      font-size: 1.2rem;
+      border: 2px solid white;
     }
+    .reel-info .author-name {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .reel-info .title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .reel-info .description {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    /* Right side action buttons */
     .reel-actions {
+      position: absolute;
+      right: 12px;
+      bottom: 80px;
+      z-index: 3;
       display: flex;
       flex-direction: column;
       gap: 16px;
-      margin-right: 10px;
+      align-items: center;
     }
     .action-btn {
-      background: none;
+      background: rgba(0,0,0,0.6);
       border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: white;
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       cursor: pointer;
-      text-shadow: 0 2px 5px rgba(0,0,0,0.5);
-      min-width: 44px;
-      min-height: 44px;
+      backdrop-filter: blur(4px);
+      transition: transform 0.2s, background 0.2s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .action-btn:hover {
+      transform: scale(1.1);
+      background: rgba(0,0,0,0.8);
+    }
+    .action-btn.liked {
+      color: #ff3b5c;
     }
     .action-count {
       font-size: 0.8rem;
-      text-align: center;
-      margin-top: -8px;
+      margin-top: 2px;
+      color: white;
+      text-shadow: 0 1px 2px black;
     }
+    /* Follow button specific */
+    .follow-btn {
+      background: #C8962E;
+      color: black;
+      font-size: 0.9rem;
+      font-weight: bold;
+      width: auto;
+      padding: 0 16px;
+      border-radius: 24px;
+      gap: 4px;
+    }
+    .follow-btn.following {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    /* Watermark (CSS overlay – not permanent) */
+    .reel-watermark {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(0,0,0,0.65);
+      border-radius: 20px;
+      padding: 4px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 3;
+      pointer-events: none;
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .reel-watermark img {
+      height: 18px;
+      width: auto;
+      filter: brightness(0) invert(1); /* make logo white */
+    }
+    .reel-watermark span {
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    /* Loading / error */
     .loading, .error {
       color: white;
       text-align: center;
@@ -104,22 +199,34 @@
 <body>
   <div id="reels-container"></div>
   <script>
+    // Configuration
+    const API_BASE = '/api';
     let reels = [];
     let currentIndex = 0;
     let isLoading = false;
     let hasMore = true;
-    const container = document.getElementById('reels-container');
+    let currentUser = null;
 
-    // Load initial reels
-    loadReels();
+    // Fetch current user
+    async function fetchCurrentUser() {
+      try {
+        const res = await fetch(`${API_BASE}/users/me`);
+        if (res.ok) {
+          currentUser = await res.json();
+        }
+      } catch (e) {
+        console.warn('Not logged in');
+      }
+    }
 
+    // Load reels from backend
     async function loadReels(offset = 0) {
       if (isLoading || !hasMore) return;
       isLoading = true;
       showLoader();
 
       try {
-        const res = await fetch(`/api/reels?limit=5&offset=${offset}`);
+        const res = await fetch(`${API_BASE}/reels?limit=5&offset=${offset}`);
         const data = await res.json();
         if (data.reels && data.reels.length) {
           reels = reels.concat(data.reels);
@@ -137,39 +244,68 @@
       }
     }
 
+    // Render new reels
     function renderReels(newReels, clear = false) {
+      const container = document.getElementById('reels-container');
       if (clear) container.innerHTML = '';
+
       newReels.forEach((reel, i) => {
         const reelDiv = document.createElement('div');
         reelDiv.className = 'reel';
         reelDiv.dataset.id = reel.id;
+        reelDiv.dataset.authorId = reel.author_id; // need author_id from API – you may need to include it in the /reels response
         reelDiv.dataset.index = reels.length - newReels.length + i;
         reelDiv.innerHTML = `
-          <video src="${reel.video_url}" loop playsinline muted preload="metadata"></video>
+          <video src="${reel.video_url}" loop playsinline preload="metadata"></video>
+          <div class="reel-overlay"></div>
+
+          <!-- Bottom left info -->
           <div class="reel-info">
-            <div class="reel-user">
-              <div class="avatar">${reel.author_username?.charAt(0) || 'U'}</div>
-              <div>
-                <strong>@${reel.author_username}</strong>
-                <div style="font-size:0.8rem; margin-top:4px;">${reel.title || ''}</div>
-              </div>
+            <div class="author">
+              <div class="author-avatar">${reel.author_username?.charAt(0) || 'U'}</div>
+              <span class="author-name">@${reel.author_username}</span>
             </div>
-            <div class="reel-actions">
-              <button class="action-btn" onclick="likeReel('${reel.id}')">❤️</button>
-              <span class="action-count">${reel.likes || 0}</span>
-              <button class="action-btn" onclick="commentReel('${reel.id}')">💬</button>
-              <button class="action-btn" onclick="shareReel('${reel.id}')">↗️</button>
-            </div>
+            <div class="title">${reel.title || ''}</div>
+            ${reel.description ? `<div class="description">${reel.description}</div>` : ''}
+          </div>
+
+          <!-- Right side action buttons -->
+          <div class="reel-actions">
+            <button class="action-btn like-btn" onclick="toggleLike(this, '${reel.id}')">
+              ❤️
+            </button>
+            <span class="action-count" id="like-count-${reel.id}">${reel.likes || 0}</span>
+
+            <button class="action-btn comment-btn" onclick="openComments('${reel.id}')">
+              💬
+            </button>
+            <span class="action-count">${reel.comment_count || 0}</span>
+
+            <button class="action-btn share-btn" onclick="shareReel('${reel.id}')">
+              ↪️
+            </button>
+
+            <button class="action-btn follow-btn ${reel.is_following ? 'following' : ''}" 
+                    onclick="toggleFollow(this, '${reel.author_id}')" 
+                    data-following="${reel.is_following || false}">
+              ${reel.is_following ? 'Following' : 'Follow'}
+            </button>
+          </div>
+
+          <!-- Watermark overlay -->
+          <div class="reel-watermark">
+            <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+            <span>EchoStack</span>
           </div>
         `;
         container.appendChild(reelDiv);
       });
 
-      // After rendering, attach intersection observer to play/pause
+      // Attach video playback on visibility
       observeVideos();
     }
 
-    // Intersection Observer to auto‑play when visible
+    // Intersection Observer to auto‑play/pause
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         const video = entry.target.querySelector('video');
@@ -186,7 +322,73 @@
       document.querySelectorAll('.reel').forEach(reel => observer.observe(reel));
     }
 
-    // Infinite scroll: load more when reaching the last reel
+    // Like / unlike
+    async function toggleLike(btn, postId) {
+      if (!currentUser) {
+        alert('Please log in to like');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/posts/${postId}/like`, { method: 'POST' });
+        const data = await res.json();
+        const countSpan = document.getElementById(`like-count-${postId}`);
+        if (countSpan) countSpan.textContent = data.likes;
+        btn.classList.toggle('liked', data.liked);
+      } catch (e) {
+        console.error('Like error', e);
+      }
+    }
+
+    // Follow / unfollow
+    async function toggleFollow(btn, authorId) {
+      if (!currentUser) {
+        alert('Please log in to follow');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/follow/${authorId}`, { method: 'POST' });
+        const data = await res.json();
+        const isFollowing = data.following;
+        btn.textContent = isFollowing ? 'Following' : 'Follow';
+        btn.classList.toggle('following', isFollowing);
+        btn.dataset.following = isFollowing;
+      } catch (e) {
+        console.error('Follow error', e);
+      }
+    }
+
+    // Open comments (go to post page)
+    function openComments(postId) {
+      window.location.href = `/post/${postId}`;
+    }
+
+    // Share
+    function shareReel(postId) {
+      const url = window.location.origin + '/post/' + postId;
+      if (navigator.share) {
+        navigator.share({ title: 'Check out this reel on EchoStack', url });
+      } else {
+        navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
+      }
+    }
+
+    // Loader helpers
+    function showLoader() {
+      if (!document.getElementById('loader') && hasMore) {
+        const loader = document.createElement('div');
+        loader.id = 'loader';
+        loader.className = 'reel';
+        loader.innerHTML = '<div class="spinner"></div>';
+        document.getElementById('reels-container').appendChild(loader);
+      }
+    }
+    function removeLoader() {
+      const loader = document.getElementById('loader');
+      if (loader) loader.remove();
+    }
+
+    // Infinite scroll
+    const container = document.getElementById('reels-container');
     container.addEventListener('scroll', () => {
       const scrollTop = container.scrollTop;
       const scrollHeight = container.scrollHeight;
@@ -195,47 +397,16 @@
         loadReels(reels.length);
       }
 
-      // Update current index for potential preloading
+      // Update current index (optional)
       const reelHeight = clientHeight;
       currentIndex = Math.round(scrollTop / reelHeight);
     });
 
-    // Helpers
-    function showLoader() {
-      if (!document.getElementById('loader') && hasMore) {
-        const loader = document.createElement('div');
-        loader.id = 'loader';
-        loader.className = 'reel';
-        loader.innerHTML = '<div class="spinner"></div>';
-        container.appendChild(loader);
-      }
-    }
-    function removeLoader() {
-      const loader = document.getElementById('loader');
-      if (loader) loader.remove();
-    }
-
-    // Action stubs (connect to your backend)
-    async function likeReel(id) {
-      // Call your like endpoint, e.g., POST /api/posts/{id}/like
-      const res = await fetch(`/api/posts/${id}/like`, { method: 'POST' });
-      if (res.ok) {
-        // update like count in UI
-        location.reload(); // quick hack – better to update dynamically
-      }
-    }
-    function commentReel(id) {
-      window.location.href = `/post/${id}`; // go to post detail with comments
-    }
-    function shareReel(id) {
-      navigator.share?.({ url: window.location.origin + `/post/${id}` }) ||
-      prompt('Copy link:', window.location.origin + `/post/${id}`);
-    }
-
-    // Ensure videos play when user taps (unmute after first interaction)
-    document.addEventListener('click', () => {
-      document.querySelectorAll('video').forEach(v => { v.muted = false; });
-    }, { once: true });
+    // Initial load
+    (async () => {
+      await fetchCurrentUser();
+      await loadReels(0);
+    })();
   </script>
 </body>
 </html>
