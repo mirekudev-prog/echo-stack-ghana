@@ -795,7 +795,7 @@ nav.side-nav {
 
   <nav class="side-nav">
     <a href="/dashboard" class="nav-item active"><span class="icon">📰</span>Feed</a>
-    <a href="/reels" class="nav-item"><span class="icon">📱</span>Reels</a> 
+    <a href="/reels" class="nav-item"><span class="icon">📱</span>Reels</a>
     <a href="/app" class="nav-item"><span class="icon">🗺️</span>Explore Map</a>
     <a href="/following" class="nav-item"><span class="icon">👥</span>Following</a>
     <a href="/activity" class="nav-item"><span class="icon">⚡</span>Activity</a>
@@ -1044,9 +1044,15 @@ function buildPostCard(p) {
   // Build actions including delete button if user is admin/superuser
   let actionsHtml = `
     <button class="act-btn" onclick="quickLike(${p.id}, this)">❤️ <span class="lc">${p.likes||0}</span></button>
-    <button class="act-btn" onclick="goPost(${p.id})">💬 ${p.comment_count||0}</button>
+    <button class="act-btn" onclick="goPost(${p.id})">💬 ${p.comment_count || 0}</button>
     <button class="act-btn" onclick="sharePost(${p.id}, '${escHtml(p.title).replace(/'/g,"\\'")}')">🔗</button>`;
-  
+
+  // Follow button (if author exists and is not current user)
+  if (currentUser && p.author_id && p.author_id !== currentUser.id) {
+    const followingText = p.is_following ? 'Following' : 'Follow';
+    actionsHtml += `<button class="act-btn" onclick="toggleFollow('${p.author_id}', this)" data-following="${p.is_following}">${followingText}</button>`;
+  }
+
   if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superuser')) {
     actionsHtml += `<button class="act-btn" onclick="deletePost(${p.id})" style="color:#ef4444;">🗑 Delete</button>`;
   }
@@ -1072,6 +1078,22 @@ function buildPostCard(p) {
       ${actionsHtml}
     </div>
   </div>`;
+}
+
+// ────────────────────────────
+// TOGGLE FOLLOW (new function)
+// ────────────────────────────
+async function toggleFollow(authorId, btn) {
+  if (!currentUser) { showToast('Please log in to follow', 'er'); return; }
+  try {
+    const res = await fetch(`/api/follow/${authorId}`, { method: 'POST' });
+    const data = await res.json();
+    const isFollowing = data.following;
+    btn.textContent = isFollowing ? 'Following' : 'Follow';
+    btn.dataset.following = isFollowing;
+  } catch (e) {
+    showToast('Error following', 'er');
+  }
 }
 
 // ────────────────────────────
