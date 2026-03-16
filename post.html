@@ -151,7 +151,7 @@
             <!-- Video player for reel/video posts (using video_url if available) -->
             <div v-if="(post.content_type === 'video' || post.content_type === 'reel') && post.video_url" 
                  :class="['video-container', post.content_type === 'reel' ? 'reel' : '']">
-                <video controls preload="metadata" poster="post.cover_image">
+                <video controls preload="metadata" :poster="post.cover_image">
                     <source :src="post.video_url" type="video/mp4">
                 </video>
                 <!-- Watermark only for reels -->
