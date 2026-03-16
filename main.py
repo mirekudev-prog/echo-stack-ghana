@@ -644,7 +644,7 @@ async def signup(
             is_premium=0, is_suspended=0, follower_count=0,
             bio="", avatar_url="", channel_name=uname, channel_desc="",
             # Email verification enabled: user must verify before login
-            email_verified=True,
+            email_verified=False,   # Fixed: now uses capital False
             verification_token=verification_token,
             verification_token_expires=token_expires
         )
@@ -677,11 +677,13 @@ async def signup(
         db.refresh(u)
         print(f"✅ New user: {uname} ({uemail}) id={uid}")
 
-        # Send verification email (non-blocking)
-       # try:
-        #    send_verification_email(uemail, uname, verification_token)
-        #except Exception as e:
-         #   print(f"⚠️ Verification email failed (non-fatal): {e}")
+        # Send verification email (non-blocking) – now enabled!
+        try:
+            send_verification_email(uemail, uname, verification_token)
+            print(f"📧 Verification email sent to {uemail}")
+        except Exception as e:
+            # Log the error but don't fail signup – user can request resend later
+            print(f"⚠️ Verification email failed (non-fatal): {e}")
 
         # Do NOT log the user in immediately; they must verify first
         return JSONResponse({
