@@ -1039,7 +1039,6 @@ async def admin_verify_user(uid: str, request: Request, db: Session = Depends(ge
     return {"success": True}
 
 # ─── POSTS ────────────────────────────────────────────────────────────────────
-
 @app.get("/api/posts")
 async def get_posts(
     request: Request, limit: int = 20, offset: int = 0,
@@ -1057,37 +1056,61 @@ async def get_posts(
             else:
                 q = q.filter(models.Post.status == "published")
 
-        if content_type: q = q.filter(models.Post.content_type == content_type)
-        if region_id and region_id.isdigit(): q = q.filter(models.Post.region_id == int(region_id))
-        if author_id: q = q.filter(models.Post.author_id == author_id)
+        if content_type:
+            q = q.filter(models.Post.content_type == content_type)
+        if region_id and region_id.isdigit():
+            q = q.filter(models.Post.region_id == int(region_id))
+        if author_id:
+            q = q.filter(models.Post.author_id == author_id)
 
         posts = q.order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
 
-        return [{
-            "id": p.id,
-            "title":          getattr(p, "title", "") or "",
-            "slug":           getattr(p, "slug", "") or "",
-            "excerpt":        getattr(p, "excerpt", "") or "",
-            "cover_image":    getattr(p, "cover_image", "") or "",
-            "content_type":   getattr(p, "content_type", "article") or "article",
-            "status":         getattr(p, "status", "published") or "published",
-            "is_locked":      getattr(p, "is_locked", 0) or 0,
-            "author_id":      str(p.author_id) if p.author_id else "",
-            "author_username":getattr(p, "author_username", "") or "",
-            "region_id":      getattr(p, "region_id", None),
-            "tags":           getattr(p, "tags", "") or "",
-            "views":          getattr(p, "views", 0) or 0,
-            "view_count":     getattr(p, "views", 0) or 0,
-            "likes":          getattr(p, "likes", 0) or 0,
-            "audio_url":      getattr(p, "audio_url", "") or "",
-            "video_url":      getattr(p, "video_url", "") or "",
-            "gallery":        getattr(p, "gallery", "") or "",
-            "created_at":     str(getattr(p, "created_at", "")),
-            "comment_count":  db.query(models.Comment).filter(
+        # Get current user id from cookie for follow status
+        sid = request.cookies.get("user_session")
+        current_user_id = sid if sid else None
+
+        result = []
+        for p in posts:
+            # Comment count (excluding "__like__" entries)
+            comment_count = db.query(models.Comment).filter(
                 models.Comment.post_id == p.id,
                 models.Comment.content != "__like__"
             ).count()
-        } for p in posts]
+
+            # Check if current user follows the author
+            is_following = False
+            if current_user_id and p.author_id:
+                follow = db.query(models.Follow).filter(
+                    models.Follow.follower_id == current_user_id,
+                    models.Follow.following_id == p.author_id
+                ).first()
+                is_following = follow is not None
+
+            result.append({
+                "id": p.id,
+                "title": getattr(p, "title", "") or "",
+                "slug": getattr(p, "slug", "") or "",
+                "excerpt": getattr(p, "excerpt", "") or "",
+                "cover_image": getattr(p, "cover_image", "") or "",
+                "content_type": getattr(p, "content_type", "article") or "article",
+                "status": getattr(p, "status", "published") or "published",
+                "is_locked": getattr(p, "is_locked", 0) or 0,
+                "author_id": str(p.author_id) if p.author_id else "",
+                "author_username": getattr(p, "author_username", "") or "",
+                "region_id": getattr(p, "region_id", None),
+                "tags": getattr(p, "tags", "") or "",
+                "views": getattr(p, "views", 0) or 0,
+                "view_count": getattr(p, "views", 0) or 0,
+                "likes": getattr(p, "likes", 0) or 0,
+                "audio_url": getattr(p, "audio_url", "") or "",
+                "video_url": getattr(p, "video_url", "") or "",
+                "gallery": getattr(p, "gallery", "") or "",
+                "created_at": str(getattr(p, "created_at", "")),
+                "comment_count": comment_count,                 # <-- added
+                "is_following": is_following,                   # <-- added
+            })
+        return result
+
     except Exception as e:
         print(f"GET /api/posts error: {e}")
         return []
