@@ -582,15 +582,21 @@ async def admin_login(answer: str = Form(...)):
         r = JSONResponse({"success": True, "role": "admin"})
         r.set_cookie(
             "admin_session", "ADMIN_AUTHORIZED",
-            max_age=86400 * 7,
+            max_age=86400 * 7,      # 7 days
             path="/",
-            httponly=False,
-            samesite="none",
-            secure=True
+            httponly=False,          # Allow JavaScript access (if needed)
+            samesite="lax",          # Changed from "none" – works for same-site requests
+            secure=True,              # Keep Secure – your site uses HTTPS
+            # domain=".onrender.com" # Optional: uncomment if you have subdomains
         )
         return r
     raise HTTPException(403, "Wrong password")
 
+@app.get("/api/debug/cookie")
+async def debug_cookie(request: Request):
+    admin_cookie = request.cookies.get("admin_session")
+    return {"admin_session": admin_cookie}
+    
 @app.post("/api/auth/logout")
 def admin_logout():
     r = JSONResponse({"success": True})
