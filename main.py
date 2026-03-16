@@ -807,10 +807,10 @@ async def forgot_password(email: str = Form(...), db: Session = Depends(get_db))
                 send_password_reset_email(user.email, user.username, reset_token)
             except Exception as e:
                 print(f"⚠️ Reset email failed: {e}")
-        return {"success": True, "message": "If an account exists, a reset link was sent."}
+        return {"success": True, "message": "If an account exists, a reset link was sent,CHECK SPAM TOO."}
     except Exception as e:
         print(f"Forgot password error: {e}")
-        return {"success": True, "message": "If an account exists, a reset link was sent."}
+        return {"success": True, "message": "If an account exists, a reset link was sent,CHECK YOUR SPAM TOO."}
 
 @app.post("/api/users/reset-password")
 async def reset_password(
@@ -1085,7 +1085,7 @@ async def get_posts(
     except Exception as e:
         print(f"GET /api/posts error: {e}")
         return []
-
+        
 @app.get("/api/reels")
 async def get_reels(
     request: Request,
@@ -1096,6 +1096,7 @@ async def get_reels(
     """
     Return a list of published reels (content_type='reel').
     Ordered by newest first.
+    Includes comment count, follow status, author details, and description.
     """
     try:
         q = db.query(models.Post).filter(
@@ -1105,23 +1106,57 @@ async def get_reels(
         total = q.count()
         reels = q.offset(offset).limit(limit).all()
 
+        # Get current user id from cookie for follow status
+        sid = request.cookies.get("user_session")
+        current_user_id = sid if sid else None
+
+        reel_list = []
+        for p in reels:
+            # Comment count (excluding "__like__" entries)
+            comment_count = db.query(models.Comment).filter(
+                models.Comment.post_id == p.id,
+                models.Comment.content != "__like__
+            ).count()
+
+            # Check if current user follows the author
+            is_following = False
+            if current_user_id and p.author_id:
+                follow = db.query(models.Follow).filter(
+                    models.Follow.follower_id == current_user_id,
+                    models.Follow.following_id == p.author_id
+                ).first()
+                is_following = follow is not None
+
+            # Fetch author avatar (optional)
+            author_avatar = ""
+            if p.author_id:
+                user = db.query(models.User).filter(models.User.id == p.author_id).first()
+                if user:
+                    author_avatar = user.avatar_url or ""
+
+            # Build description from excerpt or content snippet
+            description = p.excerpt or (p.content[:100] + "..." if p.content else "")
+
+            reel_list.append({
+                "id": p.id,
+                "title": p.title,
+                "description": description,
+                "video_url": p.video_url or "",
+                "author_id": str(p.author_id) if p.author_id else None,
+                "author_username": p.author_username or "Creator",
+                "author_avatar": author_avatar,
+                "likes": p.likes or 0,
+                "comment_count": comment_count,
+                "views": p.views or 0,
+                "created_at": p.created_at.isoformat(),
+                "is_following": is_following
+            })
+
         return {
             "total": total,
             "offset": offset,
             "limit": limit,
-            "reels": [
-                {
-                    "id": p.id,
-                    "title": p.title,
-                    "video_url": p.video_url or "",
-                    "author_username": p.author_username,
-                    "author_avatar": "",
-                    "likes": p.likes,
-                    "views": p.views,
-                    "created_at": p.created_at.isoformat()
-                }
-                for p in reels
-            ]
+            "reels": reel_list
         }
     except Exception as e:
         print(f"GET /api/reels error: {e}")
