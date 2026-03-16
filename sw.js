@@ -18,7 +18,8 @@ const PAGES_TO_CACHE = [
     '/app',
     '/dashboard',
     '/admin',
-    '/subscribers',        // <--- added subscribers route
+    '/subscribers',
+    '/reels',               // added reels page
     OFFLINE_URL,
 ];
 
@@ -67,12 +68,23 @@ function isStaticAsset(url) {
     return extensions.some(ext => url.endsWith(ext));
 }
 
+// Helper: check if the request is for Supabase storage (videos, images, etc.)
+function isSupabaseStorage(url) {
+    return url.includes('supabase.co/storage/v1/object/public/');
+}
+
 // Fetch strategy
 self.addEventListener('fetch', event => {
     const url = event.request.url;
     const request = event.request;
 
-    // 1. API calls (including /api/subscribers if you move it) → network only
+    // 0. Special case: Supabase storage – always network, no cache (prevents video errors)
+    if (isSupabaseStorage(url)) {
+        event.respondWith(fetch(request));
+        return;
+    }
+
+    // 1. API calls – network only
     if (url.includes('/api/')) {
         event.respondWith(
             fetch(request).catch(() => 
@@ -85,7 +97,7 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // 2. Static assets → cache-first
+    // 2. Static assets – cache-first
     if (isStaticAsset(url)) {
         event.respondWith(
             caches.match(request).then(cached => 
@@ -101,7 +113,7 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // 3. All other requests (including /subscribers) → network-first, fallback to cache, then offline page
+    // 3. All other requests (including pages) – network-first, fallback to cache, then offline page
     event.respondWith(
         fetch(request)
             .then(response => {
