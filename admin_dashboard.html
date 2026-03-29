@@ -830,6 +830,37 @@ select{
 <div class="toast" id="toast"></div>
 
 <script>
+// After successful login, store the token in localStorage
+async function adminLogin(secret) {
+    const fd = new FormData();
+    fd.append('answer', secret);
+    const res = await fetch('/api/auth/login', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        localStorage.setItem('admin_token', data.token);
+        // Also set a cookie? Already done by server.
+        window.location.href = '/admin';
+    } else {
+        alert('Wrong password');
+    }
+}
+
+// On admin page load, check both cookie and localStorage token
+async function checkAdminAuth() {
+    // First, try to send the token via header if present
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+        // You can add a custom header to your fetch requests
+        // But easier: rely on cookie; if cookie missing, use token to re-authenticate
+        const res = await fetch('/api/admin/verify-token', {
+            headers: { 'X-Admin-Token': token }
+        });
+        if (res.ok) return true;
+    }
+    // Fallback to cookie check (existing _is_admin function)
+    // ...
+}
+  
 // ── SIDEBAR TOGGLE ───────────────────────────────────────────────
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
