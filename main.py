@@ -655,6 +655,8 @@ def admin_logout():
     return r
 
 # ─── USER AUTH ────────────────────────────────────────────────────────────────
+# ─── USER AUTH ────────────────────────────────────────────────────────────────
+
 @app.post("/api/users/signup")
 async def signup(
     username: str = Form(...),
@@ -685,8 +687,8 @@ async def signup(
             raise HTTPException(400, "Email already registered — try signing in")
 
         hashed = get_password_hash(password)
-        verification_token   = generate_token()
-        token_expires        = datetime.utcnow() + timedelta(hours=24)
+        verification_token = generate_token()
+        token_expires = datetime.utcnow() + timedelta(hours=24)
 
         uid = uuid.uuid4()
         u = models.User(
@@ -694,15 +696,14 @@ async def signup(
             hashed_password=hashed, role="user",
             is_premium=0, is_suspended=0, follower_count=0,
             bio="", avatar_url="", channel_name=uname, channel_desc="",
-            # Email verification enabled: user must verify before login
-            email_verified=False,   # Fixed: now uses capital False
+            email_verified=False,               # Must verify before login
             verification_token=verification_token,
             verification_token_expires=token_expires
         )
         db.add(u)
         db.flush()
 
-        # Save topic selections
+        # Save topic selections (if any)
         try:
             selected_topics = json.loads(topics) if topics else []
             if not isinstance(selected_topics, list):
@@ -728,26 +729,27 @@ async def signup(
         db.refresh(u)
         print(f"✅ New user: {uname} ({uemail}) id={uid}")
 
-        # Send verification email (non-blocking) – now enabled!
+        # Send verification email (non‑blocking)
         try:
             send_verification_email(uemail, uname, verification_token)
             print(f"📧 Verification email sent to {uemail}")
         except Exception as e:
-            # Log the error but don't fail signup – user can request resend later
             print(f"⚠️ Verification email failed (non-fatal): {e}")
 
         # Do NOT log the user in immediately; they must verify first
         return JSONResponse({
-            "success":  True,
-            "message":  "Account created! Please check your email to verify your account.",
+            "success": True,
+            "message": "Account created! Please check your email to verify your account.",
             "needs_verification": True
         })
 
     except HTTPException:
-        db.rollback(); raise
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
-        import traceback; traceback.print_exc()
+        import traceback
+        traceback.print_exc()
         raise HTTPException(500, f"Signup failed: {str(e)}")
 
 @app.post("/api/users/login")
@@ -780,7 +782,7 @@ async def user_login(
         # Check email verification (skip for admins/superusers)
         role = getattr(u, "role", "user") or "user"
         if not getattr(u, "email_verified", False) and role not in ("admin", "superuser"):
-            raise HTTPException(403, "UNVERIFIED:Please verify your email before logging in. Check your inbox.")
+            raise HTTPException(403, "UNVERIFIED: Please verify your email before logging in. Check your inbox.")
 
         resp = JSONResponse({
             "success":    True,
@@ -828,7 +830,7 @@ async def resend_verification(email: str = Form(...), db: Session = Depends(get_
             models.User.email == email.strip().lower()
         ).first()
         if not user:
-            return {"success": True, "message": "If that email exists, a link was sent."}
+            return {"success": True, "message": "If that email exists, a verification link was sent."}
         if getattr(user, "email_verified", False):
             return {"success": True, "message": "Email already verified — you can log in."}
         token = generate_token()
@@ -837,6 +839,7 @@ async def resend_verification(email: str = Form(...), db: Session = Depends(get_
         db.commit()
         try:
             send_verification_email(user.email, user.username, token)
+            print(f"📧 Resent verification email to {user.email}")
         except Exception as e:
             print(f"⚠️ Resend verification email failed: {e}")
         return {"success": True, "message": "Verification email sent! Check your inbox."}
@@ -856,12 +859,14 @@ async def forgot_password(email: str = Form(...), db: Session = Depends(get_db))
             db.commit()
             try:
                 send_password_reset_email(user.email, user.username, reset_token)
+                print(f"📧 Password reset email sent to {user.email}")
             except Exception as e:
                 print(f"⚠️ Reset email failed: {e}")
-        return {"success": True, "message": "If an account exists, a reset link was sent,CHECK SPAM TOO."}
+        # Always return generic message for security (don't reveal existence)
+        return {"success": True, "message": "If an account exists, a reset link was sent. Check your inbox (and spam)."}
     except Exception as e:
         print(f"Forgot password error: {e}")
-        return {"success": True, "message": "If an account exists, a reset link was sent,CHECK YOUR SPAM TOO."}
+        return {"success": True, "message": "If an account exists, a reset link was sent. Check your spam folder."}
 
 @app.post("/api/users/reset-password")
 async def reset_password(
@@ -884,71 +889,7 @@ async def reset_password(
     except Exception as e:
         raise HTTPException(500, str(e))
 
-# ==================== NEW 6‑DIGIT CODE RESET ENDPOINTS ====================
-@app.post("/api/users/request-reset-code")
-async def request_reset_code(
-    username_or_email: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    """
-    Generate a 6-digit numeric code and store it with a 10-minute expiry.
-    Returns the code in the response (for demo purposes – in production you'd send it via email).
-    """
-    # Find user by username or email
-    user = db.query(models.User).filter(
-        (models.User.username == username_or_email) |
-        (models.User.email == username_or_email)
-    ).first()
-    if not user:
-        # Return success anyway to avoid user enumeration
-        return {"success": True, "message": "If that account exists, a reset code has been generated."}
-
-    # Generate a 6-digit code
-    code = f"{random.randint(0, 999999):06d}"
-    user.reset_code = code
-    user.reset_code_expires = datetime.utcnow() + timedelta(minutes=10)
-    db.commit()
-
-    # ⚠️ Insecure: return the code directly for demo purposes
-    return {
-        "success": True,
-        "message": "Reset code generated (for demo: check response)",
-        "reset_code": code  # remove this in production
-    }
-
-@app.post("/api/users/verify-reset-code")
-async def verify_reset_code(
-    username_or_email: str = Form(...),
-    code: str = Form(...),
-    new_password: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    """
-    Verify the 6-digit code and set a new password.
-    """
-    if len(new_password) < 6:
-        raise HTTPException(400, "Password must be at least 6 characters")
-
-    user = db.query(models.User).filter(
-        (models.User.username == username_or_email) |
-        (models.User.email == username_or_email)
-    ).first()
-    if not user:
-        raise HTTPException(404, "User not found")
-
-    if user.reset_code != code or user.reset_code_expires < datetime.utcnow():
-        raise HTTPException(400, "Invalid or expired code")
-
-    # Set new password
-    user.hashed_password = get_password_hash(new_password)
-    user.reset_code = None
-    user.reset_code_expires = None
-    db.commit()
-
-    return {"success": True, "message": "Password reset successfully. You can now log in."}
-
-# ==================== END OF NEW ENDPOINTS ====================
-
+# ─── LOGOUT ────────────────────────────────────────────────────────────────
 @app.post("/api/users/logout")
 def user_logout():
     r = JSONResponse({"success": True})
