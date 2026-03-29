@@ -616,6 +616,18 @@ async def admin_login(answer: str = Form(...)):
         return r
     raise HTTPException(403, "Wrong password")
 
+@app.get("/api/admin/verify-token")
+async def verify_admin_token(request: Request):
+    token = request.headers.get("X-Admin-Token")
+    # In a real app, you'd validate the token against a stored value.
+    # For simplicity, we'll just check if it matches the last generated token.
+    # But since we didn't store it, we'll trust the cookie instead.
+    # Better: use a simple JWT.
+    # For now, we'll just return 401 if no cookie.
+    if _is_admin(request):
+        return {"valid": True}
+    raise HTTPException(401, "Not admin")
+
 @app.get("/api/debug/cookie")
 async def debug_cookie(request: Request):
     admin_cookie = request.cookies.get("admin_session")
