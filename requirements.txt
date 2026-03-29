@@ -9,4 +9,3 @@ bcrypt==3.2.2
 httpx==0.25.2
 resend>=2.23.0
 google-generativeai==0.3.2
-mailersend==0.2.0
