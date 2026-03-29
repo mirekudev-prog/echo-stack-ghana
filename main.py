@@ -186,6 +186,17 @@ CREATE TABLE IF NOT EXISTS story_submissions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS admin_logs (
+    id SERIAL PRIMARY KEY,
+    admin_username VARCHAR(100) NOT NULL,
+    action VARCHAR(50) NOT NULL,   -- e.g., 'upload', 'delete', 'edit'
+    target_type VARCHAR(50),       -- e.g., 'file', 'post', 'region'
+    target_id VARCHAR(100),        -- file id, post id, region id
+    details TEXT,                  -- extra info like filename, post title
+    ip_address VARCHAR(45),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS payments (
     id SERIAL PRIMARY KEY,
     user_id UUID REFERENCES users(id),
@@ -400,6 +411,16 @@ async def _do_upload(file: UploadFile, category: str, db: Session) -> dict:
         "file_size_kb": round(size_bytes / 1024, 1),
         "category": category, "mime_type": ctype,
     }
+    
+def log_admin_action(request: Request, action: str, target_type: str, target_id: str, details: str, db: Session):
+    """Log an admin action to the admin_logs table."""
+    admin_username = request.cookies.get("admin_user", "Unknown")
+    ip = request.client.host if request.client else ""
+    db.execute(
+        text("INSERT INTO admin_logs (admin_username, action, target_type, target_id, details, ip_address) VALUES (:admin, :action, :type, :tid, :details, :ip)"),
+        {"admin": admin_username, "action": action, "type": target_type, "tid": target_id, "details": details, "ip": ip}
+    )
+    db.commit()
 
 # ─── STATIC PAGE HELPER ───────────────────────────────────────────────────────
 def _serve(filename: str, request: Request = None):
@@ -581,38 +602,14 @@ async def admin_preview(request: Request, db: Session = Depends(get_db)):
         ]})
     except Exception as e:
         return JSONResponse({"posts": [], "error": str(e)})
-import secrets
-
+        
 @app.post("/api/auth/login")
 async def admin_login(answer: str = Form(...)):
     if answer.strip().lower().replace(" ", "") == ADMIN_SECRET.lower().replace(" ", ""):
-        # Generate a simple token (store in a dict or use JWT; we'll use a random token)
-        admin_token = secrets.token_urlsafe(32)
-        # In a real app, you'd store this token in a database or cache. For simplicity,
-        # we'll just set a cookie and also return the token. The frontend can store it.
-        r = JSONResponse({
-            "success": True,
-            "role": "admin",
-            "token": admin_token
-        })
-        # Set the cookie as before (sameSite='Lax' for better mobile compatibility)
-        r.set_cookie(
-            "admin_session", "ADMIN_AUTHORIZED",
-            max_age=86400 * 7,
-            path="/",
-            httponly=False,
-            samesite="Lax",   # changed from "none" to "Lax" – works on mobile
-            secure=True        # keep secure because your site is HTTPS
-        )
-        # Also set a token cookie (optional, but good for redundancy)
-        r.set_cookie(
-            "admin_token", admin_token,
-            max_age=86400 * 7,
-            path="/",
-            httponly=False,
-            samesite="Lax",
-            secure=True
-        )
+        admin_username = os.getenv("ADMIN_USERNAME", "Admin")
+        r = JSONResponse({"success": True, "role": "admin"})
+        r.set_cookie("admin_session", "ADMIN_AUTHORIZED", max_age=86400*7, path="/", httponly=False, samesite="Lax", secure=True)
+        r.set_cookie("admin_user", admin_username, max_age=86400*7, path="/", httponly=False, samesite="Lax", secure=True)
         return r
     raise HTTPException(403, "Wrong password")
 
@@ -627,6 +624,24 @@ async def verify_admin_token(request: Request):
     if _is_admin(request):
         return {"valid": True}
     raise HTTPException(401, "Not admin")
+
+@app.get("/api/admin/logs")
+async def get_admin_logs(request: Request, limit: int = 50, db: Session = Depends(get_db)):
+    if not _is_admin(request):
+        raise HTTPException(403)
+    logs = db.execute(text("SELECT * FROM admin_logs ORDER BY created_at DESC LIMIT :limit"), {"limit": limit}).fetchall()
+    return [
+        {
+            "id": l.id,
+            "admin": l.admin_username,
+            "action": l.action,
+            "target_type": l.target_type,
+            "target_id": l.target_id,
+            "details": l.details,
+            "created_at": l.created_at.isoformat()
+        }
+        for l in logs
+    ]
 
 @app.get("/api/debug/cookie")
 async def debug_cookie(request: Request):
@@ -1379,17 +1394,17 @@ async def update_post(
         return {"success": True, "id": p.id}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
-
+        
 @app.delete("/api/posts/{post_id}")
 async def delete_post(post_id: int, request: Request, db: Session = Depends(get_db)):
-    # Only admins can delete posts
     if not _is_admin(request):
         raise HTTPException(403, "Admin access required")
     p = db.query(models.Post).filter(models.Post.id == post_id).first()
     if not p:
         raise HTTPException(404, "Post not found")
+    # Log before deletion
+    log_admin_action(request, "delete", "post", str(post_id), f"Title: {p.title}, author: {p.author_username}", db)
     try:
-        # Delete associated comments first
         db.query(models.Comment).filter(models.Comment.post_id == post_id).delete()
         db.delete(p)
         db.commit()
@@ -1675,16 +1690,27 @@ async def upload_cover(file: UploadFile = File(...), db: Session = Depends(get_d
 @app.post("/api/upload/image")
 async def upload_image(file: UploadFile = File(...), db: Session = Depends(get_db)):
     return await _do_upload(file, "image", db)
-
+    
 @app.post("/api/upload/file")
 async def upload_file(
-    file: UploadFile = File(...), filename: str = Form(""),
-    category: str = Form("general"), description: str = Form(""),
-    region_id: str = Form(""), is_public: str = Form("1"),
+    request: Request,
+    file: UploadFile = File(...),
+    filename: str = Form(""),
+    category: str = Form("general"),
+    description: str = Form(""),
+    region_id: str = Form(""),
+    is_public: str = Form("1"),
     db: Session = Depends(get_db)
 ):
-    if filename: file.filename = filename
-    return await _do_upload(file, category, db)
+    if not _is_admin(request):
+        raise HTTPException(403, "Admin access required")
+    if filename:
+        file.filename = filename
+    result = await _do_upload(file, category, db)
+    if result.get("success"):
+        # Log the upload
+        log_admin_action(request, "upload", "file", str(result.get("file_id", "")), f"Filename: {result.get('filename')}, original: {result.get('original_name')}", db)
+    return result
 
 @app.post("/api/upload/multiple")
 async def upload_multiple(files: list[UploadFile] = File(...), db: Session = Depends(get_db)):
@@ -1732,18 +1758,25 @@ async def get_files(category: str = "", db: Session = Depends(get_db)):
         return result
     except Exception:
         return []
-
+        
 @app.delete("/api/files/{file_id}")
-async def delete_file(file_id: int, db: Session = Depends(get_db)):
+async def delete_file(file_id: int, request: Request, db: Session = Depends(get_db)):
+    if not _is_admin(request):
+        raise HTTPException(403)
     f = db.query(models.UploadedFile).filter(models.UploadedFile.id == file_id).first()
-    if not f: raise HTTPException(404)
+    if not f:
+        raise HTTPException(404)
+    # Log before deletion
+    log_admin_action(request, "delete", "file", str(file_id), f"Filename: {f.filename}, original: {f.original_name}", db)
     try:
         if f.file_path and not f.file_path.startswith("http") and os.path.exists(f.file_path):
             os.remove(f.file_path)
-        db.delete(f); db.commit()
+        db.delete(f)
+        db.commit()
         return {"success": True}
     except Exception as e:
-        db.rollback(); raise HTTPException(500, str(e))
+        db.rollback()
+        raise HTTPException(500, str(e))
 
 # ─── REGIONS ─────────────────────────────────────────────────────────────────
 @app.get("/api/regions")
@@ -1806,11 +1839,18 @@ def update_region(
         db.rollback(); raise HTTPException(500, str(e))
 
 @app.delete("/api/regions/{rid}")
-def delete_region(rid: int, db: Session = Depends(get_db)):
+def delete_region(rid: int, request: Request, db: Session = Depends(get_db)):
+    if not _is_admin(request):
+        raise HTTPException(403)
     r = db.query(models.Region).filter(models.Region.id == rid).first()
-    if not r: raise HTTPException(404)
-    db.delete(r); db.commit(); return {"success": True}
-
+    if not r:
+        raise HTTPException(404)
+    # Log before deletion
+    log_admin_action(request, "delete", "region", str(rid), f"Name: {r.name}", db)
+    db.delete(r)
+    db.commit()
+    return {"success": True}
+    
 # ─── ADMIN PUBLISH FILE ───────────────────────────────────────────────────────
 @app.post("/api/admin/publish-file")
 async def publish_file(
