@@ -423,6 +423,12 @@ select{
     <span class="icon">⚙️</span> Settings
   </button>
 
+  <!-- NEW: Activity Logs button -->
+  <div class="sb-section">Audit</div>
+  <button class="sb-item" onclick="show('logs')" id="nav-logs">
+    <span class="icon">📋</span> Activity Logs
+  </button>
+
   <div class="sb-section">Visit</div>
   <a class="sb-item" href="/" target="_blank">
     <span class="icon">🌍</span> View Live Site ↗
@@ -461,12 +467,14 @@ select{
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Posts</h3><button class="btn btn-ghost" onclick="show('posts')" style="font-size:.85rem;padding:8px 14px">View All</button></div>
           <table><thead><tr><th>Title</th><th>Status</th><th>Author</th></tr></thead>
-          <tbody id="recent-posts-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></table>
+          <tbody id="recent-posts-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+        </table>
         </div>
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Uploads</h3><button class="btn btn-ghost" onclick="show('files')" style="font-size:.85rem;padding:8px 14px">File Manager</button></div>
           <table><thead><tr><th>File</th><th>Type</th><th>Size</th></tr></thead>
-          <tbody id="recent-files-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></table>
+          <tbody id="recent-files-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+        </table>
         </div>
       </div>
     </div>
@@ -610,7 +618,6 @@ select{
         <button class="btn btn-ghost" onclick="show('regions')" style="padding:10px 16px;">← Back</button>
       </div>
       <div class="form-section" style="max-height:70vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:80px;">
-        <!-- Added bottom padding to ensure last elements are reachable -->
         <input type="hidden" id="reg-id">
         <h4>📍 Basic Info</h4>
         <div class="form-grid">
@@ -712,7 +719,7 @@ select{
     <div class="panel" id="panel-newsletter">
       <div class="table-wrap">
         <div class="table-head"><h3>Newsletter Subscribers</h3><button class="btn btn-ghost" onclick="loadNewsletter()">Refresh</button></div>
-        <table>
+        <td>
           <thead><tr><th>#</th><th>Email</th><th>Joined</th></tr></thead>
           <tbody id="newsletter-tbody"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </table>
@@ -773,7 +780,7 @@ select{
       </div>
     </div>
 
-    <!-- ── WRITE POST ── (UPDATED with Reel option) -->
+    <!-- ── WRITE POST ── (with Reel option) -->
     <div class="panel" id="panel-write-post">
       <div class="form-section" style="max-height:70vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:80px;">
         <h4>✍️ Write New Post</h4>
@@ -809,6 +816,33 @@ select{
       </div>
     </div>
 
+    <!-- ── ACTIVITY LOGS PANEL (NEW) ── -->
+    <div class="panel" id="panel-logs">
+      <div class="table-wrap">
+        <div class="table-head">
+          <h3>Admin Activity Logs</h3>
+          <button class="btn btn-ghost" onclick="loadLogs()">🔄 Refresh</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="min-width:600px; width:100%;">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Admin</th>
+                <th>Action</th>
+                <th>Target</th>
+                <th>Details</th>
+                <th>IP</th>
+              </tr>
+            </thead>
+            <tbody id="logs-tbody">
+              <tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading logs...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -830,37 +864,32 @@ select{
 <div class="toast" id="toast"></div>
 
 <script>
-// After successful login, store the token in localStorage
+// ── ADMIN LOGIN TOKEN (optional) ────────────────────────────────────────────
 async function adminLogin(secret) {
-    const fd = new FormData();
-    fd.append('answer', secret);
-    const res = await fetch('/api/auth/login', { method: 'POST', body: fd });
-    const data = await res.json();
-    if (data.success) {
-        localStorage.setItem('admin_token', data.token);
-        // Also set a cookie? Already done by server.
-        window.location.href = '/admin';
-    } else {
-        alert('Wrong password');
-    }
+  const fd = new FormData();
+  fd.append('answer', secret);
+  const res = await fetch('/api/auth/login', { method: 'POST', body: fd });
+  const data = await res.json();
+  if (data.success) {
+    localStorage.setItem('admin_token', data.token);
+    window.location.href = '/admin';
+  } else {
+    alert('Wrong password');
+  }
 }
 
-// On admin page load, check both cookie and localStorage token
 async function checkAdminAuth() {
-    // First, try to send the token via header if present
-    const token = localStorage.getItem('admin_token');
-    if (token) {
-        // You can add a custom header to your fetch requests
-        // But easier: rely on cookie; if cookie missing, use token to re-authenticate
-        const res = await fetch('/api/admin/verify-token', {
-            headers: { 'X-Admin-Token': token }
-        });
-        if (res.ok) return true;
-    }
-    // Fallback to cookie check (existing _is_admin function)
-    // ...
+  const token = localStorage.getItem('admin_token');
+  if (token) {
+    const res = await fetch('/api/admin/verify-token', {
+      headers: { 'X-Admin-Token': token }
+    });
+    if (res.ok) return true;
+  }
+  // Fallback to cookie check (already done by server)
+  return true;
 }
-  
+
 // ── SIDEBAR TOGGLE ───────────────────────────────────────────────
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
@@ -888,7 +917,7 @@ function show(panel) {
     'add-region':'Add / Edit Region', users:'Users', creators:'Creators',
     posts:'All Posts', stories:'Stories', newsletter:'Newsletter',
     events:'Events', categories:'Categories', chat:'Chat',
-    settings:'Settings', 'write-post':'Write Post'
+    settings:'Settings', 'write-post':'Write Post', logs:'Activity Logs'
   };
   document.getElementById('topbar-title').textContent = titles[panel] || panel;
   currentPanel = panel;
@@ -904,6 +933,7 @@ function show(panel) {
   if (panel === 'events') loadEvents();
   if (panel === 'categories') loadCategories();
   if (panel === 'chat') loadChat();
+  if (panel === 'logs') loadLogs();   // new
 
   // Auto‑close sidebar on mobile after navigation
   if (window.innerWidth <= 768) closeSidebar();
@@ -1645,6 +1675,42 @@ async function uploadCover(file) {
       toast('✅ Cover image uploaded!', 'ok');
     } else throw new Error(d.detail || 'Upload failed');
   } catch (e) { toast('❌ Upload failed: ' + e.message, 'er'); }
+}
+
+// ── ACTIVITY LOGS (NEW) ───────────────────────────────────────────
+async function loadLogs() {
+  try {
+    const res = await fetch('/api/admin/logs');
+    if (!res.ok) throw new Error('Failed to load logs');
+    const logs = await res.json();
+    const tbody = document.getElementById('logs-tbody');
+    if (!logs.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No logs yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = logs.map(log => `
+      <tr>
+        <td style="white-space:nowrap;">${new Date(log.created_at).toLocaleString()}</td>
+        <td>${escapeHtml(log.admin)}</td>
+        <td><span class="role-badge" style="background:${log.action === 'upload' ? 'rgba(34,197,94,.15)' : (log.action === 'delete' ? 'rgba(239,68,68,.15)' : 'rgba(200,150,46,.15)')}; color:${log.action === 'upload' ? '#15803d' : (log.action === 'delete' ? '#b91c1c' : '#c9933a')};">${log.action}</span></td>
+        <td>${escapeHtml(log.target_type)}</td>
+        <td>${escapeHtml(log.details)}</td>
+        <td>${log.ip_address || '—'}</td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    document.getElementById('logs-tbody').innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Failed to load logs</td></tr>';
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
 }
 
 // ── LOGOUT ─────────────────────────────────────────────────────────
