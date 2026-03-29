@@ -581,19 +581,37 @@ async def admin_preview(request: Request, db: Session = Depends(get_db)):
         ]})
     except Exception as e:
         return JSONResponse({"posts": [], "error": str(e)})
+import secrets
 
 @app.post("/api/auth/login")
 async def admin_login(answer: str = Form(...)):
     if answer.strip().lower().replace(" ", "") == ADMIN_SECRET.lower().replace(" ", ""):
-        r = JSONResponse({"success": True, "role": "admin"})
+        # Generate a simple token (store in a dict or use JWT; we'll use a random token)
+        admin_token = secrets.token_urlsafe(32)
+        # In a real app, you'd store this token in a database or cache. For simplicity,
+        # we'll just set a cookie and also return the token. The frontend can store it.
+        r = JSONResponse({
+            "success": True,
+            "role": "admin",
+            "token": admin_token
+        })
+        # Set the cookie as before (sameSite='Lax' for better mobile compatibility)
         r.set_cookie(
             "admin_session", "ADMIN_AUTHORIZED",
-            max_age=86400 * 7,      # 7 days
+            max_age=86400 * 7,
             path="/",
-            httponly=False,          # Allow JavaScript access (if needed)
-            samesite="lax",          # Changed from "none" – works for same-site requests
-            secure=True,              # Keep Secure – your site uses HTTPS
-            # domain=".onrender.com" # Optional: uncomment if you have subdomains
+            httponly=False,
+            samesite="Lax",   # changed from "none" to "Lax" – works on mobile
+            secure=True        # keep secure because your site is HTTPS
+        )
+        # Also set a token cookie (optional, but good for redundancy)
+        r.set_cookie(
+            "admin_token", admin_token,
+            max_age=86400 * 7,
+            path="/",
+            httponly=False,
+            samesite="Lax",
+            secure=True
         )
         return r
     raise HTTPException(403, "Wrong password")
