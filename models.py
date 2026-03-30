@@ -54,16 +54,12 @@ class User(Base):
     verification_token_expires = Column(DateTime, nullable=True)
     reset_token                = Column(String(255), nullable=True)
     reset_token_expires        = Column(DateTime, nullable=True)
-    # ===== ADDED: 6-digit reset code fields =====
     reset_code                 = Column(String(6), nullable=True)
     reset_code_expires         = Column(DateTime, nullable=True)
-    # ===========================================
     created_at                 = Column(DateTime, default=datetime.utcnow)
     updated_at                 = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # ===== ADDED: Relationship for topics =====
     topics = relationship("Topic", secondary="user_topics", back_populates="users")
-    # ==========================================
 
 
 # ─── POST ─────────────────────────────────────────────────────────────────────
@@ -96,14 +92,12 @@ class Post(Base):
 class Comment(Base):
     __tablename__ = "comments"
 
-    id         = Column(Integer, primary_key=True, index=True)    post_id    = Column(Integer, ForeignKey("posts.id"), nullable=True)
+    id         = Column(Integer, primary_key=True, index=True)
+    post_id    = Column(Integer, ForeignKey("posts.id"), nullable=True)
     user_id    = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     username   = Column(String(200), default="")
-    content    = Column(Text, default="")
-    # ===== ADDED: Nested replies + likes =====
-    parent_id  = Column(Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=True)
+    content    = Column(Text, default="")    parent_id  = Column(Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=True)
     likes      = Column(Integer, default=0)
-    # =========================================
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -145,13 +139,13 @@ class Section(Base):
     slug              = Column(String(100), unique=True)
     description       = Column(Text)
     parent_section_id = Column(Integer, nullable=True)
-    display_order     = Column(Integer, default=0)    is_active         = Column(Integer, default=1)
+    display_order     = Column(Integer, default=0)
+    is_active         = Column(Integer, default=1)
     created_at        = Column(DateTime, default=datetime.utcnow)
 
 
 # ─── NEWSLETTER SUBSCRIBER ────────────────────────────────────────────────────
-class NewsletterSubscriber(Base):
-    __tablename__ = "newsletter_subscribers"
+class NewsletterSubscriber(Base):    __tablename__ = "newsletter_subscribers"
 
     id         = Column(Integer, primary_key=True, index=True)
     email      = Column(String(200), unique=True, nullable=False)
@@ -181,7 +175,7 @@ class ChatMessage(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
-# ─── CREATOR CHAT MESSAGE (already exists - no changes needed) ────────────────
+# ─── CREATOR CHAT MESSAGE ─────────────────────────────────────────────────────
 class CreatorChatMessage(Base):
     __tablename__ = "creator_chat_messages"
     id = Column(Integer, primary_key=True, index=True)
@@ -195,12 +189,12 @@ class CreatorChatMessage(Base):
 # ─── STORY SUBMISSION ─────────────────────────────────────────────────────────
 class StorySubmission(Base):
     __tablename__ = "story_submissions"
+
     id          = Column(Integer, primary_key=True, index=True)
     title       = Column(String(300), nullable=False)
     content     = Column(Text)
     region      = Column(String(100))
-    author_name = Column(String(200))
-    status      = Column(String(50), default="pending")
+    author_name = Column(String(200))    status      = Column(String(50), default="pending")
     created_at  = Column(DateTime, default=datetime.utcnow)
 
 
@@ -224,9 +218,7 @@ class Topic(Base):
     id   = Column(Integer, primary_key=True, index=True)
     name = Column(Text, unique=True, nullable=False)
     
-    # ===== ADDED: Back-reference for relationship =====
     users = relationship("User", secondary="user_topics", back_populates="topics")
-    # ==================================================
 
 
 # ─── USER TOPIC (junction) ────────────────────────────────────────────────────
@@ -237,14 +229,15 @@ class UserTopic(Base):
     topic_id = Column(Integer, ForeignKey("topics.id", ondelete="CASCADE"), primary_key=True)
 
 
-# ─── ADMIN LOG (NEW - for audit trail) ────────────────────────────────────────
+# ─── ADMIN LOG ────────────────────────────────────────────────────────────────
 class AdminLog(Base):
     __tablename__ = "admin_logs"
     
     id = Column(Integer, primary_key=True, index=True)
     admin_username = Column(String(100), nullable=False)
-    action = Column(String(50), nullable=False)  # create, update, delete, upload    target_type = Column(String(50))  # post, user, file, region
-    target_id = Column(String(100))   # the ID of the affected resource
-    details = Column(Text)            # extra context (filename, title, etc.)
+    action = Column(String(50), nullable=False)
+    target_type = Column(String(50))
+    target_id = Column(String(100))
+    details = Column(Text)
     ip_address = Column(String(45))
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
