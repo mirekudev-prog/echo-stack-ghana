@@ -8,7 +8,6 @@
 <title>EchoStack Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
-/* ----- RESET & VARIABLES ----- */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
   --ink:#0D1B2A;
@@ -35,7 +34,7 @@
 html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);display:flex}
 
-/* ----- SIDEBAR (dark) – off-canvas on mobile ----- */
+/* ── SIDEBAR (dark) – off-canvas on mobile ── */
 .sidebar{
   width:var(--sidebar-w);flex-shrink:0;
   background:var(--ink2);border-right:1px solid var(--border);
@@ -73,7 +72,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 }
 .sb-footer button:hover{background:rgba(239,68,68,.2)}
 
-/* ----- MAIN (light theme) ----- */
+/* ── MAIN (light theme) ── */
 .main{
   flex:1;display:flex;flex-direction:column;overflow:hidden;height:100vh;
   background:var(--main-bg);
@@ -472,12 +471,12 @@ select{
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Posts</h3><button class="btn btn-ghost" onclick="show('posts')" style="font-size:.85rem;padding:8px 14px">View All</button></div>
-          <thead> <tr><th>Title</th><th>Status</th><th>Author</th></tr> </thead>
+          <thead>  <tr><th>Title</th><th>Status</th><th>Author</th></tr> </thead>
           <tbody id="recent-posts-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </div>
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Uploads</h3><button class="btn btn-ghost" onclick="show('files')" style="font-size:.85rem;padding:8px 14px">File Manager</button></div>
-          <thead> <tr><th>File</th><th>Type</th><th>Size</th></tr> </thead>
+          <thead>  <tr><th>File</th><th>Type</th><th>Size</th></tr> </thead>
           <tbody id="recent-files-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </div>
       </div>
@@ -518,7 +517,7 @@ select{
           <h3>All Regions</h3>
           <div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn btn-gold" onclick="showNewRegionForm()">➕ Create Region</button><button class="btn btn-ghost" onclick="loadRegions()">🔄 Refresh</button></div>
         </div>
-        <thead> <tr><th>#</th><th>Name</th><th>Capital</th><th>Category</th><th>Media</th><th>Actions</th></tr> </thead>
+        <thead>  <tr><th>#</th><th>Name</th><th>Capital</th><th>Category</th><th>Media</th><th>Actions</th></tr> </thead>
         <tbody id="regions-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
       </div>
       <div id="new-region-form" style="display:none; background:white; border:1px solid var(--main-border); border-radius:12px; padding:24px; margin-top:20px;">
@@ -574,7 +573,7 @@ select{
     <!-- ── USERS ── -->
     <div class="panel" id="panel-users">
       <div class="table-wrap"><div class="table-head"><h3>All Users</h3><button class="btn btn-ghost" onclick="loadUsers()">Refresh</button></div>
-        <thead> <tr><th>Username</th><th>Email</th><th>Role</th><th>Premium</th><th>Joined</th><th>Actions</th></tr> </thead>
+        <thead>  <tr><th>Username</th><th>Email</th><th>Role</th><th>Premium</th><th>Joined</th><th>Actions</th></tr> </thead>
         <tbody id="users-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
       </div>
     </div>
@@ -582,7 +581,7 @@ select{
     <!-- ── CREATORS ── -->
     <div class="panel" id="panel-creators">
       <div class="table-wrap"><div class="table-head"><h3>Creators</h3></div>
-        <thead> <tr><th>Username</th><th>Channel</th><th>Posts</th><th>Actions</th></tr> </thead>
+        <thead>  <tr><th>Username</th><th>Channel</th><th>Posts</th><th>Actions</th></tr> </thead>
         <tbody id="creators-tbody"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
       </div>
     </div>
@@ -590,7 +589,7 @@ select{
     <!-- ── POSTS ── -->
     <div class="panel" id="panel-posts">
       <div class="table-wrap"><div class="table-head"><h3>All Posts</h3><button class="btn btn-ghost" onclick="loadPosts()">Refresh</button></div>
-        <thead> <tr><th>Title</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th>Actions</th></tr> </thead>
+        <thead>  <tr><th>Title</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th>Actions</th></tr> </thead>
         <tbody id="posts-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
       </div>
     </div>
@@ -598,7 +597,7 @@ select{
     <!-- ── STORIES ── -->
     <div class="panel" id="panel-stories">
       <div class="table-wrap"><div class="table-head"><h3>Story Submissions</h3><button class="btn btn-ghost" onclick="loadStories()">Refresh</button></div>
-        <thead> <tr><th>Title</th><th>Author</th><th>Region</th><th>Status</th><th>Date</th></tr> </thead>
+        <thead>  <tr><th>Title</th><th>Author</th><th>Region</th><th>Status</th><th>Date</th></tr> </thead>
         <tbody id="stories-tbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
       </div>
     </div>
@@ -606,7 +605,7 @@ select{
     <!-- ── NEWSLETTER ── -->
     <div class="panel" id="panel-newsletter">
       <div class="table-wrap"><div class="table-head"><h3>Newsletter Subscribers</h3><button class="btn btn-ghost" onclick="loadNewsletter()">Refresh</button></div>
-        <thead> <tr><th>#</th><th>Email</th><th>Joined</th></tr> </thead>
+        <thead>  <tr><th>#</th><th>Email</th><th>Joined</th></tr> </thead>
         <tbody id="newsletter-tbody"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
       </div>
     </div>
@@ -619,7 +618,7 @@ select{
         <button class="btn btn-gold" onclick="addEvent()" style="margin-top:10px; width:100%;">Add Event</button>
       </div>
       <div class="table-wrap"><div class="table-head"><h3>Events</h3></div>
-        <thead> <tr><th>Title</th><th>Location</th><th>Date</th><th>Actions</th></tr> </thead>
+        <thead>  <tr><th>Title</th><th>Location</th><th>Date</th><th>Actions</th></tr> </thead>
         <tbody id="events-tbody"></tbody>
       </div>
     </div>
@@ -664,7 +663,7 @@ select{
     <div class="panel" id="panel-logs">
       <div class="table-wrap">
         <div class="table-head"><h3>Admin Activity Logs</h3><button class="btn btn-ghost" onclick="loadLogs()">🔄 Refresh</button></div>
-        <div style="overflow-x:auto;"><table style="min-width:600px; width:100%;"><thead> <tr><th>Time</th><th>Admin</th><th>Action</th><th>Target</th><th>Details</th><th>IP</th></tr> </thead><tbody id="logs-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading logs...</td></tr></tbody></table></div>
+        <div style="overflow-x:auto;"><table style="min-width:600px; width:100%;"><thead>  <tr><th>Time</th><th>Admin</th><th>Action</th><th>Target</th><th>Details</th><th>IP</th></tr> </thead><tbody id="logs-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading logs...</td></tr></tbody></table></div>
       </div>
     </div>
 
@@ -772,7 +771,62 @@ async function loadStats() {
   } catch(e) {}
 }
 
-// ── FILE MANAGER ───────────────────────────────────────────────────
+// ── RECENT POSTS (fixed) ───────────────────────────────────────────
+async function loadRecentPosts() {
+  try {
+    const r = await fetch('/api/posts?limit=6');
+    const d = await r.json();
+    const posts = Array.isArray(d) ? d : (d.posts || []);
+    const tbody = document.getElementById('recent-posts-body');
+    if (!posts.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No posts yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = posts.slice(0,6).map(p => `
+      <tr>
+        <td><strong>${escapeHtml(p.title || 'Untitled')}</strong></td>
+        <td><span class="role-badge ${p.status==='published'?'role-admin':'role-user'}">${p.status}</span></td>
+        <td>${escapeHtml(p.author_username || '—')}</td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    console.error('Recent posts error:', e);
+    document.getElementById('recent-posts-body').innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Failed to load</td></tr>';
+  }
+}
+
+// ── RECENT FILES (fixed) ───────────────────────────────────────────
+async function loadRecentFiles() {
+  try {
+    const r = await fetch('/api/files');
+    const files = await r.json();
+    const tbody = document.getElementById('recent-files-body');
+    if (!files.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No files yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = files.slice(0,6).map(f => `
+      <tr>
+        <td>${icon(f.mime_type,f.category)} ${escapeHtml((f.original_name||f.filename||'').substring(0,30))}</td>
+        <td><span class="role-badge role-${f.category}">${f.category}</span></td>
+        <td>${f.file_size_kb || 0} KB</td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    console.error('Recent files error:', e);
+    document.getElementById('recent-files-body').innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Failed to load</td></tr>';
+  }
+}
+
+function icon(mime, cat) {
+  if ((mime||'').startsWith('video') || cat==='video') return '🎬';
+  if ((mime||'').startsWith('audio') || cat==='audio') return '🎵';
+  if ((mime||'').startsWith('image') || cat==='image') return '🖼️';
+  if (cat==='document') return '📄';
+  return '📦';
+}
+
+// ── FILE MANAGER (unchanged) ───────────────────────────────────────
 async function loadFiles() {
   try {
     const r = await fetch('/api/files');
@@ -782,24 +836,6 @@ async function loadFiles() {
   } catch(e) {
     document.getElementById('files-grid').innerHTML = '<div class="no-files"><div class="no-icon">⚠️</div><p>Failed to load files</p></div>';
   }
-}
-
-async function loadRecentFiles() {
-  try {
-    const r = await fetch('/api/files');
-    const files = await r.json();
-    const tbody = document.getElementById('recent-files-body');
-    if (!files.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:14px;text-align:center;color:var(--main-muted)">No files yet</td></tr>'; return; }
-    tbody.innerHTML = files.slice(0,6).map(f => `<tr><td>${icon(f.mime_type,f.category)} ${(f.original_name||'').substring(0,24)}</td><td><span class="role-badge role-${f.category}">${f.category}</span></td><td>${f.file_size_kb || 0} KB</td></tr>`).join('');
-  } catch(e) {}
-}
-
-function icon(mime, cat) {
-  if ((mime||'').startsWith('video') || cat==='video') return '🎬';
-  if ((mime||'').startsWith('audio') || cat==='audio') return '🎵';
-  if ((mime||'').startsWith('image') || cat==='image') return '🖼️';
-  if (cat==='document') return '📄';
-  return '📦';
 }
 
 function renderFiles(files) {
@@ -1000,7 +1036,7 @@ function copyUrl() {
   toast('URL copied to clipboard!', 'info');
 }
 
-// ─── REGIONS ───────────────────────────────────────────────────────
+// ─── REGIONS (unchanged) ───────────────────────────────────────────
 async function loadRegions() {
   try {
     const r = await fetch('/api/regions');
@@ -1013,29 +1049,18 @@ function renderRegions(regions) {
   const tbody = document.getElementById('regions-tbody');
   if (!regions.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No regions yet</td></tr>'; return; }
   tbody.innerHTML = regions.map((r, i) => `
-     <tr>
+    <tr>
       <td style="color:var(--main-muted)">${i+1}</td>
-      <td><strong>${r.name}</strong></td>
-      <td>${r.capital || '—'}</td>
-      <td><span class="role-badge role-user">${r.category || 'Uncategorized'}</span></td>
+      <td><strong>${escapeHtml(r.name)}</strong></td>
+      <td>${escapeHtml(r.capital || '—')}</td>
+      <td><span class="role-badge role-user">${escapeHtml(r.category || 'Uncategorized')}</span></td>
       <td>${r.gallery_images ? '🖼️' : ''} ${r.audio_files ? '🎵' : ''}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-ghost" style="font-size:.8rem;padding:8px 12px; min-height:44px;" onclick="editRegion(${r.id})">✏️ Edit</button>
-        <button class="btn btn-danger" style="font-size:.8rem;padding:8px 12px; margin-left:4px; min-height:44px;" onclick="deleteRegion(${r.id},'${r.name}')">🗑</button>
+        <button class="btn btn-danger" style="font-size:.8rem;padding:8px 12px; margin-left:4px; min-height:44px;" onclick="deleteRegion(${r.id},'${escapeHtml(r.name)}')">🗑</button>
       </td>
-     </tr>`).join('');
-}
-
-function searchRegions(q) {
-  const f = allRegions.filter(r => r.name.toLowerCase().includes(q.toLowerCase()) || (r.capital||'').toLowerCase().includes(q.toLowerCase()));
-  renderRegions(f);
-}
-
-function resetRegionForm() {
-  ['reg-id','reg-name','reg-capital','reg-population','reg-terrain','reg-description','reg-category','reg-tags','reg-source','reg-overview','reg-hero','reg-gallery','reg-audio'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
+    </tr>
+  `).join('');
 }
 
 function editRegion(id) {
@@ -1229,9 +1254,9 @@ async function loadUsers() {
     const tbody = document.getElementById('users-tbody');
     if (!allUsers.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No users yet</td></tr>'; return; }
     tbody.innerHTML = allUsers.map(u => `
-       <tr>
-        <td><strong>${u.username}</strong></td>
-        <td style="font-size:.85rem;color:var(--main-muted)">${u.email}</td>
+      <tr>
+        <td><strong>${escapeHtml(u.username)}</strong></td>
+        <td style="font-size:.85rem;color:var(--main-muted)">${escapeHtml(u.email)}</td>
         <td><span class="role-badge role-${u.role}">${u.role}</span></td>
         <td>${u.is_premium ? '<span style="color:var(--gold)">✨ Yes</span>' : '<span style="color:var(--main-muted)">No</span>'}</td>
         <td style="font-size:.8rem;color:var(--main-muted)">${timeAgo(u.created_at)}</td>
@@ -1241,7 +1266,8 @@ async function loadUsers() {
           </select>
           <button onclick="togglePremium('${u.id}',${u.is_premium})" style="margin-left:4px" class="btn ${u.is_premium ? 'btn-danger' : 'btn-ghost'}" style="padding:8px 12px;">${u.is_premium ? 'Revoke' : '✨ Premium'}</button>
         </td>
-       </tr>`).join('');
+      </tr>
+    `).join('');
   } catch(e) { toast('Failed to load users', 'er'); }
 }
 
@@ -1269,12 +1295,13 @@ async function loadCreators() {
     const tbody = document.getElementById('creators-tbody');
     if (!creators.length) { tbody.innerHTML = '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No creators yet</td></tr>'; return; }
     tbody.innerHTML = creators.map(c => `
-       <tr>
-        <td><strong>${c.username}</strong></td>
-        <td style="color:var(--main-muted)">${c.channel_name || '—'}</td>
+      <tr>
+        <td><strong>${escapeHtml(c.username)}</strong></td>
+        <td style="color:var(--main-muted)">${escapeHtml(c.channel_name || '—')}</td>
         <td>${c.post_count || 0}</td>
         <td><a href="/user/${c.username}" target="_blank" class="btn btn-ghost" style="font-size:.85rem;padding:8px 12px;">View</a></td>
-       </tr>`).join('');
+      </tr>
+    `).join('');
   } catch(e) {}
 }
 
@@ -1287,30 +1314,15 @@ async function loadPosts() {
     const tbody = document.getElementById('posts-tbody');
     if (!allPosts.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No posts yet</td></tr>'; return; }
     tbody.innerHTML = allPosts.map(p => `
-       <tr>
-        <td><strong>${(p.title||'').substring(0,40)}</strong></td>
-        <td style="color:var(--main-muted)">${p.author_username || '—'}</td>
+      <tr>
+        <td><strong>${escapeHtml(p.title||'').substring(0,40)}</strong></td>
+        <td style="color:var(--main-muted)">${escapeHtml(p.author_username || '—')}</td>
         <td><span class="role-badge ${p.status === 'published' ? 'role-admin' : 'role-user'}">${p.status}</span></td>
         <td>${p.views || 0}</td>
         <td style="font-size:.8rem;color:var(--main-muted)">${timeAgo(p.created_at)}</td>
         <td><a href="/post/${p.id}" target="_blank" class="btn btn-ghost" style="font-size:.85rem;padding:8px 12px;">View</a></td>
-       </tr>`).join('');
-  } catch(e) {}
-}
-
-async function loadRecentPosts() {
-  try {
-    const r = await fetch('/api/posts?limit=6');
-    const d = await r.json();
-    const posts = Array.isArray(d) ? d : (d.posts || []);
-    const tbody = document.getElementById('recent-posts-body');
-    if (!posts.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:14px;text-align:center;color:var(--main-muted)">No posts yet</td></tr>'; return; }
-    tbody.innerHTML = posts.slice(0,6).map(p => `
-       <tr>
-        <td>${(p.title||'Untitled').substring(0,30)}</td>
-        <td><span class="role-badge ${p.status==='published'?'role-admin':'role-user'}">${p.status}</span></td>
-        <td style="color:var(--main-muted)">${p.author_username||'—'}</td>
-       </tr>`).join('');
+      </tr>
+    `).join('');
   } catch(e) {}
 }
 
@@ -1322,13 +1334,14 @@ async function loadStories() {
     const tbody = document.getElementById('stories-tbody');
     if (!stories.length) { tbody.innerHTML = '<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">No stories submitted yet</td></tr>'; return; }
     tbody.innerHTML = stories.map(s => `
-       <tr>
-        <td><strong>${(s.title||'').substring(0,40)}</strong></td>
-        <td>${s.author_name || '—'}</td>
-        <td>${s.region || '—'}</td>
+      <tr>
+        <td><strong>${escapeHtml(s.title||'').substring(0,40)}</strong></td>
+        <td>${escapeHtml(s.author_name || '—')}</td>
+        <td>${escapeHtml(s.region || '—')}</td>
         <td><span class="role-badge ${s.status==='approved'?'role-admin':s.status==='rejected'?'role-user':'role-creator'}">${s.status}</span></td>
         <td style="font-size:.8rem;color:var(--main-muted)">${timeAgo(s.created_at)}</td>
-       </tr>`).join('');
+      </tr>
+    `).join('');
   } catch(e) {}
 }
 
@@ -1340,11 +1353,12 @@ async function loadNewsletter() {
     const tbody = document.getElementById('newsletter-tbody');
     if (!subs.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No subscribers yet</td></tr>'; return; }
     tbody.innerHTML = subs.map((s,i) => `
-       <tr>
+      <tr>
         <td style="color:var(--main-muted)">${i+1}</td>
-        <td>${s.email}</td>
+        <td>${escapeHtml(s.email)}</td>
         <td style="color:var(--main-muted);font-size:.8rem">${timeAgo(s.created_at)}</td>
-       </tr>`).join('');
+      </tr>
+    `).join('');
   } catch(e) {}
 }
 
@@ -1356,12 +1370,13 @@ async function loadEvents() {
     const tbody = document.getElementById('events-tbody');
     if (!events.length) { tbody.innerHTML = '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No events yet</td></tr>'; return; }
     tbody.innerHTML = events.map(e => `
-       <tr>
-        <td><strong>${e.title}</strong></td>
-        <td>${e.location || '—'}</td>
+      <tr>
+        <td><strong>${escapeHtml(e.title)}</strong></td>
+        <td>${escapeHtml(e.location || '—')}</td>
         <td style="font-size:.85rem">${e.event_date ? new Date(e.event_date).toLocaleDateString() : '—'}</td>
         <td><button onclick="deleteEvent(${e.id})" class="btn btn-danger" style="font-size:.85rem;padding:8px 12px;">🗑 Delete</button></td>
-       </tr>`).join('');
+      </tr>
+    `).join('');
   } catch(e) {}
 }
 
@@ -1394,9 +1409,10 @@ async function loadCategories() {
     if (!cats.length) { container.innerHTML = '<p style="color:var(--main-muted);font-size:.9rem">No categories yet</p>'; return; }
     container.innerHTML = cats.map(c => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--main-border)">
-        <span style="font-size:.9rem">${c.name}</span>
+        <span style="font-size:.9rem">${escapeHtml(c.name)}</span>
         <button onclick="deleteCategory(${c.id})" class="btn btn-danger" style="font-size:.8rem;padding:6px 12px; min-height:44px;">✕</button>
-      </div>`).join('');
+      </div>
+    `).join('');
   } catch(e) {}
 }
 
@@ -1426,11 +1442,12 @@ async function loadChat() {
     container.innerHTML = msgs.slice(-50).map(m => `
       <div style="background:white;border:1px solid var(--main-border);border-radius:8px;padding:12px">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <strong style="font-size:.9rem">${m.username}</strong>
+          <strong style="font-size:.9rem">${escapeHtml(m.username)}</strong>
           <span style="font-size:.8rem;color:var(--main-muted)">${timeAgo(m.created_at)}</span>
         </div>
-        <p style="font-size:.95rem;color:var(--main-text)">${m.content}</p>
-      </div>`).join('');
+        <p style="font-size:.95rem;color:var(--main-text)">${escapeHtml(m.content)}</p>
+      </div>
+    `).join('');
   } catch(e) {}
 }
 
@@ -1500,14 +1517,14 @@ async function loadLogs() {
       return;
     }
     tbody.innerHTML = logs.map(log => `
-       <tr>
+      <tr>
         <td style="white-space:nowrap;">${new Date(log.created_at).toLocaleString()}</td>
         <td>${escapeHtml(log.admin)}</td>
         <td><span class="role-badge" style="background:${log.action === 'upload' ? 'rgba(34,197,94,.15)' : (log.action === 'delete' ? 'rgba(239,68,68,.15)' : 'rgba(200,150,46,.15)')}; color:${log.action === 'upload' ? '#15803d' : (log.action === 'delete' ? '#b91c1c' : '#c9933a')};">${log.action}</span></td>
         <td>${escapeHtml(log.target_type)}</td>
         <td>${escapeHtml(log.details)}</td>
         <td>${log.ip_address || '—'}</td>
-       </tr>
+      </tr>
     `).join('');
   } catch(e) {
     tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Failed to load logs</td></tr>';
