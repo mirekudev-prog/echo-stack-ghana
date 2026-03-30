@@ -92,6 +92,10 @@
         .bottom-row a{color:var(--gold);text-decoration:none;font-weight:600}
         .bottom-row a:hover{color:var(--gold2)}
 
+        .resend-link{text-align:center;margin-top:12px;font-size:.8rem}
+        .resend-link a{color:var(--muted);text-decoration:none;cursor:pointer}
+        .resend-link a:hover{color:var(--gold2)}
+
         .welcome-card{background:rgba(200,150,46,.08);border:1px solid rgba(200,150,46,.2);border-radius:16px;padding:20px;margin-bottom:20px;display:none;align-items:center;gap:12px}
         .welcome-card.show{display:flex}
         .wc-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--ink);flex-shrink:0}
@@ -178,6 +182,10 @@
         <button class="btn-primary" id="login-btn" onclick="submitLogin()">
             Sign In →
         </button>
+
+        <div class="resend-link">
+            <a onclick="resendVerification()">📧 Didn't receive verification email? Resend it</a>
+        </div>
 
         <div class="divider"><span>New to EchoStack?</span></div>
         <div class="bottom-row">Don't have an account? <a href="/signup">Join Free</a></div>
@@ -304,18 +312,29 @@ async function submitLogin() {
     }
 }
 
-// ── Resend verification ───────────────────────────────────────────────────────
+// ── Resend verification (enhanced: uses email from username field or stored value) ──
 async function resendVerification() {
-    const email = window._unverifiedEmail || document.getElementById('username').value.trim();
-    if (!email) { showToast('Enter your email above first', 'er'); return; }
+    // First try to get email from the username field (if it looks like email)
+    let email = document.getElementById('username').value.trim();
+    if (!email || !email.includes('@')) {
+        // If not, try the stored unverified email from a failed login
+        email = window._unverifiedEmail;
+    }
+    if (!email) {
+        showToast('Please enter your email address in the field above', 'er');
+        return;
+    }
 
     showToast('Sending…', '');
+    const fd = new FormData();
+    fd.append('email', email);
+
     try {
-        const fd = new FormData();
-        fd.append('email', email);
         const r = await fetch('/api/users/resend-verification', { method: 'POST', body: fd });
         const d = await r.json();
-        showToast(d.message || 'Verification email sent!', 'ok');
+        showToast(d.message || 'Verification email sent! Check your inbox (and spam).', 'ok');
+        // Clear stored unverified email after successful resend
+        window._unverifiedEmail = null;
     } catch(e) {
         showToast('Could not send — try again shortly', 'er');
     }
@@ -355,7 +374,7 @@ async function sendReset() {
         const d = await r.json();
 
         closeForgot();
-        showToast(d.message || 'Reset link sent — check your inbox', 'ok');
+        showToast(d.message || 'Reset link sent — check your inbox (and spam)', 'ok');
     } catch(e) {
         showToast('Could not send reset email — try again', 'er');
     } finally {
