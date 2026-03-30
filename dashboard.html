@@ -11,761 +11,142 @@
 <title>Feed — EchoStack Ghana</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-/* ---------- RESET & VARIABLES ---------- */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0D1B2A;--gold:#C8962E;--cream:#FAF6EF;--border:#E8EDF3;
+  --muted:#94A3B8;--blue:#0077b6;--sidebar:260px;--red:#ef4444
 }
-:root {
-    --ink: #0D1B2A;
-    --gold: #C8962E;
-    --cream: #FAF6EF;
-    --border: #E8EDF3;
-    --muted: #94A3B8;
-    --blue: #0077b6;
-    --sidebar: 260px;
-    --red: #ef4444;
+body{font-family:'DM Sans',sans-serif;background:#F0F2F5;min-height:100vh;color:var(--ink);overflow-x:hidden}
+
+/* ── LAYOUT (mobile first) ── */
+.layout{display:flex;min-height:100vh}
+
+/* ── LEFT SIDEBAR (off-canvas) ── */
+.sidebar{
+  width:var(--sidebar);position:fixed;top:0;left:0;height:100vh;
+  background:var(--ink);display:flex;flex-direction:column;z-index:200;
+  overflow-y:auto;transition:transform .3s;transform:translateX(-100%)
 }
-body {
-    font-family: 'DM Sans', sans-serif;
-    background: #F0F2F5;
-    min-height: 100vh;
-    color: var(--ink);
-    overflow-x: hidden; /* prevent accidental horizontal scroll */
+.sidebar.open{transform:translateX(0)}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.1);text-decoration:none}
+.sidebar-logo img{width:36px;height:36px;border-radius:8px;object-fit:cover}
+.sidebar-logo span{font-family:'Playfair Display',serif;color:#fff;font-size:1.1rem;font-weight:700}
+.sidebar-badge{font-size:.6rem;background:var(--gold);color:#fff;padding:1px 6px;border-radius:10px;margin-left:4px}
+.sidebar-user{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center}
+.user-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E8B84B);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.9rem;flex-shrink:0;overflow:hidden}
+.user-info{margin-left:10px}
+.user-info strong{color:#fff;font-size:.85rem;display:block}
+.user-info span{color:rgba(255,255,255,.5);font-size:.72rem}
+nav.side-nav{flex:1;padding:12px 10px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;color:rgba(255,255,255,.65);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .15s;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif}
+.nav-item:hover,.nav-item.active{background:rgba(255,255,255,.1);color:#fff}
+.nav-item .icon{font-size:1.1rem;width:22px;text-align:center}
+.nav-sep{height:1px;background:rgba(255,255,255,.08);margin:8px 0}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.08)}
+.logout-btn{width:100%;padding:10px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
+.logout-btn:hover{background:rgba(239,68,68,.3);color:#fff}
+
+/* ── TOP BAR (mobile only) ── */
+.topbar{display:flex;position:fixed;top:0;left:0;right:0;height:56px;background:var(--ink);border-bottom:2px solid var(--gold);z-index:300;align-items:center;padding:0 16px;justify-content:space-between}
+.topbar-logo{font-family:'Playfair Display',serif;color:#fff;font-size:1rem;font-weight:700}
+.menu-btn{background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;padding:8px}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:199}
+.sidebar-overlay.show{display:block}
+
+/* ── MAIN CONTENT (mobile first) ── */
+.main-col{margin-left:0;flex:1;min-height:100vh;padding:72px 12px 40px;width:100%}
+.feed-col{width:100%;max-width:600px;margin:0 auto}
+
+/* ── STORIES BAR ── */
+.stories-bar{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 12px;margin-bottom:16px;overflow-x:auto;display:flex;gap:14px;scrollbar-width:none}
+.stories-bar::-webkit-scrollbar{display:none}
+.story-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0}
+.story-ring{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e8b84b);padding:2px}
+.story-ring.unread{background:linear-gradient(135deg,#0077b6,var(--gold))}
+.story-av{width:100%;height:100%;border-radius:50%;background:var(--ink);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;overflow:hidden}
+.story-name{font-size:.65rem;color:var(--ink);font-weight:500;max-width:52px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+/* ── CREATE PROMPT ── */
+.create-bar{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.create-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e8b84b);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.85rem;flex-shrink:0;overflow:hidden}
+.create-input{flex:1;padding:10px 16px;border:1.5px solid var(--border);border-radius:24px;font-family:'DM Sans',sans-serif;font-size:.88rem;cursor:pointer;background:#F8FAFC;color:var(--muted);outline:none}
+.create-input:hover{border-color:var(--gold);background:#fff}
+
+/* ── FILTER TABS (scrollable) ── */
+.filter-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.filter-tabs::-webkit-scrollbar{display:none}
+.tab{padding:7px 16px;border-radius:24px;font-size:.8rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--muted);transition:all .15s;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.tab.active,.tab:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* ── POST CARD (fully responsive) ── */
+.post-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;transition:box-shadow .2s}
+.post-header{display:flex;align-items:center;gap:10px;padding:14px 16px 0}
+.p-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e8b84b);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.82rem;flex-shrink:0;overflow:hidden}
+.p-info{flex:1;min-width:0}
+.p-name{font-size:.84rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-time{font-size:.72rem;color:var(--muted)}
+.p-type{padding:2px 9px;border-radius:12px;font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-left:auto;white-space:nowrap}
+.pt-article{background:#EFF6FF;color:#2563EB}
+.pt-audio{background:#F0FDF4;color:#16A34A}
+.pt-photo_essay{background:#FFF7ED;color:#D97706}
+.pt-video{background:#FDF2F8;color:#9333EA}
+.pt-reel{background:#FCE7F3;color:#B21E6C}
+
+.post-title-link{display:block;padding:10px 16px 2px;text-decoration:none}
+.post-title-link h2{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink);line-height:1.4;transition:color .15s}
+.post-title-link:hover h2{color:var(--blue)}
+.post-excerpt{padding:0 16px 10px;font-size:.83rem;color:#64748B;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Media in card */
+.card-media{width:100%;background:#000;position:relative;overflow:hidden}
+.card-media img{width:100%;max-height:340px;object-fit:cover;display:block}
+.card-media video{width:100%;max-height:340px;display:block;background:#000}
+.card-media.reel video{max-height:480px;aspect-ratio:9/16;object-fit:cover;margin:0 auto}
+.play-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.55);border-radius:50%;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 2px 12px rgba(0,0,0,.4);cursor:pointer;z-index:10}
+.reel-watermark{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);border-radius:20px;padding:4px 10px;display:flex;align-items:center;justify-content:center;z-index:15;pointer-events:none;backdrop-filter:blur(2px);border:1px solid rgba(255,255,255,.15)}
+.reel-watermark img{height:18px;width:auto;display:block}
+.reel-watermark span{color:white;font-size:0.7rem;font-weight:600;margin-left:4px;letter-spacing:0.5px}
+.card-audio{padding:12px 16px;background:linear-gradient(135deg,#0D1B2A,#1a2a3a);margin:8px 12px;border-radius:12px}
+.card-audio audio{width:100%;border-radius:8px}
+.card-audio-label{color:rgba(255,255,255,.7);font-size:.72rem;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.premium-banner{background:linear-gradient(135deg,var(--gold),#a97825);padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:#fff}
+
+.post-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 12px;border-top:1px solid var(--border)}
+.act-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;font-size:.79rem;font-weight:500;cursor:pointer;border:none;background:none;color:var(--muted);transition:all .15s;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.act-btn:hover{background:#F8FAFC;color:var(--ink)}
+.act-btn.liked{color:#ef4444}
+.act-read{margin-left:auto;background:var(--gold);color:#fff;border-radius:8px;padding:7px 16px;font-size:.78rem;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;text-decoration:none;white-space:nowrap;flex-shrink:0}
+.act-read:hover{background:#a97825}
+@media (max-width: 480px){
+  .post-actions{gap:4px;padding:8px 10px}
+  .act-btn{padding:6px 8px;font-size:.7rem}
+  .act-read{padding:6px 10px;font-size:.7rem;margin-left:0}
 }
 
-/* ---------- LAYOUT (mobile first) ---------- */
-.layout {
-    display: flex;
-    min-height: 100vh;
-}
+.feed-empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.feed-empty .icon{font-size:3rem;margin-bottom:16px}
+.feed-empty h3{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--ink);margin-bottom:8px}
+.feed-empty p{font-size:.85rem;line-height:1.6}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e4e4e4 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
+.skel-row{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+.skel-circle{border-radius:50%;flex-shrink:0}
 
-/* ---------- LEFT SIDEBAR (off-canvas on mobile) ---------- */
-.sidebar {
-    width: var(--sidebar);
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    background: var(--ink);
-    display: flex;
-    flex-direction: column;
-    z-index: 200;
-    overflow-y: auto;
-    transition: transform 0.3s;
-    transform: translateX(-100%); /* hidden by default on mobile */
-}
-.sidebar.open {
-    transform: translateX(0);
-}
-.sidebar-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    text-decoration: none;
-}
-.sidebar-logo img {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    object-fit: cover;
-}
-.sidebar-logo span {
-    font-family: 'Playfair Display', serif;
-    color: #fff;
-    font-size: 1.1rem;
-    font-weight: 700;
-}
-.sidebar-badge {
-    font-size: 0.6rem;
-    background: var(--gold);
-    color: #fff;
-    padding: 1px 6px;
-    border-radius: 10px;
-    margin-left: 4px;
-    vertical-align: middle;
-}
-.sidebar-user {
-    padding: 16px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    display: flex;
-    align-items: center;
-}
-.user-av {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), #E8B84B);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: #fff;
-    font-size: 0.9rem;
-    flex-shrink: 0;
-    overflow: hidden;
-}
-.user-av img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-.user-info {
-    margin-left: 10px;
-}
-.user-info strong {
-    color: #fff;
-    font-size: 0.85rem;
-    display: block;
-}
-.user-info span {
-    color: rgba(255,255,255,0.5);
-    font-size: 0.72rem;
-}
-nav.side-nav {
-    flex: 1;
-    padding: 12px 10px;
-}
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 14px;
-    border-radius: 10px;
-    color: rgba(255,255,255,0.65);
-    text-decoration: none;
-    font-size: 0.88rem;
-    font-weight: 500;
-    transition: all 0.15s;
-    cursor: pointer;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
-    font-family: 'DM Sans', sans-serif;
-}
-.nav-item:hover,
-.nav-item.active {
-    background: rgba(255,255,255,0.1);
-    color: #fff;
-}
-.nav-item .icon {
-    font-size: 1.1rem;
-    width: 22px;
-    text-align: center;
-}
-.nav-sep {
-    height: 1px;
-    background: rgba(255,255,255,0.08);
-    margin: 8px 0;
-}
-.sidebar-footer {
-    padding: 16px 20px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-}
-.logout-btn {
-    width: 100%;
-    padding: 10px;
-    background: rgba(239,68,68,0.15);
-    border: 1px solid rgba(239,68,68,0.3);
-    color: #fca5a5;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.83rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s;
-}
-.logout-btn:hover {
-    background: rgba(239,68,68,0.3);
-    color: #fff;
-}
+.right-col{display:none;width:280px;flex-shrink:0}
+@media(min-width:1100px){.right-col{display:block}.main-col{padding-right:8px}}
+.right-panel{position:sticky;top:28px;background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.rp-hdr{padding:14px 16px;border-bottom:1px solid var(--border);font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:var(--ink)}
+.rp-item{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer}
+.rp-item:last-child{border-bottom:none}
+.rp-item-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e8b84b);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:#fff;flex-shrink:0}
+.rp-item-name{font-size:.82rem;font-weight:600;color:var(--ink)}
+.rp-item-sub{font-size:.72rem;color:var(--muted)}
 
-/* ---------- TOP BAR (mobile only) ---------- */
-.topbar {
-    display: flex;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-    background: var(--ink);
-    border-bottom: 2px solid var(--gold);
-    z-index: 300;
-    align-items: center;
-    padding: 0 16px;
-    justify-content: space-between;
-}
-.topbar-logo {
-    font-family: 'Playfair Display', serif;
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 700;
-}
-.menu-btn {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 1.3rem;
-    cursor: pointer;
-    padding: 8px;
-}
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.55);
-    z-index: 199;
-}
-.sidebar-overlay.show {
-    display: block;
-}
-
-/* ---------- MAIN CONTENT (mobile first) ---------- */
-.main-col {
-    margin-left: 0; /* no sidebar offset on mobile */
-    flex: 1;
-    min-height: 100vh;
-    padding: 72px 12px 40px; /* top padding for fixed topbar */
-    width: 100%;
-}
-.feed-col {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto; /* center on larger screens */
-}
-
-/* ---------- STORIES BAR ---------- */
-.stories-bar {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 12px 12px;
-    margin-bottom: 16px;
-    overflow-x: auto;
-    display: flex;
-    gap: 14px;
-    scrollbar-width: none;
-}
-.stories-bar::-webkit-scrollbar {
-    display: none;
-}
-.story-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-.story-ring {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), #e8b84b);
-    padding: 2px;
-}
-.story-ring.unread {
-    background: linear-gradient(135deg, #0077b6, var(--gold));
-}
-.story-av {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: var(--ink);
-    border: 2px solid #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #fff;
-    overflow: hidden;
-}
-.story-av img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-.story-name {
-    font-size: 0.65rem;
-    color: var(--ink);
-    font-weight: 500;
-    max-width: 52px;
-    text-align: center;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-.story-add {
-    background: rgba(0,119,182,0.08);
-    border: 2px dashed rgba(0,119,182,0.3);
-}
-
-/* ---------- CREATE PROMPT ---------- */
-.create-bar {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.create-av {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), #e8b84b);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: #fff;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-    overflow: hidden;
-}
-.create-av img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-.create-input {
-    flex: 1;
-    padding: 10px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 24px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.88rem;
-    cursor: pointer;
-    background: #F8FAFC;
-    color: var(--muted);
-    outline: none;
-}
-.create-input:hover {
-    border-color: var(--gold);
-    background: #fff;
-}
-
-/* ---------- FILTER TABS (scrollable, no overflow) ---------- */
-.filter-tabs {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 16px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding-bottom: 2px;
-}
-.filter-tabs::-webkit-scrollbar {
-    display: none;
-}
-.tab {
-    padding: 7px 16px;
-    border-radius: 24px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1.5px solid var(--border);
-    background: #fff;
-    color: var(--muted);
-    transition: all 0.15s;
-    white-space: nowrap;
-    font-family: 'DM Sans', sans-serif;
-}
-.tab.active,
-.tab:hover {
-    background: var(--ink);
-    color: #fff;
-    border-color: var(--ink);
-}
-
-/* ---------- POST CARDS (fully responsive) ---------- */
-.post-card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    margin-bottom: 14px;
-    transition: box-shadow 0.2s;
-}
-.post-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 16px 0;
-}
-.p-av {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), #e8b84b);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: #fff;
-    font-size: 0.82rem;
-    flex-shrink: 0;
-    overflow: hidden;
-}
-.p-av img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-.p-info {
-    flex: 1;
-    min-width: 0; /* allows truncation */
-}
-.p-name {
-    font-size: 0.84rem;
-    font-weight: 600;
-    color: var(--ink);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.p-time {
-    font-size: 0.72rem;
-    color: var(--muted);
-}
-.p-type {
-    padding: 2px 9px;
-    border-radius: 12px;
-    font-size: 0.64rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    margin-left: auto;
-    white-space: nowrap;
-}
-.pt-article { background: #EFF6FF; color: #2563EB; }
-.pt-audio { background: #F0FDF4; color: #16A34A; }
-.pt-photo_essay { background: #FFF7ED; color: #D97706; }
-.pt-video { background: #FDF2F8; color: #9333EA; }
-.pt-reel { background: #FCE7F3; color: #B21E6C; }
-
-.post-title-link {
-    display: block;
-    padding: 10px 16px 2px;
-    text-decoration: none;
-}
-.post-title-link h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    color: var(--ink);
-    line-height: 1.4;
-    transition: color 0.15s;
-}
-.post-title-link:hover h2 {
-    color: var(--blue);
-}
-.post-excerpt {
-    padding: 0 16px 10px;
-    font-size: 0.83rem;
-    color: #64748B;
-    line-height: 1.6;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-.card-media {
-    width: 100%;
-    background: #000;
-    position: relative;
-    overflow: hidden;
-}
-.card-media img {
-    width: 100%;
-    max-height: 340px;
-    object-fit: cover;
-    display: block;
-}
-.card-media video {
-    width: 100%;
-    max-height: 340px;
-    display: block;
-    background: #000;
-}
-.card-media.reel video {
-    max-height: 480px;
-    aspect-ratio: 9/16;
-    object-fit: cover;
-    margin: 0 auto;
-}
-.reel-watermark {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.65);
-    border-radius: 20px;
-    padding: 4px 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 15;
-    pointer-events: none;
-    backdrop-filter: blur(2px);
-    border: 1px solid rgba(255,255,255,0.15);
-}
-.reel-watermark img {
-    height: 18px;
-    width: auto;
-    display: block;
-}
-.reel-watermark span {
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 600;
-    margin-left: 4px;
-    letter-spacing: 0.5px;
-}
-.card-audio {
-    padding: 12px 16px;
-    background: linear-gradient(135deg, #0D1B2A, #1a2a3a);
-}
-.card-audio audio {
-    width: 100%;
-    border-radius: 8px;
-}
-.card-audio-label {
-    color: rgba(255,255,255,0.7);
-    font-size: 0.72rem;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.premium-banner {
-    background: linear-gradient(135deg, var(--gold), #a97825);
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #fff;
-}
-.post-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 12px;
-    border-top: 1px solid var(--border);
-}
-.act-btn {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 7px 12px;
-    border-radius: 8px;
-    font-size: 0.79rem;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    background: none;
-    color: var(--muted);
-    transition: all 0.15s;
-    font-family: 'DM Sans', sans-serif;
-    white-space: nowrap;
-}
-.act-btn:hover {
-    background: #F8FAFC;
-    color: var(--ink);
-}
-.act-btn.liked {
-    color: #ef4444;
-}
-.act-btn.liked:hover {
-    background: #FEF2F2;
-}
-.act-read {
-    margin-left: auto;
-    background: var(--gold);
-    color: #fff;
-    border-radius: 8px;
-    padding: 7px 16px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    font-family: 'DM Sans', sans-serif;
-    text-decoration: none;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-.act-read:hover {
-    background: #a97825;
-}
-@media (max-width: 480px) {
-    .post-actions {
-        gap: 4px;
-        padding: 8px 10px;
-    }
-    .act-btn {
-        padding: 6px 8px;
-        font-size: 0.7rem;
-    }
-    .act-read {
-        padding: 6px 10px;
-        font-size: 0.7rem;
-        margin-left: 0;
-    }
-}
-
-/* ---------- EMPTY / LOADING ---------- */
-.feed-empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted);
-}
-.feed-empty .icon {
-    font-size: 3rem;
-    margin-bottom: 16px;
-}
-.feed-empty h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.2rem;
-    color: var(--ink);
-    margin-bottom: 8px;
-}
-.feed-empty p {
-    font-size: 0.85rem;
-    line-height: 1.6;
-}
-.skeleton {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-    border-radius: 8px;
-}
-@keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-.skel-card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 14px;
-}
-.skel-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 14px;
-}
-.skel-circle {
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-/* ---------- RIGHT PANEL (only visible on large screens) ---------- */
-.right-col {
-    display: none;
-    width: 280px;
-    flex-shrink: 0;
-}
-@media (min-width: 1100px) {
-    .right-col {
-        display: block;
-    }
-    .main-col {
-        padding-right: 8px;
-    }
-}
-.right-panel {
-    position: sticky;
-    top: 28px;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-}
-.rp-hdr {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border);
-    font-family: 'Playfair Display', serif;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--ink);
-}
-.rp-item {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-}
-.rp-item:last-child {
-    border-bottom: none;
-}
-.rp-item-av {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), #e8b84b);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: #fff;
-    flex-shrink: 0;
-}
-.rp-item-name {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--ink);
-}
-.rp-item-sub {
-    font-size: 0.72rem;
-    color: var(--muted);
-}
-
-/* ---------- TOAST ---------- */
-.toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--ink);
-    color: #fff;
-    padding: 11px 20px;
-    border-radius: 10px;
-    font-size: 0.84rem;
-    font-weight: 500;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    transition: transform 0.3s;
-    z-index: 3000;
-    white-space: nowrap;
-}
-.toast.on {
-    transform: translateX(-50%) translateY(0);
-}
-.toast.ok {
-    background: #1A7A4A;
-}
-.toast.er {
-    background: #C0392B;
-}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:.84rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:transform .3s;z-index:3000;white-space:nowrap}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.toast.ok{background:#1A7A4A}
+.toast.er{background:#C0392B}
 </style>
 </head>
 <body>
@@ -784,7 +165,6 @@ nav.side-nav {
     <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
     <span>EchoStack <span class="sidebar-badge">GH</span></span>
   </a>
-
   <div class="sidebar-user">
     <div class="user-av" id="sb-av">?</div>
     <div class="user-info">
@@ -792,7 +172,6 @@ nav.side-nav {
       <span id="sb-role">Member</span>
     </div>
   </div>
-
   <nav class="side-nav">
     <a href="/dashboard" class="nav-item active"><span class="icon">📰</span>Feed</a>
     <a href="/reels" class="nav-item"><span class="icon">📱</span>Reels</a>
@@ -806,7 +185,6 @@ nav.side-nav {
     <div class="nav-sep"></div>
     <a href="/chat" class="nav-item"><span class="icon">💬</span>Community Chat</a>
   </nav>
-
   <div class="sidebar-footer">
     <button onclick="logout()" class="logout-btn">🚪 Sign Out</button>
   </div>
@@ -815,21 +193,9 @@ nav.side-nav {
 <!-- MAIN LAYOUT -->
 <div class="layout">
   <div class="main-col">
-    <!-- FEED COLUMN (centered) -->
     <div class="feed-col">
-
-      <!-- STORIES / CREATORS BAR -->
-      <div class="stories-bar" id="stories-bar">
-        <div style="color:var(--muted); font-size:0.8rem; align-self:center; white-space:nowrap;">Loading creators...</div>
-      </div>
-
-      <!-- CREATE PROMPT -->
-      <div class="create-bar" id="create-bar">
-        <div class="create-av" id="create-av">?</div>
-        <input class="create-input" placeholder="Share a story about Ghana's heritage..." onclick="handleCreateClick()" readonly>
-      </div>
-
-      <!-- FILTER TABS -->
+      <div class="stories-bar" id="stories-bar"><div style="color:var(--muted); font-size:0.8rem; align-self:center; white-space:nowrap;">Loading creators...</div></div>
+      <div class="create-bar" id="create-bar"><div class="create-av" id="create-av">?</div><input class="create-input" placeholder="Share a story about Ghana's heritage..." onclick="handleCreateClick()" readonly></div>
       <div class="filter-tabs">
         <button class="tab active" onclick="filterFeed('all',this)">🌍 All</button>
         <button class="tab" onclick="filterFeed('article',this)">📝 Articles</button>
@@ -838,47 +204,9 @@ nav.side-nav {
         <button class="tab" onclick="filterFeed('audio',this)">🎵 Audio</button>
         <button class="tab" onclick="filterFeed('photo_essay',this)">📸 Photos</button>
       </div>
-
-      <!-- FEED -->
-      <div id="feed-container">
-        <!-- skeleton loaders (will be replaced by JS) -->
-        <div class="skel-card">
-          <div class="skel-row">
-            <div class="skeleton skel-circle" style="width:38px;height:38px"></div>
-            <div style="flex:1"><div class="skeleton" style="width:120px;height:13px"></div><div class="skeleton" style="width:80px;height:11px;margin-top:6px"></div></div>
-          </div>
-          <div class="skeleton" style="width:85%;height:18px;margin-bottom:8px"></div>
-          <div class="skeleton" style="width:60%;height:18px;margin-bottom:12px"></div>
-          <div class="skeleton" style="height:180px;border-radius:10px"></div>
-        </div>
-        <div class="skel-card">
-          <div class="skel-row">
-            <div class="skeleton skel-circle" style="width:38px;height:38px"></div>
-            <div style="flex:1"><div class="skeleton" style="width:120px;height:13px"></div><div class="skeleton" style="width:80px;height:11px;margin-top:6px"></div></div>
-          </div>
-          <div class="skeleton" style="width:85%;height:18px;margin-bottom:8px"></div>
-          <div class="skeleton" style="width:60%;height:18px;margin-bottom:12px"></div>
-          <div class="skeleton" style="height:180px;border-radius:10px"></div>
-        </div>
-        <div class="skel-card">
-          <div class="skel-row">
-            <div class="skeleton skel-circle" style="width:38px;height:38px"></div>
-            <div style="flex:1"><div class="skeleton" style="width:120px;height:13px"></div><div class="skeleton" style="width:80px;height:11px;margin-top:6px"></div></div>
-          </div>
-          <div class="skeleton" style="width:85%;height:18px;margin-bottom:8px"></div>
-          <div class="skeleton" style="width:60%;height:18px;margin-bottom:12px"></div>
-          <div class="skeleton" style="height:180px;border-radius:10px"></div>
-        </div>
-      </div>
+      <div id="feed-container"><div class="skel-card"><div class="skel-row"><div class="skeleton skel-circle" style="width:38px;height:38px"></div><div style="flex:1"><div class="skeleton" style="width:120px;height:13px"></div><div class="skeleton" style="width:80px;height:11px;margin-top:6px"></div></div></div><div class="skeleton" style="width:85%;height:18px;margin-bottom:8px"></div><div class="skeleton" style="width:60%;height:18px;margin-bottom:12px"></div><div class="skeleton" style="height:180px;border-radius:10px"></div></div></div>
     </div>
-
-    <!-- RIGHT PANEL (desktop only) -->
-    <div class="right-col">
-      <div class="right-panel" id="right-panel">
-        <div class="rp-hdr">🏛️ Regions</div>
-        <div id="rp-regions"><div style="padding:16px;font-size:.82rem;color:var(--muted)">Loading...</div></div>
-      </div>
-    </div>
+    <div class="right-col"><div class="right-panel"><div class="rp-hdr">🏛️ Regions</div><div id="rp-regions"><div style="padding:16px;font-size:.82rem;color:var(--muted)">Loading...</div></div></div></div>
   </div>
 </div>
 
@@ -890,19 +218,12 @@ let currentUser = null;
 let allPosts = [];
 let activeFilter = 'all';
 
-// ────────────────────────────
-// AUTH CHECK – Universal (handles both user and admin)
-// ────────────────────────────
 async function checkAuth() {
   try {
     const res = await fetch('/api/users/me');
     if (!res.ok) throw new Error('Not authenticated');
     currentUser = await res.json();
-
-    // Save to localStorage for other pages if needed (optional)
     localStorage.setItem('es_user', JSON.stringify(currentUser));
-
-    // Update UI with user info
     const initials = (currentUser.username || 'U')[0].toUpperCase();
     document.getElementById('sb-av').textContent = initials;
     document.getElementById('sb-name').textContent = currentUser.username;
@@ -912,23 +233,14 @@ async function checkAuth() {
     else if (currentUser.is_premium) roleText = 'Premium ⭐';
     document.getElementById('sb-role').textContent = roleText;
     document.getElementById('create-av').textContent = initials;
-
-    // Show creator link if applicable
-    if (['creator','admin','superuser'].includes(currentUser.role)) {
-      document.getElementById('creator-link').style.display = 'flex';
-    }
-
+    if (['creator','admin','superuser'].includes(currentUser.role)) document.getElementById('creator-link').style.display = 'flex';
     return true;
   } catch (e) {
-    // Not authenticated – redirect to login
     window.location.href = '/user-login';
     return false;
   }
 }
 
-// ────────────────────────────
-// INIT
-// ────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   const authed = await checkAuth();
   if (authed) {
@@ -936,9 +248,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// ────────────────────────────
-// FEED
-// ────────────────────────────
 async function loadFeed() {
   try {
     const r = await fetch(`${API}/posts?status=published&limit=50`);
@@ -946,12 +255,7 @@ async function loadFeed() {
     allPosts = await r.json();
     renderFeed(allPosts);
   } catch(e) {
-    document.getElementById('feed-container').innerHTML = `
-      <div class="feed-empty">
-        <div class="icon">📭</div>
-        <h3>No posts yet</h3>
-        <p>Be the first to share a story about Ghana's heritage!</p>
-      </div>`;
+    document.getElementById('feed-container').innerHTML = `<div class="feed-empty"><div class="icon">📭</div><h3>No posts yet</h3><p>Be the first to share a story about Ghana's heritage!</p></div>`;
   }
 }
 
@@ -966,12 +270,7 @@ function filterFeed(type, btn) {
 function renderFeed(posts) {
   const container = document.getElementById('feed-container');
   if (!posts || posts.length === 0) {
-    container.innerHTML = `
-      <div class="feed-empty">
-        <div class="icon">🔍</div>
-        <h3>Nothing here yet</h3>
-        <p>No posts in this category. Check back soon!</p>
-      </div>`;
+    container.innerHTML = `<div class="feed-empty"><div class="icon">🔍</div><h3>Nothing here yet</h3><p>No posts in this category. Check back soon!</p></div>`;
     return;
   }
   container.innerHTML = posts.map(p => buildPostCard(p)).join('');
@@ -981,27 +280,17 @@ function buildPostCard(p) {
   const ct = p.content_type || 'article';
   const authorInitial = (p.author_username || 'C')[0].toUpperCase();
   const timeAgo = formatTime(p.created_at);
-
-  // Media preview
   let mediaHtml = '';
   if (ct === 'reel') {
     const match = (p.content || '').match(/\[video\](.*?)\[\/video\]/i);
     const url = match ? match[1].trim() : (p.video_url || '');
     if (url) {
       mediaHtml = `<div class="card-media reel" style="position:relative">
-        <video preload="none" style="width:100%;display:block;background:#000;cursor:pointer"
-               onclick="goPost(${p.id})" poster="${p.cover_image||''}">
+        <video preload="none" style="width:100%;display:block;background:#000;cursor:pointer" onclick="goPost(${p.id})" poster="${p.cover_image||''}">
           <source src="${url}" type="video/mp4">
         </video>
-        <div onclick="goPost(${p.id})" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-             background:rgba(0,0,0,.55);border-radius:50%;width:52px;height:52px;cursor:pointer;
-             display:flex;align-items:center;justify-content:center;font-size:1.4rem;
-             box-shadow:0 2px 12px rgba(0,0,0,.4);z-index:10">▶️</div>
-        <!-- WATERMARK for reel -->
-        <div class="reel-watermark">
-          <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
-          <span>EchoStack</span>
-        </div>
+        <div onclick="goPost(${p.id})" class="play-overlay">▶️</div>
+        <div class="reel-watermark"><img src="/echostack-logo.png" onerror="this.style.display='none'"><span>EchoStack</span></div>
       </div>`;
     }
   } else if (ct === 'video') {
@@ -1009,14 +298,10 @@ function buildPostCard(p) {
     const url = match ? match[1].trim() : (p.video_url || '');
     if (url) {
       mediaHtml = `<div class="card-media" style="position:relative">
-        <video preload="none" style="width:100%;max-height:300px;display:block;background:#000;cursor:pointer"
-               onclick="goPost(${p.id})" poster="${p.cover_image||''}">
+        <video preload="none" style="width:100%;max-height:300px;display:block;background:#000;cursor:pointer" onclick="goPost(${p.id})" poster="${p.cover_image||''}">
           <source src="${url}" type="video/mp4">
         </video>
-        <div onclick="goPost(${p.id})" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-             background:rgba(0,0,0,.55);border-radius:50%;width:52px;height:52px;cursor:pointer;
-             display:flex;align-items:center;justify-content:center;font-size:1.4rem;
-             box-shadow:0 2px 12px rgba(0,0,0,.4);z-index:10">▶️</div>
+        <div onclick="goPost(${p.id})" class="play-overlay">▶️</div>
       </div>`;
     }
   } else if (ct === 'audio') {
@@ -1025,9 +310,7 @@ function buildPostCard(p) {
     if (url) {
       mediaHtml = `<div class="card-audio">
         <div class="card-audio-label">🎵 Audio Recording</div>
-        <audio controls style="width:100%;border-radius:8px">
-          <source src="${url}" type="audio/mpeg">
-        </audio>
+        <audio controls style="width:100%;border-radius:8px"><source src="${url}" type="audio/mpeg"></audio>
       </div>`;
     }
   } else if (p.cover_image) {
@@ -1038,26 +321,18 @@ function buildPostCard(p) {
       mediaHtml = `<div class="card-media"><img src="${match[1].trim()}" alt="${p.title}" onclick="goPost(${p.id})" style="cursor:pointer" onerror="this.closest('.card-media').style.display='none'"></div>`;
     }
   }
-
   const premiumBadge = p.is_locked ? `<div class="premium-banner">⭐ Premium Content — Subscribe to read full article</div>` : '';
-
-  // Build actions including delete button if user is admin/superuser
-  let actionsHtml = `
-    <button class="act-btn" onclick="quickLike(${p.id}, this)">❤️ <span class="lc">${p.likes||0}</span></button>
-    <button class="act-btn" onclick="goPost(${p.id})">💬 ${p.comment_count || 0}</button>
+  let actionsHtml = `<button class="act-btn" onclick="quickLike(${p.id}, this)">❤️ <span class="lc">${p.likes||0}</span></button>
+    <button class="act-btn" onclick="goPost(${p.id})">💬 ${p.comment_count||0}</button>
     <button class="act-btn" onclick="sharePost(${p.id}, '${escHtml(p.title).replace(/'/g,"\\'")}')">🔗</button>`;
-
-  // Follow button (if author exists and is not current user)
   if (currentUser && p.author_id && p.author_id !== currentUser.id) {
     const followingText = p.is_following ? 'Following' : 'Follow';
-    actionsHtml += `<button class="act-btn" onclick="toggleFollow('${p.author_id}', this)" data-following="${p.is_following}">${followingText}</button>`;
+    actionsHtml += `<button class="act-btn follow-btn" onclick="toggleFollow('${p.author_id}', this)" data-following="${p.is_following}">${followingText}</button>`;
   }
-
   if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superuser')) {
     actionsHtml += `<button class="act-btn" onclick="deletePost(${p.id})" style="color:#ef4444;">🗑 Delete</button>`;
   }
   actionsHtml += `<a href="/post/${p.id}" class="act-read">Read →</a>`;
-
   return `<div class="post-card">
     <div class="post-header">
       <div class="p-av" onclick="goPost(${p.id})" style="cursor:pointer">${authorInitial}</div>
@@ -1067,57 +342,22 @@ function buildPostCard(p) {
       </div>
       <span class="p-type pt-${ct}">${ct.replace('_',' ')}</span>
     </div>
-
     <a href="/post/${p.id}" class="post-title-link"><h2>${escHtml(p.title)}</h2></a>
     ${p.excerpt ? `<div class="post-excerpt">${escHtml(p.excerpt)}</div>` : ''}
-
     ${mediaHtml}
     ${premiumBadge}
-
-    <div class="post-actions">
-      ${actionsHtml}
-    </div>
+    <div class="post-actions">${actionsHtml}</div>
   </div>`;
 }
 
-// ────────────────────────────
-// TOGGLE FOLLOW (new function)
-// ────────────────────────────
-async function toggleFollow(authorId, btn) {
-  if (!currentUser) { showToast('Please log in to follow', 'er'); return; }
-  try {
-    const res = await fetch(`/api/follow/${authorId}`, { method: 'POST' });
-    const data = await res.json();
-    const isFollowing = data.following;
-    btn.textContent = isFollowing ? 'Following' : 'Follow';
-    btn.dataset.following = isFollowing;
-  } catch (e) {
-    showToast('Error following', 'er');
-  }
-}
-
-// ────────────────────────────
-// CREATORS STORIES BAR
-// ────────────────────────────
 async function loadCreatorsBar() {
   try {
     const r = await fetch(`${API}/creators`);
     const creators = r.ok ? await r.json() : [];
     const bar = document.getElementById('stories-bar');
-    if (!creators.length) {
-      bar.innerHTML = `<div style="color:var(--muted);font-size:.8rem;align-self:center;white-space:nowrap">No creators yet</div>`;
-      return;
-    }
-    bar.innerHTML = creators.map(c => `
-      <div class="story-item" onclick="filterByCreator('${c.username}')">
-        <div class="story-ring unread">
-          <div class="story-av">${(c.channel_name||c.username||'?')[0].toUpperCase()}</div>
-        </div>
-        <div class="story-name">${c.channel_name||c.username}</div>
-      </div>`).join('');
-  } catch(e) {
-    document.getElementById('stories-bar').style.display = 'none';
-  }
+    if (!creators.length) { bar.innerHTML = `<div style="color:var(--muted);font-size:.8rem;align-self:center;white-space:nowrap">No creators yet</div>`; return; }
+    bar.innerHTML = creators.map(c => `<div class="story-item" onclick="filterByCreator('${c.username}')"><div class="story-ring unread"><div class="story-av">${(c.channel_name||c.username||'?')[0].toUpperCase()}</div></div><div class="story-name">${c.channel_name||c.username}</div></div>`).join('');
+  } catch(e) { document.getElementById('stories-bar').style.display = 'none'; }
 }
 
 function filterByCreator(username) {
@@ -1126,30 +366,16 @@ function filterByCreator(username) {
   if (filtered.length) showToast(`Showing posts by ${username}`, 'ok');
 }
 
-// ────────────────────────────
-// RIGHT PANEL — REGIONS
-// ────────────────────────────
 async function loadRegionPanel() {
   try {
     const r = await fetch(`${API}/regions`);
     const regions = r.ok ? await r.json() : [];
     const el = document.getElementById('rp-regions');
     if (!regions.length) { el.innerHTML = '<div style="padding:16px;font-size:.82rem;color:var(--muted)">No regions yet</div>'; return; }
-    el.innerHTML = regions.slice(0,6).map(reg => `
-      <div class="rp-item" onclick="window.location.href='/app'" style="cursor:pointer">
-        <div class="rp-item-av">${reg.name[0]}</div>
-        <div>
-          <div class="rp-item-name">${reg.name}</div>
-          <div class="rp-item-sub">${reg.capital||'Ghana'}</div>
-        </div>
-      </div>`).join('') +
-      (regions.length > 6 ? `<div style="padding:12px 16px;font-size:.78rem;color:var(--blue);cursor:pointer" onclick="window.location.href='/app'">View all ${regions.length} regions →</div>` : '');
+    el.innerHTML = regions.slice(0,6).map(reg => `<div class="rp-item" onclick="window.location.href='/app'" style="cursor:pointer"><div class="rp-item-av">${reg.name[0]}</div><div><div class="rp-item-name">${reg.name}</div><div class="rp-item-sub">${reg.capital||'Ghana'}</div></div></div>`).join('') + (regions.length > 6 ? `<div style="padding:12px 16px;font-size:.78rem;color:var(--blue);cursor:pointer" onclick="window.location.href='/app'">View all ${regions.length} regions →</div>` : '');
   } catch(e) {}
 }
 
-// ────────────────────────────
-// QUICK LIKE (from feed)
-// ────────────────────────────
 async function quickLike(postId, btn) {
   if (!currentUser) { showToast('Please log in to like', 'er'); return; }
   try {
@@ -1161,30 +387,33 @@ async function quickLike(postId, btn) {
   } catch(e) {}
 }
 
-// ────────────────────────────
-// DELETE POST (admin only)
-// ────────────────────────────
-async function deletePost(postId) {
-    if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
-    try {
-        const res = await fetch(`/api/posts/${postId}`, { method: 'DELETE' });
-        const data = await res.json();
-        if (res.ok && data.success) {
-            showToast('✅ Post deleted', 'ok');
-            // Remove from local array and re-render feed
-            allPosts = allPosts.filter(p => p.id !== postId);
-            renderFeed(allPosts);
-        } else {
-            showToast('❌ ' + (data.detail || 'Delete failed'), 'er');
-        }
-    } catch (err) {
-        showToast('❌ ' + err.message, 'er');
-    }
+async function toggleFollow(authorId, btn) {
+  if (!currentUser) { showToast('Please log in to follow', 'er'); return; }
+  try {
+    const res = await fetch(`/api/follow/${authorId}`, { method: 'POST' });
+    const data = await res.json();
+    const isFollowing = data.following;
+    btn.textContent = isFollowing ? 'Following' : 'Follow';
+    btn.classList.toggle('following', isFollowing);
+    btn.dataset.following = isFollowing;
+  } catch (e) { showToast('Error following', 'er'); }
 }
 
-// ────────────────────────────
-// HELPERS
-// ────────────────────────────
+async function deletePost(postId) {
+  if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+  try {
+    const res = await fetch(`/api/posts/${postId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('✅ Post deleted', 'ok');
+      allPosts = allPosts.filter(p => p.id !== postId);
+      renderFeed(allPosts);
+    } else {
+      showToast('❌ ' + (data.detail || 'Delete failed'), 'er');
+    }
+  } catch (err) { showToast('❌ ' + err.message, 'er'); }
+}
+
 function goPost(id) { window.location.href = '/post/' + id; }
 
 function handleCreateClick() {
@@ -1243,13 +472,9 @@ function showToast(msg, type) {
   setTimeout(() => t.className = 'toast', 3000);
 }
 
-// Service Worker (PWA)
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
+  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
 }
 </script>
-
 </body>
 </html>
