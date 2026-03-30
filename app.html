@@ -1,862 +1,763 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0D1B2A">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>EchoStack - Explore Ghana</title>
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="EchoStack">
-    <link rel="icon" type="image/png" href="/echostack-logo.png">
-    <link rel="apple-touch-icon" href="/echostack-logo.png">
-    <link rel="manifest" href="/manifest.json">
-
-    <script>
-        try {
-            var _u = localStorage.getItem('es_user');
-            if (!_u) { window.location.href = '/user-login'; }
-            else {
-                var _p = JSON.parse(_u);
-                if (!_p || !_p.loggedIn) window.location.href = '/user-login';
-            }
-        } catch(e) { window.location.href = '/user-login'; }
-    </script>
-
-    <style>
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-        :root { --ink:#1a1e29; --blue:#0077b6; --gold:#C8962E; --cream:#f5f5f5; --white:#ffffff; --border:#e0e0e0; --sidebar-w:260px; }
-        body { font-family: Georgia, serif; background: var(--cream); color: var(--ink); }
-        .sidebar { position:fixed; left:0; top:0; height:100vh; width:var(--sidebar-w); background:var(--ink); color:white; display:flex; flex-direction:column; z-index:1000; transition:transform 0.3s ease; overflow-y:auto; }
-        .sidebar-header { padding:1.25rem 1.25rem 1rem; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:space-between; }
-        .sidebar-logo { display:flex; align-items:center; gap:0.6rem; text-decoration:none; }
-        .sidebar-logo img { width:36px; height:36px; border-radius:7px; object-fit:contain; background:rgba(255,255,255,0.05); }
-        .sidebar-logo span { font-size:1.2rem; font-weight:bold; color:white; }
-        .sidebar-close { display:none; background:none; border:none; color:rgba(255,255,255,0.5); font-size:1.6rem; cursor:pointer; line-height:1; padding:2px 6px; }
-        @media(max-width:768px){ .sidebar-close { display:block; } }
-        .user-pill { margin:1rem 1.25rem 0; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:10px; }
-        .user-av { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--gold),#E8B84B); display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:700; color:var(--ink); flex-shrink:0; }
-        .user-info { min-width:0; }
-        .user-name { font-size:0.82rem; font-weight:600; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .user-plan { font-size:0.68rem; color:rgba(255,255,255,0.4); margin-top:1px; }
-        .sidebar-nav { flex:1; padding:0.75rem; }
-        .nav-label { font-size:0.62rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.25); padding:0.75rem 0.75rem 0.4rem; }
-        .sidebar-nav a { display:flex; align-items:center; gap:0.75rem; padding:0.7rem 0.9rem; color:rgba(255,255,255,0.6); text-decoration:none; border-radius:8px; margin-bottom:2px; font-size:0.88rem; transition:all 0.2s; }
-        .sidebar-nav a:hover, .sidebar-nav a.active { background:rgba(255,255,255,0.08); color:white; }
-        .sidebar-nav a svg { width:18px; height:18px; flex-shrink:0; }
-        .sidebar-footer { padding:1rem 1.25rem 1.5rem; border-top:1px solid rgba(255,255,255,0.08); }
-        .btn-logout { width:100%; background:rgba(220,38,38,0.15); border:1px solid rgba(220,38,38,0.3); color:#f87171; padding:0.7rem 1rem; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:all 0.2s; }
-        .btn-logout:hover { background:rgba(220,38,38,0.3); color:#fff; }
-        .main-wrapper { margin-left:var(--sidebar-w); min-height:100vh; display:flex; flex-direction:column; }
-        .mobile-bar { display:none; position:sticky; top:0; z-index:900; background:var(--ink); padding:0.75rem 1rem; align-items:center; justify-content:space-between; border-bottom:2px solid var(--gold); }
-        .mobile-bar-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
-        .mobile-bar-logo img { width:28px; height:28px; border-radius:6px; object-fit:contain; }
-        .mobile-bar-logo span { font-weight:bold; color:white; font-size:1rem; }
-        .burger { background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; padding:4px; display:flex; align-items:center; }
-        .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:999; }
-        .overlay.show { display:block; }
-        @media(max-width:768px){ .sidebar { transform:translateX(-100%); } .sidebar.open { transform:translateX(0); } .main-wrapper { margin-left:0; } .mobile-bar { display:flex; } }
-        .main { max-width:1100px; margin:0 auto; padding:1.5rem 1rem 3rem; flex:1; }
-        .hero-banner { background:linear-gradient(135deg,var(--ink) 0%,#243047 100%); border-radius:14px; padding:2rem 1.5rem; margin-bottom:2rem; color:white; position:relative; overflow:hidden; }
-        .hero-banner::before { content:'🇬🇭'; position:absolute; right:1.5rem; top:50%; transform:translateY(-50%); font-size:4rem; opacity:0.15; }
-        .hero-banner h2 { font-size:clamp(1.3rem,4vw,1.8rem); margin-bottom:0.4rem; }
-        .hero-banner p { font-size:0.88rem; color:rgba(255,255,255,0.55); line-height:1.6; max-width:500px; }
-        .section-head { font-size:1.1rem; color:var(--ink); margin-bottom:1rem; padding-left:0.85rem; border-left:4px solid var(--blue); font-weight:bold; }
-        .map-wrapper { background:white; border:1.5px solid var(--border); border-radius:12px; padding:1.5rem; box-shadow:0 2px 12px rgba(0,0,0,0.05); margin-bottom:2rem; }
-        svg { width:100%; height:auto; max-height:560px; display:block; }
-        .region-path { transition:all 0.25s; cursor:pointer; stroke:#c0c0c0; stroke-width:1.5; fill:#eef2f7; }
-        .region-path:hover { fill:var(--blue); stroke:var(--ink); stroke-width:2; opacity:0.9; }
-        .region-active { fill:var(--blue)!important; stroke:var(--ink)!important; stroke-width:2.5!important; filter:drop-shadow(0 2px 6px rgba(0,119,182,0.4)); }
-        .map-label { font-size:8px; font-weight:bold; font-family:Arial,sans-serif; pointer-events:none; fill:var(--ink); paint-order:stroke; stroke:white; stroke-width:2.5px; }
-        .regions-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; margin-bottom:2rem; }
-        @media(max-width:480px){ .regions-grid { grid-template-columns:1fr 1fr; gap:0.75rem; } }
-        .region-card { background:white; border:1.5px solid var(--border); border-radius:10px; padding:1rem; cursor:pointer; transition:all 0.2s; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
-        .region-card:hover { transform:translateY(-3px); box-shadow:0 6px 16px rgba(0,119,182,0.12); border-color:var(--blue); }
-        .region-card h4 { font-size:0.95rem; color:var(--ink); margin-bottom:0.3rem; }
-        .region-card p { font-size:0.78rem; color:#666; line-height:1.4; }
-        .detail-panel { position:fixed; top:0; right:-100%; width:100%; max-width:560px; height:100vh; background:white; box-shadow:-4px 0 24px rgba(0,0,0,0.12); transition:right 0.35s ease; z-index:1100; overflow-y:auto; padding:1.5rem; }
-        .detail-panel.show { right:0; }
-        @media(max-width:600px){ .detail-panel { max-width:100%; } }
-        .detail-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:2px solid var(--border); }
-        .detail-code { display:inline-block; background:var(--blue); color:white; padding:2px 10px; border-radius:20px; font-size:0.72rem; font-weight:700; margin-bottom:6px; }
-        .detail-title { font-size:1.6rem; font-weight:bold; color:var(--ink); margin-bottom:4px; }
-        .detail-capital { font-size:0.85rem; color:#666; font-style:italic; }
-        .close-btn { background:none; border:none; font-size:1.8rem; cursor:pointer; color:#888; line-height:1; padding:0 4px; }
-        .close-btn:hover { color:var(--ink); }
-        .dtitle { font-size:1rem; font-weight:bold; color:var(--ink); margin:1.5rem 0 0.75rem; padding-left:0.6rem; border-left:3px solid var(--blue); }
-        .media-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:0.75rem; margin:0.75rem 0; }
-        .media-item { border-radius:8px; overflow:hidden; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
-        .media-item img { width:100%; height:110px; object-fit:cover; display:block; }
-        audio { width:100%; margin:0.4rem 0; border-radius:8px; }
-        .facts { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.5rem; }
-        .fact { background:#f0f9ff; padding:0.85rem; border-radius:8px; }
-        .fact-label { font-size:0.75rem; color:#666; margin-bottom:3px; }
-        .fact-val { font-size:1.05rem; font-weight:bold; color:var(--ink); }
-        .footer { background:white; border-top:1px solid var(--border); padding:1.25rem 1rem; text-align:center; font-size:0.8rem; color:#888; }
-        .footer a { color:var(--blue); text-decoration:none; margin:0 0.5rem; }
-        .loading { text-align:center; padding:2rem; color:#888; font-size:0.95rem; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0D1B2A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Explore Ghana's 16 regions with EchoStack">
+  <title>EchoStack — Explore Ghana</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ===== CSS VARIABLES & RESET ===== */
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    :root{
+      --ink:#0D1B2A;--ink2:#1a2744;--gold:#C8962E;--gold2:#E8B84B;--gold3:#F4D06F;
+      --surface:#fafafa;--surface2:#f5f5f5;--card:#ffffff;--border:#e5e5e5;--border2:#d1d1d1;
+      --text:#1a1a1a;--text2:#3a3a3a;--muted:#8e8e93;--muted2:#6b6b6b;
+      --danger:#ef4444;--danger2:#dc2626;--success:#22c55e;--success2:#16a34a;
+      --warning:#f59e0b;--info:#3b82f6;--purple:#8b5cf6;--pink:#ec4899;--cyan:#06b6d4;
+      --hover:#f0f0f0;--hover2:#e8e8e8;--shadow:0 1px 3px rgba(0,0,0,.08);
+      --shadow2:0 2px 8px rgba(0,0,0,.12);--shadow3:0 4px 16px rgba(0,0,0,.16);
+      --radius:12px;--radius2:16px;--radius3:20px;--sidebar-w:280px;--topbar-h:57px;
+      --transition:all .2s ease;
+    }
+    html,body{height:100%;overflow-x:hidden;scroll-behavior:smooth}
+    body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--surface);color:var(--text);line-height:1.5;padding-bottom:env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased;}
+    img,video{max-width:100%;height:auto;display:block}
+    a{text-decoration:none;color:inherit}
+    button{font-family:inherit;border:none;background:none;cursor:pointer}
+    
+    /* ===== SIDEBAR (Same as Dashboard) ===== */
+    .sidebar{width:var(--sidebar-w);background:var(--card);color:var(--text);position:fixed;left:0;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;transform:translateX(-100%);transition:var(--transition);z-index:2000;-webkit-overflow-scrolling:touch;box-shadow:var(--shadow3);}
+    .sidebar.open{transform:translateX(0)}
+    .sb-header{padding:20px 16px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surface),var(--surface2));}
+    .sb-brand{display:flex;align-items:center;gap:12px}
+    .sb-brand img{width:40px;height:40px;border-radius:10px;object-fit:cover}
+    .sb-brand-text strong{display:block;font-size:1.1rem;font-weight:700;color:var(--ink)}
+    .sb-brand-text span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+    .sb-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    .sb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;color:var(--text);text-decoration:none;transition:var(--transition);font-size:.95rem;font-weight:500;border-radius:8px;margin:2px 8px;min-height:48px;}
+    .sb-item:hover{background:var(--hover)}
+    .sb-item:active{transform:scale(.98)}
+    .sb-item.active{background:rgba(200,150,46,.15);color:var(--gold);font-weight:600}
+    .sb-item .icon{width:24px;text-align:center;font-size:1.1rem}
+    .sb-item .badge{margin-left:auto;background:var(--danger);color:white;font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:700;}
+    .sb-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);background:var(--surface2);}
+    .sb-footer button{width:100%;padding:12px;border-radius:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--danger);font-size:.95rem;font-weight:600;cursor:pointer;min-height:48px;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:8px;}
+    .sb-footer button:active{background:rgba(239,68,68,.2);transform:scale(.98)}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1999;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;transition:opacity .3s ease;}
+    .sidebar-overlay.show{display:block;opacity:1}
+    
+    /* ===== TOPBAR ===== */
+    .topbar{position:sticky;top:0;z-index:1000;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+    .topbar.scrolled{box-shadow:var(--shadow2)}
+    .menu-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;font-size:1.4rem;color:var(--text);transition:var(--transition);}
+    .menu-btn:active{background:var(--hover);transform:scale(.95)}
+    .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--ink);letter-spacing:-.5px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .topbar-actions{display:flex;gap:8px;align-items:center}
+    .topbar-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:20px;padding:8px 14px;font-size:.85rem;font-weight:600;transition:var(--transition);display:flex;align-items:center;gap:6px;}
+    .topbar-btn:hover{background:var(--hover)}
+    .topbar-btn:active{transform:scale(.96)}
+    
+    /* ===== MAIN CONTAINER ===== */
+    .container{max-width:1200px;margin:0 auto;padding:20px 16px 80px}
+    
+    /* ===== HERO BANNER ===== */
+    .hero-banner{background:linear-gradient(135deg,var(--ink),var(--ink2));border-radius:var(--radius2);padding:24px;margin-bottom:24px;color:white;position:relative;overflow:hidden;}
+    .hero-banner::after{content:'🇬🇭';position:absolute;right:24px;top:12px;font-size:60px;opacity:.1;pointer-events:none;}
+    .hero-banner h1{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;margin-bottom:8px;}
+    .hero-banner p{font-size:.95rem;opacity:.9;max-width:600px;line-height:1.6;}
+    
+    /* ===== MAP SECTION ===== */
+    .section-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--ink);margin:24px 0 16px;display:flex;align-items:center;gap:8px;}
+    .section-title i{color:var(--gold)}
+    .map-wrapper{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;margin-bottom:24px;overflow-x:auto;}
+    .map-container{position:relative;width:100%;min-height:400px;display:flex;align-items:center;justify-content:center;}
+    .ghana-map{width:100%;max-width:500px;height:auto;max-height:500px;}
+    .region-path{fill:var(--surface2);stroke:var(--border);stroke-width:1.5;cursor:pointer;transition:var(--transition);}
+    .region-path:hover{fill:var(--gold);stroke:var(--gold2);stroke-width:2;filter:drop-shadow(0 2px 8px rgba(200,150,46,.3));}
+    .region-path.active{fill:var(--gold);stroke:var(--gold2);stroke-width:2.5;filter:drop-shadow(0 4px 12px rgba(200,150,46,.4));}
+    .region-label{font-size:.7rem;font-weight:600;fill:var(--text);pointer-events:none;text-anchor:middle;}
+    
+    /* ===== REGIONS GRID ===== */
+    .regions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:24px;}
+    .region-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:var(--transition);display:flex;flex-direction:column;gap:12px;}
+    .region-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--shadow2);}
+    .region-card.active{border-color:var(--gold);background:rgba(200,150,46,.05);}
+    .region-header{display:flex;align-items:center;gap:12px;}
+    .region-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:white;flex-shrink:0;}
+    .region-info{flex:1;min-width:0}
+    .region-name{font-weight:700;font-size:1rem;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .region-capital{font-size:.8rem;color:var(--muted);}
+    .region-stats{display:flex;gap:12px;font-size:.75rem;color:var(--muted);}
+    .region-stats span{display:flex;align-items:center;gap:4px;}
+    
+    /* ===== DETAIL PANEL (MODAL) ===== */
+    .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+    .detail-overlay.active{display:flex}
+    .detail-panel{background:var(--card);border-radius:var(--radius2);max-width:600px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow3);animation:slideIn .3s ease;}
+    @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .detail-header{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--card);z-index:10;}
+    .detail-header h2{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--ink);}
+    .detail-close{width:36px;height:36px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--muted);cursor:pointer;transition:var(--transition);}
+    .detail-close:hover{background:var(--hover);color:var(--text)}
+    .detail-body{padding:20px;}
+    .detail-section{margin-bottom:24px;}
+    .detail-section h3{font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+    .detail-section h3 i{color:var(--gold)}
+    .detail-description{font-size:.95rem;line-height:1.6;color:var(--text2);margin-bottom:16px;}
+    .detail-facts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+    .fact-item{background:var(--surface2);padding:12px;border-radius:10px;}
+    .fact-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+    .fact-value{font-weight:600;color:var(--text);}
+    .detail-media{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:16px;}
+    .media-item{border-radius:8px;overflow:hidden;aspect-ratio:1;position:relative;background:var(--surface2);}
+    .media-item img{width:100%;height:100%;object-fit:cover;}
+    .media-item audio{width:100%;padding:8px;}
+    .detail-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+    .tag{background:var(--surface2);color:var(--muted);padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:500;}
+    .detail-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;}
+    .detail-actions button{padding:10px 20px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:var(--transition);min-height:44px;display:flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--gold);color:var(--ink);border:none;}
+    .btn-primary:hover{background:var(--gold2)}
+    .btn-primary:active{transform:scale(.98)}
+    .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+    .btn-secondary:hover{background:var(--hover)}
+    .btn-secondary:active{transform:scale(.98)}
+    
+    /* ===== EMPTY/LOADING STATES ===== */
+    .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+    .empty-state i{font-size:3rem;margin-bottom:16px;opacity:.5;color:var(--gold)}
+    .empty-state p{font-size:1rem;font-weight:500;margin-bottom:8px}
+    .empty-state a{color:var(--gold);font-weight:600}
+    .loading{text-align:center;padding:40px 20px;color:var(--muted);}
+    .loading i{font-size:2rem;margin-bottom:12px;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+    
+    /* ===== TOAST ===== */
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,26,26,.95);color:white;padding:14px 28px;border-radius:30px;font-size:.9rem;font-weight:600;z-index:9999;transition:all .3s;opacity:0;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap;max-width:90%;text-align:center;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.ok{background:rgba(34,197,94,.95)}
+    .toast.er{background:rgba(239,68,68,.95)}
+    
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:768px){
+      .sidebar{width:260px}
+      .hero-banner{padding:16px}
+      .hero-banner h1{font-size:1.4rem}
+      .regions-grid{grid-template-columns:1fr}
+      .detail-facts{grid-template-columns:1fr}
+      .detail-panel{max-width:100%;margin:0 16px}
+    }
+    @media(max-width:480px){
+      .topbar{padding:10px 14px}
+      .logo{font-size:1.3rem}
+      .section-title{font-size:1.1rem}
+      .region-card{padding:12px}
+      .region-icon{width:40px;height:40px;font-size:1.2rem}
+      .region-name{font-size:.95rem}
+    }
+  </style>
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
+<!-- SIDEBAR NAVIGATION -->
 <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <a href="/app" class="sidebar-logo">
-            <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
-            <span>EchoStack</span>
-        </a>
-        <button class="sidebar-close" onclick="closeSidebar()">&#215;</button>
+  <div class="sb-header">
+    <div class="sb-brand">
+      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
+      <div class="sb-brand-text">
+        <strong>EchoStack</strong>
+        <span>Ghana's Heritage</span>
+      </div>
     </div>
-    <div class="user-pill">
-        <div class="user-av" id="user-av">?</div>
-        <div class="user-info">
-            <div class="user-name" id="user-name">Loading...</div>
-            <div class="user-plan" id="user-plan">Free Plan</div>
-        </div>
-    </div>
-    <nav class="sidebar-nav">
-        <div class="nav-label">Explore</div>
-        <a href="/app" class="active">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Map &amp; Regions
-        </a>
-        <a href="/dashboard">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v12a2 2 0 01-2 2z"/></svg>News Feed
-        </a>
-        <a href="/explore">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Explore
-        </a>
-        <div class="nav-label">Community</div>
-        <a href="/chat">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Community Chat
-        </a>
-        <a href="/subscriptions">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Subscriptions
-        </a>
-        <a href="/subscribers" id="nav-subscribers" style="display:none">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="23" y2="8"/><line x1="21" y1="6" x2="21" y2="10"/></svg>My Subscribers
-        </a>
-        <a href="/following">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><polyline points="16,11 18,13 22,9"/></svg>Following
-        </a>
-        <div class="nav-label">Account</div>
-        <a href="/user-profile">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile
-        </a>
-        <a href="/creator" id="nav-creator" style="display:none">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Creator Studio
-        </a>
-        <a href="/user-settings">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings
-        </a>
-    </nav>
-    <div class="sidebar-footer">
-        <a href="/premium" id="upgrade-cta" style="display:none;text-decoration:none;margin-bottom:10px;">
-            <div style="background:linear-gradient(135deg,rgba(201,147,58,0.18),rgba(201,147,58,0.08));border:1px solid rgba(201,147,58,0.3);border-radius:10px;padding:12px 14px;text-align:center;margin-bottom:10px;">
-                <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#c9933a;margin-bottom:4px;">⭐ Upgrade to Premium</div>
-                <div style="font-size:0.75rem;color:rgba(255,255,255,0.45);">EchoBot AI + Creator Studio</div>
-                <div style="font-size:0.72rem;color:#c9933a;margin-top:4px;font-weight:600;">GH₵150/month →</div>
-            </div>
-        </a>
-        <button onclick="logout()" class="btn-logout">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Sign Out
-        </button>
-    </div>
+  </div>
+  <div class="sb-section">Navigation</div>
+  <a href="/dashboard" class="sb-item"><span class="icon"><i class="fas fa-home"></i></span> Home Feed</a>
+  <a href="/explore" class="sb-item"><span class="icon"><i class="fas fa-compass"></i></span> Explore</a>
+  <a href="/reels.html" class="sb-item"><span class="icon"><i class="fas fa-video"></i></span> Reels</a>
+  <a href="/archive" class="sb-item"><span class="icon"><i class="fas fa-book"></i></span> Archive</a>
+  <a href="/app" class="sb-item active"><span class="icon"><i class="fas fa-map-marked-alt"></i></span> Regions Map</a>
+  <div class="sb-section">Create</div>
+  <a href="/creator.html" class="sb-item"><span class="icon"><i class="fas fa-pen"></i></span> New Post</a>
+  <a href="/creator.html?type=story" class="sb-item"><span class="icon"><i class="fas fa-camera"></i></span> Add Story</a>
+  <div class="sb-section">Account</div>
+  <a href="/user_profile.html" class="sb-item"><span class="icon"><i class="fas fa-user"></i></span> Profile</a>
+  <a href="/user-settings.html" class="sb-item"><span class="icon"><i class="fas fa-cog"></i></span> Settings</a>
+  <a href="/premium.html" class="sb-item"><span class="icon"><i class="fas fa-crown"></i></span> Go Premium</a>
+  <div class="sb-footer">
+    <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
 </aside>
 
-<div class="main-wrapper">
-    <div class="mobile-bar">
-        <a href="/app" class="mobile-bar-logo">
-            <img src="/echostack-logo.png" alt="" onerror="this.style.display='none'">
-            <span>EchoStack</span>
-        </a>
-        <button class="burger" onclick="openSidebar()">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-        </button>
-    </div>
-
-    <main class="main">
-        <div class="hero-banner">
-            <h2>Explore Ghana's Heritage 🗺️</h2>
-            <p>Click any region on the map or browse the cards below to discover Ghana's 16 regions.</p>
-        </div>
-        <h3 class="section-head">Interactive Map</h3>
-        <div class="map-wrapper">
-            <svg viewBox="0 0 400 620" id="ghana-map"></svg>
-        </div>
-        <h3 class="section-head">All Regions</h3>
-        <div class="regions-grid" id="regions-list">
-            <div class="loading">Loading regions...</div>
-        </div>
-    </main>
-
-    <div id="detail-panel" class="detail-panel">
-        <div class="detail-header">
-            <div>
-                <span class="detail-code" id="detail-code">GH-01</span>
-                <div class="detail-title" id="detail-title">Region Name</div>
-                <div class="detail-capital" id="detail-capital">Capital: —</div>
-            </div>
-            <button class="close-btn" onclick="closeDetail()">&#215;</button>
-        </div>
-        <div id="detail-content"></div>
-    </div>
-
-    <footer class="footer">
-        <p>© 2026 EchoStack — Preserving Ghana's Stories</p>
-        <p style="margin-top:6px">
-            <a href="/">Home</a>
-            <a href="/dashboard">Feed</a>
-            <a href="#" onclick="logout();return false">Sign Out</a>
-        </p>
-    </footer>
+<!-- TOPBAR -->
+<div class="topbar" id="topbar">
+  <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="logo">EchoStack</div>
+  <div class="topbar-actions">
+    <a href="/dashboard" class="topbar-btn">
+      <i class="fas fa-home"></i> Feed
+    </a>
+    <a href="/creator.html" class="topbar-btn">
+      <i class="fas fa-plus"></i> Create
+    </a>
+  </div>
 </div>
 
+<!-- MAIN CONTAINER -->
+<div class="container" id="app">
+  
+  <!-- HERO BANNER -->
+  <div class="hero-banner">
+    <h1>🗺️ Explore Ghana's Heritage</h1>
+    <p>Click any region on the interactive map or browse the cards below to discover stories, culture, and traditions from all 16 regions of Ghana.</p>
+  </div>
+
+  <!-- MAP SECTION -->
+  <h2 class="section-title"><i class="fas fa-map"></i> Interactive Map</h2>
+  <div class="map-wrapper">
+    <div class="map-container">
+      <svg class="ghana-map" viewBox="0 0 400 600" id="ghana-map">
+        <!-- Ghana regions will be rendered here by JavaScript -->
+        <text x="200" y="300" text-anchor="middle" fill="var(--muted)" font-size=".9rem">Loading map…</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- REGIONS GRID -->
+  <h2 class="section-title"><i class="fas fa-th-large"></i> All Regions</h2>
+  <div class="regions-grid" id="regions-grid">
+    <div class="loading">
+      <i class="fas fa-spinner"></i>
+      <p>Loading regions…</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- DETAIL PANEL (MODAL) -->
+<div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel">
+    <div class="detail-header">
+      <h2 id="detail-title">Region Name</h2>
+      <button class="detail-close" onclick="closeDetail()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="detail-body" id="detail-body">
+      <div class="loading">
+        <i class="fas fa-spinner"></i>
+        <p>Loading details…</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast"></div>
+
 <script>
-var currentUser = {};
-try { currentUser = JSON.parse(localStorage.getItem('es_user') || '{}'); } catch(e) {}
+/**
+ * ============================================
+ * ECHOSTACK EXPLORE - GHANA REGIONS MAP
+ * Complete JavaScript Implementation
+ * ============================================
+ */
 
-if (currentUser.username) {
-    document.getElementById('user-name').textContent = currentUser.username;
-    document.getElementById('user-av').textContent = currentUser.username.charAt(0).toUpperCase();
-    var isCreator = ['creator','admin','superuser'].includes(currentUser.role);
-    var isPremiumUser = currentUser.is_premium == 1 || currentUser.plan === 'premium' || isCreator;
-    document.getElementById('user-plan').textContent = isPremiumUser ? (isCreator ? '✨ Creator' : '⭐ Premium') : 'Free Plan';
-    if (isCreator) {
-        var cel = document.getElementById('nav-creator'); if(cel) cel.style.display = 'flex';
-        var sel = document.getElementById('nav-subscribers'); if(sel) sel.style.display = 'flex';
-    }
-    if (!isPremiumUser) {
-        var cta = document.getElementById('upgrade-cta'); if(cta) cta.style.display = 'block';
-    }
-}
-
-function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('show'); document.body.style.overflow='hidden'; }
-function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); document.body.style.overflow=''; }
-
-var svgPaths = {
-    'upper-west':'M60,40 L160,50 L165,130 L100,140 L50,110 Z',
-    'upper-east':'M160,50 L280,25 L290,100 L165,130 Z',
-    'north-east':'M165,130 L290,100 L350,130 L340,190 L180,195 Z',
-    'savannah':'M50,110 L100,140 L165,130 L180,195 L220,260 L180,340 L80,340 L40,250 Z',
-    'northern':'M180,195 L340,190 L370,300 L320,320 L220,260 Z',
-    'bono':'M80,340 L180,340 L160,420 L70,420 Z',
-    'bono-east':'M180,340 L220,260 L320,320 L330,410 L190,410 L160,420 Z',
-    'ahafo':'M70,420 L160,420 L140,470 L60,470 Z',
-    'ashanti':'M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z',
-    'oti':'M320,320 L370,300 L380,450 L340,450 L330,410 Z',
-    'volta':'M340,450 L380,450 L400,560 L360,570 L340,510 Z',
-    'eastern':'M310,510 L330,410 L340,450 L340,510 L360,570 L300,580 L280,510 Z',
-    'western-north':'M60,470 L140,470 L130,530 L50,530 Z',
-    'western':'M50,530 L130,530 L110,610 L40,590 Z',
-    'central':'M130,530 L180,510 L280,510 L250,600 L110,610 Z',
-    'greater-accra':'M300,580 L360,570 L375,600 L290,610 Z'
-};
-var regionLabels = {
-    'upper-west':{x:105,y:100},'upper-east':{x:210,y:80},'north-east':{x:255,y:155},
-    'savannah':{x:120,y:240},'northern':{x:265,y:255},'bono':{x:120,y:390},
-    'bono-east':{x:245,y:360},'ahafo':{x:105,y:455},'ashanti':{x:240,y:475},
-    'oti':{x:355,y:385},'volta':{x:370,y:525},'eastern':{x:320,y:555},
-    'western-north':{x:90,y:505},'western':{x:80,y:580},'central':{x:200,y:570},
-    'greater-accra':{x:315,y:602}
+// ===== GLOBAL STATE =====
+const ExploreState = {
+  regions: [],
+  currentRegion: null,
+  isLoading: false
 };
 
-function keyToLabel(key) { return key.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }
+// ===== UTILS =====
+const Utils = {
+  escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  },
+  debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+};
 
-var allRegions = [];
+// ===== TOAST =====
+const Toast = {
+  element: null,
+  timeout: null,
+  init() { this.element = document.getElementById('toast'); },
+  show(message, type = '') {
+    if (!this.element) this.init();
+    this.element.textContent = message;
+    this.element.className = `toast show ${type}`;
+    if (this.timeout) clearTimeout(this.timeout);
+    this.timeout = setTimeout(() => this.element.classList.remove('show'), 3000);
+  },
+  ok(msg) { this.show(msg, 'ok'); },
+  error(msg) { this.show(msg, 'er'); }
+};
 
-document.addEventListener('DOMContentLoaded', function() { initMap(); loadRegions(); });
+// ===== SIDEBAR =====
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+  document.body.style.overflow = document.getElementById('sidebar').classList.contains('open') ? 'hidden' : '';
+}
 
-function initMap() {
-    var svg = document.getElementById('ghana-map');
-    var s = '';
-    var keys = Object.keys(svgPaths);
-    for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        var lbl = keyToLabel(key);
-        var lx = regionLabels[key].x;
-        var ly = regionLabels[key].y;
-        s += '<path id="' + key + '" d="' + svgPaths[key] + '" class="region-path" onclick="showRegionDetail(\'' + key + '\')"/>';
-        s += '<text x="' + lx + '" y="' + ly + '" class="map-label">' + lbl + '</text>';
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// ===== API HELPER =====
+async function apiFetch(endpoint, options = {}) {
+  const config = {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...options.headers },
+    ...options
+  };
+  
+  try {
+    const response = await fetch(endpoint, config);
+    if (!response.ok) {
+      if (response.status === 401) {
+        window.location.href = '/user-login.html';
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`HTTP ${response.status}`);
     }
-    svg.innerHTML = s;
-}
-
-function loadRegions() {
-    fetch('/api/regions')
-        .then(function(res){return res.json();})
-        .then(function(data){
-            allRegions = data;
-            renderRegionsList();
-            linkMapRegions();
-        })
-        .catch(function(e){
-            document.getElementById('regions-list').innerHTML = '<div class="loading">Failed to load regions. Please refresh.</div>';
-        });
-}
-
-function renderRegionsList() {
-    var c = document.getElementById('regions-list');
-    if (!allRegions.length) { c.innerHTML = '<div class="loading">No regions available yet.</div>'; return; }
-    var html = '';
-    for (var i = 0; i < allRegions.length; i++) {
-        var r = allRegions[i];
-        html += '<div class="region-card" onclick="showRegionDetailFromData(' + r.id + ')">'
-              + '<h4>' + escHtml(r.name) + '</h4>'
-              + '<p><strong>Capital:</strong> ' + escHtml(r.capital || 'N/A') + '</p>'
-              + '<p><strong>Category:</strong> ' + escHtml(r.category || 'Uncategorized') + '</p>'
-              + '</div>';
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return await response.json();
     }
-    c.innerHTML = html;
+    return await response.text();
+  } catch (error) {
+    console.error(`API Error (${endpoint}):`, error);
+    Toast.error('Failed to load data');
+    throw error;
+  }
 }
 
-function linkMapRegions() {
-    for (var i = 0; i < allRegions.length; i++) {
-        var r = allRegions[i];
-        var k = r.name.toLowerCase().replace(/\s*region\s*$/i,'').trim().replace(/\s+/g,'-');
-        var p = document.getElementById(k);
-        if (p) p.setAttribute('data-region-id', r.id);
+// ===== GHANA REGIONS DATA (for map rendering) =====
+const GhanaRegions = [
+  { id: 1, name: 'Ashanti', capital: 'Kumasi', emoji: '👑', color: '#C8962E', path: 'M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z', label: { x: 240, y: 475 } },
+  { id: 2, name: 'Brong-Ahafo', capital: 'Sunyani', emoji: '🌾', color: '#22c55e', path: 'M80,340 L180,340 L160,420 L70,420 Z', label: { x: 120, y: 390 } },
+  { id: 3, name: 'Central', capital: 'Cape Coast', emoji: '🏛️', color: '#3b82f6', path: 'M130,530 L180,510 L280,510 L250,600 L110,610 Z', label: { x: 200, y: 570 } },
+  { id: 4, name: 'Eastern', capital: 'Koforidua', emoji: '🏔️', color: '#10b981', path: 'M310,510 L330,410 L340,450 L340,510 L360,570 L300,580 L280,510 Z', label: { x: 320, y: 555 } },
+  { id: 5, name: 'Greater Accra', capital: 'Accra', emoji: '🏙️', color: '#ef4444', path: 'M300,580 L360,570 L375,600 L290,610 Z', label: { x: 315, y: 602 } },
+  { id: 6, name: 'Northern', capital: 'Tamale', emoji: '🦁', color: '#f59e0b', path: 'M180,195 L340,190 L370,300 L320,320 L220,260 Z', label: { x: 265, y: 255 } },
+  { id: 7, name: 'Upper East', capital: 'Bolgatanga', emoji: '🌅', color: '#f97316', path: 'M160,50 L280,25 L290,100 L165,130 Z', label: { x: 210, y: 80 } },
+  { id: 8, name: 'Upper West', capital: 'Wa', emoji: '🌄', color: '#8b5cf6', path: 'M60,40 L160,50 L165,130 L100,140 L50,110 Z', label: { x: 105, y: 100 } },
+  { id: 9, name: 'Volta', capital: 'Ho', emoji: '🌊', color: '#06b6d4', path: 'M340,450 L380,450 L400,560 L360,570 L340,510 Z', label: { x: 370, y: 525 } },
+  { id: 10, name: 'Western', capital: 'Sekondi-Takoradi', emoji: '🌴', color: '#14b8a6', path: 'M50,530 L130,530 L110,610 L40,590 Z', label: { x: 80, y: 580 } },
+  { id: 11, name: 'Ahafo', capital: 'Goaso', emoji: '🌳', color: '#84cc16', path: 'M70,420 L160,420 L140,470 L60,470 Z', label: { x: 105, y: 455 } },
+  { id: 12, name: 'Bono', capital: 'Sunyani', emoji: '🪘', color: '#eab308', path: 'M80,340 L180,340 L160,420 L70,420 Z', label: { x: 120, y: 390 } },
+  { id: 13, name: 'Bono East', capital: 'Techiman', emoji: '🌻', color: '#fbbf24', path: 'M180,340 L220,260 L320,320 L330,410 L190,410 L160,420 Z', label: { x: 245, y: 360 } },
+  { id: 14, name: 'North East', capital: 'Nalerigu', emoji: '☀️', color: '#fb923c', path: 'M165,130 L290,100 L350,130 L340,190 L180,195 Z', label: { x: 255, y: 155 } },
+  { id: 15, name: 'Oti', capital: 'Dambai', emoji: '🦋', color: '#a78bfa', path: 'M320,320 L370,300 L380,450 L340,450 L330,410 Z', label: { x: 355, y: 385 } },
+  { id: 16, name: 'Savannah', capital: 'Damongo', emoji: '🌾', color: '#34d399', path: 'M50,110 L100,140 L165,130 L180,195 L220,260 L180,340 L80,340 L40,250 Z', label: { x: 120, y: 240 } },
+  { id: 17, name: 'Western North', capital: 'Sefwi Wiawso', emoji: '🏞️', color: '#2dd4bf', path: 'M60,470 L140,470 L130,530 L50,530 Z', label: { x: 90, y: 505 } }
+];
+
+// ===== LOAD REGIONS =====
+async function loadRegions() {
+  const grid = document.getElementById('regions-grid');
+  
+  if (ExploreState.isLoading) return;
+  ExploreState.isLoading = true;
+  
+  grid.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>Loading regions…</p></div>';
+  
+  try {
+    const regions = await apiFetch('/api/regions');
+    ExploreState.regions = regions;
+    renderMap();
+    renderRegionsGrid(regions);
+  } catch (e) {
+    console.error('Failed to load regions:', e);
+    grid.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>Failed to load regions</p>
+        <span>Pull to refresh or check your connection</span>
+      </div>
+    `;
+  } finally {
+    ExploreState.isLoading = false;
+  }
+}
+
+// ===== RENDER MAP =====
+function renderMap() {
+  const svg = document.getElementById('ghana-map');
+  if (!svg) return;
+  
+  // Clear existing content
+  svg.innerHTML = '';
+  
+  // Add region paths
+  GhanaRegions.forEach(region => {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', region.path);
+    path.setAttribute('class', 'region-path');
+    path.setAttribute('data-region-id', region.id);
+    path.setAttribute('data-region-name', region.name);
+    path.setAttribute('fill', 'var(--surface2)');
+    path.setAttribute('stroke', 'var(--border)');
+    path.setAttribute('stroke-width', '1.5');
+    path.style.cursor = 'pointer';
+    path.style.transition = 'all .2s ease';
+    
+    path.addEventListener('click', () => openRegionDetail(region.id));
+    path.addEventListener('mouseenter', () => {
+      path.setAttribute('fill', 'var(--gold)');
+      path.setAttribute('stroke', 'var(--gold2)');
+      path.setAttribute('stroke-width', '2');
+    });
+    path.addEventListener('mouseleave', () => {
+      if (ExploreState.currentRegion?.id !== region.id) {
+        path.setAttribute('fill', 'var(--surface2)');
+        path.setAttribute('stroke', 'var(--border)');
+        path.setAttribute('stroke-width', '1.5');
+      }
+    });
+    
+    svg.appendChild(path);
+    
+    // Add label
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', region.label.x);
+    text.setAttribute('y', region.label.y);
+    text.setAttribute('class', 'region-label');
+    text.setAttribute('text-anchor', 'middle');
+    text.textContent = region.name.length > 10 ? region.name.substring(0, 9) + '…' : region.name;
+    text.style.pointerEvents = 'none';
+    
+    svg.appendChild(text);
+  });
+}
+
+// ===== RENDER REGIONS GRID =====
+function renderRegionsGrid(regions) {
+  const grid = document.getElementById('regions-grid');
+  
+  if (!regions.length) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <p>No regions available yet</p>
+        <span>Check back later for updates</span>
+      </div>
+    `;
+    return;
+  }
+  
+  grid.innerHTML = regions.map(region => {
+    const ghanaRegion = GhanaRegions.find(r => r.id === region.id) || {};
+    const emoji = ghanaRegion.emoji || '📍';
+    const posts = region.post_count || 0;
+    const stories = region.story_count || 0;
+    
+    return `
+      <div class="region-card" onclick="openRegionDetail(${region.id})" data-region-id="${region.id}">
+        <div class="region-header">
+          <div class="region-icon">${emoji}</div>
+          <div class="region-info">
+            <div class="region-name">${Utils.escapeHtml(region.name)}</div>
+            <div class="region-capital">${Utils.escapeHtml(region.capital || 'Capital TBD')}</div>
+          </div>
+        </div>
+        <div class="region-stats">
+          <span><i class="far fa-file-alt"></i> ${posts} posts</span>
+          <span><i class="fas fa-book-open"></i> ${stories} stories</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== OPEN REGION DETAIL =====
+async function openRegionDetail(regionId) {
+  const region = ExploreState.regions.find(r => r.id === regionId);
+  if (!region) return;
+  
+  ExploreState.currentRegion = region;
+  
+  // Update map highlight
+  document.querySelectorAll('.region-path').forEach(path => {
+    if (path.dataset.regionId == regionId) {
+      path.setAttribute('fill', 'var(--gold)');
+      path.setAttribute('stroke', 'var(--gold2)');
+      path.setAttribute('stroke-width', '2.5');
+      path.classList.add('active');
+    } else {
+      path.setAttribute('fill', 'var(--surface2)');
+      path.setAttribute('stroke', 'var(--border)');
+      path.setAttribute('stroke-width', '1.5');
+      path.classList.remove('active');
     }
-}
-
-function showRegionDetail(key) {
-    var r = null;
-    for (var i = 0; i < allRegions.length; i++) {
-        var rk = allRegions[i].name.toLowerCase().replace(/\s*region\s*$/i,'').trim().replace(/\s+/g,'-');
-        if (rk === key) { r = allRegions[i]; break; }
+  });
+  
+  // Update grid highlight
+  document.querySelectorAll('.region-card').forEach(card => {
+    if (card.dataset.regionId == regionId) {
+      card.classList.add('active');
+    } else {
+      card.classList.remove('active');
     }
-    if (r) showRegionPanel(r);
-    else showRegionNoData(keyToLabel(key) + ' Region');
+  });
+  
+  // Show detail panel
+  const overlay = document.getElementById('detail-overlay');
+  const body = document.getElementById('detail-body');
+  const title = document.getElementById('detail-title');
+  
+  title.textContent = region.name;
+  body.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>Loading details…</p></div>';
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  
+  try {
+    // Fetch full region details
+    const details = await apiFetch(`/api/regions/${regionId}`);
+    renderRegionDetail(details);
+  } catch (e) {
+    console.error('Failed to load region details:', e);
+    body.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>Failed to load region details</p>
+        <span>Try again later</span>
+      </div>
+    `;
+  }
 }
 
-function showRegionDetailFromData(id) {
-    for (var i = 0; i < allRegions.length; i++) {
-        if (allRegions[i].id === id) { showRegionPanel(allRegions[i]); return; }
-    }
+// ===== RENDER REGION DETAIL =====
+function renderRegionDetail(region) {
+  const body = document.getElementById('detail-body');
+  const ghanaRegion = GhanaRegions.find(r => r.id === region.id) || {};
+  
+  // Parse media arrays
+  const images = Array.isArray(region.gallery_images) ? region.gallery_images : (region.gallery_images || '').split(',').filter(s => s.trim());
+  const audios = Array.isArray(region.audio_files) ? region.audio_files : (region.audio_files || '').split(',').filter(s => s.trim());
+  const tags = Array.isArray(region.tags) ? region.tags : (region.tags || '').split(',').filter(s => s.trim());
+  
+  body.innerHTML = `
+    <!-- Description -->
+    <div class="detail-section">
+      <h3><i class="fas fa-book-open"></i> About ${Utils.escapeHtml(region.name)}</h3>
+      <p class="detail-description">${Utils.escapeHtml(region.description || 'No description available yet.')}</p>
+    </div>
+    
+    <!-- Quick Facts -->
+    <div class="detail-section">
+      <h3><i class="fas fa-info-circle"></i> Quick Facts</h3>
+      <div class="detail-facts">
+        <div class="fact-item">
+          <div class="fact-label">Capital</div>
+          <div class="fact-value">${Utils.escapeHtml(region.capital || 'N/A')}</div>
+        </div>
+        <div class="fact-item">
+          <div class="fact-label">Population</div>
+          <div class="fact-value">${Utils.escapeHtml(region.population || 'N/A')}</div>
+        </div>
+        <div class="fact-item">
+          <div class="fact-label">Terrain</div>
+          <div class="fact-value">${Utils.escapeHtml(region.terrain || 'N/A')}</div>
+        </div>
+        <div class="fact-item">
+          <div class="fact-label">Category</div>
+          <div class="fact-value">${Utils.escapeHtml(region.category || 'Uncategorized')}</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Gallery -->
+    ${images.length ? `
+    <div class="detail-section">
+      <h3><i class="fas fa-images"></i> Photo Gallery</h3>
+      <div class="detail-media">
+        ${images.map(img => `<div class="media-item"><img src="${Utils.escapeHtml(img.trim())}" alt="Gallery" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\'fas fa-image\' style=\'font-size:2rem;color:var(--muted)\'></i>'"></div>`).join('')}
+      </div>
+    </div>
+    ` : ''}
+    
+    <!-- Audio -->
+    ${audios.length ? `
+    <div class="detail-section">
+      <h3><i class="fas fa-headphones"></i> Audio Archives</h3>
+      ${audios.map(audio => `
+        <div style="margin-bottom:12px">
+          <audio controls style="width:100%">
+            <source src="${Utils.escapeHtml(audio.trim())}" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+    
+    <!-- Tags -->
+    ${tags.length ? `
+    <div class="detail-section">
+      <h3><i class="fas fa-tags"></i> Topics</h3>
+      <div class="detail-tags">
+        ${tags.map(tag => `<span class="tag">#${Utils.escapeHtml(tag.trim())}</span>`).join('')}
+      </div>
+    </div>
+    ` : ''}
+    
+    <!-- Actions -->
+    <div class="detail-actions">
+      <button class="btn-primary" onclick="viewRegionPosts(${region.id})">
+        <i class="fas fa-file-alt"></i> View Posts
+      </button>
+      <button class="btn-secondary" onclick="shareRegion(${region.id})">
+        <i class="fas fa-share-alt"></i> Share
+      </button>
+    </div>
+  `;
 }
 
-function showRegionNoData(name) {
-    document.getElementById('detail-code').textContent = '—';
-    document.getElementById('detail-title').textContent = name;
-    document.getElementById('detail-capital').textContent = 'No data uploaded yet';
-    document.getElementById('detail-content').innerHTML =
-        '<div style="text-align:center;padding:3rem 1rem;">'
-        + '<div style="font-size:3.5rem;margin-bottom:1rem;">🗺️</div>'
-        + '<h3 style="color:#1a1e29;margin-bottom:0.5rem;">Coming Soon</h3>'
-        + '<p style="color:#888;font-size:0.9rem;line-height:1.7;max-width:280px;margin:0 auto;">'
-        + 'The <strong>' + escHtml(name) + '</strong> archive is being built.</p>'
-        + '<a href="/signup" style="display:inline-block;margin-top:1.5rem;padding:0.65rem 1.5rem;background:#0077b6;color:white;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600;">📝 Submit a Story</a>'
-        + '</div>';
-    document.getElementById('detail-panel').classList.add('show');
-    document.getElementById('detail-panel').scrollTop = 0;
-}
-
-function showRegionPanel(region) {
-    document.querySelectorAll('.region-path').forEach(function(p){p.classList.remove('region-active');});
-    var ak = region.name.toLowerCase().replace(/\s*region\s*$/i,'').trim().replace(/\s+/g,'-');
-    var ap = document.getElementById(ak);
-    if (ap) ap.classList.add('region-active');
-
-    document.getElementById('detail-code').textContent = 'GH-' + String(region.id).padStart(2,'0');
-    document.getElementById('detail-title').textContent = region.name;
-    document.getElementById('detail-capital').textContent = 'Capital: ' + (region.capital || 'Not specified');
-
-    var imgs = Array.isArray(region.gallery_images) ? region.gallery_images : (region.gallery_images||'').split(',');
-    var auds = Array.isArray(region.audio_files) ? region.audio_files : (region.audio_files||'').split(',');
-
-    var imgHtml = imgs.filter(function(s){return s.trim();}).length
-        ? '<div class="media-grid">' + imgs.map(function(s){return s.trim() ? '<div class="media-item"><img src="'+escHtml(s.trim())+'" alt="Gallery" loading="lazy" onerror="this.src=\'https://via.placeholder.com/130x110?text=Photo\'"></div>' : '';}).join('') + '</div>'
-        : '<p style="color:#888;font-size:.85rem;margin-bottom:1rem">No images uploaded yet.</p>';
-
-    var audHtml = auds.filter(function(s){return s.trim();}).length
-        ? auds.map(function(s){return s.trim() ? '<div style="margin:.5rem 0;padding:.75rem;background:#f8f8f8;border-radius:8px"><audio controls style="width:100%"><source src="'+escHtml(s.trim())+'" type="audio/mpeg"></audio></div>' : '';}).join('')
-        : '<p style="color:#888;font-size:.85rem;margin-bottom:1.5rem">No audio recordings yet.</p>';
-
-    var tags = Array.isArray(region.tags) ? region.tags.join(', ') : (region.tags || 'None');
-
-    document.getElementById('detail-content').innerHTML =
-        '<div class="dtitle">📖 Heritage Description</div>'
-        + '<p style="line-height:1.8;color:#333;margin-bottom:1.5rem">' + escHtml(region.description || 'No description available.') + '</p>'
-        + '<div class="dtitle">📊 Quick Facts</div>'
-        + '<div class="facts"><div class="fact"><div class="fact-label">Population</div><div class="fact-val">' + escHtml(region.population||'N/A') + '</div></div>'
-        + '<div class="fact"><div class="fact-label">Terrain</div><div class="fact-val">' + escHtml(region.terrain||'N/A') + '</div></div></div>'
-        + '<div class="dtitle">🏛️ Gallery</div>' + imgHtml
-        + '<div class="dtitle">🎵 Audio Archives</div><div style="margin-bottom:1.5rem">' + audHtml + '</div>'
-        + '<div class="dtitle">📝 Details</div>'
-        + '<p style="font-size:.85rem;color:#555"><strong>Category:</strong> ' + escHtml(region.category||'Uncategorized') + '</p>'
-        + '<p style="font-size:.85rem;color:#555;margin-top:4px"><strong>Tags:</strong> ' + escHtml(tags) + '</p>'
-        + (region.overview ? '<div class="dtitle">📄 Full Overview</div><p style="line-height:1.8;font-size:.88rem;color:#444">' + escHtml(region.overview) + '</p>' : '');
-
-    document.getElementById('detail-panel').classList.add('show');
-    document.getElementById('detail-panel').scrollTop = 0;
-}
-
+// ===== CLOSE DETAIL PANEL =====
 function closeDetail() {
-    document.getElementById('detail-panel').classList.remove('show');
-    document.querySelectorAll('.region-path').forEach(function(p){p.classList.remove('region-active');});
+  document.getElementById('detail-overlay').classList.remove('active');
+  document.body.style.overflow = '';
+  ExploreState.currentRegion = null;
+  
+  // Reset map highlights
+  document.querySelectorAll('.region-path').forEach(path => {
+    path.setAttribute('fill', 'var(--surface2)');
+    path.setAttribute('stroke', 'var(--border)');
+    path.setAttribute('stroke-width', '1.5');
+    path.classList.remove('active');
+  });
+  
+  // Reset grid highlights
+  document.querySelectorAll('.region-card').forEach(card => {
+    card.classList.remove('active');
+  });
 }
 
-document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeDetail(); });
+// ===== VIEW REGION POSTS =====
+function viewRegionPosts(regionId) {
+  window.location.href = `/archive?region=${regionId}`;
+}
 
-function logout() {
-    fetch('/api/users/logout',{method:'POST'}).catch(function(){});
+// ===== SHARE REGION =====
+function shareRegion(regionId) {
+  const region = ExploreState.regions.find(r => r.id === regionId);
+  if (!region) return;
+  
+  const url = `${window.location.origin}/app?region=${regionId}`;
+  const title = `Explore ${region.name} on EchoStack`;
+  
+  if (navigator.share) {
+    navigator.share({ title, text: `Discover stories from ${region.name}, Ghana`, url }).catch(() => {
+      navigator.clipboard.writeText(url);
+      Toast.ok('📋 Link copied!');
+    });
+  } else {
+    navigator.clipboard.writeText(url);
+    Toast.ok('📋 Link copied!');
+  }
+}
+
+// ===== LOGOUT =====
+async function logout() {
+  if (!confirm('Are you sure you want to logout?')) return;
+  
+  try {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+  } catch (e) {
+    console.warn('Logout error:', e);
+  } finally {
     localStorage.removeItem('es_user');
-    document.cookie = 'user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
-    window.location.href = '/';
+    window.location.href = '/user-login.html';
+  }
 }
 
-function escHtml(str) {
-    if (!str && str !== 0) return '';
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+// ===== TOPBAR SCROLL EFFECT =====
+function setupTopbarScroll() {
+  const topbar = document.getElementById('topbar');
+  
+  window.addEventListener('scroll', Utils.debounce(() => {
+    if (window.scrollY > 10) {
+      topbar.classList.add('scrolled');
+    } else {
+      topbar.classList.remove('scrolled');
+    }
+  }, 100));
 }
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
+// ===== PULL TO REFRESH =====
+function setupPullToRefresh() {
+  let startY = 0;
+  
+  document.addEventListener('touchstart', e => {
+    if (window.scrollY === 0) startY = e.touches[0].clientY;
+  }, { passive: true });
+  
+  document.addEventListener('touchmove', e => {
+    if (window.scrollY === 0) {
+      const diff = e.touches[0].clientY - startY;
+      if (diff > 100) {
+        loadRegions();
+        Toast.info('🔄 Refreshed');
+        startY = 0;
+      }
+    }
+  }, { passive: true });
 }
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize toast
+  Toast.init();
+  
+  // Setup interactions
+  setupTopbarScroll();
+  setupPullToRefresh();
+  
+  // Load regions
+  await loadRegions();
+  
+  // Handle online/offline
+  window.addEventListener('online', () => Toast.ok('🌐 Back online'));
+  window.addEventListener('offline', () => Toast.error('⚠️ You are offline'));
+  
+  // Close sidebar on scroll
+  document.querySelector('.container')?.addEventListener('scroll', () => {
+    if (document.getElementById('sidebar').classList.contains('open')) {
+      closeSidebar();
+    }
+  });
+  
+  // Handle escape key to close detail
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDetail();
+  });
+});
 </script>
-
-<!-- ═══════════════════════════════════════
-     ADWOA — African Female Heritage Guide
-     FIX 1: Use innerHTML for emoji/unicode (not textContent)
-     FIX 2: SVG avatar replaces robot icon
-═══════════════════════════════════════ -->
-<style>
-/* ── Shared SVG avatar style ── */
-.adwoa-av {
-    border-radius: 50%;
-    overflow: hidden;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* ── FAB ── */
-#echobot-fab {
-    position: fixed; bottom: 28px; right: 28px;
-    width: 64px; height: 64px; border-radius: 50%;
-    border: 3px solid #fff;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(201,147,58,0.5);
-    z-index: 1200;
-    transition: transform 0.2s, box-shadow 0.2s;
-    padding: 0; overflow: hidden;
-    background: transparent;
-}
-#echobot-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(201,147,58,0.65); }
-
-/* ── Chat window ── */
-#echobot-window {
-    position: fixed; bottom: 108px; right: 28px;
-    width: 370px; max-width: calc(100vw - 32px);
-    height: 520px; max-height: calc(100vh - 130px);
-    background: #0d0e13;
-    border: 1px solid rgba(201,147,58,0.28);
-    border-radius: 20px;
-    box-shadow: 0 16px 56px rgba(0,0,0,0.6);
-    z-index: 1199; display: none; flex-direction: column; overflow: hidden;
-    font-family: 'DM Sans', Arial, sans-serif;
-}
-#echobot-window.open { display: flex; animation: botSlideIn 0.28s cubic-bezier(0.34,1.56,0.64,1); }
-@keyframes botSlideIn {
-    from { opacity:0; transform:translateY(20px) scale(0.95); }
-    to   { opacity:1; transform:translateY(0)   scale(1); }
-}
-
-/* ── Header ── */
-.bot-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 16px;
-    background: linear-gradient(135deg, #1a1c2e, #252840);
-    border-bottom: 1px solid rgba(201,147,58,0.18);
-    flex-shrink: 0;
-}
-.bot-header-left { display: flex; align-items: center; gap: 10px; }
-.bot-name  { font-weight: 700; color: #f0ead6; font-size: 0.95rem; line-height: 1.2; }
-.bot-title { font-size: 0.68rem; color: #c9933a; font-weight: 600; margin-top: 1px; }
-.bot-online {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 0.68rem; color: #7a7a9a; margin-top: 2px;
-}
-.bot-online-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: #22c55e;
-    box-shadow: 0 0 6px rgba(34,197,94,0.6);
-    animation: pulseGreen 2s infinite;
-}
-@keyframes pulseGreen { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
-.bot-close { background: none; border: none; color: #7a7a9a; cursor: pointer; font-size: 1.4rem; padding: 2px 6px; border-radius: 6px; line-height: 1; }
-.bot-close:hover { color: #f0ead6; background: rgba(255,255,255,0.08); }
-
-/* ── Context bar ── */
-.bot-context {
-    padding: 6px 16px;
-    background: rgba(201,147,58,0.1);
-    border-bottom: 1px solid rgba(201,147,58,0.15);
-    font-size: 0.72rem; color: #c9933a; font-weight: 600;
-    flex-shrink: 0; display: none;
-}
-.bot-context.visible { display: block; }
-
-/* ── Messages ── */
-.bot-messages {
-    flex: 1; overflow-y: auto;
-    padding: 14px 12px;
-    display: flex; flex-direction: column; gap: 12px;
-    scrollbar-width: thin; scrollbar-color: rgba(201,147,58,0.2) transparent;
-}
-.bot-messages::-webkit-scrollbar { width: 4px; }
-.bot-messages::-webkit-scrollbar-thumb { background: rgba(201,147,58,0.25); border-radius: 2px; }
-
-.bot-msg { display: flex; gap: 8px; align-items: flex-end; max-width: 88%; }
-.bot-msg.user { align-self: flex-end; flex-direction: row-reverse; }
-.bot-msg.bot  { align-self: flex-start; }
-.bot-msg.locked { align-self: flex-start; }
-
-.bot-msg-av {
-    width: 30px; height: 30px; border-radius: 50%;
-    flex-shrink: 0; overflow: hidden;
-    display: flex; align-items: center; justify-content: center;
-}
-.bot-msg-av.user-av-icon {
-    background: linear-gradient(135deg, #c9933a, #e8b45a);
-    font-size: 0.9rem; font-weight: 700; color: #0d0e13;
-}
-
-.bot-msg-bubble {
-    padding: 10px 14px;
-    font-size: 0.875rem; line-height: 1.55;
-    color: #e8e4d8; word-break: break-word; white-space: pre-wrap;
-}
-.bot-msg.bot .bot-msg-bubble, .bot-msg.locked .bot-msg-bubble {
-    background: #1c1f2e;
-    border: 1px solid rgba(201,147,58,0.14);
-    border-radius: 4px 16px 16px 16px;
-}
-.bot-msg.locked .bot-msg-bubble {
-    background: rgba(200,40,40,0.1);
-    border-color: rgba(200,40,40,0.2);
-    color: #fca5a5;
-}
-.bot-msg.user .bot-msg-bubble {
-    background: linear-gradient(135deg, #c9933a, #e8b45a);
-    color: #0d0e13; font-weight: 500;
-    border-radius: 16px 4px 16px 16px;
-}
-
-/* ── Typing ── */
-.typing-dots { display: flex; gap: 5px; padding: 4px 0; align-items: center; }
-.typing-dots span { width: 7px; height: 7px; background: #c9933a; border-radius: 50%; animation: typingBounce 1.4s infinite; }
-.typing-dots span:nth-child(2){animation-delay:.22s;}
-.typing-dots span:nth-child(3){animation-delay:.44s;}
-@keyframes typingBounce { 0%,60%,100%{transform:translateY(0);opacity:0.35;} 30%{transform:translateY(-7px);opacity:1;} }
-
-/* ── Input ── */
-.bot-input-area { padding: 12px 14px; background: #10121a; border-top: 1px solid rgba(201,147,58,0.14); flex-shrink: 0; }
-.bot-input-row { display: flex; gap: 8px; align-items: flex-end; }
-.bot-input {
-    flex: 1; background: #1c1f2e;
-    border: 1.5px solid rgba(201,147,58,0.22);
-    border-radius: 12px; padding: 10px 14px;
-    font-family: inherit; font-size: 0.875rem; color: #e8e4d8;
-    outline: none; resize: none; transition: border-color 0.18s; max-height: 90px;
-}
-.bot-input::placeholder { color: rgba(160,160,185,0.5); }
-.bot-input:focus { border-color: #c9933a; }
-.bot-send {
-    width: 40px; height: 40px; min-width: 40px;
-    background: linear-gradient(135deg, #c9933a, #e8b45a);
-    border: none; border-radius: 12px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: opacity 0.15s, transform 0.15s;
-}
-.bot-send:hover:not(:disabled) { opacity: 0.88; transform: scale(1.05); }
-.bot-send:disabled { opacity: 0.3; cursor: not-allowed; }
-.bot-footer-note { font-size: 0.67rem; color: #3a3a5a; text-align: center; margin-top: 6px; }
-</style>
-
-<!-- Shared SVG definition (rendered inline, referenced by JS) -->
-<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
-  <symbol id="adwoa-face" viewBox="0 0 100 100">
-    <!-- Skin & body -->
-    <circle cx="50" cy="50" r="50" fill="#7A3B10"/>
-    <ellipse cx="50" cy="92" rx="34" ry="18" fill="#C8962E"/>
-    <!-- Kente collar band -->
-    <rect x="33" y="83" width="34" height="7" rx="2" fill="#E8B84B"/>
-    <rect x="36" y="83" width="5" height="7" fill="#CC2200"/>
-    <rect x="45" y="83" width="5" height="7" fill="#006400"/>
-    <rect x="54" y="83" width="5" height="7" fill="#CC2200"/>
-    <!-- Neck -->
-    <rect x="43" y="69" width="14" height="16" rx="4" fill="#6A3010"/>
-    <!-- Face -->
-    <ellipse cx="50" cy="52" rx="22" ry="25" fill="#A0522D"/>
-    <!-- Eyes whites -->
-    <ellipse cx="41" cy="50" rx="4.5" ry="5" fill="white"/>
-    <ellipse cx="59" cy="50" rx="4.5" ry="5" fill="white"/>
-    <!-- Pupils -->
-    <circle cx="41" cy="51" r="3" fill="#1a0800"/>
-    <circle cx="59" cy="51" r="3" fill="#1a0800"/>
-    <!-- Eye shine -->
-    <circle cx="42" cy="50" r="1.2" fill="white"/>
-    <circle cx="60" cy="50" r="1.2" fill="white"/>
-    <!-- Eyebrows -->
-    <path d="M36.5 44 Q41 41.5 45.5 44" stroke="#3a1a00" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M54.5 44 Q59 41.5 63.5 44" stroke="#3a1a00" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <!-- Nose -->
-    <ellipse cx="50" cy="57" rx="4" ry="3" fill="#7A3010" opacity="0.5"/>
-    <circle cx="47" cy="58" r="2.2" fill="#6A2808" opacity="0.6"/>
-    <circle cx="53" cy="58" r="2.2" fill="#6A2808" opacity="0.6"/>
-    <!-- Warm smile -->
-    <path d="M41 64 Q50 71 59 64" stroke="#7A2200" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-    <path d="M42 64.5 Q50 69 58 64.5" fill="#C04020" opacity="0.65"/>
-    <!-- Blush -->
-    <ellipse cx="35" cy="57" rx="5.5" ry="3.5" fill="#CC5533" opacity="0.28"/>
-    <ellipse cx="65" cy="57" rx="5.5" ry="3.5" fill="#CC5533" opacity="0.28"/>
-    <!-- Afro hair -->
-    <ellipse cx="50" cy="28" rx="27" ry="22" fill="#1a0800"/>
-    <ellipse cx="50" cy="24" rx="25" ry="18" fill="#2a1200"/>
-    <circle cx="30" cy="27" r="8" fill="#1a0800"/>
-    <circle cx="39" cy="18" r="9" fill="#2a1200"/>
-    <circle cx="50" cy="15" r="10" fill="#1a0800"/>
-    <circle cx="61" cy="18" r="9" fill="#2a1200"/>
-    <circle cx="70" cy="27" r="8" fill="#1a0800"/>
-    <!-- Gold headband -->
-    <path d="M26 31 Q50 10 74 31" stroke="#C8962E" stroke-width="3" fill="none" stroke-linecap="round"/>
-    <circle cx="50" cy="11" r="5" fill="#C8962E"/>
-    <circle cx="50" cy="11" r="3" fill="#E8B84B"/>
-    <!-- Earrings -->
-    <circle cx="27" cy="54" r="4" fill="#C8962E"/>
-    <circle cx="73" cy="54" r="4" fill="#C8962E"/>
-    <circle cx="27" cy="60" r="2.5" fill="#E8B84B"/>
-    <circle cx="73" cy="60" r="2.5" fill="#E8B84B"/>
-    <line x1="27" y1="57" x2="27" y2="59" stroke="#C8962E" stroke-width="1.5"/>
-    <line x1="73" y1="57" x2="73" y2="59" stroke="#C8962E" stroke-width="1.5"/>
-  </symbol>
-</svg>
-
-<!-- FAB button with SVG avatar -->
-<button id="echobot-fab" onclick="toggleBot()" title="Chat with Adwoa — Ghana Heritage Guide">
-    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 100 100">
-        <use href="#adwoa-face"/>
-    </svg>
-</button>
-
-<!-- Chat window -->
-<div id="echobot-window">
-    <div class="bot-header">
-        <div class="bot-header-left">
-            <!-- Header avatar -->
-            <div class="adwoa-av" style="width:44px;height:44px;box-shadow:0 0 0 2px rgba(201,147,58,0.5);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 100 100">
-                    <use href="#adwoa-face"/>
-                </svg>
-            </div>
-            <div>
-                <div class="bot-name">Adwoa</div>
-                <div class="bot-title">Ghana Heritage AI Guide</div>
-                <div class="bot-online"><span class="bot-online-dot"></span> Online</div>
-            </div>
-        </div>
-        <button class="bot-close" onclick="toggleBot()">&#215;</button>
-    </div>
-
-    <div class="bot-context" id="bot-context"></div>
-    <div class="bot-messages" id="bot-messages"></div>
-
-    <div class="bot-input-area">
-        <div class="bot-input-row">
-            <textarea class="bot-input" id="bot-input" rows="1"
-                placeholder="Ask Adwoa about Ghana's heritage..."
-                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendBotMessage();}"
-                oninput="autoResizeInput(this)"></textarea>
-            <button class="bot-send" id="bot-send" onclick="sendBotMessage()">
-                <svg width="18" height="18" fill="none" stroke="#0d0e13" stroke-width="2.5" viewBox="0 0 24 24">
-                    <line x1="22" y1="2" x2="11" y2="13"/>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                </svg>
-            </button>
-        </div>
-        <div class="bot-footer-note" id="bot-footer-note">✨ Premium AI · Ghana Heritage Guide</div>
-    </div>
-</div>
-
-<script>
-(function() {
-    var botOpen    = false;
-    var botTyping  = false;
-    var regionCtx  = '';
-
-    function getUser() {
-        try { return JSON.parse(localStorage.getItem('es_user') || '{}'); } catch(e) { return {}; }
-    }
-    function checkPremium() {
-        var u = getUser();
-        return u.is_premium == 1 || u.plan === 'premium' || u.role === 'admin' || u.role === 'superuser' || u.role === 'creator';
-    }
-
-    /* ── Mini SVG for message row avatars ── */
-    function adwoaSmall() {
-        return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 100 100"><use href="#adwoa-face"/></svg>';
-    }
-
-    /* ── Watch region panel ── */
-    var detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        new MutationObserver(function() {
-            var titleEl = document.getElementById('detail-title');
-            if (titleEl && detailPanel.classList.contains('show')) {
-                var name = titleEl.textContent.trim();
-                if (name && name !== regionCtx) {
-                    regionCtx = name;
-                    var ctx = document.getElementById('bot-context');
-                    if (ctx) { ctx.textContent = '📍 Context: ' + name; ctx.classList.add('visible'); }
-                }
-            }
-        }).observe(detailPanel, { attributes: true, attributeFilter: ['class'] });
-    }
-
-    window.toggleBot = function() {
-        botOpen = !botOpen;
-        var win = document.getElementById('echobot-window');
-        if (botOpen) {
-            win.classList.add('open');
-            var msgs = document.getElementById('bot-messages');
-            if (msgs.children.length === 0) {
-                /* FIX: Use innerHTML-based helper so emojis render correctly */
-                addBotBubble('bot', 'Akwaaba! 👋 I\'m Adwoa, your Ghana heritage guide.\n\nAsk me about any region\'s history, culture, festivals, or traditions!');
-                if (!checkPremium()) {
-                    addBotBubble('locked', '🔒 Full AI responses require Premium (GH₵150/mo). Ask anyway — free users get a preview!');
-                }
-            }
-            document.getElementById('bot-footer-note').textContent = checkPremium()
-                ? '✨ Premium AI active'
-                : '✨ Premium feature · GH₵150/month';
-            setTimeout(function(){ document.getElementById('bot-input').focus(); }, 120);
-        } else {
-            win.classList.remove('open');
-        }
-    };
-
-    window.sendBotMessage = function() {
-        if (botTyping) return;
-        var input = document.getElementById('bot-input');
-        var msg = input.value.trim();
-        if (!msg) return;
-        addBotBubble('user', msg);
-        input.value = ''; input.style.height = '';
-        botTyping = true;
-        document.getElementById('bot-send').disabled = true;
-        showTyping();
-
-        var fd = new FormData();
-        fd.append('message', msg);
-        fd.append('region_context', regionCtx);
-
-        fetch('/api/ai/chat', { method: 'POST', body: fd })
-            .then(function(r){ return r.json(); })
-            .then(function(d){
-                removeTyping(); botTyping = false; document.getElementById('bot-send').disabled = false;
-                if (d.locked)        addUpgradeMsg(d.reply || 'Adwoa is a Premium feature 🔒');
-                else if (d.warming)  addRetryMsg(d.reply || 'Adwoa is warming up. Try again!', msg);
-                else                 addBotBubble('bot', d.reply || 'Hmm, no response. Try again!');
-            })
-            .catch(function(){
-                removeTyping(); botTyping = false; document.getElementById('bot-send').disabled = false;
-                addBotBubble('bot', '⚠️ Connection issue — please check your internet and try again.');
-            });
-    };
-
-    /* ─────────────────────────────────────────
-       FIX: Build message rows with DOM methods
-       so emoji / unicode always renders correctly.
-       Never use textContent for emoji strings.
-    ───────────────────────────────────────── */
-    function addBotBubble(type, text) {
-        var msgs = document.getElementById('bot-messages');
-
-        var row = document.createElement('div');
-        row.className = 'bot-msg ' + type;
-
-        /* Avatar */
-        var av = document.createElement('div');
-        av.className = 'bot-msg-av';
-        if (type === 'user') {
-            av.className += ' user-av-icon';
-            var u = getUser();
-            av.textContent = u.username ? u.username.charAt(0).toUpperCase() : 'U';
-        } else {
-            av.innerHTML = adwoaSmall();
-        }
-
-        /* Bubble — use innerHTML with escaped text so newlines & emoji render */
-        var bubble = document.createElement('div');
-        bubble.className = 'bot-msg-bubble';
-        /* Convert newlines to <br>, otherwise use textContent assignment */
-        var safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-        bubble.innerHTML = safe;
-
-        row.appendChild(av);
-        row.appendChild(bubble);
-        msgs.appendChild(row);
-        msgs.scrollTop = msgs.scrollHeight;
-    }
-
-    function addRetryMsg(text, retryMsg) {
-        var msgs = document.getElementById('bot-messages');
-        var row = document.createElement('div'); row.className = 'bot-msg bot';
-        var av = document.createElement('div'); av.className = 'bot-msg-av'; av.innerHTML = adwoaSmall();
-        var bubble = document.createElement('div'); bubble.className = 'bot-msg-bubble';
-        bubble.style.cssText = 'background:rgba(201,147,58,0.1);border-color:rgba(201,147,58,0.3);border-radius:4px 16px 16px 16px;';
-        var p = document.createElement('p'); p.textContent = '⏳ ' + text; p.style.marginBottom = '10px';
-        var btn = document.createElement('button');
-        btn.textContent = '🔄 Retry now';
-        btn.style.cssText = 'background:linear-gradient(135deg,#c9933a,#e8b45a);border:none;border-radius:8px;padding:7px 16px;font-size:0.8rem;font-weight:700;color:#0d0e13;cursor:pointer;';
-        btn.onclick = function(){ row.remove(); document.getElementById('bot-input').value = retryMsg; sendBotMessage(); };
-        bubble.appendChild(p); bubble.appendChild(btn);
-        row.appendChild(av); row.appendChild(bubble);
-        msgs.appendChild(row); msgs.scrollTop = msgs.scrollHeight;
-    }
-
-    function addUpgradeMsg(text) {
-        var msgs = document.getElementById('bot-messages');
-        var row = document.createElement('div'); row.className = 'bot-msg bot';
-        var av = document.createElement('div'); av.className = 'bot-msg-av'; av.innerHTML = adwoaSmall();
-        var bubble = document.createElement('div'); bubble.className = 'bot-msg-bubble';
-        bubble.style.cssText = 'background:rgba(201,147,58,0.1);border-color:rgba(201,147,58,0.3);border-radius:4px 16px 16px 16px;';
-        var p = document.createElement('p'); p.textContent = text; p.style.marginBottom = '10px';
-        var a = document.createElement('a'); a.href = '/premium'; a.textContent = '⭐ Upgrade to Premium — GH₵150/mo';
-        a.style.cssText = 'display:block;background:linear-gradient(135deg,#c9933a,#e8b45a);border-radius:8px;padding:9px 14px;font-size:0.82rem;font-weight:700;color:#0d0e13;text-align:center;text-decoration:none;';
-        bubble.appendChild(p); bubble.appendChild(a);
-        row.appendChild(av); row.appendChild(bubble);
-        msgs.appendChild(row); msgs.scrollTop = msgs.scrollHeight;
-    }
-
-    function showTyping() {
-        var msgs = document.getElementById('bot-messages');
-        var row = document.createElement('div'); row.className = 'bot-msg bot'; row.id = 'typing-indicator';
-        var av = document.createElement('div'); av.className = 'bot-msg-av'; av.innerHTML = adwoaSmall();
-        var bubble = document.createElement('div'); bubble.className = 'bot-msg-bubble';
-        bubble.style.cssText = 'background:#1c1f2e;border:1px solid rgba(201,147,58,0.14);border-radius:4px 16px 16px 16px;padding:12px 16px;';
-        bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
-        row.appendChild(av); row.appendChild(bubble);
-        msgs.appendChild(row); msgs.scrollTop = msgs.scrollHeight;
-    }
-
-    function removeTyping() {
-        var el = document.getElementById('typing-indicator');
-        if (el) el.remove();
-    }
-
-    window.autoResizeInput = function(el) {
-        el.style.height = '';
-        el.style.height = Math.min(el.scrollHeight, 90) + 'px';
-    };
-})();
-</script>
-
 </body>
 </html>
+
