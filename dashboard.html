@@ -218,12 +218,19 @@ let currentUser = null;
 let allPosts = [];
 let activeFilter = 'all';
 
+// ────────────────────────────
+// AUTH CHECK – Universal (handles both user and admin)
+// ────────────────────────────
 async function checkAuth() {
   try {
     const res = await fetch('/api/users/me');
     if (!res.ok) throw new Error('Not authenticated');
     currentUser = await res.json();
+
+    // Save to localStorage for other pages if needed (optional)
     localStorage.setItem('es_user', JSON.stringify(currentUser));
+
+    // Update UI with user info
     const initials = (currentUser.username || 'U')[0].toUpperCase();
     document.getElementById('sb-av').textContent = initials;
     document.getElementById('sb-name').textContent = currentUser.username;
@@ -233,14 +240,23 @@ async function checkAuth() {
     else if (currentUser.is_premium) roleText = 'Premium ⭐';
     document.getElementById('sb-role').textContent = roleText;
     document.getElementById('create-av').textContent = initials;
-    if (['creator','admin','superuser'].includes(currentUser.role)) document.getElementById('creator-link').style.display = 'flex';
+
+    // Show creator link if applicable
+    if (['creator','admin','superuser'].includes(currentUser.role)) {
+      document.getElementById('creator-link').style.display = 'flex';
+    }
+
     return true;
   } catch (e) {
+    // Not authenticated – redirect to login
     window.location.href = '/user-login';
     return false;
   }
 }
 
+// ────────────────────────────
+// INIT
+// ────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   const authed = await checkAuth();
   if (authed) {
@@ -248,6 +264,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// ────────────────────────────
+// FEED
+// ────────────────────────────
 async function loadFeed() {
   try {
     const r = await fetch(`${API}/posts?status=published&limit=50`);
@@ -281,6 +300,8 @@ function buildPostCard(p) {
   const authorInitial = (p.author_username || 'C')[0].toUpperCase();
   const timeAgo = formatTime(p.created_at);
   let mediaHtml = '';
+
+  // Media preview
   if (ct === 'reel') {
     const match = (p.content || '').match(/\[video\](.*?)\[\/video\]/i);
     const url = match ? match[1].trim() : (p.video_url || '');
@@ -321,8 +342,12 @@ function buildPostCard(p) {
       mediaHtml = `<div class="card-media"><img src="${match[1].trim()}" alt="${p.title}" onclick="goPost(${p.id})" style="cursor:pointer" onerror="this.closest('.card-media').style.display='none'"></div>`;
     }
   }
+
   const premiumBadge = p.is_locked ? `<div class="premium-banner">⭐ Premium Content — Subscribe to read full article</div>` : '';
-  let actionsHtml = `<button class="act-btn" onclick="quickLike(${p.id}, this)">❤️ <span class="lc">${p.likes||0}</span></button>
+
+  // Build actions including delete button if user is admin/superuser
+  let actionsHtml = `
+    <button class="act-btn" onclick="quickLike(${p.id}, this)">❤️ <span class="lc">${p.likes||0}</span></button>
     <button class="act-btn" onclick="goPost(${p.id})">💬 ${p.comment_count||0}</button>
     <button class="act-btn" onclick="sharePost(${p.id}, '${escHtml(p.title).replace(/'/g,"\\'")}')">🔗</button>`;
   if (currentUser && p.author_id && p.author_id !== currentUser.id) {
@@ -333,6 +358,7 @@ function buildPostCard(p) {
     actionsHtml += `<button class="act-btn" onclick="deletePost(${p.id})" style="color:#ef4444;">🗑 Delete</button>`;
   }
   actionsHtml += `<a href="/post/${p.id}" class="act-read">Read →</a>`;
+
   return `<div class="post-card">
     <div class="post-header">
       <div class="p-av" onclick="goPost(${p.id})" style="cursor:pointer">${authorInitial}</div>
@@ -350,6 +376,9 @@ function buildPostCard(p) {
   </div>`;
 }
 
+// ────────────────────────────
+// CREATORS STORIES BAR
+// ────────────────────────────
 async function loadCreatorsBar() {
   try {
     const r = await fetch(`${API}/creators`);
@@ -366,6 +395,9 @@ function filterByCreator(username) {
   if (filtered.length) showToast(`Showing posts by ${username}`, 'ok');
 }
 
+// ────────────────────────────
+// RIGHT PANEL — REGIONS
+// ────────────────────────────
 async function loadRegionPanel() {
   try {
     const r = await fetch(`${API}/regions`);
@@ -376,6 +408,9 @@ async function loadRegionPanel() {
   } catch(e) {}
 }
 
+// ────────────────────────────
+// QUICK LIKE (from feed)
+// ────────────────────────────
 async function quickLike(postId, btn) {
   if (!currentUser) { showToast('Please log in to like', 'er'); return; }
   try {
@@ -387,6 +422,9 @@ async function quickLike(postId, btn) {
   } catch(e) {}
 }
 
+// ────────────────────────────
+// TOGGLE FOLLOW (new function)
+// ────────────────────────────
 async function toggleFollow(authorId, btn) {
   if (!currentUser) { showToast('Please log in to follow', 'er'); return; }
   try {
@@ -396,9 +434,14 @@ async function toggleFollow(authorId, btn) {
     btn.textContent = isFollowing ? 'Following' : 'Follow';
     btn.classList.toggle('following', isFollowing);
     btn.dataset.following = isFollowing;
-  } catch (e) { showToast('Error following', 'er'); }
+  } catch (e) {
+    showToast('Error following', 'er');
+  }
 }
 
+// ────────────────────────────
+// DELETE POST (admin only)
+// ────────────────────────────
 async function deletePost(postId) {
   if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
   try {
@@ -414,6 +457,9 @@ async function deletePost(postId) {
   } catch (err) { showToast('❌ ' + err.message, 'er'); }
 }
 
+// ────────────────────────────
+// HELPERS
+// ────────────────────────────
 function goPost(id) { window.location.href = '/post/' + id; }
 
 function handleCreateClick() {
@@ -472,6 +518,7 @@ function showToast(msg, type) {
   setTimeout(() => t.className = 'toast', 3000);
 }
 
+// Service Worker (PWA)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
 }
