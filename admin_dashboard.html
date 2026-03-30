@@ -140,7 +140,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
   border-radius:8px;color:var(--main-text);font-size:.9rem;outline:none;cursor:pointer;
   min-height:44px;
 }
-
 /* Upload zone */
 .upload-zone{
   border:2px dashed var(--gold);border-radius:12px;
@@ -227,7 +226,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .no-files .no-icon{font-size:3rem;margin-bottom:12px}
 .no-files p{font-size:.9rem}
 
-/* Tables – scrollable on mobile */
+/* Tables – scrollable on mobile with better padding */
 .table-wrap{
   background:white;border:1px solid var(--main-border);border-radius:10px;
   overflow-x:auto;box-shadow:0 1px 3px rgba(0,0,0,.02);
@@ -240,16 +239,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .table-head h3{font-weight:700;color:var(--main-text);font-size:1rem}
 table{
   width:100%;border-collapse:collapse;
-  min-width:600px; /* forces scroll on mobile if needed */
+  min-width:600px; /* ensures horizontal scroll on small screens */
 }
 thead th{
   padding:10px 12px;text-align:left;font-size:.7rem;font-weight:700;
   text-transform:uppercase;letter-spacing:.05em;color:var(--main-muted);
-  background:#f8fafc;border-bottom:1px solid var(--main-border)
+  background:#f8fafc;border-bottom:1px solid var(--main-border);
+  white-space:nowrap;
 }
 tbody tr{border-bottom:1px solid var(--main-border);transition:background .1s}
 tbody tr:hover{background:var(--main-hover)}
-tbody td{padding:10px 12px;font-size:.85rem;color:var(--main-text)}
+tbody td{
+  padding:10px 12px;font-size:.85rem;color:var(--main-text);
+  white-space:normal;
+  word-break:break-word;
+}
+tbody td:last-child{
+  white-space:nowrap; /* keep action buttons together */
+}
 tbody tr:last-child{border-bottom:none}
 
 /* Forms – enhanced for mobile */
@@ -298,11 +305,13 @@ tbody tr:last-child{border-bottom:none}
 /* Role badges */
 .role-badge{
   padding:4px 8px;border-radius:16px;font-size:.7rem;font-weight:700;
-  text-transform:uppercase;letter-spacing:.04em
+  text-transform:uppercase;letter-spacing:.04em;
+  white-space:nowrap;
 }
 .role-user{background:#e2e8f0;color:#334155}
 .role-creator{background:rgba(139,92,246,.15);color:#6d28d9}
 .role-admin{background:rgba(200,150,46,.15);color:var(--gold)}
+.role-superuser{background:rgba(200,150,46,.25);color:#a97825;}
 
 /* Users table actions */
 select{
@@ -423,7 +432,6 @@ select{
     <span class="icon">⚙️</span> Settings
   </button>
 
-  <!-- NEW: Activity Logs button -->
   <div class="sb-section">Audit</div>
   <button class="sb-item" onclick="show('logs')" id="nav-logs">
     <span class="icon">📋</span> Activity Logs
@@ -466,15 +474,17 @@ select{
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Posts</h3><button class="btn btn-ghost" onclick="show('posts')" style="font-size:.85rem;padding:8px 14px">View All</button></div>
-          <table><thead><tr><th>Title</th><th>Status</th><th>Author</th></tr></thead>
-          <tbody id="recent-posts-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
-        </table>
+          <table>
+            <thead><tr><th>Title</th><th>Status</th><th>Author</th></tr></thead>
+            <tbody id="recent-posts-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+          </table>
         </div>
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Uploads</h3><button class="btn btn-ghost" onclick="show('files')" style="font-size:.85rem;padding:8px 14px">File Manager</button></div>
-          <table><thead><tr><th>File</th><th>Type</th><th>Size</th></tr></thead>
-          <tbody id="recent-files-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
-        </table>
+          <table>
+            <thead><tr><th>File</th><th>Type</th><th>Size</th></tr></thead>
+            <tbody id="recent-files-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -484,27 +494,9 @@ select{
       <div class="form-section" style="margin-bottom:20px">
         <h4>⬆️ Upload Files</h4>
         <div class="upload-opts">
-          <div class="upload-opt">
-            <label>Category</label>
-            <select id="up-category">
-              <option value="general">General</option>
-              <option value="video">Video</option>
-              <option value="audio">Audio</option>
-              <option value="image">Image</option>
-              <option value="document">Document</option>
-            </select>
-          </div>
-          <div class="upload-opt">
-            <label>Description (optional)</label>
-            <input type="text" id="up-desc" placeholder="What is this file?">
-          </div>
-          <div class="upload-opt">
-            <label>Visibility</label>
-            <select id="up-public">
-              <option value="1">Public</option>
-              <option value="0">Private</option>
-            </select>
-          </div>
+          <div class="upload-opt"><label>Category</label><select id="up-category"><option value="general">General</option><option value="video">Video</option><option value="audio">Audio</option><option value="image">Image</option><option value="document">Document</option></select></div>
+          <div class="upload-opt"><label>Description (optional)</label><input type="text" id="up-desc" placeholder="What is this file?"></div>
+          <div class="upload-opt"><label>Visibility</label><select id="up-public"><option value="1">Public</option><option value="0">Private</option></select></div>
         </div>
         <div class="upload-zone" id="upload-zone">
           <input type="file" id="file-input" multiple onchange="handleFiles(this.files)">
@@ -517,12 +509,7 @@ select{
       <div class="fm-toolbar">
         <input type="text" class="fm-search" placeholder="🔍 Search files…" oninput="filterFiles(this.value)" id="fm-search">
         <select class="fm-filter" onchange="filterFiles()" id="fm-cat-filter">
-          <option value="">All Types</option>
-          <option value="video">🎬 Videos</option>
-          <option value="audio">🎵 Audio</option>
-          <option value="image">🖼️ Images</option>
-          <option value="document">📄 Documents</option>
-          <option value="general">📦 General</option>
+          <option value="">All Types</option><option value="video">🎬 Videos</option><option value="audio">🎵 Audio</option><option value="image">🖼️ Images</option><option value="document">📄 Documents</option><option value="general">📦 General</option>
         </select>
         <button class="btn btn-ghost" onclick="loadFiles()">🔄</button>
         <span id="files-count" style="font-size:.85rem;color:var(--main-muted)"></span>
@@ -533,90 +520,38 @@ select{
     <!-- ── REGIONS (with inline new create form) ── -->
     <div class="panel" id="panel-regions">
       <div class="table-wrap">
-        <div class="table-head">
-          <h3>All Regions</h3>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn btn-gold" onclick="showNewRegionForm()">➕ Create Region</button>
-            <button class="btn btn-ghost" onclick="loadRegions()">🔄 Refresh</button>
-          </div>
-        </div>
+        <div class="table-head"><h3>All Regions</h3><div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn btn-gold" onclick="showNewRegionForm()">➕ Create Region</button><button class="btn btn-ghost" onclick="loadRegions()">🔄 Refresh</button></div></div>
         <table>
           <thead><tr><th>#</th><th>Name</th><th>Capital</th><th>Category</th><th>Media</th><th>Actions</th></tr></thead>
           <tbody id="regions-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </table>
       </div>
-
-      <!-- New Region Form (hidden by default) -->
       <div id="new-region-form" style="display:none; background:white; border:1px solid var(--main-border); border-radius:12px; padding:24px; margin-top:20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <h3 style="font-weight:700; font-size:1.2rem; color:var(--main-text);">➕ Create New Region</h3>
-          <button onclick="hideNewRegionForm()" style="background:none; border:none; font-size:2rem; cursor:pointer; color:var(--main-muted); min-width:44px; min-height:44px;">×</button>
-        </div>
-
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h3 style="font-weight:700; font-size:1.2rem; color:var(--main-text);">➕ Create New Region</h3><button onclick="hideNewRegionForm()" style="background:none; border:none; font-size:2rem; cursor:pointer; color:var(--main-muted); min-width:44px; min-height:44px;">×</button></div>
         <input type="hidden" id="new-reg-id">
-
         <div class="form-grid">
           <div class="field"><label>Region Name *</label><input type="text" id="new-reg-name" placeholder="e.g. Ashanti"></div>
           <div class="field"><label>Capital City *</label><input type="text" id="new-reg-capital" placeholder="e.g. Kumasi"></div>
           <div class="field"><label>Population</label><input type="text" id="new-reg-population" placeholder="e.g. 5,440,463"></div>
           <div class="field"><label>Terrain</label><input type="text" id="new-reg-terrain" placeholder="e.g. Highland"></div>
-          <div class="field"><label>Category</label>
-            <select id="new-reg-category">
-              <option value="">Select…</option>
-              <option>Culture</option><option>History</option><option>Nature</option>
-              <option>Tourism</option><option>Food</option><option>Music</option>
-            </select>
-          </div>
+          <div class="field"><label>Category</label><select id="new-reg-category"><option value="">Select…</option><option>Culture</option><option>History</option><option>Nature</option><option>Tourism</option><option>Food</option><option>Music</option></select></div>
           <div class="field"><label>Tags (comma separated)</label><input type="text" id="new-reg-tags" placeholder="festivals, kings, gold"></div>
           <div class="field full"><label>Heritage Description *</label><textarea id="new-reg-description" rows="4" placeholder="Write about this region…"></textarea></div>
           <div class="field"><label>Brief Overview</label><input type="text" id="new-reg-overview" placeholder="Short summary"></div>
           <div class="field"><label>Source Reference</label><input type="text" id="new-reg-source" placeholder="Where did you find this info?"></div>
         </div>
-
-        <!-- Media uploads -->
-        <div style="margin-top:24px;">
-          <h4 style="font-weight:700; font-size:1rem; color:var(--gold); margin-bottom:16px;">🖼️ Media</h4>
-          <div class="form-grid">
-            <div class="field">
-              <label>Hero Image URL</label>
-              <input type="text" id="new-reg-hero" placeholder="/uploads/image.jpg or Supabase URL">
-              <div class="upload-btn" onclick="document.getElementById('new-hero-upload').click()">
-                <span>⬆️ Upload Image</span>
-                <input type="file" id="new-hero-upload" accept="image/*" onchange="uploadNewHero(this.files[0])" style="display:none;">
-              </div>
-            </div>
-            <div class="field">
-              <label>Gallery Images (comma separated)</label>
-              <input type="text" id="new-reg-gallery" placeholder="/uploads/img1.jpg, /uploads/img2.jpg">
-              <div class="upload-btn" onclick="document.getElementById('new-gallery-upload').click()">
-                <span>⬆️ Upload Images (multiple)</span>
-                <input type="file" id="new-gallery-upload" accept="image/*" multiple onchange="uploadNewGallery(this.files)" style="display:none;">
-              </div>
-            </div>
-            <div class="field">
-              <label>Audio Files (comma separated)</label>
-              <input type="text" id="new-reg-audio" placeholder="/uploads/story.mp3">
-              <div class="upload-btn" onclick="document.getElementById('new-audio-upload').click()">
-                <span>⬆️ Upload Audio</span>
-                <input type="file" id="new-audio-upload" accept="audio/*" multiple onchange="uploadNewAudio(this.files)" style="display:none;">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style="display:flex; gap:12px; margin-top:28px;">
-          <button class="btn btn-gold" onclick="saveNewRegion()" style="flex:1; padding:14px;">💾 Save New Region</button>
-          <button class="btn btn-ghost" onclick="hideNewRegionForm()" style="padding:14px 24px;">Cancel</button>
-        </div>
+        <div style="margin-top:24px;"><h4 style="font-weight:700; font-size:1rem; color:var(--gold); margin-bottom:16px;">🖼️ Media</h4><div class="form-grid">
+          <div class="field"><label>Hero Image URL</label><input type="text" id="new-reg-hero" placeholder="/uploads/image.jpg or Supabase URL"><div class="upload-btn" onclick="document.getElementById('new-hero-upload').click()"><span>⬆️ Upload Image</span><input type="file" id="new-hero-upload" accept="image/*" onchange="uploadNewHero(this.files[0])" style="display:none;"></div></div>
+          <div class="field"><label>Gallery Images (comma separated)</label><input type="text" id="new-reg-gallery" placeholder="/uploads/img1.jpg, /uploads/img2.jpg"><div class="upload-btn" onclick="document.getElementById('new-gallery-upload').click()"><span>⬆️ Upload Images (multiple)</span><input type="file" id="new-gallery-upload" accept="image/*" multiple onchange="uploadNewGallery(this.files)" style="display:none;"></div></div>
+          <div class="field"><label>Audio Files (comma separated)</label><input type="text" id="new-reg-audio" placeholder="/uploads/story.mp3"><div class="upload-btn" onclick="document.getElementById('new-audio-upload').click()"><span>⬆️ Upload Audio</span><input type="file" id="new-audio-upload" accept="audio/*" multiple onchange="uploadNewAudio(this.files)" style="display:none;"></div></div>
+        </div></div>
+        <div style="display:flex; gap:12px; margin-top:28px;"><button class="btn btn-gold" onclick="saveNewRegion()" style="flex:1; padding:14px;">💾 Save New Region</button><button class="btn btn-ghost" onclick="hideNewRegionForm()" style="padding:14px 24px;">Cancel</button></div>
       </div>
     </div>
 
-    <!-- ── ADD/EDIT REGION ── (enhanced for mobile) -->
+    <!-- ── ADD/EDIT REGION ── -->
     <div class="panel" id="panel-add-region">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px; flex-wrap:wrap; gap:8px;">
-        <h3 style="font-size:1.1rem;">Edit Region</h3>
-        <button class="btn btn-ghost" onclick="show('regions')" style="padding:10px 16px;">← Back</button>
-      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px; flex-wrap:wrap; gap:8px;"><h3 style="font-size:1.1rem;">Edit Region</h3><button class="btn btn-ghost" onclick="show('regions')" style="padding:10px 16px;">← Back</button></div>
       <div class="form-section" style="max-height:70vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:80px;">
         <input type="hidden" id="reg-id">
         <h4>📍 Basic Info</h4>
@@ -625,13 +560,7 @@ select{
           <div class="field"><label>Capital City *</label><input type="text" id="reg-capital" placeholder="e.g. Kumasi"></div>
           <div class="field"><label>Population</label><input type="text" id="reg-population" placeholder="e.g. 5,440,463"></div>
           <div class="field"><label>Terrain</label><input type="text" id="reg-terrain" placeholder="e.g. Highland"></div>
-          <div class="field"><label>Category</label>
-            <select id="reg-category">
-              <option value="">Select…</option>
-              <option>Culture</option><option>History</option><option>Nature</option>
-              <option>Tourism</option><option>Food</option><option>Music</option>
-            </select>
-          </div>
+          <div class="field"><label>Category</label><select id="reg-category"><option value="">Select…</option><option>Culture</option><option>History</option><option>Nature</option><option>Tourism</option><option>Food</option><option>Music</option></select></div>
           <div class="field"><label>Tags (comma separated)</label><input type="text" id="reg-tags" placeholder="festivals, kings, gold"></div>
           <div class="field full"><label>Heritage Description *</label><textarea id="reg-description" rows="4" placeholder="Write about this region…"></textarea></div>
           <div class="field"><label>Brief Overview</label><input type="text" id="reg-overview" placeholder="Short summary"></div>
@@ -639,35 +568,11 @@ select{
         </div>
         <h4 style="margin-top:24px;">🖼️ Media</h4>
         <div class="form-grid">
-          <div class="field">
-            <label>Hero Image URL</label>
-            <input type="text" id="reg-hero" placeholder="/uploads/image.jpg or Supabase URL">
-            <div class="upload-btn" onclick="document.getElementById('hero-upload').click()">
-              <span>⬆️ Upload Image</span>
-              <input type="file" id="hero-upload" accept="image/*" onchange="uploadHero(this.files[0])" style="display:none;">
-            </div>
-          </div>
-          <div class="field">
-            <label>Gallery Images (comma separated)</label>
-            <input type="text" id="reg-gallery" placeholder="/uploads/img1.jpg, /uploads/img2.jpg">
-            <div class="upload-btn" onclick="document.getElementById('gallery-upload').click()">
-              <span>⬆️ Upload Images (multiple)</span>
-              <input type="file" id="gallery-upload" accept="image/*" multiple onchange="uploadGallery(this.files)" style="display:none;">
-            </div>
-          </div>
-          <div class="field">
-            <label>Audio Files (comma separated)</label>
-            <input type="text" id="reg-audio" placeholder="/uploads/story.mp3">
-            <div class="upload-btn" onclick="document.getElementById('audio-upload').click()">
-              <span>⬆️ Upload Audio</span>
-              <input type="file" id="audio-upload" accept="audio/*" multiple onchange="uploadAudio(this.files)" style="display:none;">
-            </div>
-          </div>
+          <div class="field"><label>Hero Image URL</label><input type="text" id="reg-hero" placeholder="/uploads/image.jpg or Supabase URL"><div class="upload-btn" onclick="document.getElementById('hero-upload').click()"><span>⬆️ Upload Image</span><input type="file" id="hero-upload" accept="image/*" onchange="uploadHero(this.files[0])" style="display:none;"></div></div>
+          <div class="field"><label>Gallery Images (comma separated)</label><input type="text" id="reg-gallery" placeholder="/uploads/img1.jpg, /uploads/img2.jpg"><div class="upload-btn" onclick="document.getElementById('gallery-upload').click()"><span>⬆️ Upload Images (multiple)</span><input type="file" id="gallery-upload" accept="image/*" multiple onchange="uploadGallery(this.files)" style="display:none;"></div></div>
+          <div class="field"><label>Audio Files (comma separated)</label><input type="text" id="reg-audio" placeholder="/uploads/story.mp3"><div class="upload-btn" onclick="document.getElementById('audio-upload').click()"><span>⬆️ Upload Audio</span><input type="file" id="audio-upload" accept="audio/*" multiple onchange="uploadAudio(this.files)" style="display:none;"></div></div>
         </div>
-        <!-- Save button inside scrollable container, but sticky at bottom -->
-        <div style="position:sticky; bottom:0; background:white; padding:16px 0 0; margin-top:20px;">
-          <button class="btn btn-gold" onclick="saveRegion()" style="width:100%; padding:14px;">💾 Save Region</button>
-        </div>
+        <div style="position:sticky; bottom:0; background:white; padding:16px 0 0; margin-top:20px;"><button class="btn btn-gold" onclick="saveRegion()" style="width:100%; padding:14px;">💾 Save Region</button></div>
       </div>
     </div>
 
@@ -684,103 +589,47 @@ select{
 
     <!-- ── CREATORS ── -->
     <div class="panel" id="panel-creators">
-      <div class="table-wrap">
-        <div class="table-head"><h3>Creators</h3></div>
-        <table>
-          <thead><tr><th>Username</th><th>Channel</th><th>Posts</th><th>Actions</th></tr></thead>
-          <tbody id="creators-tbody"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
-        </table>
-      </div>
+      <div class="table-wrap"><div class="table-head"><h3>Creators</h3></div><table><thead><tr><th>Username</th><th>Channel</th><th>Posts</th><th>Actions</th></tr></thead><tbody id="creators-tbody"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></table></div>
     </div>
 
     <!-- ── POSTS ── -->
     <div class="panel" id="panel-posts">
-      <div class="table-wrap">
-        <div class="table-head"><h3>All Posts</h3><button class="btn btn-ghost" onclick="loadPosts()">Refresh</button></div>
-        <table>
-          <thead><tr><th>Title</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th>Actions</th></tr></thead>
-          <tbody id="posts-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
-        </table>
-      </div>
+      <div class="table-wrap"><div class="table-head"><h3>All Posts</h3><button class="btn btn-ghost" onclick="loadPosts()">Refresh</button></div><table><thead><tr><th>Title</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th>Actions</th></tr></thead><tbody id="posts-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></table></div>
     </div>
 
     <!-- ── STORIES ── -->
     <div class="panel" id="panel-stories">
-      <div class="table-wrap">
-        <div class="table-head"><h3>Story Submissions</h3><button class="btn btn-ghost" onclick="loadStories()">Refresh</button></div>
-        <table>
-          <thead><tr><th>Title</th><th>Author</th><th>Region</th><th>Status</th><th>Date</th></tr></thead>
-          <tbody id="stories-tbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
-        </table>
-      </div>
+      <div class="table-wrap"><div class="table-head"><h3>Story Submissions</h3><button class="btn btn-ghost" onclick="loadStories()">Refresh</button></div><table><thead><tr><th>Title</th><th>Author</th><th>Region</th><th>Status</th><th>Date</th></tr></thead><tbody id="stories-tbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></table></div>
     </div>
 
     <!-- ── NEWSLETTER ── -->
     <div class="panel" id="panel-newsletter">
-      <div class="table-wrap">
-        <div class="table-head"><h3>Newsletter Subscribers</h3><button class="btn btn-ghost" onclick="loadNewsletter()">Refresh</button></div>
-        <td>
-          <thead><tr><th>#</th><th>Email</th><th>Joined</th></tr></thead>
-          <tbody id="newsletter-tbody"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
-        </table>
-      </div>
+      <div class="table-wrap"><div class="table-head"><h3>Newsletter Subscribers</h3><button class="btn btn-ghost" onclick="loadNewsletter()">Refresh</button></div><table><thead><tr><th>#</th><th>Email</th><th>Joined</th></tr></thead><tbody id="newsletter-tbody"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></table></div>
     </div>
 
     <!-- ── EVENTS ── -->
     <div class="panel" id="panel-events">
-      <div class="form-section" style="margin-bottom:16px">
-        <h4>📅 Add Event</h4>
-        <div class="form-grid">
-          <div class="field"><label>Title</label><input type="text" id="ev-title" placeholder="Event name"></div>
-          <div class="field"><label>Location</label><input type="text" id="ev-location" placeholder="Accra, Ghana"></div>
-          <div class="field"><label>Date</label><input type="datetime-local" id="ev-date"></div>
-          <div class="field"><label>Description</label><input type="text" id="ev-desc" placeholder="About the event"></div>
-        </div>
-        <button class="btn btn-gold" onclick="addEvent()" style="margin-top:10px; width:100%;">Add Event</button>
-      </div>
-      <div class="table-wrap">
-        <div class="table-head"><h3>Events</h3></div>
-        <table><thead><tr><th>Title</th><th>Location</th><th>Date</th><th>Actions</th></tr></thead>
-        <tbody id="events-tbody"></tbody></table>
-      </div>
+      <div class="form-section"><h4>📅 Add Event</h4><div class="form-grid"><div class="field"><label>Title</label><input type="text" id="ev-title" placeholder="Event name"></div><div class="field"><label>Location</label><input type="text" id="ev-location" placeholder="Accra, Ghana"></div><div class="field"><label>Date</label><input type="datetime-local" id="ev-date"></div><div class="field"><label>Description</label><input type="text" id="ev-desc" placeholder="About the event"></div></div><button class="btn btn-gold" onclick="addEvent()" style="margin-top:10px; width:100%;">Add Event</button></div>
+      <div class="table-wrap"><div class="table-head"><h3>Events</h3></div><table><thead><tr><th>Title</th><th>Location</th><th>Date</th><th>Actions</th></tr></thead><tbody id="events-tbody"></tbody></table></div>
     </div>
 
     <!-- ── CATEGORIES ── -->
     <div class="panel" id="panel-categories">
-      <div class="form-section" style="margin-bottom:16px">
-        <h4>🏷️ Add Category</h4>
-        <div style="display:flex;gap:8px; flex-wrap:wrap;">
-          <div class="field" style="flex:1;"><input type="text" id="cat-name" placeholder="Category name…"></div>
-          <button class="btn btn-gold" onclick="addCategory()" style="min-width:100px;">Add</button>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <div class="table-head"><h3>Categories</h3></div>
-        <div id="cats-list" style="padding:12px"></div>
-      </div>
+      <div class="form-section"><h4>🏷️ Add Category</h4><div style="display:flex;gap:8px; flex-wrap:wrap;"><div class="field" style="flex:1;"><input type="text" id="cat-name" placeholder="Category name…"></div><button class="btn btn-gold" onclick="addCategory()" style="min-width:100px;">Add</button></div></div>
+      <div class="table-wrap"><div class="table-head"><h3>Categories</h3></div><div id="cats-list" style="padding:12px"></div></div>
     </div>
 
     <!-- ── CHAT ── -->
     <div class="panel" id="panel-chat">
-      <div class="table-wrap" style="max-height:500px;overflow-y:auto">
-        <div class="table-head"><h3>Community Chat</h3><button class="btn btn-ghost" onclick="loadChat()">Refresh</button></div>
-        <div id="chat-msgs" style="padding:12px;display:flex;flex-direction:column;gap:8px"></div>
-      </div>
+      <div class="table-wrap" style="max-height:500px;overflow-y:auto"><div class="table-head"><h3>Community Chat</h3><button class="btn btn-ghost" onclick="loadChat()">Refresh</button></div><div id="chat-msgs" style="padding:12px;display:flex;flex-direction:column;gap:8px"></div></div>
     </div>
 
     <!-- ── SETTINGS ── -->
     <div class="panel" id="panel-settings">
-      <div class="form-section">
-        <h4>⚙️ Site Settings</h4>
-        <p style="font-size:.9rem;color:var(--main-muted);margin-bottom:12px">Coming soon — configure site name, description, and social links.</p>
-        <div class="form-grid">
-          <div class="field"><label>Site Name</label><input type="text" placeholder="EchoStack Ghana" disabled></div>
-          <div class="field"><label>Contact Email</label><input type="text" placeholder="admin@echostack.com" disabled></div>
-        </div>
-      </div>
+      <div class="form-section"><h4>⚙️ Site Settings</h4><p style="font-size:.9rem;color:var(--main-muted);margin-bottom:12px">Coming soon — configure site name, description, and social links.</p><div class="form-grid"><div class="field"><label>Site Name</label><input type="text" placeholder="EchoStack Ghana" disabled></div><div class="field"><label>Contact Email</label><input type="text" placeholder="admin@echostack.com" disabled></div></div></div>
     </div>
 
-    <!-- ── WRITE POST ── (with Reel option) -->
+    <!-- ── WRITE POST ── -->
     <div class="panel" id="panel-write-post">
       <div class="form-section" style="max-height:70vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:80px;">
         <h4>✍️ Write New Post</h4>
@@ -788,58 +637,20 @@ select{
           <div class="field full"><label>Title</label><input type="text" id="wp-title" placeholder="Post title…"></div>
           <div class="field full"><label>Excerpt</label><input type="text" id="wp-excerpt" placeholder="Short summary…"></div>
           <div class="field full"><label>Content</label><textarea id="wp-content" rows="8" placeholder="Write your content here… supports markdown and [video]URL[/video] tags"></textarea></div>
-          <div class="field"><label>Content Type</label>
-            <select id="wp-type">
-              <option value="article">📝 Article</option>
-              <option value="video">🎬 Video</option>
-              <option value="reel">📱 Short Reel</option>
-              <option value="audio">🎵 Audio</option>
-              <option value="story">📖 Story</option>
-            </select>
-          </div>
-          <div class="field"><label>Status</label>
-            <select id="wp-status"><option value="published">Published</option><option value="draft">Draft</option></select>
-          </div>
-          <div class="field full">
-            <label>Cover Image URL</label>
-            <input type="text" id="wp-cover" placeholder="Paste URL or upload via File Manager">
-            <div class="upload-btn" onclick="document.getElementById('cover-upload').click()">
-              <span>⬆️ Upload Cover Image</span>
-              <input type="file" id="cover-upload" accept="image/*" onchange="uploadCover(this.files[0])" style="display:none;">
-            </div>
-          </div>
+          <div class="field"><label>Content Type</label><select id="wp-type"><option value="article">📝 Article</option><option value="video">🎬 Video</option><option value="reel">📱 Short Reel</option><option value="audio">🎵 Audio</option><option value="story">📖 Story</option></select></div>
+          <div class="field"><label>Status</label><select id="wp-status"><option value="published">Published</option><option value="draft">Draft</option></select></div>
+          <div class="field full"><label>Cover Image URL</label><input type="text" id="wp-cover" placeholder="Paste URL or upload via File Manager"><div class="upload-btn" onclick="document.getElementById('cover-upload').click()"><span>⬆️ Upload Cover Image</span><input type="file" id="cover-upload" accept="image/*" onchange="uploadCover(this.files[0])" style="display:none;"></div></div>
           <div class="field full"><label>Tags (comma separated)</label><input type="text" id="wp-tags" placeholder="heritage, culture, ghana"></div>
         </div>
-        <div style="position:sticky; bottom:0; background:white; padding:16px 0 0;">
-          <button class="btn btn-gold" onclick="savePost()" style="width:100%; padding:14px;">Publish Post</button>
-        </div>
+        <div style="position:sticky; bottom:0; background:white; padding:16px 0 0;"><button class="btn btn-gold" onclick="savePost()" style="width:100%; padding:14px;">Publish Post</button></div>
       </div>
     </div>
 
-    <!-- ── ACTIVITY LOGS PANEL (NEW) ── -->
+    <!-- ── ACTIVITY LOGS PANEL ── -->
     <div class="panel" id="panel-logs">
       <div class="table-wrap">
-        <div class="table-head">
-          <h3>Admin Activity Logs</h3>
-          <button class="btn btn-ghost" onclick="loadLogs()">🔄 Refresh</button>
-        </div>
-        <div style="overflow-x:auto;">
-          <table style="min-width:600px; width:100%;">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Admin</th>
-                <th>Action</th>
-                <th>Target</th>
-                <th>Details</th>
-                <th>IP</th>
-              </tr>
-            </thead>
-            <tbody id="logs-tbody">
-              <tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading logs...</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="table-head"><h3>Admin Activity Logs</h3><button class="btn btn-ghost" onclick="loadLogs()">🔄 Refresh</button></div>
+        <div style="overflow-x:auto;"><table style="min-width:600px; width:100%;"><thead><tr><th>Time</th><th>Admin</th><th>Action</th><th>Target</th><th>Details</th><th>IP</th></tr></thead><tbody id="logs-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading logs...</td></tr></tbody></table></div>
       </div>
     </div>
 
@@ -849,22 +660,16 @@ select{
 <!-- MEDIA VIEWER MODAL -->
 <div class="modal-bg" id="media-modal" style="display:none" onclick="if(event.target===this)closeModal()">
   <div class="modal-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <strong id="modal-name" style="font-size:.9rem"></strong>
-      <button onclick="closeModal()" style="background:none;border:none;color:var(--main-muted);cursor:pointer;font-size:1.5rem;min-width:44px;min-height:44px;">✕</button>
-    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><strong id="modal-name" style="font-size:.9rem"></strong><button onclick="closeModal()" style="background:none;border:none;color:var(--main-muted);cursor:pointer;font-size:1.5rem;min-width:44px;min-height:44px;">✕</button></div>
     <div id="modal-content"></div>
-    <div style="margin-top:16px;display:flex;gap:8px; flex-wrap:wrap;">
-      <a id="modal-link" href="#" target="_blank" class="btn btn-gold" style="font-size:.85rem;padding:10px 16px;">🔗 Open in New Tab</a>
-      <button id="modal-copy" onclick="copyUrl()" class="btn btn-ghost" style="font-size:.85rem;padding:10px 16px;">📋 Copy URL</button>
-    </div>
+    <div style="margin-top:16px;display:flex;gap:8px; flex-wrap:wrap;"><a id="modal-link" href="#" target="_blank" class="btn btn-gold" style="font-size:.85rem;padding:10px 16px;">🔗 Open in New Tab</a><button id="modal-copy" onclick="copyUrl()" class="btn btn-ghost" style="font-size:.85rem;padding:10px 16px;">📋 Copy URL</button></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── ADMIN LOGIN TOKEN (optional) ────────────────────────────────────────────
+// ── Admin login token helpers (optional) ────────────────────────────────────
 async function adminLogin(secret) {
   const fd = new FormData();
   fd.append('answer', secret);
@@ -877,16 +682,12 @@ async function adminLogin(secret) {
     alert('Wrong password');
   }
 }
-
 async function checkAdminAuth() {
   const token = localStorage.getItem('admin_token');
   if (token) {
-    const res = await fetch('/api/admin/verify-token', {
-      headers: { 'X-Admin-Token': token }
-    });
+    const res = await fetch('/api/admin/verify-token', { headers: { 'X-Admin-Token': token } });
     if (res.ok) return true;
   }
-  // Fallback to cookie check (already done by server)
   return true;
 }
 
@@ -933,9 +734,8 @@ function show(panel) {
   if (panel === 'events') loadEvents();
   if (panel === 'categories') loadCategories();
   if (panel === 'chat') loadChat();
-  if (panel === 'logs') loadLogs();   // new
+  if (panel === 'logs') loadLogs();
 
-  // Auto‑close sidebar on mobile after navigation
   if (window.innerWidth <= 768) closeSidebar();
 }
 
@@ -976,10 +776,7 @@ async function loadRecentFiles() {
     const files = await r.json();
     const tbody = document.getElementById('recent-files-body');
     if (!files.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:14px;text-align:center;color:var(--main-muted)">No files yet</td></tr>'; return; }
-    tbody.innerHTML = files.slice(0,6).map(f => `
-      <tr><td>${icon(f.mime_type,f.category)} ${(f.original_name||'').substring(0,24)}</td>
-      <td><span class="role-badge role-${f.category}">${f.category}</span></td>
-      <td>${f.file_size_kb || 0} KB</td></tr>`).join('');
+    tbody.innerHTML = files.slice(0,6).map(f => `<tr><td>${icon(f.mime_type,f.category)} ${(f.original_name||'').substring(0,24)}</td><td><span class="role-badge role-${f.category}">${f.category}</span></td><td>${f.file_size_kb || 0} KB</td></tr>`).join('');
   } catch(e) {}
 }
 
@@ -1405,7 +1202,7 @@ async function saveNewRegion() {
     if (r.ok && d.success) {
       toast('✅ New region saved!', 'ok');
       hideNewRegionForm();
-      loadRegions();  // refresh the list
+      loadRegions();
     } else throw new Error(d.detail || 'Save failed');
   } catch(e) { toast('❌ ' + e.message, 'er'); }
 }
@@ -1677,7 +1474,7 @@ async function uploadCover(file) {
   } catch (e) { toast('❌ Upload failed: ' + e.message, 'er'); }
 }
 
-// ── ACTIVITY LOGS (NEW) ───────────────────────────────────────────
+// ── ACTIVITY LOGS ──────────────────────────────────────────────────
 async function loadLogs() {
   try {
     const res = await fetch('/api/admin/logs');
