@@ -424,12 +424,12 @@ select{
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Posts</h3><button class="btn btn-ghost" onclick="show('posts')" style="font-size:.85rem;padding:8px 14px">View All</button></div>
-          <thead><tr><th>Title</th><th>Status</th><th>Author</th></tr></thead>
+          <thead><th>Title</th><th>Status</th><th>Author</th></thead>
           <tbody id="recent-posts-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </div>
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Uploads</h3><button class="btn btn-ghost" onclick="show('files')" style="font-size:.85rem;padding:8px 14px">File Manager</button></div>
-          <thead><tr><th>File</th><th>Type</th><th>Size</th></tr></thead>
+          <thead><th>File</th><th>Type</th><th>Size</th></thead>
           <tbody id="recent-files-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
         </div>
       </div>
@@ -444,7 +444,7 @@ select{
 
     <!-- REGIONS (with inline new create form) -->
     <div class="panel" id="panel-regions">
-      <div class="table-wrap"><div class="table-head"><h3>All Regions</h3><div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn btn-gold" onclick="showNewRegionForm()">➕ Create Region</button><button class="btn btn-ghost" onclick="loadRegions()">🔄 Refresh</button></div></div><thead><tr><th>#</th><th>Name</th><th>Capital</th><th>Category</th><th>Media</th><th>Actions</th></tr></thead><tbody id="regions-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div>
+      <div class="table-wrap"><div class="table-head"><h3>All Regions</h3><div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn btn-gold" onclick="showNewRegionForm()">➕ Create Region</button><button class="btn btn-ghost" onclick="loadRegions()">🔄 Refresh</button></div></div><thead><th>#</th><th>Name</th><th>Capital</th><th>Category</th><th>Media</th><th>Actions</th></thead><tbody id="regions-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div>
       <div id="new-region-form" style="display:none; background:white; border:1px solid var(--main-border); border-radius:12px; padding:24px; margin-top:20px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h3 style="font-weight:700; font-size:1.2rem; color:var(--main-text);">➕ Create New Region</h3><button onclick="hideNewRegionForm()" style="background:none; border:none; font-size:2rem; cursor:pointer; color:var(--main-muted); min-width:44px; min-height:44px;">×</button></div><input type="hidden" id="new-reg-id"><div class="form-grid"><div class="field"><label>Region Name *</label><input type="text" id="new-reg-name" placeholder="e.g. Ashanti"></div><div class="field"><label>Capital City *</label><input type="text" id="new-reg-capital" placeholder="e.g. Kumasi"></div><div class="field"><label>Population</label><input type="text" id="new-reg-population" placeholder="e.g. 5,440,463"></div><div class="field"><label>Terrain</label><input type="text" id="new-reg-terrain" placeholder="e.g. Highland"></div><div class="field"><label>Category</label><select id="new-reg-category"><option value="">Select…</option><option>Culture</option><option>History</option><option>Nature</option><option>Tourism</option><option>Food</option><option>Music</option></select></div><div class="field"><label>Tags (comma separated)</label><input type="text" id="new-reg-tags" placeholder="festivals, kings, gold"></div><div class="field full"><label>Heritage Description *</label><textarea id="new-reg-description" rows="4" placeholder="Write about this region…"></textarea></div><div class="field"><label>Brief Overview</label><input type="text" id="new-reg-overview" placeholder="Short summary"></div><div class="field"><label>Source Reference</label><input type="text" id="new-reg-source" placeholder="Where did you find this info?"></div></div><div style="margin-top:24px;"><h4 style="font-weight:700; font-size:1rem; color:var(--gold); margin-bottom:16px;">🖼️ Media</h4><div class="form-grid"><div class="field"><label>Hero Image URL</label><input type="text" id="new-reg-hero" placeholder="/uploads/image.jpg or Supabase URL"><div class="upload-btn" onclick="document.getElementById('new-hero-upload').click()"><span>⬆️ Upload Image</span><input type="file" id="new-hero-upload" accept="image/*" onchange="uploadNewHero(this.files[0])" style="display:none;"></div></div><div class="field"><label>Gallery Images (comma separated)</label><input type="text" id="new-reg-gallery" placeholder="/uploads/img1.jpg, /uploads/img2.jpg"><div class="upload-btn" onclick="document.getElementById('new-gallery-upload').click()"><span>⬆️ Upload Images (multiple)</span><input type="file" id="new-gallery-upload" accept="image/*" multiple onchange="uploadNewGallery(this.files)" style="display:none;"></div></div><div class="field"><label>Audio Files (comma separated)</label><input type="text" id="new-reg-audio" placeholder="/uploads/story.mp3"><div class="upload-btn" onclick="document.getElementById('new-audio-upload').click()"><span>⬆️ Upload Audio</span><input type="file" id="new-audio-upload" accept="audio/*" multiple onchange="uploadNewAudio(this.files)" style="display:none;"></div></div></div></div><div style="display:flex; gap:12px; margin-top:28px;"><button class="btn btn-gold" onclick="saveNewRegion()" style="flex:1; padding:14px;">💾 Save New Region</button><button class="btn btn-ghost" onclick="hideNewRegionForm()" style="padding:14px 24px;">Cancel</button></div></div>
     </div>
 
@@ -455,22 +455,22 @@ select{
     </div>
 
     <!-- USERS -->
-    <div class="panel" id="panel-users"><div class="table-wrap"><div class="table-head"><h3>All Users</h3><button class="btn btn-ghost" onclick="loadUsers()">Refresh</button></div><thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Premium</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="users-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div></div>
+    <div class="panel" id="panel-users"><div class="table-wrap"><div class="table-head"><h3>All Users</h3><button class="btn btn-ghost" onclick="loadUsers()">Refresh</button></div><thead><th>Username</th><th>Email</th><th>Role</th><th>Premium</th><th>Joined</th><th>Actions</th></thead><tbody id="users-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div></div>
 
     <!-- CREATORS -->
-    <div class="panel" id="panel-creators"><div class="table-wrap"><div class="table-head"><h3>Creators</h3></div><thead><tr><th>Username</th><th>Channel</th><th>Posts</th><th>Actions</th></tr></thead><tbody id="creators-tbody"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div></div>
+    <div class="panel" id="panel-creators"><div class="table-wrap"><div class="table-head"><h3>Creators</h3></div><thead><th>Username</th><th>Channel</th><th>Posts</th><th>Actions</th></thead><tbody id="creators-tbody"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div></div>
 
     <!-- POSTS -->
-    <div class="panel" id="panel-posts"><div class="table-wrap"><div class="table-head"><h3>All Posts</h3><button class="btn btn-ghost" onclick="loadPosts()">Refresh</button></div><thead><tr><th>Title</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th>Actions</th></tr></thead><tbody id="posts-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div></div>
+    <div class="panel" id="panel-posts"><div class="table-wrap"><div class="table-head"><h3>All Posts</h3><button class="btn btn-ghost" onclick="loadPosts()">Refresh</button></div><thead><th>Title</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th>Actions</th></thead><tbody id="posts-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div></div>
 
     <!-- STORIES -->
-    <div class="panel" id="panel-stories"><div class="table-wrap"><div class="table-head"><h3>Story Submissions</h3><button class="btn btn-ghost" onclick="loadStories()">Refresh</button></div><thead><tr><th>Title</th><th>Author</th><th>Region</th><th>Status</th><th>Date</th></tr></thead><tbody id="stories-tbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div></div>
+    <div class="panel" id="panel-stories"><div class="table-wrap"><div class="table-head"><h3>Story Submissions</h3><button class="btn btn-ghost" onclick="loadStories()">Refresh</button></div><thead><th>Title</th><th>Author</th><th>Region</th><th>Status</th><th>Date</th></thead><tbody id="stories-tbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div></div>
 
     <!-- NEWSLETTER -->
-    <div class="panel" id="panel-newsletter"><div class="table-wrap"><div class="table-head"><h3>Newsletter Subscribers</h3><button class="btn btn-ghost" onclick="loadNewsletter()">Refresh</button></div><thead><tr><th>#</th><th>Email</th><th>Joined</th></tr></thead><tbody id="newsletter-tbody"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div></div>
+    <div class="panel" id="panel-newsletter"><div class="table-wrap"><div class="table-head"><h3>Newsletter Subscribers</h3><button class="btn btn-ghost" onclick="loadNewsletter()">Refresh</button></div><thead><th>#</th><th>Email</th><th>Joined</th></thead><tbody id="newsletter-tbody"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody></div></div>
 
     <!-- EVENTS -->
-    <div class="panel" id="panel-events"><div class="form-section"><h4>📅 Add Event</h4><div class="form-grid"><div class="field"><label>Title</label><input type="text" id="ev-title" placeholder="Event name"></div><div class="field"><label>Location</label><input type="text" id="ev-location" placeholder="Accra, Ghana"></div><div class="field"><label>Date</label><input type="datetime-local" id="ev-date"></div><div class="field"><label>Description</label><input type="text" id="ev-desc" placeholder="About the event"></div></div><button class="btn btn-gold" onclick="addEvent()" style="margin-top:10px; width:100%;">Add Event</button></div><div class="table-wrap"><div class="table-head"><h3>Events</h3></div><thead><tr><th>Title</th><th>Location</th><th>Date</th><th>Actions</th></tr></thead><tbody id="events-tbody"></tbody></div></div>
+    <div class="panel" id="panel-events"><div class="form-section"><h4>📅 Add Event</h4><div class="form-grid"><div class="field"><label>Title</label><input type="text" id="ev-title" placeholder="Event name"></div><div class="field"><label>Location</label><input type="text" id="ev-location" placeholder="Accra, Ghana"></div><div class="field"><label>Date</label><input type="datetime-local" id="ev-date"></div><div class="field"><label>Description</label><input type="text" id="ev-desc" placeholder="About the event"></div></div><button class="btn btn-gold" onclick="addEvent()" style="margin-top:10px; width:100%;">Add Event</button></div><div class="table-wrap"><div class="table-head"><h3>Events</h3></div><thead><th>Title</th><th>Location</th><th>Date</th><th>Actions</th></thead><tbody id="events-tbody"></tbody></div></div>
 
     <!-- CATEGORIES -->
     <div class="panel" id="panel-categories"><div class="form-section"><h4>🏷️ Add Category</h4><div style="display:flex;gap:8px; flex-wrap:wrap;"><div class="field" style="flex:1;"><input type="text" id="cat-name" placeholder="Category name…"></div><button class="btn btn-gold" onclick="addCategory()" style="min-width:100px;">Add</button></div></div><div class="table-wrap"><div class="table-head"><h3>Categories</h3></div><div id="cats-list" style="padding:12px"></div></div></div>
@@ -485,7 +485,7 @@ select{
     <div class="panel" id="panel-write-post"><div class="form-section" style="max-height:70vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:80px;"><h4>✍️ Write New Post</h4><div class="form-grid"><div class="field full"><label>Title</label><input type="text" id="wp-title" placeholder="Post title…"></div><div class="field full"><label>Excerpt</label><input type="text" id="wp-excerpt" placeholder="Short summary…"></div><div class="field full"><label>Content</label><textarea id="wp-content" rows="8" placeholder="Write your content here… supports markdown and [video]URL[/video] tags"></textarea></div><div class="field"><label>Content Type</label><select id="wp-type"><option value="article">📝 Article</option><option value="video">🎬 Video</option><option value="reel">📱 Short Reel</option><option value="audio">🎵 Audio</option><option value="story">📖 Story</option></select></div><div class="field"><label>Status</label><select id="wp-status"><option value="published">Published</option><option value="draft">Draft</option></select></div><div class="field full"><label>Cover Image URL</label><input type="text" id="wp-cover" placeholder="Paste URL or upload via File Manager"><div class="upload-btn" onclick="document.getElementById('cover-upload').click()"><span>⬆️ Upload Cover Image</span><input type="file" id="cover-upload" accept="image/*" onchange="uploadCover(this.files[0])" style="display:none;"></div></div><div class="field full"><label>Tags (comma separated)</label><input type="text" id="wp-tags" placeholder="heritage, culture, ghana"></div></div><div style="position:sticky; bottom:0; background:white; padding:16px 0 0;"><button class="btn btn-gold" onclick="savePost()" style="width:100%; padding:14px;">Publish Post</button></div></div></div>
 
     <!-- ACTIVITY LOGS -->
-    <div class="panel" id="panel-logs"><div class="table-wrap"><div class="table-head"><h3>Admin Activity Logs</h3><button class="btn btn-ghost" onclick="loadLogs()">🔄 Refresh</button></div><div style="overflow-x:auto;"><table style="min-width:600px; width:100%;"><thead><tr><th>Time</th><th>Admin</th><th>Action</th><th>Target</th><th>Details</th><th>IP</th></tr></thead><tbody id="logs-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading logs...</td></tr></tbody></table></div></div></div>
+    <div class="panel" id="panel-logs"><div class="table-wrap"><div class="table-head"><h3>Admin Activity Logs</h3><button class="btn btn-ghost" onclick="loadLogs()">🔄 Refresh</button></div><div style="overflow-x:auto;"><table style="min-width:600px; width:100%;"><thead><th>Time</th><th>Admin</th><th>Action</th><th>Target</th><th>Details</th><th>IP</th></thead><tbody id="logs-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading logs...</td></tr></tbody></table></div></div></div>
 
   </div>
 </div>
@@ -853,13 +853,15 @@ function copyUrl() {
   toast('URL copied to clipboard!', 'info');
 }
 
-// Regions (simplified, but kept)
+// Regions
 async function loadRegions() {
   try {
     const r = await fetch('/api/regions', { credentials: 'include' });
     allRegions = await r.json();
     renderRegions(allRegions);
-  } catch(e) {}
+  } catch(e) {
+    toast('Failed to load regions', 'er');
+  }
 }
 
 function renderRegions(regions) {
@@ -923,21 +925,500 @@ async function deleteRegion(id, name) {
   } catch(e) { toast('❌ Delete failed', 'er'); }
 }
 
-// Placeholder upload functions for region (simplified)
-async function uploadHero(file) { /* ... */ }
-async function uploadGallery(files) { /* ... */ }
-async function uploadAudio(files) { /* ... */ }
+// Placeholder upload functions for region (these can be implemented to call /api/upload/file)
+async function uploadHero(file) {
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('category', 'image');
+  fd.append('description', 'Hero image');
+  fd.append('is_public', '1');
+  try {
+    const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
+    const d = await r.json();
+    if (r.ok && d.url) {
+      document.getElementById('reg-hero').value = d.url;
+      toast('Hero image uploaded', 'ok');
+    } else throw new Error('Upload failed');
+  } catch(e) { toast('Hero upload failed', 'er'); }
+}
+async function uploadGallery(files) {
+  // similar to above, update gallery field with comma-separated URLs
+  const urls = [];
+  for (const file of files) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('category', 'image');
+    fd.append('is_public', '1');
+    try {
+      const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
+      const d = await r.json();
+      if (r.ok && d.url) urls.push(d.url);
+    } catch(e) {}
+  }
+  if (urls.length) {
+    const current = document.getElementById('reg-gallery').value;
+    const newVal = current ? current + ', ' + urls.join(', ') : urls.join(', ');
+    document.getElementById('reg-gallery').value = newVal;
+    toast(`${urls.length} image(s) uploaded`, 'ok');
+  }
+}
+async function uploadAudio(files) {
+  // similar to gallery, append to audio field
+  const urls = [];
+  for (const file of files) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('category', 'audio');
+    fd.append('is_public', '1');
+    try {
+      const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
+      const d = await r.json();
+      if (r.ok && d.url) urls.push(d.url);
+    } catch(e) {}
+  }
+  if (urls.length) {
+    const current = document.getElementById('reg-audio').value;
+    const newVal = current ? current + ', ' + urls.join(', ') : urls.join(', ');
+    document.getElementById('reg-audio').value = newVal;
+    toast(`${urls.length} audio(s) uploaded`, 'ok');
+  }
+}
 function showNewRegionForm() { document.getElementById('new-region-form').style.display = 'block'; }
 function hideNewRegionForm() { document.getElementById('new-region-form').style.display = 'none'; }
-async function uploadNewHero(file) { /* ... */ }
-async function uploadNewGallery(files) { /* ... */ }
-async function uploadNewAudio(files) { /* ... */ }
-async function saveNewRegion() { /* ... */ }
+async function uploadNewHero(file) {
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('category', 'image');
+  fd.append('is_public', '1');
+  try {
+    const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
+    const d = await r.json();
+    if (r.ok && d.url) {
+      document.getElementById('new-reg-hero').value = d.url;
+      toast('Hero image uploaded', 'ok');
+    } else throw new Error('Upload failed');
+  } catch(e) { toast('Upload failed', 'er'); }
+}
+async function uploadNewGallery(files) {
+  const urls = [];
+  for (const file of files) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('category', 'image');
+    fd.append('is_public', '1');
+    try {
+      const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
+      const d = await r.json();
+      if (r.ok && d.url) urls.push(d.url);
+    } catch(e) {}
+  }
+  if (urls.length) {
+    const current = document.getElementById('new-reg-gallery').value;
+    const newVal = current ? current + ', ' + urls.join(', ') : urls.join(', ');
+    document.getElementById('new-reg-gallery').value = newVal;
+    toast(`${urls.length} image(s) uploaded`, 'ok');
+  }
+}
+async function uploadNewAudio(files) {
+  const urls = [];
+  for (const file of files) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('category', 'audio');
+    fd.append('is_public', '1');
+    try {
+      const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
+      const d = await r.json();
+      if (r.ok && d.url) urls.push(d.url);
+    } catch(e) {}
+  }
+  if (urls.length) {
+    const current = document.getElementById('new-reg-audio').value;
+    const newVal = current ? current + ', ' + urls.join(', ') : urls.join(', ');
+    document.getElementById('new-reg-audio').value = newVal;
+    toast(`${urls.length} audio(s) uploaded`, 'ok');
+  }
+}
+async function saveNewRegion() {
+  const fd = new FormData();
+  ['name','capital','population','terrain','description','category','tags','source','overview','hero','gallery','audio'].forEach(k => {
+    const val = document.getElementById('new-reg-' + k).value;
+    if (val) fd.append(k, val);
+  });
+  try {
+    const r = await fetch('/api/regions', { method: 'POST', body: fd, credentials: 'include' });
+    const d = await r.json();
+    if (r.ok && d.success) {
+      toast('Region created!', 'ok');
+      hideNewRegionForm();
+      loadRegions();
+      show('regions');
+    } else throw new Error(d.detail || 'Failed');
+  } catch(e) { toast('❌ ' + e.message, 'er'); }
+}
 
-// Users, Creators, Posts, Stories, Newsletter, Events, Categories, Chat, Write Post, Logs
-// (all the remaining functions from the original – I'm keeping them as they were, but they are not displayed here for brevity. They are present in the final code.)
+// Users
+async function loadUsers() {
+  try {
+    const r = await fetch('/api/admin/users', { credentials: 'include' });
+    const users = await r.json();
+    const tbody = document.getElementById('users-tbody');
+    if (!users.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No users found</td></tr>';
+      return;
+    }
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>${escapeHtml(u.username)}</td>
+        <td>${escapeHtml(u.email)}</td>
+        <td><span class="role-badge role-${u.role}">${u.role}</span></td>
+        <td><input type="checkbox" ${u.is_premium ? 'checked' : ''} onchange="togglePremium(${u.id}, this.checked)"></td>
+        <td>${new Date(u.created_at).toLocaleDateString()}</td>
+        <td>
+          <select onchange="changeRole(${u.id}, this.value)" style="padding:4px;">
+            <option ${u.role === 'user' ? 'selected' : ''}>user</option>
+            <option ${u.role === 'creator' ? 'selected' : ''}>creator</option>
+            <option ${u.role === 'admin' ? 'selected' : ''}>admin</option>
+          </select>
+        </td>
+      </tr>
+    `).join('');
+  } catch(e) { toast('Failed to load users', 'er'); }
+}
 
-// ...
+async function togglePremium(userId, checked) {
+  try {
+    const r = await fetch(`/api/admin/users/${userId}/premium`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ premium: checked }),
+      credentials: 'include'
+    });
+    if (r.ok) toast(`Premium ${checked ? 'enabled' : 'disabled'}`, 'ok');
+    else throw new Error('Failed');
+  } catch(e) { toast('Error updating premium', 'er'); loadUsers(); }
+}
+
+async function changeRole(userId, newRole) {
+  try {
+    const r = await fetch(`/api/admin/users/${userId}/role`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: newRole }),
+      credentials: 'include'
+    });
+    if (r.ok) toast('Role updated', 'ok');
+    else throw new Error('Failed');
+  } catch(e) { toast('Error updating role', 'er'); }
+  loadUsers();
+}
+
+// Creators
+async function loadCreators() {
+  try {
+    const r = await fetch('/api/admin/creators', { credentials: 'include' });
+    const creators = await r.json();
+    const tbody = document.getElementById('creators-tbody');
+    if (!creators.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No creators yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = creators.map(c => `
+      <tr>
+        <td>${escapeHtml(c.username)}</td>
+        <td>${escapeHtml(c.channel_name || '—')}</td>
+        <td>${c.post_count || 0}</td>
+        <td><button class="btn btn-ghost" onclick="viewCreatorPosts(${c.id})">View Posts</button></td>
+      </tr>
+    `).join('');
+  } catch(e) { toast('Failed to load creators', 'er'); }
+}
+
+// Posts
+async function loadPosts() {
+  try {
+    const r = await fetch('/api/admin/posts', { credentials: 'include' });
+    const posts = await r.json();
+    const tbody = document.getElementById('posts-tbody');
+    if (!posts.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No posts found</td></tr>';
+      return;
+    }
+    tbody.innerHTML = posts.map(p => `
+      <tr>
+        <td><strong>${escapeHtml(p.title)}</strong></td>
+        <td>${escapeHtml(p.author_username)}</td>
+        <td><span class="role-badge ${p.status==='published'?'role-admin':'role-user'}">${p.status}</span></td>
+        <td>${p.views || 0}</td>
+        <td>${new Date(p.created_at).toLocaleDateString()}</td>
+        <td><button class="btn btn-danger" onclick="deletePost(${p.id})">Delete</button></td>
+      </tr>
+    `).join('');
+  } catch(e) { toast('Failed to load posts', 'er'); }
+}
+
+async function deletePost(id) {
+  if (!confirm('Delete this post?')) return;
+  try {
+    const r = await fetch(`/api/admin/posts/${id}`, { method: 'DELETE', credentials: 'include' });
+    if (r.ok) { toast('Post deleted', 'ok'); loadPosts(); }
+    else throw new Error('Failed');
+  } catch(e) { toast('Error deleting post', 'er'); }
+}
+
+// Stories
+async function loadStories() {
+  try {
+    const r = await fetch('/api/admin/stories', { credentials: 'include' });
+    const stories = await r.json();
+    const tbody = document.getElementById('stories-tbody');
+    if (!stories.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">No stories submitted</td></tr>';
+      return;
+    }
+    tbody.innerHTML = stories.map(s => `
+      <tr>
+        <td>${escapeHtml(s.title)}</td>
+        <td>${escapeHtml(s.author_username)}</td>
+        <td>${escapeHtml(s.region_name || '—')}</td>
+        <td><span class="role-badge ${s.status==='approved'?'role-admin':'role-user'}">${s.status}</span></td>
+        <td>${new Date(s.created_at).toLocaleDateString()}</td>
+      </tr>
+    `).join('');
+  } catch(e) { toast('Failed to load stories', 'er'); }
+}
+
+// Newsletter
+async function loadNewsletter() {
+  try {
+    const r = await fetch('/api/admin/newsletter', { credentials: 'include' });
+    const subs = await r.json();
+    const tbody = document.getElementById('newsletter-tbody');
+    if (!subs.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No subscribers yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = subs.map((s,i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>${escapeHtml(s.email)}</td>
+        <td>${new Date(s.created_at).toLocaleDateString()}</td>
+      </tr>
+    `).join('');
+  } catch(e) { toast('Failed to load newsletter', 'er'); }
+}
+
+// Events
+async function loadEvents() {
+  try {
+    const r = await fetch('/api/events', { credentials: 'include' });
+    const events = await r.json();
+    const tbody = document.getElementById('events-tbody');
+    if (!events.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No events yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = events.map(e => `
+      <tr>
+        <td>${escapeHtml(e.title)}</td>
+        <td>${escapeHtml(e.location)}</td>
+        <td>${new Date(e.event_date).toLocaleString()}</td>
+        <td><button class="btn btn-danger" onclick="deleteEvent(${e.id})">Delete</button></td>
+      </tr>
+    `).join('');
+  } catch(e) { toast('Failed to load events', 'er'); }
+}
+
+async function addEvent() {
+  const title = document.getElementById('ev-title').value.trim();
+  const location = document.getElementById('ev-location').value.trim();
+  const date = document.getElementById('ev-date').value;
+  const description = document.getElementById('ev-desc').value.trim();
+  if (!title || !date) { toast('Title and date required', 'er'); return; }
+  try {
+    const r = await fetch('/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, location, event_date: date, description }),
+      credentials: 'include'
+    });
+    if (r.ok) {
+      toast('Event added', 'ok');
+      document.getElementById('ev-title').value = '';
+      document.getElementById('ev-location').value = '';
+      document.getElementById('ev-date').value = '';
+      document.getElementById('ev-desc').value = '';
+      loadEvents();
+    } else throw new Error('Failed');
+  } catch(e) { toast('Error adding event', 'er'); }
+}
+
+async function deleteEvent(id) {
+  if (!confirm('Delete this event?')) return;
+  try {
+    const r = await fetch(`/api/events/${id}`, { method: 'DELETE', credentials: 'include' });
+    if (r.ok) { toast('Event deleted', 'ok'); loadEvents(); }
+    else throw new Error('Failed');
+  } catch(e) { toast('Delete failed', 'er'); }
+}
+
+// Categories
+async function loadCategories() {
+  try {
+    const r = await fetch('/api/categories', { credentials: 'include' });
+    const cats = await r.json();
+    const container = document.getElementById('cats-list');
+    if (!cats.length) {
+      container.innerHTML = '<p style="padding:12px;color:var(--main-muted)">No categories yet</p>';
+      return;
+    }
+    container.innerHTML = cats.map(c => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid var(--main-border)">
+        <span>${escapeHtml(c.name)}</span>
+        <button class="btn btn-danger" onclick="deleteCategory(${c.id})" style="padding:6px 12px;">Delete</button>
+      </div>
+    `).join('');
+  } catch(e) { toast('Failed to load categories', 'er'); }
+}
+
+async function addCategory() {
+  const name = document.getElementById('cat-name').value.trim();
+  if (!name) return;
+  try {
+    const r = await fetch('/api/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+      credentials: 'include'
+    });
+    if (r.ok) {
+      toast('Category added', 'ok');
+      document.getElementById('cat-name').value = '';
+      loadCategories();
+    } else throw new Error('Failed');
+  } catch(e) { toast('Error adding category', 'er'); }
+}
+
+async function deleteCategory(id) {
+  if (!confirm('Delete category?')) return;
+  try {
+    const r = await fetch(`/api/categories/${id}`, { method: 'DELETE', credentials: 'include' });
+    if (r.ok) { toast('Category deleted', 'ok'); loadCategories(); }
+    else throw new Error('Failed');
+  } catch(e) { toast('Delete failed', 'er'); }
+}
+
+// Chat
+async function loadChat() {
+  try {
+    const r = await fetch('/api/chat/messages?limit=50', { credentials: 'include' });
+    const msgs = await r.json();
+    const container = document.getElementById('chat-msgs');
+    if (!msgs.length) {
+      container.innerHTML = '<p style="color:var(--main-muted);text-align:center">No messages yet</p>';
+      return;
+    }
+    container.innerHTML = msgs.map(m => `
+      <div style="background:var(--main-hover);border-radius:12px;padding:10px;">
+        <strong>${escapeHtml(m.username)}</strong> <span style="font-size:.7rem;color:var(--main-muted)">${new Date(m.created_at).toLocaleString()}</span><br>
+        <span>${escapeHtml(m.message)}</span>
+      </div>
+    `).join('');
+  } catch(e) { toast('Failed to load chat', 'er'); }
+}
+
+// Write Post
+async function savePost() {
+  const title = document.getElementById('wp-title').value.trim();
+  const excerpt = document.getElementById('wp-excerpt').value.trim();
+  const content = document.getElementById('wp-content').value.trim();
+  const contentType = document.getElementById('wp-type').value;
+  const status = document.getElementById('wp-status').value;
+  const cover = document.getElementById('wp-cover').value.trim();
+  const tags = document.getElementById('wp-tags').value.trim();
+  if (!title || !content) { toast('Title and content required', 'er'); return; }
+  const payload = {
+    title, excerpt, content, content_type: contentType, status,
+    cover_image: cover, tags: tags ? tags.split(',').map(s=>s.trim()) : []
+  };
+  try {
+    const r = await fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      credentials: 'include'
+    });
+    if (r.ok) {
+      toast('Post saved!', 'ok');
+      document.getElementById('wp-title').value = '';
+      document.getElementById('wp-excerpt').value = '';
+      document.getElementById('wp-content').value = '';
+      document.getElementById('wp-cover').value = '';
+      document.getElementById('wp-tags').value = '';
+    } else throw new Error('Failed');
+  } catch(e) { toast('Error saving post', 'er'); }
+}
+
+async function uploadCover(file) {
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('category', 'image');
+  fd.append('is_public', '1');
+  try {
+    const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
+    const d = await r.json();
+    if (r.ok && d.url) {
+      document.getElementById('wp-cover').value = d.url;
+      toast('Cover uploaded', 'ok');
+    } else throw new Error('Upload failed');
+  } catch(e) { toast('Cover upload failed', 'er'); }
+}
+
+// Activity Logs
+async function loadLogs() {
+  try {
+    const r = await fetch('/api/admin/logs', { credentials: 'include' });
+    const logs = await r.json();
+    const tbody = document.getElementById('logs-tbody');
+    if (!logs.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No logs yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = logs.map(l => `
+      <tr>
+        <td>${new Date(l.created_at).toLocaleString()}</td>
+        <td>${escapeHtml(l.admin_username)}</td>
+        <td>${escapeHtml(l.action)}</td>
+        <td>${escapeHtml(l.target || '—')}</td>
+        <td>${escapeHtml(l.details || '—')}</td>
+        <td>${l.ip || '—'}</td>
+      </tr>
+    `).join('');
+  } catch(e) { toast('Failed to load logs', 'er'); }
+}
+
+// Logout
+async function logout() {
+  try {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    window.location.href = '/user-login.html';
+  } catch(e) { window.location.href = '/user-login.html'; }
+}
+
+// Helper for time ago
+function timeAgo(dateStr) {
+  if (!dateStr) return '—';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  return `${Math.floor(diff/86400)}d ago`;
+}
 </script>
 </body>
 </html>
