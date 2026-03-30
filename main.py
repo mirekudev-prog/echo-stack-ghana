@@ -987,15 +987,19 @@ async def admin_users(request: Request, db: Session = Depends(get_db)):
         "email_verified": getattr(u, "email_verified", False),
         "created_at": str(getattr(u, "created_at", "")),
     } for u in users]
-
+    
 @app.put("/api/admin/users/{uid}/role")
 async def set_role(uid: str, request: Request, role: str = Form(...), db: Session = Depends(get_db)):
     if not _is_admin(request): raise HTTPException(403)
     u = db.query(models.User).filter(models.User.id == uid).first()
     if not u: raise HTTPException(404)
-    u.role = role; db.commit()
+    u.role = role
+    db.commit()
+    # --- ADD THIS LOGGING ---
+    log_admin_action(request, "update", "user", uid, f"Role changed to {role}", db)
+    # -----------------------
     return {"success": True}
-
+    
 @app.put("/api/admin/users/{uid}/premium")
 async def set_premium(uid: str, request: Request, db: Session = Depends(get_db)):
     if not _is_admin(request): raise HTTPException(403)
@@ -1003,8 +1007,12 @@ async def set_premium(uid: str, request: Request, db: Session = Depends(get_db))
     if not u: raise HTTPException(404)
     u.is_premium = 0 if getattr(u, "is_premium", 0) else 1
     db.commit()
+    # --- ADD THIS LOGGING ---
+    status = "premium" if u.is_premium else "non-premium"
+    log_admin_action(request, "update", "user", uid, f"Premium status set to {status}", db)
+    # -----------------------
     return {"success": True, "is_premium": u.is_premium}
-
+    
 @app.put("/api/admin/users/{uid}/suspend")
 async def suspend_user(uid: str, request: Request, db: Session = Depends(get_db)):
     if not _is_admin(request): raise HTTPException(403)
@@ -1012,6 +1020,10 @@ async def suspend_user(uid: str, request: Request, db: Session = Depends(get_db)
     if not u: raise HTTPException(404)
     u.is_suspended = 0 if getattr(u, "is_suspended", 0) else 1
     db.commit()
+    # --- ADD THIS LOGGING ---
+    status = "suspended" if u.is_suspended else "unsuspended"
+    log_admin_action(request, "update", "user", uid, f"Account {status}", db)
+    # -----------------------
     return {"success": True, "is_suspended": u.is_suspended}
 
 @app.put("/api/admin/users/{uid}/verify")
@@ -1775,10 +1787,15 @@ def update_region(
                      ("category", category), ("tags", tags), ("hero_image", hero_image),
                      ("gallery_images", gallery_images), ("audio_files", audio_files), ("source", source)]:
             if v is not None: setattr(r, a, v.strip())
-        db.commit(); return {"success": True}
+        db.commit()
+        # --- ADD THIS LOGGING ---
+        log_admin_action(request, "update", "region", str(rid), f"Name: {r.name}", db)
+        # -----------------------
+        return {"success": True}
     except Exception as e:
-        db.rollback(); raise HTTPException(500, str(e))
-
+        db.rollback()
+        raise HTTPException(500, str(e))
+        
 @app.delete("/api/regions/{rid}")
 def delete_region(rid: int, request: Request, db: Session = Depends(get_db)):
     if not _is_admin(request):
@@ -1820,7 +1837,7 @@ async def publish_file(
         return {"success": True, "post_id": p.id}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
-
+        
 # ─── STATS ───────────────────────────────────────────────────────────────────
 @app.get("/api/stats")
 def get_stats(db: Session = Depends(get_db)):
@@ -1842,9 +1859,10 @@ def get_sections(db: Session = Depends(get_db)):
         return [{"id": x.id, "name": x.name, "slug": x.slug} for x in s]
     except Exception:
         return []
-
+        
 @app.post("/api/sections")
 def create_section(
+    request: Request,
     name: str = Form(...), description: str = Form(""),
     display_order: int = Form(0), db: Session = Depends(get_db)
 ):
@@ -1852,16 +1870,24 @@ def create_section(
         s = models.Section(name=name, slug=slugify(name),
                            description=description, display_order=display_order)
         db.add(s); db.commit()
+        # --- ADD THIS LOGGING ---
+        log_admin_action(request, "create", "category", str(s.id), f"Name: {s.name}", db)
+        # -----------------------
         return {"success": True, "id": s.id}
     except Exception as e:
         db.rollback(); raise HTTPException(500, str(e))
 
 @app.delete("/api/sections/{sid}")
-def delete_section(sid: int, db: Session = Depends(get_db)):
+def delete_section(sid: int, request: Request, db: Session = Depends(get_db)):
     s = db.query(models.Section).filter(models.Section.id == sid).first()
     if not s: raise HTTPException(404)
-    s.is_active = 0; db.commit(); return {"success": True}
-
+    s.is_active = 0
+    db.commit()
+    # --- ADD THIS LOGGING ---
+    log_admin_action(request, "delete", "category", str(sid), f"Name: {s.name}", db)
+    # -----------------------
+    return {"success": True}
+    
 # ─── NEWSLETTER ──────────────────────────────────────────────────────────────
 @app.post("/api/newsletter/subscribe")
 async def subscribe(email: str = Form(...), db: Session = Depends(get_db)):
