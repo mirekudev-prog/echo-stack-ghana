@@ -40,7 +40,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      pointer-events: none;
+      pointer-events: none;   /* allow clicking through to overlay buttons */
       z-index: 1;
     }
     /* Overlay gradient to make text readable */
@@ -53,6 +53,37 @@
       background: linear-gradient(0deg, rgba(0,0,0,0.5) 0%, transparent 50%, rgba(0,0,0,0.2) 100%);
       z-index: 2;
       pointer-events: none;
+    }
+    /* Loading spinner on video (centered) */
+    .video-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: #C8962E;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 10;
+      pointer-events: none;
+    }
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    /* Error overlay for failed video */
+    .video-error {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      z-index: 10;
+      pointer-events: none;
+      white-space: nowrap;
     }
     /* Bottom left info */
     .reel-info {
@@ -151,7 +182,7 @@
       color: white;
       border: 1px solid rgba(255,255,255,0.5);
     }
-    /* Watermark (CSS overlay – not permanent) */
+    /* Watermark */
     .reel-watermark {
       position: absolute;
       bottom: 12px;
@@ -170,7 +201,7 @@
     .reel-watermark img {
       height: 18px;
       width: auto;
-      filter: brightness(0) invert(1); /* make logo white */
+      filter: brightness(0) invert(1);
     }
     .reel-watermark span {
       color: white;
@@ -178,7 +209,7 @@
       font-weight: 600;
       letter-spacing: 0.5px;
     }
-    /* Loading / error */
+    /* Global loading / error */
     .loading, .error {
       color: white;
       text-align: center;
@@ -193,7 +224,6 @@
       animation: spin 1s linear infinite;
       margin: 20px auto;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -253,65 +283,139 @@
         const reelDiv = document.createElement('div');
         reelDiv.className = 'reel';
         reelDiv.dataset.id = reel.id;
-        reelDiv.dataset.authorId = reel.author_id; // need author_id from API – you may need to include it in the /reels response
+        reelDiv.dataset.authorId = reel.author_id;
         reelDiv.dataset.index = reels.length - newReels.length + i;
-        reelDiv.innerHTML = `
-          <video src="${reel.video_url}" loop playsinline preload="metadata"></video>
-          <div class="reel-overlay"></div>
 
-          <!-- Bottom left info -->
-          <div class="reel-info">
-            <div class="author">
-              <div class="author-avatar">${reel.author_username?.charAt(0) || 'U'}</div>
-              <span class="author-name">@${reel.author_username}</span>
-            </div>
-            <div class="title">${reel.title || ''}</div>
-            ${reel.description ? `<div class="description">${reel.description}</div>` : ''}
+        // Create video element and attach handlers
+        const video = document.createElement('video');
+        video.src = reel.video_url;
+        video.loop = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.muted = true;       // start muted to allow autoplay
+        video.style.width = "100%";
+        video.style.height = "100%";
+        video.style.objectFit = "cover";
+        video.style.pointerEvents = "none"; // let clicks pass through
+
+        // Loading spinner
+        const loadingSpinner = document.createElement('div');
+        loadingSpinner.className = 'video-loading';
+
+        // Error overlay (hidden initially)
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'video-error';
+        errorMsg.textContent = '❌ Video failed to load';
+        errorMsg.style.display = 'none';
+
+        video.addEventListener('canplay', () => {
+          loadingSpinner.remove();
+        });
+        video.addEventListener('error', () => {
+          loadingSpinner.remove();
+          errorMsg.style.display = 'block';
+        });
+
+        reelDiv.appendChild(video);
+        reelDiv.appendChild(loadingSpinner);
+        reelDiv.appendChild(errorMsg);
+
+        // Overlay gradient
+        const overlay = document.createElement('div');
+        overlay.className = 'reel-overlay';
+        reelDiv.appendChild(overlay);
+
+        // Bottom left info
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'reel-info';
+        infoDiv.innerHTML = `
+          <div class="author">
+            <div class="author-avatar">${reel.author_username?.charAt(0) || 'U'}</div>
+            <span class="author-name">@${reel.author_username || 'creator'}</span>
           </div>
-
-          <!-- Right side action buttons -->
-          <div class="reel-actions">
-            <button class="action-btn like-btn" onclick="toggleLike(this, '${reel.id}')">
-              ❤️
-            </button>
-            <span class="action-count" id="like-count-${reel.id}">${reel.likes || 0}</span>
-
-            <button class="action-btn comment-btn" onclick="openComments('${reel.id}')">
-              💬
-            </button>
-            <span class="action-count">${reel.comment_count || 0}</span>
-
-            <button class="action-btn share-btn" onclick="shareReel('${reel.id}')">
-              ↪️
-            </button>
-
-            <button class="action-btn follow-btn ${reel.is_following ? 'following' : ''}" 
-                    onclick="toggleFollow(this, '${reel.author_id}')" 
-                    data-following="${reel.is_following || false}">
-              ${reel.is_following ? 'Following' : 'Follow'}
-            </button>
-          </div>
-
-          <!-- Watermark overlay -->
-          <div class="reel-watermark">
-            <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
-            <span>EchoStack</span>
-          </div>
+          <div class="title">${escapeHtml(reel.title || '')}</div>
+          ${reel.description ? `<div class="description">${escapeHtml(reel.description)}</div>` : ''}
         `;
+        reelDiv.appendChild(infoDiv);
+
+        // Right side action buttons
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'reel-actions';
+        actionsDiv.innerHTML = `
+          <button class="action-btn like-btn" data-id="${reel.id}">❤️</button>
+          <span class="action-count" id="like-count-${reel.id}">${reel.likes || 0}</span>
+          <button class="action-btn comment-btn" data-id="${reel.id}">💬</button>
+          <span class="action-count" id="comment-count-${reel.id}">${reel.comment_count || 0}</span>
+          <button class="action-btn share-btn" data-id="${reel.id}">↪️</button>
+          <button class="action-btn follow-btn ${reel.is_following ? 'following' : ''}" 
+                  data-author-id="${reel.author_id}" 
+                  data-following="${reel.is_following || false}">
+            ${reel.is_following ? 'Following' : 'Follow'}
+          </button>
+        `;
+        reelDiv.appendChild(actionsDiv);
+
+        // Watermark
+        const watermark = document.createElement('div');
+        watermark.className = 'reel-watermark';
+        watermark.innerHTML = `
+          <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+          <span>EchoStack</span>
+        `;
+        reelDiv.appendChild(watermark);
+
         container.appendChild(reelDiv);
+
+        // Attach event listeners to the buttons
+        const likeBtn = actionsDiv.querySelector('.like-btn');
+        likeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleLike(likeBtn, reel.id);
+        });
+        const commentBtn = actionsDiv.querySelector('.comment-btn');
+        commentBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openComments(reel.id);
+        });
+        const shareBtn = actionsDiv.querySelector('.share-btn');
+        shareBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          shareReel(reel.id);
+        });
+        const followBtn = actionsDiv.querySelector('.follow-btn');
+        followBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleFollow(followBtn, reel.author_id);
+        });
       });
 
-      // Attach video playback on visibility
+      // Attach Intersection Observer to control video playback
       observeVideos();
+
+      // Preload next video's metadata (optional)
+      preloadNextMetadata();
+    }
+
+    // Helper to preload the next video's metadata (improves smoothness)
+    function preloadNextMetadata() {
+      const reelsList = document.querySelectorAll('.reel');
+      if (reelsList.length >= 2) {
+        const nextVideo = reelsList[reelsList.length - 2]?.querySelector('video');
+        if (nextVideo && nextVideo.preload !== 'auto') {
+          nextVideo.preload = 'auto';
+        }
+      }
     }
 
     // Intersection Observer to auto‑play/pause
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         const video = entry.target.querySelector('video');
+        if (!video) return;
         if (entry.isIntersecting) {
-          video.play().catch(e => {}); // autoplay may be blocked
-          video.muted = false; // unmute after user interaction
+          video.play().catch(e => {});
+          // Unmute only after user taps anywhere on the reel (optional, we'll do it on the whole reel)
+          // But we'll add a one-time unmute on user tap below.
         } else {
           video.pause();
         }
@@ -320,6 +424,21 @@
 
     function observeVideos() {
       document.querySelectorAll('.reel').forEach(reel => observer.observe(reel));
+    }
+
+    // One‑time unmute on user tap (fixes autoplay with sound restrictions)
+    function addUnmuteOnTap() {
+      const container = document.getElementById('reels-container');
+      container.addEventListener('click', (e) => {
+        const reel = e.target.closest('.reel');
+        if (reel) {
+          const video = reel.querySelector('video');
+          if (video && video.muted) {
+            video.muted = false;
+            // Optional: show a small toast that sound is on
+          }
+        }
+      });
     }
 
     // Like / unlike
@@ -396,16 +515,25 @@
       if (scrollTop + clientHeight >= scrollHeight - 100) {
         loadReels(reels.length);
       }
-
-      // Update current index (optional)
-      const reelHeight = clientHeight;
-      currentIndex = Math.round(scrollTop / reelHeight);
+      currentIndex = Math.round(scrollTop / clientHeight);
     });
+
+    // Escape HTML to prevent injection
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
 
     // Initial load
     (async () => {
       await fetchCurrentUser();
       await loadReels(0);
+      addUnmuteOnTap();
     })();
   </script>
 </body>
