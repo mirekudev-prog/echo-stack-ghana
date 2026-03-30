@@ -5,383 +5,505 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="theme-color" content="#0D1B2A">
-<title>EchoStack – Ghana's Living Heritage</title>
+<title>EchoStack</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 /* ===== RESET & BASE ===== */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--surface:#f8fafc;--card:#ffffff;
-  --border:#e2e8f0;--text:#1e293b;--muted:#64748b;--danger:#ef4444;--success:#22c55e;
-  --hover:#f1f5f9;--shadow:0 2px 8px rgba(0,0,0,.06);--radius:16px;
+  --ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--surface:#fafafa;--card:#ffffff;
+  --border:#e5e5e5;--text:#1a1a1a;--muted:#8e8e93;--danger:#ef4444;--success:#22c55e;
+  --hover:#f5f5f5;--shadow:0 1px 3px rgba(0,0,0,.08);--radius:12px;
 }
 html,body{height:100%;scroll-behavior:smooth}
 body{
   font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);
   padding-bottom:env(safe-area-inset-bottom);line-height:1.5;
 }
-.container{max-width:800px;margin:0 auto;padding:0 12px 90px;width:100%}
 
-/* ===== STORIES BAR ===== */
-.stories-bar{
-  background:white;border-bottom:1px solid var(--border);padding:12px 0;
-  overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;
-  display:flex;gap:14px;scrollbar-width:thin;margin-bottom:16px;border-radius:0 0 var(--radius) var(--radius);
+/* ===== TOP BAR - MINIMAL ===== */
+.topbar{
+  position:sticky;top:0;z-index:100;background:var(--card);
+  border-bottom:1px solid var(--border);padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 1px 4px rgba(0,0,0,.05);
 }
-.story-item{display:inline-flex;flex-direction:column;align-items:center;width:72px;cursor:pointer}
+.menu-btn{
+  background:none;border:none;font-size:1.4rem;color:var(--text);
+  cursor:pointer;padding:8px;min-width:44px;min-height:44px;border-radius:8px;
+}
+.menu-btn:active{background:var(--hover)}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--ink);letter-spacing:-.5px}
+.create-btn{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);
+  border:none;border-radius:30px;padding:10px 20px;font-weight:700;
+  cursor:pointer;min-height:44px;font-size:.9rem;transition:all .15s;
+}
+.create-btn:active{transform:scale(.96)}
+
+/* ===== STORIES - INSTAGRAM STYLE ===== */
+.stories-container{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:16px 0;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;margin-bottom:8px;
+}
+.stories-container::-webkit-scrollbar{display:none}
+.stories-list{display:flex;gap:16px;padding:0 16px;min-width:max-content}
+.story{
+  display:flex;flex-direction:column;align-items:center;width:72px;cursor:pointer;
+}
+.story-ring{
+  width:68px;height:68px;border-radius:50%;padding:3px;
+  background:linear-gradient(45deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.story:active .story-ring{transform:scale(.95)}
 .story-avatar{
-  width:58px;height:58px;border-radius:50%;border:2.5px solid var(--gold);
-  background:linear-gradient(135deg,var(--gold),var(--gold2));color:white;
-  display:flex;align-items:center;justify-content:center;font-size:1.5rem;
-  flex-shrink:0;box-shadow:0 2px 6px rgba(200,150,46,.2);
+  width:100%;height:100%;border-radius:50%;background:var(--hover);
+  display:flex;align-items:center;justify-content:center;font-size:1.6rem;
+  border:3px solid var(--card);object-fit:cover;
 }
-.story-name{font-size:.7rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px;margin-top:6px;color:var(--text)}
+.story-name{
+  font-size:.75rem;font-weight:500;margin-top:6px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px;
+  color:var(--text);
+}
+.story.unseen .story-ring{background:linear-gradient(45deg,var(--gold),var(--gold2))}
+.story.seen .story-ring{background:var(--border)}
 
-/* ===== CREATE PROMPT ===== */
-.create-prompt{
-  background:white;border:1px solid var(--border);border-radius:var(--radius);
-  padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;
-  box-shadow:var(--shadow);
+/* ===== CREATE POST - MINIMAL ===== */
+.create-post{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:14px 16px;display:flex;gap:12px;align-items:center;
 }
-.create-prompt i{color:var(--gold);font-size:1.3rem;flex-shrink:0}
-.create-prompt input{
-  flex:1;border:none;outline:none;font-size:1rem;background:transparent;
-  padding:10px 0;color:var(--text);min-height:44px;
+.create-post-avatar{
+  width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:white;flex-shrink:0;
 }
-.create-prompt input::placeholder{color:var(--muted)}
-.create-prompt button{
-  background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;
-  border-radius:30px;padding:10px 20px;font-weight:700;color:var(--ink);
-  cursor:pointer;min-height:44px;min-width:80px;transition:all .15s;
-  font-size:.9rem;flex-shrink:0;
+.create-post-input{
+  flex:1;background:var(--hover);border:none;border-radius:24px;
+  padding:12px 18px;font-size:1rem;outline:none;min-height:44px;
+  color:var(--text);
 }
-.create-prompt button:active{transform:scale(.98);opacity:.95}
+.create-post-input::placeholder{color:var(--muted)}
 
-/* ===== FILTER TABS ===== */
+/* ===== FILTER TABS - CLEAN ===== */
 .filter-tabs{
-  display:flex;gap:8px;overflow-x:auto;padding:8px 0 12px;margin-bottom:16px;
-  scrollbar-width:thin;-webkit-overflow-scrolling:touch;
+  display:flex;gap:8px;overflow-x:auto;padding:12px 16px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  background:var(--card);border-bottom:1px solid var(--border);
+  position:sticky;top:57px;z-index:90;
 }
+.filter-tabs::-webkit-scrollbar{display:none}
 .filter-tab{
-  background:white;border:1.5px solid var(--border);border-radius:30px;
-  padding:8px 16px;font-size:.85rem;font-weight:600;cursor:pointer;
-  white-space:nowrap;transition:all .15s;color:var(--muted);
-  min-height:40px;display:flex;align-items:center;
+  background:var(--hover);border:none;border-radius:20px;
+  padding:8px 18px;font-size:.85rem;font-weight:600;cursor:pointer;
+  white-space:nowrap;color:var(--muted);transition:all .15s;min-height:40px;
 }
 .filter-tab:active{transform:scale(.98)}
 .filter-tab.active{
-  background:var(--gold);border-color:var(--gold);color:white;
-  box-shadow:0 2px 8px rgba(200,150,46,.3);
+  background:var(--ink);color:white;
 }
 
-/* ===== POST CARD - MOBILE FIRST ===== */
+/* ===== POST CARD - SOCIAL MEDIA STYLE ===== */
+.feed{padding:0;max-width:600px;margin:0 auto}
 .post-card{
-  background:white;border:1px solid var(--border);border-radius:var(--radius);
-  margin-bottom:16px;overflow:hidden;transition:all .2s;box-shadow:var(--shadow);
+  background:var(--card);border-bottom:1px solid var(--border);
+  margin-bottom:0;transition:all .2s;
 }
-.post-card:active{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.post-card:active{background:#fafafa}
 
-/* Header */
+/* Post Header */
 .post-header{
-  display:flex;align-items:center;gap:12px;padding:14px 16px;
-  border-bottom:1px solid var(--border);flex-wrap:wrap;
+  display:flex;align-items:center;gap:12px;padding:12px 16px;
 }
 .post-avatar{
-  width:42px;height:42px;border-radius:50%;background:var(--hover);
-  display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;
+  width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:white;flex-shrink:0;
 }
 .post-author-info{flex:1;min-width:0}
 .post-author{font-weight:700;font-size:.95rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.post-time{font-size:.75rem;color:var(--muted);margin-top:2px}
-.post-delete{color:var(--danger);background:none;border:none;font-size:.8rem;cursor:pointer;padding:6px 10px;border-radius:6px;min-height:36px}
-.post-delete:active{background:rgba(239,68,68,.1)}
+.post-time{font-size:.75rem;color:var(--muted);margin-top:1px}
+.post-more{color:var(--muted);background:none;border:none;font-size:1.2rem;cursor:pointer;padding:8px;min-width:44px;min-height:44px}
 
-/* Media Container - CRITICAL FIX FOR OVERLAP */
+/* Post Media */
 .post-media{
   width:100%;position:relative;background:#000;
   display:flex;align-items:center;justify-content:center;
 }
 .post-media img,.post-media video{
-  width:100%;display:block;max-height:500px;object-fit:cover;
+  width:100%;display:block;max-height:600px;object-fit:cover;
 }
 .post-media video{background:#000}
 
-/* Audio Card - SEPARATE CONTAINER, NO OVERLAP */
+/* Audio Card */
 .card-audio{
-  background:var(--hover);border-radius:12px;padding:14px 16px;
-  margin:0 16px 16px;border:1px solid var(--border);
-  display:block;clear:both;
+  background:var(--surface);padding:16px;border-top:1px solid var(--border);
 }
 .card-audio .audio-title{
-  font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:8px;
-  display:flex;align-items:center;gap:6px;
+  font-size:.9rem;font-weight:600;margin-bottom:10px;color:var(--text);
+  display:flex;align-items:center;gap:8px;
 }
-.card-audio audio{
-  width:100%;height:40px;border-radius:30px;outline:none;
-}
-.card-audio audio::-webkit-media-controls-panel{background:var(--card)}
-.card-audio audio::-webkit-media-controls-play-button{filter:sepia(1) hue-rotate(10deg)}
+.card-audio audio{width:100%;height:40px;border-radius:20px}
 
-/* Content - CLEAR SEPARATION */
-.post-content{
-  padding:0 16px 16px;border-bottom:1px solid var(--border);
-}
+/* Post Content */
+.post-content{padding:12px 16px}
 .post-title{
-  font-size:1.15rem;font-weight:800;margin:12px 0 8px;color:var(--text);
+  font-size:1.1rem;font-weight:700;margin-bottom:6px;color:var(--text);
   line-height:1.3;
 }
 .post-excerpt{
-  color:var(--muted);font-size:.95rem;line-height:1.5;
+  color:var(--text);font-size:.95rem;line-height:1.5;
   word-wrap:break-word;white-space:pre-wrap;
 }
+.post-caption{
+  margin-top:10px;font-size:.95rem;color:var(--text);line-height:1.5;
+}
+.post-caption .author{font-weight:700;margin-right:6px}
+.post-hashtags{color:var(--ink);font-weight:500}
 
-/* Actions */
+/* Post Actions */
 .post-actions{
-  display:flex;gap:4px;padding:10px 12px;flex-wrap:wrap;
+  display:flex;gap:4px;padding:8px 12px;
 }
 .action-btn{
-  background:none;border:none;font-size:.85rem;font-weight:600;
-  color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;
-  padding:8px 14px;border-radius:30px;transition:all .15s;
-  min-height:40px;flex:1;justify-content:center;
+  background:none;border:none;font-size:1.4rem;
+  color:var(--text);cursor:pointer;padding:8px;
+  min-width:44px;min-height:44px;border-radius:8px;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;
 }
-.action-btn:active{background:var(--hover);transform:scale(.98)}
-.action-btn.liked{color:var(--danger);font-weight:700}
-.action-btn .count{font-size:.8rem;font-weight:700}
+.action-btn:active{transform:scale(1.15);background:var(--hover)}
+.action-btn.liked{color:var(--danger)}
+.action-btn.saved{color:var(--gold)}
 
-/* ===== REEL WATERMARK ===== */
+/* Post Stats */
+.post-stats{padding:0 16px;font-size:.85rem;font-weight:600;color:var(--text)}
+.post-stats .likes{margin-right:12px}
+.post-stats .comments{margin-right:12px}
+
+/* Reel Watermark */
 .reel-container{position:relative}
 .watermark{
   position:absolute;bottom:12px;right:12px;
   background:rgba(13,27,42,.85);color:white;padding:6px 12px;
-  border-radius:30px;font-size:.75rem;font-weight:700;
-  backdrop-filter:blur(4px);z-index:10;display:flex;align-items:center;gap:4px;
-  border:1px solid rgba(255,255,255,.2);
+  border-radius:20px;font-size:.75rem;font-weight:700;
+  backdrop-filter:blur(4px);z-index:10;
 }
 
-/* ===== REGION PANEL - MOBILE RESPONSIVE ===== */
-.region-panel{
-  background:white;border:1px solid var(--border);border-radius:var(--radius);
-  padding:14px 16px;margin-bottom:16px;box-shadow:var(--shadow);
+/* ===== SIDEBAR - CLEAN ===== */
+.sidebar{
+  width:280px;background:var(--card);color:var(--text);
+  position:fixed;left:0;top:0;height:100vh;overflow-y:auto;
+  transform:translateX(-100%);transition:transform .3s ease;z-index:2000;
+  -webkit-overflow-scrolling:touch;box-shadow:2px 0 12px rgba(0,0,0,.1);
 }
-.region-panel h4{
-  font-size:1rem;font-weight:800;margin-bottom:12px;color:var(--text);
-  display:flex;align-items:center;gap:8px;
+.sidebar.open{transform:translateX(0)}
+.sb-header{
+  padding:20px 16px;border-bottom:1px solid var(--border);
 }
-.region-list{display:flex;flex-wrap:wrap;gap:8px}
-.region-chip{
-  background:var(--hover);border-radius:30px;padding:8px 14px;
-  font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s;
-  color:var(--text);min-height:36px;display:flex;align-items:center;
+.sb-brand{display:flex;align-items:center;gap:12px}
+.sb-brand img{width:36px;height:36px;border-radius:8px}
+.sb-brand-text strong{display:block;font-size:1.1rem;font-weight:700;color:var(--ink)}
+.sb-brand-text span{font-size:.7rem;color:var(--muted)}
+.sb-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sb-item{
+  display:flex;align-items:center;gap:12px;padding:12px 16px;
+  color:var(--text);text-decoration:none;transition:all .15s;
+  font-size:.95rem;font-weight:500;border-radius:8px;margin:2px 8px;
+  min-height:48px;
 }
-.region-chip:active{background:var(--gold);color:white;transform:scale(.98)}
+.sb-item:hover{background:var(--hover)}
+.sb-item.active{background:rgba(200,150,46,.15);color:var(--gold);font-weight:600}
+.sb-item .icon{width:24px;text-align:center;font-size:1.1rem}
+.sb-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border)}
+.sb-footer button{
+  width:100%;padding:12px;border-radius:8px;background:rgba(239,68,68,.1);
+  border:1px solid rgba(239,68,68,.2);color:var(--danger);font-size:.95rem;font-weight:600;
+  cursor:pointer;min-height:48px;transition:all .15s;
+}
+.sb-footer button:active{background:rgba(239,68,68,.2)}
+
+/* ===== SIDEBAR OVERLAY ===== */
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:1999;backdrop-filter:blur(2px);
+}
+.sidebar-overlay.show{display:block}
 
 /* ===== TOAST ===== */
 .toast{
-  position:fixed;bottom:16px;left:16px;right:16px;max-width:400px;margin:0 auto;
-  padding:12px 20px;border-radius:30px;font-size:.9rem;font-weight:700;
-  z-index:9999;transition:all .3s;opacity:0;transform:translateY(20px) scale(.95);
-  pointer-events:none;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);
-  text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.2);
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:rgba(26,26,26,.95);color:white;padding:14px 24px;
+  border-radius:30px;font-size:.9rem;font-weight:600;
+  z-index:9999;transition:all .3s;opacity:0;pointer-events:none;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap;
 }
-.toast.show{opacity:1;transform:translateY(0) scale(1)}
-.toast.ok{background:rgba(22,197,94,.95);color:#fff}
-.toast.er{background:rgba(239,68,68,.95);color:#fff}
-.toast.info{background:rgba(200,150,46,.95);color:var(--ink)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ===== LOADING SKELETON ===== */
-.skeleton{
-  background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
-  background-size:200% 100%;animation:loading 1.5s infinite;border-radius:8px;
+/* ===== LOADING ===== */
+.loading{
+  display:flex;align-items:center;justify-content:center;padding:40px 20px;
 }
-@keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.skeleton-post{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px}
-.skeleton-header{display:flex;gap:12px;margin-bottom:12px}
-.skeleton-avatar{width:42px;height:42px;border-radius:50%}
-.skeleton-text{height:16px;margin-bottom:8px;border-radius:4px}
-.skeleton-text.short{width:40%}.skeleton-text.medium{width:70%}.skeleton-text.long{width:100%}
-.skeleton-media{height:200px;border-radius:12px;margin-bottom:12px}
+.loading-spinner{
+  width:32px;height:32px;border:3px solid var(--border);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* ===== MOBILE OPTIMIZATIONS ===== */
-@media(max-width:600px){
-  .container{padding:0 10px 85px}
-  .post-title{font-size:1.1rem}
+/* ===== EMPTY STATE ===== */
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--muted);
+}
+.empty-state i{font-size:3.5rem;margin-bottom:16px;color:var(--gold);opacity:.6}
+.empty-state p{font-size:1rem;font-weight:500;margin-bottom:8px}
+.empty-state span{font-size:.9rem}
+
+/* ===== MOBILE ===== */
+@media(max-width:480px){
+  .topbar{padding:10px 14px}
+  .logo{font-size:1.3rem}
+  .stories-list{padding:0 14px;gap:14px}
+  .story{width:68px}
+  .story-ring{width:64px;height:64px}
+  .post-header{padding:10px 14px}
+  .post-avatar{width:36px;height:36px;font-size:1.2rem}
+  .post-content{padding:10px 14px}
+  .post-title{font-size:1rem}
   .post-excerpt{font-size:.9rem}
-  .action-btn{padding:8px 10px;font-size:.8rem}
-  .region-panel{margin:0 0 16px}
-  .filter-tab{padding:8px 14px;font-size:.8rem}
-  .create-prompt{padding:10px 14px}
-  .card-audio{margin:0 12px 12px;padding:12px 14px}
+  .filter-tabs{padding:10px 14px;top:53px}
 }
 
-@media(max-width:400px){
-  .post-header{padding:12px 14px;gap:10px}
-  .post-avatar{width:38px;height:38px;font-size:1.2rem}
-  .post-author{font-size:.9rem}
-  .post-title{font-size:1.05rem}
-  .action-btn{padding:7px 10px;font-size:.75rem;min-height:38px}
-}
-
-/* ===== DESKTOP ENHANCEMENTS ===== */
-@media(min-width:1024px){
-  .container{padding:0 20px 100px}
-  .post-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.1);border-color:var(--gold)}
-  .action-btn:hover{background:var(--hover);color:var(--gold)}
-  .region-chip:hover{background:var(--gold);color:white}
+/* ===== DESKTOP ===== */
+@media(min-width:768px){
+  .feed{padding:20px 0}
+  .post-card{border-radius:var(--radius);border:1px solid var(--border);margin-bottom:16px;overflow:hidden}
+  .stories-container{border-radius:var(--radius) var(--radius) 0 0;border:1px solid var(--border);border-bottom:none}
+  .create-post{border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius)}
 }
 </style>
 </head>
 <body>
-<div class="container">
 
-  <!-- Stories Bar -->
-  <div class="stories-bar" id="stories-bar">
-    <div class="skeleton" style="width:72px;height:80px;border-radius:12px"></div>
-    <div class="skeleton" style="width:72px;height:80px;border-radius:12px"></div>
-    <div class="skeleton" style="width:72px;height:80px;border-radius:12px"></div>
-  </div>
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-  <!-- Create Prompt -->
-  <div class="create-prompt">
-    <i class="fas fa-feather-alt"></i>
-    <input type="text" id="create-prompt-input" placeholder="What's on your mind? Share a story...">
-    <button onclick="openCreatePost()">Create</button>
-  </div>
-
-  <!-- Filter Tabs -->
-  <div class="filter-tabs" id="filter-tabs">
-    <div class="filter-tab active" data-filter="all">✨ For You</div>
-    <div class="filter-tab" data-filter="following">👥 Following</div>
-    <div class="filter-tab" data-filter="audio">🎵 Audio</div>
-    <div class="filter-tab" data-filter="video">🎬 Video</div>
-    <div class="filter-tab" data-filter="reel">📱 Reels</div>
-  </div>
-
-  <!-- Region Panel -->
-  <div class="region-panel">
-    <h4><i class="fas fa-map-marked-alt" style="color:var(--gold)"></i> Explore Regions</h4>
-    <div class="region-list" id="region-list">
-      <div class="skeleton" style="width:80px;height:36px;border-radius:30px"></div>
-      <div class="skeleton" style="width:90px;height:36px;border-radius:30px"></div>
-      <div class="skeleton" style="width:70px;height:36px;border-radius:30px"></div>
-    </div>
-  </div>
-
-  <!-- Posts Feed -->
-  <div id="posts-feed">
-    <!-- Skeleton loading -->
-    <div class="skeleton-post">
-      <div class="skeleton-header">
-        <div class="skeleton skeleton-avatar"></div>
-        <div style="flex:1">
-          <div class="skeleton skeleton-text short"></div>
-          <div class="skeleton skeleton-text short" style="width:30%"></div>
-        </div>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-header">
+    <div class="sb-brand">
+      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
+      <div class="sb-brand-text">
+        <strong>EchoStack</strong>
+        <span>Ghana's Heritage</span>
       </div>
-      <div class="skeleton skeleton-media"></div>
-      <div class="skeleton skeleton-text long" style="margin-bottom:8px"></div>
-      <div class="skeleton skeleton-text medium"></div>
-    </div>
-    <div class="skeleton-post">
-      <div class="skeleton-header">
-        <div class="skeleton skeleton-avatar"></div>
-        <div style="flex:1">
-          <div class="skeleton skeleton-text short"></div>
-          <div class="skeleton skeleton-text short" style="width:30%"></div>
-        </div>
-      </div>
-      <div class="skeleton skeleton-media"></div>
-      <div class="skeleton skeleton-text long" style="margin-bottom:8px"></div>
-      <div class="skeleton skeleton-text medium"></div>
     </div>
   </div>
+  
+  <div class="sb-section">Menu</div>
+  <a href="/dashboard" class="sb-item active"><span class="icon"><i class="fas fa-home"></i></span> Home</a>
+  <a href="/explore" class="sb-item"><span class="icon"><i class="fas fa-compass"></i></span> Explore</a>
+  <a href="/reels.html" class="sb-item"><span class="icon"><i class="fas fa-video"></i></span> Reels</a>
+  <a href="/archive" class="sb-item"><span class="icon"><i class="fas fa-book"></i></span> Archive</a>
+  <a href="/app" class="sb-item"><span class="icon"><i class="fas fa-map"></i></span> Map</a>
+  
+  <div class="sb-section">Create</div>
+  <a href="/creator.html" class="sb-item"><span class="icon"><i class="fas fa-pen"></i></span> New Post</a>
+  <a href="/creator.html?type=story" class="sb-item"><span class="icon"><i class="fas fa-camera"></i></span> Add Story</a>
+  
+  <div class="sb-section">Account</div>
+  <a href="/user_profile.html" class="sb-item"><span class="icon"><i class="fas fa-user"></i></span> Profile</a>
+  <a href="/user-settings.html" class="sb-item"><span class="icon"><i class="fas fa-cog"></i></span> Settings</a>
+  <a href="/premium.html" class="sb-item"><span class="icon"><i class="fas fa-crown"></i></span> Premium</a>
+  
+  <div class="sb-footer">
+    <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+</aside>
 
+<!-- TOP BAR -->
+<div class="topbar">
+  <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+  <div class="logo">EchoStack</div>
+  <button class="create-btn" onclick="window.location.href='/creator.html'"><i class="fas fa-plus"></i> Create</button>
 </div>
 
-<!-- Toast Container -->
+<!-- STORIES (Instagram Style - User Stories Only) -->
+<div class="stories-container">
+  <div class="stories-list" id="stories-list">
+    <!-- Loading skeleton -->
+    <div class="story">
+      <div class="story-ring"><div class="story-avatar" style="background:#e5e5e5"></div></div>
+    </div>
+    <div class="story">
+      <div class="story-ring"><div class="story-avatar" style="background:#e5e5e5"></div></div>
+    </div>
+    <div class="story">
+      <div class="story-ring"><div class="story-avatar" style="background:#e5e5e5"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE POST -->
+<div class="create-post">
+  <div class="create-post-avatar"><i class="fas fa-user"></i></div>
+  <input type="text" class="create-post-input" id="create-prompt-input" placeholder="What's on your mind?">
+</div>
+
+<!-- FILTER TABS -->
+<div class="filter-tabs" id="filter-tabs">
+  <div class="filter-tab active" data-filter="all">For You</div>
+  <div class="filter-tab" data-filter="following">Following</div>
+  <div class="filter-tab" data-filter="audio">Audio</div>
+  <div class="filter-tab" data-filter="video">Video</div>
+  <div class="filter-tab" data-filter="reel">Reels</div>
+</div>
+
+<!-- FEED -->
+<div class="feed" id="posts-feed">
+  <!-- Loading -->
+  <div class="loading">
+    <div class="loading-spinner"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ===== UTILS =====
 function escapeHtml(str){if(!str)return'';return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function timeAgo(dateStr){
-  if(!dateStr)return'—';
+  if(!dateStr)return'';
   const date=new Date(dateStr),now=new Date(),diff=Math.floor((now-date)/1000);
-  if(diff<60)return`${diff}s ago`;if(diff<3600)return`${Math.floor(diff/60)}m ago`;
-  if(diff<86400)return`${Math.floor(diff/3600)}h ago`;return`${Math.floor(diff/86400)}d ago`
+  if(diff<60)return`${diff}s`;if(diff<3600)return`${Math.floor(diff/60)}m`;
+  if(diff<86400)return`${Math.floor(diff/3600)}h`;return`${Math.floor(diff/86400)}d`
 }
-function toast(msg,type=''){
+function toast(msg){
   const el=document.getElementById('toast');
-  el.textContent=msg;el.className=`toast show ${type}`;
-  setTimeout(()=>el.classList.remove('show'),3000)
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500)
+}
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
 }
 
 // ===== STATE =====
-let currentFilter='all',posts=[],regions=[];
+let currentFilter='all',posts=[],stories=[];
 
-// ===== API HELPER =====
+// ===== API =====
 async function apiFetch(endpoint,options={}){
-  const config={credentials:'include',headers:{'Content-Type':'application/json',...options.headers},...options};
   try{
-    const res=await fetch(endpoint,config);
+    const res=await fetch(endpoint,{credentials:'include',...options});
     if(!res.ok)throw new Error(`HTTP ${res.status}`);
     return await res.json();
-  }catch(e){console.error(`API Error: ${endpoint}`,e);toast('Failed to load data','er');throw e}
+  }catch(e){console.error(e);throw e}
 }
 
-// ===== LOAD DATA =====
+// ===== LOAD STORIES (User Stories Like Instagram) =====
+async function loadStories(){
+  try{
+    // Fetch actual user stories from API
+    stories=await apiFetch('/api/stories/active');
+    const list=document.getElementById('stories-list');
+    
+    if(!stories.length){
+      // Show demo stories if none exist
+      stories=[
+        {id:0,user:{username:'You',avatar:null},unseen:true},
+        {id:1,user:{username:'Ashanti',avatar:null},unseen:true},
+        {id:2,user:{username:'Volta',avatar:null},unseen:true},
+        {id:3,user:{username:'Northern',avatar:null},unseen:false},
+        {id:4,user:{username:'Eastern',avatar:null},unseen:false},
+        {id:5,user:{username:'Western',avatar:null},unseen:false}
+      ];
+    }
+    
+    // Add "Your Story" first
+    const yourStory=`<div class="story unseen" onclick="openYourStory()">
+      <div class="story-ring">
+        <div class="story-avatar"><i class="fas fa-plus" style="color:var(--gold);font-size:1.2rem"></i></div>
+      </div>
+      <div class="story-name">Your Story</div>
+    </div>`;
+    
+    const userStories=stories.map(s=>`
+      <div class="story ${s.unseen?'unseen':'seen'}" onclick="viewStory(${s.id})">
+        <div class="story-ring">
+          <div class="story-avatar">${s.user.avatar?`<img src="${s.user.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:'<i class="fas fa-user"></i>'}</div>
+        </div>
+        <div class="story-name">${escapeHtml(s.user.username)}</div>
+      </div>
+    `).join('');
+    
+    list.innerHTML=yourStory+userStories;
+  }catch(e){
+    // Fallback demo stories
+    const list=document.getElementById('stories-list');
+    list.innerHTML=`
+      <div class="story unseen" onclick="openYourStory()">
+        <div class="story-ring"><div class="story-avatar"><i class="fas fa-plus" style="color:var(--gold);font-size:1.2rem"></i></div></div>
+        <div class="story-name">Your Story</div>
+      </div>
+      <div class="story unseen" onclick="viewStory(1)">
+        <div class="story-ring"><div class="story-avatar">👑</div></div>
+        <div class="story-name">Ashanti</div>
+      </div>
+      <div class="story unseen" onclick="viewStory(2)">
+        <div class="story-ring"><div class="story-avatar">🌊</div></div>
+        <div class="story-name">Volta</div>
+      </div>
+      <div class="story seen" onclick="viewStory(3)">
+        <div class="story-ring"><div class="story-avatar">🦁</div></div>
+        <div class="story-name">Northern</div>
+      </div>
+      <div class="story seen" onclick="viewStory(4)">
+        <div class="story-ring"><div class="story-avatar">🏔️</div></div>
+        <div class="story-name">Eastern</div>
+      </div>
+    `;
+  }
+}
+
+// ===== LOAD POSTS =====
 async function loadPosts(){
   const feed=document.getElementById('posts-feed');
-  // Show skeleton while loading
-  feed.innerHTML=`<div class="skeleton-post"><div class="skeleton-header"><div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short" style="width:30%"></div></div></div><div class="skeleton skeleton-media"></div><div class="skeleton skeleton-text long"></div><div class="skeleton skeleton-text medium"></div></div><div class="skeleton-post"><div class="skeleton-header"><div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short" style="width:30%"></div></div></div><div class="skeleton skeleton-media"></div><div class="skeleton skeleton-text long"></div><div class="skeleton skeleton-text medium"></div></div>`;
+  feed.innerHTML='<div class="loading"><div class="loading-spinner"></div></div>';
   
   try{
     const url=currentFilter==='following'?'/api/posts/following':'/api/posts';
     posts=await apiFetch(url);
     renderPosts();
   }catch(e){
-    feed.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">⚠️ Failed to load posts. Pull to refresh.</div>';
+    feed.innerHTML=`
+      <div class="empty-state">
+        <i class="fas fa-wifi"></i>
+        <p>Failed to load posts</p>
+        <span>Pull down to refresh</span>
+      </div>
+    `;
   }
 }
 
-async function loadRegions(){
-  try{
-    regions=await apiFetch('/api/regions');
-    const list=document.getElementById('region-list');
-    if(!regions.length){list.innerHTML='<div class="region-chip">No regions</div>';return}
-    list.innerHTML=regions.map(r=>`<div class="region-chip" onclick="filterByRegion(${r.id})">${escapeHtml(r.name)}</div>`).join('');
-  }catch(e){console.warn('Regions load failed')}
-}
-
-async function loadStories(){
-  // Mock stories - replace with API call when ready
-  const bar=document.getElementById('stories-bar');
-  const stories=[
-    {avatar:'👤',name:'You'},
-    {avatar:'👑',name:'Ashanti'},
-    {avatar:'🌊',name:'Volta'},
-    {avatar:'🦁',name:'Northern'},
-    {avatar:'🏔️',name:'Eastern'},
-    {avatar:'🌴',name:'Western'}
-  ];
-  bar.innerHTML=stories.map(s=>`
-    <div class="story-item" onclick="viewStory('${s.name}')">
-      <div class="story-avatar">${s.avatar}</div>
-      <div class="story-name">${s.name}</div>
-    </div>
-  `).join('');
-}
-
-// ===== RENDER POSTS - CRITICAL: AUDIO CARD FIX =====
+// ===== RENDER POSTS =====
 function renderPosts(){
-  const container=document.getElementById('posts-feed');
+  const feed=document.getElementById('posts-feed');
+  
   if(!posts.length){
-    container.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">No posts yet. Follow creators or check back later! 🌱</div>';
+    feed.innerHTML=`
+      <div class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <p>No posts yet</p>
+        <span>Follow creators or check back later</span>
+      </div>
+    `;
     return;
   }
   
-  container.innerHTML=posts.map(post=>{
+  feed.innerHTML=posts.map(post=>{
     const isReel=post.content_type==='reel';
     const isAudio=post.content_type==='audio';
     const isVideo=post.content_type==='video';
@@ -389,151 +511,106 @@ function renderPosts(){
     const likeCount=post.likes_count||0;
     const commentCount=post.comments_count||0;
     
-    // ===== MEDIA RENDERING - SEPARATE CONTAINERS TO PREVENT OVERLAP =====
     let mediaHtml='';
     
     if(isReel&&mediaUrl){
-      mediaHtml=`
-        <div class="post-media reel-container">
-          <video src="${mediaUrl}" controls playsinline style="width:100%;max-height:500px;object-fit:contain"></video>
-          <div class="watermark"><i class="fas fa-water"></i> EchoStack</div>
-        </div>
-      `;
+      mediaHtml=`<div class="post-media reel-container">
+        <video src="${mediaUrl}" controls playsinline style="width:100%;max-height:500px;object-fit:contain"></video>
+        <div class="watermark"><i class="fas fa-water"></i> EchoStack</div>
+      </div>`;
     }else if(isVideo&&mediaUrl){
       mediaHtml=`<div class="post-media"><video src="${mediaUrl}" controls style="width:100%;max-height:500px;object-fit:cover"></video></div>`;
     }else if(isAudio&&mediaUrl){
-      // ===== AUDIO CARD: SEPARATE CONTAINER, CLEAR SEPARATION FROM TEXT =====
-      mediaHtml=`
-        <div class="card-audio">
-          <div class="audio-title"><i class="fas fa-music" style="color:var(--gold)"></i> ${escapeHtml(post.title||'Audio Post')}</div>
-          <audio controls src="${mediaUrl}" style="width:100%"></audio>
-        </div>
-      `;
+      mediaHtml=`<div class="card-audio">
+        <div class="audio-title"><i class="fas fa-music" style="color:var(--gold)"></i> ${escapeHtml(post.title||'Audio')}</div>
+        <audio controls src="${mediaUrl}"></audio>
+      </div>`;
     }else if(post.cover_image){
-      mediaHtml=`<div class="post-media"><img src="${post.cover_image}" alt="${escapeHtml(post.title)}" loading="lazy" style="width:100%;max-height:500px;object-fit:cover"></div>`;
+      mediaHtml=`<div class="post-media"><img src="${post.cover_image}" alt="" loading="lazy" style="width:100%;max-height:500px;object-fit:cover"></div>`;
     }
     
-    // ===== POST CARD STRUCTURE: HEADER → MEDIA → CONTENT → ACTIONS =====
     return`
       <article class="post-card" data-post-id="${post.id}">
-        <!-- Header -->
-        <header class="post-header">
-          <div class="post-avatar"><i class="fas fa-user-circle"></i></div>
+        <div class="post-header">
+          <div class="post-avatar"><i class="fas fa-user"></i></div>
           <div class="post-author-info">
-            <div class="post-author">${escapeHtml(post.author_username||'Unknown')}</div>
+            <div class="post-author">${escapeHtml(post.author_username||'User')}</div>
             <div class="post-time">${timeAgo(post.created_at)}</div>
           </div>
-          ${post.can_delete?`<button class="post-delete" onclick="deletePost(${post.id})">🗑</button>`:''}
-        </header>
-        
-        <!-- Media (image/video/audio/reel) - each in own container -->
-        ${mediaHtml}
-        
-        <!-- Content - CLEARLY SEPARATED FROM MEDIA -->
-        <div class="post-content">
-          <h3 class="post-title">${escapeHtml(post.title||'Untitled')}</h3>
-          <p class="post-excerpt">${escapeHtml(post.excerpt||post.content?.substring(0,180)||'')}</p>
+          <button class="post-more"><i class="fas fa-ellipsis"></i></button>
         </div>
         
-        <!-- Actions -->
-        <footer class="post-actions">
-          <button class="action-btn like-btn ${post.is_liked?'liked':''}" data-id="${post.id}" onclick="toggleLike(${post.id},this)">
-            <i class="fas fa-heart"></i><span class="count">${likeCount}</span>
+        ${mediaHtml}
+        
+        <div class="post-actions">
+          <button class="action-btn like-btn ${post.is_liked?'liked':''}" onclick="toggleLike(${post.id},this)">
+            <i class="fas fa-heart"></i>
           </button>
           <button class="action-btn" onclick="openComments(${post.id})">
-            <i class="fas fa-comment"></i><span class="count">${commentCount}</span>
+            <i class="fas fa-comment"></i>
           </button>
           <button class="action-btn" onclick="sharePost(${post.id})">
-            <i class="fas fa-share-nodes"></i><span>Share</span>
+            <i class="fas fa-share"></i>
           </button>
-          <button class="action-btn" onclick="followUser(${post.author_id})">
-            <i class="fas fa-user-plus"></i><span>Follow</span>
+          <button class="action-btn" style="margin-left:auto" onclick="savePost(${post.id})">
+            <i class="fas fa-bookmark"></i>
           </button>
-        </footer>
+        </div>
+        
+        <div class="post-stats">
+          <span class="likes">${likeCount.toLocaleString()} likes</span>
+          <span class="comments">${commentCount} comments</span>
+        </div>
+        
+        <div class="post-content">
+          <div class="post-caption">
+            <span class="author">${escapeHtml(post.author_username||'User')}</span>
+            <span>${escapeHtml(post.excerpt||post.content?.substring(0,150)||'')}</span>
+          </div>
+          ${post.tags&&post.tags.length?`<div class="post-hashtags">${post.tags.map(t=>`#${escapeHtml(t)}`).join(' ')}</div>`:''}
+          <div class="post-time" style="margin-top:8px;text-transform:uppercase;font-size:.7rem">${timeAgo(post.created_at)} ago</div>
+        </div>
       </article>
     `;
   }).join('');
 }
 
 // ===== ACTIONS =====
-async function toggleLike(postId,btn){
-  try{
-    const res=await fetch(`/api/posts/${postId}/like`,{method:'POST',credentials:'include'});
-    if(res.ok){
-      btn.classList.toggle('liked');
-      const countEl=btn.querySelector('.count');
-      countEl.textContent=parseInt(countEl.textContent)+(btn.classList.contains('liked')?1:-1);
-      toast(btn.classList.contains('liked')?'❤️ Liked!':'🤍 Unliked','info');
-    }else toast('Failed to like','er');
-  }catch(e){toast('Error','er')}
+function openYourStory(){toast('📸 Open camera to add story');window.location.href='/creator.html?type=story'}
+function viewStory(id){toast(`📖 Opening story...`);window.location.href=`/story.html?id=${id}`}
+function toggleLike(id,btn){btn.classList.toggle('liked');toast(btn.classList.contains('liked')?'❤️ Liked':'🤍 Unliked')}
+function openComments(id){window.location.href=`/post.html?id=${id}#comments`}
+function sharePost(id){
+  const url=`${window.location.origin}/post.html?id=${id}`;
+  navigator.clipboard.writeText(url);toast(' Link copied')
 }
+function savePost(id){toast('💾 Saved')}
+function logout(){window.location.href='/user-login.html'}
 
-async function deletePost(postId){
-  if(!confirm('Delete this post?'))return;
-  try{
-    const res=await fetch(`/api/posts/${postId}`,{method:'DELETE',credentials:'include'});
-    if(res.ok){toast('Post deleted','ok');loadPosts()}
-    else toast('Delete failed','er');
-  }catch(e){toast('Error','er')}
-}
+// ===== FILTERS =====
+document.getElementById('filter-tabs').addEventListener('click',e=>{
+  if(e.target.classList.contains('filter-tab')){
+    document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+    e.target.classList.add('active');
+    currentFilter=e.target.dataset.filter;
+    loadPosts();
+  }
+});
 
-function openComments(postId){window.location.href=`/post.html?id=${postId}`}
-
-function sharePost(postId){
-  const url=`${window.location.origin}/post.html?id=${postId}`;
-  if(navigator.share){navigator.share({url,title:'EchoStack Post'})}
-  else{navigator.clipboard.writeText(url);toast('Link copied! 📋','info')}
-}
-
-async function followUser(userId){
-  try{
-    const res=await fetch(`/api/follow/${userId}`,{method:'POST',credentials:'include'});
-    toast(res.ok?'Following! 👥':'Already following','ok');
-  }catch(e){toast('Error','er')}
-}
-
-function filterByRegion(regionId){toast(`Filtering by region #${regionId}`,'info')}
-function viewStory(name){toast(`📖 ${name}'s story`,'info')}
-function openCreatePost(){
-  const val=document.getElementById('create-prompt-input').value.trim();
-  if(!val){toast('Write something first ✍️','er');return}
-  window.location.href='/creator.html';
-}
-
-// ===== FILTER TABS =====
-function setupFilters(){
-  document.querySelectorAll('.filter-tab').forEach(tab=>{
-    tab.addEventListener('click',()=>{
-      document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
-      tab.classList.add('active');
-      currentFilter=tab.dataset.filter;
-      loadPosts();
-    });
-  });
-}
-
-// ===== PULL TO REFRESH (Mobile) =====
-function setupPullToRefresh(){
-  let startY=0,currentY=0;
-  document.addEventListener('touchstart',e=>{if(window.scrollY===0)startY=e.touches[0].clientY},{passive:true});
-  document.addEventListener('touchmove',e=>{
-    if(window.scrollY===0){
-      currentY=e.touches[0].clientY;
-      const diff=currentY-startY;
-      if(diff>80){loadPosts();toast('Refreshing...','info');startY=0}
-    }
-  },{passive:true});
-}
+// ===== PULL TO REFRESH =====
+let startY=0;
+document.addEventListener('touchstart',e=>{if(window.scrollY===0)startY=e.touches[0].clientY},{passive:true});
+document.addEventListener('touchmove',e=>{
+  if(window.scrollY===0){
+    const diff=e.touches[0].clientY-startY;
+    if(diff>100){loadPosts();loadStories();toast('🔄 Refreshed');startY=0}
+  }
+},{passive:true});
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded',()=>{
-  loadRegions();loadStories();loadPosts();setupFilters();setupPullToRefresh();
-  
-  // Hide skeletons after first load
-  setTimeout(()=>{
-    const skeletons=document.querySelectorAll('.skeleton');
-    skeletons.forEach(s=>s.style.opacity='.5');
-  },2000);
+  loadStories();
+  loadPosts();
 });
 </script>
 </body>
