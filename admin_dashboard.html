@@ -471,13 +471,13 @@ select{
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Posts</h3><button class="btn btn-ghost" onclick="show('posts')" style="font-size:.85rem;padding:8px 14px">View All</button></div>
-          <thead>  <tr><th>Title</th><th>Status</th><th>Author</th></tr> </thead>
-          <tbody id="recent-posts-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+          <thead>   </thead>
+          <tbody id="recent-posts-body">   <td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td>   </tbody>
         </div>
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Uploads</h3><button class="btn btn-ghost" onclick="show('files')" style="font-size:.85rem;padding:8px 14px">File Manager</button></div>
-          <thead>  <tr><th>File</th><th>Type</th><th>Size</th></tr> </thead>
-          <tbody id="recent-files-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+          <thead>   </thead>
+          <tbody id="recent-files-body">   <td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td>   </tbody>
         </div>
       </div>
     </div>
@@ -517,8 +517,8 @@ select{
           <h3>All Regions</h3>
           <div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn btn-gold" onclick="showNewRegionForm()">➕ Create Region</button><button class="btn btn-ghost" onclick="loadRegions()">🔄 Refresh</button></div>
         </div>
-        <thead>  <tr><th>#</th><th>Name</th><th>Capital</th><th>Category</th><th>Media</th><th>Actions</th></tr> </thead>
-        <tbody id="regions-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+        <thead>   </thead>
+        <tbody id="regions-tbody">   <td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td>   </tbody>
       </div>
       <div id="new-region-form" style="display:none; background:white; border:1px solid var(--main-border); border-radius:12px; padding:24px; margin-top:20px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h3 style="font-weight:700; font-size:1.2rem; color:var(--main-text);">➕ Create New Region</h3><button onclick="hideNewRegionForm()" style="background:none; border:none; font-size:2rem; cursor:pointer; color:var(--main-muted); min-width:44px; min-height:44px;">×</button></div>
@@ -573,40 +573,40 @@ select{
     <!-- ── USERS ── -->
     <div class="panel" id="panel-users">
       <div class="table-wrap"><div class="table-head"><h3>All Users</h3><button class="btn btn-ghost" onclick="loadUsers()">Refresh</button></div>
-        <thead>  <tr><th>Username</th><th>Email</th><th>Role</th><th>Premium</th><th>Joined</th><th>Actions</th></tr> </thead>
-        <tbody id="users-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+        <thead>   </thead>
+        <tbody id="users-tbody">   <td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td>   </tbody>
       </div>
     </div>
 
     <!-- ── CREATORS ── -->
     <div class="panel" id="panel-creators">
       <div class="table-wrap"><div class="table-head"><h3>Creators</h3></div>
-        <thead>  <tr><th>Username</th><th>Channel</th><th>Posts</th><th>Actions</th></tr> </thead>
-        <tbody id="creators-tbody"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+        <thead>   </thead>
+        <tbody id="creators-tbody">   <td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td>   </tbody>
       </div>
     </div>
 
     <!-- ── POSTS ── -->
     <div class="panel" id="panel-posts">
       <div class="table-wrap"><div class="table-head"><h3>All Posts</h3><button class="btn btn-ghost" onclick="loadPosts()">Refresh</button></div>
-        <thead>  <tr><th>Title</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th>Actions</th></tr> </thead>
-        <tbody id="posts-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+        <thead>   </thead>
+        <tbody id="posts-tbody">   <td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td>   </tbody>
       </div>
     </div>
 
     <!-- ── STORIES ── -->
     <div class="panel" id="panel-stories">
       <div class="table-wrap"><div class="table-head"><h3>Story Submissions</h3><button class="btn btn-ghost" onclick="loadStories()">Refresh</button></div>
-        <thead>  <tr><th>Title</th><th>Author</th><th>Region</th><th>Status</th><th>Date</th></tr> </thead>
-        <tbody id="stories-tbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+        <thead>   </thead>
+        <tbody id="stories-tbody">   <td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td>   </tbody>
       </div>
     </div>
 
     <!-- ── NEWSLETTER ── -->
     <div class="panel" id="panel-newsletter">
       <div class="table-wrap"><div class="table-head"><h3>Newsletter Subscribers</h3><button class="btn btn-ghost" onclick="loadNewsletter()">Refresh</button></div>
-        <thead>  <tr><th>#</th><th>Email</th><th>Joined</th></tr> </thead>
-        <tbody id="newsletter-tbody"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
+        <thead>   </thead>
+        <tbody id="newsletter-tbody">   <td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td>   </tbody>
       </div>
     </div>
 
@@ -618,7 +618,7 @@ select{
         <button class="btn btn-gold" onclick="addEvent()" style="margin-top:10px; width:100%;">Add Event</button>
       </div>
       <div class="table-wrap"><div class="table-head"><h3>Events</h3></div>
-        <thead>  <tr><th>Title</th><th>Location</th><th>Date</th><th>Actions</th></tr> </thead>
+        <thead>   </thead>
         <tbody id="events-tbody"></tbody>
       </div>
     </div>
@@ -663,7 +663,7 @@ select{
     <div class="panel" id="panel-logs">
       <div class="table-wrap">
         <div class="table-head"><h3>Admin Activity Logs</h3><button class="btn btn-ghost" onclick="loadLogs()">🔄 Refresh</button></div>
-        <div style="overflow-x:auto;"><table style="min-width:600px; width:100%;"><thead>  <tr><th>Time</th><th>Admin</th><th>Action</th><th>Target</th><th>Details</th><th>IP</th></tr> </thead><tbody id="logs-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading logs...</td></tr></tbody></table></div>
+        <div style="overflow-x:auto;"><table style="min-width:600px; width:100%;"><thead>   </thead><tbody id="logs-tbody">   <td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading logs...</td>   </tbody></table></div>
       </div>
     </div>
 
@@ -682,11 +682,21 @@ select{
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Admin login token helpers (optional) ────────────────────────────────────
+// ── Helper: show toast ─────────────────────────────────────────────
+let _toastTimer;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ── Admin login token helpers (optional) ───────────────────────────
 async function adminLogin(secret) {
   const fd = new FormData();
   fd.append('answer', secret);
-  const res = await fetch('/api/auth/login', { method: 'POST', body: fd });
+  const res = await fetch('/api/auth/login', { method: 'POST', body: fd, credentials: 'include' });
   const data = await res.json();
   if (data.success) {
     localStorage.setItem('admin_token', data.token);
@@ -698,7 +708,7 @@ async function adminLogin(secret) {
 async function checkAdminAuth() {
   const token = localStorage.getItem('admin_token');
   if (token) {
-    const res = await fetch('/api/admin/verify-token', { headers: { 'X-Admin-Token': token } });
+    const res = await fetch('/api/admin/verify-token', { headers: { 'X-Admin-Token': token }, credentials: 'include' });
     if (res.ok) return true;
   }
   return true;
@@ -762,24 +772,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadStats() {
   try {
-    const r = await fetch('/api/stats');
+    const r = await fetch('/api/stats', { credentials: 'include' });
     const d = await r.json();
     document.getElementById('s-regions').textContent = d.total_regions || 0;
     document.getElementById('s-posts').textContent   = d.total_posts   || 0;
     document.getElementById('s-users').textContent   = d.total_users   || 0;
     document.getElementById('s-files').textContent   = d.total_files   || '—';
-  } catch(e) {}
+  } catch(e) { console.warn('Stats load error', e); }
 }
 
-// ── RECENT POSTS (fixed) ───────────────────────────────────────────
+// ── RECENT POSTS ───────────────────────────────────────────────────
 async function loadRecentPosts() {
   try {
-    const r = await fetch('/api/posts?limit=6');
+    const r = await fetch('/api/posts?limit=6', { credentials: 'include' });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const d = await r.json();
     const posts = Array.isArray(d) ? d : (d.posts || []);
     const tbody = document.getElementById('recent-posts-body');
     if (!posts.length) {
-      tbody.innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No posts yet</td></tr>';
+      tbody.innerHTML = ' <td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No posts yet</td> ';
       return;
     }
     tbody.innerHTML = posts.slice(0,6).map(p => `
@@ -791,18 +802,20 @@ async function loadRecentPosts() {
     `).join('');
   } catch(e) {
     console.error('Recent posts error:', e);
-    document.getElementById('recent-posts-body').innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Failed to load</td></tr>';
+    document.getElementById('recent-posts-body').innerHTML = ' <td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Failed to load posts</td> ';
+    toast('Failed to load recent posts: ' + e.message, 'er');
   }
 }
 
-// ── RECENT FILES (fixed) ───────────────────────────────────────────
+// ── RECENT FILES ───────────────────────────────────────────────────
 async function loadRecentFiles() {
   try {
-    const r = await fetch('/api/files');
+    const r = await fetch('/api/files', { credentials: 'include' });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const files = await r.json();
     const tbody = document.getElementById('recent-files-body');
     if (!files.length) {
-      tbody.innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No files yet</td></tr>';
+      tbody.innerHTML = ' <td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No files yet</td> ';
       return;
     }
     tbody.innerHTML = files.slice(0,6).map(f => `
@@ -814,7 +827,8 @@ async function loadRecentFiles() {
     `).join('');
   } catch(e) {
     console.error('Recent files error:', e);
-    document.getElementById('recent-files-body').innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Failed to load</td></tr>';
+    document.getElementById('recent-files-body').innerHTML = ' <td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Failed to load files</td> ';
+    toast('Failed to load recent files: ' + e.message, 'er');
   }
 }
 
@@ -826,15 +840,17 @@ function icon(mime, cat) {
   return '📦';
 }
 
-// ── FILE MANAGER (unchanged) ───────────────────────────────────────
+// ── FILE MANAGER (full) ────────────────────────────────────────────
 async function loadFiles() {
   try {
-    const r = await fetch('/api/files');
+    const r = await fetch('/api/files', { credentials: 'include' });
     allFiles = await r.json();
     renderFiles(allFiles);
     document.getElementById('files-count').textContent = `${allFiles.length} file${allFiles.length !== 1 ? 's' : ''}`;
   } catch(e) {
+    console.error('Files load error', e);
     document.getElementById('files-grid').innerHTML = '<div class="no-files"><div class="no-icon">⚠️</div><p>Failed to load files</p></div>';
+    toast('Failed to load files: ' + e.message, 'er');
   }
 }
 
@@ -936,7 +952,7 @@ async function handleFiles(fileList) {
         if (status) status.textContent = prog + '%';
       }, 200);
 
-      const r = await fetch('/api/upload/file', { method: 'POST', body: fd });
+      const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
       clearInterval(ticker);
       const d = await r.json();
 
@@ -971,7 +987,7 @@ async function handleFiles(fileList) {
 async function deleteFile(id) {
   if (!confirm('Delete this file permanently?')) return;
   try {
-    const r = await fetch('/api/files/' + id, { method: 'DELETE' });
+    const r = await fetch('/api/files/' + id, { method: 'DELETE', credentials: 'include' });
     const d = await r.json();
     if (r.ok && d.success) {
       toast('File deleted', 'ok');
@@ -997,7 +1013,7 @@ async function publishFile(fileId, fileName, category) {
   fd.append('content_type', contentType);
 
   try {
-    const res = await fetch('/api/admin/publish-file', { method: 'POST', body: fd });
+    const res = await fetch('/api/admin/publish-file', { method: 'POST', body: fd, credentials: 'include' });
     const data = await res.json();
     if (res.ok && data.success) {
       toast('✅ Post published!', 'ok');
@@ -1036,10 +1052,10 @@ function copyUrl() {
   toast('URL copied to clipboard!', 'info');
 }
 
-// ─── REGIONS (unchanged) ───────────────────────────────────────────
+// ── REGIONS ───────────────────────────────────────────────────────
 async function loadRegions() {
   try {
-    const r = await fetch('/api/regions');
+    const r = await fetch('/api/regions', { credentials: 'include' });
     allRegions = await r.json();
     renderRegions(allRegions);
   } catch(e) {}
@@ -1047,7 +1063,7 @@ async function loadRegions() {
 
 function renderRegions(regions) {
   const tbody = document.getElementById('regions-tbody');
-  if (!regions.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No regions yet</td></tr>'; return; }
+  if (!regions.length) { tbody.innerHTML = ' <td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No regions yet</td> '; return; }
   tbody.innerHTML = regions.map((r, i) => `
     <tr>
       <td style="color:var(--main-muted)">${i+1}</td>
@@ -1094,7 +1110,7 @@ async function saveRegion() {
   try {
     const method = id ? 'PUT' : 'POST';
     const url    = id ? `/api/regions/${id}` : '/api/regions';
-    const r = await fetch(url, { method, body: fd });
+    const r = await fetch(url, { method, body: fd, credentials: 'include' });
     const d = await r.json();
     if (r.ok && d.success) { toast('✅ Region saved!', 'ok'); loadRegions(); show('regions'); }
     else throw new Error(d.detail || 'Save failed');
@@ -1104,7 +1120,7 @@ async function saveRegion() {
 async function deleteRegion(id, name) {
   if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
   try {
-    const r = await fetch('/api/regions/' + id, { method: 'DELETE' });
+    const r = await fetch('/api/regions/' + id, { method: 'DELETE', credentials: 'include' });
     const d = await r.json();
     if (r.ok && d.success) { toast('Deleted!', 'ok'); loadRegions(); }
     else throw new Error('Delete failed');
@@ -1116,7 +1132,7 @@ async function uploadHero(file) {
   if (!file) return;
   try {
     const fd = new FormData(); fd.append('file', file);
-    const r = await fetch('/api/upload/image', { method: 'POST', body: fd });
+    const r = await fetch('/api/upload/image', { method: 'POST', body: fd, credentials: 'include' });
     const d = await r.json();
     if (r.ok && d.success) {
       document.getElementById('reg-hero').value = d.url;
@@ -1130,7 +1146,7 @@ async function uploadGallery(files) {
   for (const file of files) {
     try {
       const fd = new FormData(); fd.append('file', file);
-      const r = await fetch('/api/upload/image', { method: 'POST', body: fd });
+      const r = await fetch('/api/upload/image', { method: 'POST', body: fd, credentials: 'include' });
       const d = await r.json();
       if (r.ok && d.success) {
         const current = document.getElementById('reg-gallery').value;
@@ -1147,7 +1163,7 @@ async function uploadAudio(files) {
   for (const file of files) {
     try {
       const fd = new FormData(); fd.append('file', file);
-      const r = await fetch('/api/upload/audio', { method: 'POST', body: fd });
+      const r = await fetch('/api/upload/audio', { method: 'POST', body: fd, credentials: 'include' });
       const d = await r.json();
       if (r.ok && d.success) {
         const current = document.getElementById('reg-audio').value;
@@ -1177,7 +1193,7 @@ async function uploadNewHero(file) {
   if (!file) return;
   try {
     const fd = new FormData(); fd.append('file', file);
-    const r = await fetch('/api/upload/image', { method: 'POST', body: fd });
+    const r = await fetch('/api/upload/image', { method: 'POST', body: fd, credentials: 'include' });
     const d = await r.json();
     if (r.ok && d.success) {
       document.getElementById('new-reg-hero').value = d.url;
@@ -1191,7 +1207,7 @@ async function uploadNewGallery(files) {
   for (const file of files) {
     try {
       const fd = new FormData(); fd.append('file', file);
-      const r = await fetch('/api/upload/image', { method: 'POST', body: fd });
+      const r = await fetch('/api/upload/image', { method: 'POST', body: fd, credentials: 'include' });
       const d = await r.json();
       if (r.ok && d.success) {
         const current = document.getElementById('new-reg-gallery').value;
@@ -1208,7 +1224,7 @@ async function uploadNewAudio(files) {
   for (const file of files) {
     try {
       const fd = new FormData(); fd.append('file', file);
-      const r = await fetch('/api/upload/audio', { method: 'POST', body: fd });
+      const r = await fetch('/api/upload/audio', { method: 'POST', body: fd, credentials: 'include' });
       const d = await r.json();
       if (r.ok && d.success) {
         const current = document.getElementById('new-reg-audio').value;
@@ -1236,7 +1252,7 @@ async function saveNewRegion() {
   fd.append('audio_files', document.getElementById('new-reg-audio').value);
 
   try {
-    const r = await fetch('/api/regions', { method: 'POST', body: fd });
+    const r = await fetch('/api/regions', { method: 'POST', body: fd, credentials: 'include' });
     const d = await r.json();
     if (r.ok && d.success) {
       toast('✅ New region saved!', 'ok');
@@ -1249,10 +1265,10 @@ async function saveNewRegion() {
 // ── USERS ──────────────────────────────────────────────────────────
 async function loadUsers() {
   try {
-    const r = await fetch('/api/admin/users');
+    const r = await fetch('/api/admin/users', { credentials: 'include' });
     allUsers = await r.json();
     const tbody = document.getElementById('users-tbody');
-    if (!allUsers.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No users yet</td></tr>'; return; }
+    if (!allUsers.length) { tbody.innerHTML = ' <td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No users yet</td> '; return; }
     tbody.innerHTML = allUsers.map(u => `
       <tr>
         <td><strong>${escapeHtml(u.username)}</strong></td>
@@ -1274,7 +1290,7 @@ async function loadUsers() {
 async function setRole(uid, role) {
   try {
     const fd = new FormData(); fd.append('role', role);
-    await fetch(`/api/admin/users/${uid}/role`, { method: 'PUT', body: fd });
+    await fetch(`/api/admin/users/${uid}/role`, { method: 'PUT', body: fd, credentials: 'include' });
     toast('Role updated!', 'ok');
   } catch(e) {}
 }
@@ -1282,7 +1298,7 @@ async function setRole(uid, role) {
 async function togglePremium(uid, current) {
   try {
     const fd = new FormData(); fd.append('is_premium', current ? '0' : '1');
-    await fetch(`/api/admin/users/${uid}/premium`, { method: 'PUT', body: fd });
+    await fetch(`/api/admin/users/${uid}/premium`, { method: 'PUT', body: fd, credentials: 'include' });
     toast('Premium status updated!', 'ok'); loadUsers();
   } catch(e) {}
 }
@@ -1290,10 +1306,10 @@ async function togglePremium(uid, current) {
 // ── CREATORS ───────────────────────────────────────────────────────
 async function loadCreators() {
   try {
-    const r = await fetch('/api/creators');
+    const r = await fetch('/api/creators', { credentials: 'include' });
     const creators = await r.json();
     const tbody = document.getElementById('creators-tbody');
-    if (!creators.length) { tbody.innerHTML = '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No creators yet</td></tr>'; return; }
+    if (!creators.length) { tbody.innerHTML = ' <td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No creators yet</td> '; return; }
     tbody.innerHTML = creators.map(c => `
       <tr>
         <td><strong>${escapeHtml(c.username)}</strong></td>
@@ -1308,11 +1324,11 @@ async function loadCreators() {
 // ── POSTS ──────────────────────────────────────────────────────────
 async function loadPosts() {
   try {
-    const r = await fetch('/api/posts?limit=50');
+    const r = await fetch('/api/posts?limit=50', { credentials: 'include' });
     const d = await r.json();
     allPosts = Array.isArray(d) ? d : (d.posts || []);
     const tbody = document.getElementById('posts-tbody');
-    if (!allPosts.length) { tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No posts yet</td></tr>'; return; }
+    if (!allPosts.length) { tbody.innerHTML = ' <td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No posts yet</td> '; return; }
     tbody.innerHTML = allPosts.map(p => `
       <tr>
         <td><strong>${escapeHtml(p.title||'').substring(0,40)}</strong></td>
@@ -1329,10 +1345,10 @@ async function loadPosts() {
 // ── STORIES ────────────────────────────────────────────────────────
 async function loadStories() {
   try {
-    const r = await fetch('/api/stories');
+    const r = await fetch('/api/stories', { credentials: 'include' });
     const stories = await r.json();
     const tbody = document.getElementById('stories-tbody');
-    if (!stories.length) { tbody.innerHTML = '<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">No stories submitted yet</td></tr>'; return; }
+    if (!stories.length) { tbody.innerHTML = ' <td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">No stories submitted yet</td> '; return; }
     tbody.innerHTML = stories.map(s => `
       <tr>
         <td><strong>${escapeHtml(s.title||'').substring(0,40)}</strong></td>
@@ -1348,10 +1364,10 @@ async function loadStories() {
 // ── NEWSLETTER ─────────────────────────────────────────────────────
 async function loadNewsletter() {
   try {
-    const r = await fetch('/api/newsletter/subscribers');
+    const r = await fetch('/api/newsletter/subscribers', { credentials: 'include' });
     const subs = await r.json();
     const tbody = document.getElementById('newsletter-tbody');
-    if (!subs.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No subscribers yet</td></tr>'; return; }
+    if (!subs.length) { tbody.innerHTML = ' <td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No subscribers yet</td> '; return; }
     tbody.innerHTML = subs.map((s,i) => `
       <tr>
         <td style="color:var(--main-muted)">${i+1}</td>
@@ -1365,10 +1381,10 @@ async function loadNewsletter() {
 // ── EVENTS ─────────────────────────────────────────────────────────
 async function loadEvents() {
   try {
-    const r = await fetch('/api/events');
+    const r = await fetch('/api/events', { credentials: 'include' });
     const events = await r.json();
     const tbody = document.getElementById('events-tbody');
-    if (!events.length) { tbody.innerHTML = '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No events yet</td></tr>'; return; }
+    if (!events.length) { tbody.innerHTML = ' <td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No events yet</td> '; return; }
     tbody.innerHTML = events.map(e => `
       <tr>
         <td><strong>${escapeHtml(e.title)}</strong></td>
@@ -1387,7 +1403,7 @@ async function addEvent() {
   fd.append('event_date',  document.getElementById('ev-date').value);
   fd.append('description', document.getElementById('ev-desc').value);
   try {
-    const r = await fetch('/api/events', { method: 'POST', body: fd });
+    const r = await fetch('/api/events', { method: 'POST', body: fd, credentials: 'include' });
     const d = await r.json();
     if (r.ok && d.success) { toast('Event added!', 'ok'); loadEvents(); }
     else throw new Error(d.detail);
@@ -1396,14 +1412,14 @@ async function addEvent() {
 
 async function deleteEvent(id) {
   if (!confirm('Delete event?')) return;
-  await fetch('/api/events/' + id, { method: 'DELETE' });
+  await fetch('/api/events/' + id, { method: 'DELETE', credentials: 'include' });
   toast('Deleted', 'ok'); loadEvents();
 }
 
 // ── CATEGORIES ─────────────────────────────────────────────────────
 async function loadCategories() {
   try {
-    const r = await fetch('/api/sections');
+    const r = await fetch('/api/sections', { credentials: 'include' });
     const cats = await r.json();
     const container = document.getElementById('cats-list');
     if (!cats.length) { container.innerHTML = '<p style="color:var(--main-muted);font-size:.9rem">No categories yet</p>'; return; }
@@ -1421,21 +1437,21 @@ async function addCategory() {
   if (!name) return;
   const fd = new FormData(); fd.append('name', name);
   try {
-    const r = await fetch('/api/sections', { method: 'POST', body: fd });
+    const r = await fetch('/api/sections', { method: 'POST', body: fd, credentials: 'include' });
     const d = await r.json();
     if (r.ok && d.success) { toast('Category added!', 'ok'); document.getElementById('cat-name').value = ''; loadCategories(); }
   } catch(e) { toast('❌ Failed', 'er'); }
 }
 
 async function deleteCategory(id) {
-  await fetch('/api/sections/' + id, { method: 'DELETE' });
+  await fetch('/api/sections/' + id, { method: 'DELETE', credentials: 'include' });
   toast('Deleted', 'ok'); loadCategories();
 }
 
 // ── CHAT ───────────────────────────────────────────────────────────
 async function loadChat() {
   try {
-    const r = await fetch('/api/chat');
+    const r = await fetch('/api/chat', { credentials: 'include' });
     const msgs = await r.json();
     const container = document.getElementById('chat-msgs');
     if (!msgs.length) { container.innerHTML = '<p style="color:var(--main-muted);font-size:.9rem;padding:8px">No messages yet</p>'; return; }
@@ -1473,7 +1489,7 @@ async function savePost() {
   btn.textContent = 'Publishing...';
 
   try {
-    const r = await fetch('/api/posts', { method: 'POST', body: fd });
+    const r = await fetch('/api/posts', { method: 'POST', body: fd, credentials: 'include' });
     const d = await r.json();
     if (r.ok && d.success) {
       toast('✅ Post published!', 'ok');
@@ -1496,7 +1512,7 @@ async function uploadCover(file) {
   if (!file) return;
   try {
     const fd = new FormData(); fd.append('file', file);
-    const r = await fetch('/api/upload/image', { method: 'POST', body: fd });
+    const r = await fetch('/api/upload/image', { method: 'POST', body: fd, credentials: 'include' });
     const d = await r.json();
     if (r.ok && d.success) {
       document.getElementById('wp-cover').value = d.url;
@@ -1508,12 +1524,12 @@ async function uploadCover(file) {
 // ── ACTIVITY LOGS ──────────────────────────────────────────────────
 async function loadLogs() {
   try {
-    const res = await fetch('/api/admin/logs');
+    const res = await fetch('/api/admin/logs', { credentials: 'include' });
     if (!res.ok) throw new Error('Failed to load logs');
     const logs = await res.json();
     const tbody = document.getElementById('logs-tbody');
     if (!logs.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No logs yet</td></tr>';
+      tbody.innerHTML = ' <td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No logs yet</td> ';
       return;
     }
     tbody.innerHTML = logs.map(log => `
@@ -1527,7 +1543,7 @@ async function loadLogs() {
       </tr>
     `).join('');
   } catch(e) {
-    tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Failed to load logs</td></tr>';
+    tbody.innerHTML = ' <td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Failed to load logs</td> ';
   }
 }
 
@@ -1544,7 +1560,7 @@ function escapeHtml(str) {
 // ── LOGOUT ─────────────────────────────────────────────────────────
 function logout() {
   if (!confirm('Logout?')) return;
-  fetch('/api/auth/logout', { method: 'POST' });
+  fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
   document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
   window.location.href = '/login';
 }
@@ -1560,15 +1576,6 @@ function timeAgo(str) {
     if (s < 86400) return Math.floor(s/3600) + 'h ago';
     return Math.floor(s/86400) + 'd ago';
   } catch(e) { return str; }
-}
-
-let _toastTimer;
-function toast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show ' + (type || '');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
 }
 </script>
 </body>
