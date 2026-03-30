@@ -1,9 +1,10 @@
 from sqlalchemy import (
     Column, Integer, String, Text, DateTime, Boolean,
-    ForeignKey, BigInteger
+    ForeignKey, BigInteger, func
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
 
@@ -40,22 +41,29 @@ class User(Base):
     id                         = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username                   = Column(String(100), unique=True, nullable=False)
     email                      = Column(String(200), unique=True, nullable=False)
-    hashed_password            = Column(String(255), nullable=False)      # bcrypt hash
+    hashed_password            = Column(String(255), nullable=False)
     bio                        = Column(Text, default="")
     avatar_url                 = Column(String(500), default="")
     channel_name               = Column(String(200), default="")
     channel_desc               = Column(Text, default="")
     role                       = Column(String(50), default="user")
-    is_premium                 = Column(Integer, default=0)               # integer, not boolean
-    is_suspended               = Column(Integer, default=0)
+    is_premium                 = Column(Integer, default=0)    is_suspended               = Column(Integer, default=0)
     follower_count             = Column(Integer, default=0)
     email_verified             = Column(Boolean, default=False)
     verification_token         = Column(String(255), nullable=True)
     verification_token_expires = Column(DateTime, nullable=True)
     reset_token                = Column(String(255), nullable=True)
     reset_token_expires        = Column(DateTime, nullable=True)
+    # ===== ADDED: 6-digit reset code fields =====
+    reset_code                 = Column(String(6), nullable=True)
+    reset_code_expires         = Column(DateTime, nullable=True)
+    # ===========================================
     created_at                 = Column(DateTime, default=datetime.utcnow)
     updated_at                 = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # ===== ADDED: Relationship for topics =====
+    topics = relationship("Topic", secondary="user_topics", back_populates="users")
+    # ==========================================
 
 
 # ─── POST ─────────────────────────────────────────────────────────────────────
@@ -88,11 +96,14 @@ class Post(Base):
 class Comment(Base):
     __tablename__ = "comments"
 
-    id         = Column(Integer, primary_key=True, index=True)
-    post_id    = Column(Integer, ForeignKey("posts.id"), nullable=True)
+    id         = Column(Integer, primary_key=True, index=True)    post_id    = Column(Integer, ForeignKey("posts.id"), nullable=True)
     user_id    = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     username   = Column(String(200), default="")
     content    = Column(Text, default="")
+    # ===== ADDED: Nested replies + likes =====
+    parent_id  = Column(Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=True)
+    likes      = Column(Integer, default=0)
+    # =========================================
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -120,7 +131,7 @@ class UploadedFile(Base):
     region_id     = Column(Integer, ForeignKey("regions.id"), nullable=True)
     description   = Column(Text)
     uploaded_by   = Column(String(100), default="user")
-    is_public     = Column(Integer, default=1)        # integer, not boolean
+    is_public     = Column(Integer, default=1)
     created_at    = Column(DateTime, default=datetime.utcnow)
     updated_at    = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -134,8 +145,7 @@ class Section(Base):
     slug              = Column(String(100), unique=True)
     description       = Column(Text)
     parent_section_id = Column(Integer, nullable=True)
-    display_order     = Column(Integer, default=0)
-    is_active         = Column(Integer, default=1)
+    display_order     = Column(Integer, default=0)    is_active         = Column(Integer, default=1)
     created_at        = Column(DateTime, default=datetime.utcnow)
 
 
@@ -170,6 +180,8 @@ class ChatMessage(Base):
     content    = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+
+# ─── CREATOR CHAT MESSAGE (already exists - no changes needed) ────────────────
 class CreatorChatMessage(Base):
     __tablename__ = "creator_chat_messages"
     id = Column(Integer, primary_key=True, index=True)
@@ -179,10 +191,10 @@ class CreatorChatMessage(Base):
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
+
 # ─── STORY SUBMISSION ─────────────────────────────────────────────────────────
 class StorySubmission(Base):
     __tablename__ = "story_submissions"
-
     id          = Column(Integer, primary_key=True, index=True)
     title       = Column(String(300), nullable=False)
     content     = Column(Text)
@@ -211,6 +223,10 @@ class Topic(Base):
 
     id   = Column(Integer, primary_key=True, index=True)
     name = Column(Text, unique=True, nullable=False)
+    
+    # ===== ADDED: Back-reference for relationship =====
+    users = relationship("User", secondary="user_topics", back_populates="topics")
+    # ==================================================
 
 
 # ─── USER TOPIC (junction) ────────────────────────────────────────────────────
@@ -219,3 +235,16 @@ class UserTopic(Base):
 
     user_id  = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     topic_id = Column(Integer, ForeignKey("topics.id", ondelete="CASCADE"), primary_key=True)
+
+
+# ─── ADMIN LOG (NEW - for audit trail) ────────────────────────────────────────
+class AdminLog(Base):
+    __tablename__ = "admin_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    admin_username = Column(String(100), nullable=False)
+    action = Column(String(50), nullable=False)  # create, update, delete, upload    target_type = Column(String(50))  # post, user, file, region
+    target_id = Column(String(100))   # the ID of the affected resource
+    details = Column(Text)            # extra context (filename, title, etc.)
+    ip_address = Column(String(45))
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
