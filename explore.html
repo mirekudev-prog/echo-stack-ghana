@@ -1,677 +1,658 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0D1B2A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta charset="UTF-8">
-<title>Explore — EchoStack</title>
-<link rel="icon" type="image/png" href="/echostack-logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="description" content="Discover stories, creators, and heritage from all 16 regions of Ghana">
+<title>EchoStack — Explore</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+/* ===== CSS VARIABLES & RESET ===== */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --ink:#0D1B2A;
-  --gold:#C8962E;
-  --gold2:#E8B84B;
-  --border:#E2E8F0;
-  --muted:#94A3B8;
-  --blue:#0077b6;
-  --cream:#F8FAFC;
-  --sidebar-w:260px;
+  --ink:#0D1B2A;--ink2:#1a2744;--gold:#C8962E;--gold2:#E8B84B;--gold3:#F4D06F;
+  --surface:#fafafa;--surface2:#f5f5f5;--card:#ffffff;--border:#e5e5e5;--border2:#d1d1d1;
+  --text:#1a1a1a;--text2:#3a3a3a;--muted:#8e8e93;--muted2:#6b6b6b;
+  --danger:#ef4444;--danger2:#dc2626;--success:#22c55e;--success2:#16a34a;
+  --warning:#f59e0b;--info:#3b82f6;--purple:#8b5cf6;--pink:#ec4899;--cyan:#06b6d4;
+  --hover:#f0f0f0;--hover2:#e8e8e8;--shadow:0 1px 3px rgba(0,0,0,.08);
+  --shadow2:0 2px 8px rgba(0,0,0,.12);--shadow3:0 4px 16px rgba(0,0,0,.16);
+  --radius:12px;--radius2:16px;--radius3:20px;--sidebar-w:280px;--topbar-h:57px;
+  --transition:all .2s ease;
 }
-body{
-  font-family:'DM Sans',sans-serif;
-  background:var(--cream);
-  color:var(--ink);
-  min-height:100vh;
-  overflow-x:hidden;
-}
+html,body{height:100%;overflow-x:hidden;scroll-behavior:smooth}
+body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--surface);color:var(--text);line-height:1.5;padding-bottom:env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased;}
+img,video{max-width:100%;height:auto;display:block}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;border:none;background:none;cursor:pointer}
 
-/* ── TOP BAR (mobile only) ── */
-.topbar{
-  display:none;
-  position:fixed;
-  top:0; left:0; right:0;
-  height:60px;
-  background:var(--ink);
-  border-bottom:2px solid var(--gold);
-  align-items:center;
-  justify-content:space-between;
-  padding:0 16px;
-  z-index:300;
-}
-.topbar-logo{
-  font-family:'Playfair Display',serif;
-  color:#fff;
-  font-size:1.1rem;
-  font-weight:700;
-}
-.menu-btn{
-  background:none;
-  border:none;
-  color:rgba(255,255,255,.8);
-  font-size:1.5rem;
-  cursor:pointer;
-  padding:8px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.menu-btn:hover{color:#fff;}
+/* ===== SIDEBAR (Same as Dashboard) ===== */
+.sidebar{width:var(--sidebar-w);background:var(--card);color:var(--text);position:fixed;left:0;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;transform:translateX(-100%);transition:var(--transition);z-index:2000;-webkit-overflow-scrolling:touch;box-shadow:var(--shadow3);}
+.sidebar.open{transform:translateX(0)}
+.sb-header{padding:20px 16px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surface),var(--surface2));}
+.sb-brand{display:flex;align-items:center;gap:12px}
+.sb-brand img{width:40px;height:40px;border-radius:10px;object-fit:cover}
+.sb-brand-text strong{display:block;font-size:1.1rem;font-weight:700;color:var(--ink)}
+.sb-brand-text span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.sb-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;color:var(--text);text-decoration:none;transition:var(--transition);font-size:.95rem;font-weight:500;border-radius:8px;margin:2px 8px;min-height:48px;}
+.sb-item:hover{background:var(--hover)}
+.sb-item:active{transform:scale(.98)}
+.sb-item.active{background:rgba(200,150,46,.15);color:var(--gold);font-weight:600}
+.sb-item .icon{width:24px;text-align:center;font-size:1.1rem}
+.sb-item .badge{margin-left:auto;background:var(--danger);color:white;font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:700;}
+.sb-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);background:var(--surface2);}
+.sb-footer button{width:100%;padding:12px;border-radius:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--danger);font-size:.95rem;font-weight:600;cursor:pointer;min-height:48px;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:8px;}
+.sb-footer button:active{background:rgba(239,68,68,.2);transform:scale(.98)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1999;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;transition:opacity .3s ease;}
+.sidebar-overlay.show{display:block;opacity:1}
 
-/* ── SIDEBAR (dark) ── */
-.sidebar{
-  position:fixed;
-  left:0; top:0;
-  width:var(--sidebar-w);
-  height:100vh;
-  background:var(--ink);
-  display:flex;
-  flex-direction:column;
-  z-index:200;
-  padding:20px 0;
-  overflow-y:auto;
-  transition:transform .3s ease;
-}
-.sidebar-logo{
-  font-family:'Playfair Display',serif;
-  font-size:1.4rem;
-  font-weight:700;
-  color:#fff;
-  padding:0 20px 20px;
-  border-bottom:1px solid rgba(255,255,255,.1);
-}
-.sidebar-nav{
-  flex:1;
-  padding:12px 0;
-}
-.nav-item{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px 20px;
-  color:rgba(255,255,255,.7);
-  text-decoration:none;
-  font-size:.95rem;
-  font-weight:500;
-  transition:all .15s;
-}
-.nav-item:hover,
-.nav-item.active{
-  background:rgba(255,255,255,.1);
-  color:#fff;
-}
-.nav-item .icon{font-size:1.1rem; width:24px; text-align:center;}
-.sidebar-footer{
-  padding:20px;
-  border-top:1px solid rgba(255,255,255,.1);
-}
-.logout-btn{
-  width:100%;
-  padding:10px;
-  background:rgba(239,68,68,.15);
-  border:1px solid rgba(239,68,68,.3);
-  color:#fca5a5;
-  border-radius:8px;
-  font-size:.85rem;
-  font-weight:600;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  transition:all .2s;
-}
-.logout-btn:hover{
-  background:rgba(239,68,68,.3);
-  color:#fff;
-}
+/* ===== TOPBAR ===== */
+.topbar{position:sticky;top:0;z-index:1000;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.topbar.scrolled{box-shadow:var(--shadow2)}
+.menu-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;font-size:1.4rem;color:var(--text);transition:var(--transition);}
+.menu-btn:active{background:var(--hover);transform:scale(.95)}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--ink);letter-spacing:-.5px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.topbar-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:20px;padding:8px 14px;font-size:.85rem;font-weight:600;transition:var(--transition);display:flex;align-items:center;gap:6px;}
+.topbar-btn:hover{background:var(--hover)}
+.topbar-btn:active{transform:scale(.96)}
 
-/* ── SIDEBAR OVERLAY (mobile) ── */
-.sidebar-overlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  z-index:199;
-  backdrop-filter:blur(2px);
-}
-.sidebar-overlay.show{display:block;}
+/* ===== MAIN CONTAINER ===== */
+.container{max-width:900px;margin:0 auto;padding:20px 16px 80px}
 
-/* ── MAIN CONTENT ── */
-.main{
-  margin-left:var(--sidebar-w);
-  padding:40px 24px;
-  max-width:900px;
-  min-height:100vh;
-  transition:margin .3s;
-}
+/* ===== PAGE HEADER ===== */
+.page-header{margin-bottom:24px}
+.page-header h1{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--ink);margin-bottom:8px}
+.page-header p{font-size:1rem;color:var(--muted);line-height:1.6}
 
-/* ── PAGE HEADER ── */
-.page-title{
-  font-family:'Playfair Display',serif;
-  font-size:2rem;
-  font-weight:900;
-  color:var(--ink);
-  margin-bottom:6px;
-}
-.subtitle{
-  font-size:.95rem;
-  color:var(--muted);
-  margin-bottom:32px;
-}
+/* ===== FILTER TABS ===== */
+.filter-tabs{display:flex;gap:8px;overflow-x:auto;padding:8px 0;margin-bottom:24px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.filter-tabs::-webkit-scrollbar{display:none}
+.filter-tab{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:10px 20px;font-size:.9rem;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--muted);transition:var(--transition);min-height:44px;display:flex;align-items:center;gap:8px;}
+.filter-tab:active{transform:scale(.98)}
+.filter-tab.active{background:var(--ink);border-color:var(--ink);color:white;box-shadow:0 2px 8px rgba(13,27,42,.3)}
 
-/* ── FILTER TABS (copied from dashboard) ── */
-.filter-tabs{
-  display:flex;
-  gap:6px;
-  margin-bottom:24px;
-  overflow-x:auto;
-  scrollbar-width:none;
-  padding-bottom:2px;
-}
-.filter-tabs::-webkit-scrollbar{display:none;}
-.tab{
-  padding:7px 16px;
-  border-radius:24px;
-  font-size:.8rem;
-  font-weight:600;
-  cursor:pointer;
-  border:1.5px solid var(--border);
-  background:#fff;
-  color:var(--muted);
-  transition:all .15s;
-  white-space:nowrap;
-  font-family:'DM Sans',sans-serif;
-}
-.tab.active,
-.tab:hover{
-  background:var(--ink);
-  color:#fff;
-  border-color:var(--ink);
-}
+/* ===== POST CARDS ===== */
+.posts-grid{display:flex;flex-direction:column;gap:16px}
+.post-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;transition:var(--transition);cursor:pointer}
+.post-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--shadow2)}
 
-/* ── POST CARDS (enhanced with media previews) ── */
-.card{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  overflow:hidden;
-  margin-bottom:20px;
-  box-shadow:0 2px 8px rgba(0,0,0,.05);
-  transition:box-shadow .2s;
-}
-.card:hover{
-  box-shadow:0 4px 16px rgba(13,27,42,.08);
-}
-.post-header{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:14px 16px 0;
-}
-.p-av{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;
-  color:#fff;
-  font-size:.82rem;
-  flex-shrink:0;
-  overflow:hidden;
-}
-.p-info{flex:1;}
-.p-name{
-  font-size:.84rem;
-  font-weight:600;
-  color:var(--ink);
-}
-.p-time{
-  font-size:.72rem;
-  color:var(--muted);
-}
-.post-type{
-  padding:2px 9px;
-  border-radius:12px;
-  font-size:.64rem;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.03em;
-}
-.type-article{background:#EFF6FF;color:#2563EB;}
-.type-story{background:#F0FDF4;color:#16A34A;}
-.type-video{background:#FDF2F8;color:#9333EA;}
-.type-reel{background:#FCE7F3;color:#B21E6C;}
-.type-premium{background:rgba(201,147,58,.15);color:#c9933a;}
+/* Post Header */
+.post-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.post-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:white;font-weight:700;flex-shrink:0}
+.post-author-info{flex:1;min-width:0}
+.post-author{font-weight:700;font-size:.95rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post-time{font-size:.75rem;color:var(--muted);margin-top:2px}
+.post-type-badge{padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.post-type-badge.article{background:#EFF6FF;color:#2563EB}
+.post-type-badge.story{background:#F0FDF4;color:#16A34A}
+.post-type-badge.video{background:#FDF2F8;color:#9333EA}
+.post-type-badge.reel{background:#FCE7F3;color:#B21E6C}
+.post-type-badge.audio{background:#F0FDF4;color:#06B6D4}
+.post-type-badge.premium{background:rgba(200,150,46,.15);color:var(--gold);border:1px solid rgba(200,150,46,.3)}
 
-.post-title{
-  padding:6px 16px 2px;
-  font-family:'Playfair Display',serif;
-  font-size:1.1rem;
-  color:var(--ink);
-  line-height:1.4;
-  text-decoration:none;
-  display:block;
-}
-.post-excerpt{
-  padding:0 16px 8px;
-  font-size:.83rem;
-  color:#64748B;
-  line-height:1.6;
-}
+/* Post Content */
+.post-content{padding:12px 16px}
+.post-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.4;display:block}
+.post-excerpt{font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:8px}
 
-/* MEDIA PREVIEW */
-.card-media{
-  width:100%;
-  background:#000;
-  position:relative;
-  overflow:hidden;
-}
-.card-media img{
-  width:100%;
-  max-height:300px;
-  object-fit:cover;
-  display:block;
-}
-.card-media video{
-  width:100%;
-  max-height:300px;
-  display:block;
-  background:#000;
-}
-.card-media.reel video{
-  max-height:480px;
-  aspect-ratio:9/16;
-  object-fit:cover;
-  margin:0 auto;
-}
-.play-overlay{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  background:rgba(0,0,0,.55);
-  border-radius:50%;
-  width:52px;
-  height:52px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:1.4rem;
-  box-shadow:0 2px 12px rgba(0,0,0,.4);
-  cursor:pointer;
-  z-index:10;
-}
-.reel-watermark{
-  position:absolute;
-  bottom:8px;
-  right:8px;
-  background:rgba(0,0,0,.65);
-  border-radius:20px;
-  padding:4px 10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:15;
-  pointer-events:none;
-  backdrop-filter:blur(2px);
-  border:1px solid rgba(255,255,255,.15);
-}
-.reel-watermark img{
-  height:18px;
-  width:auto;
-  display:block;
-}
-.reel-watermark span{
-  color:white;
-  font-size:0.7rem;
-  font-weight:600;
-  margin-left:4px;
-  letter-spacing:0.5px;
-}
-.premium-banner{
-  background:linear-gradient(135deg,var(--gold),#a97825);
-  padding:10px 16px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size:.78rem;
-  font-weight:600;
-  color:#fff;
-}
+/* Media Preview */
+.post-media{position:relative;background:#000;overflow:hidden}
+.post-media img{width:100%;max-height:300px;object-fit:cover;display:block}
+.post-media video{width:100%;max-height:300px;display:block;background:#000}
+.post-media.reel video{max-height:480px;aspect-ratio:9/16;object-fit:cover;margin:0 auto}
+.play-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);border-radius:50%;width:52px;height:52px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.4rem;cursor:pointer;z-index:10;transition:var(--transition)}
+.play-overlay:hover{background:rgba(0,0,0,.8);transform:translate(-50%,-50%) scale(1.1)}
+.reel-watermark{position:absolute;bottom:12px;right:12px;background:rgba(13,27,42,.85);border-radius:20px;padding:6px 12px;display:flex;align-items:center;gap:6px;z-index:10;pointer-events:none;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.15)}
+.reel-watermark img{height:18px;width:auto;filter:brightness(0) invert(1)}
+.reel-watermark span{color:white;font-size:.7rem;font-weight:700;letter-spacing:.5px}
 
-.post-actions{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:6px;
-  padding:10px 16px;
-  border-top:1px solid var(--border);
-}
-.act-btn{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  padding:7px 12px;
-  border-radius:8px;
-  font-size:.79rem;
-  font-weight:500;
-  cursor:pointer;
-  border:none;
-  background:none;
-  color:var(--muted);
-  transition:all .15s;
-  font-family:'DM Sans',sans-serif;
-  white-space:nowrap;
-}
-.act-btn:hover{background:#F8FAFC;color:var(--ink);}
-.act-read{
-  margin-left:auto;
-  background:var(--gold);
-  color:#fff;
-  border-radius:8px;
-  padding:7px 16px;
-  font-size:.78rem;
-  font-weight:700;
-  cursor:pointer;
-  border:none;
-  font-family:'DM Sans',sans-serif;
-  text-decoration:none;
-  white-space:nowrap;
-  flex-shrink:0;
-}
-.act-read:hover{background:#a97825;}
+/* Premium Banner */
+.premium-banner{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);padding:10px 16px;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px}
+.premium-banner i{font-size:1rem}
 
-@media (max-width:480px){
-  .post-actions{gap:4px;padding:8px 10px;}
-  .act-btn{padding:6px 8px;font-size:.7rem;}
-  .act-read{padding:6px 10px;font-size:.7rem;margin-left:0;}
-}
+/* Post Actions */
+.post-actions{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);flex-wrap:wrap}
+.action-btn{background:none;border:none;font-size:.85rem;font-weight:600;color:var(--muted);cursor:pointer;padding:8px 12px;border-radius:10px;transition:var(--transition);display:flex;align-items:center;gap:6px;min-height:40px}
+.action-btn:active{transform:scale(.98);background:var(--hover)}
+.action-btn.liked{color:var(--danger)}
+.action-btn .count{font-size:.8rem;font-weight:700}
+.read-btn{margin-left:auto;background:var(--gold);color:var(--ink);border:none;border-radius:10px;padding:8px 16px;font-weight:700;font-size:.85rem;cursor:pointer;transition:var(--transition);min-height:40px;display:flex;align-items:center;gap:6px}
+.read-btn:hover{background:var(--gold2)}
+.read-btn:active{transform:scale(.98)}
 
-.empty-state{
-  text-align:center;
-  padding:60px 20px;
-  color:var(--muted);
-  background:#fff;
-  border-radius:14px;
-  border:1px solid var(--border);
-}
-.loading{
-  text-align:center;
-  padding:40px;
-  color:var(--muted);
-}
-.spinner{
-  display:inline-block;
-  width:24px;
-  height:24px;
-  border:3px solid #e2e8f0;
-  border-top-color:var(--gold);
-  border-radius:50%;
-  animation:spin .8s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ===== EMPTY/LOADING STATES ===== */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:var(--radius2)}
+.empty-state i{font-size:3rem;margin-bottom:16px;opacity:.5;color:var(--gold)}
+.empty-state p{font-size:1rem;font-weight:500;margin-bottom:8px}
+.empty-state a{color:var(--gold);font-weight:600}
+.loading{text-align:center;padding:40px 20px;color:var(--muted)}
+.loading i{font-size:2rem;margin-bottom:12px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
 
-/* ── MOBILE STYLES ── */
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,26,26,.95);color:white;padding:14px 28px;border-radius:30px;font-size:.9rem;font-weight:600;z-index:9999;transition:all .3s;opacity:0;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap;max-width:90%;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:rgba(34,197,94,.95)}
+.toast.er{background:rgba(239,68,68,.95)}
+
+/* ===== RESPONSIVE ===== */
 @media(max-width:768px){
-  .topbar{display:flex;}
-  .sidebar{
-    transform:translateX(-100%);
-    width:260px;
-  }
-  .sidebar.open{transform:translateX(0);}
-  .main{
-    margin-left:0;
-    padding:80px 16px 24px;
-  }
-  .page-title{font-size:1.8rem;}
+  .sidebar{width:260px}
+  .container{padding:16px 12px 80px}
+  .page-header h1{font-size:1.5rem}
+  .filter-tabs{padding:8px 0}
+  .filter-tab{padding:10px 14px;font-size:.85rem}
+  .post-header{padding:12px 14px}
+  .post-avatar{width:36px;height:36px;font-size:1.1rem}
+  .post-content{padding:12px 14px}
+  .post-title{font-size:1rem}
+  .post-actions{padding:10px 14px}
+  .action-btn{padding:8px 10px;font-size:.8rem}
+  .read-btn{padding:8px 14px;font-size:.8rem}
+}
+@media(max-width:480px){
+  .topbar{padding:10px 14px}
+  .logo{font-size:1.3rem}
+  .page-header h1{font-size:1.3rem}
+  .post-media img,.post-media video{max-height:250px}
+  .post-media.reel video{max-height:400px}
 }
 </style>
 </head>
 <body>
 
-<!-- MOBILE TOP BAR -->
-<div class="topbar">
-  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-  <span class="topbar-logo">EchoStack</span>
-  <div style="width:24px;"></div>
-</div>
-
 <!-- SIDEBAR OVERLAY -->
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-<!-- SIDEBAR -->
+<!-- SIDEBAR NAVIGATION -->
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">EchoStack</div>
-  <nav class="sidebar-nav">
-    <a href="/app" class="nav-item"><span class="icon">🏠</span> Home</a>
-    <a href="/explore" class="nav-item active"><span class="icon">🔍</span> Explore</a>
-    <a href="/chat" class="nav-item"><span class="icon">💬</span> Chat</a>
-    <a href="/dashboard" class="nav-item"><span class="icon">📊</span> Dashboard</a>
-    <a href="/activity" class="nav-item"><span class="icon">⚡</span> Activity</a>
-    <a href="/following" class="nav-item"><span class="icon">👥</span> Following</a>
-  </nav>
-  <div class="sidebar-footer">
-    <button onclick="logout()" class="logout-btn">
-      <span>🚪</span> Sign Out
-    </button>
+  <div class="sb-header">
+    <div class="sb-brand">
+      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
+      <div class="sb-brand-text">
+        <strong>EchoStack</strong>
+        <span>Ghana's Heritage</span>
+      </div>
+    </div>
+  </div>
+  <div class="sb-section">Navigation</div>
+  <a href="/dashboard" class="sb-item"><span class="icon"><i class="fas fa-home"></i></span> Home Feed</a>
+  <a href="/explore" class="sb-item active"><span class="icon"><i class="fas fa-compass"></i></span> Explore</a>
+  <a href="/reels.html" class="sb-item"><span class="icon"><i class="fas fa-video"></i></span> Reels</a>
+  <a href="/archive" class="sb-item"><span class="icon"><i class="fas fa-book"></i></span> Archive</a>
+  <a href="/app" class="sb-item"><span class="icon"><i class="fas fa-map"></i></span> Map</a>
+  <div class="sb-section">Create</div>
+  <a href="/creator.html" class="sb-item"><span class="icon"><i class="fas fa-pen"></i></span> New Post</a>
+  <a href="/creator.html?type=story" class="sb-item"><span class="icon"><i class="fas fa-camera"></i></span> Add Story</a>
+  <div class="sb-section">Account</div>
+  <a href="/user_profile.html" class="sb-item"><span class="icon"><i class="fas fa-user"></i></span> Profile</a>
+  <a href="/user-settings.html" class="sb-item"><span class="icon"><i class="fas fa-cog"></i></span> Settings</a>
+  <a href="/premium.html" class="sb-item"><span class="icon"><i class="fas fa-crown"></i></span> Go Premium</a>
+  <div class="sb-footer">
+    <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
 </aside>
 
-<!-- MAIN CONTENT -->
-<main class="main" id="main">
-  <h1 class="page-title">Explore</h1>
-  <p class="subtitle">Discover new stories, creators and heritage from all 16 regions.</p>
+<!-- TOPBAR -->
+<div class="topbar" id="topbar">
+  <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="logo">EchoStack</div>
+  <div class="topbar-actions">
+    <a href="/dashboard" class="topbar-btn">
+      <i class="fas fa-home"></i> Feed
+    </a>
+    <a href="/creator.html" class="topbar-btn">
+      <i class="fas fa-plus"></i> Create
+    </a>
+  </div>
+</div>
 
-  <!-- Filter tabs -->
-  <div class="filter-tabs">
-    <button class="tab active" onclick="filterByType('', this)">🌍 All</button>
-    <button class="tab" onclick="filterByType('article', this)">📰 Articles</button>
-    <button class="tab" onclick="filterByType('story', this)">📖 Stories</button>
-    <button class="tab" onclick="filterByType('video', this)">🎬 Videos</button>
-    <button class="tab" onclick="filterByType('reel', this)">📱 Reels</button>
-    <button class="tab" onclick="filterByType('premium', this)">⭐ Premium</button>
+<!-- MAIN CONTAINER -->
+<div class="container" id="app">
+  
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h1>🔍 Explore</h1>
+    <p>Discover new stories, creators, and heritage from all 16 regions of Ghana. Filter by content type or browse everything.</p>
   </div>
 
-  <!-- Loading State -->
-  <div id="loading-state" class="loading">
-    <div class="spinner"></div>
-    <p style="margin-top:10px;">Loading posts…</p>
+  <!-- FILTER TABS -->
+  <div class="filter-tabs" id="filter-tabs">
+    <button class="filter-tab active" data-filter="all">
+      <i class="fas fa-globe-africa"></i> All
+    </button>
+    <button class="filter-tab" data-filter="article">
+      <i class="fas fa-newspaper"></i> Articles
+    </button>
+    <button class="filter-tab" data-filter="story">
+      <i class="fas fa-book-open"></i> Stories
+    </button>
+    <button class="filter-tab" data-filter="video">
+      <i class="fas fa-video"></i> Videos
+    </button>
+    <button class="filter-tab" data-filter="reel">
+      <i class="fas fa-film"></i> Reels
+    </button>
+    <button class="filter-tab" data-filter="audio">
+      <i class="fas fa-music"></i> Audio
+    </button>
+    <button class="filter-tab" data-filter="premium">
+      <i class="fas fa-crown"></i> Premium
+    </button>
   </div>
 
-  <!-- Posts Container -->
-  <div id="content-container" style="display:none;"></div>
-</main>
+  <!-- LOADING STATE -->
+  <div class="loading" id="loading-state">
+    <i class="fas fa-spinner"></i>
+    <p>Loading posts…</p>
+  </div>
+
+  <!-- POSTS CONTAINER -->
+  <div class="posts-grid" id="posts-container" style="display:none"></div>
+
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast"></div>
 
 <script>
-const API_BASE = '/api';
-let allPosts = [];
-let currentFilter = ''; // '' = all, article, story, video, reel, premium
+/**
+ * ============================================
+ * ECHOSTACK EXPLORE - DISCOVERY PAGE
+ * Complete JavaScript Implementation
+ * ============================================
+ */
 
-// Check login
-document.addEventListener('DOMContentLoaded', function() {
-  const user = localStorage.getItem('es_user');
-  if (!user) {
-    window.location.href = '/user-login';
-    return;
+// ===== GLOBAL STATE =====
+const ExploreState = {
+  posts: [],
+  currentFilter: 'all',
+  isLoading: false
+};
+
+// ===== UTILS =====
+const Utils = {
+  escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  },
+  timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const diff = (Date.now() - d.getTime()) / 1000;
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  },
+  debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
   }
-  loadPosts();
-});
+};
 
-// Sidebar functions
+// ===== TOAST =====
+const Toast = {
+  element: null,
+  timeout: null,
+  init() { this.element = document.getElementById('toast'); },
+  show(message, type = '') {
+    if (!this.element) this.init();
+    this.element.textContent = message;
+    this.element.className = `toast show ${type}`;
+    if (this.timeout) clearTimeout(this.timeout);
+    this.timeout = setTimeout(() => this.element.classList.remove('show'), 3000);
+  },
+  ok(msg) { this.show(msg, 'ok'); },
+  error(msg) { this.show(msg, 'er'); }
+};
+
+// ===== SIDEBAR =====
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('sidebar-overlay').classList.toggle('show');
+  document.body.style.overflow = document.getElementById('sidebar').classList.contains('open') ? 'hidden' : '';
 }
+
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebar-overlay').classList.remove('show');
+  document.body.style.overflow = '';
 }
-// Auto‑close sidebar on mobile after clicking a nav link
-document.querySelectorAll('.sidebar-nav a').forEach(link => {
-  link.addEventListener('click', (e) => {
-    if (window.innerWidth <= 768) {
-      setTimeout(closeSidebar, 100);
-    }
-  });
-});
 
-async function loadPosts() {
+// ===== API HELPER =====
+async function apiFetch(endpoint, options = {}) {
+  const config = {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...options.headers },
+    ...options
+  };
+  
   try {
-    const res = await fetch(`${API_BASE}/posts?status=published&limit=50`);
-    const posts = await res.json();
-    if (posts && Array.isArray(posts)) {
-      allPosts = posts;
-      renderPosts(allPosts);
-    } else {
-      showEmpty('No posts yet 😢', 'Check back soon for new stories!');
+    const response = await fetch(endpoint, config);
+    if (!response.ok) {
+      if (response.status === 401) {
+        window.location.href = '/user-login.html';
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`HTTP ${response.status}`);
     }
-  } catch (err) {
-    showError(err.message);
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return await response.json();
+    }
+    return await response.text();
+  } catch (error) {
+    console.error(`API Error (${endpoint}):`, error);
+    Toast.error('Failed to load data');
+    throw error;
   }
 }
 
-function filterByType(type, btn) {
-  document.querySelectorAll('.filter-tabs .tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  currentFilter = type;
-
-  if (type === 'premium') {
-    const filtered = allPosts.filter(p => p.is_premium == 1);
-    renderPosts(filtered);
-  } else if (type === '') {
-    renderPosts(allPosts);
-  } else {
-    const filtered = allPosts.filter(p => p.content_type === type);
-    renderPosts(filtered);
-  }
-}
-
-function renderPosts(posts) {
-  const container = document.getElementById('content-container');
-  if (!posts || posts.length === 0) {
-    document.getElementById('loading-state').style.display = 'none';
-    container.innerHTML = '<div class="empty-state"><h3>No posts found</h3><p>Try a different filter.</p></div>';
-    container.style.display = 'block';
-    return;
-  }
-
-  let html = '';
-  posts.forEach(p => {
-    const date = new Date(p.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-    const authorInitial = (p.author_username || 'C')[0].toUpperCase();
-    const typeClass = p.is_premium ? 'type-premium' : ('type-' + (p.content_type || 'article'));
-    const typeLabel = p.is_premium ? 'Premium' : (p.content_type || 'article');
-
-    // Media preview
-    let mediaHtml = '';
-    if (p.content_type === 'reel') {
-      const videoUrl = p.video_url || '';
-      if (videoUrl) {
-        mediaHtml = `<div class="card-media reel" style="position:relative">
-          <video preload="none" style="width:100%;display:block;background:#000;" poster="${p.cover_image||''}">
-            <source src="${videoUrl}" type="video/mp4">
-          </video>
-          <div class="play-overlay" onclick="goPost(${p.id})">▶️</div>
-          <div class="reel-watermark">
-            <img src="/echostack-logo.png" onerror="this.style.display='none'">
-            <span>EchoStack</span>
-          </div>
-        </div>`;
-      }
-    } else if (p.content_type === 'video') {
-      const videoUrl = p.video_url || '';
-      if (videoUrl) {
-        mediaHtml = `<div class="card-media" style="position:relative">
-          <video preload="none" style="width:100%;max-height:300px;display:block;background:#000;" poster="${p.cover_image||''}">
-            <source src="${videoUrl}" type="video/mp4">
-          </video>
-          <div class="play-overlay" onclick="goPost(${p.id})">▶️</div>
-        </div>`;
-      } else if (p.cover_image) {
-        mediaHtml = `<div class="card-media"><img src="${p.cover_image}" alt="" onclick="goPost(${p.id})" style="cursor:pointer"></div>`;
-      }
-    } else if (p.cover_image) {
-      mediaHtml = `<div class="card-media"><img src="${p.cover_image}" alt="" onclick="goPost(${p.id})" style="cursor:pointer"></div>`;
-    }
-
-    const premiumBadge = p.is_locked ? `<div class="premium-banner">⭐ Premium Content — Subscribe to read</div>` : '';
-
-    html += `
-      <div class="card">
-        <div class="post-header">
-          <div class="p-av">${authorInitial}</div>
-          <div class="p-info">
-            <div class="p-name">${escapeHtml(p.author_username || 'Creator')}</div>
-            <div class="p-time">${date}</div>
-          </div>
-          <span class="post-type ${typeClass}">${typeLabel}</span>
-        </div>
-
-        <a href="/post/${p.id}" class="post-title">${escapeHtml(p.title)}</a>
-        ${p.excerpt ? `<div class="post-excerpt">${escapeHtml(p.excerpt)}</div>` : ''}
-
-        ${mediaHtml}
-        ${premiumBadge}
-
-        <div class="post-actions">
-          <button class="act-btn" onclick="quickLike(${p.id}, this)">❤️ <span class="lc">${p.likes||0}</span></button>
-          <a href="/post/${p.id}" class="act-read">Read →</a>
-        </div>
+// ===== LOAD POSTS =====
+async function loadPosts() {
+  const container = document.getElementById('posts-container');
+  const loading = document.getElementById('loading-state');
+  
+  if (ExploreState.isLoading) return;
+  ExploreState.isLoading = true;
+  
+  loading.style.display = 'block';
+  container.style.display = 'none';
+  
+  try {
+    const posts = await apiFetch('/api/posts?status=published&limit=50');
+    ExploreState.posts = posts;
+    renderPosts(posts);
+  } catch (e) {
+    console.error('Failed to load posts:', e);
+    loading.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>Failed to load posts</p>
+        <span>Pull to refresh or check your connection</span>
       </div>
     `;
-  });
+  } finally {
+    ExploreState.isLoading = false;
+  }
+}
 
-  document.getElementById('loading-state').style.display = 'none';
-  container.innerHTML = html;
+// ===== RENDER POSTS =====
+function renderPosts(posts) {
+  const container = document.getElementById('posts-container');
+  const loading = document.getElementById('loading-state');
+  
+  // Filter posts
+  let filtered = posts;
+  if (ExploreState.currentFilter === 'premium') {
+    filtered = posts.filter(p => p.is_premium);
+  } else if (ExploreState.currentFilter !== 'all') {
+    filtered = posts.filter(p => p.content_type === ExploreState.currentFilter);
+  }
+  
+  if (!filtered.length) {
+    loading.style.display = 'none';
+    container.style.display = 'block';
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-search"></i>
+        <p>No posts found</p>
+        <span>Try a different filter or check back later</span>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = filtered.map(post => {
+    const typeClass = post.is_premium ? 'premium' : (post.content_type || 'article');
+    const typeLabel = post.is_premium ? 'Premium' : (post.content_type || 'Article');
+    const initials = (post.author_username || 'U')[0].toUpperCase();
+    const likeCount = post.likes || post.likes_count || 0;
+    const commentCount = post.comments || post.comment_count || 0;
+    
+    // Media preview
+    let mediaHtml = '';
+    if (post.content_type === 'reel' && post.video_url) {
+      mediaHtml = `
+        <div class="post-media reel">
+          <video preload="none" poster="${Utils.escapeHtml(post.cover_image || '')}">
+            <source src="${Utils.escapeHtml(post.video_url)}" type="video/mp4">
+          </video>
+          <div class="play-overlay" onclick="event.stopPropagation();goPost(${post.id})">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="reel-watermark">
+            <img src="/echostack-logo.png" alt="" onerror="this.style.display='none'">
+            <span>EchoStack</span>
+          </div>
+        </div>
+      `;
+    } else if (post.content_type === 'video' && post.video_url) {
+      mediaHtml = `
+        <div class="post-media">
+          <video preload="none" poster="${Utils.escapeHtml(post.cover_image || '')}">
+            <source src="${Utils.escapeHtml(post.video_url)}" type="video/mp4">
+          </video>
+          <div class="play-overlay" onclick="event.stopPropagation();goPost(${post.id})">
+            <i class="fas fa-play"></i>
+          </div>
+        </div>
+      `;
+    } else if (post.cover_image) {
+      mediaHtml = `
+        <div class="post-media">
+          <img src="${Utils.escapeHtml(post.cover_image)}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\'fas fa-image\' style=\'font-size:2rem;color:var(--muted);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)\'></i>'">
+        </div>
+      `;
+    }
+    
+    // Premium banner
+    const premiumBanner = post.is_premium && post.is_locked ? `
+      <div class="premium-banner">
+        <i class="fas fa-crown"></i>
+        <span>Premium Content — Subscribe to read</span>
+      </div>
+    ` : '';
+    
+    return `
+      <article class="post-card" onclick="goPost(${post.id})">
+        <!-- Header -->
+        <div class="post-header">
+          <div class="post-avatar">${initials}</div>
+          <div class="post-author-info">
+            <div class="post-author">${Utils.escapeHtml(post.author_username || 'Creator')}</div>
+            <div class="post-time">${Utils.timeAgo(post.created_at)}</div>
+          </div>
+          <span class="post-type-badge ${typeClass}">${typeLabel}</span>
+        </div>
+        
+        <!-- Content -->
+        <div class="post-content">
+          <h3 class="post-title">${Utils.escapeHtml(post.title || 'Untitled')}</h3>
+          ${post.excerpt ? `<p class="post-excerpt">${Utils.escapeHtml(post.excerpt.substring(0, 150))}${post.excerpt.length > 150 ? '…' : ''}</p>` : ''}
+        </div>
+        
+        <!-- Media -->
+        ${mediaHtml}
+        
+        <!-- Premium Banner -->
+        ${premiumBanner}
+        
+        <!-- Actions -->
+        <div class="post-actions" onclick="event.stopPropagation()">
+          <button class="action-btn ${post.is_liked ? 'liked' : ''}" onclick="toggleLike(${post.id}, this)">
+            <i class="${post.is_liked ? 'fas' : 'far'} fa-heart"></i>
+            <span class="count">${likeCount}</span>
+          </button>
+          <button class="action-btn" onclick="event.stopPropagation();openComments(${post.id})">
+            <i class="far fa-comment"></i>
+            <span class="count">${commentCount}</span>
+          </button>
+          <button class="action-btn" onclick="event.stopPropagation();sharePost(${post.id})">
+            <i class="fas fa-share-alt"></i>
+            <span>Share</span>
+          </button>
+          <button class="read-btn" onclick="event.stopPropagation();goPost(${post.id})">
+            Read <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </article>
+    `;
+  }).join('');
+  
+  loading.style.display = 'none';
   container.style.display = 'block';
 }
 
-function goPost(id) {
-  window.location.href = '/post/' + id;
-}
-
-async function quickLike(postId, btn) {
-  // Quick like without reload
-  try {
-    const r = await fetch(`${API_BASE}/posts/${postId}/like`, { method: 'POST' });
-    const d = await r.json();
-    const countEl = btn.querySelector('.lc');
-    if (countEl) countEl.textContent = d.likes ?? 0;
-    btn.classList.toggle('liked', !!d.liked);
-  } catch (e) {}
-}
-
-function logout() {
-  fetch('/api/users/logout', { method:'POST' }).finally(() => {
-    localStorage.removeItem('es_user');
-    document.cookie = 'user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
-    window.location.href = '/';
+// ===== FILTER TABS =====
+function setupFilters() {
+  document.getElementById('filter-tabs').addEventListener('click', e => {
+    const tab = e.target.closest('.filter-tab');
+    if (!tab) return;
+    
+    // Update active state
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    
+    // Update filter and re-render
+    ExploreState.currentFilter = tab.dataset.filter;
+    renderPosts(ExploreState.posts);
+    
+    Toast.info(`Showing ${tab.textContent.trim()} posts`);
   });
 }
 
-function escapeHtml(text) {
-  if (!text) return '';
-  return String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+// ===== POST INTERACTIONS =====
+function goPost(postId) {
+  window.location.href = `/post.html?id=${postId}`;
 }
 
-function showEmpty(title, msg) {
-  document.getElementById('loading-state').innerHTML = `<div class="empty-state"><h3>${title}</h3><p>${msg}</p></div>`;
+async function toggleLike(postId, btn) {
+  event.stopPropagation();
+  
+  try {
+    const data = await apiFetch(`/api/posts/${postId}/like`, { method: 'POST' });
+    const countEl = btn.querySelector('.count');
+    if (countEl) countEl.textContent = data.likes || 0;
+    btn.classList.toggle('liked', data.liked);
+    btn.querySelector('i').className = data.liked ? 'fas fa-heart' : 'far fa-heart';
+    Toast.ok(data.liked ? '❤️ Liked!' : '🤍 Unliked');
+  } catch (e) {
+    Toast.error('Failed to like');
+  }
 }
-function showError(msg) {
-  document.getElementById('loading-state').innerHTML = `<div class="empty-state"><h3>Error 😞</h3><p>${escapeHtml(msg)}</p></div>`;
+
+function openComments(postId) {
+  window.location.href = `/post.html?id=${postId}#comments`;
 }
+
+function sharePost(postId) {
+  const url = `${window.location.origin}/post.html?id=${postId}`;
+  
+  if (navigator.share) {
+    navigator.share({
+      title: 'Check out this post on EchoStack',
+      url: url
+    }).catch(() => {
+      navigator.clipboard.writeText(url);
+      Toast.ok('📋 Link copied!');
+    });
+  } else {
+    navigator.clipboard.writeText(url);
+    Toast.ok('📋 Link copied!');
+  }
+}
+
+// ===== LOGOUT =====
+async function logout() {
+  if (!confirm('Are you sure you want to logout?')) return;
+  
+  try {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+  } catch (e) {
+    console.warn('Logout error:', e);
+  } finally {
+    localStorage.removeItem('es_user');
+    window.location.href = '/user-login.html';
+  }
+}
+
+// ===== TOPBAR SCROLL EFFECT =====
+function setupTopbarScroll() {
+  const topbar = document.getElementById('topbar');
+  
+  window.addEventListener('scroll', Utils.debounce(() => {
+    if (window.scrollY > 10) {
+      topbar.classList.add('scrolled');
+    } else {
+      topbar.classList.remove('scrolled');
+    }
+  }, 100));
+}
+
+// ===== PULL TO REFRESH =====
+function setupPullToRefresh() {
+  let startY = 0;
+  
+  document.addEventListener('touchstart', e => {
+    if (window.scrollY === 0) startY = e.touches[0].clientY;
+  }, { passive: true });
+  
+  document.addEventListener('touchmove', e => {
+    if (window.scrollY === 0) {
+      const diff = e.touches[0].clientY - startY;
+      if (diff > 100) {
+        loadPosts();
+        Toast.info('🔄 Refreshed');
+        startY = 0;
+      }
+    }
+  }, { passive: true });
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize toast
+  Toast.init();
+  
+  // Setup interactions
+  setupFilters();
+  setupTopbarScroll();
+  setupPullToRefresh();
+  
+  // Load posts
+  await loadPosts();
+  
+  // Handle online/offline
+  window.addEventListener('online', () => Toast.ok('🌐 Back online'));
+  window.addEventListener('offline', () => Toast.error('⚠️ You are offline'));
+  
+  // Close sidebar on scroll
+  document.querySelector('.container')?.addEventListener('scroll', () => {
+    if (document.getElementById('sidebar').classList.contains('open')) {
+      closeSidebar();
+    }
+  });
+});
 </script>
 </body>
 </html>
+
