@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="theme-color" content="#0D1B2A">
 <title>EchoStack Admin</title>
@@ -13,12 +13,12 @@
   --ink:#0D1B2A;--ink2:#0f1e2d;--gold:#C8962E;--gold2:#E8B84B;--surface:#142030;--card:#1a2d40;
   --border:rgba(255,255,255,.07);--muted:#64748B;--text:#e2e8f0;--danger:#ef4444;--success:#22c55e;
   --sidebar-w:280px;--main-bg:#f8fafc;--main-card:#ffffff;--main-border:#e2e8f0;--main-text:#1e293b;
-  --main-muted:#64748b;--main-hover:#f1f5f9;--shadow:0 2px 8px rgba(0,0,0,.08);
+  --main-muted:#64748b;--main-hover:#f1f5f9;--shadow:0 2px 8px rgba(0,0,0,.08);--radius:12px;
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);display:flex}
 
-/* SIDEBAR - Mobile Optimized */
+/* ===== SIDEBAR - ORIGINAL STRUCTURE PRESERVED ===== */
 .sidebar{
   width:var(--sidebar-w);background:var(--ink2);border-right:1px solid var(--border);
   display:flex;flex-direction:column;height:100vh;overflow-y:auto;overflow-x:hidden;
@@ -47,8 +47,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
   cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;min-height:48px;
 }
 .sb-footer button:active{background:rgba(239,68,68,.25);transform:scale(.98)}
-
-/* MAIN - Mobile First */
+/* ===== MAIN - MOBILE FIRST ===== */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;height:100vh;background:var(--main-bg);margin-left:0;width:100%}
 .topbar{
   padding:0 12px;height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
@@ -79,12 +78,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
   -webkit-overflow-scrolling:touch;padding-bottom:80px;
 }
 
-/* PANELS */
+/* ===== PANELS ===== */
 .panel{display:none;animation:fadeIn .2s ease}
 .panel.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* STATS - Mobile Grid */
+/* ===== STATS ===== */
 .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
 @media(min-width:600px){.stats-row{grid-template-columns:repeat(4,1fr);gap:12px}}
 .stat-card{
@@ -96,18 +95,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 .stat-val{font-size:1.3rem;font-weight:700;color:var(--main-text);line-height:1}
 @media(min-width:600px){.stat-val{font-size:1.5rem}}
 
-/* TABLES - Mobile Optimized */
-.table-wrap{
-  background:white;border:1px solid var(--main-border);border-radius:10px;
+/* ===== TABLES - MOBILE SCROLL FIX ===== */
+.table-wrap{  background:white;border:1px solid var(--main-border);border-radius:10px;
   overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
   box-shadow:var(--shadow);margin-bottom:16px;position:relative;
+  width:100%;
 }
 .table-wrap::after{
-  content:'→';position:absolute;bottom:6px;right:8px;font-size:1.2rem;
+  content:'↔';position:absolute;bottom:6px;right:8px;font-size:1rem;
   color:var(--gold);pointer-events:none;animation:scrollHint 1.5s ease-in-out infinite;
-  opacity:0.7;text-shadow:0 0 4px rgba(255,255,255,.8);
+  opacity:0.7;text-shadow:0 0 4px rgba(255,255,255,.8);z-index:5;
 }
-@keyframes scrollHint{0%,100%{transform:translateX(0)}50%{transform:translateX(-5px)}}
+@keyframes scrollHint{0%,100%{transform:translateX(0)}50%{transform:translateX(-4px)}}
 .table-head{
   padding:12px;border-bottom:1px solid var(--main-border);
   display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
@@ -115,8 +114,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);di
 }
 .table-head h3{font-weight:700;color:var(--main-text);font-size:.95rem}
 @media(min-width:600px){.table-head{padding:12px 16px}}
-table{width:100%;border-collapse:collapse;min-width:550px}
-@media(min-width:600px){table{min-width:650px}}
+.table-scroll{
+  overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;
+}
+table{width:100%;border-collapse:collapse;min-width:600px}
+@media(max-width:480px){table{min-width:550px;font-size:.8rem}}
 thead th{
   padding:10px 12px;text-align:left;font-size:.7rem;font-weight:700;
   text-transform:uppercase;letter-spacing:.05em;color:var(--main-muted);
@@ -133,7 +135,7 @@ tbody td{
 tbody td:last-child{white-space:nowrap}
 tbody tr:last-child{border-bottom:none}
 
-/* FORMS - Mobile Friendly */
+/* ===== FORMS ===== */
 .form-grid{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:600px){.form-grid{grid-template-columns:1fr 1fr;gap:16px}}
 .field{display:flex;flex-direction:column;gap:6px}
@@ -143,8 +145,7 @@ tbody tr:last-child{border-bottom:none}
   padding:12px;background:white;border:1.5px solid var(--main-border);
   border-radius:8px;color:var(--main-text);font-size:1rem;outline:none;
   transition:border-color .15s;min-height:44px;font-family:'DM Sans',sans-serif;
-}
-@media(min-width:600px){.field input,.field textarea,.field select{padding:12px 14px;border-radius:10px;min-height:48px}}
+}@media(min-width:600px){.field input,.field textarea,.field select{padding:12px 14px;border-radius:10px;min-height:48px}}
 .field textarea{resize:vertical;min-height:100px}
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold)}
 .form-section{
@@ -163,7 +164,7 @@ tbody tr:last-child{border-bottom:none}
 .upload-btn:active{background:rgba(200,150,46,.2);transform:scale(.98)}
 .upload-btn input{display:none}
 
-/* BADGES */
+/* ===== BADGES ===== */
 .role-badge{
   padding:4px 10px;border-radius:12px;font-size:.7rem;font-weight:700;
   text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;display:inline-block;
@@ -174,7 +175,7 @@ tbody tr:last-child{border-bottom:none}
 .role-superuser{background:rgba(200,150,46,.25);color:#a97825}
 select{background:white;color:var(--main-text);border:1px solid var(--main-border);border-radius:6px;padding:6px 8px;font-size:.8rem;cursor:pointer;outline:none;min-height:40px}
 
-/* FILE MANAGER - Mobile Grid */
+/* ===== FILE MANAGER ===== */
 .fm-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
 .fm-search{
   flex:1;min-width:160px;padding:10px 12px;background:white;border:1.5px solid var(--main-border);
@@ -193,8 +194,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
 }
 .upload-zone:active{border-color:var(--gold2);background:rgba(200,150,46,.08);transform:scale(.99)}
 .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.upload-icon{font-size:2.5rem;margin-bottom:8px}
-.upload-title{font-weight:700;color:var(--main-text);margin-bottom:4px;font-size:.95rem}
+.upload-icon{font-size:2.5rem;margin-bottom:8px}.upload-title{font-weight:700;color:var(--main-text);margin-bottom:4px;font-size:.95rem}
 .upload-sub{font-size:.8rem;color:var(--main-muted)}
 .upload-opts{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px}
 @media(min-width:500px){.upload-opts{grid-template-columns:1fr 1fr}}
@@ -243,8 +243,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
 }
 .fa-btn:active{transform:scale(.95)}
 .fa-view{background:rgba(200,150,46,.15);color:var(--gold)}
-.fa-del{background:rgba(239,68,68,.15);color:#b91c1c}
-.fa-publish{background:rgba(34,197,94,.15);color:#15803d}
+.fa-del{background:rgba(239,68,68,.15);color:#b91c1c}.fa-publish{background:rgba(34,197,94,.15);color:#15803d}
 .no-files{
   grid-column:1/-1;text-align:center;padding:32px 16px;color:var(--main-muted);
   background:white;border-radius:10px;border:2px dashed var(--main-border);
@@ -252,7 +251,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
 .no-files .no-icon{font-size:3rem;margin-bottom:12px}
 .no-files p{font-size:.9rem}
 
-/* TOAST & MODAL - Mobile */
+/* ===== TOAST & MODAL ===== */
 .toast{
   position:fixed;bottom:16px;left:16px;right:16px;max-width:400px;margin:0 auto;
   padding:12px 20px;border-radius:30px;font-size:.85rem;font-weight:600;
@@ -279,39 +278,31 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
 .modal-box video,.modal-box audio{width:100%;border-radius:8px;margin-top:8px}
 .modal-box img{width:100%;border-radius:8px;margin-top:8px;object-fit:contain;max-height:300px}
 
-/* MOBILE SIDEBAR OVERLAY */
+/* ===== MOBILE SIDEBAR ===== */
 .sidebar-overlay{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
   z-index:999;backdrop-filter:blur(3px);
 }
 .sidebar-overlay.show{display:block}
 
-/* RESPONSIVE UTILITIES */
+/* ===== RESPONSIVE ===== */
 @media(max-width:768px){
   .menu-btn{display:flex}
   .sidebar{position:fixed;left:-280px;top:0;height:100vh;z-index:2000;transition:left .25s ease}
   .sidebar.open{left:0}
   .content{padding:10px}
   .stats-row{grid-template-columns:repeat(2,1fr)}
-  .table-head{flex-direction:column;align-items:flex-start}
-  .table-head .btn{width:100%;margin-top:8px}
+  .table-head{flex-direction:column;align-items:flex-start}  .table-head .btn{width:100%;margin-top:8px}
+  .form-section{padding:14px}
 }
-
 @media(max-width:480px){
   .stat-val{font-size:1.2rem}
-  table{min-width:500px;font-size:.8rem}
+  table{min-width:520px;font-size:.8rem}
   tbody td,thead th{padding:8px 10px}
   .btn{padding:8px 10px;font-size:.75rem;min-height:38px}
   .role-badge{padding:3px 8px;font-size:.65rem}
+  .sb-item{font-size:.8rem;padding:10px 12px}
 }
-
-/* LOADING STATES */
-.loading-skeleton{
-  background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
-  background-size:200% 100%;animation:loading 1.5s infinite;
-  border-radius:4px;height:20px;
-}
-@keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 </head>
 <body>
@@ -319,7 +310,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
 <!-- SIDEBAR OVERLAY -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-<!-- SIDEBAR -->
+<!-- SIDEBAR - ORIGINAL NAVIGATION PRESERVED -->
 <aside class="sidebar" id="sidebar">
   <div class="sb-brand">
     <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
@@ -348,6 +339,9 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
   <button class="sb-item" onclick="showPanel('logs')" id="nav-logs"><span class="icon">📋</span> Activity Logs</button>
   <div class="sb-section">Visit</div>
   <a class="sb-item" href="/" target="_blank"><span class="icon">🌍</span> View Live Site ↗</a>
+  <a class="sb-item" href="/reels.html" target="_blank"><span class="icon">📱</span> Reels ↗</a>
+  <a class="sb-item" href="/app" target="_blank"><span class="icon">🗺️</span> Map ↗</a>
+  <a class="sb-item" href="/archive" target="_blank"><span class="icon">📚</span> Archive ↗</a>  <a class="sb-item" href="/explore" target="_blank"><span class="icon">🔍</span> Explore ↗</a>
   <div class="sb-footer"><button onclick="logout()">🚪 Logout</button></div>
 </aside>
 
@@ -376,7 +370,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
       <div style="display:grid;grid-template-columns:1fr;gap:16px">
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Posts</h3><button class="btn btn-ghost" onclick="showPanel('posts')" style="font-size:.8rem;padding:6px 10px">View All</button></div>
-          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <div class="table-scroll">
             <table>
               <thead><tr><th>Title</th><th>Status</th><th>Author</th></tr></thead>
               <tbody id="recent-posts-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
@@ -385,7 +379,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
         </div>
         <div class="table-wrap">
           <div class="table-head"><h3>Recent Uploads</h3><button class="btn btn-ghost" onclick="showPanel('files')" style="font-size:.8rem;padding:6px 10px">Files</button></div>
-          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <div class="table-scroll">
             <table>
               <thead><tr><th>File</th><th>Type</th><th>Size</th></tr></thead>
               <tbody id="recent-files-body"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
@@ -396,8 +390,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
     </div>
 
     <!-- FILE MANAGER -->
-    <div class="panel" id="panel-files">
-      <div class="form-section"><h4>⬆️ Upload Files</h4>
+    <div class="panel" id="panel-files">      <div class="form-section"><h4>⬆️ Upload Files</h4>
         <div class="upload-opts">
           <div class="upload-opt"><label>Category</label><select id="up-category"><option value="general">General</option><option value="video">Video</option><option value="audio">Audio</option><option value="image">Image</option><option value="document">Document</option></select></div>
           <div class="upload-opt"><label>Description</label><input type="text" id="up-desc" placeholder="What is this file?"></div>
@@ -419,7 +412,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
     <div class="panel" id="panel-regions">
       <div class="table-wrap">
         <div class="table-head"><h3>All Regions</h3><div style="display:flex;gap:8px;flex-wrap:wrap;width:100%;margin-top:8px"><button class="btn btn-gold" onclick="showNewRegionForm()" style="flex:1;min-width:120px">➕ Create</button><button class="btn btn-ghost" onclick="loadRegions()" style="flex:1;min-width:100px">🔄 Refresh</button></div></div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div class="table-scroll">
           <table>
             <thead><tr><th>#</th><th>Name</th><th>Capital</th><th>Category</th><th>Media</th><th>Actions</th></tr></thead>
             <tbody id="regions-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
@@ -446,8 +439,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
         <div style="margin-top:20px">
           <h4 style="font-weight:700;font-size:1rem;color:var(--gold);margin-bottom:12px">🖼️ Media</h4>
           <div class="form-grid">
-            <div class="field"><label>Hero Image URL</label><input type="text" id="new-reg-hero" placeholder="/uploads/image.jpg"><div class="upload-btn" onclick="document.getElementById('new-hero-upload').click()"><span>⬆️ Upload Image</span><input type="file" id="new-hero-upload" accept="image/*" onchange="uploadNewHero(this.files[0])" style="display:none"></div></div>
-            <div class="field"><label>Gallery Images (comma separated)</label><input type="text" id="new-reg-gallery" placeholder="/uploads/img1.jpg, /uploads/img2.jpg"><div class="upload-btn" onclick="document.getElementById('new-gallery-upload').click()"><span>⬆️ Upload Images</span><input type="file" id="new-gallery-upload" accept="image/*" multiple onchange="uploadNewGallery(this.files)" style="display:none"></div></div>
+            <div class="field"><label>Hero Image URL</label><input type="text" id="new-reg-hero" placeholder="/uploads/image.jpg"><div class="upload-btn" onclick="document.getElementById('new-hero-upload').click()"><span>⬆️ Upload Image</span><input type="file" id="new-hero-upload" accept="image/*" onchange="uploadNewHero(this.files[0])" style="display:none"></div></div>            <div class="field"><label>Gallery Images (comma separated)</label><input type="text" id="new-reg-gallery" placeholder="/uploads/img1.jpg, /uploads/img2.jpg"><div class="upload-btn" onclick="document.getElementById('new-gallery-upload').click()"><span>⬆️ Upload Images</span><input type="file" id="new-gallery-upload" accept="image/*" multiple onchange="uploadNewGallery(this.files)" style="display:none"></div></div>
             <div class="field"><label>Audio Files (comma separated)</label><input type="text" id="new-reg-audio" placeholder="/uploads/story.mp3"><div class="upload-btn" onclick="document.getElementById('new-audio-upload').click()"><span>⬆️ Upload Audio</span><input type="file" id="new-audio-upload" accept="audio/*" multiple onchange="uploadNewAudio(this.files)" style="display:none"></div></div>
           </div>
         </div>
@@ -490,13 +482,21 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
       </div>
     </div>
 
-    <!-- USERS -->
+    <!-- USERS - FIXED SCROLLING -->
     <div class="panel" id="panel-users">
       <div class="table-wrap">
         <div class="table-head"><h3>All Users</h3><button class="btn btn-ghost" onclick="loadUsers()">🔄 Refresh</button></div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div class="table-scroll">
           <table>
-            <thead><tr><th style="min-width:120px">Username</th><th style="min-width:180px">Email</th><th style="min-width:80px">Role</th><th style="min-width:80px">Premium</th><th style="min-width:100px">Joined</th><th style="min-width:120px">Actions</th></tr></thead>
+            <thead>              <tr>
+                <th style="min-width:120px">Username</th>
+                <th style="min-width:180px">Email</th>
+                <th style="min-width:80px">Role</th>
+                <th style="min-width:80px">Premium</th>
+                <th style="min-width:100px">Joined</th>
+                <th style="min-width:120px">Actions</th>
+              </tr>
+            </thead>
             <tbody id="users-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
           </table>
         </div>
@@ -507,7 +507,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
     <div class="panel" id="panel-creators">
       <div class="table-wrap">
         <div class="table-head"><h3>Creators</h3></div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div class="table-scroll">
           <table>
             <thead><tr><th>Username</th><th>Channel</th><th>Posts</th><th>Actions</th></tr></thead>
             <tbody id="creators-tbody"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
@@ -520,7 +520,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
     <div class="panel" id="panel-posts">
       <div class="table-wrap">
         <div class="table-head"><h3>All Posts</h3><button class="btn btn-ghost" onclick="loadPosts()">🔄 Refresh</button></div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div class="table-scroll">
           <table>
             <thead><tr><th>Title</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th>Actions</th></tr></thead>
             <tbody id="posts-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
@@ -533,12 +533,11 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
     <div class="panel" id="panel-stories">
       <div class="table-wrap">
         <div class="table-head"><h3>Story Submissions</h3><button class="btn btn-ghost" onclick="loadStories()">🔄 Refresh</button></div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div class="table-scroll">
           <table>
             <thead><tr><th>Title</th><th>Author</th><th>Region</th><th>Status</th><th>Date</th></tr></thead>
             <tbody id="stories-tbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
-          </table>
-        </div>
+          </table>        </div>
       </div>
     </div>
 
@@ -546,7 +545,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
     <div class="panel" id="panel-newsletter">
       <div class="table-wrap">
         <div class="table-head"><h3>Newsletter Subscribers</h3><button class="btn btn-ghost" onclick="loadNewsletter()">🔄 Refresh</button></div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div class="table-scroll">
           <table>
             <thead><tr><th>#</th><th>Email</th><th>Joined</th></tr></thead>
             <tbody id="newsletter-tbody"><tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading…</td></tr></tbody>
@@ -568,7 +567,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
       </div>
       <div class="table-wrap">
         <div class="table-head"><h3>Events</h3></div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div class="table-scroll">
           <table>
             <thead><tr><th>Title</th><th>Location</th><th>Date</th><th>Actions</th></tr></thead>
             <tbody id="events-tbody"></tbody>
@@ -587,8 +586,7 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
       </div>
       <div class="table-wrap">
         <div class="table-head"><h3>Categories</h3></div>
-        <div id="cats-list" style="padding:12px"></div>
-      </div>
+        <div id="cats-list" style="padding:12px"></div>      </div>
     </div>
 
     <!-- CHAT -->
@@ -633,12 +631,11 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
     <div class="panel" id="panel-logs">
       <div class="table-wrap">
         <div class="table-head"><h3>Admin Activity Logs</h3><button class="btn btn-ghost" onclick="loadLogs()">🔄 Refresh</button></div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div class="table-scroll">
           <table style="min-width:600px;width:100%">
             <thead><tr><th>Time</th><th>Admin</th><th>Action</th><th>Target</th><th>Details</th><th>IP</th></tr></thead>
             <tbody id="logs-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">Loading logs...</td></tr></tbody>
-          </table>
-        </div>
+          </table>        </div>
       </div>
     </div>
 
@@ -668,7 +665,7 @@ let allFiles=[],allRegions=[],allUsers=[],allPosts=[],allCreators=[],allStories=
 let currentPanel='overview';
 
 // ===== UTILS =====
-function escapeHtml(str){if(!str)return'';return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function escapeHtml(str){if(!str)return'';return String(str).replace(/[&<>"']/g,m=>({'&':'&','<':'<','>':'>','"':'"',"'":'''}[m]))}
 function timeAgo(dateStr){if(!dateStr)return'—';const date=new Date(dateStr),now=new Date(),diff=Math.floor((now-date)/1000);if(diff<60)return`${diff}s ago`;if(diff<3600)return`${Math.floor(diff/60)}m ago`;if(diff<86400)return`${Math.floor(diff/3600)}h ago`;return`${Math.floor(diff/86400)}d ago`}
 function toast(msg,type=''){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.className=`toast show ${type}`;setTimeout(()=>el.classList.remove('show'),3000)}
 
@@ -687,8 +684,7 @@ function showPanel(panel){
   if(panel==='files'&&!allFiles.length)loadFiles();
   if(panel==='regions'&&!allRegions.length)loadRegions();
   if(panel==='users')loadUsers();
-  if(panel==='creators')loadCreators();
-  if(panel==='posts')loadPosts();
+  if(panel==='creators')loadCreators();  if(panel==='posts')loadPosts();
   if(panel==='stories')loadStories();
   if(panel==='newsletter')loadNewsletter();
   if(panel==='events')loadEvents();
@@ -737,8 +733,7 @@ async function loadRecentFiles(){
     if(!files.length){tbody.innerHTML='<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">No uploads yet</td></tr>';return}
     tbody.innerHTML=files.slice(0,6).map(f=>{
       const icon=getFileIcon(f),size=f.file_size_mb?`${f.file_size_mb} MB`:`${f.file_size_kb||0} KB`,name=escapeHtml((f.original_name||f.filename||'file').substring(0,25));
-      return`<tr><td>${icon} ${name}</td><td><span class="role-badge role-${f.category||'general'}">${f.category||'general'}</span></td><td>${size}</td></tr>`
-    }).join('');
+      return`<tr><td>${icon} ${name}</td><td><span class="role-badge role-${f.category||'general'}">${f.category||'general'}</span></td><td>${size}</td></tr>`    }).join('');
   }catch(e){tbody.innerHTML='<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--danger)">⚠️ Failed</td></tr>'}
 }
 function getFileIcon(f){const mime=f.mime_type||'',cat=f.category||'';if(mime.startsWith('video')||cat==='video')return'🎬';if(mime.startsWith('audio')||cat==='audio')return'🎵';if(mime.startsWith('image')||cat==='image')return'🖼️';if(cat==='document')return'📄';return'📦'}
@@ -787,8 +782,7 @@ async function handleFiles(fileList){
       const fd=new FormData();fd.append('file',file);fd.append('filename',file.name);fd.append('category',cat);fd.append('description',desc);fd.append('is_public',document.getElementById('up-public').value);
       let prog=0;const ticker=setInterval(()=>{prog=Math.min(prog+8,90);const bar=document.getElementById(rowId+'-bar'),status=document.getElementById(rowId+'-status');if(bar)bar.style.width=prog+'%';if(status)status.textContent=prog+'%'},200);
       const r=await fetch('/api/upload/file',{method:'POST',body:fd,credentials:'include'});clearInterval(ticker);const d=await r.json();
-      const bar=document.getElementById(rowId+'-bar'),status=document.getElementById(rowId+'-status'),row=document.getElementById(rowId);
-      if(r.ok&&d.success){if(bar)bar.style.width='100%';if(status){status.textContent='✅ Done';status.style.color='var(--success)'}toast(`✅ ${file.name} uploaded!`,'ok');await loadFiles();await loadStats()}else throw new Error(d.detail||'Upload failed');
+      const bar=document.getElementById(rowId+'-bar'),status=document.getElementById(rowId+'-status'),row=document.getElementById(rowId);      if(r.ok&&d.success){if(bar)bar.style.width='100%';if(status){status.textContent='✅ Done';status.style.color='var(--success)'}toast(`✅ ${file.name} uploaded!`,'ok');await loadFiles();await loadStats()}else throw new Error(d.detail||'Upload failed');
       setTimeout(()=>{if(row)row.remove()},3000)
     }catch(err){
       const status=document.getElementById(rowId+'-status'),bar=document.getElementById(rowId+'-bar');
@@ -837,8 +831,7 @@ async function saveRegion(){
   const id=document.getElementById('reg-id').value,fd=new FormData();
   ['name','capital','population','terrain','description','category','tags','source','overview'].forEach(k=>{fd.append(k,document.getElementById('reg-'+k).value)});
   fd.append('hero_image',document.getElementById('reg-hero').value);fd.append('gallery_images',document.getElementById('reg-gallery').value);fd.append('audio_files',document.getElementById('reg-audio').value);
-  try{
-    const method=id?'PUT':'POST',url=id?`/api/regions/${id}`:'/api/regions',r=await fetch(url,{method,body:fd,credentials:'include'}),d=await r.json();
+  try{    const method=id?'PUT':'POST',url=id?`/api/regions/${id}`:'/api/regions',r=await fetch(url,{method,body:fd,credentials:'include'}),d=await r.json();
     if(r.ok&&d.success){toast('✅ Region saved!','ok');loadRegions();showPanel('regions')}else throw new Error(d.detail||'Save failed')
   }catch(e){toast('❌ '+e.message,'er')}
 }
@@ -859,14 +852,27 @@ async function saveNewRegion(){
   }catch(e){toast('❌ '+e.message,'er')}
 }
 
-// ===== USERS =====
+// ===== USERS - FIXED SCROLLING =====
 async function loadUsers(){
   const tbody=document.getElementById('users-tbody');if(!tbody)return;
   tbody.innerHTML='<tr><td colspan="6" style="padding:20px;text-align:center">⏳ Loading…</td></tr>';
   try{
     allUsers=await apiFetch('/api/admin/users');
     if(!allUsers.length){tbody.innerHTML='<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--main-muted)">No users found</td></tr>';return}
-    tbody.innerHTML=allUsers.map(u=>`<tr><td>${escapeHtml(u.username)}</td><td style="word-break:break-all">${escapeHtml(u.email)}</td><td><span class="role-badge role-${u.role}">${u.role}</span></td><td><input type="checkbox" ${u.is_premium?'checked':''} onchange="togglePremium(${u.id},this.checked)" style="min-width:18px;min-height:18px"></td><td>${new Date(u.created_at).toLocaleDateString()}</td><td><select onchange="changeRole(${u.id},this.value)" style="padding:6px 4px;min-height:36px;font-size:.75rem"><option ${u.role==='user'?'selected':''}>user</option><option ${u.role==='creator'?'selected':''}>creator</option><option ${u.role==='admin'?'selected':''}>admin</option></select></td></tr>`).join('')
+    tbody.innerHTML=allUsers.map(u=>`<tr>
+      <td style="min-width:120px">${escapeHtml(u.username)}</td>
+      <td style="min-width:180px;word-break:break-all">${escapeHtml(u.email)}</td>
+      <td style="min-width:80px"><span class="role-badge role-${u.role}">${u.role}</span></td>
+      <td style="min-width:80px"><input type="checkbox" ${u.is_premium?'checked':''} onchange="togglePremium(${u.id},this.checked)" style="min-width:18px;min-height:18px"></td>
+      <td style="min-width:100px">${new Date(u.created_at).toLocaleDateString()}</td>
+      <td style="min-width:120px;white-space:nowrap">
+        <select onchange="changeRole(${u.id},this.value)" style="padding:6px 4px;min-height:36px;font-size:.75rem;width:100%">
+          <option ${u.role==='user'?'selected':''}>user</option>
+          <option ${u.role==='creator'?'selected':''}>creator</option>
+          <option ${u.role==='admin'?'selected':''}>admin</option>
+        </select>
+      </td>
+    </tr>`).join('');
   }catch(e){tbody.innerHTML='<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--danger)">⚠️ Failed</td></tr>'}
 }
 async function togglePremium(userId,checked){try{await apiFetch(`/api/admin/users/${userId}/premium`,{method:'POST',body:JSON.stringify({premium:checked})});toast(`Premium ${checked?'enabled':'disabled'}`,'ok')}catch(e){toast('Error updating premium','er');loadUsers()}}
@@ -874,8 +880,7 @@ async function changeRole(userId,newRole){try{await apiFetch(`/api/admin/users/$
 
 // ===== CREATORS =====
 async function loadCreators(){
-  const tbody=document.getElementById('creators-tbody');if(!tbody)return;
-  tbody.innerHTML='<tr><td colspan="4" style="padding:20px;text-align:center">⏳ Loading…</td></tr>';
+  const tbody=document.getElementById('creators-tbody');if(!tbody)return;  tbody.innerHTML='<tr><td colspan="4" style="padding:20px;text-align:center">⏳ Loading…</td></tr>';
   try{
     allCreators=await apiFetch('/api/admin/creators');
     if(!allCreators.length){tbody.innerHTML='<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No creators yet</td></tr>';return}
@@ -924,8 +929,7 @@ async function loadEvents(){
   tbody.innerHTML='<tr><td colspan="4" style="padding:20px;text-align:center">⏳ Loading…</td></tr>';
   try{
     allEvents=await apiFetch('/api/events');
-    if(!allEvents.length){tbody.innerHTML='<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No events yet</td></tr>';return}
-    tbody.innerHTML=allEvents.map(e=>`<tr><td>${escapeHtml(e.title)}</td><td>${escapeHtml(e.location)}</td><td>${new Date(e.event_date).toLocaleString()}</td><td><button class="btn btn-danger" onclick="deleteEvent(${e.id})" style="font-size:.75rem;padding:6px 8px">Delete</button></td></tr>`).join('')
+    if(!allEvents.length){tbody.innerHTML='<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No events yet</td></tr>';return}    tbody.innerHTML=allEvents.map(e=>`<tr><td>${escapeHtml(e.title)}</td><td>${escapeHtml(e.location)}</td><td>${new Date(e.event_date).toLocaleString()}</td><td><button class="btn btn-danger" onclick="deleteEvent(${e.id})" style="font-size:.75rem;padding:6px 8px">Delete</button></td></tr>`).join('')
   }catch(e){tbody.innerHTML='<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--danger)">⚠️ Failed</td></tr>'}
 }
 async function addEvent(){
@@ -974,8 +978,7 @@ async function savePost(){
   try{
     const r=await fetch('/api/posts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),credentials:'include'});
     if(r.ok){toast('Post saved!','ok');document.getElementById('wp-title').value='';document.getElementById('wp-excerpt').value='';document.getElementById('wp-content').value='';document.getElementById('wp-cover').value='';document.getElementById('wp-tags').value=''}else throw new Error('Failed')
-  }catch(e){toast('Error saving post','er')}
-}
+  }catch(e){toast('Error saving post','er')}}
 async function uploadCover(file){if(!file)return;const fd=new FormData();fd.append('file',file);fd.append('category','image');fd.append('is_public','1');try{const r=await fetch('/api/upload/file',{method:'POST',body:fd,credentials:'include'}),d=await r.json();if(r.ok&&d.url){document.getElementById('wp-cover').value=d.url;toast('Cover uploaded','ok')}else throw new Error('Upload failed')}catch(e){toast('Cover upload failed','er')}}
 
 // ===== ACTIVITY LOGS =====
@@ -999,4 +1002,3 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
-
