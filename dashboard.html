@@ -9,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* ===== RESET & BASE ===== */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
   --ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--surface:#fafafa;--card:#ffffff;
@@ -17,266 +16,123 @@
   --hover:#f5f5f5;--shadow:0 1px 3px rgba(0,0,0,.08);--radius:12px;
 }
 html,body{height:100%;scroll-behavior:smooth}
-body{
-  font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);
-  padding-bottom:env(safe-area-inset-bottom);line-height:1.5;
-}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);padding-bottom:env(safe-area-inset-bottom);line-height:1.5;}
 
-/* ===== TOP BAR - MINIMAL ===== */
-.topbar{
-  position:sticky;top:0;z-index:100;background:var(--card);
-  border-bottom:1px solid var(--border);padding:12px 16px;
-  display:flex;align-items:center;justify-content:space-between;
-  box-shadow:0 1px 4px rgba(0,0,0,.05);
-}
-.menu-btn{
-  background:none;border:none;font-size:1.4rem;color:var(--text);
-  cursor:pointer;padding:8px;min-width:44px;min-height:44px;border-radius:8px;
-}
+/* TOP BAR */
+.topbar{position:sticky;top:0;z-index:100;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.menu-btn{background:none;border:none;font-size:1.4rem;color:var(--text);cursor:pointer;padding:8px;min-width:44px;min-height:44px;border-radius:8px;}
 .menu-btn:active{background:var(--hover)}
 .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--ink);letter-spacing:-.5px}
-.create-btn{
-  background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);
-  border:none;border-radius:30px;padding:10px 20px;font-weight:700;
-  cursor:pointer;min-height:44px;font-size:.9rem;transition:all .15s;
-}
+.create-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);border:none;border-radius:30px;padding:10px 20px;font-weight:700;cursor:pointer;min-height:44px;font-size:.9rem;transition:all .15s;}
 .create-btn:active{transform:scale(.96)}
 
-/* ===== STORIES - INSTAGRAM STYLE ===== */
-.stories-container{
-  background:var(--card);border-bottom:1px solid var(--border);
-  padding:16px 0;overflow-x:auto;-webkit-overflow-scrolling:touch;
-  scrollbar-width:none;margin-bottom:8px;
-}
+/* STORIES - ALL 16 REGIONS */
+.stories-container{background:var(--card);border-bottom:1px solid var(--border);padding:16px 0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:8px;}
 .stories-container::-webkit-scrollbar{display:none}
-.stories-list{display:flex;gap:16px;padding:0 16px;min-width:max-content}
-.story{
-  display:flex;flex-direction:column;align-items:center;width:72px;cursor:pointer;
-}
-.story-ring{
-  width:68px;height:68px;border-radius:50%;padding:3px;
-  background:linear-gradient(45deg,var(--gold),var(--gold2));
-  display:flex;align-items:center;justify-content:center;
-  transition:all .2s;
-}
+.stories-list{display:flex;gap:14px;padding:0 16px;min-width:max-content}
+.story{display:flex;flex-direction:column;align-items:center;width:70px;cursor:pointer;}
+.story-ring{width:66px;height:66px;border-radius:50%;padding:3px;background:linear-gradient(45deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;transition:all .2s;}
 .story:active .story-ring{transform:scale(.95)}
-.story-avatar{
-  width:100%;height:100%;border-radius:50%;background:var(--hover);
-  display:flex;align-items:center;justify-content:center;font-size:1.6rem;
-  border:3px solid var(--card);object-fit:cover;
-}
-.story-name{
-  font-size:.75rem;font-weight:500;margin-top:6px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px;
-  color:var(--text);
-}
+.story-avatar{width:100%;height:100%;border-radius:50%;background:var(--hover);display:flex;align-items:center;justify-content:center;font-size:1.7rem;border:3px solid var(--card);object-fit:cover;}
+.story-name{font-size:.7rem;font-weight:500;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px;color:var(--text);}
 .story.unseen .story-ring{background:linear-gradient(45deg,var(--gold),var(--gold2))}
 .story.seen .story-ring{background:var(--border)}
 
-/* ===== CREATE POST - MINIMAL ===== */
-.create-post{
-  background:var(--card);border-bottom:1px solid var(--border);
-  padding:14px 16px;display:flex;gap:12px;align-items:center;
-}
-.create-post-avatar{
-  width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));
-  display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:white;flex-shrink:0;
-}
-.create-post-input{
-  flex:1;background:var(--hover);border:none;border-radius:24px;
-  padding:12px 18px;font-size:1rem;outline:none;min-height:44px;
-  color:var(--text);
-}
+/* CREATE POST */
+.create-post{background:var(--card);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;gap:12px;align-items:center;}
+.create-post-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:white;flex-shrink:0;}
+.create-post-input{flex:1;background:var(--hover);border:none;border-radius:24px;padding:12px 18px;font-size:1rem;outline:none;min-height:44px;color:var(--text);}
 .create-post-input::placeholder{color:var(--muted)}
 
-/* ===== FILTER TABS - CLEAN ===== */
-.filter-tabs{
-  display:flex;gap:8px;overflow-x:auto;padding:12px 16px;
-  -webkit-overflow-scrolling:touch;scrollbar-width:none;
-  background:var(--card);border-bottom:1px solid var(--border);
-  position:sticky;top:57px;z-index:90;
-}
+/* FILTER TABS */
+.filter-tabs{display:flex;gap:8px;overflow-x:auto;padding:12px 16px;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:57px;z-index:90;}
 .filter-tabs::-webkit-scrollbar{display:none}
-.filter-tab{
-  background:var(--hover);border:none;border-radius:20px;
-  padding:8px 18px;font-size:.85rem;font-weight:600;cursor:pointer;
-  white-space:nowrap;color:var(--muted);transition:all .15s;min-height:40px;
-}
+.filter-tab{background:var(--hover);border:none;border-radius:20px;padding:8px 18px;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--muted);transition:all .15s;min-height:40px;}
 .filter-tab:active{transform:scale(.98)}
-.filter-tab.active{
-  background:var(--ink);color:white;
-}
+.filter-tab.active{background:var(--ink);color:white;}
 
-/* ===== POST CARD - SOCIAL MEDIA STYLE ===== */
+/* FEED */
 .feed{padding:0;max-width:600px;margin:0 auto}
-.post-card{
-  background:var(--card);border-bottom:1px solid var(--border);
-  margin-bottom:0;transition:all .2s;
-}
+.post-card{background:var(--card);border-bottom:1px solid var(--border);margin-bottom:0;transition:all .2s;}
 .post-card:active{background:#fafafa}
-
-/* Post Header */
-.post-header{
-  display:flex;align-items:center;gap:12px;padding:12px 16px;
-}
-.post-avatar{
-  width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));
-  display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:white;flex-shrink:0;
-}
+.post-header{display:flex;align-items:center;gap:12px;padding:12px 16px;}
+.post-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:white;flex-shrink:0;}
 .post-author-info{flex:1;min-width:0}
 .post-author{font-weight:700;font-size:.95rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .post-time{font-size:.75rem;color:var(--muted);margin-top:1px}
 .post-more{color:var(--muted);background:none;border:none;font-size:1.2rem;cursor:pointer;padding:8px;min-width:44px;min-height:44px}
-
-/* Post Media */
-.post-media{
-  width:100%;position:relative;background:#000;
-  display:flex;align-items:center;justify-content:center;
-}
-.post-media img,.post-media video{
-  width:100%;display:block;max-height:600px;object-fit:cover;
-}
+.post-media{width:100%;position:relative;background:#000;display:flex;align-items:center;justify-content:center;}
+.post-media img,.post-media video{width:100%;display:block;max-height:600px;object-fit:cover;}
 .post-media video{background:#000}
-
-/* Audio Card */
-.card-audio{
-  background:var(--surface);padding:16px;border-top:1px solid var(--border);
-}
-.card-audio .audio-title{
-  font-size:.9rem;font-weight:600;margin-bottom:10px;color:var(--text);
-  display:flex;align-items:center;gap:8px;
-}
+.card-audio{background:var(--surface);padding:16px;border-top:1px solid var(--border);}
+.card-audio .audio-title{font-size:.9rem;font-weight:600;margin-bottom:10px;color:var(--text);display:flex;align-items:center;gap:8px;}
 .card-audio audio{width:100%;height:40px;border-radius:20px}
-
-/* Post Content */
 .post-content{padding:12px 16px}
-.post-title{
-  font-size:1.1rem;font-weight:700;margin-bottom:6px;color:var(--text);
-  line-height:1.3;
-}
-.post-excerpt{
-  color:var(--text);font-size:.95rem;line-height:1.5;
-  word-wrap:break-word;white-space:pre-wrap;
-}
-.post-caption{
-  margin-top:10px;font-size:.95rem;color:var(--text);line-height:1.5;
-}
+.post-title{font-size:1.1rem;font-weight:700;margin-bottom:6px;color:var(--text);line-height:1.3;}
+.post-excerpt{color:var(--text);font-size:.95rem;line-height:1.5;word-wrap:break-word;white-space:pre-wrap;}
+.post-caption{margin-top:10px;font-size:.95rem;color:var(--text);line-height:1.5;}
 .post-caption .author{font-weight:700;margin-right:6px}
 .post-hashtags{color:var(--ink);font-weight:500}
-
-/* Post Actions */
-.post-actions{
-  display:flex;gap:4px;padding:8px 12px;
-}
-.action-btn{
-  background:none;border:none;font-size:1.4rem;
-  color:var(--text);cursor:pointer;padding:8px;
-  min-width:44px;min-height:44px;border-radius:8px;
-  transition:all .15s;display:flex;align-items:center;justify-content:center;
-}
+.post-actions{display:flex;gap:4px;padding:8px 12px;}
+.action-btn{background:none;border:none;font-size:1.4rem;color:var(--text);cursor:pointer;padding:8px;min-width:44px;min-height:44px;border-radius:8px;transition:all .15s;display:flex;align-items:center;justify-content:center;}
 .action-btn:active{transform:scale(1.15);background:var(--hover)}
 .action-btn.liked{color:var(--danger)}
 .action-btn.saved{color:var(--gold)}
-
-/* Post Stats */
 .post-stats{padding:0 16px;font-size:.85rem;font-weight:600;color:var(--text)}
 .post-stats .likes{margin-right:12px}
 .post-stats .comments{margin-right:12px}
-
-/* Reel Watermark */
 .reel-container{position:relative}
-.watermark{
-  position:absolute;bottom:12px;right:12px;
-  background:rgba(13,27,42,.85);color:white;padding:6px 12px;
-  border-radius:20px;font-size:.75rem;font-weight:700;
-  backdrop-filter:blur(4px);z-index:10;
-}
+.watermark{position:absolute;bottom:12px;right:12px;background:rgba(13,27,42,.85);color:white;padding:6px 12px;border-radius:20px;font-size:.75rem;font-weight:700;backdrop-filter:blur(4px);z-index:10;}
 
-/* ===== SIDEBAR - CLEAN ===== */
-.sidebar{
-  width:280px;background:var(--card);color:var(--text);
-  position:fixed;left:0;top:0;height:100vh;overflow-y:auto;
-  transform:translateX(-100%);transition:transform .3s ease;z-index:2000;
-  -webkit-overflow-scrolling:touch;box-shadow:2px 0 12px rgba(0,0,0,.1);
-}
+/* SIDEBAR */
+.sidebar{width:280px;background:var(--card);color:var(--text);position:fixed;left:0;top:0;height:100vh;overflow-y:auto;transform:translateX(-100%);transition:transform .3s ease;z-index:2000;-webkit-overflow-scrolling:touch;box-shadow:2px 0 12px rgba(0,0,0,.1);}
 .sidebar.open{transform:translateX(0)}
-.sb-header{
-  padding:20px 16px;border-bottom:1px solid var(--border);
-}
+.sb-header{padding:20px 16px;border-bottom:1px solid var(--border);}
 .sb-brand{display:flex;align-items:center;gap:12px}
 .sb-brand img{width:36px;height:36px;border-radius:8px}
 .sb-brand-text strong{display:block;font-size:1.1rem;font-weight:700;color:var(--ink)}
 .sb-brand-text span{font-size:.7rem;color:var(--muted)}
 .sb-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.sb-item{
-  display:flex;align-items:center;gap:12px;padding:12px 16px;
-  color:var(--text);text-decoration:none;transition:all .15s;
-  font-size:.95rem;font-weight:500;border-radius:8px;margin:2px 8px;
-  min-height:48px;
-}
+.sb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;color:var(--text);text-decoration:none;transition:all .15s;font-size:.95rem;font-weight:500;border-radius:8px;margin:2px 8px;min-height:48px;}
 .sb-item:hover{background:var(--hover)}
 .sb-item.active{background:rgba(200,150,46,.15);color:var(--gold);font-weight:600}
 .sb-item .icon{width:24px;text-align:center;font-size:1.1rem}
 .sb-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border)}
-.sb-footer button{
-  width:100%;padding:12px;border-radius:8px;background:rgba(239,68,68,.1);
-  border:1px solid rgba(239,68,68,.2);color:var(--danger);font-size:.95rem;font-weight:600;
-  cursor:pointer;min-height:48px;transition:all .15s;
-}
+.sb-footer button{width:100%;padding:12px;border-radius:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--danger);font-size:.95rem;font-weight:600;cursor:pointer;min-height:48px;transition:all .15s;}
 .sb-footer button:active{background:rgba(239,68,68,.2)}
-
-/* ===== SIDEBAR OVERLAY ===== */
-.sidebar-overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
-  z-index:1999;backdrop-filter:blur(2px);
-}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1999;backdrop-filter:blur(2px);}
 .sidebar-overlay.show{display:block}
 
-/* ===== TOAST ===== */
-.toast{
-  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:rgba(26,26,26,.95);color:white;padding:14px 24px;
-  border-radius:30px;font-size:.9rem;font-weight:600;
-  z-index:9999;transition:all .3s;opacity:0;pointer-events:none;
-  box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap;
-}
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,26,26,.95);color:white;padding:14px 24px;border-radius:30px;font-size:.9rem;font-weight:600;z-index:9999;transition:all .3s;opacity:0;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ===== LOADING ===== */
-.loading{
-  display:flex;align-items:center;justify-content:center;padding:40px 20px;
-}
-.loading-spinner{
-  width:32px;height:32px;border:3px solid var(--border);
-  border-top-color:var(--gold);border-radius:50%;
-  animation:spin 1s linear infinite;
-}
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+.loading-spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ===== EMPTY STATE ===== */
-.empty-state{
-  text-align:center;padding:60px 20px;color:var(--muted);
-}
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
 .empty-state i{font-size:3.5rem;margin-bottom:16px;color:var(--gold);opacity:.6}
 .empty-state p{font-size:1rem;font-weight:500;margin-bottom:8px}
 .empty-state span{font-size:.9rem}
 
-/* ===== MOBILE ===== */
 @media(max-width:480px){
   .topbar{padding:10px 14px}
   .logo{font-size:1.3rem}
-  .stories-list{padding:0 14px;gap:14px}
-  .story{width:68px}
-  .story-ring{width:64px;height:64px}
+  .stories-list{padding:0 14px;gap:12px}
+  .story{width:66px}
+  .story-ring{width:62px;height:62px}
+  .story-avatar{font-size:1.5rem}
+  .story-name{font-size:.65rem}
   .post-header{padding:10px 14px}
   .post-avatar{width:36px;height:36px;font-size:1.2rem}
   .post-content{padding:10px 14px}
   .post-title{font-size:1rem}
-  .post-excerpt{font-size:.9rem}
   .filter-tabs{padding:10px 14px;top:53px}
 }
 
-/* ===== DESKTOP ===== */
 @media(min-width:768px){
   .feed{padding:20px 0}
   .post-card{border-radius:var(--radius);border:1px solid var(--border);margin-bottom:16px;overflow:hidden}
@@ -287,72 +143,51 @@ body{
 </head>
 <body>
 
-<!-- SIDEBAR OVERLAY -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sb-header">
     <div class="sb-brand">
       <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-      <div class="sb-brand-text">
-        <strong>EchoStack</strong>
-        <span>Ghana's Heritage</span>
-      </div>
+      <div class="sb-brand-text"><strong>EchoStack</strong><span>Ghana's Heritage</span></div>
     </div>
   </div>
-  
   <div class="sb-section">Menu</div>
   <a href="/dashboard" class="sb-item active"><span class="icon"><i class="fas fa-home"></i></span> Home</a>
   <a href="/explore" class="sb-item"><span class="icon"><i class="fas fa-compass"></i></span> Explore</a>
   <a href="/reels.html" class="sb-item"><span class="icon"><i class="fas fa-video"></i></span> Reels</a>
   <a href="/archive" class="sb-item"><span class="icon"><i class="fas fa-book"></i></span> Archive</a>
   <a href="/app" class="sb-item"><span class="icon"><i class="fas fa-map"></i></span> Map</a>
-  
   <div class="sb-section">Create</div>
   <a href="/creator.html" class="sb-item"><span class="icon"><i class="fas fa-pen"></i></span> New Post</a>
   <a href="/creator.html?type=story" class="sb-item"><span class="icon"><i class="fas fa-camera"></i></span> Add Story</a>
-  
   <div class="sb-section">Account</div>
   <a href="/user_profile.html" class="sb-item"><span class="icon"><i class="fas fa-user"></i></span> Profile</a>
   <a href="/user-settings.html" class="sb-item"><span class="icon"><i class="fas fa-cog"></i></span> Settings</a>
   <a href="/premium.html" class="sb-item"><span class="icon"><i class="fas fa-crown"></i></span> Premium</a>
-  
-  <div class="sb-footer">
-    <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-  </div>
+  <div class="sb-footer"><button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
 </aside>
 
-<!-- TOP BAR -->
 <div class="topbar">
   <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
   <div class="logo">EchoStack</div>
   <button class="create-btn" onclick="window.location.href='/creator.html'"><i class="fas fa-plus"></i> Create</button>
 </div>
 
-<!-- STORIES (Instagram Style - User Stories Only) -->
+<!-- STORIES - ALL 16 REGIONS -->
 <div class="stories-container">
   <div class="stories-list" id="stories-list">
-    <!-- Loading skeleton -->
-    <div class="story">
-      <div class="story-ring"><div class="story-avatar" style="background:#e5e5e5"></div></div>
-    </div>
-    <div class="story">
-      <div class="story-ring"><div class="story-avatar" style="background:#e5e5e5"></div></div>
-    </div>
-    <div class="story">
-      <div class="story-ring"><div class="story-avatar" style="background:#e5e5e5"></div></div>
-    </div>
+    <div class="story"><div class="story-ring"><div class="story-avatar" style="background:#e5e5e5"></div></div></div>
+    <div class="story"><div class="story-ring"><div class="story-avatar" style="background:#e5e5e5"></div></div></div>
+    <div class="story"><div class="story-ring"><div class="story-avatar" style="background:#e5e5e5"></div></div></div>
   </div>
 </div>
 
-<!-- CREATE POST -->
 <div class="create-post">
   <div class="create-post-avatar"><i class="fas fa-user"></i></div>
   <input type="text" class="create-post-input" id="create-prompt-input" placeholder="What's on your mind?">
 </div>
 
-<!-- FILTER TABS -->
 <div class="filter-tabs" id="filter-tabs">
   <div class="filter-tab active" data-filter="all">For You</div>
   <div class="filter-tab" data-filter="following">Following</div>
@@ -361,40 +196,23 @@ body{
   <div class="filter-tab" data-filter="reel">Reels</div>
 </div>
 
-<!-- FEED -->
 <div class="feed" id="posts-feed">
-  <!-- Loading -->
-  <div class="loading">
-    <div class="loading-spinner"></div>
-  </div>
+  <div class="loading"><div class="loading-spinner"></div></div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== UTILS =====
+// UTILS
 function escapeHtml(str){if(!str)return'';return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function timeAgo(dateStr){
-  if(!dateStr)return'';
-  const date=new Date(dateStr),now=new Date(),diff=Math.floor((now-date)/1000);
-  if(diff<60)return`${diff}s`;if(diff<3600)return`${Math.floor(diff/60)}m`;
-  if(diff<86400)return`${Math.floor(diff/3600)}h`;return`${Math.floor(diff/86400)}d`
-}
-function toast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),2500)
-}
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('show');
-}
+function timeAgo(dateStr){if(!dateStr)return'';const date=new Date(dateStr),now=new Date(),diff=Math.floor((now-date)/1000);if(diff<60)return`${diff}s`;if(diff<3600)return`${Math.floor(diff/60)}m`;if(diff<86400)return`${Math.floor(diff/3600)}h`;return`${Math.floor(diff/86400)}d`}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500)}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show');}
 
-// ===== STATE =====
+// STATE
 let currentFilter='all',posts=[],stories=[];
 
-// ===== API =====
+// API
 async function apiFetch(endpoint,options={}){
   try{
     const res=await fetch(endpoint,{credentials:'include',...options});
@@ -403,72 +221,53 @@ async function apiFetch(endpoint,options={}){
   }catch(e){console.error(e);throw e}
 }
 
-// ===== LOAD STORIES (User Stories Like Instagram) =====
+// LOAD STORIES - ALL 16 REGIONS
 async function loadStories(){
-  try{
-    // Fetch actual user stories from API
-    stories=await apiFetch('/api/stories/active');
-    const list=document.getElementById('stories-list');
-    
-    if(!stories.length){
-      // Show demo stories if none exist
-      stories=[
-        {id:0,user:{username:'You',avatar:null},unseen:true},
-        {id:1,user:{username:'Ashanti',avatar:null},unseen:true},
-        {id:2,user:{username:'Volta',avatar:null},unseen:true},
-        {id:3,user:{username:'Northern',avatar:null},unseen:false},
-        {id:4,user:{username:'Eastern',avatar:null},unseen:false},
-        {id:5,user:{username:'Western',avatar:null},unseen:false}
-      ];
-    }
-    
-    // Add "Your Story" first
-    const yourStory=`<div class="story unseen" onclick="openYourStory()">
-      <div class="story-ring">
-        <div class="story-avatar"><i class="fas fa-plus" style="color:var(--gold);font-size:1.2rem"></i></div>
+  const list=document.getElementById('stories-list');
+  
+  // ALL 16 REGIONS OF GHANA
+  const allRegions=[
+    {id:1,name:'Ashanti',emoji:'👑',color:'#C8962E'},
+    {id:2,name:'Brong-Ahafo',emoji:'🌾',color:'#22c55e'},
+    {id:3,name:'Central',emoji:'🏛️',color:'#3b82f6'},
+    {id:4,name:'Eastern',emoji:'🏔️',color:'#10b981'},
+    {id:5,name:'Greater Accra',emoji:'🏙️',color:'#ef4444'},
+    {id:6,name:'Northern',emoji:'🦁',color:'#f59e0b'},
+    {id:7,name:'Upper East',emoji:'🌅',color:'#f97316'},
+    {id:8,name:'Upper West',emoji:'🌄',color:'#8b5cf6'},
+    {id:9,name:'Volta',emoji:'🌊',color:'#06b6d4'},
+    {id:10,name:'Western',emoji:'🌴',color:'#14b8a6'},
+    {id:11,name:'Ahafo',emoji:'🌳',color:'#84cc16'},
+    {id:12,name:'Bono',emoji:'🪘',color:'#eab308'},
+    {id:13,name:'Bono East',emoji:'🌻',color:'#fbbf24'},
+    {id:14,name:'North East',emoji:'☀️',color:'#fb923c'},
+    {id:15,name:'Oti',emoji:'🦋',color:'#a78bfa'},
+    {id:16,name:'Savannah',emoji:'🌾',color:'#34d399'},
+    {id:17,name:'Western North',emoji:'🏞️',color:'#2dd4bf'}
+  ];
+  
+  // Your Story (Add Story)
+  let html=`<div class="story unseen" onclick="openYourStory()">
+    <div class="story-ring"><div class="story-avatar"><i class="fas fa-plus" style="color:var(--gold);font-size:1.1rem"></i></div></div>
+    <div class="story-name">Your Story</div>
+  </div>`;
+  
+  // All 16 Regions
+  allRegions.forEach((r,i)=>{
+    const unseen=i<5?'unseen':'seen';
+    const displayName=r.name.length>10?r.name.substring(0,9)+'..':r.name;
+    html+=`<div class="story ${unseen}" onclick="viewRegion(${r.id},'${r.name}')">
+      <div class="story-ring" style="background:linear-gradient(45deg,${r.color},var(--gold2))">
+        <div class="story-avatar" style="font-size:1.6rem">${r.emoji}</div>
       </div>
-      <div class="story-name">Your Story</div>
+      <div class="story-name">${displayName}</div>
     </div>`;
-    
-    const userStories=stories.map(s=>`
-      <div class="story ${s.unseen?'unseen':'seen'}" onclick="viewStory(${s.id})">
-        <div class="story-ring">
-          <div class="story-avatar">${s.user.avatar?`<img src="${s.user.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:'<i class="fas fa-user"></i>'}</div>
-        </div>
-        <div class="story-name">${escapeHtml(s.user.username)}</div>
-      </div>
-    `).join('');
-    
-    list.innerHTML=yourStory+userStories;
-  }catch(e){
-    // Fallback demo stories
-    const list=document.getElementById('stories-list');
-    list.innerHTML=`
-      <div class="story unseen" onclick="openYourStory()">
-        <div class="story-ring"><div class="story-avatar"><i class="fas fa-plus" style="color:var(--gold);font-size:1.2rem"></i></div></div>
-        <div class="story-name">Your Story</div>
-      </div>
-      <div class="story unseen" onclick="viewStory(1)">
-        <div class="story-ring"><div class="story-avatar">👑</div></div>
-        <div class="story-name">Ashanti</div>
-      </div>
-      <div class="story unseen" onclick="viewStory(2)">
-        <div class="story-ring"><div class="story-avatar">🌊</div></div>
-        <div class="story-name">Volta</div>
-      </div>
-      <div class="story seen" onclick="viewStory(3)">
-        <div class="story-ring"><div class="story-avatar">🦁</div></div>
-        <div class="story-name">Northern</div>
-      </div>
-      <div class="story seen" onclick="viewStory(4)">
-        <div class="story-ring"><div class="story-avatar">🏔️</div></div>
-        <div class="story-name">Eastern</div>
-      </div>
-    `;
-  }
+  });
+  
+  list.innerHTML=html;
 }
 
-// ===== LOAD POSTS =====
+// LOAD POSTS
 async function loadPosts(){
   const feed=document.getElementById('posts-feed');
   feed.innerHTML='<div class="loading"><div class="loading-spinner"></div></div>';
@@ -478,28 +277,15 @@ async function loadPosts(){
     posts=await apiFetch(url);
     renderPosts();
   }catch(e){
-    feed.innerHTML=`
-      <div class="empty-state">
-        <i class="fas fa-wifi"></i>
-        <p>Failed to load posts</p>
-        <span>Pull down to refresh</span>
-      </div>
-    `;
+    feed.innerHTML=`<div class="empty-state"><i class="fas fa-wifi"></i><p>Failed to load posts</p><span>Pull down to refresh</span></div>`;
   }
 }
 
-// ===== RENDER POSTS =====
+// RENDER POSTS
 function renderPosts(){
   const feed=document.getElementById('posts-feed');
-  
   if(!posts.length){
-    feed.innerHTML=`
-      <div class="empty-state">
-        <i class="fas fa-inbox"></i>
-        <p>No posts yet</p>
-        <span>Follow creators or check back later</span>
-      </div>
-    `;
+    feed.innerHTML=`<div class="empty-state"><i class="fas fa-inbox"></i><p>No posts yet</p><span>Follow creators or check back later</span></div>`;
     return;
   }
   
@@ -512,82 +298,52 @@ function renderPosts(){
     const commentCount=post.comments_count||0;
     
     let mediaHtml='';
-    
     if(isReel&&mediaUrl){
-      mediaHtml=`<div class="post-media reel-container">
-        <video src="${mediaUrl}" controls playsinline style="width:100%;max-height:500px;object-fit:contain"></video>
-        <div class="watermark"><i class="fas fa-water"></i> EchoStack</div>
-      </div>`;
+      mediaHtml=`<div class="post-media reel-container"><video src="${mediaUrl}" controls playsinline style="width:100%;max-height:500px;object-fit:contain"></video><div class="watermark"><i class="fas fa-water"></i> EchoStack</div></div>`;
     }else if(isVideo&&mediaUrl){
       mediaHtml=`<div class="post-media"><video src="${mediaUrl}" controls style="width:100%;max-height:500px;object-fit:cover"></video></div>`;
     }else if(isAudio&&mediaUrl){
-      mediaHtml=`<div class="card-audio">
-        <div class="audio-title"><i class="fas fa-music" style="color:var(--gold)"></i> ${escapeHtml(post.title||'Audio')}</div>
-        <audio controls src="${mediaUrl}"></audio>
-      </div>`;
+      mediaHtml=`<div class="card-audio"><div class="audio-title"><i class="fas fa-music" style="color:var(--gold)"></i> ${escapeHtml(post.title||'Audio')}</div><audio controls src="${mediaUrl}"></audio></div>`;
     }else if(post.cover_image){
       mediaHtml=`<div class="post-media"><img src="${post.cover_image}" alt="" loading="lazy" style="width:100%;max-height:500px;object-fit:cover"></div>`;
     }
     
-    return`
-      <article class="post-card" data-post-id="${post.id}">
-        <div class="post-header">
-          <div class="post-avatar"><i class="fas fa-user"></i></div>
-          <div class="post-author-info">
-            <div class="post-author">${escapeHtml(post.author_username||'User')}</div>
-            <div class="post-time">${timeAgo(post.created_at)}</div>
-          </div>
-          <button class="post-more"><i class="fas fa-ellipsis"></i></button>
+    return`<article class="post-card" data-post-id="${post.id}">
+      <div class="post-header">
+        <div class="post-avatar"><i class="fas fa-user"></i></div>
+        <div class="post-author-info">
+          <div class="post-author">${escapeHtml(post.author_username||'User')}</div>
+          <div class="post-time">${timeAgo(post.created_at)}</div>
         </div>
-        
-        ${mediaHtml}
-        
-        <div class="post-actions">
-          <button class="action-btn like-btn ${post.is_liked?'liked':''}" onclick="toggleLike(${post.id},this)">
-            <i class="fas fa-heart"></i>
-          </button>
-          <button class="action-btn" onclick="openComments(${post.id})">
-            <i class="fas fa-comment"></i>
-          </button>
-          <button class="action-btn" onclick="sharePost(${post.id})">
-            <i class="fas fa-share"></i>
-          </button>
-          <button class="action-btn" style="margin-left:auto" onclick="savePost(${post.id})">
-            <i class="fas fa-bookmark"></i>
-          </button>
-        </div>
-        
-        <div class="post-stats">
-          <span class="likes">${likeCount.toLocaleString()} likes</span>
-          <span class="comments">${commentCount} comments</span>
-        </div>
-        
-        <div class="post-content">
-          <div class="post-caption">
-            <span class="author">${escapeHtml(post.author_username||'User')}</span>
-            <span>${escapeHtml(post.excerpt||post.content?.substring(0,150)||'')}</span>
-          </div>
-          ${post.tags&&post.tags.length?`<div class="post-hashtags">${post.tags.map(t=>`#${escapeHtml(t)}`).join(' ')}</div>`:''}
-          <div class="post-time" style="margin-top:8px;text-transform:uppercase;font-size:.7rem">${timeAgo(post.created_at)} ago</div>
-        </div>
-      </article>
-    `;
+        <button class="post-more"><i class="fas fa-ellipsis"></i></button>
+      </div>
+      ${mediaHtml}
+      <div class="post-actions">
+        <button class="action-btn like-btn ${post.is_liked?'liked':''}" onclick="toggleLike(${post.id},this)"><i class="fas fa-heart"></i></button>
+        <button class="action-btn" onclick="openComments(${post.id})"><i class="fas fa-comment"></i></button>
+        <button class="action-btn" onclick="sharePost(${post.id})"><i class="fas fa-share"></i></button>
+        <button class="action-btn" style="margin-left:auto" onclick="savePost(${post.id})"><i class="fas fa-bookmark"></i></button>
+      </div>
+      <div class="post-stats"><span class="likes">${likeCount.toLocaleString()} likes</span><span class="comments">${commentCount} comments</span></div>
+      <div class="post-content">
+        <div class="post-caption"><span class="author">${escapeHtml(post.author_username||'User')}</span><span>${escapeHtml(post.excerpt||post.content?.substring(0,150)||'')}</span></div>
+        ${post.tags&&post.tags.length?`<div class="post-hashtags">${post.tags.map(t=>`#${escapeHtml(t)}`).join(' ')}</div>`:''}
+        <div class="post-time" style="margin-top:8px;text-transform:uppercase;font-size:.7rem">${timeAgo(post.created_at)} ago</div>
+      </div>
+    </article>`;
   }).join('');
 }
 
-// ===== ACTIONS =====
+// ACTIONS
 function openYourStory(){toast('📸 Open camera to add story');window.location.href='/creator.html?type=story'}
-function viewStory(id){toast(`📖 Opening story...`);window.location.href=`/story.html?id=${id}`}
+function viewRegion(id,name){toast(`📍 Exploring ${name}`);window.location.href=`/app?region=${id}`}
 function toggleLike(id,btn){btn.classList.toggle('liked');toast(btn.classList.contains('liked')?'❤️ Liked':'🤍 Unliked')}
 function openComments(id){window.location.href=`/post.html?id=${id}#comments`}
-function sharePost(id){
-  const url=`${window.location.origin}/post.html?id=${id}`;
-  navigator.clipboard.writeText(url);toast(' Link copied')
-}
+function sharePost(id){const url=`${window.location.origin}/post.html?id=${id}`;navigator.clipboard.writeText(url);toast('📋 Link copied')}
 function savePost(id){toast('💾 Saved')}
 function logout(){window.location.href='/user-login.html'}
 
-// ===== FILTERS =====
+// FILTERS
 document.getElementById('filter-tabs').addEventListener('click',e=>{
   if(e.target.classList.contains('filter-tab')){
     document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
@@ -597,7 +353,7 @@ document.getElementById('filter-tabs').addEventListener('click',e=>{
   }
 });
 
-// ===== PULL TO REFRESH =====
+// PULL TO REFRESH
 let startY=0;
 document.addEventListener('touchstart',e=>{if(window.scrollY===0)startY=e.touches[0].clientY},{passive:true});
 document.addEventListener('touchmove',e=>{
@@ -607,7 +363,7 @@ document.addEventListener('touchmove',e=>{
   }
 },{passive:true});
 
-// ===== INIT =====
+// INIT
 document.addEventListener('DOMContentLoaded',()=>{
   loadStories();
   loadPosts();
