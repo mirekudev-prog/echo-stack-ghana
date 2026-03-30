@@ -339,13 +339,30 @@ SUPABASE_KEY    = os.getenv("SUPABASE_SERVICE_KEY", "")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
 HF_TOKEN        = os.getenv("HF_TOKEN", "")
 PAYSTACK_SECRET = os.getenv("PAYSTACK_SECRET_KEY", "")
+SUPERUSER_EMAIL = "memmanuel06@outlook.com"
 
 # ─── HELPERS ──────────────────────────────────────────────────────────────────
 def slugify(t: str) -> str:
     return re.sub(r'[^a-z0-9]+', '-', t.lower()).strip('-')[:80]
-
+    
 def _is_admin(request: Request) -> bool:
-    return request.cookies.get("admin_session") == "ADMIN_AUTHORIZED"
+    # First, check the admin cookie (for normal admins)
+    if request.cookies.get("admin_session") == "ADMIN_AUTHORIZED":
+        return True
+
+    # Then, check if the logged‑in user is the hardcoded superuser
+    sid = request.cookies.get("user_session")
+    if sid:
+        # We need a DB session – but this function is called often and we don't have a DB session here.
+        # However, we can pass `db` only when needed. Since _is_admin is called in many endpoints,
+        # we'll have to pass the DB session as an argument, or we can fetch the user inside the endpoint.
+        # To keep it simple, we'll not rely on DB inside _is_admin; instead we'll add a separate check in the endpoints.
+        # But many endpoints already have `db`. We'll refactor _is_admin to accept an optional `db` param,
+        # but that would require changing many calls. Alternative: we'll add a helper that checks superuser.
+        # For now, we'll not change _is_admin; we'll handle superuser in the login endpoint.
+        # See below for login endpoint changes.
+        pass
+    return False
 
 def _get_user(request: Request, db: Session):
     """Return User row from user_session cookie, or None."""
@@ -779,8 +796,19 @@ async def user_login(
         if getattr(u, "is_suspended", 0):
             raise HTTPException(403, "Account suspended. Contact support.")
 
-        # Check email verification (skip for admins/superusers)
+        # --- HARDCODED SUPERUSER CHECK ---
+        SUPERUSER_EMAIL = "memmanuel06@outlook.com"  # define this constant at top of file
         role = getattr(u, "role", "user") or "user"
+        is_superuser = (u.email == SUPERUSER_EMAIL)
+        if is_superuser:
+            role = "superuser"
+            # Also set admin_session cookie for admin dashboard access
+            admin_cookie = True
+        else:
+            admin_cookie = False
+        # ---------------------------------
+
+        # Check email verification (skip for admins/superusers)
         if not getattr(u, "email_verified", False) and role not in ("admin", "superuser"):
             raise HTTPException(403, "UNVERIFIED: Please verify your email before logging in. Check your inbox.")
 
@@ -797,6 +825,12 @@ async def user_login(
         })
         resp.set_cookie("user_session", str(u.id),
                         max_age=86400 * 30, path="/", httponly=False, samesite="lax")
+
+        if admin_cookie:
+            resp.set_cookie("admin_session", "ADMIN_AUTHORIZED",
+                            max_age=86400 * 7, path="/", httponly=False, samesite="Lax", secure=True)
+            resp.set_cookie("admin_user", u.username, max_age=86400 * 7, path="/", httponly=False, samesite="Lax", secure=True)
+
         return resp
 
     except HTTPException:
