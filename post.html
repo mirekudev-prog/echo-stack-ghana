@@ -2,189 +2,336 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0D1B2A">
+    <meta name="description" content="Read post on EchoStack">
     <title>EchoStack — Post</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'DM Sans',sans-serif;background:#F0F2F5;color:#1e293b}
-        .container{max-width:720px;margin:0 auto;padding:20px 16px 40px}
-        .back-btn{display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;color:#C8962E;text-decoration:none;font-weight:600}
-
-        /* Post header */
-        .post-header{margin-bottom:24px}
-        .post-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#0D1B2A;margin-bottom:8px;line-height:1.2}
-        .post-meta{display:flex;align-items:center;gap:10px;color:#64748b;font-size:.85rem;margin-bottom:8px;flex-wrap:wrap}
-        .post-type-badge{
-            padding:4px 10px;
-            border-radius:20px;
-            font-size:.7rem;
-            font-weight:700;
-            text-transform:uppercase;
-            letter-spacing:.03em;
-            background:#EFF6FF;
-            color:#2563EB;
-            display:inline-block;
+        /* ===== CSS VARIABLES & RESET ===== */
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        :root{
+            --ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--surface:#fafafa;--card:#ffffff;
+            --border:#e5e5e5;--text:#1a1a1a;--muted:#8e8e93;--danger:#ef4444;--success:#22c55e;
+            --hover:#f5f5f5;--shadow:0 1px 3px rgba(0,0,0,.08);--radius:12px;
         }
+        html,body{height:100%;scroll-behavior:smooth}
+        body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);line-height:1.5;padding-bottom:env(safe-area-inset-bottom);}
+        
+        /* ===== SIDEBAR (Same as Dashboard) ===== */
+        .sidebar{width:280px;background:var(--card);color:var(--text);position:fixed;left:0;top:0;height:100vh;overflow-y:auto;transform:translateX(-100%);transition:all .3s ease;z-index:2000;box-shadow:0 0 20px rgba(0,0,0,.1);}
+        .sidebar.open{transform:translateX(0)}
+        .sb-header{padding:20px 16px;border-bottom:1px solid var(--border);}
+        .sb-brand{display:flex;align-items:center;gap:12px}
+        .sb-brand img{width:40px;height:40px;border-radius:10px}
+        .sb-brand-text strong{display:block;font-size:1.1rem;font-weight:700;color:var(--ink)}
+        .sb-brand-text span{font-size:.7rem;color:var(--muted)}
+        .sb-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+        .sb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;color:var(--text);text-decoration:none;transition:all .15s;font-size:.95rem;font-weight:500;border-radius:8px;margin:2px 8px;min-height:48px;}
+        .sb-item:hover{background:var(--hover)}
+        .sb-item.active{background:rgba(200,150,46,.15);color:var(--gold);font-weight:600}
+        .sb-item .icon{width:24px;text-align:center;font-size:1.1rem}
+        .sb-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border)}
+        .sb-footer button{width:100%;padding:12px;border-radius:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--danger);font-size:.95rem;font-weight:600;cursor:pointer;min-height:48px;}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1999;backdrop-filter:blur(2px);}
+        .sidebar-overlay.show{display:block}
+        
+        /* ===== TOPBAR ===== */
+        .topbar{position:sticky;top:0;z-index:1000;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);}
+        .menu-btn{background:none;border:none;font-size:1.4rem;color:var(--text);cursor:pointer;padding:8px;min-width:44px;min-height:44px;border-radius:8px;}
+        .menu-btn:active{background:var(--hover)}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--ink);letter-spacing:-.5px}
+        .topbar-actions{display:flex;gap:8px}
+        .action-btn-top{background:var(--hover);border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--text);cursor:pointer;transition:all .15s;}
+        .action-btn-top:active{transform:scale(.95);background:var(--hover)}
+        .action-btn-top.liked{color:var(--danger)}
+        .action-btn-top.saved{color:var(--gold)}
+        
+        /* ===== MAIN CONTAINER ===== */
+        .container{max-width:720px;margin:0 auto;padding:20px 16px 80px}
+        
+        /* ===== POST HEADER ===== */
+        .post-header{margin-bottom:24px;background:var(--card);padding:20px;border-radius:var(--radius);border:1px solid var(--border);}
+        .post-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--ink);margin-bottom:12px;line-height:1.2}
+        .post-meta{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.85rem;margin-bottom:12px;flex-wrap:wrap}
+        .post-type-badge{padding:4px 12px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;background:#EFF6FF;color:#2563EB;display:inline-block;}
         .post-type-badge.video{background:#FDF2F8;color:#9333EA;}
         .post-type-badge.reel{background:#FCE7F3;color:#B21E6C;}
         .post-type-badge.audio{background:#F0FDF4;color:#16A34A;}
-        .post-type-badge.premium{background:rgba(201,147,58,.15);color:#c9933a;}
-
-        /* Cover image */
-        .post-cover{width:100%;border-radius:16px;margin-bottom:24px;max-height:400px;object-fit:cover}
-
-        /* Video player (for video/reel) */
-        .video-container{
-            width:100%;
-            background:#000;
-            border-radius:16px;
-            overflow:hidden;
-            margin-bottom:24px;
-            position:relative;
-        }
-        .video-container video{
-            width:100%;
-            display:block;
-            max-height:70vh;
-            object-fit:contain;
-            background:#000;
-        }
-        .video-container.reel video{
-            max-height:80vh;
-            aspect-ratio:9/16;
-            object-fit:cover;
-            margin:0 auto;
-        }
-        .reel-watermark{
-            position:absolute;
-            bottom:12px;
-            right:12px;
-            background:rgba(0,0,0,.65);
-            border-radius:20px;
-            padding:5px 12px;
-            display:flex;
-            align-items:center;
-            gap:6px;
-            z-index:20;
-            pointer-events:none;
-            backdrop-filter:blur(2px);
-            border:1px solid rgba(255,255,255,.15);
-        }
-        .reel-watermark img{
-            height:18px;
-            width:auto;
-        }
-        .reel-watermark span{
-            color:white;
-            font-size:0.7rem;
-            font-weight:600;
-            letter-spacing:0.5px;
-        }
-
-        /* Post content (markdown) */
-        .post-content{font-size:.95rem;line-height:1.8;color:#334155;margin-bottom:32px}
+        .post-type-badge.premium{background:rgba(200,150,46,.15);color:var(--gold);}
+        
+        /* ===== AUTHOR CARD ===== */
+        .author-card{display:flex;align-items:center;gap:12px;padding:16px;background:var(--surface);border-radius:var(--radius);margin-bottom:20px;}
+        .author-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:white;font-weight:700;flex-shrink:0;}
+        .author-info{flex:1}
+        .author-name{font-weight:700;color:var(--text);font-size:1rem}
+        .author-meta{font-size:.8rem;color:var(--muted);margin-top:2px}
+        .follow-btn{background:var(--gold);color:var(--ink);border:none;border-radius:20px;padding:8px 16px;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .15s;min-height:36px;}
+        .follow-btn:active{transform:scale(.96)}
+        .follow-btn.following{background:var(--surface);border:1px solid var(--border)}
+        
+        /* ===== MEDIA CONTAINERS ===== */
+        .post-cover{width:100%;border-radius:var(--radius);margin-bottom:24px;max-height:400px;object-fit:cover;border:1px solid var(--border);}
+        .video-container{width:100%;background:#000;border-radius:var(--radius);overflow:hidden;margin-bottom:24px;position:relative;}
+        .video-container video{width:100%;display:block;max-height:70vh;object-fit:contain;background:#000;}
+        .video-container.reel video{max-height:80vh;aspect-ratio:9/16;object-fit:cover;margin:0 auto;}
+        .reel-watermark{position:absolute;bottom:12px;right:12px;background:rgba(13,27,42,.85);border-radius:20px;padding:6px 12px;display:flex;align-items:center;gap:6px;z-index:20;pointer-events:none;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.15);}
+        .reel-watermark img{height:18px;width:auto;}
+        .reel-watermark span{color:white;font-size:.7rem;font-weight:700;letter-spacing:.5px;}
+        .audio-container{background:var(--surface);padding:20px;border-radius:var(--radius);margin-bottom:24px;border:1px solid var(--border);}
+        .audio-container audio{width:100%;height:44px;border-radius:22px;}
+        
+        /* ===== POST CONTENT (MARKDOWN) ===== */
+        .post-content{font-size:.95rem;line-height:1.8;color:var(--text);margin-bottom:32px;background:var(--card);padding:24px;border-radius:var(--radius);border:1px solid var(--border);}
         .post-content p{margin-bottom:1.2rem}
-        .post-content h2{font-family:'Playfair Display',serif;font-size:1.4rem;margin:2rem 0 .8rem}
-        .post-content h3{font-size:1.1rem;margin:1.5rem 0 .6rem;font-weight:700}
-        .post-content img{max-width:100%;border-radius:12px;margin:1rem 0}
+        .post-content h2{font-family:'Playfair Display',serif;font-size:1.4rem;margin:2rem 0 .8rem;color:var(--ink)}
+        .post-content h3{font-size:1.1rem;margin:1.5rem 0 .6rem;font-weight:700;color:var(--ink)}
+        .post-content img{max-width:100%;border-radius:12px;margin:1rem 0;border:1px solid var(--border)}
         .post-content video,.post-content audio{width:100%;border-radius:8px;margin:1rem 0}
-        .post-content blockquote{border-left:4px solid #C8962E;background:#f9f5eb;padding:.8rem 1.2rem;border-radius:0 8px 8px 0;font-style:italic;margin:1rem 0}
+        .post-content blockquote{border-left:4px solid var(--gold);background:#f9f5eb;padding:.8rem 1.2rem;border-radius:0 8px 8px 0;font-style:italic;margin:1rem 0;color:var(--text)}
         .post-content pre{background:#1e293b;color:#e2e8f0;padding:1rem;border-radius:10px;overflow-x:auto}
-        .post-content code{background:#e2e8f0;padding:2px 6px;border-radius:4px;font-size:.85rem}
-
-        .loading{text-align:center;padding:40px;color:#94a3b8}
-        .error{text-align:center;padding:40px;color:#dc2626}
-
-        /* Comments section */
-        .comments-section{background:white;border-radius:16px;padding:20px;margin-top:32px;border:1px solid #E2E8F0}
+        .post-content code{background:#e2e8f0;padding:2px 6px;border-radius:4px;font-size:.85rem;color:var(--ink)}
+        
+        /* ===== ACTION BUTTONS ===== */
+        .post-actions{display:flex;gap:8px;padding:16px;background:var(--card);border-radius:var(--radius);margin-bottom:24px;border:1px solid var(--border);}
+        .action-btn{flex:1;background:none;border:none;font-size:1.3rem;color:var(--muted);cursor:pointer;padding:10px;border-radius:10px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;min-height:48px;}
+        .action-btn:active{transform:scale(.98);background:var(--hover)}
+        .action-btn.liked{color:var(--danger)}
+        .action-btn.saved{color:var(--gold)}
+        .action-btn span{font-size:.85rem}
+        
+        /* ===== COMMENTS SECTION ===== */
+        .comments-section{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);}
+        .comments-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+        .comments-header h3{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--ink)}
+        .comments-count{background:var(--surface);padding:4px 12px;border-radius:20px;font-size:.8rem;color:var(--muted);font-weight:600}
         .comment-form{display:flex;gap:12px;margin-bottom:24px}
-        .comment-input{flex:1;padding:12px 16px;border:1.5px solid #E2E8F0;border-radius:24px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none}
-        .comment-input:focus{border-color:#C8962E}
-        .comment-submit{padding:12px 24px;background:#C8962E;color:white;border:none;border-radius:24px;font-weight:600;cursor:pointer;white-space:nowrap}
+        .comment-input{flex:1;padding:12px 18px;border:1.5px solid var(--border);border-radius:24px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .15s;min-height:44px;}
+        .comment-input:focus{border-color:var(--gold)}
+        .comment-submit{padding:12px 24px;background:var(--gold);color:var(--ink);border:none;border-radius:24px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;min-height:44px;}
         .comment-submit:disabled{opacity:.6;cursor:not-allowed}
-        .comment{display:flex;gap:12px;margin-bottom:16px}
-        .comment-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#C8962E,#E8B84B);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0}
+        .comment-submit:active{transform:scale(.96)}
+        .comment{display:flex;gap:12px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+        .comment:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+        .comment-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0;font-size:.9rem;}
         .comment-content{flex:1}
-        .comment-header{display:flex;justify-content:space-between;margin-bottom:4px}
-        .comment-author{font-weight:600;color:#0D1B2A}
-        .comment-time{font-size:.7rem;color:#94A3B8}
-        .comment-body{font-size:.85rem;color:#334155;line-height:1.5;margin-bottom:8px}
-        .comment-actions{display:flex;gap:12px;font-size:.75rem;color:#94A3B8}
-        .comment-action{cursor:pointer;display:flex;align-items:center;gap:4px;transition:color .15s}
-        .comment-action:hover{color:#C8962E}
-        .comment-likes{display:flex;align-items:center;gap:4px}
-        .reply-form{display:flex;gap:8px;margin-top:8px;margin-bottom:16px;margin-left:48px}
-        .reply-input{flex:1;padding:8px 12px;border:1.5px solid #E2E8F0;border-radius:20px;font-size:.8rem;outline:none}
-        .reply-input:focus{border-color:#C8962E}
-        .reply-submit{padding:8px 16px;background:#C8962E;color:white;border:none;border-radius:20px;font-weight:600;font-size:.75rem;cursor:pointer}
-        .replies{margin-left:48px;margin-top:8px}
-        @media(max-width:500px){
-            .reply-form{margin-left:0}
-            .replies{margin-left:0}
+        .comment-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+        .comment-author{font-weight:700;color:var(--text);font-size:.95rem}
+        .comment-time{font-size:.75rem;color:var(--muted)}
+        .comment-body{font-size:.9rem;color:var(--text);line-height:1.5;margin-bottom:10px}
+        .comment-actions{display:flex;gap:16px;font-size:.8rem;color:var(--muted)}
+        .comment-action{cursor:pointer;display:flex;align-items:center;gap:6px;transition:color .15s;font-weight:500;}
+        .comment-action:hover{color:var(--gold)}
+        .reply-form{display:flex;gap:8px;margin-top:12px;margin-bottom:16px;margin-left:52px;}
+        .reply-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:.85rem;outline:none;transition:border-color .15s;min-height:40px;}
+        .reply-input:focus{border-color:var(--gold)}
+        .reply-submit{padding:10px 18px;background:var(--gold);color:var(--ink);border:none;border-radius:20px;font-weight:600;font-size:.8rem;cursor:pointer;transition:all .15s;min-height:40px;}
+        .reply-submit:active{transform:scale(.96)}
+        .replies{margin-left:52px;margin-top:16px;padding-left:16px;border-left:2px solid var(--border);}
+        .reply{display:flex;gap:12px;margin-bottom:16px;}
+        .reply:last-child{margin-bottom:0}
+        .no-comments{text-align:center;color:var(--muted);padding:40px 20px;}
+        .no-comments i{font-size:3rem;margin-bottom:12px;opacity:.5;color:var(--gold)}
+        
+        /* ===== LOADING & ERROR STATES ===== */
+        .loading{text-align:center;padding:60px 20px;color:var(--muted);}
+        .loading i{font-size:2.5rem;margin-bottom:16px;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+        .error{text-align:center;padding:60px 20px;color:var(--danger);}
+        .error i{font-size:3rem;margin-bottom:16px}
+        .error button{margin-top:16px;padding:10px 20px;background:var(--gold);color:var(--ink);border:none;border-radius:8px;font-weight:600;cursor:pointer;}
+        
+        /* ===== TOAST ===== */
+        .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,26,26,.95);color:white;padding:14px 28px;border-radius:30px;font-size:.9rem;font-weight:600;z-index:9999;transition:all .3s;opacity:0;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap;}
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+        .toast.ok{background:rgba(34,197,94,.95)}
+        .toast.er{background:rgba(239,68,68,.95)}
+        
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:768px){
+            .sidebar{width:260px}
+            .post-title{font-size:1.5rem}
+            .post-content{padding:16px}
+            .comments-section{padding:16px}
+            .reply-form,.replies{margin-left:0}
+            .replies{border-left:none;padding-left:0}
+        }
+        @media(max-width:480px){
+            .post-title{font-size:1.3rem}
+            .post-header{padding:16px}
+            .author-card{padding:12px}
+            .post-content{padding:16px;font-size:.9rem}
+            .action-btn{font-size:1.1rem;padding:8px}
+            .comment-actions{gap:12px;font-size:.75rem}
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 </head>
 <body>
+    <!-- SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sb-header">
+            <div class="sb-brand">
+                <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
+                <div class="sb-brand-text">
+                    <strong>EchoStack</strong>
+                    <span>Ghana's Heritage</span>
+                </div>
+            </div>
+        </div>
+        <div class="sb-section">Navigation</div>
+        <a href="/dashboard" class="sb-item"><span class="icon"><i class="fas fa-home"></i></span> Home Feed</a>
+        <a href="/explore" class="sb-item"><span class="icon"><i class="fas fa-compass"></i></span> Explore</a>
+        <a href="/reels.html" class="sb-item"><span class="icon"><i class="fas fa-video"></i></span> Reels</a>
+        <a href="/archive" class="sb-item"><span class="icon"><i class="fas fa-book"></i></span> Archive</a>
+        <a href="/app" class="sb-item"><span class="icon"><i class="fas fa-map"></i></span> Map</a>
+        <div class="sb-section">Create</div>
+        <a href="/creator.html" class="sb-item"><span class="icon"><i class="fas fa-pen"></i></span> New Post</a>
+        <a href="/creator.html?type=story" class="sb-item"><span class="icon"><i class="fas fa-camera"></i></span> Add Story</a>
+        <div class="sb-section">Account</div>
+        <a href="/user_profile.html" class="sb-item"><span class="icon"><i class="fas fa-user"></i></span> Profile</a>
+        <a href="/user-settings.html" class="sb-item"><span class="icon"><i class="fas fa-cog"></i></span> Settings</a>
+        <div class="sb-footer">
+            <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </aside>
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="logo">EchoStack</div>
+        <div class="topbar-actions">
+            <button class="action-btn-top" :class="{liked: postLiked}" @click="togglePostLike" title="Like">
+                <i :class="postLiked ? 'fas fa-heart' : 'far fa-heart'"></i>
+            </button>
+            <button class="action-btn-top" @click="sharePost" title="Share">
+                <i class="fas fa-share-alt"></i>
+            </button>
+            <button class="action-btn-top" :class="{saved: postSaved}" @click="toggleSave" title="Save">
+                <i :class="postSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
     <div class="container" id="app">
-        <a href="javascript:history.back()" class="back-btn">← Back</a>
-        <div v-if="loading" class="loading">Loading post…</div>
-        <div v-if="error" class="error">{{ error }}</div>
+        <!-- Loading State -->
+        <div v-if="loading" class="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Loading post…</p>
+        </div>
+        
+        <!-- Error State -->
+        <div v-if="error" class="error">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>{{ error }}</p>
+            <button onclick="window.location.reload()">Try Again</button>
+        </div>
+        
+        <!-- Post Content -->
         <template v-if="post">
+            <!-- Post Header -->
             <div class="post-header">
                 <h1 class="post-title">{{ post.title }}</h1>
                 <div class="post-meta">
-                    <span>By {{ post.author_username || 'Creator' }}</span>
+                    <span><i class="far fa-clock"></i> {{ formatDate(post.created_at) }}</span>
                     <span>•</span>
-                    <span>{{ formatDate(post.created_at) }}</span>
-                    <!-- Type badge -->
+                    <span><i class="far fa-eye"></i> {{ post.views || 0 }} views</span>
                     <span :class="['post-type-badge', post.content_type]" v-if="post.content_type">
-                        {{ post.content_type === 'reel' ? '📱 Reel' : (post.content_type === 'video' ? '🎬 Video' : (post.content_type === 'audio' ? '🎵 Audio' : (post.content_type === 'story' ? '📖 Story' : '📰 Article'))) }}
+                        {{ getContentTypeLabel(post.content_type) }}
                     </span>
-                    <span class="post-type-badge premium" v-if="post.is_premium">⭐ Premium</span>
+                    <span class="post-type-badge premium" v-if="post.is_premium"><i class="fas fa-star"></i> Premium</span>
                 </div>
             </div>
 
-            <!-- Video player for reel/video posts (using video_url if available) -->
+            <!-- Author Card -->
+            <div class="author-card">
+                <div class="author-avatar">{{ (post.author_username || 'U')[0].toUpperCase() }}</div>
+                <div class="author-info">
+                    <div class="author-name">{{ post.author_username || 'Creator' }}</div>
+                    <div class="author-meta">{{ post.author_followers ? post.author_followers + ' followers' : 'Creator' }}</div>
+                </div>
+                <button class="follow-btn" :class="{following: isFollowing}" @click="toggleFollow">
+                    {{ isFollowing ? 'Following' : 'Follow' }}
+                </button>
+            </div>
+
+            <!-- Video Player (Reel/Video) -->
             <div v-if="(post.content_type === 'video' || post.content_type === 'reel') && post.video_url" 
                  :class="['video-container', post.content_type === 'reel' ? 'reel' : '']">
                 <video controls preload="metadata" :poster="post.cover_image">
                     <source :src="post.video_url" type="video/mp4">
                 </video>
-                <!-- Watermark only for reels -->
                 <div v-if="post.content_type === 'reel'" class="reel-watermark">
                     <img src="/echostack-logo.png" alt="" onerror="this.style.display='none'">
                     <span>EchoStack</span>
                 </div>
             </div>
 
-            <!-- Cover image (if no video) -->
+            <!-- Cover Image -->
             <img v-else-if="post.cover_image" :src="post.cover_image" class="post-cover" alt="">
 
-            <!-- Audio player for audio posts -->
-            <div v-if="post.content_type === 'audio' && post.audio_url" style="margin-bottom:20px">
-                <audio controls style="width:100%;border-radius:8px">
-                    <source :src="post.audio_url" type="audio/mpeg">
-                </audio>
+            <!-- Audio Player -->
+            <div v-if="post.content_type === 'audio' && post.audio_url" class="audio-container">
+                <div style="margin-bottom:12px;font-weight:600;color:var(--text)">
+                    <i class="fas fa-music" style="color:var(--gold);margin-right:8px"></i>
+                    {{ post.title }}
+                </div>
+                <audio controls :src="post.audio_url"></audio>
             </div>
 
-            <!-- Main content (markdown) -->
+            <!-- Main Content (Markdown) -->
             <div class="post-content" v-html="renderedContent"></div>
 
+            <!-- Action Buttons -->
+            <div class="post-actions">
+                <button class="action-btn" :class="{liked: postLiked}" @click="togglePostLike">
+                    <i :class="postLiked ? 'fas fa-heart' : 'far fa-heart'"></i>
+                    <span>{{ post.likes || 0 }}</span>
+                </button>
+                <button class="action-btn" @click="scrollToComments">
+                    <i class="far fa-comment"></i>
+                    <span>{{ comments.length }}</span>
+                </button>
+                <button class="action-btn" @click="sharePost">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Share</span>
+                </button>
+                <button class="action-btn" :class="{saved: postSaved}" @click="toggleSave">
+                    <i :class="postSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                    <span>Save</span>
+                </button>
+            </div>
+
             <!-- Comments Section -->
-            <div class="comments-section">
-                <h3 style="margin-bottom:16px;font-family:'Playfair Display'">Comments ({{ comments.length }})</h3>
-                <!-- New comment form -->
+            <div class="comments-section" id="comments">
+                <div class="comments-header">
+                    <h3><i class="far fa-comments"></i> Comments</h3>
+                    <span class="comments-count">{{ comments.length }}</span>
+                </div>
+                
+                <!-- New Comment Form -->
                 <div class="comment-form">
                     <input type="text" class="comment-input" placeholder="Write a comment…" v-model="newComment" @keyup.enter="postComment">
-                    <button class="comment-submit" @click="postComment" :disabled="!newComment.trim()">Post</button>
+                    <button class="comment-submit" @click="postComment" :disabled="!newComment.trim()">
+                        <i class="fas fa-paper-plane"></i> Post
+                    </button>
                 </div>
-                <!-- List of comments -->
+                
+                <!-- Comments List -->
+                <div v-if="comments.length === 0" class="no-comments">
+                    <i class="far fa-comment-dots"></i>
+                    <p>No comments yet</p>
+                    <span style="font-size:.85rem">Be the first to comment!</span>
+                </div>
+                
                 <div v-for="c in comments" :key="c.id" class="comment">
-                    <div class="comment-avatar">{{ (c.username||'U')[0] }}</div>
+                    <div class="comment-avatar">{{ (c.username||'U')[0].toUpperCase() }}</div>
                     <div class="comment-content">
                         <div class="comment-header">
                             <span class="comment-author">{{ c.username }}</span>
@@ -193,19 +340,24 @@
                         <div class="comment-body">{{ c.content }}</div>
                         <div class="comment-actions">
                             <span class="comment-action" @click="likeComment(c.id)">
-                                <span v-if="c.liked">❤️</span><span v-else>🤍</span> {{ c.likes }}
+                                <i :class="c.liked ? 'fas fa-heart' : 'far fa-heart'"></i>
+                                {{ c.likes || 0 }}
                             </span>
-                            <span class="comment-action" @click="showReplyForm(c.id)">↩️ Reply</span>
+                            <span class="comment-action" @click="showReplyForm(c.id)">
+                                <i class="fas fa-reply"></i> Reply
+                            </span>
                         </div>
-                        <!-- Reply form (shown when replying) -->
+                        
+                        <!-- Reply Form -->
                         <div v-if="replyFormVisible === c.id" class="reply-form">
                             <input type="text" class="reply-input" placeholder="Write a reply…" v-model="replyText[c.id]" @keyup.enter="postReply(c.id)">
                             <button class="reply-submit" @click="postReply(c.id)">Reply</button>
                         </div>
+                        
                         <!-- Replies -->
                         <div v-if="c.replies && c.replies.length" class="replies">
-                            <div v-for="r in c.replies" :key="r.id" class="comment" style="margin-bottom:8px">
-                                <div class="comment-avatar">{{ (r.username||'U')[0] }}</div>
+                            <div v-for="r in c.replies" :key="r.id" class="reply">
+                                <div class="comment-avatar" style="width:36px;height:36px;font-size:.8rem">{{ (r.username||'U')[0].toUpperCase() }}</div>
                                 <div class="comment-content">
                                     <div class="comment-header">
                                         <span class="comment-author">{{ r.username }}</span>
@@ -214,7 +366,8 @@
                                     <div class="comment-body">{{ r.content }}</div>
                                     <div class="comment-actions">
                                         <span class="comment-action" @click="likeComment(r.id)">
-                                            <span v-if="r.liked">❤️</span><span v-else>🤍</span> {{ r.likes }}
+                                            <i :class="r.liked ? 'fas fa-heart' : 'far fa-heart'"></i>
+                                            {{ r.likes || 0 }}
                                         </span>
                                     </div>
                                 </div>
@@ -222,12 +375,33 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="comments.length === 0" style="text-align:center;color:#94A3B8;padding:20px">No comments yet. Be the first!</div>
             </div>
         </template>
     </div>
 
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
     <script>
+        // Sidebar toggle
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('show');
+        }
+        
+        function logout() {
+            window.location.href = '/user-login.html';
+        }
+        
+        // Toast notification
+        function toast(message, type = '') {
+            const el = document.getElementById('toast');
+            el.textContent = message;
+            el.className = `toast show ${type}`;
+            setTimeout(() => el.classList.remove('show'), 3000);
+        }
+        
+        // Vue.js App
         new Vue({
             el: '#app',
             data: {
@@ -238,18 +412,30 @@
                 newComment: '',
                 replyFormVisible: null,
                 replyText: {},
-                currentUser: null
+                postLiked: false,
+                postSaved: false,
+                isFollowing: false
             },
             computed: {
                 renderedContent() {
                     if (!this.post || !this.post.content) return '';
                     let html = this.post.content
-                        .replace(/\[video\](.*?)\[\/video\]/gi, '<video controls style="max-width:100%"><source src="$1"></video>')
+                        .replace(/\[video\](.*?)\[\/video\]/gi, '<video controls style="max-width:100%;border-radius:8px"><source src="$1"></video>')
                         .replace(/\[audio\](.*?)\[\/audio\]/gi, '<audio controls style="max-width:100%"><source src="$1"></audio>');
                     return marked.parse(html);
                 }
             },
             methods: {
+                getContentTypeLabel(type) {
+                    const labels = {
+                        'reel': '📱 Reel',
+                        'video': '🎬 Video',
+                        'audio': '🎵 Audio',
+                        'story': '📖 Story',
+                        'article': '📰 Article'
+                    };
+                    return labels[type] || type;
+                },
                 formatDate(dateStr) {
                     if (!dateStr) return '';
                     const d = new Date(dateStr);
@@ -260,12 +446,43 @@
                     const d = new Date(dateStr);
                     const diff = (Date.now() - d.getTime()) / 1000;
                     if (diff < 60) return 'just now';
-                    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-                    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
-                    return Math.floor(diff/86400) + 'd ago';
+                    if (diff < 3600) return Math.floor(diff/60) + 'm';
+                    if (diff < 86400) return Math.floor(diff/3600) + 'h';
+                    return Math.floor(diff/86400) + 'd';
+                },
+                togglePostLike() {
+                    this.postLiked = !this.postLiked;
+                    toast(this.postLiked ? '❤️ Liked!' : '🤍 Unliked', this.postLiked ? 'ok' : '');
+                },
+                toggleSave() {
+                    this.postSaved = !this.postSaved;
+                    toast(this.postSaved ? '💾 Saved' : '🔖 Removed', this.postSaved ? 'ok' : '');
+                },
+                toggleFollow() {
+                    this.isFollowing = !this.isFollowing;
+                    toast(this.isFollowing ? 'Following!' : 'Unfollowed', this.isFollowing ? 'ok' : '');
+                },
+                sharePost() {
+                    const url = window.location.href;
+                    if (navigator.share) {
+                        navigator.share({
+                            title: this.post.title,
+                            text: 'Check out this post on EchoStack',
+                            url: url
+                        }).catch(() => {
+                            navigator.clipboard.writeText(url);
+                            toast('📋 Link copied!', 'ok');
+                        });
+                    } else {
+                        navigator.clipboard.writeText(url);
+                        toast('📋 Link copied!', 'ok');
+                    }
+                },
+                scrollToComments() {
+                    document.getElementById('comments').scrollIntoView({ behavior: 'smooth' });
                 },
                 async fetchComments() {
-                    const postId = this.$route?.params?.id || window.location.pathname.split('/').pop();
+                    const postId = window.location.pathname.split('/').pop();
                     try {
                         const res = await fetch(`/api/posts/${postId}/comments`);
                         if (res.ok) {
@@ -275,7 +492,7 @@
                 },
                 async postComment() {
                     if (!this.newComment.trim()) return;
-                    const postId = this.$route?.params?.id || window.location.pathname.split('/').pop();
+                    const postId = window.location.pathname.split('/').pop();
                     const fd = new FormData();
                     fd.append('content', this.newComment.trim());
                     try {
@@ -283,10 +500,13 @@
                         if (res.ok) {
                             this.newComment = '';
                             await this.fetchComments();
+                            toast('Comment posted!', 'ok');
                         } else {
-                            alert('Failed to post comment');
+                            toast('Failed to post comment', 'er');
                         }
-                    } catch(e) { alert('Error'); }
+                    } catch(e) { 
+                        toast('Error posting comment', 'er');
+                    }
                 },
                 showReplyForm(commentId) {
                     this.replyFormVisible = this.replyFormVisible === commentId ? null : commentId;
@@ -303,27 +523,31 @@
                             this.replyText[commentId] = '';
                             this.replyFormVisible = null;
                             await this.fetchComments();
+                            toast('Reply posted!', 'ok');
                         } else {
-                            alert('Failed to post reply');
+                            toast('Failed to post reply', 'er');
                         }
-                    } catch(e) { alert('Error'); }
+                    } catch(e) { 
+                        toast('Error posting reply', 'er');
+                    }
                 },
                 async likeComment(commentId) {
                     try {
                         const res = await fetch(`/api/comments/${commentId}/like`, { method: 'POST' });
                         if (res.ok) {
                             const data = await res.json();
-                            // Update local comment likes count
                             const updateLikes = (list) => {
                                 for (let c of list) {
                                     if (c.id === commentId) {
                                         c.likes = data.likes;
+                                        c.liked = !c.liked;
                                         return true;
                                     }
                                     if (c.replies) {
                                         for (let r of c.replies) {
                                             if (r.id === commentId) {
                                                 r.likes = data.likes;
+                                                r.liked = !r.liked;
                                                 return true;
                                             }
                                         }
@@ -342,19 +566,17 @@
                     const res = await fetch(`/api/posts/${postId}`);
                     if (!res.ok) throw new Error('Post not found');
                     this.post = await res.json();
+                    this.postLiked = this.post.is_liked || false;
+                    this.postSaved = this.post.is_saved || false;
                 } catch (e) {
                     this.error = e.message;
                 } finally {
                     this.loading = false;
                 }
                 await this.fetchComments();
-                // Get current user (for like status, not implemented)
-                try {
-                    const me = await fetch('/api/users/me');
-                    if (me.ok) this.currentUser = await me.json();
-                } catch(e) {}
             }
         });
     </script>
 </body>
 </html>
+
