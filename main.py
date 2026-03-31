@@ -2135,6 +2135,49 @@ def get_stories(db: Session = Depends(get_db)):
     except Exception:
         return []
 
+@app.get("/api/stories/active")
+def get_active_stories(db: Session = Depends(get_db)):
+    """Get active stories with media for the story viewer."""
+    try:
+        s = db.query(models.StorySubmission).filter(
+            models.StorySubmission.status == "approved"
+        ).order_by(models.StorySubmission.created_at.desc()).limit(20).all()
+        
+        stories = []
+        for x in s:
+            # Parse content to extract media_url and media_type
+            content = getattr(x, "content", "") or ""
+            media_url = ""
+            media_type = "image"
+            
+            # Try to parse JSON content or extract from text
+            try:
+                data = json.loads(content) if content else {}
+                media_url = data.get("media_url", "")
+                media_type = data.get("media_type", "image")
+            except:
+                # Fallback: check if content is a URL
+                if content.startswith('http'):
+                    media_url = content
+                    if content.endswith('.mp4'):
+                        media_type = "video"
+            
+            stories.append({
+                "id": x.id,
+                "title": x.title,
+                "content": content,
+                "media_url": media_url,
+                "media_type": media_type,
+                "author_name": getattr(x, "author_name", ""),
+                "region": getattr(x, "region", ""),
+                "created_at": str(x.created_at)
+            })
+        
+        return {"stories": stories}
+    except Exception as e:
+        print(f"Error getting active stories: {e}")
+        return {"stories": []}
+
 @app.post("/api/stories")
 async def submit_story(
     request: Request, title: str = Form(...), content: str = Form(...),
