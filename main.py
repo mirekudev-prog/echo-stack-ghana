@@ -227,6 +227,35 @@ CREATE TABLE IF NOT EXISTS creator_chat_messages (
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS site_settings (
+    id SERIAL PRIMARY KEY,
+    key VARCHAR(100) UNIQUE NOT NULL,
+    value TEXT NOT NULL,
+    category VARCHAR(50) DEFAULT 'general',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS page_contents (
+    id SERIAL PRIMARY KEY,
+    page_name VARCHAR(100) NOT NULL,
+    section VARCHAR(100) NOT NULL,
+    content TEXT NOT NULL,
+    is_active INTEGER DEFAULT 1,
+    display_order INTEGER DEFAULT 0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS navigation_items (
+    id SERIAL PRIMARY KEY,
+    label VARCHAR(100) NOT NULL,
+    url VARCHAR(500) NOT NULL,
+    target VARCHAR(20) DEFAULT '_self',
+    parent_id INTEGER DEFAULT NULL,
+    display_order INTEGER DEFAULT 0,
+    is_active INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 """
 
 try:
@@ -2404,3 +2433,349 @@ def get_topics(db: Session = Depends(get_db)):
         return [{"id": t.id, "name": t.name} for t in topics]
     except Exception:
         return []
+
+# ─── SITE SETTINGS (No-Code Theme & Branding) ────────────────────────────────
+@app.get("/api/admin/settings")
+def get_site_settings(db: Session = Depends(get_db)):
+    """Get all site settings grouped by category."""
+    try:
+        settings = db.query(models.SiteSetting).all()
+        result = {"branding": {}, "seo": {}, "theme": {}, "general": {}}
+        for s in settings:
+            if s.category not in result:
+                result[s.category] = {}
+            # Try to parse JSON value, otherwise use plain text
+            try:
+                result[s.category][s.key] = json.loads(s.value)
+            except (json.JSONDecodeError, TypeError):
+                result[s.category][s.key] = s.value
+        return result
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+@app.post("/api/admin/settings")
+def update_site_settings(request: Request, settings: dict, db: Session = Depends(get_db)):
+    """Update site settings (branding, theme, seo, etc)."""
+    try:
+        for category, items in settings.items():
+            for key, value in items.items():
+                # Serialize complex values to JSON
+                if isinstance(value, (dict, list)):
+                    val_str = json.dumps(value)
+                else:
+                    val_str = str(value)
+                
+                existing = db.query(models.SiteSetting).filter(
+                    models.SiteSetting.key == key
+                ).first()
+                
+                if existing:
+                    existing.value = val_str
+                    existing.category = category
+                    existing.updated_at = datetime.utcnow()
+                else:
+                    new_setting = models.SiteSetting(
+                        key=key, value=val_str, category=category
+                    )
+                    db.add(new_setting)
+        
+        db.commit()
+        log_admin_action(request, "update", "site_settings", "bulk", f"Updated {category} settings", db)
+        return {"success": True, "message": "Settings updated successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, str(e))
+
+# ─── PAGE CONTENT EDITOR ─────────────────────────────────────────────────────
+@app.get("/api/admin/pages")
+def get_page_contents(db: Session = Depends(get_db)):
+    """Get all page content sections."""
+    try:
+        pages = db.query(models.PageContent).filter(
+            models.PageContent.is_active == 1
+        ).order_by(
+            models.PageContent.page_name, models.PageContent.display_order
+        ).all()
+        
+        result = {}
+        for p in pages:
+            if p.page_name not in result:
+                result[p.page_name] = []
+            try:
+                content_data = json.loads(p.content)
+            except (json.JSONDecodeError, TypeError):
+                content_data = {"html": p.content}
+            
+            result[p.page_name].append({
+                "id": p.id,
+                "section": p.section,
+                "content": content_data,
+                "display_order": p.display_order
+            })
+        
+        return result
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+@app.post("/api/admin/pages")
+def update_page_content(request: Request, page_name: str, section: str, 
+                        content: dict, display_order: int = 0,
+                        db: Session = Depends(get_db)):
+    """Update or create a page section."""
+    try:
+        existing = db.query(models.PageContent).filter(
+            models.PageContent.page_name == page_name,
+            models.PageContent.section == section
+        ).first()
+        
+        content_str = json.dumps(content)
+        
+        if existing:
+            existing.content = content_str
+            existing.display_order = display_order
+            existing.updated_at = datetime.utcnow()
+        else:
+            new_page = models.PageContent(
+                page_name=page_name,
+                section=section,
+                content=content_str,
+                display_order=display_order,
+                is_active=1
+            )
+            db.add(new_page)
+        
+        db.commit()
+        log_admin_action(request, "update", "page_content", f"{page_name}/{section}", f"Updated {page_name} - {section}", db)
+        return {"success": True, "message": "Page content updated"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, str(e))
+
+@app.delete("/api/admin/pages/{page_id}")
+def delete_page_content(request: Request, page_id: int, db: Session = Depends(get_db)):
+    """Delete a page content section."""
+    try:
+        page = db.query(models.PageContent).filter(
+            models.PageContent.id == page_id
+        ).first()
+        
+        if not page:
+            raise HTTPException(404, "Page content not found")
+        
+        db.delete(page)
+        db.commit()
+        log_admin_action(request, "delete", "page_content", str(page_id), f"Deleted {page.page_name}/{page.section}", db)
+        return {"success": True, "message": "Page content deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, str(e))
+
+# ─── NAVIGATION MENU BUILDER ─────────────────────────────────────────────────
+@app.get("/api/admin/navigation")
+def get_navigation(db: Session = Depends(get_db)):
+    """Get all navigation menu items."""
+    try:
+        items = db.query(models.NavigationItem).filter(
+            models.NavigationItem.is_active == 1
+        ).order_by(
+            models.NavigationItem.display_order
+        ).all()
+        
+        return [{
+            "id": i.id,
+            "label": i.label,
+            "url": i.url,
+            "target": i.target,
+            "parent_id": i.parent_id,
+            "display_order": i.display_order
+        } for i in items]
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+@app.post("/api/admin/navigation")
+def create_navigation_item(request: Request, label: str, url: str,
+                           target: str = "_self", parent_id: int = None,
+                           display_order: int = 0,
+                           db: Session = Depends(get_db)):
+    """Create a new navigation menu item."""
+    try:
+        new_item = models.NavigationItem(
+            label=label,
+            url=url,
+            target=target,
+            parent_id=parent_id,
+            display_order=display_order,
+            is_active=1
+        )
+        db.add(new_item)
+        db.commit()
+        db.refresh(new_item)
+        log_admin_action(request, "create", "navigation", str(new_item.id), f"Added menu item: {label}", db)
+        return {"success": True, "item": {
+            "id": new_item.id,
+            "label": new_item.label,
+            "url": new_item.url,
+            "target": new_item.target,
+            "parent_id": new_item.parent_id,
+            "display_order": new_item.display_order
+        }}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, str(e))
+
+@app.put("/api/admin/navigation/{item_id}")
+def update_navigation_item(request: Request, item_id: int, 
+                           label: str = None, url: str = None,
+                           target: str = None, parent_id: int = None,
+                           display_order: int = None,
+                           db: Session = Depends(get_db)):
+    """Update a navigation menu item."""
+    try:
+        item = db.query(models.NavigationItem).filter(
+            models.NavigationItem.id == item_id
+        ).first()
+        
+        if not item:
+            raise HTTPException(404, "Navigation item not found")
+        
+        if label is not None:
+            item.label = label
+        if url is not None:
+            item.url = url
+        if target is not None:
+            item.target = target
+        if parent_id is not None:
+            item.parent_id = parent_id
+        if display_order is not None:
+            item.display_order = display_order
+        
+        db.commit()
+        log_admin_action(request, "update", "navigation", str(item_id), f"Updated menu item: {item.label}", db)
+        return {"success": True, "message": "Navigation item updated"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, str(e))
+
+@app.delete("/api/admin/navigation/{item_id}")
+def delete_navigation_item(request: Request, item_id: int, db: Session = Depends(get_db)):
+    """Delete a navigation menu item."""
+    try:
+        item = db.query(models.NavigationItem).filter(
+            models.NavigationItem.id == item_id
+        ).first()
+        
+        if not item:
+            raise HTTPException(404, "Navigation item not found")
+        
+        db.delete(item)
+        db.commit()
+        log_admin_action(request, "delete", "navigation", str(item_id), f"Deleted menu item: {item.label}", db)
+        return {"success": True, "message": "Navigation item deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, str(e))
+
+# ─── ANALYTICS (Placeholder for future integration) ──────────────────────────
+@app.get("/api/admin/analytics")
+def get_analytics(db: Session = Depends(get_db)):
+    """Get basic site analytics (placeholder)."""
+    try:
+        total_users = db.query(models.User).count()
+        total_posts = db.query(models.Post).filter(
+            models.Post.status == "published"
+        ).count()
+        total_views = db.query(func.sum(models.Post.views)).scalar() or 0
+        
+        return {
+            "total_users": total_users,
+            "total_posts": total_posts,
+            "total_views": int(total_views),
+            "unique_visitors": random.randint(500, 2000),
+            "avg_time_on_site": "3:24",
+            "bounce_rate": "42%",
+            "top_pages": [
+                {"path": "/", "views": random.randint(100, 500)},
+                {"path": "/dashboard", "views": random.randint(80, 300)},
+                {"path": "/regions", "views": random.randint(50, 200)}
+            ],
+            "referrers": [
+                {"source": "Google", "visits": random.randint(200, 800)},
+                {"source": "Direct", "visits": random.randint(100, 400)},
+                {"source": "Social", "visits": random.randint(50, 200)}
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+# ─── BACKUP & RESTORE ────────────────────────────────────────────────────────
+@app.get("/api/admin/backup")
+def create_backup(db: Session = Depends(get_db)):
+    """Create a backup of site settings and content."""
+    try:
+        backup_data = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "settings": db.query(models.SiteSetting).all(),
+            "pages": db.query(models.PageContent).all(),
+            "navigation": db.query(models.NavigationItem).all()
+        }
+        
+        def serialize(obj):
+            if hasattr(obj, '__dict__'):
+                d = {}
+                for k, v in obj.__dict__.items():
+                    if k != '_sa_instance_state':
+                        if isinstance(v, datetime):
+                            d[k] = v.isoformat()
+                        else:
+                            d[k] = v
+                return d
+            return obj
+        
+        backup_serializable = {
+            "timestamp": backup_data["timestamp"],
+            "settings": [serialize(s) for s in backup_data["settings"]],
+            "pages": [serialize(p) for p in backup_data["pages"]],
+            "navigation": [serialize(n) for n in backup_data["navigation"]]
+        }
+        
+        return {
+            "success": True,
+            "backup": backup_serializable,
+            "filename": f"echostack_backup_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+        }
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+@app.post("/api/admin/restore")
+def restore_backup(request: Request, backup_data: dict, db: Session = Depends(get_db)):
+    """Restore site from backup data."""
+    try:
+        if "settings" in backup_data:
+            for s in backup_data["settings"]:
+                existing = db.query(models.SiteSetting).filter(
+                    models.SiteSetting.key == s.get("key")
+                ).first()
+                if existing:
+                    existing.value = s.get("value", "")
+                    existing.category = s.get("category", "general")
+                else:
+                    db.add(models.SiteSetting(**s))
+        
+        if "navigation" in backup_data:
+            for n in backup_data["navigation"]:
+                if "id" in n:
+                    del n["id"]
+                db.add(models.NavigationItem(**n))
+        
+        db.commit()
+        log_admin_action(request, "restore", "backup", "bulk", "Restored site from backup", db)
+        return {"success": True, "message": "Backup restored successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, str(e))

@@ -262,3 +262,41 @@ class AdminLog(Base):
     details = Column(Text)
     ip_address = Column(String(45))
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+# ─── SITE SETTINGS (for no-code theme/branding) ───────────────────────────────
+class SiteSetting(Base):
+    __tablename__ = "site_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String(100), unique=True, nullable=False)  # e.g., 'primary_color', 'logo_url'
+    value = Column(Text, nullable=False)  # JSON string or plain text
+    category = Column(String(50), default='general')  # e.g., 'branding', 'seo', 'theme'
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ─── PAGE CONTENT (for dynamic page editing) ──────────────────────────────────
+class PageContent(Base):
+    __tablename__ = "page_contents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    page_name = Column(String(100), nullable=False)  # e.g., 'homepage', 'about', 'contact'
+    section = Column(String(100), nullable=False)  # e.g., 'hero', 'features', 'footer'
+    content = Column(Text, nullable=False)  # JSON string with content structure
+    is_active = Column(Integer, default=1)
+    display_order = Column(Integer, default=0)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ─── NAVIGATION ITEM (for menu builder) ───────────────────────────────────────
+class NavigationItem(Base):
+    __tablename__ = "navigation_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    label = Column(String(100), nullable=False)
+    url = Column(String(500), nullable=False)
+    target = Column(String(20), default='_self')  # _self, _blank
+    parent_id = Column(Integer, ForeignKey("navigation_items.id"), nullable=True)
+    display_order = Column(Integer, default=0)
+    is_active = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
