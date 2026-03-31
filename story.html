@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="theme-color" content="#0D1B2A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Story – EchoStack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#0D1B2A;
+  --ink2:#1a2744;
+  --gold:#C8962E;
+  --gold2:#E8B84B;
+  --gold3:#F4D06F;
+  --surface:#fafafa;
+  --card:#ffffff;
+  --border:#e5e5e5;
+  --text:#1a1a1a;
+  --text2:#3a3a3a;
+  --muted:#8e8e93;
+  --danger:#ef4444;
+  --success:#22c55e;
+  --shadow:0 2px 8px rgba(0,0,0,.12);
+  --shadow2:0 4px 16px rgba(0,0,0,.16);
+}
+html,body{height:100%;overflow:hidden;background:var(--ink)}
+body{font-family:'DM Sans',sans-serif;color:var(--text)}
+
+/* Story Container */
+.story-viewer{
+  position:relative;
+  width:100%;
+  height:100vh;
+  background:#000;
+  display:flex;
+  flex-direction:column;
+}
+
+/* Progress Bars */
+.progress-container{
+  position:absolute;
+  top:8px;
+  left:8px;
+  right:8px;
+  z-index:100;
+  display:flex;
+  gap:4px;
+  padding-top:env(safe-area-inset-top);
+}
+.progress-bar{
+  flex:1;
+  height:3px;
+  background:rgba(255,255,255,.3);
+  border-radius:2px;
+  overflow:hidden;
+}
+.progress-bar.active{background:rgba(255,255,255,.3)}
+.progress-bar.completed{background:rgba(255,255,255,.8)}
+.progress-fill{
+  height:100%;
+  width:0%;
+  background:rgba(255,255,255,.8);
+  border-radius:2px;
+  transition:width linear;
+}
+
+/* Header */
+.story-header{
+  position:absolute;
+  top:calc(8px + env(safe-area-inset-top));
+  left:0;
+  right:0;
+  z-index:100;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.6),transparent);
+}
+.story-user{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:white;
+}
+.story-avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.2rem;
+  overflow:hidden;
+}
+.story-avatar img{width:100%;height:100%;object-fit:cover}
+.story-info{display:flex;flex-direction:column}
+.story-username{font-weight:700;font-size:.95rem;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.story-time{font-size:.75rem;color:rgba(255,255,255,.8);text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.story-close{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:rgba(255,255,255,.2);
+  backdrop-filter:blur(4px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:1.2rem;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+.story-close:active{background:rgba(255,255,255,.3);transform:scale(.95)}
+
+/* Story Content */
+.story-content{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+}
+.story-media{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.story-media.video{background:#000}
+
+/* Navigation Zones */
+.nav-zone{
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:30%;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  transition:opacity .2s ease;
+}
+.nav-zone:hover{opacity:1}
+.nav-zone.prev{left:0;background:linear-gradient(to right,rgba(0,0,0,.3),transparent)}
+.nav-zone.next{right:0;background:linear-gradient(to left,rgba(0,0,0,.3),transparent)}
+.nav-arrow{
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  background:rgba(255,255,255,.2);
+  backdrop-filter:blur(4px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:1.5rem;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+.nav-arrow:active{background:rgba(255,255,255,.3);transform:scale(.95)}
+
+/* Footer Actions */
+.story-footer{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:100;
+  padding:16px;
+  padding-bottom:calc(16px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top,rgba(0,0,0,.8),transparent);
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.story-input{
+  flex:1;
+  background:rgba(255,255,255,.2);
+  backdrop-filter:blur(4px);
+  border:none;
+  border-radius:24px;
+  padding:12px 18px;
+  font-size:.95rem;
+  color:white;
+  outline:none;
+  min-height:44px;
+}
+.story-input::placeholder{color:rgba(255,255,255,.7)}
+.story-action{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:rgba(255,255,255,.2);
+  backdrop-filter:blur(4px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:1.3rem;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+.story-action:active{background:rgba(255,255,255,.3);transform:scale(.95)}
+.story-action.liked{color:var(--danger)}
+
+/* Loading State */
+.loading-state{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:var(--ink);
+  z-index:200;
+}
+.loading-spinner{
+  width:48px;
+  height:48px;
+  border:4px solid rgba(255,255,255,.2);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{
+  margin-top:16px;
+  color:white;
+  font-size:1rem;
+}
+
+/* Error State */
+.error-state{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:var(--ink);
+  z-index:200;
+  padding:24px;
+  text-align:center;
+}
+.error-icon{
+  font-size:4rem;
+  color:var(--danger);
+  margin-bottom:16px;
+}
+.error-title{
+  font-size:1.3rem;
+  font-weight:700;
+  color:white;
+  margin-bottom:8px;
+}
+.error-message{
+  color:rgba(255,255,255,.7);
+  font-size:.95rem;
+  margin-bottom:24px;
+}
+.error-btn{
+  background:var(--gold);
+  color:var(--ink);
+  border:none;
+  border-radius:24px;
+  padding:12px 32px;
+  font-weight:700;
+  font-size:.95rem;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+.error-btn:active{transform:scale(.96)}
+
+/* Toast */
+.toast{
+  position:fixed;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:rgba(26,26,26,.95);
+  color:white;
+  padding:12px 24px;
+  border-radius:24px;
+  font-size:.9rem;
+  font-weight:500;
+  z-index:10000;
+  opacity:0;
+  visibility:hidden;
+  transition:all .3s ease;
+  box-shadow:var(--shadow2);
+}
+.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.toast.info{background:rgba(13,27,42,.95)}
+.toast.success{background:rgba(34,197,94,.95)}
+.toast.error{background:rgba(239,68,68,.95)}
+</style>
+</head>
+<body>
+<div class="story-viewer" id="story-viewer">
+  <!-- Loading State -->
+  <div class="loading-state" id="loading-state">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading story...</div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" id="error-state" style="display:none">
+    <i class="fas fa-exclamation-triangle error-icon"></i>
+    <div class="error-title">Story Not Found</div>
+    <div class="error-message">This story may have expired or been deleted.</div>
+    <button class="error-btn" onclick="goBack()">Go Back</button>
+  </div>
+
+  <!-- Progress Bars -->
+  <div class="progress-container" id="progress-container"></div>
+
+  <!-- Header -->
+  <div class="story-header">
+    <div class="story-user">
+      <div class="story-avatar" id="story-avatar">
+        <i class="fas fa-user"></i>
+      </div>
+      <div class="story-info">
+        <div class="story-username" id="story-username">User</div>
+        <div class="story-time" id="story-time">Just now</div>
+      </div>
+    </div>
+    <div class="story-close" onclick="goBack()">
+      <i class="fas fa-times"></i>
+    </div>
+  </div>
+
+  <!-- Navigation Zones -->
+  <div class="nav-zone prev" onclick="prevStory()">
+    <div class="nav-arrow"><i class="fas fa-chevron-left"></i></div>
+  </div>
+  <div class="nav-zone next" onclick="nextStory()">
+    <div class="nav-arrow"><i class="fas fa-chevron-right"></i></div>
+  </div>
+
+  <!-- Story Content -->
+  <div class="story-content">
+    <img class="story-media" id="story-media" src="" alt="Story" style="display:none">
+    <video class="story-media video" id="story-video" style="display:none" playsinline loop muted></video>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="story-footer">
+    <input type="text" class="story-input" placeholder="Send a message..." id="story-input">
+    <div class="story-action" onclick="toggleLike()">
+      <i class="far fa-heart" id="like-icon"></i>
+    </div>
+    <div class="story-action" onclick="shareStory()">
+      <i class="fas fa-paper-plane"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE MANAGEMENT =====
+const state = {
+  stories: [],
+  currentIndex: 0,
+  currentStory: null,
+  isLoading: false,
+  isLiked: false,
+  progressTimer: null,
+  progressDuration: 5000 // 5 seconds per story
+};
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const storyId = urlParams.get('id');
+  
+  if (!storyId) {
+    showError('No story ID provided');
+    return;
+  }
+  
+  await loadStories();
+  setupEventListeners();
+});
+
+// ===== LOAD STORIES =====
+async function loadStories() {
+  try {
+    const response = await fetch('/api/stories/active');
+    const data = await response.json();
+    state.stories = data.stories || data || [];
+    
+    if (state.stories.length === 0) {
+      showError('No active stories found');
+      return;
+    }
+    
+    // Find the requested story
+    const urlParams = new URLSearchParams(window.location.search);
+    const storyId = parseInt(urlParams.get('id'));
+    const index = state.stories.findIndex(s => s.id === storyId);
+    
+    if (index === -1) {
+      showError('Story not found');
+      return;
+    }
+    
+    state.currentIndex = index;
+    await displayStory(state.currentIndex);
+  } catch (error) {
+    console.error('Error loading stories:', error);
+    showError('Failed to load stories');
+  }
+}
+
+// ===== DISPLAY STORY =====
+async function displayStory(index) {
+  if (index < 0 || index >= state.stories.length) {
+    goBack();
+    return;
+  }
+  
+  state.currentStory = state.stories[index];
+  state.isLiked = false;
+  
+  // Hide loading, show content
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('error-state').style.display = 'none';
+  
+  // Update header
+  const story = state.currentStory;
+  const user = story.user || {};
+  
+  document.getElementById('story-username').textContent = user.username || 'User';
+  document.getElementById('story-time').textContent = formatTime(story.created_at);
+  
+  if (user.avatar) {
+    document.getElementById('story-avatar').innerHTML = `<img src="${user.avatar}" alt="${user.username}">`;
+  } else {
+    document.getElementById('story-avatar').innerHTML = '<i class="fas fa-user"></i>';
+  }
+  
+  // Load media
+  const imgEl = document.getElementById('story-media');
+  const videoEl = document.getElementById('story-video');
+  
+  if (story.media_type === 'video' || story.media_url?.endsWith('.mp4')) {
+    imgEl.style.display = 'none';
+    videoEl.style.display = 'block';
+    videoEl.src = story.media_url;
+    videoEl.play().catch(e => console.log('Video autoplay prevented:', e));
+  } else {
+    videoEl.style.display = 'none';
+    imgEl.style.display = 'block';
+    imgEl.src = story.media_url;
+  }
+  
+  // Update like icon
+  document.getElementById('like-icon').className = 'far fa-heart';
+  
+  // Setup progress bars
+  setupProgressBars();
+  
+  // Start auto-advance
+  startProgress();
+}
+
+// ===== PROGRESS BARS =====
+function setupProgressBars() {
+  const container = document.getElementById('progress-container');
+  container.innerHTML = '';
+  
+  state.stories.forEach((_, i) => {
+    const bar = document.createElement('div');
+    bar.className = 'progress-bar';
+    if (i < state.currentIndex) {
+      bar.classList.add('completed');
+    } else if (i === state.currentIndex) {
+      bar.classList.add('active');
+    }
+    
+    const fill = document.createElement('div');
+    fill.className = 'progress-fill';
+    if (i < state.currentIndex) {
+      fill.style.width = '100%';
+    }
+    
+    bar.appendChild(fill);
+    container.appendChild(bar);
+  });
+}
+
+function startProgress() {
+  if (state.progressTimer) {
+    clearTimeout(state.progressTimer);
+  }
+  
+  const activeBar = document.querySelector('.progress-bar.active .progress-fill');
+  if (activeBar) {
+    activeBar.style.transition = 'none';
+    activeBar.style.width = '0%';
+    
+    setTimeout(() => {
+      activeBar.style.transition = `width ${state.progressDuration}ms linear`;
+      activeBar.style.width = '100%';
+    }, 50);
+  }
+  
+  state.progressTimer = setTimeout(() => {
+    nextStory();
+  }, state.progressDuration);
+}
+
+// ===== NAVIGATION =====
+function prevStory() {
+  if (state.currentIndex > 0) {
+    state.currentIndex--;
+    displayStory(state.currentIndex);
+  } else {
+    goBack();
+  }
+}
+
+function nextStory() {
+  if (state.currentIndex < state.stories.length - 1) {
+    state.currentIndex++;
+    displayStory(state.currentIndex);
+  } else {
+    goBack();
+  }
+}
+
+// ===== INTERACTIONS =====
+function toggleLike() {
+  state.isLiked = !state.isLiked;
+  const icon = document.getElementById('like-icon');
+  
+  if (state.isLiked) {
+    icon.className = 'fas fa-heart liked';
+    showToast('❤️ Story liked!', 'success');
+    // TODO: Send like to API
+  } else {
+    icon.className = 'far fa-heart';
+    // TODO: Remove like from API
+  }
+}
+
+function shareStory() {
+  const story = state.currentStory;
+  const shareData = {
+    title: 'Check out this story',
+    text: `${story.user?.username}'s story on EchoStack`,
+    url: window.location.href
+  };
+  
+  if (navigator.share) {
+    navigator.share(shareData).catch(e => console.log('Share cancelled'));
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    showToast('🔗 Link copied to clipboard!', 'success');
+  }
+}
+
+function sendMessage() {
+  const input = document.getElementById('story-input');
+  const message = input.value.trim();
+  
+  if (message) {
+    showToast('💬 Message sent!', 'success');
+    input.value = '';
+    // TODO: Send message to API
+  }
+}
+
+// ===== UTILITIES =====
+function formatTime(dateString) {
+  if (!dateString) return 'Just now';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000);
+  
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function showError(message) {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('error-state').style.display = 'flex';
+  document.querySelector('.error-message').textContent = message;
+}
+
+function goBack() {
+  // Clear any pending timers
+  if (state.progressTimer) {
+    clearTimeout(state.progressTimer);
+  }
+  
+  // Stop any playing video
+  const videoEl = document.getElementById('story-video');
+  if (videoEl) {
+    videoEl.pause();
+  }
+  
+  // Navigate back to dashboard
+  window.location.href = '/dashboard.html';
+}
+
+function showToast(message, type = 'info') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `toast ${type} show`;
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2500);
+}
+
+function setupEventListeners() {
+  // Handle Enter key in input
+  document.getElementById('story-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      sendMessage();
+    }
+  });
+  
+  // Tap zones for navigation
+  let touchStartX = 0;
+  const viewer = document.getElementById('story-viewer');
+  
+  viewer.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+  
+  viewer.addEventListener('touchend', (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        nextStory();
+      } else {
+        prevStory();
+      }
+    }
+  }, { passive: true });
+  
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') nextStory();
+    if (e.key === 'ArrowLeft') prevStory();
+    if (e.key === 'Escape') goBack();
+  });
+}
+</script>
+</body>
+</html>
