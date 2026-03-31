@@ -334,7 +334,13 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
   <button class="sb-item" onclick="showPanel('events')" id="nav-events"><span class="icon">📅</span> Events</button>
   <button class="sb-item" onclick="showPanel('categories')" id="nav-categories"><span class="icon">🏷️</span> Categories</button>
   <button class="sb-item" onclick="showPanel('chat')" id="nav-chat"><span class="icon">💬</span> Chat</button>
-  <button class="sb-item" onclick="showPanel('settings')" id="nav-settings"><span class="icon">⚙️</span> Settings</button>
+  <button class="sb-item" onclick="showPanel('site-editor')" id="nav-site-editor"><span class="icon">🎨</span> Site Editor</button>
+  <button class="sb-item" onclick="showPanel('theme-settings')" id="nav-theme-settings"><span class="icon">🎨</span> Theme & Branding</button>
+  <button class="sb-item" onclick="showPanel('seo-settings')" id="nav-seo-settings"><span class="icon">🔍</span> SEO Settings</button>
+  <button class="sb-item" onclick="showPanel('menu-editor')" id="nav-menu-editor"><span class="icon">📱</span> Navigation Menu</button>
+  <button class="sb-item" onclick="showPanel('analytics')" id="nav-analytics"><span class="icon">📈</span> Analytics</button>
+  <button class="sb-item" onclick="showPanel('backup-restore')" id="nav-backup-restore"><span class="icon">💾</span> Backup & Restore</button>
+  <button class="sb-item" onclick="showPanel('settings')" id="nav-settings"><span class="icon">⚙️</span> General Settings</button>
   <div class="sb-section">Audit</div>
   <button class="sb-item" onclick="showPanel('logs')" id="nav-logs"><span class="icon">📋</span> Activity Logs</button>
   <div class="sb-section">Visit</div>
@@ -639,6 +645,355 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
       </div>
     </div>
 
+    <!-- SITE EDITOR - NO-CODE PAGE BUILDER -->
+    <div class="panel" id="panel-site-editor">
+      <div class="form-section">
+        <h4>🎨 Site Editor - Customize Your Pages</h4>
+        <p style="font-size:.85rem;color:var(--main-muted);margin-bottom:16px">Edit page content, sections, and layouts without coding. Changes apply instantly.</p>
+        
+        <div class="field" style="margin-bottom:16px">
+          <label>Select Page to Edit</label>
+          <select id="site-editor-page" onchange="loadPageContent()" style="width:100%;padding:12px;font-size:1rem">
+            <option value="">-- Choose a page --</option>
+            <option value="homepage">Homepage</option>
+            <option value="about">About Us</option>
+            <option value="contact">Contact</option>
+            <option value="footer">Footer Content</option>
+            <option value="hero">Hero Section</option>
+            <option value="features">Features Section</option>
+          </select>
+        </div>
+
+        <div id="page-editor-container" style="display:none">
+          <div class="field full" style="margin-bottom:12px">
+            <label>Page Title</label>
+            <input type="text" id="page-title" placeholder="Page title..." style="width:100%">
+          </div>
+          
+          <div class="field full" style="margin-bottom:12px">
+            <label>Meta Description (SEO)</label>
+            <input type="text" id="page-meta-desc" placeholder="Search engine description..." style="width:100%">
+          </div>
+
+          <div class="field full" style="margin-bottom:12px">
+            <label>Main Content</label>
+            <textarea id="page-content" rows="10" placeholder="Page content supports HTML..." style="width:100%;font-family:monospace"></textarea>
+          </div>
+
+          <div class="field full" style="margin-bottom:16px">
+            <label>Custom CSS (Optional)</label>
+            <textarea id="page-custom-css" rows="6" placeholder=".custom-class { color: red; }" style="width:100%;font-family:monospace;font-size:.85rem"></textarea>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-gold" onclick="savePageContent()" style="flex:1;min-width:140px;padding:12px">💾 Save Changes</button>
+            <button class="btn btn-ghost" onclick="previewPage()" style="flex:1;min-width:120px;padding:12px">👁 Preview</button>
+          </div>
+        </div>
+
+        <div id="page-editor-empty" style="text-align:center;padding:40px 20px;color:var(--main-muted)">
+          <div style="font-size:3rem;margin-bottom:12px">📄</div>
+          <p>Select a page from the dropdown above to start editing</p>
+        </div>
+      </div>
+
+      <div class="form-section" style="margin-top:16px">
+        <h4>🧱 Quick Sections</h4>
+        <p style="font-size:.85rem;color:var(--main-muted);margin-bottom:12px">Add pre-built sections to any page</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">
+          <button class="btn btn-ghost" onclick="insertSection('cta')" style="padding:16px;text-align:center">📣 Call to Action</button>
+          <button class="btn btn-ghost" onclick="insertSection('testimonials')" style="padding:16px;text-align:center">⭐ Testimonials</button>
+          <button class="btn btn-ghost" onclick="insertSection('gallery')" style="padding:16px;text-align:center">🖼️ Image Gallery</button>
+          <button class="btn btn-ghost" onclick="insertSection('team')" style="padding:16px;text-align:center">👥 Team Members</button>
+          <button class="btn btn-ghost" onclick="insertSection('faq')" style="padding:16px;text-align:center">❓ FAQ</button>
+          <button class="btn btn-ghost" onclick="insertSection('newsletter')" style="padding:16px;text-align:center">📧 Newsletter Signup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- THEME & BRANDING -->
+    <div class="panel" id="panel-theme-settings">
+      <div class="form-section">
+        <h4>🎨 Theme & Branding Settings</h4>
+        <p style="font-size:.85rem;color:var(--main-muted);margin-bottom:16px">Customize colors, fonts, and branding elements across your site.</p>
+
+        <h4 style="margin-top:20px;margin-bottom:12px">🏷️ Brand Identity</h4>
+        <div class="form-grid">
+          <div class="field">
+            <label>Site Logo URL</label>
+            <input type="text" id="theme-logo" placeholder="/echostack-logo.png">
+            <div class="upload-btn" onclick="document.getElementById('theme-logo-upload').click()" style="margin-top:8px">
+              <span>⬆️ Upload Logo</span>
+              <input type="file" id="theme-logo-upload" accept="image/*" onchange="uploadThemeAsset('logo', this.files[0])" style="display:none">
+            </div>
+          </div>
+          <div class="field">
+            <label>Favicon URL</label>
+            <input type="text" id="theme-favicon" placeholder="/favicon.ico">
+            <div class="upload-btn" onclick="document.getElementById('theme-favicon-upload').click()" style="margin-top:8px">
+              <span>⬆️ Upload Favicon</span>
+              <input type="file" id="theme-favicon-upload" accept="image/*" onchange="uploadThemeAsset('favicon', this.files[0])" style="display:none">
+            </div>
+          </div>
+        </div>
+
+        <h4 style="margin-top:20px;margin-bottom:12px">🎨 Color Scheme</h4>
+        <div class="form-grid">
+          <div class="field">
+            <label>Primary Color</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="color" id="theme-primary-color" value="#C8962E" style="width:50px;height:44px;border:none;cursor:pointer">
+              <input type="text" id="theme-primary-text" value="#C8962E" style="flex:1" onchange="syncColor('primary')">
+            </div>
+          </div>
+          <div class="field">
+            <label>Secondary Color</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="color" id="theme-secondary-color" value="#E8B84B" style="width:50px;height:44px;border:none;cursor:pointer">
+              <input type="text" id="theme-secondary-text" value="#E8B84B" style="flex:1" onchange="syncColor('secondary')">
+            </div>
+          </div>
+          <div class="field">
+            <label>Background Color</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="color" id="theme-bg-color" value="#0D1B2A" style="width:50px;height:44px;border:none;cursor:pointer">
+              <input type="text" id="theme-bg-text" value="#0D1B2A" style="flex:1" onchange="syncColor('bg')">
+            </div>
+          </div>
+          <div class="field">
+            <label>Text Color</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="color" id="theme-text-color" value="#e2e8f0" style="width:50px;height:44px;border:none;cursor:pointer">
+              <input type="text" id="theme-text-text" value="#e2e8f0" style="flex:1" onchange="syncColor('text')">
+            </div>
+          </div>
+        </div>
+
+        <h4 style="margin-top:20px;margin-bottom:12px">📝 Typography</h4>
+        <div class="form-grid">
+          <div class="field">
+            <label>Heading Font</label>
+            <select id="theme-heading-font" style="width:100%">
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="DM Sans">DM Sans</option>
+              <option value="Arial">Arial</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Times New Roman">Times New Roman</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Body Font</label>
+            <select id="theme-body-font" style="width:100%">
+              <option value="DM Sans">DM Sans</option>
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="Arial">Arial</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Verdana">Verdana</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+          <button class="btn btn-gold" onclick="saveThemeSettings()" style="flex:1;min-width:140px;padding:12px">💾 Save Theme</button>
+          <button class="btn btn-ghost" onclick="resetThemeDefaults()" style="flex:1;min-width:120px;padding:12px">🔄 Reset to Defaults</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEO SETTINGS -->
+    <div class="panel" id="panel-seo-settings">
+      <div class="form-section">
+        <h4>🔍 SEO Settings</h4>
+        <p style="font-size:.85rem;color:var(--main-muted);margin-bottom:16px">Optimize your site for search engines and social media sharing.</p>
+
+        <div class="field full" style="margin-bottom:12px">
+          <label>Default Page Title</label>
+          <input type="text" id="seo-title" placeholder="EchoStack - Discover Ghana's Heritage" style="width:100%">
+        </div>
+
+        <div class="field full" style="margin-bottom:12px">
+          <label>Default Meta Description</label>
+          <textarea id="seo-description" rows="3" placeholder="Discover the rich heritage, culture, and stories of Ghana..." style="width:100%"></textarea>
+        </div>
+
+        <div class="field full" style="margin-bottom:12px">
+          <label>Keywords (comma separated)</label>
+          <input type="text" id="seo-keywords" placeholder="ghana, heritage, culture, african history, tourism" style="width:100%">
+        </div>
+
+        <h4 style="margin-top:20px;margin-bottom:12px">🔗 Social Media</h4>
+        <div class="form-grid">
+          <div class="field">
+            <label>Open Graph Image URL</label>
+            <input type="text" id="seo-og-image" placeholder="/og-image.jpg">
+            <div class="upload-btn" onclick="document.getElementById('seo-og-upload').click()" style="margin-top:8px">
+              <span>⬆️ Upload OG Image</span>
+              <input type="file" id="seo-og-upload" accept="image/*" onchange="uploadThemeAsset('og-image', this.files[0])" style="display:none">
+            </div>
+          </div>
+          <div class="field">
+            <label>Twitter Card Image URL</label>
+            <input type="text" id="seo-twitter-image" placeholder="/twitter-card.jpg">
+            <div class="upload-btn" onclick="document.getElementById('seo-twitter-upload').click()" style="margin-top:8px">
+              <span>⬆️ Upload Twitter Image</span>
+              <input type="file" id="seo-twitter-upload" accept="image/*" onchange="uploadThemeAsset('twitter-image', this.files[0])" style="display:none">
+            </div>
+          </div>
+        </div>
+
+        <h4 style="margin-top:20px;margin-bottom:12px">🔗 Social Profiles</h4>
+        <div class="form-grid">
+          <div class="field"><label>Facebook URL</label><input type="url" id="seo-facebook" placeholder="https://facebook.com/echostack"></div>
+          <div class="field"><label>Twitter/X URL</label><input type="url" id="seo-twitter" placeholder="https://twitter.com/echostack"></div>
+          <div class="field"><label>Instagram URL</label><input type="url" id="seo-instagram" placeholder="https://instagram.com/echostack"></div>
+          <div class="field"><label>YouTube URL</label><input type="url" id="seo-youtube" placeholder="https://youtube.com/echostack"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+          <button class="btn btn-gold" onclick="saveSeoSettings()" style="flex:1;min-width:140px;padding:12px">💾 Save SEO Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVIGATION MENU EDITOR -->
+    <div class="panel" id="panel-menu-editor">
+      <div class="form-section">
+        <h4>📱 Navigation Menu Editor</h4>
+        <p style="font-size:.85rem;color:var(--main-muted);margin-bottom:16px">Customize your site's navigation menu. Drag and drop to reorder (coming soon).</p>
+
+        <div id="menu-items-container">
+          <div class="menu-item" style="background:white;border:1px solid var(--main-border);border-radius:8px;padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <div style="font-size:1.2rem;cursor:move">☰</div>
+            <div class="field" style="flex:1;min-width:150px">
+              <label>Label</label>
+              <input type="text" value="Home" class="menu-label" style="width:100%">
+            </div>
+            <div class="field" style="flex:2;min-width:200px">
+              <label>URL</label>
+              <input type="text" value="/" class="menu-url" style="width:100%">
+            </div>
+            <div class="field" style="width:120px">
+              <label>Open in</label>
+              <select class="menu-target" style="width:100%">
+                <option value="_self">Same Tab</option>
+                <option value="_blank">New Tab</option>
+              </select>
+            </div>
+            <button class="btn btn-danger" onclick="removeMenuItem(this)" style="margin-top:auto;min-height:44px">🗑</button>
+          </div>
+          <div class="menu-item" style="background:white;border:1px solid var(--main-border);border-radius:8px;padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <div style="font-size:1.2rem;cursor:move">☰</div>
+            <div class="field" style="flex:1;min-width:150px">
+              <label>Label</label>
+              <input type="text" value="Explore" class="menu-label" style="width:100%">
+            </div>
+            <div class="field" style="flex:2;min-width:200px">
+              <label>URL</label>
+              <input type="text" value="/explore" class="menu-url" style="width:100%">
+            </div>
+            <div class="field" style="width:120px">
+              <label>Open in</label>
+              <select class="menu-target" style="width:100%">
+                <option value="_self">Same Tab</option>
+                <option value="_blank">New Tab</option>
+              </select>
+            </div>
+            <button class="btn btn-danger" onclick="removeMenuItem(this)" style="margin-top:auto;min-height:44px">🗑</button>
+          </div>
+        </div>
+
+        <button class="btn btn-ghost" onclick="addMenuItem()" style="width:100%;padding:12px;margin-top:12px">➕ Add Menu Item</button>
+
+        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+          <button class="btn btn-gold" onclick="saveMenu()" style="flex:1;min-width:140px;padding:12px">💾 Save Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS DASHBOARD -->
+    <div class="panel" id="panel-analytics">
+      <div class="stats-row" style="margin-bottom:20px">
+        <div class="stat-card"><div class="stat-label">Total Views</div><div class="stat-val" id="analytics-views">—</div></div>
+        <div class="stat-card"><div class="stat-label">Unique Visitors</div><div class="stat-val" id="analytics-visitors">—</div></div>
+        <div class="stat-card"><div class="stat-label">Avg. Time on Site</div><div class="stat-val" id="analytics-time">—</div></div>
+        <div class="stat-card"><div class="stat-label">Bounce Rate</div><div class="stat-val" id="analytics-bounce">—</div></div>
+      </div>
+
+      <div class="form-section">
+        <h4>📊 Traffic Overview</h4>
+        <div style="background:white;border:1px solid var(--main-border);border-radius:10px;padding:20px;text-align:center;color:var(--main-muted)">
+          <div style="font-size:3rem;margin-bottom:12px">📈</div>
+          <p>Analytics chart will appear here</p>
+          <p style="font-size:.8rem;margin-top:8px">Connect Google Analytics or use built-in tracking</p>
+        </div>
+      </div>
+
+      <div class="form-section" style="margin-top:16px">
+        <h4>🌍 Top Pages</h4>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Page</th><th>Views</th><th>Unique</th><th>Avg. Time</th></tr></thead>
+              <tbody id="analytics-pages-body">
+                <tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">Loading analytics...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section" style="margin-top:16px">
+        <h4>🔍 Top Referrers</h4>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Source</th><th>Visits</th><th>% of Total</th></tr></thead>
+              <tbody id="analytics-referrers-body">
+                <tr><td colspan="3" style="padding:20px;text-align:center;color:var(--main-muted)">Loading referrers...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BACKUP & RESTORE -->
+    <div class="panel" id="panel-backup-restore">
+      <div class="form-section">
+        <h4>💾 Backup & Restore</h4>
+        <p style="font-size:.85rem;color:var(--main-muted);margin-bottom:16px">Create backups of your site data and restore from previous backups.</p>
+
+        <div style="display:grid;grid-template-columns:1fr;gap:16px">
+          <div style="background:white;border:1px solid var(--main-border);border-radius:10px;padding:20px">
+            <h4 style="margin-bottom:12px">📥 Create Backup</h4>
+            <p style="font-size:.85rem;color:var(--main-muted);margin-bottom:16px">Download a complete backup of your site including posts, regions, users, and settings.</p>
+            <button class="btn btn-gold" onclick="createBackup()" style="width:100%;padding:12px">⬇️ Download Backup</button>
+          </div>
+
+          <div style="background:white;border:1px solid var(--main-border);border-radius:10px;padding:20px">
+            <h4 style="margin-bottom:12px">📤 Restore Backup</h4>
+            <p style="font-size:.85rem;color:var(--main-muted);margin-bottom:16px">Upload a previously downloaded backup file to restore your site.</p>
+            <input type="file" id="backup-file" accept=".json,.zip" style="margin-bottom:12px;width:100%">
+            <button class="btn btn-danger" onclick="restoreBackup()" style="width:100%;padding:12px">⚠️ Restore from Backup</button>
+          </div>
+        </div>
+
+        <div class="form-section" style="margin-top:20px">
+          <h4>📜 Recent Backups</h4>
+          <div class="table-wrap">
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Date</th><th>Size</th><th>Type</th><th>Actions</th></tr></thead>
+                <tbody id="backups-list-body">
+                  <tr><td colspan="4" style="padding:20px;text-align:center;color:var(--main-muted)">No backups found</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -679,7 +1034,7 @@ function showPanel(panel){
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
   const el=document.getElementById('panel-'+panel),nav=document.getElementById('nav-'+panel);
   if(el)el.classList.add('active');if(nav)nav.classList.add('active');
-  const titles={overview:'Dashboard',files:'File Manager',regions:'Regions','add-region':'Edit Region',users:'Users',creators:'Creators',posts:'All Posts',stories:'Stories',newsletter:'Newsletter',events:'Events',categories:'Categories',chat:'Chat',settings:'Settings','write-post':'Write Post',logs:'Activity Logs'};
+  const titles={overview:'Dashboard',files:'File Manager',regions:'Regions','add-region':'Edit Region',users:'Users',creators:'Creators',posts:'All Posts',stories:'Stories',newsletter:'Newsletter',events:'Events',categories:'Categories',chat:'Chat',settings:'General Settings','write-post':'Write Post',logs:'Activity Logs','site-editor':'Site Editor','theme-settings':'Theme & Branding','seo-settings':'SEO Settings','menu-editor':'Navigation Menu',analytics:'Analytics','backup-restore':'Backup & Restore'};
   document.getElementById('topbar-title').textContent=titles[panel]||panel;currentPanel=panel;
   if(panel==='files'&&!allFiles.length)loadFiles();
   if(panel==='regions'&&!allRegions.length)loadRegions();
@@ -691,6 +1046,7 @@ function showPanel(panel){
   if(panel==='categories')loadCategories();
   if(panel==='chat')loadChat();
   if(panel==='logs')loadLogs();
+  if(panel==='analytics')loadAnalytics();
   if(window.innerWidth<=768)closeSidebar();
 }
 
@@ -994,6 +1350,34 @@ async function loadLogs(){
 
 // ===== AUTH =====
 async function logout(){try{await fetch('/api/auth/logout',{method:'POST',credentials:'include'})}finally{window.location.href='/user-login.html'}}
+
+// ===== NO-CODE SITE EDITOR FUNCTIONS =====
+let pageContentData={};
+function loadPageContent(){const page=document.getElementById('site-editor-page').value;if(!page){document.getElementById('page-editor-container').style.display='none';document.getElementById('page-editor-empty').style.display='block';return}document.getElementById('page-editor-container').style.display='block';document.getElementById('page-editor-empty').style.display='none';toast('Loading page content...','info')}
+async function savePageContent(){const page=document.getElementById('site-editor-page').value;if(!page)return toast('Select a page first','er');const data={title:document.getElementById('page-title').value,metaDesc:document.getElementById('page-meta-desc').value,content:document.getElementById('page-content').value,customCss:document.getElementById('page-custom-css').value};try{await apiFetch('/api/admin/site-pages/'+page,{method:'PUT',body:JSON.stringify(data)});toast('✅ Page saved!','ok')}catch(e){toast('Failed to save','er')}}
+function previewPage(){const page=document.getElementById('site-editor-page').value;if(!page)return;window.open('/preview/'+page,'_blank');toast('Opening preview...','info')}
+function insertSection(type){const sections={cta:'<div class="cta-section"><h2>Ready to Get Started?</h2><p>Join thousands of users discovering Ghana\'s heritage today.</p><button>Get Started →</button></div>',testimonials:'<div class="testimonials"><div class="testimonial"><p>"Amazing platform for learning about our culture!"</p><span>- Ama K.</span></div></div>',gallery:'<div class="gallery-grid"><div class="gallery-item"></div><div class="gallery-item"></div><div class="gallery-item"></div></div>',team:'<div class="team-section"><div class="team-member"><img src="" alt=""><h4>Name</h4><p>Role</p></div></div>',faq:'<div class="faq-section"><details><summary>Question 1?</summary><p>Answer here...</p></details></div>',newsletter:'<div class="newsletter-signup"><h3>Subscribe to Our Newsletter</h3><input type="email" placeholder="Your email"><button>Subscribe</button></div>'};const textarea=document.getElementById('page-content');textarea.value+=sections[type]||'';toast('Section inserted!','ok')}
+
+// ===== THEME SETTINGS =====
+function syncColor(type){const color=document.getElementById('theme-'+type+'-color').value,text=document.getElementById('theme-'+type+'-text');text.value=color}
+async function uploadThemeAsset(type,file){if(!file)return;const fd=new FormData();fd.append('file',file);fd.append('category','image');fd.append('is_public','1');try{const r=await fetch('/api/upload/file',{method:'POST',body:fd,credentials:'include'}),d=await r.json();if(r.ok&&d.url){document.getElementById('theme-'+type).value=d.url;toast('Asset uploaded','ok')}else throw new Error('Upload failed')}catch(e){toast('Upload failed','er')}}
+async function saveThemeSettings(){const data={logo:document.getElementById('theme-logo').value,favicon:document.getElementById('theme-favicon').value,primaryColor:document.getElementById('theme-primary-color').value,secondaryColor:document.getElementById('theme-secondary-color').value,backgroundColor:document.getElementById('theme-bg-color').value,textColor:document.getElementById('theme-text-color').value,headingFont:document.getElementById('theme-heading-font').value,bodyFont:document.getElementById('theme-body-font').value};try{await apiFetch('/api/admin/theme',{method:'PUT',body:JSON.stringify(data)});toast('✅ Theme saved!','ok')}catch(e){toast('Failed to save theme','er')}}
+function resetThemeDefaults(){document.getElementById('theme-primary-color').value='#C8962E';document.getElementById('theme-primary-text').value='#C8962E';document.getElementById('theme-secondary-color').value='#E8B84B';document.getElementById('theme-secondary-text').value='#E8B84B';document.getElementById('theme-bg-color').value='#0D1B2A';document.getElementById('theme-bg-text').value='#0D1B2A';document.getElementById('theme-text-color').value='#e2e8f0';document.getElementById('theme-text-text').value='#e2e8f0';document.getElementById('theme-heading-font').value='Playfair Display';document.getElementById('theme-body-font').value='DM Sans';toast('Reset to defaults','info')}
+
+// ===== SEO SETTINGS =====
+async function saveSeoSettings(){const data={title:document.getElementById('seo-title').value,description:document.getElementById('seo-description').value,keywords:document.getElementById('seo-keywords').value,ogImage:document.getElementById('seo-og-image').value,twitterImage:document.getElementById('seo-twitter-image').value,social:{facebook:document.getElementById('seo-facebook').value,twitter:document.getElementById('seo-twitter').value,instagram:document.getElementById('seo-instagram').value,youtube:document.getElementById('seo-youtube').value}};try{await apiFetch('/api/admin/seo',{method:'PUT',body:JSON.stringify(data)});toast('✅ SEO settings saved!','ok')}catch(e){toast('Failed to save SEO','er')}}
+
+// ===== MENU EDITOR =====
+function addMenuItem(){const container=document.getElementById('menu-items-container');const div=document.createElement('div');div.className='menu-item';div.style.cssText='background:white;border:1px solid var(--main-border);border-radius:8px;padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap';div.innerHTML='<div style="font-size:1.2rem;cursor:move">☰</div><div class="field" style="flex:1;min-width:150px"><label>Label</label><input type="text" class="menu-label" style="width:100%"></div><div class="field" style="flex:2;min-width:200px"><label>URL</label><input type="text" class="menu-url" style="width:100%"></div><div class="field" style="width:120px"><label>Open in</label><select class="menu-target" style="width:100%"><option value="_self">Same Tab</option><option value="_blank">New Tab</option></select></div><button class="btn btn-danger" onclick="removeMenuItem(this)" style="margin-top:auto;min-height:44px">🗑</button>';container.appendChild(div)}
+function removeMenuItem(btn){btn.closest('.menu-item').remove()}
+async function saveMenu(){const items=[...document.querySelectorAll('.menu-item')].map(el=>({label:el.querySelector('.menu-label').value,url:el.querySelector('.menu-url').value,target:el.querySelector('.menu-target').value}));try{await apiFetch('/api/admin/menu',{method:'PUT',body:JSON.stringify({items})});toast('✅ Menu saved!','ok')}catch(e){toast('Failed to save menu','er')}}
+
+// ===== ANALYTICS =====
+async function loadAnalytics(){try{const stats=await apiFetch('/api/analytics');document.getElementById('analytics-views').textContent=stats.totalViews||'—';document.getElementById('analytics-visitors').textContent=stats.uniqueVisitors||'—';document.getElementById('analytics-time').textContent=stats.avgTime||'—';document.getElementById('analytics-bounce').textContent=stats.bounceRate||'—'}catch(e){console.error('Analytics error:',e)}}
+
+// ===== BACKUP & RESTORE =====
+async function createBackup(){try{const res=await fetch('/api/admin/backup',{method:'POST',credentials:'include'});if(!res.ok)throw new Error('Failed');const blob=await res.blob();const url=window.URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='echostack-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click();window.URL.revokeObjectURL(url);toast('✅ Backup downloaded!','ok')}catch(e){toast('Failed to create backup','er')}}
+async function restoreBackup(){const file=document.getElementById('backup-file').files[0];if(!file)return toast('Select a backup file first','er');if(!confirm('⚠️ This will overwrite all site data. Continue?'))return;const fd=new FormData();fd.append('backup',file);try{const res=await fetch('/api/admin/restore',{method:'POST',body:fd,credentials:'include'});if(!res.ok)throw new Error('Failed');toast('✅ Site restored! Refreshing...','ok');setTimeout(()=>location.reload(),2000)}catch(e){toast('Restore failed: '+e.message,'er')}}
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded',()=>{
