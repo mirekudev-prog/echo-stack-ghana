@@ -368,10 +368,10 @@ select{background:white;color:var(--main-text);border:1px solid var(--main-borde
     <!-- OVERVIEW -->
     <div class="panel active" id="panel-overview">
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-label">Regions</div><div class="stat-val" id="s-regions">—</div></div>
-        <div class="stat-card"><div class="stat-label">Posts</div><div class="stat-val" id="s-posts">—</div></div>
         <div class="stat-card"><div class="stat-label">Users</div><div class="stat-val" id="s-users">—</div></div>
-        <div class="stat-card"><div class="stat-label">Files</div><div class="stat-val" id="s-files">—</div></div>
+        <div class="stat-card"><div class="stat-label">Posts</div><div class="stat-val" id="s-posts">—</div></div>
+        <div class="stat-card"><div class="stat-label">Views</div><div class="stat-val" id="s-views">—</div></div>
+        <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-val" id="s-revenue">$0</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr;gap:16px">
         <div class="table-wrap">
@@ -1063,12 +1063,46 @@ async function apiFetch(endpoint,options={}){
 // ===== DASHBOARD DATA LOADING =====
 async function loadStats(){
   try{
-    const d=await apiFetch('/api/stats');
-    document.getElementById('s-regions').textContent=d.total_regions||0;
-    document.getElementById('s-posts').textContent=d.total_posts||0;
-    document.getElementById('s-users').textContent=d.total_users||0;
-    document.getElementById('s-files').textContent=d.total_files||'—';
-  }catch(e){}
+    const d=await apiFetch('/api/dashboard/stats');
+    if(d.success && d.data){
+      document.getElementById('s-users').textContent=d.data.total_users||0;
+      document.getElementById('s-posts').textContent=d.data.total_posts||0;
+      document.getElementById('s-views').textContent=d.data.total_views||0;
+      document.getElementById('s-revenue').textContent=d.data.revenue||'$0';
+    }else{
+      // Fallback to old /api/stats endpoint
+      const old=await apiFetch('/api/stats');
+      document.getElementById('s-regions').textContent=old.total_regions||0;
+      document.getElementById('s-posts').textContent=old.total_posts||0;
+      document.getElementById('s-users').textContent=old.total_users||0;
+      document.getElementById('s-files').textContent=old.total_files||'—';
+    }
+  }catch(e){console.error('Stats error:',e)}
+}
+async function loadRecentActivity(){
+  const container=document.getElementById('activity-feed');
+  if(!container)return;
+  container.innerHTML='<div style="padding:20px;text-align:center">⏳ Loading…</div>';
+  try{
+    const res=await apiFetch('/api/dashboard/recent-activity');
+    if(res.success && res.data && res.data.length>0){
+      container.innerHTML=res.data.map(item=>`
+        <div class="activity-item" style="display:flex;gap:12px;padding:12px;border-bottom:1px solid var(--main-border)">
+          <img src="${item.user.avatar||'https://ui-avatars.com/api/?name=User'}" alt="${item.user.username}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">
+          <div style="flex:1">
+            <h4 style="margin:0;font-size:.9rem">${item.user.name} <span style="color:var(--gold)">@${item.user.username}</span></h4>
+            <p style="margin:4px 0 0;font-size:.85rem;color:var(--main-muted)">${item.content}</p>
+            <small style="color:var(--main-muted)">${item.stats} • ${new Date(item.time).toLocaleDateString()}</small>
+          </div>
+        </div>
+      `).join('');
+    }else{
+      container.innerHTML='<p style="padding:20px;text-align:center;color:var(--main-muted)">No recent activity found.</p>';
+    }
+  }catch(e){
+    console.error('Activity error:',e);
+    container.innerHTML='<p style="padding:20px;text-align:center;color:var(--danger)">Failed to load activity.</p>';
+  }
 }
 async function loadRecentPosts(){
   const tbody=document.getElementById('recent-posts-body');
@@ -1381,7 +1415,7 @@ async function restoreBackup(){const file=document.getElementById('backup-file')
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded',()=>{
-  loadStats();loadRecentPosts();loadRecentFiles();setupDragDrop();
+  loadStats();loadRecentActivity();loadRecentPosts();loadRecentFiles();setupDragDrop();
 });
 </script>
 </body>

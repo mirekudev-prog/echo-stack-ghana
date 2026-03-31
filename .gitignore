@@ -1,11 +1,14 @@
 ```
-# Database files
-*.db
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# Environment files
+# Environment variables
 .env
 .env.local
-*.env.*
+.env.*
 
 # Logs
 *.log
@@ -15,43 +18,16 @@
 *.swp
 *.swo
 
-# Dependencies
-venv/
-.venv/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Build artifacts
-dist/
-build/
-*.egg-info/
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Editors
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# Coverage reports
+# Coverage
+.coverage
 coverage/
 htmlcov/
-.coverage
 
-# Testing
-.pytest_cache/
-.mypy_cache/
+# IDE
+.vscode/
+.idea/
 
-# Distribution / packaging
-*.tar.gz
-*.whl
-*.zip
-
-# Local configuration
-config.local.*
+# OS
+.DS_Store
+Thumbs.db
 ```

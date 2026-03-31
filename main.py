@@ -1902,6 +1902,57 @@ async def publish_file(
         db.rollback(); raise HTTPException(500, str(e))
         
 # ─── STATS ───────────────────────────────────────────────────────────────────
+@app.get("/api/dashboard/stats")
+def get_dashboard_stats(db: Session = Depends(get_db)):
+    """Get dashboard statistics for the admin panel."""
+    try:
+        user_count = db.query(models.User).count()
+        post_count = db.query(models.Post).filter(models.Post.status == "published").count()
+        
+        # Calculate total interactions (likes + comments)
+        posts = db.query(models.Post).all()
+        total_interactions = sum((p.likes_count or 0) + (p.comments_count or 0) for p in posts)
+        
+        return {
+            "success": True,
+            "data": {
+                "total_users": user_count,
+                "total_posts": post_count,
+                "total_views": total_interactions,
+                "revenue": "$0.00"
+            }
+        }
+    except Exception as e:
+        print(f"Error fetching dashboard stats: {e}")
+        return {"success": False, "error": str(e), "data": {"total_users": 0, "total_posts": 0, "total_views": 0, "revenue": "$0.00"}}
+
+@app.get("/api/dashboard/recent-activity")
+def get_recent_activity(db: Session = Depends(get_db)):
+    """Get recent activity for the admin dashboard."""
+    try:
+        posts = db.query(models.Post).order_by(models.Post.created_at.desc()).limit(5).all()
+        
+        activities = []
+        for post in posts:
+            user = post.user if hasattr(post, 'user') and post.user else None
+            activities.append({
+                "id": post.id,
+                "type": "post",
+                "user": {
+                    "username": user.username if user and hasattr(user, 'username') else "Unknown",
+                    "avatar": user.avatar_url if user and hasattr(user, 'avatar_url') else "",
+                    "name": user.full_name if user and hasattr(user, 'full_name') else "User"
+                },
+                "content": post.content[:50] + "..." if len(post.content) > 50 else post.content,
+                "stats": f"{post.likes_count or 0} likes, {post.comments_count or 0} comments",
+                "time": str(post.created_at)
+            })
+            
+        return {"success": True, "data": activities}
+    except Exception as e:
+        print(f"Error fetching recent activity: {e}")
+        return {"success": False, "error": str(e), "data": []}
+
 @app.get("/api/stats")
 def get_stats(db: Session = Depends(get_db)):
     try:
@@ -2191,21 +2242,23 @@ def get_active_stories(db: Session = Depends(get_db)):
                     if content.endswith('.mp4'):
                         media_type = "video"
             
+            # Get user info if available
+            username = getattr(x, "author_name", "") or "Unknown"
+            avatar_url = ""
+            
             stories.append({
                 "id": x.id,
-                "title": x.title,
-                "content": content,
-                "media_url": media_url,
-                "media_type": media_type,
-                "author_name": getattr(x, "author_name", ""),
-                "region": getattr(x, "region", ""),
-                "created_at": str(x.created_at)
+                "mediaUrl": media_url,
+                "mediaType": media_type,
+                "username": username,
+                "userAvatar": avatar_url,
+                "timestamp": str(x.created_at)
             })
         
-        return {"stories": stories}
+        return {"success": True, "data": stories}
     except Exception as e:
         print(f"Error getting active stories: {e}")
-        return {"stories": []}
+        return {"success": False, "error": str(e), "data": []}
 
 @app.post("/api/stories")
 async def submit_story(
