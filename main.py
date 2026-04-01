@@ -493,6 +493,10 @@ try:
     app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 except Exception:
     pass
+try:
+    app.mount("/css", StaticFiles(directory="css"), name="css")
+except Exception:
+    pass
 
 ADMIN_SECRET    = os.getenv("ADMIN_SECRET", "THE ADMIN")
 SUPABASE_URL    = os.getenv("SUPABASE_URL", "")
