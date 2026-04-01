@@ -8,6 +8,144 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .project-hero {
+            background: linear-gradient(135deg, var(--ink), var(--ink2));
+            color: white;
+            padding: 32px 24px;
+        }
+        .project-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(200,150,46,0.2);
+            color: var(--gold2);
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+        .project-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            margin-bottom: 12px;
+        }
+        .project-hero p {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.7;
+            max-width: 600px;
+        }
+        .project-content {
+            padding: 20px 16px;
+        }
+        .concept-block {
+            background: var(--main-card);
+            border: 1px solid var(--gold);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .concept-block h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--main-text);
+        }
+        .concept-block p {
+            color: var(--main-muted);
+            line-height: 1.8;
+            font-style: italic;
+        }
+        .section-block {
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 3px solid var(--gold);
+        }
+        .section-block h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+            color: var(--main-text);
+        }
+        .section-block p, .section-block .formatted-content {
+            color: var(--main-muted);
+            line-height: 1.7;
+            font-size: 0.9rem;
+        }
+        .section-block .formatted-content h4 {
+            color: var(--gold);
+            margin: 16px 0 8px;
+            font-weight: 700;
+        }
+        .section-block .formatted-content div {
+            padding-left: 16px;
+            color: var(--main-muted);
+            margin-bottom: 4px;
+        }
+        .section-block .formatted-content p {
+            margin-bottom: 8px;
+        }
+        .audio-section {
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .audio-section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            color: var(--main-text);
+        }
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        .plan-card {
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            text-align: center;
+        }
+        .plan-card.featured {
+            border-color: var(--gold);
+            box-shadow: 0 8px 24px rgba(200,150,46,0.12);
+        }
+        .plan-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--main-text);
+        }
+        .plan-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin: 12px 0;
+        }
+        .plan-price span {
+            font-size: 0.85rem;
+            color: var(--main-muted);
+        }
+        .plan-desc {
+            font-size: 0.85rem;
+            color: var(--main-muted);
+            margin-bottom: 16px;
+        }
+        .page-footer {
+            padding: 28px 20px;
+            text-align: center;
+            border-top: 1px solid var(--main-border);
+        }
+    </style>
 </head>
 <body>
 <div class="app">
@@ -67,179 +205,156 @@
             </div>
         </header>
 
-        <main class="main-content" style="padding-bottom:100px">
-            <div id="projectContent">
-                <div class="loading"><div class="spinner"></div></div>
-            </div>
+        <main class="main-content" id="projectContent">
+            <div class="loading"><div class="spinner"></div></div>
         </main>
-    </div>
-</div>
 
-<script>
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('show');
-}
-
-async function logout() {
-    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
-    localStorage.removeItem('es_user');
-    location.href = '/';
-}
-
-async function checkAuth() {
-    try {
-        const res = await fetch('/api/users/me', { credentials: 'include' });
-        if (res.ok) {
-            const user = await res.json();
-            const initial = (user.username || 'U').charAt(0).toUpperCase();
-            if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
-            if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = user.full_name || user.username;
-            const badge = document.getElementById('sidebarBadge');
-            if (badge) {
-                if (user.role === 'admin' || user.role === 'superuser') { badge.className = 'sidebar-user-badge badge-admin'; badge.textContent = 'Admin'; }
-                else if (user.role === 'creator') { badge.className = 'sidebar-user-badge badge-creator'; badge.textContent = 'Creator'; }
-                else if (user.is_premium) { badge.className = 'sidebar-user-badge badge-premium'; badge.textContent = 'Premium'; }
-            }
-        }
-    } catch(e) {}
-}
-
-checkAuth();
-</script>
-<script>
-function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-async function loadProject() {
-    const path = location.pathname;
-    const match = path.match(/\/project\/(\d+)/);
-    if (!match) {
-        document.getElementById('projectContent').innerHTML = '<div class="empty-state"><i class="fas fa-folder"></i><h3>Project not found</h3></div>';
-        return;
-    }
-    
-    try {
-        const res = await fetch(`/api/admin/projects/${match[1]}`);
-        if (!res.ok) throw new Error('Not found');
-        const project = await res.json();
-        document.getElementById('projectTitle').textContent = project.name;
-        renderProject(project);
-    } catch(e) {
-        document.getElementById('projectContent').innerHTML = '<div class="empty-state"><i class="fas fa-folder"></i><h3>Project not found</h3></div>';
-    }
-}
-
-function renderProject(project) {
-    const container = document.getElementById('projectContent');
-    
-    let blocksHtml = '';
-    if (project.blocks?.length) {
-        project.blocks.forEach(b => {
-            blocksHtml += renderBlock(b);
-        });
-    }
-    
-    let audioHtml = '';
-    if (project.audio_clips?.length) {
-        audioHtml = '<section style="padding:24px 16px;border-top:1px solid var(--border)"><h2 style="font-family:Playfair Display,serif;font-size:1.3rem;margin-bottom:16px">Audio Archive</h2>';
-        project.audio_clips.forEach(a => {
-            audioHtml += `<div class="audio-card">
-                <div class="audio-header">
-                    <div class="audio-icon"><i class="fas fa-headphones"></i></div>
-                    <div class="audio-info">
-                        <h4>${escapeHtml(a.title)}</h4>
-                        <p>${escapeHtml(a.region || 'Ghana')} · ${escapeHtml(a.language || 'Various')}</p>
-                    </div>
-                </div>
-                ${a.url ? `<audio src="${escapeHtml(a.url)}" controls style="width:100%"></audio>` : '<p style="color:var(--text-muted);font-size:.85rem">Audio coming soon</p>'}
-            </div>`;
-        });
-        audioHtml += '</section>';
-    }
-    
-    let revenueHtml = '';
-    if (project.revenue_plans?.length) {
-        revenueHtml = '<section style="padding:24px 16px;border-top:1px solid var(--border)"><h2 style="font-family:Playfair Display,serif;font-size:1.3rem;margin-bottom:16px">Access Plans</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px">';
-        project.revenue_plans.forEach(r => {
-            const isFree = r.amount === 0;
-            revenueHtml += `<div class="card" style="padding:24px;text-align:center">
-                <h3 style="font-family:Playfair Display,serif;font-size:1.1rem;margin-bottom:8px">${escapeHtml(r.name)}</h3>
-                <div style="font-size:2rem;font-weight:700;color:var(--gold);margin-bottom:8px">${isFree ? 'Free' : `${(r.amount/100).toFixed(2)} ${r.currency}`}</div>
-                <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:16px">${escapeHtml(r.description)}</p>
-                <button class="btn ${isFree ? 'btn-secondary' : 'btn-primary'}" style="width:100%;border-radius:50px">${isFree ? 'Get Started' : 'Subscribe'}</button>
-            </div>`;
-        });
-        revenueHtml += '</div></section>';
-    }
-    
-    container.innerHTML = `
-        <section style="padding:24px 16px;background:linear-gradient(135deg,var(--card),var(--ink2));border-bottom:1px solid var(--border)">
-            <span class="badge badge-gold" style="margin-bottom:12px">Project</span>
-            <h1 style="font-family:Playfair Display,serif;font-size:1.8rem;margin-bottom:12px">${escapeHtml(project.name)}</h1>
-            <p style="color:var(--text-secondary);line-height:1.7">${escapeHtml(project.description)}</p>
-        </section>
-        <section style="padding:16px" id="blocks">${blocksHtml}</section>
-        ${audioHtml}
-        ${revenueHtml}
-        <footer class="footer">
+        <footer class="page-footer">
             <div class="footer-brand">EchoStack Ghana</div>
             <p class="footer-text">Preserving Ghana's cultural heritage</p>
             <p class="footer-dev">Built by Mireku Development</p>
         </footer>
-    `;
-}
+    </div>
+</div>
 
-function renderBlock(block) {
-    const iconMap = { concept: 'fa-lightbulb', section: 'fa-folder', component: 'fa-cube', detail: 'fa-file-alt' };
-    const icon = iconMap[block.block_type] || 'fa-file';
-    
-    if (block.block_type === 'concept') {
-        return `<div style="background:var(--card);border:1px solid var(--gold);border-radius:var(--radius-lg);padding:24px;margin-bottom:16px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <i class="fas ${icon}" style="color:var(--gold)"></i>
-                <h2 style="font-family:Playfair Display,serif;font-size:1.3rem">${escapeHtml(block.title)}</h2>
-            </div>
-            <p style="color:var(--text-secondary);line-height:1.8;font-style:italic">${escapeHtml(block.content)}</p>
-        </div>`;
+<script>
+(function() {
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('show');
     }
-    
-    if (block.block_type === 'component') {
-        return `<div class="card" style="margin-bottom:12px;padding:20px;border-left:3px solid var(--gold)">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                <i class="fas ${icon}" style="color:var(--gold)"></i>
-                <h3 style="font-weight:700">${escapeHtml(block.title)}</h3>
-            </div>
-            <p style="color:var(--text-secondary);line-height:1.7">${escapeHtml(block.content)}</p>
-        </div>`;
-    }
-    
-    // detail/section blocks - render content with formatting
-    const formatted = (block.content || '').split('\n').map(line => {
-        if (line.startsWith('Phase') || line.startsWith('Core') || line.startsWith('Revenue') || line.startsWith('Show') || line.startsWith('Podcast')) {
-            return `<h4 style="color:var(--gold);margin:16px 0 8px;font-weight:700">${escapeHtml(line)}</h4>`;
-        }
-        if (line.startsWith('•') || line.startsWith('-')) {
-            return `<div style="padding-left:16px;color:var(--text-secondary);margin-bottom:4px">${escapeHtml(line)}</div>`;
-        }
-        if (line.match(/^\d+\./)) {
-            return `<div style="padding-left:16px;color:var(--text-secondary);margin-bottom:4px;font-weight:500">${escapeHtml(line)}</div>`;
-        }
-        return line.trim() ? `<p style="margin-bottom:8px">${escapeHtml(line)}</p>` : '';
-    }).join('');
-    
-    return `<div class="card" style="margin-bottom:16px;padding:20px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-            <i class="fas ${icon}" style="color:var(--gold)"></i>
-            <h3 style="font-family:Playfair Display,serif;font-size:1.1rem">${escapeHtml(block.title)}</h3>
-        </div>
-        <div style="color:var(--text-secondary);line-height:1.7">${formatted}</div>
-    </div>`;
-}
 
-loadProject();
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    async function checkAuth() {
+        try {
+            const res = await fetch('/api/users/me', { credentials: 'include' });
+            if (res.ok) {
+                const user = await res.json();
+                const initial = (user.username || 'U').charAt(0).toUpperCase();
+                if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
+                if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = user.full_name || user.username;
+                const badge = document.getElementById('sidebarBadge');
+                if (badge) {
+                    if (user.role === 'admin' || user.role === 'superuser') { badge.className = 'sidebar-user-badge badge-admin'; badge.textContent = 'Admin'; }
+                    else if (user.role === 'creator') { badge.className = 'sidebar-user-badge badge-creator'; badge.textContent = 'Creator'; }
+                    else if (user.is_premium) { badge.className = 'sidebar-user-badge badge-premium'; badge.textContent = 'Premium'; }
+                }
+                loadProject();
+            }
+        } catch(e) {}
+    }
+
+    async function logout() {
+        await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
+        localStorage.removeItem('es_user');
+        location.href = '/';
+    }
+
+    async function loadProject() {
+        const match = location.pathname.match(/\/project\/(\d+)/);
+        if (!match) {
+            document.getElementById('projectContent').innerHTML = '<div class="empty-state"><i class="fas fa-folder"></i><h3>Project not found</h3></div>';
+            return;
+        }
+        try {
+            const res = await fetch('/api/admin/projects/' + match[1]);
+            if (!res.ok) throw new Error('Not found');
+            const project = await res.json();
+            document.getElementById('topbarTitle').textContent = project.name;
+            document.title = project.name + ' — EchoStack';
+            renderProject(project);
+        } catch(e) {
+            document.getElementById('projectContent').innerHTML = '<div class="empty-state"><i class="fas fa-folder"></i><h3>Project not found</h3></div>';
+        }
+    }
+
+    function renderProject(project) {
+        const container = document.getElementById('projectContent');
+        let blocksHtml = '';
+        if (project.blocks && project.blocks.length) {
+            project.blocks.forEach(function(b) { blocksHtml += renderBlock(b); });
+        }
+
+        let audioHtml = '';
+        if (project.audio_clips && project.audio_clips.length) {
+            audioHtml = '<div class="audio-section"><div class="audio-section-title"><i class="fas fa-headphones" style="color:var(--gold);margin-right:8px"></i>Audio Archive</div>';
+            project.audio_clips.forEach(function(a) {
+                audioHtml += '<div class="audio-card"><div class="audio-header"><div class="audio-icon"><i class="fas fa-headphones"></i></div><div class="audio-info"><h4>' + escapeHtml(a.title) + '</h4><p>' + escapeHtml(a.region || 'Ghana') + ' · ' + escapeHtml(a.language || 'Various') + '</p></div></div>';
+                if (a.url) {
+                    audioHtml += '<audio controls preload="none"><source src="' + escapeHtml(a.url) + '" type="audio/mpeg"></audio>';
+                } else {
+                    audioHtml += '<p style="color:var(--main-muted);font-size:.85rem;margin-top:8px">Audio coming soon</p>';
+                }
+                audioHtml += '</div>';
+            });
+            audioHtml += '</div>';
+        }
+
+        let revenueHtml = '';
+        if (project.revenue_plans && project.revenue_plans.length) {
+            revenueHtml = '<div class="section-block"><div class="audio-section-title"><i class="fas fa-ticket" style="color:var(--gold);margin-right:8px"></i>Access Plans</div><div class="plans-grid">';
+            project.revenue_plans.forEach(function(r) {
+                const isFree = r.amount === 0;
+                revenueHtml += '<div class="plan-card' + (isFree ? '' : ' featured') + '">' +
+                    '<h3>' + escapeHtml(r.name) + '</h3>' +
+                    '<div class="plan-price">' + (isFree ? 'Free' : (r.amount / 100).toFixed(2) + ' ' + r.currency) + '</div>' +
+                    '<p class="plan-desc">' + escapeHtml(r.description || '') + '</p>' +
+                    '<button class="btn ' + (isFree ? 'btn-secondary' : 'btn-primary') + '" style="width:100%">' + (isFree ? 'Get Started' : 'Subscribe') + '</button>' +
+                '</div>';
+            });
+            revenueHtml += '</div></div>';
+        }
+
+        container.innerHTML =
+            '<div class="project-hero">' +
+                '<span class="project-badge"><i class="fas fa-folder"></i> Project</span>' +
+                '<h1>' + escapeHtml(project.name) + '</h1>' +
+                '<p>' + escapeHtml(project.description || '') + '</p>' +
+            '</div>' +
+            '<div class="project-content">' + blocksHtml + audioHtml + revenueHtml + '</div>';
+    }
+
+    function renderBlock(block) {
+        var iconMap = { concept: 'fa-lightbulb', section: 'fa-folder', component: 'fa-cube', detail: 'fa-file-alt' };
+        var icon = iconMap[block.block_type] || 'fa-file';
+
+        if (block.block_type === 'concept') {
+            return '<div class="concept-block">' +
+                '<h2><i class="fas ' + icon + '" style="color:var(--gold);margin-right:8px"></i>' + escapeHtml(block.title) + '</h2>' +
+                '<p>' + escapeHtml(block.content || '') + '</p>' +
+            '</div>';
+        }
+
+        var formatted = '';
+        if (block.content) {
+            var lines = block.content.split('\n');
+            formatted = '<div class="formatted-content">';
+            lines.forEach(function(line) {
+                if (line.trim().startsWith('Phase') || line.trim().startsWith('Core') || line.trim().startsWith('Revenue') || line.trim().startsWith('Show') || line.trim().startsWith('Podcast')) {
+                    formatted += '<h4>' + escapeHtml(line.trim()) + '</h4>';
+                } else if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
+                    formatted += '<div>' + escapeHtml(line.trim()) + '</div>';
+                } else if (line.trim().match(/^\d+\./)) {
+                    formatted += '<div style="font-weight:500">' + escapeHtml(line.trim()) + '</div>';
+                } else if (line.trim()) {
+                    formatted += '<p>' + escapeHtml(line.trim()) + '</p>';
+                }
+            });
+            formatted += '</div>';
+        }
+
+        return '<div class="section-block">' +
+            '<h3><i class="fas ' + icon + '" style="color:var(--gold);margin-right:8px"></i>' + escapeHtml(block.title) + '</h3>' +
+            '<div class="formatted-content">' + formatted + '</div>' +
+        '</div>';
+    }
+
+    checkAuth();
+})();
 </script>
 </body>
 </html>

@@ -9,8 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/base.css">
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        html, body { height:100%; overflow:hidden; background:var(--main-bg); }
+        body { background: var(--cream); }
         .reels-page { height:calc(100vh - 56px); display:flex; align-items:center; justify-content:center; }
         .reel-wrapper { height:calc(100vh - 56px); width:100%; max-width:500px; position:relative; scroll-snap-type:y mandatory; overflow-y:scroll; scrollbar-width:none; }
         .reel-wrapper::-webkit-scrollbar { display:none; }
@@ -115,7 +114,7 @@
             </div>
         </header>
 
-        <main class="main-content" style="padding:0;overflow:hidden">
+        <main class="main-content" style="padding:0;overflow:hidden;background:var(--cream)">
             <div class="reels-page">
     <div class="reel-wrapper" id="reelsContainer">
         <!-- Reels will be loaded here -->

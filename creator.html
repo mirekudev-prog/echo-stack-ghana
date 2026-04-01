@@ -13,28 +13,28 @@
         .creator-header-top { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
         .creator-avatar { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold2)); display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:700; color:var(--ink); }
         .creator-info h1 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:4px; }
-        .creator-info p { color:var(--text-secondary); font-size:0.9rem; }
+        .creator-info p { color:var(--main-muted); font-size:0.9rem; }
         .creator-stats { display:flex; gap:32px; }
         .creator-stat { text-align:center; }
         .creator-stat-value { font-size:1.3rem; font-weight:700; color:var(--gold); }
-        .creator-stat-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); }
+        .creator-stat-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--main-muted); }
         .creator-tabs { display:flex; background:var(--main-card); border-bottom:1px solid var(--main-border); overflow-x:auto; scrollbar-width:none; }
         .creator-tabs::-webkit-scrollbar { display:none; }
-        .creator-tab { padding:16px 24px; font-size:0.9rem; font-weight:600; color:var(--main-text-muted); white-space:nowrap; border-bottom:2px solid transparent; transition:all 0.15s; cursor:pointer; }
+        .creator-tab { padding:16px 24px; font-size:0.9rem; font-weight:600; color:var(--main-muted); white-space:nowrap; border-bottom:2px solid transparent; transition:all 0.15s; cursor:pointer; }
         .creator-tab:hover { color:var(--main-text); }
         .creator-tab.active { color:var(--gold); border-bottom-color:var(--gold); }
         .creator-content { padding:24px; max-width:800px; margin:0 auto; }
         .creator-empty { text-align:center; padding:60px 20px; }
-        .creator-empty i { font-size:3rem; color:var(--main-text-muted); margin-bottom:16px; }
+        .creator-empty i { font-size:3rem; color:var(--main-muted); margin-bottom:16px; }
         .post-list-item { display:flex; gap:16px; padding:16px; background:var(--main-card); border:1px solid var(--main-border); border-radius:var(--radius-lg); margin-bottom:12px; cursor:pointer; transition:all 0.2s; }
         .post-list-item:hover { box-shadow:0 4px 12px rgba(0,0,0,0.05); }
         .post-list-thumb { width:120px; height:80px; border-radius:var(--radius); background:var(--main-bg); flex-shrink:0; overflow:hidden; }
         .post-list-thumb img { width:100%; height:100%; object-fit:cover; }
         .post-list-info { flex:1; min-width:0; }
         .post-list-title { font-weight:600; font-size:0.95rem; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .post-list-meta { font-size:0.8rem; color:var(--main-text-secondary); display:flex; gap:12px; }
+        .post-list-meta { font-size:0.8rem; color:var(--main-muted); display:flex; gap:12px; }
         .post-list-actions { display:flex; gap:8px; margin-top:8px; }
-        .post-list-actions button { padding:6px 12px; border-radius:var(--radius); font-size:0.75rem; background:var(--main-bg); color:var(--main-text-secondary); }
+        .post-list-actions button { padding:6px 12px; border-radius:var(--radius); font-size:0.75rem; background:var(--main-bg); color:var(--main-muted); }
         .post-list-actions button:hover { background:var(--main-hover); }
         .post-list-actions button.delete:hover { color:var(--danger); }
         .new-post-form { background:var(--main-card); border:1px solid var(--main-border); border-radius:var(--radius-lg); padding:24px; }
@@ -47,7 +47,7 @@
         .premium-toggle { display:flex; align-items:center; gap:12px; padding:16px; background:var(--main-bg); border-radius:var(--radius); margin-bottom:20px; }
         .cover-upload { border:2px dashed var(--main-border); border-radius:var(--radius-lg); padding:40px; text-align:center; cursor:pointer; transition:all 0.2s; margin-bottom:20px; }
         .cover-upload:hover { border-color:var(--gold); background:rgba(200,150,46,0.05); }
-        .cover-upload i { font-size:2rem; color:var(--main-text-muted); margin-bottom:8px; }
+        .cover-upload i { font-size:2rem; color:var(--main-muted); margin-bottom:8px; }
         .cover-preview { position:relative; border-radius:var(--radius-lg); overflow:hidden; margin-bottom:20px; }
         .cover-preview img { width:100%; max-height:200px; object-fit:cover; }
         .cover-preview .remove { position:absolute; top:8px; right:8px; width:32px; height:32px; border-radius:50%; background:rgba(0,0,0,0.7); color:white; display:flex; align-items:center; justify-content:center; }
@@ -102,14 +102,14 @@
         </div>
     </aside>
     <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
-    
+
     <div class="main-wrapper">
         <header class="topbar">
             <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
             <div class="topbar-title">Creator Studio</div>
             <a href="/dashboard" class="topbar-btn"><i class="fas fa-home"></i></a>
         </header>
-        
+
         <main class="main-content">
             <div class="creator-header">
                 <div class="creator-header-top">
@@ -125,42 +125,42 @@
                     <div class="creator-stat"><div class="creator-stat-value" id="statViews">0</div><div class="creator-stat-label">Views</div></div>
                 </div>
             </div>
-            
+
             <div class="creator-tabs">
                 <div class="creator-tab active" onclick="showTab('posts', this)">My Posts</div>
                 <div class="creator-tab" onclick="showTab('analytics', this)">Analytics</div>
                 <div class="creator-tab" onclick="showTab('new', this)">New Post</div>
                 <div class="creator-tab" onclick="showTab('settings', this)">Channel Settings</div>
             </div>
-            
+
             <div id="tabPosts" class="creator-content">
                 <div id="postsList"><div class="loading"><div class="spinner"></div></div></div>
             </div>
-            
+
             <div id="tabAnalytics" class="creator-content" style="display:none">
                 <div class="card" style="padding:24px">
                     <h3 style="font-family:'Playfair Display',serif;margin-bottom:20px">Analytics Overview</h3>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px">
                         <div style="text-align:center;padding:20px;background:var(--main-bg);border-radius:var(--radius)">
                             <div style="font-size:1.5rem;font-weight:700;color:var(--gold)" id="analyticTotalPosts">0</div>
-                            <div style="font-size:0.75rem;color:var(--main-text-muted)">Total Posts</div>
+                            <div style="font-size:0.75rem;color:var(--main-muted)">Total Posts</div>
                         </div>
                         <div style="text-align:center;padding:20px;background:var(--main-bg);border-radius:var(--radius)">
                             <div style="font-size:1.5rem;font-weight:700;color:var(--gold)" id="analyticTotalLikes">0</div>
-                            <div style="font-size:0.75rem;color:var(--main-text-muted)">Total Likes</div>
+                            <div style="font-size:0.75rem;color:var(--main-muted)">Total Likes</div>
                         </div>
                         <div style="text-align:center;padding:20px;background:var(--main-bg);border-radius:var(--radius)">
                             <div style="font-size:1.5rem;font-weight:700;color:var(--gold)" id="analyticTotalComments">0</div>
-                            <div style="font-size:0.75rem;color:var(--main-text-muted)">Comments</div>
+                            <div style="font-size:0.75rem;color:var(--main-muted)">Comments</div>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <div id="tabNew" class="creator-content" style="display:none">
                 <form class="new-post-form" onsubmit="return false">
                     <h3 style="font-family:'Playfair Display',serif;margin-bottom:20px">Create New Post</h3>
-                    
+
                     <div class="content-type-selector">
                         <div class="type-option active" onclick="selectType('article', this)"><i class="fas fa-file-alt"></i> Article</div>
                         <div class="type-option" onclick="selectType('video', this)"><i class="fas fa-video"></i> Video</div>
@@ -168,17 +168,17 @@
                         <div class="type-option" onclick="selectType('audio', this)"><i class="fas fa-microphone"></i> Audio</div>
                         <div class="type-option" onclick="selectType('photo', this)"><i class="fas fa-image"></i> Photo Essay</div>
                     </div>
-                    
+
                     <div class="input-group">
                         <label>Title</label>
                         <input type="text" class="input" id="postTitle" placeholder="Give your story a compelling title...">
                     </div>
-                    
+
                     <div class="input-group">
                         <label>Excerpt</label>
                         <input type="text" class="input" id="postExcerpt" placeholder="A short summary (appears in feed)..." maxlength="200">
                     </div>
-                    
+
                     <div class="input-group">
                         <label>Region</label>
                         <select class="input" id="postRegion">
@@ -201,49 +201,49 @@
                             <option value="Savannah">Savannah</option>
                         </select>
                     </div>
-                    
+
                     <div class="input-group">
                         <label>Content</label>
                         <textarea class="input" id="postContent" placeholder="Write your story..." style="min-height:200px"></textarea>
                     </div>
-                    
+
                     <div class="input-group">
                         <label>Cover Image</label>
                         <input type="file" id="coverUpload" accept="image/*" style="display:none" onchange="handleCoverSelect(this)">
                         <div class="cover-upload" onclick="document.getElementById('coverUpload').click()" id="coverPlaceholder">
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <p style="font-size:0.9rem;color:var(--main-text-secondary)">Click to upload cover image</p>
+                            <p style="font-size:0.9rem;color:var(--main-muted)">Click to upload cover image</p>
                         </div>
                         <div class="cover-preview" id="coverPreview" style="display:none">
                             <img id="coverImage" src="" alt="">
                             <button class="remove" onclick="removeCover()"><i class="fas fa-times"></i></button>
                         </div>
                     </div>
-                    
+
                     <div class="input-group">
                         <label>Media Files (Video/Audio)</label>
                         <input type="file" id="mediaUpload" accept="video/*,audio/*" style="display:none" onchange="handleMediaSelect(this)">
                         <button type="button" class="btn btn-secondary" onclick="document.getElementById('mediaUpload').click()" style="width:100%">
                             <i class="fas fa-upload"></i> Upload Media
                         </button>
-                        <div id="mediaInfo" style="margin-top:8px;font-size:0.85rem;color:var(--main-text-secondary)"></div>
+                        <div id="mediaInfo" style="margin-top:8px;font-size:0.85rem;color:var(--main-muted)"></div>
                     </div>
-                    
+
                     <div class="premium-toggle">
                         <div class="toggle" id="premiumToggle" onclick="this.classList.toggle('active')"></div>
                         <div>
                             <div style="font-weight:600">Premium Content</div>
-                            <div style="font-size:0.8rem;color:var(--main-text-secondary)">Only premium subscribers can view this</div>
+                            <div style="font-size:0.8rem;color:var(--main-muted)">Only premium subscribers can view this</div>
                         </div>
                     </div>
-                    
+
                     <div class="form-actions">
                         <button class="btn btn-secondary" onclick="saveDraft()"><i class="fas fa-save"></i> Save Draft</button>
                         <button class="btn btn-primary" id="publishBtn" onclick="publishPost()"><i class="fas fa-paper-plane"></i> Publish</button>
                     </div>
                 </form>
             </div>
-            
+
             <div id="tabSettings" class="creator-content" style="display:none">
                 <div class="card" style="padding:24px">
                     <h3 style="font-family:'Playfair Display',serif;margin-bottom:20px">Channel Settings</h3>
@@ -317,7 +317,6 @@ function setupCreatorUI() {
     document.getElementById('creatorBio').textContent = user.bio || 'Your heritage channel';
     document.getElementById('channelName').value = user.full_name || user.username;
     document.getElementById('channelDesc').value = user.bio || '';
-    // Sidebar user
     if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
     if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = user.full_name || user.username;
     const badge = document.getElementById('sidebarBadge');
@@ -355,14 +354,14 @@ async function loadMyPosts() {
 function renderMyPosts() {
     const container = document.getElementById('postsList');
     if (!myPosts.length) {
-        container.innerHTML = '<div class="creator-empty"><i class="fas fa-pen-fancy"></i><h3>No posts yet</h3><p>Create your first post!</p><button class="btn btn-primary" style="margin-top:16px" onclick="showTab(\'new\', document.querySelectorAll(\' .creator-tab\')[2])"><i class="fas fa-plus"></i> Create Post</button></div>';
+        container.innerHTML = '<div class="creator-empty"><i class="fas fa-pen-fancy"></i><h3>No posts yet</h3><p>Create your first post!</p><button class="btn btn-primary" style="margin-top:16px" onclick="showTab(\'new\', document.querySelectorAll(\'.creator-tab\')[2])"><i class="fas fa-plus"></i> Create Post</button></div>';
         return;
     }
-    
+
     container.innerHTML = myPosts.map(p => `
         <div class="post-list-item" onclick="location.href='/post/${p.id}'">
             <div class="post-list-thumb">
-                ${p.media_url && p.content_type !== 'audio' ? `<img src="${escapeHtml(p.media_url)}" alt="">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--main-text-muted)"><i class="fas fa-file"></i></div>'}
+                ${p.media_url && p.content_type !== 'audio' ? `<img src="${escapeHtml(p.media_url)}" alt="">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--main-muted)"><i class="fas fa-file"></i></div>'}
             </div>
             <div class="post-list-info">
                 <div class="post-list-title">${escapeHtml(p.title)}</div>
@@ -384,9 +383,9 @@ function renderMyPosts() {
 function updateStats() {
     const totalLikes = myPosts.reduce((sum, p) => sum + (p.likes || 0), 0);
     const totalComments = myPosts.reduce((sum, p) => sum + (p.comments_count || 0), 0);
-    
+
     document.getElementById('statPosts').textContent = myPosts.length;
-    document.getElementById('statFollowers').textContent = 0; // Would need API
+    document.getElementById('statFollowers').textContent = 0;
     document.getElementById('statViews').textContent = totalLikes + totalComments;
     document.getElementById('analyticTotalPosts').textContent = myPosts.length;
     document.getElementById('analyticTotalLikes').textContent = totalLikes;
@@ -443,16 +442,16 @@ async function publishPost() {
     const excerpt = document.getElementById('postExcerpt').value.trim();
     const region = document.getElementById('postRegion').value;
     const isPremium = document.getElementById('premiumToggle').classList.contains('active');
-    
+
     if (!title || !content) {
         showToast('Please fill in title and content', 'error');
         return;
     }
-    
+
     const btn = document.getElementById('publishBtn');
     btn.disabled = true;
     btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px"></div>';
-    
+
     try {
         const formData = new FormData();
         formData.append('title', title);
@@ -463,9 +462,9 @@ async function publishPost() {
         if (isPremium) formData.append('is_premium', '1');
         if (coverFile) formData.append('cover', coverFile);
         if (mediaFile) formData.append('media', mediaFile);
-        
+
         const res = await fetch('/api/posts', { method: 'POST', body: formData });
-        
+
         if (res.ok) {
             const post = await res.json();
             showToast('Published successfully!', 'success');
@@ -496,7 +495,7 @@ async function deletePost(id) {
 async function saveChannelSettings() {
     const name = document.getElementById('channelName').value.trim();
     const desc = document.getElementById('channelDesc').value.trim();
-    
+
     try {
         await fetch('/api/users/me', {
             method: 'PUT',

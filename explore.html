@@ -188,17 +188,17 @@ function renderResults(data) {
     let html = '';
     
     if (data.users?.length) {
-        html += '<h3 style="margin-bottom:12px;font-size:.85rem;color:var(--text-muted);text-transform:uppercase">Creators</h3>';
+        html += '<h3 style="margin-bottom:12px;font-size:.85rem;color:var(--main-muted);text-transform:uppercase">Creators</h3>';
         data.users.forEach(u => {
             html += `<div class="card" style="margin-bottom:10px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="location.href='/user/${u.username}'">
                 <div class="post-avatar">${u.username.charAt(0).toUpperCase()}</div>
-                <div style="flex:1"><div style="font-weight:600">${escapeHtml(u.channel_name || u.username)}</div><div style="font-size:.8rem;color:var(--text-muted)">@${escapeHtml(u.username)} · ${u.follower_count || 0} followers</div></div>
+                <div style="flex:1"><div style="font-weight:600">${escapeHtml(u.channel_name || u.username)}</div><div style="font-size:.8rem;color:var(--main-muted)">@${escapeHtml(u.username)} · ${u.follower_count || 0} followers</div></div>
             </div>`;
         });
     }
     
     if (data.posts?.length) {
-        html += '<h3 style="margin:20px 0 12px;font-size:.85rem;color:var(--text-muted);text-transform:uppercase">Stories</h3>';
+        html += '<h3 style="margin:20px 0 12px;font-size:.85rem;color:var(--main-muted);text-transform:uppercase">Stories</h3>';
         renderPosts(data.posts, container, html);
         return;
     }
