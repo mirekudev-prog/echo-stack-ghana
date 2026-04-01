@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Admin Dashboard - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        .admin-sidebar {
+            width: 260px;
+            background: var(--ink2);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+            flex-shrink: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+        .sidebar-logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .sidebar-logo h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--gold);
+        }
+        .sidebar-logo span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .nav-section {
+            padding: 10px 12px;
+        }
+        .nav-section-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 8px 12px;
+        }
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            color: var(--text-secondary);
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .sidebar-item:hover {
+            background: var(--ink3);
+            color: var(--text);
+        }
+        .sidebar-item.active {
+            background: rgba(200, 150, 46, 0.1);
+            color: var(--gold);
+        }
+        .sidebar-item i {
+            width: 20px;
+            text-align: center;
+        }
+        .admin-main {
+            flex: 1;
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+        .admin-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .admin-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+        }
+        .admin-content {
+            padding: 24px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+        .stat-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .content-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .panel-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+        }
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .project-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .project-item:hover {
+            border-color: var(--gold);
+            background: var(--card-hover);
+        }
+        .project-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink);
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .project-info { flex: 1; }
+        .project-name {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+        .project-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .project-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+        .project-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-draft { background: rgba(255,255,255,0.1); color: var(--text-secondary); }
+        .status-active { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .block-editor {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .block-type {
+            padding: 2px 8px;
+            background: var(--gold);
+            color: var(--ink);
+            font-size: 0.65rem;
+            font-weight: 700;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .block-title-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--ink2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+        .block-content-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            background: var(--ink2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 0.85rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .block-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .hidden { display: none !important; }
+        @media (max-width: 900px) {
+            .admin-sidebar { display: none; }
+            .admin-main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-logo">
+                <h1>EchoStack</h1>
+                <span>Admin Dashboard</span>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-label">Management</div>
+                <nav class="sidebar-nav">
+                    <button class="sidebar-item active" onclick="showPanel('overview')">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Overview</span>
+                    </button>
+                    <button class="sidebar-item" onclick="showPanel('projects')">
+                        <i class="fas fa-folder-open"></i>
+                        <span>Projects</span>
+                    </button>
+                    <button class="sidebar-item" onclick="showPanel('content')">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Content</span>
+                    </button>
+                    <button class="sidebar-item" onclick="showPanel('audio')">
+                        <i class="fas fa-headphones"></i>
+                        <span>Audio Library</span>
+                    </button>
+                </nav>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-label">Settings</div>
+                <nav class="sidebar-nav">
+                    <button class="sidebar-item" onclick="showPanel('branding')">
+                        <i class="fas fa-palette"></i>
+                        <span>Branding</span>
+                    </button>
+                    <button class="sidebar-item" onclick="showPanel('users')">
+                        <i class="fas fa-users"></i>
+                        <span>Users</span>
+                    </button>
+                    <button class="sidebar-item" onclick="showPanel('activity')">
+                        <i class="fas fa-history"></i>
+                        <span>Activity</span>
+                    </button>
+                </nav>
+            </div>
+            
+            <div class="nav-section" style="margin-top:auto; padding-top:20px; border-top:1px solid var(--border);">
+                <a href="/dashboard" class="sidebar-item">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Site</span>
+                </a>
+                <button class="sidebar-item" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <h2 id="panelTitle">Overview</h2>
+                <div style="display:flex;align-items:center;gap:12px">
+                    <span style="font-size:0.8rem;color:var(--text-muted)">Logged in as Admin</span>
+                    <button class="btn btn-primary" style="padding:8px 16px;font-size:0.8rem" onclick="showCreateProject()">
+                        <i class="fas fa-plus"></i> New Project
+                    </button>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                <!-- OVERVIEW PANEL -->
+                <div id="panel-overview" class="panel">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Total Projects</div>
+                            <div class="stat-value" id="statProjects">0</div>
+                            <div class="stat-desc">Active CMS projects</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Content Blocks</div>
+                            <div class="stat-value" id="statBlocks">0</div>
+                            <div class="stat-desc">Across all projects</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Audio Clips</div>
+                            <div class="stat-value" id="statAudio">0</div>
+                            <div class="stat-desc">Oral histories archived</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Revenue Plans</div>
+                            <div class="stat-value" id="statRevenue">0</div>
+                            <div class="stat-desc">Monetization tiers</div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Recent Projects</h3>
+                        </div>
+                        <div class="project-list" id="projectList">
+                            <div style="color:var(--text-muted);text-align:center;padding:20px">Loading projects...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROJECTS PANEL -->
+                <div id="panel-projects" class="panel hidden">
+                    <div class="content-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">All Projects</h3>
+                            <button class="btn btn-primary" style="padding:8px 16px;font-size:0.8rem" onclick="showCreateProject()">
+                                <i class="fas fa-plus"></i> New Project
+                            </button>
+                        </div>
+                        <div class="project-list" id="allProjectsList"></div>
+                    </div>
+                </div>
+
+                <!-- PROJECT EDITOR PANEL -->
+                <div id="panel-editor" class="panel hidden">
+                    <div class="content-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title" id="editorProjectName">Project Editor</h3>
+                            <div style="display:flex;gap:8px">
+                                <button class="btn btn-secondary" style="padding:8px 16px;font-size:0.8rem" onclick="showPanel('projects')">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                                <button class="btn btn-primary" style="padding:8px 16px;font-size:0.8rem" onclick="addBlock()">
+                                    <i class="fas fa-plus"></i> Add Block
+                                </button>
+                            </div>
+                        </div>
+                        <div id="blockEditorList"></div>
+                    </div>
+                </div>
+
+                <!-- CONTENT PANEL -->
+                <div id="panel-content" class="panel hidden">
+                    <div class="content-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Content Management</h3>
+                        </div>
+                        <p style="color:var(--text-secondary)">Select a project from the Projects panel to edit its content blocks.</p>
+                    </div>
+                </div>
+
+                <!-- AUDIO PANEL -->
+                <div id="panel-audio" class="panel hidden">
+                    <div class="content-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Audio Library</h3>
+                        </div>
+                        <p style="color:var(--text-secondary)">Audio clips will be managed here. Select a project to add audio assets.</p>
+                    </div>
+                </div>
+
+                <!-- BRANDING PANEL -->
+                <div id="panel-branding" class="panel hidden">
+                    <div class="content-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Site Branding</h3>
+                        </div>
+                        <div class="input-group">
+                            <label>Site Name</label>
+                            <input type="text" class="input" value="EchoStack Ghana" id="siteName">
+                        </div>
+                        <div class="input-group">
+                            <label>Tagline</label>
+                            <input type="text" class="input" value="Ghana's Living Heritage Archive" id="siteTagline">
+                        </div>
+                        <div class="input-group">
+                            <label>Developer</label>
+                            <input type="text" class="input" value="Mireku Development" id="siteDeveloper">
+                        </div>
+                        <button class="btn btn-primary" style="margin-top:16px" onclick="saveBranding()">
+                            <i class="fas fa-save"></i> Save Branding
+                        </button>
+                    </div>
+                </div>
+
+                <!-- USERS PANEL -->
+                <div id="panel-users" class="panel hidden">
+                    <div class="content-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">User Management</h3>
+                        </div>
+                        <p style="color:var(--text-secondary)">User management features coming soon.</p>
+                    </div>
+                </div>
+
+                <!-- ACTIVITY PANEL -->
+                <div id="panel-activity" class="panel hidden">
+                    <div class="content-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Activity Log</h3>
+                        </div>
+                        <p style="color:var(--text-secondary)">Activity tracking coming soon.</p>
+                    </div>
+                </div>
+
+                <!-- CREATE PROJECT MODAL -->
+                <div class="modal-overlay" id="createProjectModal">
+                    <div class="modal">
+                        <button class="modal-close" onclick="closeCreateProject()"><i class="fas fa-times"></i></button>
+                        <h2 style="font-family:'Playfair Display',serif;margin-bottom:20px">Create New Project</h2>
+                        <div class="input-group">
+                            <label>Project Name</label>
+                            <input type="text" class="input" id="newProjectName" placeholder="e.g., Audio Archive & Podcast Network">
+                        </div>
+                        <div class="input-group">
+                            <label>Slug (URL-friendly)</label>
+                            <input type="text" class="input" id="newProjectSlug" placeholder="e.g., audio-archive-podcast-network">
+                        </div>
+                        <div class="input-group">
+                            <label>Description</label>
+                            <input type="text" class="input" id="newProjectDesc" placeholder="Brief description...">
+                        </div>
+                        <div class="input-group">
+                            <label>Status</label>
+                            <select class="input" id="newProjectStatus">
+                                <option value="draft">Draft</option>
+                                <option value="active">Active</option>
+                                <option value="archived">Archived</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="createProject()">
+                            <i class="fas fa-plus"></i> Create Project
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let currentProject = null;
+        let projects = [];
+
+        async function loadProjects() {
+            try {
+                const res = await fetch('/api/admin/projects', { credentials: 'include' });
+                if (!res.ok) throw new Error('Failed to load');
+                projects = await res.json();
+                renderProjects();
+                updateStats();
+            } catch(e) {
+                console.error('Load error:', e);
+                document.getElementById('projectList').innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px">Failed to load projects</div>';
+            }
+        }
+
+        function renderProjects() {
+            const list = document.getElementById('projectList');
+            const allList = document.getElementById('allProjectsList');
+            
+            if (!projects.length) {
+                list.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px">No projects yet. Create your first project!</div>';
+                allList.innerHTML = list.innerHTML;
+                return;
+            }
+            
+            const html = projects.map(p => `
+                <div class="project-item" onclick="openProject(${p.id})">
+                    <div class="project-icon"><i class="fas fa-folder"></i></div>
+                    <div class="project-info">
+                        <div class="project-name">${escapeHtml(p.name)}</div>
+                        <div class="project-desc">${escapeHtml(p.description || 'No description')}</div>
+                        <div class="project-stats">
+                            <span><i class="fas fa-cube"></i> ${p.block_count} blocks</span>
+                            <span><i class="fas fa-clock"></i> ${formatDate(p.created_at)}</span>
+                        </div>
+                    </div>
+                    <span class="project-status status-${p.status}">${p.status}</span>
+                </div>
+            `).join('');
+            
+            list.innerHTML = html;
+            allList.innerHTML = html;
+        }
+
+        function updateStats() {
+            document.getElementById('statProjects').textContent = projects.length;
+            let totalBlocks = 0;
+            projects.forEach(p => totalBlocks += p.block_count || 0);
+            document.getElementById('statBlocks').textContent = totalBlocks;
+        }
+
+        async function openProject(id) {
+            try {
+                const res = await fetch(`/api/admin/projects/${id}`, { credentials: 'include' });
+                if (!res.ok) throw new Error('Failed to load project');
+                currentProject = await res.json();
+                
+                document.getElementById('editorProjectName').textContent = currentProject.name;
+                renderBlocks();
+                showPanel('editor');
+            } catch(e) {
+                showToast('Failed to load project', 'error');
+            }
+        }
+
+        function renderBlocks() {
+            const container = document.getElementById('blockEditorList');
+            if (!currentProject || !currentProject.blocks) {
+                container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px">No blocks yet</div>';
+                return;
+            }
+            
+            container.innerHTML = currentProject.blocks.map(b => `
+                <div class="block-editor" data-block-id="${b.id}">
+                    <div class="block-header">
+                        <span class="block-type">${escapeHtml(b.block_type)}</span>
+                        <button class="btn btn-secondary" style="padding:4px 8px;font-size:0.75rem" onclick="deleteBlock(${b.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <input type="text" class="block-title-input" value="${escapeHtml(b.title)}" placeholder="Block title" onchange="updateBlock(${b.id}, 'title', this.value)">
+                    <textarea class="block-content-input" placeholder="Block content..." onchange="updateBlock(${b.id}, 'content', this.value)">${escapeHtml(b.content)}</textarea>
+                </div>
+            `).join('');
+        }
+
+        async function addBlock() {
+            if (!currentProject) return;
+            try {
+                const res = await fetch(`/api/admin/projects/${currentProject.id}/blocks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        block_type: 'section',
+                        title: 'New Section',
+                        content: '',
+                        order: currentProject.blocks.length
+                    })
+                });
+                if (res.ok) {
+                    await openProject(currentProject.id);
+                    showToast('Block added');
+                }
+            } catch(e) {
+                showToast('Failed to add block', 'error');
+            }
+        }
+
+        async function updateBlock(blockId, field, value) {
+            if (!currentProject) return;
+            try {
+                await fetch(`/api/admin/projects/${currentProject.id}/blocks/${blockId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [field]: value })
+                });
+            } catch(e) {
+                console.error('Update error:', e);
+            }
+        }
+
+        async function deleteBlock(blockId) {
+            if (!currentProject || !confirm('Delete this block?')) return;
+            try {
+                await fetch(`/api/admin/projects/${currentProject.id}/blocks/${blockId}`, {
+                    method: 'DELETE'
+                });
+                await openProject(currentProject.id);
+                showToast('Block deleted');
+            } catch(e) {
+                showToast('Failed to delete', 'error');
+            }
+        }
+
+        function showPanel(name) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`panel-${name}`).classList.remove('hidden');
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            document.querySelector(`.sidebar-item[onclick="showPanel('${name}')"]`)?.classList.add('active');
+            
+            const titles = {
+                overview: 'Overview',
+                projects: 'Projects',
+                editor: 'Project Editor',
+                content: 'Content Management',
+                audio: 'Audio Library',
+                branding: 'Site Branding',
+                users: 'User Management',
+                activity: 'Activity Log'
+            };
+            document.getElementById('panelTitle').textContent = titles[name] || 'Admin';
+        }
+
+        function showCreateProject() {
+            document.getElementById('createProjectModal').classList.add('show');
+        }
+
+        function closeCreateProject() {
+            document.getElementById('createProjectModal').classList.remove('show');
+        }
+
+        async function createProject() {
+            const name = document.getElementById('newProjectName').value.trim();
+            const slug = document.getElementById('newProjectSlug').value.trim();
+            const description = document.getElementById('newProjectDesc').value.trim();
+            const status = document.getElementById('newProjectStatus').value;
+            
+            if (!name) {
+                showToast('Project name is required', 'error');
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/admin/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, slug, description, status })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeCreateProject();
+                    loadProjects();
+                    showToast('Project created!');
+                }
+            } catch(e) {
+                showToast('Failed to create project', 'error');
+            }
+        }
+
+        function saveBranding() {
+            showToast('Branding saved!');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            return new Date(dateStr).toLocaleDateString();
+        }
+
+        function showToast(msg, type = '') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast show' + (type ? ' ' + type : '');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+            } catch(e) {}
+            window.location.href = '/login';
+        }
+
+        // Load projects on page load
+        loadProjects();
+    </script>
+</body>
+</html>
