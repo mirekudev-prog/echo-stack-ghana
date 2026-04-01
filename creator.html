@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Create Post - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .create-form{padding:16px}
+        .create-form .input-group{margin-bottom:20px}
+        .create-form .input{width:100%;padding:14px 16px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:.95rem;outline:none;transition:.2s}
+        .create-form .input:focus{border-color:var(--gold);background:rgba(200,150,46,0.05)}
+        .create-form .input::placeholder{color:var(--text-muted)}
+        .create-form textarea.input{min-height:200px;resize:vertical;line-height:1.6}
+        .create-form select.input{appearance:none;cursor:pointer}
+        .media-preview{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+        .media-preview-item{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;background:var(--surface)}
+        .media-preview-item img{width:100%;height:100%;object-fit:cover}
+        .media-preview-item .remove{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.7);color:white;display:flex;align-items:center;justify-content:center;font-size:.7rem}
+        .create-actions{display:flex;gap:12px;padding:16px;border-top:1px solid var(--border)}
+        .create-actions .btn{flex:1;padding:14px;border-radius:50px;font-size:.9rem;font-weight:600}
+    </style>
+</head>
+<body>
+<div class="app">
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="/dashboard" class="nav-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </a>
+            <div class="nav-title">Create Post</div>
+        </div>
+    </nav>
+    
+    <main class="main-content" style="padding-bottom:120px">
+        <form id="createForm" onsubmit="return false">
+            <div class="create-form">
+                <div class="input-group">
+                    <label>Title</label>
+                    <input type="text" class="input" id="postTitle" placeholder="Give your story a title..." required>
+                </div>
+                <div class="input-group">
+                    <label>Region</label>
+                    <select class="input" id="postRegion">
+                        <option value="">Select a region...</option>
+                        <option value="Ashanti">Ashanti</option>
+                        <option value="Greater Accra">Greater Accra</option>
+                        <option value="Western">Western</option>
+                        <option value="Eastern">Eastern</option>
+                        <option value="Central">Central</option>
+                        <option value="Volta">Volta</option>
+                        <option value="Northern">Northern</option>
+                        <option value="Upper East">Upper East</option>
+                        <option value="Upper West">Upper West</option>
+                        <option value="Brong-Ahafo">Brong-Ahafo</option>
+                        <option value="Western North">Western North</option>
+                        <option value="Ahafo">Ahafo</option>
+                        <option value="Bono East">Bono East</option>
+                        <option value="Oti">Oti</option>
+                        <option value="North East">North East</option>
+                        <option value="Savannah">Savannah</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Content</label>
+                    <textarea class="input" id="postContent" placeholder="Share your story, tradition, or knowledge about Ghana's heritage..." required></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Media (optional)</label>
+                    <input type="file" id="postMedia" accept="image/*,video/*,audio/*" multiple style="display:none" onchange="handleMediaSelect(this)">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('postMedia').click()" style="width:100%">
+                        <i class="fas fa-cloud-upload-alt"></i> Add Photos, Videos, or Audio
+                    </button>
+                    <div class="media-preview" id="mediaPreview"></div>
+                </div>
+            </div>
+        </form>
+    </main>
+    
+    <div style="position:fixed;bottom:0;left:0;right:0;background:var(--ink);border-top:1px solid var(--border);padding:16px;max-width:600px;margin:0 auto">
+        <div class="create-actions" style="padding:0;border:none">
+            <button type="button" class="btn btn-secondary" onclick="saveDraft()">
+                <i class="fas fa-save"></i> Save Draft
+            </button>
+            <button type="button" class="btn btn-primary" id="publishBtn" onclick="publishPost()">
+                <i class="fas fa-paper-plane"></i> Publish
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let user = null;
+let selectedMedia = [];
+
+function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.className = 'toast', 2500);
+}
+
+async function loadUser() {
+    try {
+        const res = await fetch('/api/users/me', { credentials: 'include' });
+        if (res.ok) {
+            user = await res.json();
+        } else {
+            location.href = '/user-login';
+        }
+    } catch(e) {
+        location.href = '/user-login';
+    }
+}
+
+function handleMediaSelect(input) {
+    const files = Array.from(input.files);
+    files.forEach(file => {
+        if (selectedMedia.length >= 5) return;
+        selectedMedia.push(file);
+        renderMediaPreview();
+    });
+    input.value = '';
+}
+
+function renderMediaPreview() {
+    const container = document.getElementById('mediaPreview');
+    container.innerHTML = selectedMedia.map((file, i) => `
+        <div class="media-preview-item">
+            <img src="${URL.createObjectURL(file)}" alt="">
+            <button class="remove" onclick="removeMedia(${i})"><i class="fas fa-times"></i></button>
+        </div>
+    `).join('');
+}
+
+function removeMedia(index) {
+    selectedMedia.splice(index, 1);
+    renderMediaPreview();
+}
+
+async function saveDraft() {
+    showToast('Draft saved!', 'success');
+}
+
+async function publishPost() {
+    const title = document.getElementById('postTitle').value.trim();
+    const content = document.getElementById('postContent').value.trim();
+    const region = document.getElementById('postRegion').value;
+    
+    if (!title || !content) {
+        showToast('Please fill in title and content', 'error');
+        return;
+    }
+    
+    const btn = document.getElementById('publishBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px"></div> Publishing...';
+    
+    try {
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('excerpt', content.substring(0, 200));
+        if (region) formData.append('region', region);
+        selectedMedia.forEach(file => formData.append('media', file));
+        
+        const res = await fetch('/api/posts', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (res.ok) {
+            const post = await res.json();
+            showToast('Published successfully!', 'success');
+            setTimeout(() => location.href = `/post/${post.id}`, 1000);
+        } else {
+            throw new Error('Failed');
+        }
+    } catch(e) {
+        showToast('Failed to publish. Try again.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publish';
+    }
+}
+
+loadUser();
+</script>
+</body>
+</html>

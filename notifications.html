@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Notifications - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .notif-item{display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--border);cursor:pointer;transition:.2s}
+        .notif-item:hover{background:var(--card)}
+        .notif-item.unread{background:rgba(200,150,46,0.05)}
+        .notif-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+        .notif-icon.like{background:rgba(239,68,68,0.15);color:var(--danger)}
+        .notif-icon.comment{background:rgba(59,130,246,0.15);color:var(--primary)}
+        .notif-icon.follow{background:rgba(200,150,46,0.15);color:var(--gold)}
+        .notif-icon.mention{background:rgba(34,197,94,0.15);color:var(--success)}
+        .notif-content{flex:1}
+        .notif-text{font-size:.9rem;line-height:1.4}
+        .notif-text strong{font-weight:600}
+        .notif-time{font-size:.75rem;color:var(--text-muted);margin-top:4px}
+        .notif-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:6px}
+        .notif-header{display:flex;align-items:center;justify-content:space-between;padding:16px}
+        .notif-header h2{font-family:'Playfair Display',serif;font-size:1.2rem}
+        .mark-read{font-size:.8rem;color:var(--gold);cursor:pointer}
+    </style>
+</head>
+<body>
+<div class="app">
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="/dashboard" class="nav-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </a>
+            <div class="nav-title">Notifications</div>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="notif-header">
+            <h2>Notifications</h2>
+            <span class="mark-read" onclick="markAllRead()">Mark all as read</span>
+        </div>
+        <div id="notifList">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+    </main>
+    
+    <nav class="bottom-nav">
+        <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="/explore" class="nav-item"><i class="fas fa-compass"></i><span>Explore</span></a>
+        <a href="/creator" class="nav-item"><i class="fas fa-plus-square"></i><span>Post</span></a>
+        <a href="/messages" class="nav-item"><i class="fas fa-envelope"></i><span>Chat</span></a>
+        <a href="/user-profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let user = null;
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 60) return Math.floor(diff) + 's ago';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+}
+
+function getNotifIcon(type) {
+    switch(type) {
+        case 'like': return 'like';
+        case 'comment': return 'comment';
+        case 'follow': return 'follow';
+        case 'mention': return 'mention';
+        default: return 'follow';
+    }
+}
+
+function getNotifIconClass(type) {
+    switch(type) {
+        case 'like': return 'fa-heart';
+        case 'comment': return 'fa-comment';
+        case 'follow': return 'fa-user-plus';
+        case 'mention': return 'fa-at';
+        default: return 'fa-bell';
+    }
+}
+
+async function loadUser() {
+    try {
+        const res = await fetch('/api/users/me', { credentials: 'include' });
+        if (res.ok) {
+            user = await res.json();
+            loadNotifications();
+        } else {
+            location.href = '/user-login';
+        }
+    } catch(e) {
+        location.href = '/user-login';
+    }
+}
+
+async function loadNotifications() {
+    try {
+        const res = await fetch('/api/notifications');
+        const notifs = await res.json();
+        const container = document.getElementById('notifList');
+        
+        if (!notifs.length) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><h3>No notifications</h3><p>You\\'re all caught up!</p></div>';
+            return;
+        }
+        
+        container.innerHTML = notifs.map(n => `
+            <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="handleNotifClick('${n.link || '#'}', '${n.id}')">
+                <div class="notif-icon ${getNotifIcon(n.type)}"><i class="fas ${getNotifIconClass(n.type)}"></i></div>
+                <div class="notif-content">
+                    <div class="notif-text">${escapeHtml(n.message)}</div>
+                    <div class="notif-time">${timeAgo(n.created_at)}</div>
+                </div>
+                ${n.is_read ? '' : '<div class="notif-unread-dot"></div>'}
+            </div>
+        `).join('');
+    } catch(e) {
+        document.getElementById('notifList').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
+    }
+}
+
+async function handleNotifClick(link, id) {
+    if (id) {
+        await fetch(`/api/notifications/${id}/read`, { method: 'POST' });
+    }
+    if (link && link !== '#') location.href = link;
+}
+
+async function markAllRead() {
+    try {
+        await fetch('/api/notifications/read-all', { method: 'POST' });
+        document.querySelectorAll('.notif-item.unread').forEach(el => {
+            el.classList.remove('unread');
+            const dot = el.querySelector('.notif-unread-dot');
+            if (dot) dot.remove();
+        });
+    } catch(e) {}
+}
+
+loadUser();
+</script>
+</body>
+</html>
