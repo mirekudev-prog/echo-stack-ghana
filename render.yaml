@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: echo-stack-ghana
+    runtime: python
+    pythonVersion: "3.12"
+    buildCommand: "pip install --prefer-binary -r requirements.txt"
+    startCommand: "python main.py"
