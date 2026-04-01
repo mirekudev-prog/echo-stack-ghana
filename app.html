@@ -492,68 +492,117 @@
     </style>
 </head>
 <body>
+<div class="app">
 
-    <!-- Top Bar -->
-    <nav class="top-bar">
-        <a href="/" class="top-bar-logo">
-            <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
-            <span>EchoStack</span>
-        </a>
-        <span class="top-bar-title">Interactive Map</span>
-        <div class="top-bar-right">
-            <a href="/dashboard"><i class="fas fa-home"></i> Feed</a>
-            <a href="/explore"><i class="fas fa-compass"></i> Explore</a>
-            <a href="/premium" class="btn-nav"><i class="fas fa-crown"></i> Premium</a>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </a>
         </div>
-    </nav>
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">User</div>
+                <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i><span>Feed</span></a>
+                <a href="/reels" class="sidebar-link"><i class="fas fa-film"></i><span>Reels</span></a>
+                <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i><span>Explore</span></a>
+                <a href="/archive" class="sidebar-link"><i class="fas fa-archive"></i><span>Archive</span></a>
+                <a href="/app" class="sidebar-link active"><i class="fas fa-map-marked-alt"></i><span>Map</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Social</div>
+                <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
+                <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
+                <a href="/notifications" class="sidebar-link"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                <a href="/chatbot" class="sidebar-link"><i class="fas fa-comments"></i><span>Community Chat</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Create</div>
+                <a href="/creator" class="sidebar-link" id="createLink"><i class="fas fa-plus-circle"></i><span>Create Post</span></a>
+                <a href="/premium" class="sidebar-link"><i class="fas fa-crown"></i><span>Premium</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Account</div>
+                <a href="/user-profile" class="sidebar-link"><i class="fas fa-user"></i><span>My Profile</span></a>
+                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-    <!-- Hero Banner -->
-    <div class="hero-banner">
-        <h1>Explore Ghana's Heritage <span>🗺️</span></h1>
-        <p>Click any region on the map or select a card below to discover stories, traditions, and landmarks.</p>
-    </div>
+    <!-- Main content -->
+    <div class="main-wrapper">
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-title">Interactive Map</div>
+            <div class="topbar-actions">
+                <a href="/notifications" class="topbar-btn"><i class="fas fa-bell"></i></a>
+                <a href="/chatbot" class="topbar-btn"><i class="fas fa-robot"></i></a>
+            </div>
+        </header>
 
-    <!-- Main layout -->
-    <div class="map-section">
-
-        <!-- Map + Cards -->
-        <div class="map-area">
-            <div class="map-wrapper">
-                <svg class="ghana-map" id="ghanaSvg" viewBox="0 0 400 620">
-                    <!-- Paths and labels injected by JS -->
-                </svg>
+        <main class="main-content">
+            <!-- Hero Banner -->
+            <div class="hero-banner">
+                <h1>Explore Ghana's Heritage <span>🗺️</span></h1>
+                <p>Click any region on the map or select a card below to discover stories, traditions, and landmarks.</p>
             </div>
 
-            <!-- Region Cards -->
-            <div class="cards-section">
-                <div class="cards-title">All 16 Regions</div>
-                <div class="region-cards-grid" id="regionCardsGrid">
-                    <div class="loading-row"><div class="spinner"></div></div>
+            <!-- Main layout -->
+            <div class="map-section">
+
+                <!-- Map + Cards -->
+                <div class="map-area">
+                    <div class="map-wrapper">
+                        <svg class="ghana-map" id="ghanaSvg" viewBox="0 0 400 620">
+                            <!-- Paths and labels injected by JS -->
+                        </svg>
+                    </div>
+
+                    <!-- Region Cards -->
+                    <div class="cards-section">
+                        <div class="cards-title">All 16 Regions</div>
+                        <div class="region-cards-grid" id="regionCardsGrid">
+                            <div class="loading-row"><div class="spinner"></div></div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Detail Panel -->
-        <div class="detail-panel hidden" id="detailPanel">
-            <div class="panel-head" id="panelHead">
-                <button class="panel-close" onclick="closePanel()"><i class="fas fa-times"></i></button>
-                <h2 id="panelName">Region Name</h2>
-                <div class="panel-capital" id="panelCapital"><i class="fas fa-map-marker-alt"></i> Capital</div>
-                <div class="panel-terrain" id="panelTerrain"></div>
-            </div>
-            <div class="panel-body" id="panelBody">
-                <div class="panel-empty">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <h3>Select a Region</h3>
-                    <p>Click a region on the map or card to view details</p>
+                <!-- Detail Panel -->
+                <div class="detail-panel hidden" id="detailPanel">
+                    <div class="panel-head" id="panelHead">
+                        <button class="panel-close" onclick="closePanel()"><i class="fas fa-times"></i></button>
+                        <h2 id="panelName">Region Name</h2>
+                        <div class="panel-capital" id="panelCapital"><i class="fas fa-map-marker-alt"></i> Capital</div>
+                        <div class="panel-terrain" id="panelTerrain"></div>
+                    </div>
+                    <div class="panel-body" id="panelBody">
+                        <div class="panel-empty">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <h3>Select a Region</h3>
+                            <p>Click a region on the map or card to view details</p>
+                        </div>
+                    </div>
                 </div>
+
             </div>
-        </div>
 
+            <!-- Mobile overlay for detail panel -->
+            <div class="panel-overlay" id="panelOverlay" onclick="closePanel()" style="display:none"></div>
+        </main>
     </div>
-
-    <!-- Mobile overlay -->
-    <div class="panel-overlay" id="panelOverlay" onclick="closePanel()" style="display:none"></div>
+</div>
 
     <script>
         (function() {
@@ -647,6 +696,48 @@
 
             var allRegions = defaultRegions;
             var activeKey = null;
+
+            function toggleSidebar() {
+                var sidebar = document.getElementById('sidebar');
+                var overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.toggle('open');
+                if (overlay) overlay.classList.toggle('show');
+            }
+
+            function closeSidebar() {
+                var sidebar = document.getElementById('sidebar');
+                var overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('show');
+            }
+
+            async function checkAuth() {
+                try {
+                    var res = await fetch('/api/users/me', { credentials: 'include' });
+                    if (res.ok) {
+                        var user = await res.json();
+                        var initial = (user.username || 'U').charAt(0).toUpperCase();
+                        if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
+                        if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = user.full_name || user.username;
+                        var badge = document.getElementById('sidebarBadge');
+                        if (badge) {
+                            if (user.role === 'admin' || user.role === 'superuser') { badge.className = 'sidebar-user-badge badge-admin'; badge.textContent = 'Admin'; }
+                            else if (user.role === 'creator') { badge.className = 'sidebar-user-badge badge-creator'; badge.textContent = 'Creator'; }
+                            else if (user.is_premium) { badge.className = 'sidebar-user-badge badge-premium'; badge.textContent = 'Premium'; }
+                        }
+                    } else {
+                        location.href = '/user-login';
+                    }
+                } catch (e) {
+                    location.href = '/user-login';
+                }
+            }
+
+            async function logout() {
+                await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
+                localStorage.removeItem('es_user');
+                location.href = '/';
+            }
 
             function escapeHtml(str) {
                 if (!str) return '';
@@ -870,6 +961,7 @@
             }
 
             // ── INIT ───────────────────────────────────
+            checkAuth();
             initMap();
             loadRegions();
         })();

@@ -57,7 +57,50 @@
 </head>
 <body>
 <div class="app">
-    <aside class="sidebar" id="sidebar"></aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </a>
+        </div>
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">User</div>
+                <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i><span>Feed</span></a>
+                <a href="/reels" class="sidebar-link"><i class="fas fa-film"></i><span>Reels</span></a>
+                <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i><span>Explore</span></a>
+                <a href="/archive" class="sidebar-link"><i class="fas fa-archive"></i><span>Archive</span></a>
+                <a href="/app" class="sidebar-link"><i class="fas fa-map-marked-alt"></i><span>Map</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Social</div>
+                <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
+                <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
+                <a href="/notifications" class="sidebar-link"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                <a href="/chatbot" class="sidebar-link"><i class="fas fa-comments"></i><span>Community Chat</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Create</div>
+                <a href="/creator" class="sidebar-link active"><i class="fas fa-plus-circle"></i><span>Create Post</span></a>
+                <a href="/premium" class="sidebar-link"><i class="fas fa-crown"></i><span>Premium</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Account</div>
+                <a href="/user-profile" class="sidebar-link"><i class="fas fa-user"></i><span>My Profile</span></a>
+                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
     <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
     
     <div class="main-wrapper">
@@ -274,6 +317,28 @@ function setupCreatorUI() {
     document.getElementById('creatorBio').textContent = user.bio || 'Your heritage channel';
     document.getElementById('channelName').value = user.full_name || user.username;
     document.getElementById('channelDesc').value = user.bio || '';
+    // Sidebar user
+    if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
+    if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = user.full_name || user.username;
+    const badge = document.getElementById('sidebarBadge');
+    if (badge) {
+        if (user.role === 'admin' || user.role === 'superuser') {
+            badge.className = 'sidebar-user-badge badge-admin';
+            badge.textContent = 'Admin';
+        } else if (user.role === 'creator') {
+            badge.className = 'sidebar-user-badge badge-creator';
+            badge.textContent = 'Creator';
+        } else if (user.is_premium) {
+            badge.className = 'sidebar-user-badge badge-premium';
+            badge.textContent = 'Premium';
+        }
+    }
+}
+
+async function logout() {
+    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
+    localStorage.removeItem('es_user');
+    location.href = '/';
 }
 
 async function loadMyPosts() {

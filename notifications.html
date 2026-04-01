@@ -9,53 +9,95 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/base.css">
     <style>
-        .notif-item{display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--border);cursor:pointer;transition:.2s}
-        .notif-item:hover{background:var(--card)}
-        .notif-item.unread{background:rgba(200,150,46,0.05)}
+        .notif-list-wrap{background:var(--main-card);border:1px solid var(--main-border);border-radius:var(--radius-lg);overflow:hidden;margin:16px}
+        .notif-item{display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--main-border);cursor:pointer;transition:.2s}
+        .notif-item:last-child{border-bottom:none}
+        .notif-item:hover{background:var(--main-hover)}
+        .notif-item.unread{background:rgba(200,150,46,0.04)}
         .notif-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
-        .notif-icon.like{background:rgba(239,68,68,0.15);color:var(--danger)}
-        .notif-icon.comment{background:rgba(59,130,246,0.15);color:var(--primary)}
-        .notif-icon.follow{background:rgba(200,150,46,0.15);color:var(--gold)}
-        .notif-icon.mention{background:rgba(34,197,94,0.15);color:var(--success)}
+        .notif-icon.like{background:rgba(239,68,68,0.12);color:var(--danger)}
+        .notif-icon.comment{background:rgba(59,130,246,0.12);color:var(--blue)}
+        .notif-icon.follow{background:rgba(200,150,46,0.12);color:var(--gold)}
+        .notif-icon.mention{background:rgba(34,197,94,0.12);color:var(--success)}
         .notif-content{flex:1}
-        .notif-text{font-size:.9rem;line-height:1.4}
+        .notif-text{font-size:.9rem;line-height:1.4;color:var(--main-text)}
         .notif-text strong{font-weight:600}
-        .notif-time{font-size:.75rem;color:var(--text-muted);margin-top:4px}
+        .notif-time{font-size:.75rem;color:var(--main-muted);margin-top:4px}
         .notif-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:6px}
-        .notif-header{display:flex;align-items:center;justify-content:space-between;padding:16px}
-        .notif-header h2{font-family:'Playfair Display',serif;font-size:1.2rem}
+        .notif-header{display:flex;align-items:center;justify-content:space-between;padding:16px;background:var(--main-card);border-bottom:1px solid var(--main-border)}
+        .notif-header h2{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--main-text)}
         .mark-read{font-size:.8rem;color:var(--gold);cursor:pointer}
     </style>
 </head>
 <body>
 <div class="app">
-    <nav class="top-nav">
-        <div class="top-nav-inner">
-            <a href="/dashboard" class="nav-logo">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
                 <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
                 <span>EchoStack</span>
             </a>
-            <div class="nav-title">Notifications</div>
         </div>
-    </nav>
-    
-    <main class="main-content">
-        <div class="notif-header">
-            <h2>Notifications</h2>
-            <span class="mark-read" onclick="markAllRead()">Mark all as read</span>
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">User</div>
+                <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
+            </div>
         </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i><span>Feed</span></a>
+                <a href="/reels" class="sidebar-link"><i class="fas fa-film"></i><span>Reels</span></a>
+                <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i><span>Explore</span></a>
+                <a href="/archive" class="sidebar-link"><i class="fas fa-archive"></i><span>Archive</span></a>
+                <a href="/app" class="sidebar-link"><i class="fas fa-map-marked-alt"></i><span>Map</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Social</div>
+                <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
+                <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
+                <a href="/notifications" class="sidebar-link active"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                <a href="/chatbot" class="sidebar-link"><i class="fas fa-comments"></i><span>Community Chat</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Create</div>
+                <a href="/creator" class="sidebar-link"><i class="fas fa-plus-circle"></i><span>Create Post</span></a>
+                <a href="/premium" class="sidebar-link"><i class="fas fa-crown"></i><span>Premium</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Account</div>
+                <a href="/user-profile" class="sidebar-link"><i class="fas fa-user"></i><span>My Profile</span></a>
+                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="main-wrapper">
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-title">Notifications</div>
+            <div class="topbar-actions">
+                <a href="/chatbot" class="topbar-btn"><i class="fas fa-robot"></i></a>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="notif-header">
+                <h2>Notifications</h2>
+                <span class="mark-read" onclick="markAllRead()">Mark all as read</span>
+            </div>
+        <div class="notif-list-wrap">
         <div id="notifList">
             <div class="loading"><div class="spinner"></div></div>
         </div>
+        </div>
     </main>
-    
-    <nav class="bottom-nav">
-        <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="/explore" class="nav-item"><i class="fas fa-compass"></i><span>Explore</span></a>
-        <a href="/creator" class="nav-item"><i class="fas fa-plus-square"></i><span>Post</span></a>
-        <a href="/messages" class="nav-item"><i class="fas fa-envelope"></i><span>Chat</span></a>
-        <a href="/user-profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
-    </nav>
+    </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -102,6 +144,15 @@ async function loadUser() {
         const res = await fetch('/api/users/me', { credentials: 'include' });
         if (res.ok) {
             user = await res.json();
+            const initial = (user.username || 'U').charAt(0).toUpperCase();
+            if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
+            if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = user.full_name || user.username;
+            const badge = document.getElementById('sidebarBadge');
+            if (badge) {
+                if (user.role === 'admin' || user.role === 'superuser') { badge.className = 'sidebar-user-badge badge-admin'; badge.textContent = 'Admin'; }
+                else if (user.role === 'creator') { badge.className = 'sidebar-user-badge badge-creator'; badge.textContent = 'Creator'; }
+                else if (user.is_premium) { badge.className = 'sidebar-user-badge badge-premium'; badge.textContent = 'Premium'; }
+            }
             loadNotifications();
         } else {
             location.href = '/user-login';
@@ -109,6 +160,17 @@ async function loadUser() {
     } catch(e) {
         location.href = '/user-login';
     }
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+async function logout() {
+    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
+    localStorage.removeItem('es_user');
+    location.href = '/';
 }
 
 async function loadNotifications() {

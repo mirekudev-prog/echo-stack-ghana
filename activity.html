@@ -4,22 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0D1B2A">
-    <title>Settings - EchoStack</title>
+    <title>Activity - EchoStack</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/base.css">
     <style>
-        .settings-content { max-width:600px; margin:0 auto; padding:24px; }
-        .settings-section { background:var(--main-card); border:1px solid var(--main-border); border-radius:var(--radius-lg); padding:24px; margin-bottom:20px; }
-        .settings-section h3 { font-family:'Playfair Display',serif; font-size:1.2rem; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--main-border); }
-        .setting-item { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--main-border); }
-        .setting-item:last-child { border-bottom:none; }
-        .setting-label { font-weight:500; }
-        .setting-desc { font-size:0.8rem; color:var(--main-text-secondary); }
-        .toggle { width:48px; height:26px; border-radius:13px; background:var(--main-border); position:relative; cursor:pointer; transition:all 0.2s; }
-        .toggle.active { background:var(--gold); }
-        .toggle::after { content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:white; transition:all 0.2s; }
-        .toggle.active::after { left:25px; }
+        .activity-wrap { padding: 16px; }
+        .activity-item {
+            display: flex; gap: 14px; padding: 14px 16px;
+            background: var(--main-card); border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg); margin-bottom: 10px;
+            transition: all .2s; cursor: pointer;
+        }
+        .activity-item:hover { border-color: var(--gold); }
+        .activity-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; flex-shrink: 0;
+        }
+        .activity-icon.like { background: rgba(239,68,68,.1); color: var(--danger); }
+        .activity-icon.comment { background: rgba(0,119,182,.1); color: var(--blue); }
+        .activity-icon.follow { background: rgba(200,150,46,.1); color: var(--gold); }
+        .activity-icon.post { background: rgba(34,197,94,.1); color: var(--success); }
+        .activity-info { flex: 1; min-width: 0; }
+        .activity-text { font-size: .88rem; color: var(--main-text); line-height: 1.4; }
+        .activity-text strong { font-weight: 600; }
+        .activity-time { font-size: .75rem; color: var(--main-muted); margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -61,72 +71,28 @@
             <div class="sidebar-section">
                 <div class="sidebar-section-label">Account</div>
                 <a href="/user-profile" class="sidebar-link"><i class="fas fa-user"></i><span>My Profile</span></a>
-                <a href="/settings" class="sidebar-link active"><i class="fas fa-cog"></i><span>Settings</span></a>
+                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
             </div>
         </nav>
         <div class="sidebar-footer">
             <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
         </div>
     </aside>
-    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
-    
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <div class="main-wrapper">
         <header class="topbar">
             <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-            <div class="topbar-title">Settings</div>
-            <a href="/dashboard" class="topbar-btn"><i class="fas fa-home"></i></a>
+            <div class="topbar-title">Activity</div>
+            <div class="topbar-actions">
+                <a href="/notifications" class="topbar-btn"><i class="fas fa-bell"></i></a>
+                <a href="/chatbot" class="topbar-btn"><i class="fas fa-robot"></i></a>
+            </div>
         </header>
-        
+
         <main class="main-content">
-            <div class="settings-content">
-                <div class="settings-section">
-                    <h3>Notifications</h3>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">Email Notifications</div>
-                            <div class="setting-desc">Receive updates via email</div>
-                        </div>
-                        <div class="toggle active" onclick="this.classList.toggle('active')"></div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">Push Notifications</div>
-                            <div class="setting-desc">Get notified about new content</div>
-                        </div>
-                        <div class="toggle active" onclick="this.classList.toggle('active')"></div>
-                    </div>
-                </div>
-                
-                <div class="settings-section">
-                    <h3>Privacy</h3>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">Show Follower Count</div>
-                            <div class="setting-desc">Display your follower count on profile</div>
-                        </div>
-                        <div class="toggle active" onclick="this.classList.toggle('active')"></div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">Show Post Stats</div>
-                            <div class="setting-desc">Display likes and comments counts</div>
-                        </div>
-                        <div class="toggle active" onclick="this.classList.toggle('active')"></div>
-                    </div>
-                </div>
-                
-                <div class="settings-section">
-                    <h3>Account</h3>
-                    <a href="/user-profile" class="btn btn-secondary" style="width:100%;margin-bottom:12px">
-                        <i class="fas fa-user"></i> Edit Profile
-                    </a>
-                    <a href="/premium" class="btn btn-secondary" style="width:100%;margin-bottom:12px">
-                        <i class="fas fa-crown"></i> Manage Subscription
-                    </a>
-                    <button class="btn btn-danger" style="width:100%" onclick="confirmDelete()">
-                        <i class="fas fa-trash"></i> Delete Account
-                    </button>
-                </div>
+            <div class="activity-wrap" id="activityList">
+                <div class="loading"><div class="spinner"></div></div>
             </div>
         </main>
     </div>
@@ -135,12 +101,13 @@
 <script>
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
 }
 
-function confirmDelete() {
-    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-        alert('Account deletion requested. This will be processed within 24 hours.');
-    }
+async function logout() {
+    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
+    localStorage.removeItem('es_user');
+    location.href = '/';
 }
 
 async function checkAuth() {
@@ -157,6 +124,7 @@ async function checkAuth() {
                 else if (user.role === 'creator') { badge.className = 'sidebar-user-badge badge-creator'; badge.textContent = 'Creator'; }
                 else if (user.is_premium) { badge.className = 'sidebar-user-badge badge-premium'; badge.textContent = 'Premium'; }
             }
+            loadActivity();
         } else {
             location.href = '/user-login';
         }
@@ -165,10 +133,46 @@ async function checkAuth() {
     }
 }
 
-async function logout() {
-    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
-    localStorage.removeItem('es_user');
-    location.href = '/';
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function timeAgo(d) {
+    if (!d) return '';
+    const diff = (Date.now() - new Date(d)) / 1000;
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+}
+
+async function loadActivity() {
+    const container = document.getElementById('activityList');
+    try {
+        const res = await fetch('/api/activity', { credentials: 'include' });
+        if (!res.ok) throw new Error();
+        const activities = await res.json();
+
+        if (!activities.length) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-history"></i><h3>No recent activity</h3><p>Your activity will appear here</p></div>';
+            return;
+        }
+
+        container.innerHTML = activities.map(a => {
+            const iconClass = a.type === 'like' ? 'like' : a.type === 'comment' ? 'comment' : a.type === 'follow' ? 'follow' : 'post';
+            const icon = a.type === 'like' ? 'fa-heart' : a.type === 'comment' ? 'fa-comment' : a.type === 'follow' ? 'fa-user-plus' : 'fa-pen';
+            const text = a.message || a.description || 'Activity';
+            return '<div class="activity-item">' +
+                '<div class="activity-icon ' + iconClass + '"><i class="fas ' + icon + '"></i></div>' +
+                '<div class="activity-info">' +
+                    '<div class="activity-text">' + escapeHtml(text) + '</div>' +
+                    '<div class="activity-time">' + timeAgo(a.created_at) + '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    } catch(e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
+    }
 }
 
 checkAuth();
