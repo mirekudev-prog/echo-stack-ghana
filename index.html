@@ -6,21 +6,32 @@
     <meta name="theme-color" content="#0D1B2A">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="description" content="EchoStack - Ghana's Living Heritage Archive">
     <title>EchoStack - Ghana's Living Heritage</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .hero{padding:80px 24px 60px;text-align:center}
+        .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(200,150,46,0.1);border:1px solid rgba(200,150,46,0.3);border-radius:50px;font-size:.75rem;font-weight:600;color:var(--gold2);margin-bottom:24px}
+        .hero h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,8vw,2.8rem);font-weight:900;line-height:1.15;margin-bottom:16px}
+        .hero h1 em{font-style:italic;color:var(--gold2)}
+        .hero p{font-size:1rem;color:var(--text-secondary);max-width:400px;margin:0 auto 32px;line-height:1.7}
+        .hero-actions{display:flex;flex-direction:column;gap:12px;max-width:300px;margin:0 auto}
+        .feature-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;gap:16px;margin-bottom:12px}
+        .feature-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+        .cta-section{padding:60px 24px;text-align:center;background:linear-gradient(135deg,var(--card),var(--ink2));border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+        .cta-section h2{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:12px}
+    </style>
 </head>
 <body>
 <div class="app">
     <nav class="top-nav">
         <div class="top-nav-inner">
-            <div class="nav-logo">
+            <a href="/" class="nav-logo">
                 <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
                 <span>EchoStack</span>
-            </div>
+            </a>
             <div style="display:flex;gap:12px">
                 <a href="/user-login" class="btn btn-secondary" style="padding:10px 20px;border-radius:50px;font-size:.85rem">Sign In</a>
                 <a href="/signup" class="btn btn-primary" style="padding:10px 20px;border-radius:50px;font-size:.85rem">Join</a>
@@ -29,126 +40,52 @@
     </nav>
 
     <main class="main-content">
-        <!-- HERO -->
-        <section style="padding:80px 24px 60px;text-align:center">
-            <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(200,150,46,0.1);border:1px solid rgba(200,150,46,0.3);border-radius:50px;font-size:.75rem;font-weight:600;color:var(--gold2);margin-bottom:24px">
-                <i class="fas fa-globe-africa"></i>
-                Ghana Heritage Platform
-            </div>
-            <h1 style="font-family:'Playfair Display',serif;font-size:clamp(2rem,8vw,2.8rem);font-weight:900;line-height:1.15;margin-bottom:16px">
-                Every story deserves to be <em style="font-style:italic;color:var(--gold2)">remembered.</em>
-            </h1>
-            <p style="font-size:1rem;color:var(--text-secondary);max-width:400px;margin:0 auto 32px;line-height:1.7">
-                Join thousands preserving the oral traditions, languages, and cultures of Ghana's 16 regions.
-            </p>
-            <div style="display:flex;flex-direction:column;gap:12px;max-width:300px;margin:0 auto">
-                <a href="/signup" class="btn btn-primary" style="width:100%;padding:14px;border-radius:50px">
-                    <i class="fas fa-rocket"></i> Start Exploring
-                </a>
-                <a href="/explore" class="btn btn-secondary" style="width:100%;padding:14px;border-radius:50px">
-                    <i class="fas fa-map"></i> View Regions
-                </a>
+        <section class="hero">
+            <div class="hero-badge"><i class="fas fa-globe-africa"></i> Ghana Heritage Platform</div>
+            <h1>Every story deserves to be <em>remembered.</em></h1>
+            <p>Join thousands preserving the oral traditions, languages, and cultures of Ghana's 16 regions.</p>
+            <div class="hero-actions">
+                <a href="/signup" class="btn btn-primary" style="width:100%;padding:14px;border-radius:50px"><i class="fas fa-rocket"></i> Start Exploring</a>
+                <a href="/explore" class="btn btn-secondary" style="width:100%;padding:14px;border-radius:50px"><i class="fas fa-map"></i> View Regions</a>
             </div>
         </section>
 
-        <!-- FEATURES -->
         <section style="padding:40px 24px">
             <div style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:16px">Why EchoStack?</div>
-            
-            <div class="card" style="margin-bottom:12px;display:flex;gap:16px;padding:20px">
-                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">
-                    <i class="fas fa-book-open"></i>
-                </div>
-                <div>
-                    <h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Explore All 16 Regions</h3>
-                    <p style="font-size:.85rem;color:var(--text-secondary)">Stories, photos, audio & video from Ashanti to Northern Ghana</p>
-                </div>
-            </div>
-            
-            <div class="card" style="margin-bottom:12px;display:flex;gap:16px;padding:20px">
-                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">
-                    <i class="fas fa-music"></i>
-                </div>
-                <div>
-                    <h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Discover Music & Festivals</h3>
-                    <p style="font-size:.85rem;color:var(--text-secondary)">From Highlife to Kente weaving traditions</p>
-                </div>
-            </div>
-            
-            <div class="card" style="margin-bottom:12px;display:flex;gap:16px;padding:20px">
-                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <div>
-                    <h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">EchoBot AI Guide</h3>
-                    <p style="font-size:.85rem;color:var(--text-secondary)">Ask our AI anything about Ghana's rich heritage</p>
-                </div>
-            </div>
-            
-            <div class="card" style="margin-bottom:12px;display:flex;gap:16px;padding:20px">
-                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">
-                    <i class="fas fa-microphone"></i>
-                </div>
-                <div>
-                    <h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Audio Archive</h3>
-                    <p style="font-size:.85rem;color:var(--text-secondary)">Oral histories, folklore & contemporary stories</p>
-                </div>
-            </div>
-            
-            <div class="card" style="display:flex;gap:16px;padding:20px">
-                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">
-                    <i class="fas fa-pen-fancy"></i>
-                </div>
-                <div>
-                    <h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Share Your Stories</h3>
-                    <p style="font-size:.85rem;color:var(--text-secondary)">Become a creator & reach the world</p>
-                </div>
-            </div>
+            <div class="feature-card"><div class="feature-icon"><i class="fas fa-book-open"></i></div><div><h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Explore All 16 Regions</h3><p style="font-size:.85rem;color:var(--text-secondary)">Stories, photos, audio & video from Ashanti to Northern Ghana</p></div></div>
+            <div class="feature-card"><div class="feature-icon"><i class="fas fa-music"></i></div><div><h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Discover Music & Festivals</h3><p style="font-size:.85rem;color:var(--text-secondary)">From Highlife to Kente weaving traditions</p></div></div>
+            <div class="feature-card"><div class="feature-icon"><i class="fas fa-robot"></i></div><div><h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">EchoBot AI Guide</h3><p style="font-size:.85rem;color:var(--text-secondary)">Ask our AI anything about Ghana's rich heritage</p></div></div>
+            <div class="feature-card"><div class="feature-icon"><i class="fas fa-microphone"></i></div><div><h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Audio Archive</h3><p style="font-size:.85rem;color:var(--text-secondary)">Oral histories, folklore & contemporary stories</p></div></div>
+            <div class="feature-card"><div class="feature-icon"><i class="fas fa-pen-fancy"></i></div><div><h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Share Your Stories</h3><p style="font-size:.85rem;color:var(--text-secondary)">Become a creator & reach the world</p></div></div>
         </section>
 
-        <!-- RECENT STORIES -->
         <section style="padding:40px 24px">
             <div class="section-header">
-                <h2 style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700">Latest Stories</h2>
+                <h2 class="section-title">Latest Stories</h2>
                 <a href="/explore" class="section-link">View All <i class="fas fa-arrow-right"></i></a>
             </div>
-            <div id="recentPosts">
-                <div class="loading"><div class="spinner"></div></div>
-            </div>
+            <div id="recentPosts"><div class="loading"><div class="spinner"></div></div></div>
         </section>
 
-        <!-- AUDIO PREVIEW -->
-        <section style="padding:24px">
+        <section style="padding:40px 24px">
             <div class="section-header">
-                <h2 style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700">Audio Archive</h2>
+                <h2 class="section-title">Audio Archive</h2>
                 <a href="/explore" class="section-link">Listen <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="audio-card">
-                <div class="audio-header">
-                    <div class="audio-icon"><i class="fas fa-microphone"></i></div>
-                    <div class="audio-info">
-                        <h4>Echoes of Freedom</h4>
-                        <p>Ghana's Independence - Oral History</p>
-                    </div>
-                </div>
-                <audio controls preload="none">
-                    <source src="" type="audio/mpeg">
-                </audio>
+                <div class="audio-header"><div class="audio-icon"><i class="fas fa-microphone"></i></div><div class="audio-info"><h4>Echoes of Freedom</h4><p>Ghana's Independence - Oral History</p></div></div>
+                <audio controls preload="none"><source src="" type="audio/mpeg"></audio>
             </div>
         </section>
 
-        <!-- CTA -->
-        <section style="padding:60px 24px;text-align:center;background:linear-gradient(135deg,var(--card),var(--ink2));border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
-            <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:12px">Ready to explore Ghana?</h2>
+        <section class="cta-section">
+            <h2>Ready to explore Ghana?</h2>
             <p style="color:var(--text-secondary);margin-bottom:24px">Join our community of storytellers preserving heritage</p>
-            <a href="/signup" class="btn btn-primary" style="padding:14px 32px;border-radius:50px;display:inline-flex">
-                <i class="fas fa-user-plus"></i> Create Free Account
-            </a>
+            <a href="/signup" class="btn btn-primary" style="padding:14px 32px;border-radius:50px;display:inline-flex"><i class="fas fa-user-plus"></i> Create Free Account</a>
         </section>
 
-        <!-- FOOTER -->
         <footer class="footer">
-            <div class="footer-brand">EchoStack Ghana</div>
+            <div class="nav-logo" style="justify-content:center;margin-bottom:8px"><img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'"><span>EchoStack Ghana</span></div>
             <p class="footer-text">Preserving Ghana's cultural heritage for future generations</p>
             <p class="footer-dev">Built by Mireku Development</p>
         </footer>
@@ -156,52 +93,25 @@
 </div>
 
 <script>
-function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
+function escapeHtml(str){if(!str)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function timeAgo(d){if(!d)return'';const diff=(Date.now()-new Date(d))/1000;if(diff<3600)return Math.floor(diff/60)+'m ago';if(diff<86400)return Math.floor(diff/3600)+'h ago';return Math.floor(diff/86400)+'d ago'}
 
-function timeAgo(dateStr) {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    const diff = (Date.now() - date) / 1000;
-    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-    return Math.floor(diff / 86400) + 'd ago';
-}
-
-async function loadRecentPosts() {
-    try {
-        const res = await fetch('/api/posts?limit=3');
-        const posts = await res.json();
-        const container = document.getElementById('recentPosts');
-        
-        if (!posts.length) {
-            container.innerHTML = '<div class="empty-state"><i class="fas fa-newspaper"></i><h3>No stories yet</h3></div>';
-            return;
-        }
-        
-        container.innerHTML = posts.map(post => {
-            const author = post.author_username || 'User';
-            return `
-                <div class="post-card" onclick="location.href='/post/${post.id}'">
-                    <div class="post-header">
-                        <div class="post-avatar">${author.charAt(0).toUpperCase()}</div>
-                        <div>
-                            <div class="post-author">${escapeHtml(author)}</div>
-                            <div class="post-time">${timeAgo(post.created_at)}</div>
-                        </div>
-                    </div>
-                    <h3 class="post-title">${escapeHtml(post.title)}</h3>
-                    <p class="post-excerpt">${escapeHtml(post.excerpt || '')}</p>
-                </div>
-            `;
+async function loadRecentPosts(){
+    try{
+        const res=await fetch('/api/posts?limit=3');
+        const posts=await res.json();
+        const el=document.getElementById('recentPosts');
+        if(!posts.length){el.innerHTML='<div class="empty-state"><i class="fas fa-newspaper"></i><h3>No stories yet</h3></div>';return}
+        el.innerHTML=posts.map(p=>{
+            const a=p.author_username||'User';
+            return`<div class="post-card" onclick="location.href='/post/${p.id}'">
+                <div class="post-header"><div class="post-avatar">${a.charAt(0).toUpperCase()}</div><div><div class="post-author">${escapeHtml(a)}</div><div class="post-time">${timeAgo(p.created_at)}</div></div></div>
+                <h3 class="post-title">${escapeHtml(p.title)}</h3>
+                <p class="post-excerpt">${escapeHtml(p.excerpt||'')}</p>
+            </div>`;
         }).join('');
-    } catch(e) {
-        document.getElementById('recentPosts').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
-    }
+    }catch(e){document.getElementById('recentPosts').innerHTML='<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>'}
 }
-
 loadRecentPosts();
 </script>
 </body>
