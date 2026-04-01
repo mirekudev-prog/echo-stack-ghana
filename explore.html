@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Explore - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+</head>
+<body>
+<div class="app">
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+            <div class="nav-title">Explore</div>
+        </div>
+    </nav>
+    <main class="main-content">
+        <!-- SEARCH -->
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);padding:10px 16px">
+                <i class="fas fa-search" style="color:var(--text-muted)"></i>
+                <input type="text" id="searchInput" placeholder="Search stories, creators, regions..." style="flex:1;background:none;border:none;color:var(--text);font-size:.95rem;outline:none" oninput="debounceSearch(this.value)">
+            </div>
+        </div>
+        
+        <!-- FILTERS -->
+        <div style="display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none">
+            <button class="tab active" onclick="setFilter(this,'')">All</button>
+            <button class="tab" onclick="setFilter(this,'article')">Articles</button>
+            <button class="tab" onclick="setFilter(this,'audio')">Audio</button>
+            <button class="tab" onclick="setFilter(this,'video')">Videos</button>
+        </div>
+        
+        <!-- CONTENT -->
+        <div style="padding:16px" id="content">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+    </main>
+    <nav class="bottom-nav">
+        <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="/explore" class="nav-item active"><i class="fas fa-compass"></i><span>Explore</span></a>
+        <a href="/creator" class="nav-item"><i class="fas fa-plus-square"></i><span>Post</span></a>
+        <a href="/messages" class="nav-item"><i class="fas fa-envelope"></i><span>Chat</span></a>
+        <a href="/user-profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    </nav>
+</div>
+
+<script>
+let currentFilter = '';
+let user = null;
+
+async function loadUser() {
+    try {
+        const res = await fetch('/api/users/me', { credentials: 'include' });
+        if (res.ok) user = await res.json();
+    } catch(e) {}
+    if (!user) location.href = '/user-login';
+    else loadPosts();
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 60) return Math.floor(diff) + 's';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h';
+    return Math.floor(diff / 86400) + 'd';
+}
+
+function setFilter(el, filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    loadPosts();
+}
+
+let searchTimeout;
+function debounceSearch(query) {
+    clearTimeout(searchTimeout);
+    if (query.length < 2) { loadPosts(); return; }
+    searchTimeout = setTimeout(() => performSearch(query), 300);
+}
+
+async function performSearch(query) {
+    const container = document.getElementById('content');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        let url = `/api/search?q=${encodeURIComponent(query)}&sort=recent&limit=20`;
+        if (currentFilter) url += `&content_type=${currentFilter}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        renderResults(data);
+    } catch(e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Search failed</h3></div>'; }
+}
+
+async function loadPosts() {
+    const container = document.getElementById('content');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        let url = '/api/posts?limit=20&status=published';
+        if (currentFilter) url += `&content_type=${currentFilter}`;
+        const res = await fetch(url);
+        const posts = await res.json();
+        renderPosts(posts);
+    } catch(e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Load failed</h3></div>'; }
+}
+
+function renderResults(data) {
+    const container = document.getElementById('content');
+    let html = '';
+    
+    if (data.users?.length) {
+        html += '<h3 style="margin-bottom:12px;font-size:.85rem;color:var(--text-muted);text-transform:uppercase">Creators</h3>';
+        data.users.forEach(u => {
+            html += `<div class="card" style="margin-bottom:10px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="location.href='/user/${u.username}'">
+                <div class="post-avatar">${u.username.charAt(0).toUpperCase()}</div>
+                <div style="flex:1"><div style="font-weight:600">${escapeHtml(u.channel_name || u.username)}</div><div style="font-size:.8rem;color:var(--text-muted)">@${escapeHtml(u.username)} · ${u.follower_count || 0} followers</div></div>
+            </div>`;
+        });
+    }
+    
+    if (data.posts?.length) {
+        html += '<h3 style="margin:20px 0 12px;font-size:.85rem;color:var(--text-muted);text-transform:uppercase">Stories</h3>';
+        renderPosts(data.posts, container, html);
+        return;
+    }
+    
+    if (!html) html = '<div class="empty-state"><i class="fas fa-search"></i><h3>No results</h3></div>';
+    container.innerHTML = html;
+}
+
+function renderPosts(posts, container, prefix = '') {
+    const c = container || document.getElementById('content');
+    if (!posts?.length) { c.innerHTML = prefix + '<div class="empty-state"><i class="fas fa-newspaper"></i><h3>No stories</h3></div>'; return; }
+    
+    c.innerHTML = prefix + posts.map(p => `
+        <article class="post-card" onclick="location.href='/post/${p.id}'">
+            <div class="post-header">
+                <div class="post-avatar">${(p.author_username || 'U').charAt(0).toUpperCase()}</div>
+                <div style="flex:1">
+                    <div class="post-author">${escapeHtml(p.author_username || 'Unknown')} <span class="badge badge-gold">${p.content_type || 'article'}</span></div>
+                    <div class="post-time">${timeAgo(p.created_at)}</div>
+                </div>
+            </div>
+            <h3 class="post-title">${escapeHtml(p.title)}</h3>
+            <p class="post-excerpt">${escapeHtml(p.excerpt || '')}</p>
+            ${p.cover_image ? `<div class="post-media"><img src="${escapeHtml(p.cover_image)}" onerror="this.parentElement.style.display='none'" alt=""></div>` : ''}
+        </article>
+    `).join('');
+}
+
+loadUser();
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>EchoStack - Feed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+</head>
+<body>
+<div class="app">
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <div class="nav-logo">
+                <img src="/echostack-logo.png" alt="" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </div>
+            <div style="display:flex;gap:8px">
+                <a href="/notifications" class="nav-icon-btn" style="position:relative">
+                    <i class="fas fa-bell"></i>
+                    <span id="notifBadge" class="notif-badge" style="display:none">0</span>
+                </a>
+                <a href="/chatbot" class="nav-icon-btn" title="EchoBot">
+                    <i class="fas fa-robot"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- STORIES BAR -->
+        <div style="padding:16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
+            <div style="display:flex;gap:12px">
+                <a href="/story" style="display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none">
+                    <div style="width:64px;height:64px;border-radius:50%;border:2px dashed var(--border-light);display:flex;align-items:center;justify-content:center;color:var(--text-muted)">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <span style="font-size:.7rem;color:var(--text-secondary)">Your Story</span>
+                </a>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer">
+                    <div style="width:64px;height:64px;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--gold),var(--gold2))">
+                        <div style="width:100%;height:100%;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden">
+                            <img src="https://ui-avatars.com/api/?name=Ashanti&background=C8962E&color=0D1B2A" style="width:100%;height:100%">
+                        </div>
+                    </div>
+                    <span style="font-size:.7rem;color:var(--text-secondary)">Ashanti</span>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer">
+                    <div style="width:64px;height:64px;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--gold),var(--gold2))">
+                        <div style="width:100%;height:100%;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden">
+                            <img src="https://ui-avatars.com/api/?name=Volta&background=E8B84B&color=0D1B2A" style="width:100%;height:100%">
+                        </div>
+                    </div>
+                    <span style="font-size:.7rem;color:var(--text-secondary)">Volta</span>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer">
+                    <div style="width:64px;height:64px;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--gold),var(--gold2))">
+                        <div style="width:100%;height:100%;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden">
+                            <img src="https://ui-avatars.com/api/?name=Accra&background=F4D06F&color=0D1B2A" style="width:100%;height:100%">
+                        </div>
+                    </div>
+                    <span style="font-size:.7rem;color:var(--text-secondary)">Accra</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div style="display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none">
+            <a href="/explore" style="padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);font-size:.8rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;text-decoration:none">
+                <i class="fas fa-compass" style="color:var(--gold)"></i> Explore
+            </a>
+            <a href="/chatbot" style="padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);font-size:.8rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;text-decoration:none">
+                <i class="fas fa-robot" style="color:var(--gold)"></i> EchoBot
+            </a>
+            <a href="/trending" style="padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);font-size:.8rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;text-decoration:none">
+                <i class="fas fa-fire" style="color:var(--gold)"></i> Trending
+            </a>
+            <a href="/bookmarks" style="padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);font-size:.8rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;text-decoration:none">
+                <i class="fas fa-bookmark" style="color:var(--gold)"></i> Saved
+            </a>
+        </div>
+
+        <!-- POST INPUT -->
+        <div style="display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--border)">
+            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;color:var(--ink);font-weight:700" id="myAvatar">U</div>
+            <a href="/creator" style="flex:1;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);color:var(--text-muted);font-size:.9rem;text-decoration:none">What's happening in Ghana?</a>
+        </div>
+
+        <!-- POSTS FEED -->
+        <div style="padding:0 16px" id="posts-feed">
+            <div class="loading"><div class="spinner"></div><span style="color:var(--text-muted)">Loading stories...</span></div>
+        </div>
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <a href="/dashboard" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="/explore" class="nav-item"><i class="fas fa-compass"></i><span>Explore</span></a>
+        <a href="/creator" class="nav-item"><i class="fas fa-plus-square"></i><span>Post</span></a>
+        <a href="/messages" class="nav-item"><i class="fas fa-envelope"></i><span>Chat</span></a>
+        <a href="/user-profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const state = { posts: [], page: 1, hasMore: true, loading: false };
+let user = null;
+
+async function loadUser() {
+    try {
+        const res = await fetch('/api/users/me', { credentials: 'include' });
+        if (res.ok) {
+            user = await res.json();
+            const avatar = document.getElementById('myAvatar');
+            if (user.avatar_url) {
+                avatar.innerHTML = `<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+            } else {
+                avatar.textContent = (user.username || 'U').charAt(0).toUpperCase();
+            }
+        }
+    } catch(e) {}
+    if (!user) location.href = '/user-login';
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 60) return Math.floor(diff) + 's';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h';
+    return Math.floor(diff / 86400) + 'd';
+}
+
+async function loadPosts() {
+    if (state.loading || !state.hasMore) return;
+    state.loading = true;
+    const feed = document.getElementById('posts-feed');
+    if (state.page === 1) feed.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    
+    try {
+        const res = await fetch(`/api/posts?limit=20&offset=${(state.page - 1) * 20}`);
+        const posts = await res.json();
+        if (!posts.length) { state.hasMore = false; }
+        else {
+            state.posts = state.page === 1 ? posts : [...state.posts, ...posts];
+            renderPosts();
+            state.page++;
+        }
+        if (state.posts.length === 0 && state.page === 1) {
+            feed.innerHTML = '<div class="empty-state"><i class="fas fa-newspaper"></i><h3>No stories yet</h3><p>Be the first to share!</p></div>';
+        }
+    } catch(e) {
+        feed.innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
+    }
+    state.loading = false;
+}
+
+function renderPosts() {
+    const feed = document.getElementById('posts-feed');
+    feed.innerHTML = state.posts.map(post => {
+        const author = post.author_username || 'User';
+        const time = timeAgo(post.created_at);
+        const type = post.content_type || 'article';
+        
+        let mediaHtml = '';
+        if (type === 'audio' && post.audio_url) {
+            mediaHtml = `<div class="audio-card" style="margin:0 0 12px"><div class="audio-header"><div class="audio-icon"><i class="fas fa-headphones"></i></div><div class="audio-info"><h4>Audio</h4></div></div><audio src="${escapeHtml(post.audio_url)}" controls style="width:100%"></audio></div>`;
+        } else if (type === 'video' && post.video_url) {
+            mediaHtml = `<div class="post-media"><video src="${escapeHtml(post.video_url)}" controls></video></div>`;
+        } else if (post.cover_image) {
+            mediaHtml = `<div class="post-media"><img src="${escapeHtml(post.cover_image)}" alt="" onerror="this.parentElement.style.display='none'"></div>`;
+        }
+
+        return `
+            <article class="post-card" onclick="location.href='/post/${post.id}'">
+                <div class="post-header">
+                    <div class="post-avatar">${author.charAt(0).toUpperCase()}</div>
+                    <div style="flex:1">
+                        <div class="post-author">${escapeHtml(author)} <span class="badge badge-gold" style="margin-left:4px">${type}</span></div>
+                        <div class="post-time">${time}</div>
+                    </div>
+                </div>
+                <h3 class="post-title">${escapeHtml(post.title)}</h3>
+                <p class="post-excerpt">${escapeHtml(post.excerpt || '')}</p>
+                ${mediaHtml}
+                <div class="post-actions">
+                    <button class="post-action" onclick="event.stopPropagation();toggleLike(${post.id},this)"><i class="far fa-heart"></i><span>${post.likes||0}</span></button>
+                    <button class="post-action" onclick="event.stopPropagation();location.href='/post/${post.id}'"><i class="far fa-comment"></i><span>${post.comment_count||0}</span></button>
+                    <button class="post-action" onclick="event.stopPropagation();sharePost(${post.id},'${escapeHtml(post.title)}')"><i class="fas fa-share"></i></button>
+                    <button class="post-action" onclick="event.stopPropagation();toggleBookmark(${post.id},this)"><i class="far fa-bookmark"></i></button>
+                </div>
+            </article>
+        `;
+    }).join('');
+}
+
+async function toggleLike(id, btn) {
+    try {
+        const res = await fetch(`/api/posts/${id}/like`, { method: 'POST' });
+        const data = await res.json();
+        btn.classList.toggle('liked', data.liked);
+        btn.querySelector('i').className = data.liked ? 'fas fa-heart' : 'far fa-heart';
+        btn.querySelector('span').textContent = data.likes;
+    } catch(e) {}
+}
+
+async function toggleBookmark(id, btn) {
+    try {
+        const res = await fetch(`/api/bookmarks/${id}`, { method: 'POST' });
+        const data = await res.json();
+        btn.classList.toggle('saved', data.bookmarked);
+        btn.querySelector('i').className = data.bookmarked ? 'fas fa-bookmark' : 'far fa-bookmark';
+    } catch(e) {}
+}
+
+async function sharePost(id, title) {
+    try {
+        const res = await fetch(`/api/posts/${id}/share-url`);
+        const data = await res.json();
+        if (navigator.share) navigator.share({ title, url: data.url });
+        else { await navigator.clipboard.writeText(data.url); showToast('Link copied!'); }
+    } catch(e) {}
+}
+
+loadUser().then(loadPosts);
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Project - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+</head>
+<body>
+<div class="app">
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+            <div class="nav-title" id="projectTitle">Project</div>
+        </div>
+    </nav>
+    <main class="main-content" style="padding-bottom:100px">
+        <div id="projectContent">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+    </main>
+    <nav class="bottom-nav">
+        <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="/explore" class="nav-item"><i class="fas fa-compass"></i><span>Explore</span></a>
+        <a href="/creator" class="nav-item"><i class="fas fa-plus-square"></i><span>Post</span></a>
+        <a href="/messages" class="nav-item"><i class="fas fa-envelope"></i><span>Chat</span></a>
+        <a href="/user-profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    </nav>
+</div>
+
+<script>
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+async function loadProject() {
+    const path = location.pathname;
+    const match = path.match(/\/project\/(\d+)/);
+    if (!match) {
+        document.getElementById('projectContent').innerHTML = '<div class="empty-state"><i class="fas fa-folder"></i><h3>Project not found</h3></div>';
+        return;
+    }
+    
+    try {
+        const res = await fetch(`/api/admin/projects/${match[1]}`);
+        if (!res.ok) throw new Error('Not found');
+        const project = await res.json();
+        document.getElementById('projectTitle').textContent = project.name;
+        renderProject(project);
+    } catch(e) {
+        document.getElementById('projectContent').innerHTML = '<div class="empty-state"><i class="fas fa-folder"></i><h3>Project not found</h3></div>';
+    }
+}
+
+function renderProject(project) {
+    const container = document.getElementById('projectContent');
+    
+    let blocksHtml = '';
+    if (project.blocks?.length) {
+        project.blocks.forEach(b => {
+            blocksHtml += renderBlock(b);
+        });
+    }
+    
+    let audioHtml = '';
+    if (project.audio_clips?.length) {
+        audioHtml = '<section style="padding:24px 16px;border-top:1px solid var(--border)"><h2 style="font-family:Playfair Display,serif;font-size:1.3rem;margin-bottom:16px">Audio Archive</h2>';
+        project.audio_clips.forEach(a => {
+            audioHtml += `<div class="audio-card">
+                <div class="audio-header">
+                    <div class="audio-icon"><i class="fas fa-headphones"></i></div>
+                    <div class="audio-info">
+                        <h4>${escapeHtml(a.title)}</h4>
+                        <p>${escapeHtml(a.region || 'Ghana')} · ${escapeHtml(a.language || 'Various')}</p>
+                    </div>
+                </div>
+                ${a.url ? `<audio src="${escapeHtml(a.url)}" controls style="width:100%"></audio>` : '<p style="color:var(--text-muted);font-size:.85rem">Audio coming soon</p>'}
+            </div>`;
+        });
+        audioHtml += '</section>';
+    }
+    
+    let revenueHtml = '';
+    if (project.revenue_plans?.length) {
+        revenueHtml = '<section style="padding:24px 16px;border-top:1px solid var(--border)"><h2 style="font-family:Playfair Display,serif;font-size:1.3rem;margin-bottom:16px">Access Plans</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px">';
+        project.revenue_plans.forEach(r => {
+            const isFree = r.amount === 0;
+            revenueHtml += `<div class="card" style="padding:24px;text-align:center">
+                <h3 style="font-family:Playfair Display,serif;font-size:1.1rem;margin-bottom:8px">${escapeHtml(r.name)}</h3>
+                <div style="font-size:2rem;font-weight:700;color:var(--gold);margin-bottom:8px">${isFree ? 'Free' : `${(r.amount/100).toFixed(2)} ${r.currency}`}</div>
+                <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:16px">${escapeHtml(r.description)}</p>
+                <button class="btn ${isFree ? 'btn-secondary' : 'btn-primary'}" style="width:100%;border-radius:50px">${isFree ? 'Get Started' : 'Subscribe'}</button>
+            </div>`;
+        });
+        revenueHtml += '</div></section>';
+    }
+    
+    container.innerHTML = `
+        <section style="padding:24px 16px;background:linear-gradient(135deg,var(--card),var(--ink2));border-bottom:1px solid var(--border)">
+            <span class="badge badge-gold" style="margin-bottom:12px">Project</span>
+            <h1 style="font-family:Playfair Display,serif;font-size:1.8rem;margin-bottom:12px">${escapeHtml(project.name)}</h1>
+            <p style="color:var(--text-secondary);line-height:1.7">${escapeHtml(project.description)}</p>
+        </section>
+        <section style="padding:16px" id="blocks">${blocksHtml}</section>
+        ${audioHtml}
+        ${revenueHtml}
+        <footer class="footer">
+            <div class="footer-brand">EchoStack Ghana</div>
+            <p class="footer-text">Preserving Ghana's cultural heritage</p>
+            <p class="footer-dev">Built by Mireku Development</p>
+        </footer>
+    `;
+}
+
+function renderBlock(block) {
+    const iconMap = { concept: 'fa-lightbulb', section: 'fa-folder', component: 'fa-cube', detail: 'fa-file-alt' };
+    const icon = iconMap[block.block_type] || 'fa-file';
+    
+    if (block.block_type === 'concept') {
+        return `<div style="background:var(--card);border:1px solid var(--gold);border-radius:var(--radius-lg);padding:24px;margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+                <i class="fas ${icon}" style="color:var(--gold)"></i>
+                <h2 style="font-family:Playfair Display,serif;font-size:1.3rem">${escapeHtml(block.title)}</h2>
+            </div>
+            <p style="color:var(--text-secondary);line-height:1.8;font-style:italic">${escapeHtml(block.content)}</p>
+        </div>`;
+    }
+    
+    if (block.block_type === 'component') {
+        return `<div class="card" style="margin-bottom:12px;padding:20px;border-left:3px solid var(--gold)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                <i class="fas ${icon}" style="color:var(--gold)"></i>
+                <h3 style="font-weight:700">${escapeHtml(block.title)}</h3>
+            </div>
+            <p style="color:var(--text-secondary);line-height:1.7">${escapeHtml(block.content)}</p>
+        </div>`;
+    }
+    
+    // detail/section blocks - render content with formatting
+    const formatted = (block.content || '').split('\n').map(line => {
+        if (line.startsWith('Phase') || line.startsWith('Core') || line.startsWith('Revenue') || line.startsWith('Show') || line.startsWith('Podcast')) {
+            return `<h4 style="color:var(--gold);margin:16px 0 8px;font-weight:700">${escapeHtml(line)}</h4>`;
+        }
+        if (line.startsWith('•') || line.startsWith('-')) {
+            return `<div style="padding-left:16px;color:var(--text-secondary);margin-bottom:4px">${escapeHtml(line)}</div>`;
+        }
+        if (line.match(/^\d+\./)) {
+            return `<div style="padding-left:16px;color:var(--text-secondary);margin-bottom:4px;font-weight:500">${escapeHtml(line)}</div>`;
+        }
+        return line.trim() ? `<p style="margin-bottom:8px">${escapeHtml(line)}</p>` : '';
+    }).join('');
+    
+    return `<div class="card" style="margin-bottom:16px;padding:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <i class="fas ${icon}" style="color:var(--gold)"></i>
+            <h3 style="font-family:Playfair Display,serif;font-size:1.1rem">${escapeHtml(block.title)}</h3>
+        </div>
+        <div style="color:var(--text-secondary);line-height:1.7">${formatted}</div>
+    </div>`;
+}
+
+loadProject();
+</script>
+</body>
+</html>
