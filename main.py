@@ -45,7 +45,7 @@ def get_password_hash(password):
 
 # ─── EMAIL UTILITIES (safe import — won't crash if file is missing) ──────────
 try:
-    from email_utils import generate_token, send_verification_email, send_password_reset_email
+    from email_utils import generate_token, send_verification_email, send_password_reset_email, send_newsletter_email
     EMAIL_ENABLED = True
 except Exception as _e:
     EMAIL_ENABLED = False
@@ -56,6 +56,8 @@ except Exception as _e:
         print(f"[EMAIL STUB] verify {email} token={token}")
     def send_password_reset_email(email, username, token):
         print(f"[EMAIL STUB] reset {email} token={token}")
+    def send_newsletter_email(to_email, username, post_title, post_excerpt, post_url):
+        print(f"[EMAIL STUB] newsletter {to_email}: {post_title}")
 
 # ─── TABLE CREATION ──────────────────────────────────────────────────────────
 _CREATE_TABLES_SQL = """
@@ -745,9 +747,9 @@ async def user_page(request: Request):
     return RedirectResponse("/user-login")
 
 @app.get("/user/{uname}")
-async def user_profile_page(uname: str, request: Request):
+async def user_publication_page(uname: str, request: Request):
     if _is_admin(request) or request.cookies.get("user_session"):
-        return _serve("user_profile.html")
+        return _serve("publication.html")
     return RedirectResponse("/user-login")
 
 @app.get("/user-profile")
@@ -1573,6 +1575,28 @@ async def create_post(
 
         db.add(post); db.commit(); db.refresh(post)
         print(f"✅ Post {post.id} '{post.title}' by {author_username}")
+
+        # Send newsletter email if published
+        if status == "published" and send_newsletter_email is not None:
+            try:
+                subscribers = db.query(models.User).filter(
+                    models.User.is_premium == True,
+                    models.User.email_verified == True
+                ).all()
+                post_url = f"https://echostack.onrender.com/post/{post.id}"
+                for sub in subscribers:
+                    if sub.email:
+                        send_newsletter_email(
+                            to_email=sub.email,
+                            username=sub.full_name or sub.username,
+                            post_title=post.title,
+                            post_excerpt=post.excerpt[:200] if post.excerpt else post.content[:200],
+                            post_url=post_url
+                        )
+                print(f"📧 Newsletter sent to {len(subscribers)} subscribers")
+            except Exception as e:
+                print(f"Newsletter email failed: {e}")
+
         return {
             "success": True, "id": post.id, "slug": post.slug,
             "title": post.title, "status": post.status,

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Publication - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .pub-hero {
+            background: linear-gradient(135deg, var(--ink), var(--ink2));
+            color: white;
+            padding: 80px 24px 60px;
+            text-align: center;
+        }
+        .pub-hero-inner { max-width: 600px; margin: 0 auto; }
+        .pub-avatar {
+            width: 88px; height: 88px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem; font-weight: 700; color: var(--ink);
+            margin: 0 auto 20px;
+        }
+        .pub-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .pub-handle {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 16px;
+        }
+        .pub-bio {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.6;
+            max-width: 480px;
+            margin: 0 auto 24px;
+        }
+        .pub-stats {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+        .pub-stat { text-align: center; }
+        .pub-stat-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--gold2);
+        }
+        .pub-stat-label {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .pub-subscribe-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            color: var(--ink);
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .pub-subscribe-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(200,150,46,0.35);
+        }
+        .pub-subscribe-btn.following {
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+        }
+        .pub-content {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+        .pub-section-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--gold);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--main-border);
+        }
+        .pub-post-card {
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pub-post-card:hover {
+            border-color: var(--gold);
+            box-shadow: 0 4px 16px rgba(200,150,46,0.08);
+            transform: translateY(-2px);
+        }
+        .pub-post-type {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(200,150,46,0.1);
+            color: var(--gold);
+            border-radius: 50px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+        .pub-post-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--main-text);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        .pub-post-excerpt {
+            font-size: 0.88rem;
+            color: var(--main-muted);
+            line-height: 1.5;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .pub-post-meta {
+            font-size: 0.78rem;
+            color: var(--main-muted);
+            display: flex;
+            gap: 16px;
+        }
+        .pub-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--main-muted);
+        }
+        .pub-empty i {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            opacity: 0.4;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </a>
+        </div>
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">User</div>
+                <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i><span>Feed</span></a>
+                <a href="/reels" class="sidebar-link"><i class="fas fa-film"></i><span>Reels</span></a>
+                <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i><span>Explore</span></a>
+                <a href="/archive" class="sidebar-link"><i class="fas fa-archive"></i><span>Archive</span></a>
+                <a href="/app" class="sidebar-link"><i class="fas fa-map-marked-alt"></i><span>Map</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Social</div>
+                <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
+                <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
+                <a href="/notifications" class="sidebar-link"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                <a href="/chatbot" class="sidebar-link"><i class="fas fa-comments"></i><span>Community Chat</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Create</div>
+                <a href="/creator" class="sidebar-link"><i class="fas fa-plus-circle"></i><span>Create Post</span></a>
+                <a href="/premium" class="sidebar-link"><i class="fas fa-crown"></i><span>Premium</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Account</div>
+                <a href="/user-profile" class="sidebar-link"><i class="fas fa-user"></i><span>My Profile</span></a>
+                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="main-wrapper">
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-title" id="topbarTitle">Publication</div>
+            <div class="topbar-actions">
+                <a href="/dashboard" class="topbar-btn"><i class="fas fa-home"></i></a>
+            </div>
+        </header>
+
+        <main class="main-content" id="pubContent" style="padding:0">
+            <div class="loading"><div class="spinner"></div></div>
+        </main>
+    </div>
+</div>
+
+<script>
+let currentUser = null;
+let pubUser = null;
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+async function logout() {
+    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
+    localStorage.removeItem('es_user');
+    location.href = '/';
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    var diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+}
+
+async function loadCurrentUser() {
+    try {
+        var res = await fetch('/api/users/me', { credentials: 'include' });
+        if (res.ok) {
+            currentUser = await res.json();
+            var initial = (currentUser.username || 'U').charAt(0).toUpperCase();
+            if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
+            if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = currentUser.full_name || currentUser.username;
+            var badge = document.getElementById('sidebarBadge');
+            if (badge) {
+                if (currentUser.role === 'admin' || currentUser.role === 'superuser') { badge.className = 'sidebar-user-badge badge-admin'; badge.textContent = 'Admin'; }
+                else if (currentUser.role === 'creator') { badge.className = 'sidebar-user-badge badge-creator'; badge.textContent = 'Creator'; }
+                else if (currentUser.is_premium) { badge.className = 'sidebar-user-badge badge-premium'; badge.textContent = 'Premium'; }
+            }
+        }
+    } catch(e) {}
+}
+
+async function loadPublication() {
+    var match = location.pathname.match(/\/user\/(.+)/);
+    if (!match) {
+        document.getElementById('pubContent').innerHTML = '<div class="empty-state"><i class="fas fa-user"></i><h3>User not found</h3></div>';
+        return;
+    }
+    var username = match[1];
+    try {
+        var res = await fetch('/api/users/' + username);
+        if (!res.ok) throw new Error('Not found');
+        pubUser = await res.json();
+        document.title = (pubUser.full_name || pubUser.username) + ' — EchoStack';
+        document.getElementById('topbarTitle').textContent = pubUser.full_name || pubUser.username;
+        renderPublication();
+        loadPubPosts();
+    } catch(e) {
+        document.getElementById('pubContent').innerHTML = '<div class="empty-state"><i class="fas fa-user"></i><h3>User not found</h3></div>';
+    }
+}
+
+function renderPublication() {
+    var u = pubUser;
+    var initial = (u.username || 'U').charAt(0).toUpperCase();
+    var isFollowing = false;
+    var followBtnText = 'Follow';
+    var followBtnClass = '';
+
+    document.getElementById('pubContent').innerHTML =
+        '<div class="pub-hero">' +
+            '<div class="pub-hero-inner">' +
+                '<div class="pub-avatar">' + initial + '</div>' +
+                '<h1>' + escapeHtml(u.full_name || u.username) + '</h1>' +
+                '<div class="pub-handle">@' + escapeHtml(u.username) + '</div>' +
+                (u.bio ? '<p class="pub-bio">' + escapeHtml(u.bio) + '</p>' : '') +
+                '<div class="pub-stats">' +
+                    '<div class="pub-stat"><div class="pub-stat-num" id="pubPosts">0</div><div class="pub-stat-label">Posts</div></div>' +
+                    '<div class="pub-stat"><div class="pub-stat-num" id="pubFollowers">' + (u.follower_count || 0) + '</div><div class="pub-stat-label">Followers</div></div>' +
+                '</div>' +
+                '<button class="pub-subscribe-btn" id="pubFollowBtn" onclick="toggleFollow()"><i class="fas fa-user-plus"></i> <span id="pubFollowText">Follow</span></button>' +
+            '</div>' +
+        '</div>' +
+        '<div class="pub-content">' +
+            '<div class="pub-section-label">Published Stories</div>' +
+            '<div id="pubPostsList"><div class="loading"><div class="spinner"></div></div></div>' +
+        '</div>';
+}
+
+async function loadPubPosts() {
+    try {
+        var res = await fetch('/api/posts?author_id=' + pubUser.id + '&status=published&limit=50');
+        var posts = await res.json();
+        document.getElementById('pubPosts').textContent = posts.length;
+        var container = document.getElementById('pubPostsList');
+        if (!posts.length) {
+            container.innerHTML = '<div class="pub-empty"><i class="fas fa-pen-fancy"></i><h3>No published stories yet</h3></div>';
+            return;
+        }
+        container.innerHTML = posts.map(function(p) {
+            return '<div class="pub-post-card" onclick="location.href=\'/post/' + p.id + '\'">' +
+                '<span class="pub-post-type">' + escapeHtml(p.content_type || 'article') + '</span>' +
+                '<h3 class="pub-post-title">' + escapeHtml(p.title || 'Untitled') + '</h3>' +
+                (p.excerpt ? '<p class="pub-post-excerpt">' + escapeHtml(p.excerpt) + '</p>' : '') +
+                '<div class="pub-post-meta">' +
+                    '<span><i class="far fa-clock"></i> ' + timeAgo(p.created_at) + '</span>' +
+                    '<span><i class="far fa-heart"></i> ' + (p.likes || 0) + '</span>' +
+                    '<span><i class="far fa-eye"></i> ' + (p.views || 0) + '</span>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    } catch(e) {
+        document.getElementById('pubPostsList').innerHTML = '<div class="pub-empty"><i class="fas fa-wifi"></i><p>Could not load posts</p></div>';
+    }
+}
+
+async function toggleFollow() {
+    if (!currentUser) { location.href = '/user-login'; return; }
+    try {
+        await fetch('/api/follow/' + pubUser.id, { method: 'POST', credentials: 'include' });
+        var btn = document.getElementById('pubFollowBtn');
+        var text = document.getElementById('pubFollowText');
+        if (btn.classList.contains('following')) {
+            btn.classList.remove('following');
+            text.textContent = 'Follow';
+            btn.querySelector('i').className = 'fas fa-user-plus';
+        } else {
+            btn.classList.add('following');
+            text.textContent = 'Following';
+            btn.querySelector('i').className = 'fas fa-check';
+        }
+        var countEl = document.getElementById('pubFollowers');
+        var count = parseInt(countEl.textContent) || 0;
+        countEl.textContent = btn.classList.contains('following') ? count + 1 : Math.max(0, count - 1);
+    } catch(e) {}
+}
+
+loadCurrentUser();
+loadPublication();
+</script>
+</body>
+</html>
