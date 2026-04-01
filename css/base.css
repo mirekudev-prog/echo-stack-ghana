@@ -66,6 +66,19 @@ body {
 a { text-decoration: none; color: inherit; }
 button { font-family: inherit; border: none; background: none; cursor: pointer; }
 img { max-width: 100%; height: auto; }
+
+/* Global logo constraint — keep all logo images small and readable */
+.nav-logo img,
+.top-nav-inner img,
+.top-bar-logo img,
+.footer-logo img,
+.sidebar-logo img,
+.left-logo img {
+    height: 28px !important;
+    width: auto !important;
+    max-width: none !important;
+    border-radius: 6px;
+}
 input, textarea, select { font-family: inherit; }
 
 /* ── LAYOUT ────────────────────────────────────────────────────── */
