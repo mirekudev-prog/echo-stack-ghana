@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Archive - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .archive-header { padding:32px 24px; background:linear-gradient(135deg,var(--ink),var(--ink2)); color:white; }
+        .archive-header h1 { font-family:'Playfair Display',serif; font-size:1.8rem; margin-bottom:8px; }
+        .archive-header p { color:var(--text-secondary); font-size:0.95rem; }
+        .archive-filters { padding:20px 24px; background:var(--main-card); border-bottom:1px solid var(--main-border); display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+        .archive-search { flex:1; min-width:200px; padding:12px 16px; background:var(--main-bg); border:1px solid var(--main-border); border-radius:var(--radius-full); font-size:0.9rem; outline:none; }
+        .archive-search:focus { border-color:var(--gold); }
+        .archive-select { padding:10px 16px; background:var(--main-bg); border:1px solid var(--main-border); border-radius:var(--radius-full); font-size:0.85rem; outline:none; cursor:pointer; }
+        .archive-stats { display:flex; gap:24px; padding:20px 24px; background:var(--main-card); border-bottom:1px solid var(--main-border); flex-wrap:wrap; }
+        .stat-box { text-align:center; }
+        .stat-number { font-size:1.5rem; font-weight:700; color:var(--gold); }
+        .stat-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--main-text-muted); }
+        .archive-content { padding:24px; }
+        .month-header { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--ink); margin:24px 0 16px; padding-bottom:8px; border-bottom:1px solid var(--main-border); }
+        .month-header:first-child { margin-top:0; }
+        .premium-wall { background:linear-gradient(135deg,var(--gold),var(--gold2)); border-radius:var(--radius-lg); padding:24px; text-align:center; color:var(--ink); margin-top:24px; }
+        .premium-wall h3 { font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:8px; }
+        .premium-wall p { font-size:0.9rem; margin-bottom:16px; opacity:0.8; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- SIDEBAR (same as dashboard) -->
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="main-wrapper">
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-title">Archive</div>
+            <div class="topbar-actions">
+                <a href="/dashboard" class="topbar-btn"><i class="fas fa-home"></i></a>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="archive-header">
+                <h1>Ghana Heritage Archive</h1>
+                <p>Explore stories, audio, videos and more from all 16 regions</p>
+            </div>
+            
+            <div class="archive-filters">
+                <input type="text" class="archive-search" placeholder="Search archive..." id="searchInput" oninput="debounceSearch()">
+                <select class="archive-select" id="typeFilter" onchange="loadPosts()">
+                    <option value="">All Types</option>
+                    <option value="article">Articles</option>
+                    <option value="video">Videos</option>
+                    <option value="reel">Reels</option>
+                    <option value="audio">Audio</option>
+                    <option value="photo">Photos</option>
+                </select>
+                <select class="archive-select" id="regionFilter" onchange="loadPosts()">
+                    <option value="">All Regions</option>
+                </select>
+            </div>
+
+            <div class="archive-stats">
+                <div class="stat-box"><div class="stat-number" id="statTotal">-</div><div class="stat-label">Total Posts</div></div>
+                <div class="stat-box"><div class="stat-number" id="statArticles">-</div><div class="stat-label">Articles</div></div>
+                <div class="stat-box"><div class="stat-number" id="statVideos">-</div><div class="stat-label">Videos</div></div>
+                <div class="stat-box"><div class="stat-number" id="statAudio">-</div><div class="stat-label">Audio</div></div>
+            </div>
+
+            <div class="archive-content" id="archiveContent">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+let user = null;
+let searchTimeout = null;
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+}
+
+function debounceSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(loadPosts, 300);
+}
+
+async function loadUser() {
+    try {
+        const res = await fetch('/api/users/me', { credentials: 'include' });
+        if (res.ok) user = await res.json();
+    } catch(e) {}
+    loadPosts();
+    loadRegions();
+}
+
+async function loadRegions() {
+    try {
+        const res = await fetch('/api/regions');
+        const regions = await res.json();
+        const select = document.getElementById('regionFilter');
+        regions.forEach(r => {
+            select.innerHTML += `<option value="${r.id}">${escapeHtml(r.name)}</option>`;
+        });
+    } catch(e) {}
+}
+
+async function loadPosts() {
+    const type = document.getElementById('typeFilter').value;
+    const region = document.getElementById('regionFilter').value;
+    const search = document.getElementById('searchInput').value;
+    
+    let url = '/api/posts?limit=100';
+    if (type) url += `&type=${type}`;
+    if (region) url += `&region_id=${region}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    
+    try {
+        const res = await fetch(url);
+        const posts = await res.json();
+        renderArchive(posts);
+        updateStats(posts);
+    } catch(e) {
+        document.getElementById('archiveContent').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
+    }
+}
+
+function renderArchive(posts) {
+    const container = document.getElementById('archiveContent');
+    if (!posts.length) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-archive"></i><h3>No posts found</h3><p>Try adjusting your filters</p></div>';
+        return;
+    }
+    
+    // Group by month
+    const grouped = {};
+    posts.forEach(p => {
+        const d = new Date(p.created_at);
+        const key = d.toLocaleString('default', { month:'long', year:'numeric' });
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(p);
+    });
+    
+    let html = '';
+    for (const [month, monthPosts] of Object.entries(grouped)) {
+        html += `<h3 class="month-header">${month}</h3>`;
+        monthPosts.forEach(p => {
+            const author = p.author_username || 'User';
+            const initial = author.charAt(0).toUpperCase();
+            const typeBadge = p.content_type ? `<span class="post-type-badge ${p.content_type}">${p.content_type}</span>` : '';
+            
+            html += `
+                <article class="post-card" onclick="location.href='/post/${p.id}'">
+                    <div class="post-header">
+                        <div class="post-avatar">${initial}</div>
+                        <div class="post-author-info">
+                            <div class="post-author">${escapeHtml(author)}</div>
+                            <div class="post-meta"><span>${timeAgo(p.created_at)}</span>${typeBadge}</div>
+                        </div>
+                    </div>
+                    <h3 class="post-title">${escapeHtml(p.title)}</h3>
+                    ${p.excerpt ? `<p class="post-excerpt">${escapeHtml(p.excerpt)}</p>` : ''}
+                </article>
+            `;
+        });
+    }
+    
+    // Premium wall for free users
+    if (user && !user.is_premium && posts.length >= 10) {
+        html += `
+            <div class="premium-wall">
+                <h3>Unlock the Full Archive</h3>
+                <p>Free users can view 10 recent posts. Upgrade to Premium for unlimited access to Ghana's heritage archive.</p>
+                <a href="/premium" class="btn btn-secondary" style="background:var(--ink);color:white;border:none">Upgrade to Premium</a>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+function updateStats(posts) {
+    document.getElementById('statTotal').textContent = posts.length;
+    document.getElementById('statArticles').textContent = posts.filter(p => p.content_type === 'article').length;
+    document.getElementById('statVideos').textContent = posts.filter(p => p.content_type === 'video' || p.content_type === 'reel').length;
+    document.getElementById('statAudio').textContent = posts.filter(p => p.content_type === 'audio').length;
+}
+
+loadUser();
+</script>
+</body>
+</html>

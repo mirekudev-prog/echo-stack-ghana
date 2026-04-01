@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Explore Map - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .map-page { display:flex; height:100vh; }
+        .map-container { flex:1; display:flex; align-items:center; justify-content:center; background:var(--cream); padding:20px; overflow:auto; }
+        .ghana-map { max-width:100%; max-height:70vh; }
+        .ghana-map path { fill:var(--main-border); stroke:white; stroke-width:1; cursor:pointer; transition:all 0.2s; }
+        .ghana-map path:hover { fill:var(--gold); }
+        .ghana-map path.active { fill:var(--gold); }
+        .region-panel {
+            width:380px; flex-shrink:0; background:var(--main-card);
+            border-left:1px solid var(--main-border); overflow-y:auto;
+            display:flex; flex-direction:column;
+        }
+        .panel-header { padding:24px; background:linear-gradient(135deg,var(--ink),var(--ink2)); color:white; }
+        .panel-header h2 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:4px; }
+        .panel-header p { color:var(--text-secondary); font-size:0.9rem; }
+        .panel-content { flex:1; padding:20px; }
+        .panel-section { margin-bottom:24px; }
+        .panel-section-title { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--main-text-muted); margin-bottom:12px; }
+        .region-gallery { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+        .region-gallery-item { aspect-ratio:1; border-radius:var(--radius); overflow:hidden; background:var(--main-bg); }
+        .region-gallery-item img { width:100%; height:100%; object-fit:cover; }
+        .region-cards { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:20px; }
+        @media(max-width:1024px) {
+            .map-page { flex-direction:column; }
+            .region-panel { width:100%; height:50vh; border-left:none; border-top:1px solid var(--main-border); }
+            .ghana-map { max-height:40vh; }
+        }
+    </style>
+</head>
+<body>
+<div class="map-page">
+    <div class="map-container">
+        <svg class="ghana-map" viewBox="0 0 400 450" id="ghanaMap">
+            <!-- Simplified Ghana regions SVG paths -->
+            <path id="region-1" d="M180,30 L230,35 L240,80 L200,90 L170,60 Z" data-name="Upper West" onclick="selectRegion('Upper West')"/>
+            <path id="region-2" d="M230,35 L280,30 L300,70 L240,80 Z" data-name="Upper East" onclick="selectRegion('Upper East')"/>
+            <path id="region-3" d="M170,60 L240,80 L260,130 L180,140 L150,100 Z" data-name="Northern" onclick="selectRegion('Northern')"/>
+            <path id="region-4" d="M140,140 L180,140 L200,180 L150,190 Z" data-name="North East" onclick="selectRegion('North East')"/>
+            <path id="region-5" d="M150,100 L180,140 L140,140 L120,110 Z" data-name="Savannah" onclick="selectRegion('Savannah')"/>
+            <path id="region-6" d="M150,190 L200,180 L220,220 L160,240 Z" data-name="Oti" onclick="selectRegion('Oti')"/>
+            <path id="region-7" d="M120,110 L140,140 L150,190 L100,200 L80,150 Z" data-name="Brong-Ahafo" onclick="selectRegion('Brong-Ahafo')"/>
+            <path id="region-8" d="M100,200 L150,190 L160,240 L120,260 Z" data-name="Bono East" onclick="selectRegion('Bono East')"/>
+            <path id="region-9" d="M100,170 L120,110 L80,150 Z" data-name="Ahafo" onclick="selectRegion('Ahafo')"/>
+            <path id="region-10" d="M80,150 L100,200 L60,220 L50,180 Z" data-name="Western North" onclick="selectRegion('Western North')"/>
+            <path id="region-11" d="M50,180 L60,220 L40,280 L30,230 Z" data-name="Western" onclick="selectRegion('Western')"/>
+            <path id="region-12" d="M60,220 L120,260 L100,310 L50,280 Z" data-name="Central" onclick="selectRegion('Central')"/>
+            <path id="region-13" d="M120,260 L160,240 L180,290 L140,320 Z" data-name="Volta" onclick="selectRegion('Volta')"/>
+            <path id="region-14" d="M160,240 L220,220 L240,270 L200,300 L180,290 Z" data-name="Eastern" onclick="selectRegion('Eastern')"/>
+            <path id="region-15" d="M100,310 L140,320 L130,370 L80,350 Z" data-name="Greater Accra" onclick="selectRegion('Greater Accra')"/>
+            <path id="region-16" d="M140,280 L180,290 L140,320 L100,310 Z" data-name="Ashanti" onclick="selectRegion('Ashanti')"/>
+        </svg>
+    </div>
+    
+    <div class="region-panel" id="regionPanel">
+        <div class="panel-header" id="panelHeader">
+            <h2>Ghana's 16 Regions</h2>
+            <p>Click on a region to explore its heritage</p>
+        </div>
+        <div class="panel-content" id="panelContent">
+            <div class="empty-state" style="padding:40px 20px">
+                <i class="fas fa-map-marked-alt"></i>
+                <h3>Select a Region</h3>
+                <p>Click on any region on the map to view details, stories, and media</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let regions = [];
+let selectedRegion = null;
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+async function loadRegions() {
+    try {
+        const res = await fetch('/api/regions');
+        regions = await res.json();
+        
+        // Highlight regions that exist in DB
+        regions.forEach(r => {
+            const path = document.querySelector(`[data-name="${r.name}"]`);
+            if (path) {
+                path.style.fill = 'var(--blue)';
+                path.dataset.regionId = r.id;
+            }
+        });
+        
+        // Check URL params
+        const params = new URLSearchParams(location.search);
+        const regionId = params.get('region');
+        if (regionId) {
+            const region = regions.find(r => r.id == regionId);
+            if (region) selectRegion(region.name);
+        }
+    } catch(e) {}
+}
+
+function selectRegion(name) {
+    // Update SVG
+    document.querySelectorAll('.ghana-map path').forEach(p => p.classList.remove('active'));
+    const path = document.querySelector(`[data-name="${name}"]`);
+    if (path) path.classList.add('active');
+    
+    // Find region data
+    const region = regions.find(r => r.name === name) || { name, description: '' };
+    selectedRegion = region;
+    
+    // Update panel
+    document.getElementById('panelHeader').innerHTML = `
+        <h2>${escapeHtml(name)}</h2>
+        <p>${escapeHtml(region.description || 'Explore the heritage of ' + name)}</p>
+    `;
+    
+    loadRegionContent(region);
+}
+
+async function loadRegionContent(region) {
+    const container = document.getElementById('panelContent');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    
+    try {
+        const res = await fetch(`/api/posts?region=${region.id || region.name}&limit=6`);
+        const posts = await res.json();
+        
+        let html = '';
+        
+        if (posts.length) {
+            html += `
+                <div class="panel-section">
+                    <div class="panel-section-title">Latest Stories</div>
+                    ${posts.map(p => `
+                        <div class="post-card" style="margin-bottom:10px;padding:12px" onclick="location.href='/post/${p.id}'">
+                            <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:4px">${escapeHtml(p.title)}</h4>
+                            <p style="font-size:0.8rem;color:var(--main-text-secondary)">${escapeHtml((p.excerpt || '').substring(0,80))}...</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        html += `
+            <div class="panel-section">
+                <div class="panel-section-title">Quick Links</div>
+                <a href="/explore?region=${region.id || region.name}" class="btn btn-secondary btn-sm" style="width:100%;margin-bottom:8px">
+                    <i class="fas fa-compass"></i> Explore ${region.name}
+                </a>
+                <a href="/archive?region=${region.id || region.name}" class="btn btn-secondary btn-sm" style="width:100%">
+                    <i class="fas fa-archive"></i> View Archive
+                </a>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+    } catch(e) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
+    }
+}
+
+loadRegions();
+</script>
+</body>
+</html>

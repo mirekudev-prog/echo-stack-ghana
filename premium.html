@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Premium - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .premium-hero { padding:60px 24px; text-align:center; background:linear-gradient(135deg,var(--ink),var(--ink2)); color:white; }
+        .premium-hero h1 { font-family:'Playfair Display',serif; font-size:2.2rem; margin-bottom:12px; }
+        .premium-hero h1 em { color:var(--gold); font-style:italic; }
+        .premium-hero p { color:var(--text-secondary); max-width:500px; margin:0 auto; line-height:1.7; }
+        .pricing-cards { display:flex; gap:24px; justify-content:center; padding:48px 24px; flex-wrap:wrap; }
+        .pricing-card { width:320px; background:var(--main-card); border:1px solid var(--main-border); border-radius:var(--radius-xl); padding:32px; text-align:center; }
+        .pricing-card.featured { border-color:var(--gold); box-shadow:0 8px 40px rgba(200,150,46,0.15); }
+        .pricing-card.featured .pricing-badge { display:inline-block; padding:4px 12px; background:var(--gold); color:var(--ink); border-radius:var(--radius-full); font-size:0.7rem; font-weight:700; text-transform:uppercase; margin-bottom:16px; }
+        .pricing-card h3 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:8px; }
+        .pricing-price { font-size:2.5rem; font-weight:700; color:var(--gold); margin:16px 0; }
+        .pricing-price span { font-size:1rem; color:var(--main-text-muted); }
+        .pricing-features { list-style:none; text-align:left; margin:24px 0; }
+        .pricing-features li { padding:10px 0; border-bottom:1px solid var(--main-border); display:flex; align-items:center; gap:10px; font-size:0.9rem; }
+        .pricing-features li i { color:var(--success); }
+        .pricing-features li.disabled { color:var(--main-text-muted); }
+        .pricing-features li.disabled i { color:var(--main-border); }
+        .premium-benefits { padding:60px 24px; background:var(--main-card); }
+        .premium-benefits h2 { font-family:'Playfair Display',serif; text-align:center; font-size:1.8rem; margin-bottom:32px; }
+        .benefits-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; max-width:1000px; margin:0 auto; }
+        .benefit-card { padding:24px; background:var(--main-bg); border-radius:var(--radius-lg); }
+        .benefit-icon { width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,var(--gold),var(--gold2)); display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:var(--ink); margin-bottom:16px; }
+        .benefit-card h4 { font-weight:600; margin-bottom:8px; }
+        .benefit-card p { font-size:0.85rem; color:var(--main-text-secondary); }
+    </style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <div class="main-wrapper">
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-title">Premium</div>
+            <a href="/dashboard" class="topbar-btn"><i class="fas fa-home"></i></a>
+        </header>
+        
+        <main class="main-content">
+            <div class="premium-hero">
+                <h1>Unlock <em>Premium</em> Access</h1>
+                <p>Get unlimited access to Ghana's complete heritage archive, ad-free experience, and exclusive creator content.</p>
+            </div>
+            
+            <div class="pricing-cards">
+                <div class="pricing-card">
+                    <h3>Free</h3>
+                    <div class="pricing-price">GH₵0<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Browse public posts</li>
+                        <li><i class="fas fa-check"></i> Follow creators</li>
+                        <li><i class="fas fa-check"></i> Like & comment</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Limited archive (10 posts)</li>
+                        <li class="disabled"><i class="fas fa-times"></i> EchoBot preview only</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Ads displayed</li>
+                    </ul>
+                    <button class="btn btn-secondary" style="width:100%" disabled>Current Plan</button>
+                </div>
+                
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">Recommended</div>
+                    <h3>Premium</h3>
+                    <div class="pricing-price">GH₵150<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Full archive access</li>
+                        <li><i class="fas fa-check"></i> Unlimited posts</li>
+                        <li><i class="fas fa-check"></i> Full EchoBot AI access</li>
+                        <li><i class="fas fa-check"></i> Exclusive creator content</li>
+                        <li><i class="fas fa-check"></i> Ad-free experience</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                    </ul>
+                    <button class="btn btn-primary" style="width:100%" onclick="upgradeToPremium()">
+                        <i class="fas fa-crown"></i> Upgrade Now
+                    </button>
+                </div>
+            </div>
+            
+            <div class="premium-benefits">
+                <h2>Why Go Premium?</h2>
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-archive"></i></div>
+                        <h4>Complete Archive</h4>
+                        <p>Access every story, audio recording, and video in Ghana's heritage archive.</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-robot"></i></div>
+                        <h4>Full EchoBot Access</h4>
+                        <p>Ask our AI anything about Ghana's culture, history, and traditions.</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-ad"></i></div>
+                        <h4>Ad-Free Experience</h4>
+                        <p>Enjoy uninterrupted browsing and content consumption.</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-star"></i></div>
+                        <h4>Exclusive Content</h4>
+                        <p>Unlock premium-only posts from your favorite creators.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+}
+
+async function upgradeToPremium() {
+    try {
+        const res = await fetch('/api/premium/upgrade', { method: 'POST' });
+        const data = await res.json();
+        if (data.url) {
+            window.location.href = data.url;
+        }
+    } catch(e) {
+        alert('Payment initialization failed. Please try again.');
+    }
+}
+</script>
+</body>
+</html>

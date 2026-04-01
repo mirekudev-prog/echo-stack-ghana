@@ -5,127 +5,297 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0D1B2A">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>EchoStack - Feed</title>
+    <title>Feed - EchoStack</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .feed-container { max-width: 680px; margin: 0 auto; }
+        .create-prompt {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--main-card);
+            border-bottom: 1px solid var(--main-border);
+            cursor: pointer;
+        }
+        .create-prompt-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .create-prompt-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--main-bg);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-full);
+            color: var(--main-text-muted);
+            font-size: 0.9rem;
+        }
+        .create-prompt-icons { display: flex; gap: 12px; }
+        .create-prompt-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--main-text-secondary);
+            transition: all 0.15s;
+        }
+        .create-prompt-icon:hover { background: var(--main-hover); }
+        .post-follow-btn {
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            background: var(--blue);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .right-panel {
+            width: 320px;
+            flex-shrink: 0;
+            padding: 24px;
+            position: sticky;
+            top: 84px;
+            height: fit-content;
+        }
+        .right-panel-section { margin-bottom: 24px; }
+        .right-panel-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--main-text-muted);
+            margin-bottom: 12px;
+        }
+        .region-list { display: flex; flex-direction: column; gap: 8px; }
+        .region-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .region-item:hover { background: var(--main-hover); }
+        .region-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink);
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .region-name { font-weight: 500; font-size: 0.9rem; color: var(--main-text); }
+        @media (max-width: 1024px) {
+            .right-panel { display: none; }
+        }
+    </style>
 </head>
 <body>
 <div class="app">
-    <nav class="top-nav">
-        <div class="top-nav-inner">
-            <a href="/dashboard" class="nav-logo">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
                 <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
                 <span>EchoStack</span>
             </a>
-            <div style="display:flex;gap:8px">
-                <a href="/notifications" class="nav-icon-btn" style="position:relative">
-                    <i class="fas fa-bell"></i>
-                    <span id="notifBadge" class="notif-badge" style="display:none">0</span>
+        </div>
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">User</div>
+                <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <a href="/dashboard" class="sidebar-link active">
+                    <i class="fas fa-home"></i>
+                    <span>Feed</span>
                 </a>
-                <a href="/chatbot" class="nav-icon-btn" title="EchoBot">
+                <a href="/reels" class="sidebar-link">
+                    <i class="fas fa-film"></i>
+                    <span>Reels</span>
+                </a>
+                <a href="/explore" class="sidebar-link">
+                    <i class="fas fa-compass"></i>
+                    <span>Explore</span>
+                </a>
+                <a href="/archive" class="sidebar-link">
+                    <i class="fas fa-archive"></i>
+                    <span>Archive</span>
+                </a>
+                <a href="/app" class="sidebar-link">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Map</span>
+                </a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Social</div>
+                <a href="/following" class="sidebar-link">
+                    <i class="fas fa-user-friends"></i>
+                    <span>Following</span>
+                </a>
+                <a href="/messages" class="sidebar-link">
+                    <i class="fas fa-envelope"></i>
+                    <span>Messages</span>
+                </a>
+                <a href="/notifications" class="sidebar-link">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    <span class="badge-count" id="notifCount" style="display:none">0</span>
+                </a>
+                <a href="/chat" class="sidebar-link">
+                    <i class="fas fa-comments"></i>
+                    <span>Community Chat</span>
+                </a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Create</div>
+                <a href="/creator" class="sidebar-link" id="createLink">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Create Post</span>
+                </a>
+                <a href="/premium" class="sidebar-link" id="premiumLink">
+                    <i class="fas fa-crown"></i>
+                    <span>Premium</span>
+                </a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Account</div>
+                <a href="/user-profile" class="sidebar-link">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="/settings" class="sidebar-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign Out</span>
+            </button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- MAIN -->
+    <div class="main-wrapper">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="topbar-title">Feed</div>
+            <div class="topbar-actions">
+                <a href="/notifications" class="topbar-btn" style="position:relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge-dot" id="topNotifDot" style="display:none"></span>
+                </a>
+                <a href="/chatbot" class="topbar-btn" title="EchoBot">
                     <i class="fas fa-robot"></i>
                 </a>
             </div>
-        </div>
-    </nav>
+        </header>
 
-    <main class="main-content">
-        <!-- STORIES BAR -->
-        <div style="padding:16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
-            <div style="display:flex;gap:12px">
-                <a href="/story" style="display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none">
-                    <div style="width:64px;height:64px;border-radius:50%;border:2px dashed var(--border-light);display:flex;align-items:center;justify-content:center;color:var(--text-muted)">
-                        <i class="fas fa-plus"></i>
+        <!-- CONTENT -->
+        <main class="main-content">
+            <div style="display:flex">
+                <div class="feed-container" style="flex:1">
+                    <!-- STORIES BAR -->
+                    <div class="stories-bar" id="storiesBar">
+                        <div class="story-item" onclick="location.href='/story'">
+                            <div class="story-create"><i class="fas fa-plus"></i></div>
+                            <span class="story-name">Your Story</span>
+                        </div>
+                        <div id="storiesList"></div>
                     </div>
-                    <span style="font-size:.7rem;color:var(--text-secondary)">Your Story</span>
-                </a>
-                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer">
-                    <div style="width:64px;height:64px;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--gold),var(--gold2))">
-                        <div style="width:100%;height:100%;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden">
-                            <img src="https://ui-avatars.com/api/?name=Ashanti&background=C8962E&color=0D1B2A" style="width:100%;height:100%">
+
+                    <!-- CREATE PROMPT -->
+                    <div class="create-prompt" onclick="location.href='/creator'">
+                        <div class="create-prompt-avatar" id="createAvatar">U</div>
+                        <div class="create-prompt-input">What's on your mind?</div>
+                        <div class="create-prompt-icons">
+                            <div class="create-prompt-icon"><i class="fas fa-image" style="color:#22c55e"></i></div>
+                            <div class="create-prompt-icon"><i class="fas fa-video" style="color:#9333ea"></i></div>
+                            <div class="create-prompt-icon"><i class="fas fa-microphone" style="color:#059669"></i></div>
                         </div>
                     </div>
-                    <span style="font-size:.7rem;color:var(--text-secondary)">Ashanti</span>
+
+                    <!-- FILTER TABS -->
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" onclick="setFilter(this, '')">All</button>
+                        <button class="filter-tab" onclick="setFilter(this, 'article')">Articles</button>
+                        <button class="filter-tab" onclick="setFilter(this, 'video')">Videos</button>
+                        <button class="filter-tab" onclick="setFilter(this, 'reel')">Reels</button>
+                        <button class="filter-tab" onclick="setFilter(this, 'audio')">Audio</button>
+                        <button class="filter-tab" onclick="setFilter(this, 'photo')">Photos</button>
+                    </div>
+
+                    <!-- POSTS -->
+                    <div style="padding:20px" id="postsContainer">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
                 </div>
-                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer">
-                    <div style="width:64px;height:64px;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--gold),var(--gold2))">
-                        <div style="width:100%;height:100%;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden">
-                            <img src="https://ui-avatars.com/api/?name=Volta&background=E8B84B&color=0D1B2A" style="width:100%;height:100%">
-                        </div>
+
+                <!-- RIGHT PANEL (Desktop) -->
+                <div class="right-panel">
+                    <div class="right-panel-section">
+                        <div class="right-panel-title">Explore Regions</div>
+                        <div class="region-list" id="regionList"></div>
                     </div>
-                    <span style="font-size:.7rem;color:var(--text-secondary)">Volta</span>
-                </div>
-                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer">
-                    <div style="width:64px;height:64px;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--gold),var(--gold2))">
-                        <div style="width:100%;height:100%;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden">
-                            <img src="https://ui-avatars.com/api/?name=Accra&background=F4D06F&color=0D1B2A" style="width:100%;height:100%">
-                        </div>
+                    <div class="footer" style="margin-top:40px;padding:20px 0;border:none">
+                        <div class="footer-brand">EchoStack Ghana</div>
+                        <p class="footer-dev">Built by Mireku Development</p>
                     </div>
-                    <span style="font-size:.7rem;color:var(--text-secondary)">Accra</span>
                 </div>
             </div>
-        </div>
-
-        <!-- QUICK ACTIONS -->
-        <div style="display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none">
-            <a href="/explore" style="padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);font-size:.8rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;text-decoration:none">
-                <i class="fas fa-compass" style="color:var(--gold)"></i> Explore
-            </a>
-            <a href="/chatbot" style="padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);font-size:.8rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;text-decoration:none">
-                <i class="fas fa-robot" style="color:var(--gold)"></i> EchoBot
-            </a>
-            <a href="/trending" style="padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);font-size:.8rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;text-decoration:none">
-                <i class="fas fa-fire" style="color:var(--gold)"></i> Trending
-            </a>
-            <a href="/bookmarks" style="padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);font-size:.8rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;text-decoration:none">
-                <i class="fas fa-bookmark" style="color:var(--gold)"></i> Saved
-            </a>
-        </div>
-
-        <!-- POST INPUT -->
-        <div style="display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--border)">
-            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;color:var(--ink);font-weight:700" id="myAvatar">U</div>
-            <a href="/creator" style="flex:1;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);color:var(--text-muted);font-size:.9rem;text-decoration:none">What's happening in Ghana?</a>
-        </div>
-
-        <!-- POSTS FEED -->
-        <div style="padding:0 16px" id="posts-feed">
-            <div class="loading"><div class="spinner"></div><span style="color:var(--text-muted)">Loading stories...</span></div>
-        </div>
-    </main>
-
-    <!-- BOTTOM NAV -->
-    <nav class="bottom-nav">
-        <a href="/dashboard" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="/explore" class="nav-item"><i class="fas fa-compass"></i><span>Explore</span></a>
-        <a href="/creator" class="nav-item"><i class="fas fa-plus-square"></i><span>Post</span></a>
-        <a href="/messages" class="nav-item"><i class="fas fa-envelope"></i><span>Chat</span></a>
-        <a href="/user-profile" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
-    </nav>
+        </main>
+    </div>
 </div>
+
+<!-- ECHOBOT BUTTON -->
+<a href="/chatbot" class="echobot-btn" title="EchoBot">
+    <i class="fas fa-robot"></i>
+</a>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const state = { posts: [], page: 1, hasMore: true, loading: false };
 let user = null;
+let currentFilter = '';
+let allPosts = [];
 
-async function loadUser() {
-    try {
-        const res = await fetch('/api/users/me', { credentials: 'include' });
-        if (res.ok) {
-            user = await res.json();
-            const avatar = document.getElementById('myAvatar');
-            if (user.avatar_url) {
-                avatar.innerHTML = `<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-            } else {
-                avatar.textContent = (user.username || 'U').charAt(0).toUpperCase();
-            }
-        }
-    } catch(e) {}
-    if (!user) location.href = '/user-login';
+function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.className = 'toast', 2500);
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
 }
 
 function escapeHtml(str) {
@@ -142,98 +312,206 @@ function timeAgo(dateStr) {
     return Math.floor(diff / 86400) + 'd';
 }
 
-async function loadPosts() {
-    if (state.loading || !state.hasMore) return;
-    state.loading = true;
-    const feed = document.getElementById('posts-feed');
-    if (state.page === 1) feed.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-    
+async function loadUser() {
     try {
-        const res = await fetch(`/api/posts?limit=20&offset=${(state.page - 1) * 20}`);
-        const posts = await res.json();
-        if (!posts.length) { state.hasMore = false; }
-        else {
-            state.posts = state.page === 1 ? posts : [...state.posts, ...posts];
-            renderPosts();
-            state.page++;
-        }
-        if (state.posts.length === 0 && state.page === 1) {
-            feed.innerHTML = '<div class="empty-state"><i class="fas fa-newspaper"></i><h3>No stories yet</h3><p>Be the first to share!</p></div>';
+        const res = await fetch('/api/users/me', { credentials: 'include' });
+        if (res.ok) {
+            user = await res.json();
+            setupUserUI();
+            loadPosts();
+            loadStories();
+            loadRegions();
+        } else {
+            location.href = '/user-login';
         }
     } catch(e) {
-        feed.innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
+        location.href = '/user-login';
     }
-    state.loading = false;
+}
+
+function setupUserUI() {
+    const initial = (user.username || 'U').charAt(0).toUpperCase();
+    document.getElementById('sidebarAvatar').textContent = initial;
+    document.getElementById('sidebarName').textContent = user.full_name || user.username;
+    document.getElementById('createAvatar').textContent = initial;
+    
+    const badge = document.getElementById('sidebarBadge');
+    if (user.role === 'admin' || user.role === 'superuser') {
+        badge.className = 'sidebar-user-badge badge-admin';
+        badge.textContent = 'Admin';
+    } else if (user.role === 'creator') {
+        badge.className = 'sidebar-user-badge badge-creator';
+        badge.textContent = 'Creator';
+    } else if (user.is_premium) {
+        badge.className = 'sidebar-user-badge badge-premium';
+        badge.textContent = 'Premium';
+    }
+    
+    // Show admin link if admin
+    if (user.role === 'admin' || user.role === 'superuser') {
+        const createLink = document.getElementById('createLink');
+        createLink.insertAdjacentHTML('afterend', `
+            <a href="/admin-dashboard" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Admin Dashboard</span>
+            </a>
+        `);
+    }
+}
+
+async function loadPosts() {
+    try {
+        const url = currentFilter ? `/api/posts?type=${currentFilter}` : '/api/posts';
+        const res = await fetch(url);
+        allPosts = await res.json();
+        renderPosts();
+    } catch(e) {
+        document.getElementById('postsContainer').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
+    }
 }
 
 function renderPosts() {
-    const feed = document.getElementById('posts-feed');
-    feed.innerHTML = state.posts.map(post => {
+    const container = document.getElementById('postsContainer');
+    if (!allPosts.length) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Be the first to share a story!</p></div>';
+        return;
+    }
+    
+    container.innerHTML = allPosts.map(post => {
         const author = post.author_username || 'User';
-        const time = timeAgo(post.created_at);
-        const type = post.content_type || 'article';
+        const initial = author.charAt(0).toUpperCase();
+        const typeBadge = post.content_type ? `<span class="post-type-badge ${post.content_type}">${post.content_type}</span>` : '';
+        const followBtn = user && post.author_id !== user.id ? `<button class="post-follow-btn" onclick="event.stopPropagation();toggleFollow('${post.author_id}')">Follow</button>` : '';
         
         let mediaHtml = '';
-        if (type === 'audio' && post.audio_url) {
-            mediaHtml = `<div class="audio-card" style="margin:0 0 12px"><div class="audio-header"><div class="audio-icon"><i class="fas fa-headphones"></i></div><div class="audio-info"><h4>Audio</h4></div></div><audio src="${escapeHtml(post.audio_url)}" controls style="width:100%"></audio></div>`;
-        } else if (type === 'video' && post.video_url) {
-            mediaHtml = `<div class="post-media"><video src="${escapeHtml(post.video_url)}" controls></video></div>`;
-        } else if (post.cover_image) {
-            mediaHtml = `<div class="post-media"><img src="${escapeHtml(post.cover_image)}" alt="" onerror="this.parentElement.style.display='none'"></div>`;
+        if (post.media_url) {
+            if (post.content_type === 'video' || post.content_type === 'reel') {
+                mediaHtml = `<div class="post-media"><video src="${escapeHtml(post.media_url)}" controls preload="metadata"></video></div>`;
+            } else if (post.content_type === 'audio') {
+                mediaHtml = `<div class="audio-card"><div class="audio-header"><div class="audio-icon"><i class="fas fa-headphones"></i></div><div class="audio-info"><h4>${escapeHtml(post.title)}</h4><p>${escapeHtml(author)}</p></div></div><audio controls preload="none"><source src="${escapeHtml(post.media_url)}" type="audio/mpeg"></audio></div>`;
+            } else {
+                mediaHtml = `<div class="post-media"><img src="${escapeHtml(post.media_url)}" alt="" loading="lazy"></div>`;
+            }
         }
-
+        
         return `
             <article class="post-card" onclick="location.href='/post/${post.id}'">
                 <div class="post-header">
-                    <div class="post-avatar">${author.charAt(0).toUpperCase()}</div>
-                    <div style="flex:1">
-                        <div class="post-author">${escapeHtml(author)} <span class="badge badge-gold" style="margin-left:4px">${type}</span></div>
-                        <div class="post-time">${time}</div>
+                    <div class="post-avatar">${initial}</div>
+                    <div class="post-author-info">
+                        <div class="post-author">${escapeHtml(author)} ${followBtn}</div>
+                        <div class="post-meta">
+                            <span>${timeAgo(post.created_at)}</span>
+                            ${typeBadge}
+                        </div>
                     </div>
                 </div>
                 <h3 class="post-title">${escapeHtml(post.title)}</h3>
-                <p class="post-excerpt">${escapeHtml(post.excerpt || '')}</p>
+                ${post.excerpt ? `<p class="post-excerpt">${escapeHtml(post.excerpt)}</p>` : ''}
                 ${mediaHtml}
                 <div class="post-actions">
-                    <button class="post-action" onclick="event.stopPropagation();toggleLike(${post.id},this)"><i class="far fa-heart"></i><span>${post.likes||0}</span></button>
-                    <button class="post-action" onclick="event.stopPropagation();location.href='/post/${post.id}'"><i class="far fa-comment"></i><span>${post.comment_count||0}</span></button>
-                    <button class="post-action" onclick="event.stopPropagation();sharePost(${post.id},'${escapeHtml(post.title)}')"><i class="fas fa-share"></i></button>
-                    <button class="post-action" onclick="event.stopPropagation();toggleBookmark(${post.id},this)"><i class="far fa-bookmark"></i></button>
+                    <button class="post-action ${post.user_liked ? 'liked' : ''}" onclick="event.stopPropagation();toggleLike(${post.id}, this)">
+                        <i class="fas fa-heart"></i>
+                        <span>${post.likes || 0}</span>
+                    </button>
+                    <button class="post-action" onclick="event.stopPropagation();location.href='/post/${post.id}'">
+                        <i class="fas fa-comment"></i>
+                        <span>${post.comments_count || 0}</span>
+                    </button>
+                    <button class="post-action" onclick="event.stopPropagation();sharePost(${post.id})">
+                        <i class="fas fa-share"></i>
+                    </button>
+                    <button class="post-action ${post.user_saved ? 'saved' : ''}" onclick="event.stopPropagation();toggleSave(${post.id}, this)">
+                        <i class="fas fa-bookmark"></i>
+                    </button>
                 </div>
             </article>
         `;
     }).join('');
 }
 
-async function toggleLike(id, btn) {
+async function loadStories() {
     try {
-        const res = await fetch(`/api/posts/${id}/like`, { method: 'POST' });
-        const data = await res.json();
-        btn.classList.toggle('liked', data.liked);
-        btn.querySelector('i').className = data.liked ? 'fas fa-heart' : 'far fa-heart';
-        btn.querySelector('span').textContent = data.likes;
+        const res = await fetch('/api/creators?limit=8');
+        const creators = await res.json();
+        const container = document.getElementById('storiesList');
+        
+        container.innerHTML = creators.slice(0, 8).map(c => {
+            const initial = (c.username || 'C').charAt(0).toUpperCase();
+            return `
+                <div class="story-item" onclick="location.href='/user/${c.id}'">
+                    <div class="story-ring">
+                        <div class="story-ring-inner">
+                            <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;color:var(--ink);font-weight:700">${initial}</div>
+                        </div>
+                    </div>
+                    <span class="story-name">${escapeHtml(c.username)}</span>
+                </div>
+            `;
+        }).join('');
     } catch(e) {}
 }
 
-async function toggleBookmark(id, btn) {
+async function loadRegions() {
     try {
-        const res = await fetch(`/api/bookmarks/${id}`, { method: 'POST' });
-        const data = await res.json();
-        btn.classList.toggle('saved', data.bookmarked);
-        btn.querySelector('i').className = data.bookmarked ? 'fas fa-bookmark' : 'far fa-bookmark';
+        const res = await fetch('/api/regions');
+        const regions = await res.json();
+        const container = document.getElementById('regionList');
+        
+        container.innerHTML = regions.slice(0, 6).map(r => `
+            <div class="region-item" onclick="location.href='/app?region=${r.id}'">
+                <div class="region-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="region-name">${escapeHtml(r.name)}</div>
+            </div>
+        `).join('');
     } catch(e) {}
 }
 
-async function sharePost(id, title) {
+function setFilter(btn, filter) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = filter;
+    loadPosts();
+}
+
+async function toggleLike(postId, btn) {
     try {
-        const res = await fetch(`/api/posts/${id}/share-url`);
+        const res = await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
         const data = await res.json();
-        if (navigator.share) navigator.share({ title, url: data.url });
-        else { await navigator.clipboard.writeText(data.url); showToast('Link copied!'); }
+        btn.classList.toggle('liked');
+        btn.querySelector('span').textContent = data.likes || 0;
     } catch(e) {}
 }
 
-loadUser().then(loadPosts);
+async function toggleSave(postId, btn) {
+    btn.classList.toggle('saved');
+    showToast(btn.classList.contains('saved') ? 'Saved!' : 'Removed from saved');
+}
+
+async function toggleFollow(userId) {
+    try {
+        await fetch(`/api/follow/${userId}`, { method: 'POST' });
+        showToast('Followed!');
+    } catch(e) {}
+}
+
+function sharePost(postId) {
+    const url = `${location.origin}/post/${postId}`;
+    if (navigator.share) {
+        navigator.share({ title: 'EchoStack', url });
+    } else {
+        navigator.clipboard.writeText(url);
+        showToast('Link copied!');
+    }
+}
+
+async function logout() {
+    await fetch('/api/users/logout', { method: 'POST' });
+    localStorage.removeItem('es_user');
+    location.href = '/user-login';
+}
+
+loadUser();
 </script>
 </body>
 </html>
