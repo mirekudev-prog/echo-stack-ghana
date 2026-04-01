@@ -851,6 +851,11 @@ async def admin_dashboard_page(request: Request):
         return _serve("admin_dashboard.html")
     return _serve("login.html")
 
+@app.get("/project/{project_id}")
+async def project_page(project_id: int, request: Request):
+    """Public project viewer - Audio Archive & Podcast Network"""
+    return _serve("project.html")
+
 @app.get("/admin-preview")
 async def admin_preview(request: Request, db: Session = Depends(get_db)):
     if not _is_admin(request):
