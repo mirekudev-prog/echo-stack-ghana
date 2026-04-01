@@ -347,16 +347,7 @@ function setupUserUI() {
         badge.textContent = 'Premium';
     }
     
-    // Show admin link if admin
-    if (user.role === 'admin' || user.role === 'superuser') {
-        const createLink = document.getElementById('createLink');
-        createLink.insertAdjacentHTML('afterend', `
-            <a href="/admin-dashboard" class="sidebar-link">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>Admin Dashboard</span>
-            </a>
-        `);
-    }
+    // Hidden admin access — no public link
 }
 
 async function loadPosts() {
