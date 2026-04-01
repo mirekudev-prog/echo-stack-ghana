@@ -29,27 +29,13 @@
             --success: #22c55e;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'DM Sans', sans-serif;
             background: var(--cream);
             color: var(--main-text);
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* ── LAYOUT ─────────────────────────────────────── */
-        .map-page {
-            display: flex;
-            height: 100vh;
-        }
-
-        .map-main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            min-height: 100vh;
         }
 
         /* ── TOP BAR ────────────────────────────────────── */
@@ -60,7 +46,9 @@
             align-items: center;
             padding: 0 20px;
             gap: 16px;
-            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .top-bar-logo {
@@ -80,9 +68,8 @@
 
         .top-bar-title {
             font-family: 'Playfair Display', serif;
-            font-size: 1.1rem;
-            color: rgba(255,255,255,.8);
-            margin-left: 8px;
+            font-size: 1rem;
+            color: rgba(255,255,255,.7);
         }
 
         .top-bar-right {
@@ -101,7 +88,7 @@
             transition: all .2s;
         }
 
-        .top-bar-right a:hover { color: white; background: rgba(255,255,255,.1) }
+        .top-bar-right a:hover { color: white; background: rgba(255,255,255,.1); }
 
         .btn-nav {
             background: rgba(200,150,46,.15);
@@ -114,69 +101,95 @@
 
         .btn-nav:hover { background: rgba(200,150,46,.25) !important }
 
-        /* Mobile menu toggle */
-        .menu-toggle {
-            display: none;
-            background: none;
-            border: none;
+        /* ── HERO BANNER ───────────────────────────────── */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--ink), var(--ink2));
             color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 6px;
+            text-align: center;
+            padding: 28px 24px 24px;
         }
 
-        /* ── MAP AREA ────────────────────────────────────── */
-        .map-container {
-            flex: 1;
+        .hero-banner h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .hero-banner h1 span { color: var(--gold2) }
+
+        .hero-banner p {
+            font-size: .88rem;
+            color: rgba(255,255,255,.65);
+            max-width: 480px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* ── MAP SECTION ───────────────────────────────── */
+        .map-section {
             display: flex;
+            gap: 0;
+            min-height: calc(100vh - 56px);
+        }
+
+        .map-area {
+            flex: 1;
+            background: var(--main-card);
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background: var(--cream);
-            padding: 20px;
-            overflow: auto;
-            position: relative;
+            padding: 24px 16px;
+            overflow-y: auto;
         }
 
         .map-wrapper {
-            position: relative;
-            max-width: 600px;
             width: 100%;
+            max-width: 480px;
         }
 
         .ghana-map {
             width: 100%;
             height: auto;
-            filter: drop-shadow(0 4px 16px rgba(0,0,0,.08));
+            display: block;
         }
 
-        .ghana-map path {
-            fill: var(--main-border);
-            stroke: white;
-            stroke-width: 1;
+        .ghana-map .region-path {
+            fill: #eef2f7;
+            stroke: #c0c0c0;
+            stroke-width: 1.5;
             cursor: pointer;
-            transition: fill .2s, stroke .2s;
+            transition: fill .2s, stroke .2s, stroke-width .2s;
         }
 
-        .ghana-map path:hover {
-            fill: var(--gold);
-            stroke: var(--gold2);
-        }
-
-        .ghana-map path.active {
-            fill: var(--gold);
-            stroke: var(--gold2);
-        }
-
-        .ghana-map path.has-data {
+        .ghana-map .region-path:hover {
             fill: var(--blue);
+            stroke: var(--ink);
         }
 
-        .ghana-map path.has-data:hover {
-            fill: var(--gold);
+        .ghana-map .region-path.active {
+            fill: var(--blue);
+            stroke: var(--ink);
+            stroke-width: 2.5;
         }
 
-        /* ── REGION PANEL (side panel) ─────────────────── */
-        .region-panel {
+        .ghana-map .region-label {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 8px;
+            font-weight: 700;
+            fill: var(--ink);
+            pointer-events: none;
+            text-anchor: middle;
+        }
+
+        .ghana-map .region-label-bg {
+            fill: white;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* ── DETAIL PANEL ──────────────────────────────── */
+        .detail-panel {
             width: 360px;
             flex-shrink: 0;
             background: var(--main-card);
@@ -187,7 +200,11 @@
             transition: transform .3s ease;
         }
 
-        .panel-header {
+        .detail-panel.hidden {
+            display: none;
+        }
+
+        .panel-head {
             padding: 20px;
             background: linear-gradient(135deg, var(--ink), var(--ink2));
             color: white;
@@ -197,8 +214,8 @@
 
         .panel-close {
             position: absolute;
-            top: 16px;
-            right: 16px;
+            top: 14px;
+            right: 14px;
             background: rgba(255,255,255,.1);
             border: none;
             color: white;
@@ -213,19 +230,27 @@
             transition: background .2s;
         }
 
-        .panel-close:hover { background: rgba(255,255,255,.2) }
+        .panel-close:hover { background: rgba(255,255,255,.2); }
 
-        .panel-header h2 {
+        .panel-head h2 {
             font-family: 'Playfair Display', serif;
             font-size: 1.4rem;
-            margin-bottom: 4px;
-            padding-right: 32px;
+            margin-bottom: 2px;
+            padding-right: 36px;
         }
 
-        .panel-header p {
-            color: rgba(255,255,255,.6);
-            font-size: .82rem;
-            line-height: 1.5;
+        .panel-head .panel-capital {
+            font-size: .8rem;
+            color: var(--gold2);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .panel-head .panel-terrain {
+            font-size: .75rem;
+            color: rgba(255,255,255,.5);
+            margin-top: 4px;
         }
 
         .panel-body {
@@ -234,85 +259,95 @@
             padding: 20px;
         }
 
-        /* Region detail sections */
-        .panel-section { margin-bottom: 24px }
-        .panel-section-title {
+        .panel-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-chip {
+            padding: 4px 10px;
+            background: var(--main-bg);
+            border: 1px solid var(--main-border);
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--main-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .meta-chip i { color: var(--gold); font-size: .7rem; }
+
+        .panel-block {
+            margin-bottom: 20px;
+        }
+
+        .panel-block-title {
             font-size: .7rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: .08em;
             color: var(--gold);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
+            gap: 5px;
+        }
+
+        .panel-block p {
+            font-size: .85rem;
+            color: var(--main-muted);
+            line-height: 1.65;
+        }
+
+        .panel-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 6px;
         }
 
-        .panel-stat-row {
+        .panel-gallery img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 8px;
+            background: var(--main-bg);
+            border: 1px solid var(--main-border);
+            cursor: pointer;
+            transition: border-color .2s;
+        }
+
+        .panel-gallery img:hover { border-color: var(--gold); }
+
+        .panel-audio {
             display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .panel-stat {
-            flex: 1;
+        .audio-item {
+            padding: 10px 12px;
             background: var(--main-bg);
             border: 1px solid var(--main-border);
             border-radius: 10px;
-            padding: 12px;
-            text-align: center;
         }
 
-        .panel-stat .num {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--main-text);
-        }
-
-        .panel-stat .label {
-            font-size: .7rem;
-            color: var(--main-muted);
-            text-transform: uppercase;
-            letter-spacing: .05em;
-            margin-top: 2px;
-        }
-
-        /* Stories in panel */
-        .panel-story {
-            display: block;
-            padding: 12px;
-            background: var(--main-bg);
-            border: 1px solid var(--main-border);
-            border-radius: 10px;
-            text-decoration: none;
-            margin-bottom: 8px;
-            transition: all .2s;
-        }
-
-        .panel-story:hover {
-            border-color: var(--gold);
-            background: var(--main-hover);
-        }
-
-        .panel-story h4 {
-            font-size: .85rem;
+        .audio-item-title {
+            font-size: .78rem;
             font-weight: 600;
             color: var(--main-text);
-            margin-bottom: 4px;
-            line-height: 1.3;
+            margin-bottom: 6px;
         }
 
-        .panel-story p {
-            font-size: .75rem;
-            color: var(--main-muted);
-            line-height: 1.4;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+        .audio-item audio {
+            width: 100%;
+            height: 28px;
+            border-radius: 4px;
         }
 
-        /* Quick links */
         .panel-links {
             display: flex;
             flex-direction: column;
@@ -329,19 +364,15 @@
             border-radius: 10px;
             text-decoration: none;
             color: var(--main-text);
-            font-size: .85rem;
+            font-size: .82rem;
             font-weight: 500;
             transition: all .2s;
         }
 
-        .panel-link:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-
+        .panel-link:hover { border-color: var(--gold); color: var(--gold); }
         .panel-link i { color: var(--gold); width: 18px; text-align: center }
 
-        /* Panel empty state */
+        /* Panel empty */
         .panel-empty {
             text-align: center;
             padding: 40px 20px;
@@ -351,7 +382,8 @@
         .panel-empty i {
             font-size: 2.5rem;
             margin-bottom: 12px;
-            opacity: .4;
+            opacity: .35;
+            color: var(--gold);
         }
 
         .panel-empty h3 {
@@ -363,387 +395,258 @@
 
         .panel-empty p { font-size: .85rem; line-height: 1.5 }
 
-        /* ── REGION CARDS GRID (below map) ─────────────── */
-        .region-cards-section {
-            background: var(--main-card);
+        /* ── REGION CARDS ─────────────────────────────── */
+        .cards-section {
+            padding: 20px;
+            background: var(--cream);
             border-top: 1px solid var(--main-border);
-            padding: 16px 20px;
-            flex-shrink: 0;
-            max-height: 200px;
-            overflow-y: auto;
         }
 
-        .region-cards-scroll {
-            display: flex;
+        .cards-title {
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+
+        .region-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
             gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-            scrollbar-width: thin;
-            scrollbar-color: var(--main-border) transparent;
         }
 
-        .region-cards-scroll::-webkit-scrollbar { height: 3px }
-        .region-cards-scroll::-webkit-scrollbar-thumb { background: var(--main-border); border-radius: 2px }
-
-        .region-mini-card {
-            flex-shrink: 0;
-            width: 120px;
-            padding: 12px 10px;
-            background: var(--main-bg);
+        .region-card {
+            background: var(--main-card);
             border: 1.5px solid var(--main-border);
-            border-radius: 10px;
+            border-radius: 12px;
+            padding: 14px 10px;
             text-align: center;
-            text-decoration: none;
             cursor: pointer;
             transition: all .2s;
+            text-decoration: none;
+            display: block;
         }
 
-        .region-mini-card:hover, .region-mini-card.active {
+        .region-card:hover, .region-card.active {
             border-color: var(--gold);
-            background: rgba(200,150,46,.06);
+            box-shadow: 0 4px 16px rgba(200,150,46,.12);
+            transform: translateY(-2px);
         }
 
-        .region-mini-card .mini-icon { font-size: 1.4rem; margin-bottom: 6px; display: block }
-        .region-mini-card .mini-name { font-size: .72rem; font-weight: 600; color: var(--main-text); line-height: 1.2 }
+        .region-card .card-icon { font-size: 1.6rem; margin-bottom: 6px; display: block }
+        .region-card .card-name { font-size: .75rem; font-weight: 600; color: var(--main-text); line-height: 1.2 }
+        .region-card .card-capital { font-size: .65rem; color: var(--main-muted); margin-top: 2px }
 
-        /* ── RESPONSIVE ─────────────────────────────────── */
-        @media (max-width: 900px) {
-            body { overflow: auto }
-            .map-page { flex-direction: column; height: auto }
-            .map-container { padding: 16px; min-height: 400px }
-            .region-panel {
-                width: 100%;
-                border-left: none;
-                border-top: 1px solid var(--main-border);
-                max-height: 60vh;
-                transform: translateY(0);
-            }
-            .region-panel.hidden-panel { display: none }
-            .menu-toggle { display: block }
-            .top-bar-title { display: none }
-            .region-cards-section { max-height: 160px }
-        }
-
-        @media (max-width: 480px) {
-            .top-bar { padding: 0 12px }
-            .top-bar-right a:not(.btn-nav) { display: none }
-            .map-container { padding: 12px; min-height: 300px }
-        }
-
-        /* Loading spinner */
-        .loading-spinner {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-        }
-
+        /* ── LOADING ──────────────────────────────────── */
+        .loading-row { display: flex; align-items: center; justify-content: center; padding: 30px; }
         .spinner {
-            width: 24px;
-            height: 24px;
+            width: 22px; height: 22px;
             border: 2.5px solid var(--main-border);
             border-top-color: var(--gold);
             border-radius: 50%;
             animation: spin .7s linear infinite;
         }
-
         @keyframes spin { to { transform: rotate(360deg) } }
+
+        /* ── RESPONSIVE ───────────────────────────────── */
+        @media (max-width: 900px) {
+            .map-section { flex-direction: column; }
+            .detail-panel {
+                position: fixed;
+                top: 56px;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid var(--main-border);
+                z-index: 200;
+                transform: translateX(100%);
+                transition: transform .3s ease;
+            }
+            .detail-panel.mobile-open {
+                transform: translateX(0);
+            }
+            .panel-overlay {
+                display: block;
+                position: fixed;
+                inset: 56px 0 0 0;
+                background: rgba(0,0,0,.4);
+                z-index: 199;
+            }
+            .region-cards-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+        }
+
+        @media (min-width: 901px) {
+            .panel-overlay { display: none !important; }
+        }
+
+        @media (max-width: 480px) {
+            .top-bar { padding: 0 12px; }
+            .top-bar-right a:not(.btn-nav) { display: none; }
+            .map-area { padding: 16px 8px; }
+            .cards-section { padding: 16px 12px; }
+            .panel-gallery { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="map-page">
+    <!-- Top Bar -->
+    <nav class="top-bar">
+        <a href="/" class="top-bar-logo">
+            <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+            <span>EchoStack</span>
+        </a>
+        <span class="top-bar-title">Interactive Map</span>
+        <div class="top-bar-right">
+            <a href="/dashboard"><i class="fas fa-home"></i> Feed</a>
+            <a href="/explore"><i class="fas fa-compass"></i> Explore</a>
+            <a href="/premium" class="btn-nav"><i class="fas fa-crown"></i> Premium</a>
+        </div>
+    </nav>
 
-        <!-- Main: top bar + map + cards -->
-        <div class="map-main">
-            <!-- Top Bar -->
-            <nav class="top-bar">
-                <button class="menu-toggle" onclick="toggleMobilePanel()">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <a href="/" class="top-bar-logo">
-                    <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
-                    <span>EchoStack</span>
-                </a>
-                <span class="top-bar-title">Explore Ghana's Regions</span>
-                <div class="top-bar-right">
-                    <a href="/dashboard"><i class="fas fa-home"></i> Feed</a>
-                    <a href="/explore"><i class="fas fa-compass"></i> Explore</a>
-                    <a href="/premium" class="btn-nav"><i class="fas fa-crown"></i> Premium</a>
-                </div>
-            </nav>
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <h1>Explore Ghana's Heritage <span>🗺️</span></h1>
+        <p>Click any region on the map or select a card below to discover stories, traditions, and landmarks.</p>
+    </div>
 
-            <!-- SVG Map -->
-            <div class="map-container">
-                <div class="map-wrapper">
-                    <svg class="ghana-map" viewBox="0 0 420 480" id="ghanaMap">
-                        <!-- Greater Accra -->
-                        <path id="r-greater-accra" d="M218,300 L258,290 L268,340 L248,360 L218,348 L210,320 Z"
-                            data-region="Greater Accra" data-capital="Accra" data-desc="The capital region, home to Accra — Ghana's political and economic hub."
-                            onclick="selectRegion('Greater Accra')"/>
-                        <!-- Ashanti -->
-                        <path id="r-ashanti" d="M195,215 L245,200 L268,240 L248,280 L215,285 L195,255 Z"
-                            data-region="Ashanti" data-capital="Kumasi" data-desc="The Kingdom of Ashanti — heart of Ghana's gold, culture, and Kente traditions."
-                            onclick="selectRegion('Ashanti')"/>
-                        <!-- Central -->
-                        <path id="r-central" d="M105,255 L150,235 L168,278 L158,310 L118,318 L95,290 Z"
-                            data-region="Central" data-capital="Cape Coast" data-desc="Coastal region famous for Cape Coast Castle, Kakum Canopy Walkway, and vibrant Fante culture."
-                            onclick="selectRegion('Central')"/>
-                        <!-- Eastern -->
-                        <path id="-r-eastern" d="M230,200 L288,180 L305,230 L268,250 L248,240 L245,200 Z"
-                            data-region="Eastern" data-capital="Koforidua" data-desc="Lush highlands, cocoa farms, and the famous Boti Falls and Umbrella Rock."
-                            onclick="selectRegion('Eastern')"/>
-                        <!-- Western -->
-                        <path id="r-western" d="M30,210 L75,190 L95,255 L70,295 L30,280 L20,240 Z"
-                            data-region="Western" data-capital="Sekondi-Takoradi" data-desc="Oil-rich coast with stunning beaches, the Ankasa Rainforest, and Nzulezo stilt village."
-                            onclick="selectRegion('Western')"/>
-                        <!-- Western North -->
-                        <path id="r-western-north" d="M60,168 L105,155 L120,200 L95,232 L60,218 L48,195 Z"
-                            data-region="Western North" data-capital="Prestea" data-desc="Newest region, rich in minerals and dense rainforest including Bia National Park."
-                            onclick="selectRegion('Western North')"/>
-                        <!-- Bono -->
-                        <path id="r-bono" d="M88,185 L130,170 L150,200 L130,228 L92,222 L78,205 Z"
-                            data-region="Bono" data-capital="Sunyani" data-desc="Ghana's breadbasket with Sunyani — 'The Cleanest City' — at its heart."
-                            onclick="selectRegion('Bono')"/>
-                        <!-- Bono East -->
-                        <path id="r-bono-east" d="M130,190 L170,180 L180,215 L162,240 L130,228 L122,210 Z"
-                            data-region="Bono East" data-capital="Techiman" data-desc="Agricultural heartland formed in 2019, home to Ghana's largest markets."
-                            onclick="selectRegion('Bono East')"/>
-                        <!-- Ahafo -->
-                        <path id="r-ahafo" d="M90,148 L130,135 L140,168 L120,188 L85,180 L75,162 Z"
-                            data-region="Ahafo" data-capital="Tano" data-desc="Mining region with rich ASHANTI traditions and lush forest reserves."
-                            onclick="selectRegion('Ahafo')"/>
-                        <!-- Oti -->
-                        <path id="r-oti" d="M195,135 L248,120 L265,160 L248,195 L215,200 L195,170 Z"
-                            data-region="Oti" data-capital="Dambai" data-desc="Mountainous region with the Oti River, traditional crafts, and breath-taking landscapes."
-                            onclick="selectRegion('Oti')"/>
-                        <!-- Volta -->
-                        <path id="r-volta" d="M228,235 L275,220 L300,265 L285,310 L248,318 L228,285 Z"
-                            data-region="Volta" data-capital="Ho" data-desc="Home to Lake Volta, the Tongu people, and the iconic mountaintop cathedral of Sokode."
-                            onclick="selectRegion('Volta')"/>
-                        <!-- Northern -->
-                        <path id="r-northern" d="M185,68 L255,55 L285,95 L268,135 L232,148 L195,138 L180,100 Z"
-                            data-region="Northern" data-capital="Tamale" data-desc="The northern gateway —Tamale's bustling markets, savanna landscapes, and Dagomba heritage."
-                            onclick="selectRegion('Northern')"/>
-                        <!-- Savannah -->
-                        <path id="r-savannah" d="M120,88 L178,75 L185,118 L168,148 L128,148 L108,118 Z"
-                            data-region="Savannah" data-capital="Damongo" data-desc="Vast savanna with Mole Motel, Baobeng Monkeys, and the ancient Salaga slave trade town."
-                            onclick="selectRegion('Savannah')"/>
-                        <!-- North East -->
-                        <path id="r-north-east" d="M175,22 L232,18 L255,55 L232,85 L192,90 L170,58 Z"
-                            data-region="North East" data-capital="Nalerigu" data-desc="Ghana's newest region, home to the historic Gambaga Witch Camp and Paga Crocodile Pond."
-                            onclick="selectRegion('North East')"/>
-                        <!-- Upper East -->
-                        <path id="r-upper-east" d="M232,8 L295,5 L318,50 L295,95 L255,90 L232,58 Z"
-                            data-region="Upper East" data-capital="Bolgatanga" data-desc="Land of the Tallest Mountain (Mount Deng) and the famous Bolga market."
-                            onclick="selectRegion('Upper East')"/>
-                        <!-- Upper West -->
-                        <path id="r-upper-west" d="M145,8 L225,5 L232,55 L205,95 L158,98 L138,58 Z"
-                            data-region="Upper West" data-capital="Wa" data-desc="Remote region with the Wechiau Hippo Sanctuary, Daffiama Bushfowl, and unique Siuri culture."
-                            onclick="selectRegion('Upper West')"/>
-                    </svg>
-                </div>
+    <!-- Main layout -->
+    <div class="map-section">
+
+        <!-- Map + Cards -->
+        <div class="map-area">
+            <div class="map-wrapper">
+                <svg class="ghana-map" id="ghanaSvg" viewBox="0 0 400 620">
+                    <!-- Paths and labels injected by JS -->
+                </svg>
             </div>
 
-            <!-- Region mini-cards scroll -->
-            <div class="region-cards-section">
-                <div class="region-cards-scroll" id="regionCardsScroll">
-                    <div class="loading-spinner"><div class="spinner"></div></div>
+            <!-- Region Cards -->
+            <div class="cards-section">
+                <div class="cards-title">All 16 Regions</div>
+                <div class="region-cards-grid" id="regionCardsGrid">
+                    <div class="loading-row"><div class="spinner"></div></div>
                 </div>
             </div>
         </div>
 
-        <!-- Side Panel -->
-        <div class="region-panel" id="regionPanel">
-            <div class="panel-header" id="panelHeader">
+        <!-- Detail Panel -->
+        <div class="detail-panel hidden" id="detailPanel">
+            <div class="panel-head" id="panelHead">
                 <button class="panel-close" onclick="closePanel()"><i class="fas fa-times"></i></button>
-                <h2>Ghana's 16 Regions</h2>
-                <p>Click any region to explore its heritage</p>
+                <h2 id="panelName">Region Name</h2>
+                <div class="panel-capital" id="panelCapital"><i class="fas fa-map-marker-alt"></i> Capital</div>
+                <div class="panel-terrain" id="panelTerrain"></div>
             </div>
             <div class="panel-body" id="panelBody">
                 <div class="panel-empty">
                     <i class="fas fa-map-marked-alt"></i>
                     <h3>Select a Region</h3>
-                    <p>Tap a region on the map or choose from the cards below</p>
+                    <p>Click a region on the map or card to view details</p>
                 </div>
             </div>
         </div>
 
     </div>
 
+    <!-- Mobile overlay -->
+    <div class="panel-overlay" id="panelOverlay" onclick="closePanel()" style="display:none"></div>
+
     <script>
         (function() {
-            const regionIcons = {
-                'Ahafo': '🌾', 'Ashanti': '👑', 'Bono': '🎭', 'Bono East': '🌳',
-                'Central': '🏖️', 'Eastern': '⛰️', 'Greater Accra': '🏙️', 'Northern': '🌄',
-                'North East': '🏕️', 'North West': '🌾', 'Oti': '🏞️', 'Upper East': '🗿',
-                'Upper West': '🌾', 'Volta': '💧', 'Western': '🌊', 'Western North': '🌲',
-                'Savannah': '🌾'
+            var svgPaths = {
+                'upper-west':    'M60,40 L160,50 L165,130 L100,140 L50,110 Z',
+                'upper-east':    'M160,50 L280,25 L290,100 L165,130 Z',
+                'north-east':    'M165,130 L290,100 L350,130 L340,190 L180,195 Z',
+                'savannah':      'M50,110 L100,140 L165,130 L180,195 L220,260 L180,340 L80,340 L40,250 Z',
+                'northern':      'M180,195 L340,190 L370,300 L320,320 L220,260 Z',
+                'bono':          'M80,340 L180,340 L160,420 L70,420 Z',
+                'bono-east':     'M180,340 L220,260 L320,320 L330,410 L190,410 L160,420 Z',
+                'ahafo':         'M70,420 L160,420 L140,470 L60,470 Z',
+                'ashanti':       'M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z',
+                'oti':           'M320,320 L370,300 L380,450 L340,450 L330,410 Z',
+                'volta':         'M340,450 L380,450 L400,560 L360,570 L340,510 Z',
+                'eastern':       'M310,510 L330,410 L340,450 L340,510 L360,570 L300,580 L280,510 Z',
+                'western-north': 'M60,470 L140,470 L130,530 L50,530 Z',
+                'western':       'M50,530 L130,530 L110,610 L40,590 Z',
+                'central':       'M130,530 L180,510 L280,510 L250,600 L110,610 Z',
+                'greater-accra': 'M300,580 L360,570 L375,600 L290,610 Z'
             };
 
-            let regions = [];
-            let selectedRegionName = null;
+            var regionLabels = {
+                'upper-west':    {x: 105, y: 100},
+                'upper-east':    {x: 210, y: 80},
+                'north-east':   {x: 255, y: 155},
+                'savannah':     {x: 120, y: 240},
+                'northern':     {x: 265, y: 255},
+                'bono':         {x: 120, y: 390},
+                'bono-east':    {x: 245, y: 360},
+                'ahafo':        {x: 105, y: 455},
+                'ashanti':      {x: 240, y: 475},
+                'oti':          {x: 355, y: 385},
+                'volta':        {x: 370, y: 525},
+                'eastern':      {x: 320, y: 555},
+                'western-north':{x: 90,  y: 505},
+                'western':      {x: 80,  y: 580},
+                'central':      {x: 200, y: 570},
+                'greater-accra':{x: 315, y: 602}
+            };
 
-            async function loadRegions() {
-                try {
-                    const res = await fetch('/api/regions', { credentials: 'include' });
-                    if (!res.ok) throw new Error();
-                    regions = await res.json();
+            var regionIcons = {
+                'upper west':    '🌾', 'upper west': '🌾',
+                'upper east':    '🗿', 'north east':  '🏕️',
+                'savannah':      '🌾', 'northern':     '🌄',
+                'bono':          '🎭', 'bono east':    '🌳',
+                'ahafo':         '🌾', 'ashanti':      '👑',
+                'oti':           '🏞️', 'volta':        '💧',
+                'eastern':       '⛰️', 'western north':'🌲',
+                'western':       '🌊', 'central':      '🏖️',
+                'greater accra': '🏙️'
+            };
 
-                    regions.forEach(function(r) {
-                        const name = r.name || r.region_name;
-                        const path = document.querySelector('[data-region="' + name + '"]');
-                        if (path) {
-                            path.classList.add('has-data');
-                            path.dataset.regionId = r.id;
-                        }
-                    });
-                } catch (e) {
-                    // SVG paths work without DB data
-                }
+            var displayNames = {
+                'upper-west':    'Upper West',
+                'upper-east':    'Upper East',
+                'north-east':    'North East',
+                'savannah':      'Savannah',
+                'northern':      'Northern',
+                'bono':          'Bono',
+                'bono-east':     'Bono East',
+                'ahafo':         'Ahafo',
+                'ashanti':       'Ashanti',
+                'oti':           'Oti',
+                'volta':         'Volta',
+                'eastern':       'Eastern',
+                'western-north': 'Western North',
+                'western':       'Western',
+                'central':       'Central',
+                'greater-accra': 'Greater Accra'
+            };
 
-                // Check URL param
-                const params = new URLSearchParams(location.search);
-                const regionParam = params.get('region');
-                if (regionParam) {
-                    setTimeout(function() { selectRegion(regionParam); }, 300);
-                }
+            var defaultRegions = [
+                {id: 1, name: 'Greater Accra', capital: 'Accra', population: '5.4M', terrain: 'Coastal / Urban'},
+                {id: 2, name: 'Ashanti', capital: 'Kumasi', population: '4.0M', terrain: 'Forest / Urban'},
+                {id: 3, name: 'Central', capital: 'Cape Coast', population: '2.2M', terrain: 'Coastal / Forest'},
+                {id: 4, name: 'Eastern', capital: 'Koforidua', population: '2.9M', terrain: 'Highland / Forest'},
+                {id: 5, name: 'Western', capital: 'Sekondi-Takoradi', population: '2.4M', terrain: 'Coastal / Forest'},
+                {id: 6, name: 'Western North', capital: 'Prestea', population: '0.9M', terrain: 'Forest'},
+                {id: 7, name: 'Volta', capital: 'Ho', population: '2.1M', terrain: 'Lake / Highland'},
+                {id: 8, name: 'Oti', capital: 'Dambai', population: '0.7M', terrain: 'Mountainous'},
+                {id: 9, name: 'Northern', capital: 'Tamale', population: '2.5M', terrain: 'Savanna'},
+                {id: 10, name: 'Savannah', capital: 'Damongo', population: '0.7M', terrain: 'Savanna'},
+                {id: 11, name: 'North East', capital: 'Nalerigu', population: '0.6M', terrain: 'Savanna'},
+                {id: 12, name: 'Upper East', capital: 'Bolgatanga', population: '1.0M', terrain: 'Semi-arid'},
+                {id: 13, name: 'Upper West', capital: 'Wa', population: '0.8M', terrain: 'Semi-arid'},
+                {id: 14, name: 'Bono', capital: 'Sunyani', population: '1.2M', terrain: 'Forest'},
+                {id: 15, name: 'Bono East', capital: 'Techiman', population: '0.9M', terrain: 'Forest'},
+                {id: 16, name: 'Ahafo', capital: 'Tano', population: '0.6M', terrain: 'Forest'}
+            ];
 
-                buildRegionCards();
-            }
-
-            function buildRegionCards() {
-                const container = document.getElementById('regionCardsScroll');
-                const allRegions = [
-                    'Greater Accra','Ashanti','Central','Eastern','Western','Western North',
-                    'Bono','Bono East','Ahafo','Oti','Volta','Northern','Savannah',
-                    'North East','Upper East','Upper West'
-                ];
-
-                container.innerHTML = allRegions.map(function(name) {
-                    const icon = regionIcons[name] || '📍';
-                    const isSelected = selectedRegionName === name;
-                    return '<a href="#" class="region-mini-card' + (isSelected ? ' active' : '') + '" ' +
-                        'data-region="' + name + '" onclick="selectRegion(\'' + escapeAttr(name) + '\');return false">' +
-                        '<span class="mini-icon">' + icon + '</span>' +
-                        '<div class="mini-name">' + escapeHtml(name) + '</div>' +
-                    '</a>';
-                }).join('');
-            }
-
-            function selectRegion(name) {
-                selectedRegionName = name;
-
-                // Update map paths
-                document.querySelectorAll('.ghana-map path').forEach(function(p) { p.classList.remove('active'); });
-                var path = document.querySelector('[data-region="' + name + '"]');
-                if (path) path.classList.add('active');
-
-                // Update mini-cards
-                document.querySelectorAll('.region-mini-card').forEach(function(c) {
-                    c.classList.toggle('active', c.dataset.region === name);
-                });
-
-                // Update panel
-                var capital = '';
-                var desc = '';
-                var regionId = '';
-                var pathData = path ? path.dataset : {};
-
-                if (path) {
-                    capital = pathData.capital || '';
-                    desc = pathData.desc || '';
-                    regionId = pathData.regionId || '';
-                }
-
-                // Try to get from API
-                var regionFromApi = regions.find(function(r) { return (r.name || r.region_name) === name; });
-                if (regionFromApi) {
-                    capital = capital || regionFromApi.capital || regionFromApi.region_capital || '';
-                    desc = desc || regionFromApi.description || '';
-                    regionId = regionId || regionFromApi.id;
-                }
-
-                document.getElementById('panelHeader').innerHTML =
-                    '<button class="panel-close" onclick="closePanel()"><i class="fas fa-times"></i></button>' +
-                    '<h2>' + escapeHtml(name) + '</h2>' +
-                    '<p>' + (capital ? capital + ' • ' : '') + 'Ghana</p>';
-
-                // Mobile: ensure panel is visible
-                if (window.innerWidth <= 900) {
-                    document.getElementById('regionPanel').classList.remove('hidden-panel');
-                }
-
-                loadRegionContent(name, regionId, desc);
-            }
-
-            async function loadRegionContent(name, regionId, fallbackDesc) {
-                var container = document.getElementById('panelBody');
-                container.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
-
-                var html = '';
-                var desc = fallbackDesc || 'Explore the heritage and stories of ' + name + '.';
-
-                html += '<div class="panel-section">' +
-                    '<div class="panel-section-title"><i class="fas fa-info-circle"></i> About</div>' +
-                    '<p style="font-size:.85rem;color:var(--main-muted);line-height:1.6">' + escapeHtml(desc) + '</p>' +
-                '</div>';
-
-                // Try to load stories
-                try {
-                    var query = regionId ? 'region=' + regionId : 'region=' + encodeURIComponent(name);
-                    var postsRes = await fetch('/api/posts?' + query + '&limit=4', { credentials: 'include' });
-                    if (postsRes.ok) {
-                        var posts = await postsRes.json();
-                        if (posts && posts.length) {
-                            html += '<div class="panel-section">' +
-                                '<div class="panel-section-title"><i class="fas fa-book"></i> Stories</div>';
-                            posts.forEach(function(p) {
-                                html += '<a class="panel-story" href="/post/' + p.id + '">' +
-                                    '<h4>' + escapeHtml(p.title) + '</h4>' +
-                                    '<p>' + escapeHtml((p.excerpt || '').substring(0, 100)) + '</p>' +
-                                '</a>';
-                            });
-                            html += '</div>';
-                        }
-                    }
-                } catch (e) {}
-
-                // Quick links
-                html += '<div class="panel-section">' +
-                    '<div class="panel-section-title"><i class="fas fa-link"></i> Quick Links</div>' +
-                    '<div class="panel-links">' +
-                    '<a class="panel-link" href="/explore?region=' + encodeURIComponent(name) + '"><i class="fas fa-compass"></i> Explore stories</a>' +
-                    '<a class="panel-link" href="/archive?region=' + encodeURIComponent(name) + '"><i class="fas fa-archive"></i> View archive</a>' +
-                    '<a class="panel-link" href="/reels?region=' + encodeURIComponent(name) + '"><i class="fas fa-video"></i> Watch reels</a>' +
-                    '</div>' +
-                '</div>';
-
-                container.innerHTML = html;
-            }
-
-            function closePanel() {
-                document.querySelectorAll('.ghana-map path').forEach(function(p) { p.classList.remove('active'); });
-                selectedRegionName = null;
-                document.querySelectorAll('.region-mini-card').forEach(function(c) { c.classList.remove('active'); });
-
-                document.getElementById('panelHeader').innerHTML =
-                    '<button class="panel-close" onclick="closePanel()"><i class="fas fa-times"></i></button>' +
-                    '<h2>Ghana\'s 16 Regions</h2>' +
-                    '<p>Click any region to explore its heritage</p>';
-
-                document.getElementById('panelBody').innerHTML =
-                    '<div class="panel-empty">' +
-                    '<i class="fas fa-map-marked-alt"></i>' +
-                    '<h3>Select a Region</h3>' +
-                    '<p>Tap a region on the map or choose from the cards below</p>' +
-                    '</div>';
-            }
-
-            function toggleMobilePanel() {
-                var panel = document.getElementById('regionPanel');
-                panel.classList.toggle('hidden-panel');
-            }
+            var allRegions = defaultRegions;
+            var activeKey = null;
 
             function escapeHtml(str) {
                 if (!str) return '';
@@ -753,10 +656,221 @@
                     .replace(/>/g, '&gt;');
             }
 
-            function escapeAttr(str) {
-                return String(str).replace(/'/g, '&#39;');
+            function capitalize(str) {
+                if (!str) return '';
+                return str.replace(/\b\w/g, function(c) { return c.toUpperCase(); });
             }
 
+            function keyToName(key) {
+                return capitalize(key.replace(/-/g, ' '));
+            }
+
+            function nameToKey(name) {
+                return name.toLowerCase().replace(/\s+/g, '-');
+            }
+
+            // ── DRAW MAP ─────────────────────────────────
+            function initMap() {
+                var svg = document.getElementById('ghanaSvg');
+
+                Object.keys(svgPaths).forEach(function(key) {
+                    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', svgPaths[key]);
+                    path.setAttribute('class', 'region-path');
+                    path.setAttribute('data-key', key);
+                    path.setAttribute('onclick', "showRegionDetail('" + key + "')");
+                    svg.appendChild(path);
+
+                    // Label background + text
+                    var lbl = regionLabels[key];
+                    if (lbl) {
+                        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        text.setAttribute('x', lbl.x);
+                        text.setAttribute('y', lbl.y);
+                        text.setAttribute('class', 'region-label');
+                        text.setAttribute('text-anchor', 'middle');
+                        text.textContent = displayNames[key] || keyToName(key);
+                        svg.appendChild(text);
+                    }
+                });
+            }
+
+            // ── REGION CARDS ────────────────────────────
+            function buildRegionCards() {
+                var container = document.getElementById('regionCardsGrid');
+                var html = '';
+
+                Object.keys(svgPaths).forEach(function(key) {
+                    var name = displayNames[key] || keyToName(key);
+                    var icon = regionIcons[name.toLowerCase()] || '📍';
+                    var regData = allRegions.find(function(r) { return nameToKey(r.name) === key || r.name.toLowerCase() === name.toLowerCase(); });
+                    var capital = regData ? regData.capital : '';
+
+                    html += '<a href="#" class="region-card" data-key="' + key + '" onclick="showRegionDetail(\'' + key + '\');return false">' +
+                        '<span class="card-icon">' + icon + '</span>' +
+                        '<div class="card-name">' + escapeHtml(name) + '</div>' +
+                        (capital ? '<div class="card-capital">' + escapeHtml(capital) + '</div>' : '') +
+                    '</a>';
+                });
+
+                container.innerHTML = html;
+            }
+
+            // ── DETAIL PANEL ────────────────────────────
+            function showRegionDetail(key) {
+                activeKey = key;
+                var name = displayNames[key] || keyToName(key);
+
+                // Highlight map path
+                document.querySelectorAll('.region-path').forEach(function(p) {
+                    p.classList.toggle('active', p.dataset.key === key);
+                });
+
+                // Highlight cards
+                document.querySelectorAll('.region-card').forEach(function(c) {
+                    c.classList.toggle('active', c.dataset.key === key);
+                });
+
+                // Find region data
+                var regData = allRegions.find(function(r) {
+                    return nameToKey(r.name) === key || r.name.toLowerCase() === name.toLowerCase();
+                });
+
+                if (!regData) {
+                    regData = { name: name, capital: '', population: '', terrain: '', description: '', overview: '' };
+                }
+
+                // Populate panel head
+                document.getElementById('panelName').textContent = regData.name || name;
+                document.getElementById('panelCapital').innerHTML =
+                    '<i class="fas fa-map-marker-alt"></i> ' + (regData.capital || 'Ghana');
+                document.getElementById('panelTerrain').textContent = regData.terrain || '';
+
+                // Build panel body
+                var body = document.getElementById('panelBody');
+                var html = '';
+
+                // Meta chips
+                var chips = [];
+                if (regData.population) chips.push('<span class="meta-chip"><i class="fas fa-users"></i> ' + escapeHtml(regData.population) + '</span>');
+                if (regData.terrain) chips.push('<span class="meta-chip"><i class="fas fa-mountain"></i> ' + escapeHtml(regData.terrain) + '</span>');
+                if (chips.length) {
+                    html += '<div class="panel-meta">' + chips.join('') + '</div>';
+                }
+
+                // Overview
+                var desc = regData.description || regData.overview || '';
+                if (desc) {
+                    html += '<div class="panel-block">' +
+                        '<div class="panel-block-title"><i class="fas fa-info-circle"></i> Overview</div>' +
+                        '<p>' + escapeHtml(desc) + '</p>' +
+                    '</div>';
+                } else {
+                    html += '<div class="panel-block">' +
+                        '<div class="panel-block-title"><i class="fas fa-info-circle"></i> Overview</div>' +
+                        '<p>Explore the rich cultural heritage, traditions, and stories of ' + escapeHtml(name) + '. Discover local customs, landmarks, and community voices from this region.</p>' +
+                    '</div>';
+                }
+
+                // Gallery (if images in data)
+                var images = regData.images || regData.gallery || [];
+                if (images.length) {
+                    html += '<div class="panel-block">' +
+                        '<div class="panel-block-title"><i class="fas fa-images"></i> Gallery</div>' +
+                        '<div class="panel-gallery">';
+                    images.slice(0, 6).forEach(function(img) {
+                        html += '<img src="' + escapeAttr(img) + '" alt="Gallery" onclick="openImage(\'' + escapeAttr(img) + '\')">';
+                    });
+                    html += '</div></div>';
+                }
+
+                // Audio (if audio in data)
+                var audioFiles = regData.audio || regData.audio_files || [];
+                if (audioFiles.length) {
+                    html += '<div class="panel-block">' +
+                        '<div class="panel-block-title"><i class="fas fa-microphone"></i> Audio</div>' +
+                        '<div class="panel-audio">';
+                    audioFiles.slice(0, 3).forEach(function(a) {
+                        html += '<div class="audio-item">' +
+                            '<div class="audio-item-title">' + escapeHtml(a.title || 'Audio Recording') + '</div>' +
+                            '<audio controls preload="none"><source src="' + escapeAttr(a.url || a.src || '') + '" type="audio/mpeg"></audio>' +
+                        '</div>';
+                    });
+                    html += '</div></div>';
+                }
+
+                // Quick links
+                html += '<div class="panel-block">' +
+                    '<div class="panel-block-title"><i class="fas fa-link"></i> Explore</div>' +
+                    '<div class="panel-links">' +
+                    '<a class="panel-link" href="/explore?region=' + encodeURIComponent(name) + '"><i class="fas fa-compass"></i> Browse stories</a>' +
+                    '<a class="panel-link" href="/archive?region=' + encodeURIComponent(name) + '"><i class="fas fa-archive"></i> View archive</a>' +
+                    '<a class="panel-link" href="/reels?region=' + encodeURIComponent(name) + '"><i class="fas fa-video"></i> Watch reels</a>' +
+                    '</div>' +
+                '</div>';
+
+                body.innerHTML = html;
+
+                // Open panel
+                var panel = document.getElementById('detailPanel');
+                panel.classList.remove('hidden');
+                document.getElementById('panelOverlay').style.display = 'block';
+
+                if (window.innerWidth <= 900) {
+                    panel.classList.add('mobile-open');
+                }
+            }
+
+            function closePanel() {
+                document.querySelectorAll('.region-path').forEach(function(p) { p.classList.remove('active'); });
+                document.querySelectorAll('.region-card').forEach(function(c) { c.classList.remove('active'); });
+
+                var panel = document.getElementById('detailPanel');
+                panel.classList.add('hidden');
+                panel.classList.remove('mobile-open');
+                document.getElementById('panelOverlay').style.display = 'none';
+                activeKey = null;
+            }
+
+            function escapeAttr(str) {
+                if (!str) return '';
+                return String(str).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+            }
+
+            function openImage(url) {
+                var win = window.open(url, '_blank');
+                if (win) win.focus();
+            }
+
+            // ── LOAD REGIONS FROM API ────────────────────
+            async function loadRegions() {
+                try {
+                    var res = await fetch('/api/regions', { credentials: 'include' });
+                    if (res.ok) {
+                        var data = await res.json();
+                        if (Array.isArray(data) && data.length) {
+                            allRegions = data;
+                        }
+                    }
+                } catch (e) {
+                    // Use defaults
+                }
+
+                buildRegionCards();
+
+                // Check URL param
+                var params = new URLSearchParams(location.search);
+                var regionParam = params.get('region');
+                if (regionParam) {
+                    var key = nameToKey(regionParam);
+                    if (svgPaths[key]) {
+                        setTimeout(function() { showRegionDetail(key); }, 200);
+                    }
+                }
+            }
+
+            // ── INIT ───────────────────────────────────
+            initMap();
             loadRegions();
         })();
     </script>
