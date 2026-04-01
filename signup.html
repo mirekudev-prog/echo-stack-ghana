@@ -7,205 +7,549 @@
     <title>Join EchoStack — Create Account</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-        :root{--ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--border:#2A3A4A;--muted:#94A3B8;--surface:#0f1e2d;--success:#16A34A;--danger:#DC2626}
-        html,body{min-height:100vh}
-        body{font-family:'DM Sans',sans-serif;background:var(--ink);color:#fff;display:flex;min-height:100svh}
-        .left-panel{width:380px;flex-shrink:0;background:linear-gradient(160deg,#0a1520 0%,#0D1B2A 60%,rgba(200,150,46,.08) 100%);border-right:1px solid rgba(255,255,255,.06);padding:40px 36px;display:flex;flex-direction:column;position:relative;overflow:hidden}
-        .left-panel::before{content:'✦';position:absolute;bottom:-20px;right:-20px;font-size:200px;opacity:.03;line-height:1;pointer-events:none}
-        .left-logo{display:flex;align-items:center;gap:10px;margin-bottom:48px}
-        .left-logo img{width:36px;height:36px;border-radius:8px}
-        .left-logo span{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold)}
-        .left-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:30px;background:rgba(200,150,46,.12);border:1px solid rgba(200,150,46,.3);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2);margin-bottom:20px}
-        .left-headline{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;line-height:1.15;color:#fff;margin-bottom:16px}
-        .left-headline em{font-style:italic;color:var(--gold2)}
-        .left-sub{font-size:.88rem;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:40px}
-        .left-features{display:flex;flex-direction:column;gap:14px;margin-top:auto}
-        .left-feat{display:flex;align-items:center;gap:12px}
-        .left-feat-icon{width:36px;height:36px;border-radius:10px;background:rgba(200,150,46,.1);border:1px solid rgba(200,150,46,.2);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
-        .left-feat-text{font-size:.82rem;color:rgba(255,255,255,.6)}
-        .left-feat-text strong{color:#fff;font-weight:600;display:block;font-size:.85rem}
-        .right-panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;min-height:100svh}
-        .form-box{width:100%;max-width:440px}
-        .step{display:none}.step.active{display:block}
-        .progress-wrap{margin-bottom:28px}
-        .progress-steps{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-        .prog-step{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-        .prog-step.done{color:var(--success)}.prog-step.active{color:var(--gold)}
-        .prog-circle{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700}
-        .prog-step.done .prog-circle{background:var(--success);border-color:var(--success);color:#fff}
-        .prog-step.active .prog-circle{background:var(--gold);border-color:var(--gold);color:var(--ink)}
-        .prog-line{flex:1;height:2px;background:rgba(255,255,255,.08);border-radius:1px}
-        .prog-line.done{background:var(--success)}
-        .progress-bar{height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
-        .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .4s ease;border-radius:2px}
-        .step-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:6px}
-        .step-sub{font-size:.85rem;color:var(--muted);margin-bottom:24px}
-        .field{margin-bottom:16px}
-        .field label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-        .field input{width:100%;padding:13px 16px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;-webkit-appearance:none}
-        .field input:focus{border-color:var(--gold);background:rgba(200,150,46,.05)}
-        .field input::placeholder{color:rgba(255,255,255,.25)}
-        .btn-primary{width:100%;padding:14px;border-radius:50px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(200,150,46,.3)}
-        .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(200,150,46,.45)}
-        .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
-        .signin-row{text-align:center;margin-top:20px;font-size:.83rem;color:var(--muted)}
-        .signin-row a{color:var(--gold);text-decoration:none;font-weight:600}
-        .topics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px}
-        @media(min-width:400px){.topics-grid{grid-template-columns:repeat(3,1fr)}}
-        .topic-chip{padding:9px 10px;border-radius:10px;text-align:center;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);cursor:pointer;transition:all .15s;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.7)}
-        .topic-chip:hover{border-color:rgba(200,150,46,.5);color:#fff}
-        .topic-chip.sel{border-color:var(--gold);background:rgba(200,150,46,.15);color:var(--gold2);box-shadow:0 0 0 1px rgba(200,150,46,.3)}
-        .sel-count{font-size:.78rem;font-weight:600;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
-        .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(13,27,42,.95);color:#fff;padding:11px 20px;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:all .25s;z-index:500;opacity:0;white-space:nowrap;pointer-events:none;border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(8px)}
-        .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-        .toast.ok{background:rgba(22,163,74,.9)}.toast.er{background:rgba(220,38,38,.9)}
-        .spin{width:18px;height:18px;border:2.5px solid rgba(13,27,42,.3);border-top-color:var(--ink);border-radius:50%;animation:sp .6s linear infinite;display:inline-block}
-        @keyframes sp{to{transform:rotate(360deg)}}
-        @media(max-width:767px){.left-panel{display:none}.right-panel{padding:28px 20px}}
+        :root {
+            --ink: #0D1B2A;
+            --ink2: #0f1e2d;
+            --gold: #C8962E;
+            --gold2: #E8B84B;
+            --cream: #FAF6EF;
+            --blue: #0077b6;
+            --muted: #94A3B8;
+            --main-bg: #f8fafc;
+            --main-card: #ffffff;
+            --main-border: #e2e8f0;
+            --main-text: #1e293b;
+            --main-muted: #64748b;
+            --main-hover: #f1f5f9;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent }
+
+        html, body { min-height: 100vh }
+        body { font-family: 'DM Sans', sans-serif; display: flex; min-height: 100svh }
+
+        /* ── LEFT PANEL (dark) ───────────────────────────── */
+        .left-panel {
+            width: 380px;
+            flex-shrink: 0;
+            background: linear-gradient(160deg, #0a1520 0%, var(--ink) 60%, rgba(200,150,46,.08) 100%);
+            border-right: 1px solid rgba(255,255,255,.06);
+            padding: 40px 36px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-panel::before {
+            content: '✦';
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            font-size: 200px;
+            opacity: .03;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .left-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 48px;
+        }
+
+        .left-logo img { width: 36px; height: 36px; border-radius: 8px }
+        .left-logo span { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--gold) }
+
+        .left-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 30px;
+            background: rgba(200,150,46,.12);
+            border: 1px solid rgba(200,150,46,.3);
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--gold2);
+            margin-bottom: 20px;
+        }
+
+        .left-headline {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            line-height: 1.15;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .left-headline em { font-style: italic; color: var(--gold2) }
+
+        .left-sub {
+            font-size: .88rem;
+            color: rgba(255,255,255,.5);
+            line-height: 1.7;
+            margin-bottom: 40px;
+        }
+
+        .left-features { display: flex; flex-direction: column; gap: 14px; margin-top: auto }
+        .left-feat { display: flex; align-items: center; gap: 12px }
+        .left-feat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(200,150,46,.1);
+            border: 1px solid rgba(200,150,46,.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .left-feat-text { font-size: .82rem; color: rgba(255,255,255,.6) }
+        .left-feat-text strong { color: #fff; font-weight: 600; display: block; font-size: .85rem }
+
+        /* ── RIGHT PANEL (light / cream) ───────────────── */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+            overflow-y: auto;
+            min-height: 100svh;
+            background: var(--cream);
+        }
+
+        .form-box { width: 100%; max-width: 440px }
+
+        /* Step navigation */
+        .step { display: none }
+        .step.active { display: block }
+
+        .progress-wrap { margin-bottom: 28px }
+        .progress-steps { display: flex; align-items: center; gap: 8px; margin-bottom: 12px }
+        .prog-step { display: flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--main-muted) }
+        .prog-step.done { color: var(--success) }
+        .prog-step.active { color: var(--gold) }
+        .prog-circle {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(0,0,0,.06); border: 2px solid var(--main-border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: .7rem; font-weight: 700;
+        }
+        .prog-step.done .prog-circle { background: var(--success); border-color: var(--success); color: #fff }
+        .prog-step.active .prog-circle { background: var(--gold); border-color: var(--gold); color: var(--ink) }
+        .prog-line { flex: 1; height: 2px; background: var(--main-border); border-radius: 1px }
+        .prog-line.done { background: var(--success) }
+        .progress-bar { height: 3px; background: var(--main-border); border-radius: 2px; overflow: hidden }
+        .progress-fill { height: 100%; background: linear-gradient(90deg,var(--gold),var(--gold2)); transition: width .4s ease; border-radius: 2px }
+
+        .step-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--main-text); margin-bottom: 6px }
+        .step-sub { font-size: .85rem; color: var(--main-muted); margin-bottom: 24px }
+
+        .field { margin-bottom: 16px }
+        .field label { display: block; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--main-muted); margin-bottom: 6px }
+        .field input {
+            width: 100%;
+            padding: 13px 16px;
+            background: var(--main-card);
+            border: 1.5px solid var(--main-border);
+            border-radius: 12px;
+            color: var(--main-text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .95rem;
+            outline: none;
+            transition: border-color .2s;
+            -webkit-appearance: none;
+        }
+        .field input:focus { border-color: var(--gold); background: var(--main-card) }
+        .field input::placeholder { color: var(--main-muted) }
+        .field.error input { border-color: var(--danger) }
+        .field-error { font-size: .75rem; color: var(--danger); margin-top: 4px; display: none }
+        .field.error .field-error { display: block }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            border: none;
+            color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(200,150,46,.3);
+            min-height: 44px;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(200,150,46,.45) }
+        .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1.5px solid var(--main-border);
+            color: var(--main-text);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: .85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            min-height: 44px;
+        }
+        .btn-secondary:hover { border-color: var(--gold); color: var(--gold) }
+
+        .signin-row { text-align: center; margin-top: 20px; font-size: .83rem; color: var(--main-muted) }
+        .signin-row a { color: var(--gold); text-decoration: none; font-weight: 600 }
+
+        /* Topics */
+        .topics-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 20px }
+        @media(min-width: 400px) { .topics-grid { grid-template-columns: repeat(3,1fr) } }
+
+        .topic-chip {
+            padding: 9px 10px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1.5px solid var(--main-border);
+            background: var(--main-card);
+            cursor: pointer;
+            transition: all .15s;
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--main-muted);
+        }
+        .topic-chip:hover { border-color: rgba(200,150,46,.5); color: var(--main-text) }
+        .topic-chip.sel { border-color: var(--gold); background: rgba(200,150,46,.1); color: var(--gold); box-shadow: 0 0 0 1px rgba(200,150,46,.3) }
+
+        .sel-count { font-size: .78rem; font-weight: 600; color: var(--gold); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(13,27,42,.95);
+            color: #fff;
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-size: .83rem;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0,0,0,.3);
+            transition: all .25s;
+            z-index: 500;
+            opacity: 0;
+            white-space: nowrap;
+            pointer-events: none;
+            border: 1px solid rgba(255,255,255,.1);
+            backdrop-filter: blur(8px);
+        }
+        .toast.on { opacity: 1; transform: translateX(-50%) translateY(0) }
+        .toast.ok { background: rgba(22,197,94,.9) }
+        .toast.er { background: rgba(239,68,68,.9) }
+
+        .spin { width: 18px; height: 18px; border: 2.5px solid rgba(13,27,42,.3); border-top-color: var(--ink); border-radius: 50%; animation: sp .6s linear infinite; display: inline-block }
+        @keyframes sp { to { transform: rotate(360deg) } }
+
+        @media(max-width: 767px) {
+            .left-panel { display: none }
+            .right-panel { padding: 28px 20px }
+        }
     </style>
 </head>
 <body>
-<div class="left-panel">
-    <div class="left-logo">
-        <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-        <span>EchoStack</span>
-    </div>
-    <div class="left-badge">🇬🇭 Ghana Heritage Platform</div>
-    <h1 class="left-headline">Every story deserves to be <em>remembered.</em></h1>
-    <p class="left-sub">Join thousands preserving the oral traditions, languages, and cultures of Ghana's 16 regions.</p>
-    <div class="left-features">
-        <div class="left-feat"><div class="left-feat-icon">📖</div><div class="left-feat-text"><strong>Explore all 16 regions of Ghana</strong>Stories, photos, audio & more</div></div>
-        <div class="left-feat"><div class="left-feat-icon">🎵</div><div class="left-feat-text"><strong>Discover music, festivals & traditions</strong>From Highlife to Kente weaving</div></div>
-        <div class="left-feat"><div class="left-feat-icon">✍️</div><div class="left-feat-text"><strong>Share your heritage stories</strong>Become a creator & reach the world</div></div>
-    </div>
-</div>
-<div class="right-panel">
-    <div class="form-box">
-        <div class="progress-wrap">
-            <div class="progress-steps">
-                <div class="prog-step active" id="prog1"><div class="prog-circle">1</div>ACCOUNT</div>
-                <div class="prog-line" id="prog-line"></div>
-                <div class="prog-step" id="prog2"><div class="prog-circle">2</div>INTERESTS</div>
-            </div>
-            <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:50%"></div></div>
+
+    <!-- Left panel: dark branding -->
+    <div class="left-panel">
+        <div class="left-logo">
+            <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
+            <span>EchoStack</span>
         </div>
-        <div class="step active" id="step-1">
-            <h2 class="step-title">Create Your Account</h2>
-            <p class="step-sub">And Preserve Ghana's Heritage</p>
-            <div class="field">
-                <label>Username *</label>
-                <input type="text" id="username" placeholder="Choose a unique username" autocomplete="username">
+        <div class="left-badge">🇬🇭 Ghana Heritage Platform</div>
+        <h1 class="left-headline">Every story deserves to be <em>remembered.</em></h1>
+        <p class="left-sub">Join thousands preserving the oral traditions, languages, and cultures of Ghana's 16 regions.</p>
+        <div class="left-features">
+            <div class="left-feat">
+                <div class="left-feat-icon">📖</div>
+                <div class="left-feat-text">
+                    <strong>Explore all 16 regions of Ghana</strong>
+                    Stories, photos, audio & more
+                </div>
             </div>
-            <div class="field">
-                <label>Email Address *</label>
-                <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
+            <div class="left-feat">
+                <div class="left-feat-icon">🎵</div>
+                <div class="left-feat-text">
+                    <strong>Discover music, festivals & traditions</strong>
+                    From Highlife to Kente weaving
+                </div>
             </div>
-            <div class="field">
-                <label>Password *</label>
-                <input type="password" id="password" placeholder="Minimum 6 characters" autocomplete="new-password">
+            <div class="left-feat">
+                <div class="left-feat-icon">✍️</div>
+                <div class="left-feat-text">
+                    <strong>Share your heritage stories</strong>
+                    Become a creator & reach the world
+                </div>
             </div>
-            <div style="margin-top:24px"><button class="btn-primary" onclick="goToStep2()">Continue →</button></div>
-            <div class="signin-row">Already have an account? <a href="/user-login">Sign In</a></div>
-            <div class="signin-row" style="margin-top:8px"><a href="/" style="color:var(--muted);font-size:.78rem">← Back to Home</a></div>
-        </div>
-        <div class="step" id="step-2">
-            <h2 class="step-title">Pick your interests</h2>
-            <p class="step-sub">Select <strong style="color:var(--gold)">3 topics</strong> — we'll tailor your feed</p>
-            <div class="sel-count">
-                <span id="sel-count-text">0 / 3 selected</span>
-                <button style="background:none;border:none;color:var(--gold);font-size:.82rem;cursor:pointer" onclick="goToStep1()">← Back</button>
-            </div>
-            <div class="topics-grid" id="topics-grid"></div>
-            <button class="btn-primary" id="create-btn" disabled onclick="completeSignup()">✨ Create Free Account</button>
-            <div class="signin-row" style="margin-top:16px"><a href="/" style="color:var(--muted);font-size:.78rem">← Back to Home</a></div>
         </div>
     </div>
-</div>
-<div class="toast" id="toast"></div>
 
-<script>
-const topics = ['Oral History','Music & Dance','Festivals','Languages','Cuisine','Art & Crafts','Architecture','Traditional Medicine','Folklore','Modern Ghana','Business','Education','Technology','Sports & Culture'];
-let selected = [];
+    <!-- Right panel: light form -->
+    <div class="right-panel">
+        <div class="form-box">
 
-function goToStep1() {
-    document.getElementById('step-1').classList.add('active');
-    document.getElementById('step-2').classList.remove('active');
-    document.getElementById('prog1').classList.add('active');
-    document.getElementById('prog1').classList.remove('done');
-    document.getElementById('prog2').classList.remove('active');
-    document.getElementById('prog-line').classList.remove('done');
-    document.getElementById('progress-fill').style.width = '50%';
-}
+            <!-- Progress -->
+            <div class="progress-wrap">
+                <div class="progress-steps">
+                    <div class="prog-step active" id="prog1">
+                        <div class="prog-circle">1</div>
+                        ACCOUNT
+                    </div>
+                    <div class="prog-line" id="prog-line"></div>
+                    <div class="prog-step" id="prog2">
+                        <div class="prog-circle">2</div>
+                        INTERESTS
+                    </div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:50%"></div></div>
+            </div>
 
-function goToStep2() {
-    const u = document.getElementById('username').value.trim();
-    const e = document.getElementById('email').value.trim();
-    const p = document.getElementById('password').value.trim();
-    if (!u || !e || !p) return showToast('Please fill all fields', 'er');
-    if (p.length < 6) return showToast('Password must be 6+ characters', 'er');
-    
-    document.getElementById('step-1').classList.remove('active');
-    document.getElementById('step-2').classList.add('active');
-    document.getElementById('prog1').classList.add('done');
-    document.getElementById('prog1').classList.remove('active');
-    document.getElementById('prog2').classList.add('active');
-    document.getElementById('prog-line').classList.add('done');
-    document.getElementById('progress-fill').style.width = '100%';
-    loadTopics();
-}
+            <!-- Step 1: Account details -->
+            <div class="step active" id="step-1">
+                <h2 class="step-title">Create Your Account</h2>
+                <p class="step-sub">And Preserve Ghana's Heritage</p>
 
-function loadTopics() {
-    document.getElementById('topics-grid').innerHTML = topics.map(t => 
-        `<button class="topic-chip" onclick="toggleTopic(this,'${t}')">${t}</button>`
-    ).join('');
-}
+                <div class="field" id="field-username">
+                    <label>Username *</label>
+                    <input type="text" id="username" placeholder="Choose a unique username" autocomplete="username">
+                    <div class="field-error" id="err-username"></div>
+                </div>
 
-function toggleTopic(el, topic) {
-    el.classList.toggle('sel');
-    if (selected.includes(topic)) selected = selected.filter(t => t !== topic);
-    else if (selected.length < 3) selected.push(topic);
-    else return showToast('Maximum 3 topics', 'er');
-    document.getElementById('sel-count-text').textContent = `${selected.length} / 3 selected`;
-    document.getElementById('create-btn').disabled = selected.length !== 3;
-}
+                <div class="field" id="field-email">
+                    <label>Email Address *</label>
+                    <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
+                    <div class="field-error" id="err-email"></div>
+                </div>
 
-async function completeSignup() {
-    const btn = document.getElementById('create-btn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> Creating...';
-    
-    try {
-        const formData = new FormData();
-        formData.append('username', document.getElementById('username').value.trim());
-        formData.append('email', document.getElementById('email').value.trim());
-        formData.append('password', document.getElementById('password').value.trim());
-        formData.append('topics', JSON.stringify(selected));
-        
-        const res = await fetch('/api/users/signup', { method: 'POST', body: formData });
-        const data = await res.json();
-        
-        if (data.success || data.user_id) {
-            showToast('Account created! Redirecting...', 'ok');
-            setTimeout(() => window.location.href = '/dashboard', 1500);
-        } else {
-            showToast(data.detail || 'Signup failed', 'er');
-            btn.disabled = false;
-            btn.innerHTML = '✨ Create Free Account';
+                <div class="field" id="field-password">
+                    <label>Password *</label>
+                    <input type="password" id="password" placeholder="Minimum 6 characters" autocomplete="new-password">
+                    <div class="field-error" id="err-password"></div>
+                </div>
+
+                <div class="field" id="field-confirm">
+                    <label>Confirm Password *</label>
+                    <input type="password" id="confirmPassword" placeholder="Repeat your password" autocomplete="new-password">
+                    <div class="field-error" id="err-confirm"></div>
+                </div>
+
+                <div style="margin-top:24px">
+                    <button class="btn-primary" id="step1-btn" onclick="goToStep2()">Continue <i class="fas fa-arrow-right" style="font-size:.85em"></i></button>
+                </div>
+
+                <div class="signin-row">Already have an account? <a href="/user-login">Sign In</a></div>
+                <div class="signin-row" style="margin-top:8px"><a href="/" style="color:var(--main-muted);font-size:.78rem">← Back to Home</a></div>
+            </div>
+
+            <!-- Step 2: Interests -->
+            <div class="step" id="step-2">
+                <h2 class="step-title">Pick your interests</h2>
+                <p class="step-sub">Select <strong style="color:var(--gold)">3 topics</strong> — we'll tailor your feed</p>
+
+                <div class="sel-count">
+                    <span id="sel-count-text">0 / 3 selected</span>
+                    <button style="background:none;border:none;color:var(--gold);font-size:.82rem;cursor:pointer" onclick="goToStep1()">← Back</button>
+                </div>
+
+                <div class="topics-grid" id="topics-grid"></div>
+
+                <button class="btn-primary" id="create-btn" disabled onclick="completeSignup()">
+                    <i class="fas fa-sparkles"></i> Create Free Account
+                </button>
+
+                <div class="signin-row" style="margin-top:16px"><a href="/" style="color:var(--main-muted);font-size:.78rem">← Back to Home</a></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        const defaultTopics = [
+            'Ashanti Culture', 'Ga Traditions', 'Oral History', 'Music & Dance',
+            'Festivals', 'Languages', 'Cuisine', 'Art & Crafts',
+            'Architecture', 'Traditional Medicine', 'Folklore', 'Modern Ghana'
+        ];
+
+        let selectedTopics = [];
+        let topicsLoaded = false;
+
+        function clearErrors() {
+            ['username', 'email', 'password', 'confirm'].forEach(function(f) {
+                document.getElementById('field-' + f).classList.remove('error');
+                document.getElementById('err-' + f).textContent = '';
+            });
         }
-    } catch(e) {
-        showToast('Network error', 'er');
-        btn.disabled = false;
-        btn.innerHTML = '✨ Create Free Account';
-    }
-}
 
-function showToast(msg, type) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast on ' + (type || '');
-    setTimeout(() => t.classList.remove('on'), 3000);
-}
-</script>
+        function setError(field, msg) {
+            document.getElementById('field-' + field).classList.add('error');
+            document.getElementById('err-' + field).textContent = msg;
+        }
+
+        function validateStep1() {
+            clearErrors();
+            let valid = true;
+            const u = document.getElementById('username').value.trim();
+            const e = document.getElementById('email').value.trim();
+            const p = document.getElementById('password').value.trim();
+            const c = document.getElementById('confirmPassword').value.trim();
+
+            if (!u) { setError('username', 'Username is required'); valid = false; }
+            else if (u.length < 3) { setError('username', 'Username must be at least 3 characters'); valid = false; }
+
+            if (!e) { setError('email', 'Email is required'); valid = false; }
+            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { setError('email', 'Enter a valid email'); valid = false; }
+
+            if (!p) { setError('password', 'Password is required'); valid = false; }
+            else if (p.length < 6) { setError('password', 'Password must be at least 6 characters'); valid = false; }
+
+            if (!c) { setError('confirm', 'Please confirm your password'); valid = false; }
+            else if (p !== c) { setError('confirm', 'Passwords do not match'); valid = false; }
+
+            return valid;
+        }
+
+        function goToStep1() {
+            document.getElementById('step-1').classList.add('active');
+            document.getElementById('step-2').classList.remove('active');
+            document.getElementById('prog1').classList.add('active');
+            document.getElementById('prog1').classList.remove('done');
+            document.getElementById('prog2').classList.remove('active');
+            document.getElementById('prog-line').classList.remove('done');
+            document.getElementById('progress-fill').style.width = '50%';
+        }
+
+        function goToStep2() {
+            if (!validateStep1()) return;
+
+            document.getElementById('step-1').classList.remove('active');
+            document.getElementById('step-2').classList.add('active');
+            document.getElementById('prog1').classList.add('done');
+            document.getElementById('prog1').classList.remove('active');
+            document.getElementById('prog2').classList.add('active');
+            document.getElementById('prog-line').classList.add('done');
+            document.getElementById('progress-fill').style.width = '100%';
+
+            if (!topicsLoaded) {
+                topicsLoaded = true;
+                loadTopics();
+            }
+        }
+
+        async function loadTopics() {
+            const grid = document.getElementById('topics-grid');
+            grid.innerHTML = '<p style="color:var(--main-muted);font-size:.8rem;padding:8px">Loading...</p>';
+
+            let topics = defaultTopics;
+
+            try {
+                const res = await fetch('/api/topics', { credentials: 'include' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length) topics = data;
+                    else if (Array.isArray(data.topics) && data.topics.length) topics = data.topics;
+                }
+            } catch (e) {
+                // Use defaults
+            }
+
+            grid.innerHTML = topics.map(function(t) {
+                return '<button class="topic-chip" onclick="toggleTopic(this,\'' + escapeAttr(t) + '\')">' + escapeHtml(t) + '</button>';
+            }).join('');
+        }
+
+        function escapeAttr(str) {
+            return String(str).replace(/'/g, '&#39;');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function toggleTopic(el, topic) {
+            el.classList.toggle('sel');
+            if (selectedTopics.includes(topic)) {
+                selectedTopics = selectedTopics.filter(function(t) { return t !== topic; });
+            } else if (selectedTopics.length < 3) {
+                selectedTopics.push(topic);
+            } else {
+                showToast('Maximum 3 topics allowed', 'er');
+                return;
+            }
+            document.getElementById('sel-count-text').textContent = selectedTopics.length + ' / 3 selected';
+            document.getElementById('create-btn').disabled = selectedTopics.length !== 3;
+        }
+
+        async function completeSignup() {
+            const btn = document.getElementById('create-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spin"></span> Creating...';
+
+            try {
+                const formData = new FormData();
+                formData.append('username', document.getElementById('username').value.trim());
+                formData.append('email', document.getElementById('email').value.trim());
+                formData.append('password', document.getElementById('password').value.trim());
+                formData.append('topics', JSON.stringify(selectedTopics));
+
+                const res = await fetch('/api/users/signup', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                const data = await res.json();
+
+                if (data.success || data.user_id) {
+                    showToast('Account created! Redirecting...', 'ok');
+                    setTimeout(function() { window.location.href = '/user-login?verified=please'; }, 1200);
+                } else {
+                    showToast(data.detail || 'Signup failed. Please try again.', 'er');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sparkles"></i> Create Free Account';
+                }
+            } catch (e) {
+                showToast('Network error. Please check your connection.', 'er');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sparkles"></i> Create Free Account';
+            }
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast on ' + (type || '');
+            setTimeout(function() { t.classList.remove('on'); }, 3500);
+        }
+    </script>
 </body>
 </html>

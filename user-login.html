@@ -6,109 +6,505 @@
     <meta name="theme-color" content="#0D1B2A">
     <title>Sign In - EchoStack</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-        :root{--ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--muted:#94A3B8;--success:#16A34A;--danger:#DC2626}
-        html,body{min-height:100vh}
-        body{font-family:'DM Sans',sans-serif;background:var(--ink);color:#fff;display:flex;min-height:100svh}
-        .left-panel{width:380px;flex-shrink:0;background:linear-gradient(160deg,#0a1520 0%,#0D1B2A 60%,rgba(200,150,46,.08) 100%);border-right:1px solid rgba(255,255,255,.06);padding:40px 36px;display:flex;flex-direction:column;position:relative;overflow:hidden}
-        .left-panel::before{content:'✦';position:absolute;bottom:-20px;right:-20px;font-size:200px;opacity:.03;line-height:1;pointer-events:none}
-        .left-logo{display:flex;align-items:center;gap:10px;margin-bottom:48px}
-        .left-logo img{width:36px;height:36px;border-radius:8px}
-        .left-logo span{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold)}
-        .left-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:30px;background:rgba(200,150,46,.12);border:1px solid rgba(200,150,46,.3);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2);margin-bottom:20px}
-        .left-headline{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;line-height:1.15;color:#fff;margin-bottom:16px}
-        .left-headline em{font-style:italic;color:var(--gold2)}
-        .left-sub{font-size:.88rem;color:rgba(255,255,255,.5);line-height:1.7}
-        .right-panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;min-height:100svh}
-        .form-box{width:100%;max-width:400px}
-        .form-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;margin-bottom:8px}
-        .form-sub{color:var(--muted);font-size:.9rem;margin-bottom:32px}
-        .field{margin-bottom:20px}
-        .field label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-        .field input{width:100%;padding:14px 16px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;-webkit-appearance:none}
-        .field input:focus{border-color:var(--gold);background:rgba(200,150,46,.05)}
-        .field input::placeholder{color:rgba(255,255,255,.25)}
-        .btn-primary{width:100%;padding:14px;border-radius:50px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(200,150,46,.3)}
-        .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(200,150,46,.45)}
-        .signup-row{text-align:center;margin-top:24px;font-size:.88rem;color:var(--muted)}
-        .signup-row a{color:var(--gold);text-decoration:none;font-weight:600}
-        .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(13,27,42,.95);color:#fff;padding:11px 20px;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:all .25s;z-index:500;opacity:0;pointer-events:none;border:1px solid rgba(255,255,255,.1)}
-        .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-        .toast.er{background:rgba(220,38,38,.9)}
-        .spin{width:18px;height:18px;border:2.5px solid rgba(13,27,42,.3);border-top-color:var(--ink);border-radius:50%;animation:sp .6s linear infinite;display:inline-block}
-        @keyframes sp{to{transform:rotate(360deg)}}
-        @media(max-width:767px){.left-panel{display:none}.right-panel{padding:28px 20px}}
+        :root {
+            --ink: #0D1B2A;
+            --ink2: #0f1e2d;
+            --gold: #C8962E;
+            --gold2: #E8B84B;
+            --cream: #FAF6EF;
+            --blue: #0077b6;
+            --muted: #94A3B8;
+            --main-bg: #f8fafc;
+            --main-card: #ffffff;
+            --main-border: #e2e8f0;
+            --main-text: #1e293b;
+            --main-muted: #64748b;
+            --main-hover: #f1f5f9;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent }
+
+        html, body { min-height: 100vh }
+        body { font-family: 'DM Sans', sans-serif; display: flex; min-height: 100svh }
+
+        /* ── LEFT PANEL (dark) ───────────────────────────── */
+        .left-panel {
+            width: 380px;
+            flex-shrink: 0;
+            background: linear-gradient(160deg, #0a1520 0%, var(--ink) 60%, rgba(200,150,46,.08) 100%);
+            border-right: 1px solid rgba(255,255,255,.06);
+            padding: 40px 36px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-panel::before {
+            content: '✦';
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            font-size: 200px;
+            opacity: .03;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .left-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 48px }
+        .left-logo img { width: 36px; height: 36px; border-radius: 8px }
+        .left-logo span { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--gold) }
+
+        .left-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 30px;
+            background: rgba(200,150,46,.12);
+            border: 1px solid rgba(200,150,46,.3);
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--gold2);
+            margin-bottom: 20px;
+        }
+
+        .left-headline {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            line-height: 1.15;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .left-headline em { font-style: italic; color: var(--gold2) }
+        .left-sub { font-size: .88rem; color: rgba(255,255,255,.5); line-height: 1.7 }
+
+        /* ── RIGHT PANEL (light / cream) ───────────────── */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+            overflow-y: auto;
+            min-height: 100svh;
+            background: var(--cream);
+        }
+
+        .form-box { width: 100%; max-width: 400px }
+
+        /* Banners */
+        .banner {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: .85rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .banner-success {
+            background: rgba(34,197,94,.1);
+            border: 1px solid rgba(34,197,94,.3);
+            color: #15803d;
+        }
+
+        .banner-warning {
+            background: rgba(245,158,11,.1);
+            border: 1px solid rgba(245,158,11,.3);
+            color: #b45309;
+        }
+
+        .banner-danger {
+            background: rgba(239,68,68,.1);
+            border: 1px solid rgba(239,68,68,.3);
+            color: #b91c1c;
+        }
+
+        .form-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--main-text); margin-bottom: 8px }
+        .form-sub { color: var(--main-muted); font-size: .9rem; margin-bottom: 28px }
+
+        .field { margin-bottom: 18px }
+        .field label { display: block; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--main-muted); margin-bottom: 6px }
+        .field input {
+            width: 100%;
+            padding: 13px 16px;
+            background: var(--main-card);
+            border: 1.5px solid var(--main-border);
+            border-radius: 12px;
+            color: var(--main-text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .95rem;
+            outline: none;
+            transition: border-color .2s;
+            -webkit-appearance: none;
+        }
+        .field input:focus { border-color: var(--gold) }
+        .field input::placeholder { color: var(--main-muted) }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            border: none;
+            color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(200,150,46,.3);
+            min-height: 44px;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(200,150,46,.45) }
+        .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none }
+
+        .signup-row { text-align: center; margin-top: 20px; font-size: .83rem; color: var(--main-muted) }
+        .signup-row a { color: var(--gold); text-decoration: none; font-weight: 600 }
+
+        .forgot-row { text-align: right; margin-top: -10px; margin-bottom: 16px }
+        .forgot-row a { font-size: .8rem; color: var(--blue); text-decoration: none }
+        .forgot-row a:hover { text-decoration: underline }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(13,27,42,.95);
+            color: #fff;
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-size: .83rem;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0,0,0,.3);
+            transition: all .25s;
+            z-index: 500;
+            opacity: 0;
+            white-space: nowrap;
+            pointer-events: none;
+            border: 1px solid rgba(255,255,255,.1);
+            backdrop-filter: blur(8px);
+        }
+        .toast.on { opacity: 1; transform: translateX(-50%) translateY(0) }
+        .toast.er { background: rgba(239,68,68,.9) }
+
+        .spin { width: 18px; height: 18px; border: 2.5px solid rgba(13,27,42,.3); border-top-color: var(--ink); border-radius: 50%; animation: sp .6s linear infinite; display: inline-block }
+        @keyframes sp { to { transform: rotate(360deg) } }
+
+        /* ── MODALS ────────────────────────────────────── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.5);
+            backdrop-filter: blur(4px);
+            z-index: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex }
+
+        .modal {
+            background: var(--main-card);
+            border-radius: 16px;
+            padding: 28px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.3);
+        }
+        .modal h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 6px; color: var(--main-text) }
+        .modal p { font-size: .85rem; color: var(--main-muted); margin-bottom: 20px }
+        .modal .field input { background: var(--main-bg) }
+
+        @media(max-width: 767px) {
+            .left-panel { display: none }
+            .right-panel { padding: 28px 20px }
+        }
     </style>
 </head>
 <body>
-<div class="left-panel">
-    <div class="left-logo">
-        <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-        <span>EchoStack</span>
-    </div>
-    <div class="left-badge">🇬🇭 Welcome Back</div>
-    <h1 class="left-headline">Continue your <em>journey.</em></h1>
-    <p class="left-sub">Sign in to access your personalized feed, bookmarks, and saved stories from Ghana's heritage.</p>
-</div>
-<div class="right-panel">
-    <div class="form-box">
-        <h2 class="form-title">Welcome Back</h2>
-        <p class="form-sub">Sign in to your EchoStack account</p>
-        <div class="field">
-            <label>Username or Email</label>
-            <input type="text" id="loginId" placeholder="Enter your username or email" autocomplete="username">
-        </div>
-        <div class="field">
-            <label>Password</label>
-            <input type="password" id="loginPw" placeholder="Enter your password" autocomplete="current-password" onkeypress="if(event.key==='Enter')login()">
-        </div>
-        <button class="btn-primary" id="loginBtn" onclick="login()">Sign In</button>
-        <div class="signup-row">Don't have an account? <a href="/signup">Create one</a></div>
-        <div class="signup-row" style="margin-top:12px"><a href="/" style="color:var(--muted);font-size:.82rem">← Back to Home</a></div>
-    </div>
-</div>
-<div class="toast" id="toast"></div>
 
-<script>
-async function login() {
-    const id = document.getElementById('loginId').value.trim();
-    const pw = document.getElementById('loginPw').value.trim();
-    if (!id || !pw) return showToast('Please fill all fields', 'er');
-    
-    const btn = document.getElementById('loginBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> Signing in...';
-    
-    try {
-        const formData = new FormData();
-        formData.append('username', id);
-        formData.append('password', pw);
-        
-        const res = await fetch('/api/users/login', { method: 'POST', body: formData });
-        const data = await res.json();
-        
-        if (data.success) {
-            showToast('Welcome back!', 'ok');
-            setTimeout(() => window.location.href = '/dashboard', 1000);
-        } else {
-            showToast(data.detail || 'Invalid credentials', 'er');
-            btn.disabled = false;
-            btn.innerHTML = 'Sign In';
+    <!-- Left panel: dark branding -->
+    <div class="left-panel">
+        <div class="left-logo">
+            <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
+            <span>EchoStack</span>
+        </div>
+        <div class="left-badge">🇬🇭 Welcome Back</div>
+        <h1 class="left-headline">Continue your <em>journey.</em></h1>
+        <p class="left-sub">Sign in to access your personalized feed, bookmarks, and saved stories from Ghana's heritage.</p>
+    </div>
+
+    <!-- Right panel: light form -->
+    <div class="right-panel">
+        <div class="form-box">
+            <h2 class="form-title">Welcome Back</h2>
+            <p class="form-sub">Sign in to your EchoStack account</p>
+
+            <!-- Banners (shown via JS) -->
+            <div id="banner-success" class="banner banner-success" style="display:none">
+                <i class="fas fa-check-circle"></i> Account created! Please sign in below.
+            </div>
+            <div id="banner-unverified" class="banner banner-warning" style="display:none">
+                <i class="fas fa-exclamation-triangle"></i> Your email is not verified. <a href="#" onclick="openResendModal();return false" style="color:inherit;font-weight:700">Resend link</a>
+            </div>
+            <div id="banner-error" class="banner banner-danger" style="display:none">
+                <i class="fas fa-times-circle"></i> <span id="banner-error-text"></span>
+            </div>
+
+            <!-- Login form -->
+            <div class="field">
+                <label>Username or Email</label>
+                <input type="text" id="loginId" placeholder="Enter your username or email" autocomplete="username">
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" id="loginPw" placeholder="Enter your password" autocomplete="current-password" onkeypress="if(event.key==='Enter')login()">
+            </div>
+
+            <div class="forgot-row">
+                <a href="#" onclick="openForgotModal();return false">Forgot password?</a>
+            </div>
+
+            <button class="btn-primary" id="loginBtn" onclick="login()">
+                <i class="fas fa-arrow-right"></i> Sign In
+            </button>
+
+            <div class="signup-row">Don't have an account? <a href="/signup">Create one</a></div>
+            <div class="signup-row" style="margin-top:12px"><a href="/" style="color:var(--main-muted);font-size:.82rem">← Back to Home</a></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotModal">
+        <div class="modal">
+            <h3><i class="fas fa-key" style="color:var(--gold);margin-right:6px"></i> Reset Password</h3>
+            <p>Enter your email and we'll send you a reset link.</p>
+            <div class="field">
+                <label>Email Address</label>
+                <input type="email" id="forgotEmail" placeholder="your@email.com">
+            </div>
+            <button class="btn-primary" id="forgotBtn" onclick="sendReset()" style="margin-bottom:12px">
+                <i class="fas fa-paper-plane"></i> Send Reset Link
+            </button>
+            <div class="signup-row" style="margin-top:0"><a href="#" onclick="closeModal('forgotModal');return false">Cancel</a></div>
+        </div>
+    </div>
+
+    <!-- Resend Verification Modal -->
+    <div class="modal-overlay" id="resendModal">
+        <div class="modal">
+            <h3><i class="fas fa-envelope" style="color:var(--gold);margin-right:6px"></i> Resend Verification</h3>
+            <p>Enter your email to receive a new verification link.</p>
+            <div class="field">
+                <label>Email Address</label>
+                <input type="email" id="resendEmail" placeholder="your@email.com">
+            </div>
+            <button class="btn-primary" id="resendBtn" onclick="resendVerification()" style="margin-bottom:12px">
+                <i class="fas fa-paper-plane"></i> Resend Link
+            </button>
+            <div class="signup-row" style="margin-top:0"><a href="#" onclick="closeModal('resendModal');return false">Cancel</a></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+
+            if (params.get('verified') === 'please') {
+                document.getElementById('banner-success').style.display = 'flex';
+            }
+
+            const unverified = params.get('unverified');
+            if (unverified) {
+                document.getElementById('banner-unverified').style.display = 'flex';
+                document.getElementById('loginId').value = unverified;
+                document.getElementById('resendEmail').value = unverified;
+            }
+
+            const errorMsg = params.get('error');
+            if (errorMsg) {
+                document.getElementById('banner-error-text').textContent = decodeURIComponent(errorMsg);
+                document.getElementById('banner-error').style.display = 'flex';
+            }
+        })();
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
         }
-    } catch(e) {
-        showToast('Network error', 'er');
-        btn.disabled = false;
-        btn.innerHTML = 'Sign In';
-    }
-}
 
-function showToast(msg, type) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast on ' + (type || '');
-    setTimeout(() => t.classList.remove('on'), 3000);
-}
-</script>
+        function openForgotModal() {
+            document.getElementById('forgotModal').classList.add('open');
+            document.getElementById('forgotEmail').focus();
+        }
+
+        function openResendModal() {
+            document.getElementById('resendModal').classList.add('open');
+            document.getElementById('resendEmail').focus();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) overlay.classList.remove('open');
+            });
+        });
+
+        async function login() {
+            const id = document.getElementById('loginId').value.trim();
+            const pw = document.getElementById('loginPw').value.trim();
+            if (!id || !pw) {
+                showToast('Please fill all fields', 'er');
+                return;
+            }
+
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spin"></span> Signing in...';
+
+            try {
+                const formData = new FormData();
+                formData.append('username', id);
+                formData.append('password', pw);
+
+                const res = await fetch('/api/users/login', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('Welcome back!', '');
+                    setTimeout(function() {
+                        const role = data.role || data.user_role || '';
+                        if (role === 'admin' || role === 'superuser') {
+                            window.location.href = '/admin';
+                        } else {
+                            window.location.href = '/app';
+                        }
+                    }, 800);
+                } else {
+                    if (data.unverified) {
+                        window.location.href = '/user-login?unverified=' + encodeURIComponent(id);
+                        return;
+                    }
+                    showToast(data.detail || 'Invalid credentials', 'er');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-arrow-right"></i> Sign In';
+                }
+            } catch (e) {
+                showToast('Network error. Please check your connection.', 'er');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-arrow-right"></i> Sign In';
+            }
+        }
+
+        async function sendReset() {
+            const email = document.getElementById('forgotEmail').value.trim();
+            if (!email) {
+                showToast('Please enter your email', 'er');
+                return;
+            }
+
+            const btn = document.getElementById('forgotBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spin"></span> Sending...';
+
+            try {
+                const formData = new FormData();
+                formData.append('email', email);
+
+                const res = await fetch('/api/users/forgot-password', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                const data = await res.json();
+
+                if (data.success || res.ok) {
+                    showToast('Reset link sent! Check your email.', '');
+                    closeModal('forgotModal');
+                    document.getElementById('forgotEmail').value = '';
+                } else {
+                    showToast(data.detail || 'Failed to send reset link', 'er');
+                }
+            } catch (e) {
+                showToast('Network error', 'er');
+            }
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Link';
+        }
+
+        async function resendVerification() {
+            const email = document.getElementById('resendEmail').value.trim();
+            if (!email) {
+                showToast('Please enter your email', 'er');
+                return;
+            }
+
+            const btn = document.getElementById('resendBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spin"></span> Sending...';
+
+            try {
+                const formData = new FormData();
+                formData.append('email', email);
+
+                const res = await fetch('/api/users/resend-verification', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                const data = await res.json();
+
+                if (data.success || res.ok) {
+                    showToast('Verification link sent! Check your email.', '');
+                    closeModal('resendModal');
+                } else {
+                    showToast(data.detail || 'Failed to resend', 'er');
+                }
+            } catch (e) {
+                showToast('Network error', 'er');
+            }
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Resend Link';
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast on ' + (type || '');
+            setTimeout(function() { t.classList.remove('on'); }, 3500);
+        }
+    </script>
 </body>
 </html>
