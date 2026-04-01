@@ -2,117 +2,595 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0D1B2A">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="EchoStack - Ghana's Living Heritage Archive">
     <title>EchoStack - Ghana's Living Heritage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/base.css">
     <style>
-        .hero{padding:80px 24px 60px;text-align:center}
-        .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(200,150,46,0.1);border:1px solid rgba(200,150,46,0.3);border-radius:50px;font-size:.75rem;font-weight:600;color:var(--gold2);margin-bottom:24px}
-        .hero h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,8vw,2.8rem);font-weight:900;line-height:1.15;margin-bottom:16px}
-        .hero h1 em{font-style:italic;color:var(--gold2)}
-        .hero p{font-size:1rem;color:var(--text-secondary);max-width:400px;margin:0 auto 32px;line-height:1.7}
-        .hero-actions{display:flex;flex-direction:column;gap:12px;max-width:300px;margin:0 auto}
-        .feature-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;gap:16px;margin-bottom:12px}
-        .feature-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
-        .cta-section{padding:60px 24px;text-align:center;background:linear-gradient(135deg,var(--card),var(--ink2));border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-        .cta-section h2{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:12px}
+        :root {
+            --ink: #0D1B2A;
+            --ink2: #0f1e2d;
+            --gold: #C8962E;
+            --gold2: #E8B84B;
+            --cream: #FAF6EF;
+            --blue: #0077b6;
+            --muted: #94A3B8;
+            --main-bg: #f8fafc;
+            --main-card: #ffffff;
+            --main-border: #e2e8f0;
+            --main-text: #1e293b;
+            --main-muted: #64748b;
+            --main-hover: #f1f5f9;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--main-text);
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+        /* Top Bar */
+        .top-bar {
+            background: var(--ink);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-bar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .top-bar-logo img {
+            height: 36px;
+            width: auto;
+        }
+
+        .top-bar-logo span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .top-bar-right a {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .top-bar-right a:hover {
+            color: var(--gold2);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: var(--ink);
+            color: white;
+            text-align: center;
+            padding: 80px 24px 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 100%, rgba(200, 150, 46, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(200, 150, 46, 0.15);
+            border: 1px solid rgba(200, 150, 46, 0.3);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gold2);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 7vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero h1 em {
+            font-style: italic;
+            color: var(--gold2);
+        }
+
+        .hero-sub {
+            font-size: 1.05rem;
+            color: rgba(255,255,255,0.75);
+            max-width: 520px;
+            margin: 0 auto 36px;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            color: var(--ink);
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .btn-gold:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-white {
+            background: transparent;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            border: 2px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .btn-outline-white:hover {
+            border-color: white;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Decorative Ghana element */
+        .ghana-flag-bar {
+            background: var(--ink2);
+            display: flex;
+            justify-content: center;
+            gap: 0;
+        }
+
+        .ghana-flag-bar span {
+            height: 4px;
+            width: 80px;
+        }
+
+        .ghana-flag-bar span:nth-child(1) { background: #CE1126; }
+        .ghana-flag-bar span:nth-child(2) { background: #FCD116; }
+        .ghana-flag-bar span:nth-child(3) { background: #006B3F; }
+
+        /* Regions Section */
+        .regions-section {
+            padding: 60px 24px;
+            background: var(--main-card);
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .section-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 700;
+            color: var(--main-text);
+            margin-bottom: 32px;
+        }
+
+        .regions-scroll {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--main-border) transparent;
+        }
+
+        .regions-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .regions-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .regions-scroll::-webkit-scrollbar-thumb {
+            background: var(--main-border);
+            border-radius: 2px;
+        }
+
+        .region-card {
+            flex-shrink: 0;
+            width: 160px;
+            background: var(--cream);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg);
+            padding: 24px 16px;
+            text-align: center;
+            text-decoration: none;
+            transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+
+        .region-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(200, 150, 46, 0.12);
+        }
+
+        .region-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .region-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--main-text);
+            line-height: 1.3;
+        }
+
+        .regions-loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--main-muted);
+        }
+
+        .regions-error {
+            text-align: center;
+            padding: 40px;
+            color: var(--danger);
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 60px 24px;
+            background: var(--cream);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--gold);
+            box-shadow: 0 4px 16px rgba(200, 150, 46, 0.08);
+        }
+
+        .feature-emoji {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--main-text);
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 0.875rem;
+            color: var(--main-muted);
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: var(--ink);
+            color: white;
+            text-align: center;
+            padding: 80px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(200, 150, 46, 0.2) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .cta-section p {
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
+            margin-bottom: 32px;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--ink2);
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            padding: 32px 24px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .footer-logo img {
+            height: 28px;
+            width: auto;
+        }
+
+        .footer-logo span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--gold2);
+        }
+
+        .footer-copy {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .top-bar { padding: 0 16px; }
+            .top-bar-logo span { font-size: 1rem; }
+            .top-bar-right a:not(.btn-gold) { display: none; }
+            .hero { padding: 60px 16px 80px; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .hero-buttons a { width: 100%; max-width: 280px; justify-content: center; }
+            .regions-section, .features-section { padding: 40px 16px; }
+            .region-card { width: 130px; padding: 20px 12px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .cta-section { padding: 60px 16px; }
+            .footer-links { flex-wrap: wrap; gap: 12px; }
+        }
     </style>
 </head>
 <body>
-<div class="app">
-    <nav class="top-nav">
-        <div class="top-nav-inner">
-            <a href="/" class="nav-logo">
-                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
-                <span>EchoStack</span>
-            </a>
-            <div style="display:flex;gap:12px">
-                <a href="/user-login" class="btn btn-secondary" style="padding:10px 20px;border-radius:50px;font-size:.85rem">Sign In</a>
-                <a href="/signup" class="btn btn-primary" style="padding:10px 20px;border-radius:50px;font-size:.85rem">Join</a>
-            </div>
+
+    <!-- Top Bar -->
+    <nav class="top-bar">
+        <a href="/" class="top-bar-logo">
+            <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+            <span>EchoStack</span>
+        </a>
+        <div class="top-bar-right">
+            <a href="/user-login">Sign In</a>
+            <a href="/signup" class="btn-gold" style="padding:8px 20px;font-size:0.85rem;border-radius:50px;text-decoration:none">Join Free</a>
         </div>
     </nav>
 
-    <main class="main-content">
-        <section class="hero">
-            <div class="hero-badge"><i class="fas fa-globe-africa"></i> Ghana Heritage Platform</div>
-            <h1>Every story deserves to be <em>remembered.</em></h1>
-            <p>Join thousands preserving the oral traditions, languages, and cultures of Ghana's 16 regions.</p>
-            <div class="hero-actions">
-                <a href="/signup" class="btn btn-primary" style="width:100%;padding:14px;border-radius:50px"><i class="fas fa-rocket"></i> Start Exploring</a>
-                <a href="/explore" class="btn btn-secondary" style="width:100%;padding:14px;border-radius:50px"><i class="fas fa-map"></i> View Regions</a>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-badge">🇬🇭 Ghana Heritage Platform</div>
+        <h1>Where Heritage Comes <em>Alive</em></h1>
+        <p class="hero-sub">Discover the stories, traditions, and landmarks of Ghana's 16 regions — created by locals, for the world.</p>
+        <div class="hero-buttons">
+            <a href="/app" class="btn-gold"><i class="fas fa-map"></i> Explore Regions</a>
+            <a href="/signup" class="btn-outline-white"><i class="fas fa-user-plus"></i> Join Free</a>
+        </div>
+    </section>
+
+    <!-- Ghana Flag Decorative Bar -->
+    <div class="ghana-flag-bar">
+        <span></span><span></span><span></span>
+    </div>
+
+    <!-- Regions -->
+    <section class="regions-section">
+        <p class="section-label">Explore</p>
+        <h2 class="section-heading">Ghana's 16 Regions</h2>
+        <div class="regions-scroll" id="regionsContainer">
+            <div class="regions-loading"><i class="fas fa-spinner fa-spin"></i> Loading regions...</div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features-section">
+        <p class="section-label" style="text-align:center">Why EchoStack?</p>
+        <h2 class="section-heading" style="text-align:center">Be Part of the Archive</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-emoji">📖</span>
+                <h3>Living Archive</h3>
+                <p>Real stories from real Ghanaians. Folklore, history, and contemporary culture — preserved for generations.</p>
             </div>
-        </section>
-
-        <section style="padding:40px 24px">
-            <div style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:16px">Why EchoStack?</div>
-            <div class="feature-card"><div class="feature-icon"><i class="fas fa-book-open"></i></div><div><h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Explore All 16 Regions</h3><p style="font-size:.85rem;color:var(--text-secondary)">Stories, photos, audio & video from Ashanti to Northern Ghana</p></div></div>
-            <div class="feature-card"><div class="feature-icon"><i class="fas fa-music"></i></div><div><h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Discover Music & Festivals</h3><p style="font-size:.85rem;color:var(--text-secondary)">From Highlife to Kente weaving traditions</p></div></div>
-            <div class="feature-card"><div class="feature-icon"><i class="fas fa-robot"></i></div><div><h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">EchoBot AI Guide</h3><p style="font-size:.85rem;color:var(--text-secondary)">Ask our AI anything about Ghana's rich heritage</p></div></div>
-            <div class="feature-card"><div class="feature-icon"><i class="fas fa-microphone"></i></div><div><h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Audio Archive</h3><p style="font-size:.85rem;color:var(--text-secondary)">Oral histories, folklore & contemporary stories</p></div></div>
-            <div class="feature-card"><div class="feature-icon"><i class="fas fa-pen-fancy"></i></div><div><h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Share Your Stories</h3><p style="font-size:.85rem;color:var(--text-secondary)">Become a creator & reach the world</p></div></div>
-        </section>
-
-        <section style="padding:40px 24px">
-            <div class="section-header">
-                <h2 class="section-title">Latest Stories</h2>
-                <a href="/explore" class="section-link">View All <i class="fas fa-arrow-right"></i></a>
+            <div class="feature-card">
+                <span class="feature-emoji">🎵</span>
+                <h3>Audio & Video</h3>
+                <p>Hear oral histories, drumming traditions, and highlife music from every corner of Ghana.</p>
             </div>
-            <div id="recentPosts"><div class="loading"><div class="spinner"></div></div></div>
-        </section>
-
-        <section style="padding:40px 24px">
-            <div class="section-header">
-                <h2 class="section-title">Audio Archive</h2>
-                <a href="/explore" class="section-link">Listen <i class="fas fa-arrow-right"></i></a>
+            <div class="feature-card">
+                <span class="feature-emoji">📱</span>
+                <h3>Mobile First</h3>
+                <p>Designed for phones from the ground up. Works beautifully on any device.</p>
             </div>
-            <div class="audio-card">
-                <div class="audio-header"><div class="audio-icon"><i class="fas fa-microphone"></i></div><div class="audio-info"><h4>Echoes of Freedom</h4><p>Ghana's Independence - Oral History</p></div></div>
-                <audio controls preload="none"><source src="" type="audio/mpeg"></audio>
+            <div class="feature-card">
+                <span class="feature-emoji">✍️</span>
+                <h3>Creator Platform</h3>
+                <p>Apply to become a creator and share your region's stories with the world.</p>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="cta-section">
-            <h2>Ready to explore Ghana?</h2>
-            <p style="color:var(--text-secondary);margin-bottom:24px">Join our community of storytellers preserving heritage</p>
-            <a href="/signup" class="btn btn-primary" style="padding:14px 32px;border-radius:50px;display:inline-flex"><i class="fas fa-user-plus"></i> Create Free Account</a>
-        </section>
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Be Part of the Archive</h2>
+        <p>Join our community of storytellers preserving Ghana's cultural heritage for future generations.</p>
+        <a href="/signup" class="btn-gold" style="position:relative"><i class="fas fa-rocket"></i> Create Free Account</a>
+    </section>
 
-        <footer class="footer">
-            <div class="nav-logo" style="justify-content:center;margin-bottom:8px"><img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'"><span>EchoStack Ghana</span></div>
-            <p class="footer-text">Preserving Ghana's cultural heritage for future generations</p>
-            <p class="footer-dev">Built by Mireku Development</p>
-        </footer>
-    </main>
-</div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-logo">
+            <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+            <span>EchoStack</span>
+        </div>
+        <div class="footer-links">
+            <a href="/">Home</a>
+            <a href="/explore">Explore</a>
+            <a href="/app">Regions Map</a>
+            <a href="/signup">Join</a>
+        </div>
+        <p class="footer-copy">© 2026 EchoStack — Preserving Ghana's Stories</p>
+    </footer>
 
 <script>
-function escapeHtml(str){if(!str)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function timeAgo(d){if(!d)return'';const diff=(Date.now()-new Date(d))/1000;if(diff<3600)return Math.floor(diff/60)+'m ago';if(diff<86400)return Math.floor(diff/3600)+'h ago';return Math.floor(diff/86400)+'d ago'}
+(function() {
+    const regionIcons = {
+        'Ahafo': '🌾', 'Ashanti': '👑', 'Bono': '🎭', 'Bono East': '🌳',
+        'Central': '🏖️', 'Eastern': '⛰️', 'Greater Accra': '🏙️', 'Northern': '🌾',
+        'North East': '🏕️', 'North West': '🌾', 'Oti': '🏞️', 'Upper East': '🗿',
+        'Upper West': '🌾', 'Volta': '💧', 'Western': '🌊', 'Western North': '🌲',
+        'Savannah': '🌾', 'Obuasi': '⛏️'
+    };
 
-async function loadRecentPosts(){
-    try{
-        const res=await fetch('/api/posts?limit=3');
-        const posts=await res.json();
-        const el=document.getElementById('recentPosts');
-        if(!posts.length){el.innerHTML='<div class="empty-state"><i class="fas fa-newspaper"></i><h3>No stories yet</h3></div>';return}
-        el.innerHTML=posts.map(p=>{
-            const a=p.author_username||'User';
-            return`<div class="post-card" onclick="location.href='/post/${p.id}'">
-                <div class="post-header"><div class="post-avatar">${a.charAt(0).toUpperCase()}</div><div><div class="post-author">${escapeHtml(a)}</div><div class="post-time">${timeAgo(p.created_at)}</div></div></div>
-                <h3 class="post-title">${escapeHtml(p.title)}</h3>
-                <p class="post-excerpt">${escapeHtml(p.excerpt||'')}</p>
-            </div>`;
-        }).join('');
-    }catch(e){document.getElementById('recentPosts').innerHTML='<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>'}
-}
-loadRecentPosts();
+    async function loadRegions() {
+        const container = document.getElementById('regionsContainer');
+        try {
+            const res = await fetch('/api/regions');
+            if (!res.ok) throw new Error('Failed to fetch');
+            const regions = await res.json();
+
+            if (!regions || !regions.length) {
+                container.innerHTML = '<p style="color:var(--main-muted);text-align:center;padding:20px">No regions found.</p>';
+                return;
+            }
+
+            container.innerHTML = regions.map(function(r) {
+                const name = r.name || r.region_name || 'Region';
+                const icon = regionIcons[name] || '📍';
+                const href = '/app?region=' + encodeURIComponent(name);
+                return '<a href="' + href + '" class="region-card">' +
+                    '<span class="region-icon">' + icon + '</span>' +
+                    '<div class="region-name">' + escapeHtml(name) + '</div>' +
+                '</a>';
+            }).join('');
+        } catch (e) {
+            container.innerHTML = '<p class="regions-error"><i class="fas fa-exclamation-circle"></i> Could not load regions. <a href="/app" style="color:var(--gold)">View regions map</a></p>';
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    loadRegions();
+})();
 </script>
 </body>
 </html>
