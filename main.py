@@ -883,8 +883,8 @@ async def admin_login(answer: str = Form(...)):
     if answer.strip().lower().replace(" ", "") == ADMIN_SECRET.lower().replace(" ", ""):
         admin_username = os.getenv("ADMIN_USERNAME", "Admin")
         r = JSONResponse({"success": True, "role": "admin"})
-        r.set_cookie("admin_session", "ADMIN_AUTHORIZED", max_age=86400*7, path="/", httponly=False, samesite="Lax", secure=True)
-        r.set_cookie("admin_user", admin_username, max_age=86400*7, path="/", httponly=False, samesite="Lax", secure=True)
+        r.set_cookie("admin_session", "ADMIN_AUTHORIZED", max_age=86400*7, path="/", httponly=False, samesite="Lax")
+        r.set_cookie("admin_user", admin_username, max_age=86400*7, path="/", httponly=False, samesite="Lax")
         return r
     raise HTTPException(403, "Wrong password")
 
@@ -1088,8 +1088,8 @@ async def user_login(
 
         if admin_cookie:
             resp.set_cookie("admin_session", "ADMIN_AUTHORIZED",
-                            max_age=86400 * 7, path="/", httponly=False, samesite="Lax", secure=True)
-            resp.set_cookie("admin_user", u.username, max_age=86400 * 7, path="/", httponly=False, samesite="Lax", secure=True)
+                            max_age=86400 * 7, path="/", httponly=False, samesite="Lax")
+            resp.set_cookie("admin_user", u.username, max_age=86400 * 7, path="/", httponly=False, samesite="Lax")
 
         return resp
 
