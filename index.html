@@ -604,15 +604,15 @@
             <div class="hero-pattern"></div>
         </div>
         <div class="hero-content">
-            <div class="hero-pill">
+            <div class="hero-pill" id="heroPill">
                 <i class="fas fa-globe-africa"></i>
                 Ghana Heritage Platform
             </div>
-            <h1>Preserve the Culture.<br><span class="gold">Share the Story.</span></h1>
-            <p class="hero-desc">EchoStack is Ghana's living archive — where folklore, history, music, and traditions from all 16 regions are discovered, shared, and kept alive by the people who know them best.</p>
+            <h1 id="heroHeadline">Preserve the Culture.<br><span class="gold">Share the Story.</span></h1>
+            <p class="hero-desc" id="heroDesc">EchoStack is Ghana's living archive — where folklore, history, music, and traditions from all 16 regions are discovered, shared, and kept alive by the people who know them best.</p>
             <div class="hero-actions">
-                <a href="/app" class="btn-gold"><i class="fas fa-map-marked-alt"></i> Explore the Map</a>
-                <a href="/signup" class="btn-ghost"><i class="fas fa-play"></i> Get Started</a>
+                <a href="/app" class="btn-gold" id="heroBtn"><i class="fas fa-map-marked-alt"></i> Explore the Map</a>
+                <a href="/signup" class="btn-ghost" id="heroBtn2"><i class="fas fa-play"></i> Get Started</a>
             </div>
         </div>
         <div class="hero-scroll">
@@ -628,20 +628,20 @@
     <div class="stats-bar">
         <div class="stats-inner">
             <div class="stat-item">
-                <div class="stat-num">16</div>
-                <div class="stat-label">Regions Covered</div>
+                <div class="stat-num" id="stat1Num">16</div>
+                <div class="stat-label" id="stat1Label">Regions Covered</div>
             </div>
             <div class="stat-item">
-                <div class="stat-num">50+</div>
-                <div class="stat-label">Languages & Dialects</div>
+                <div class="stat-num" id="stat2Num">50+</div>
+                <div class="stat-label" id="stat2Label">Languages & Dialects</div>
             </div>
             <div class="stat-item">
-                <div class="stat-num">1000+</div>
-                <div class="stat-label">Stories Archived</div>
+                <div class="stat-num" id="stat3Num">1000+</div>
+                <div class="stat-label" id="stat3Label">Stories Archived</div>
             </div>
             <div class="stat-item">
-                <div class="stat-num">∞</div>
-                <div class="stat-label">Heritage Preserved</div>
+                <div class="stat-num" id="stat4Num">∞</div>
+                <div class="stat-label" id="stat4Label">Heritage Preserved</div>
             </div>
         </div>
     </div>
@@ -801,6 +801,114 @@
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
+    async function loadHomeContent() {
+        try {
+            var res = await fetch('/api/admin/pages');
+            if (!res.ok) return;
+            var pages = await res.json();
+            var home = pages.home || [];
+            var map = {};
+            home.forEach(function(s) { map[s.section] = s.content; });
+
+            if (map.hero) {
+                var h = map.hero;
+                if (h.badge) {
+                    var pill = document.getElementById('heroPill');
+                    if (pill) pill.innerHTML = '<i class="fas fa-globe-africa"></i> ' + escapeHtml(h.badge);
+                }
+                if (h.headline) {
+                    var headline = document.getElementById('heroHeadline');
+                    if (headline) headline.innerHTML = escapeHtml(h.headline).replace(/\n/g, '<br>').replace(/(Share the Story\.)/g, '<span class="gold">$1</span>');
+                }
+                if (h.description) {
+                    var desc = document.getElementById('heroDesc');
+                    if (desc) desc.textContent = h.description;
+                }
+                if (h.btnText) {
+                    var btn = document.getElementById('heroBtn');
+                    if (btn) { btn.innerHTML = '<i class="fas fa-map-marked-alt"></i> ' + escapeHtml(h.btnText); }
+                }
+                if (h.btnLink) {
+                    var btn = document.getElementById('heroBtn');
+                    if (btn) btn.href = h.btnLink;
+                }
+                if (h.btn2Text) {
+                    var btn2 = document.getElementById('heroBtn2');
+                    if (btn2) btn2.innerHTML = '<i class="fas fa-play"></i> ' + escapeHtml(h.btn2Text);
+                }
+            }
+
+            if (map.stats) {
+                var s = map.stats;
+                if (s.stat1Num) document.getElementById('stat1Num').textContent = s.stat1Num;
+                if (s.stat1Label) document.getElementById('stat1Label').textContent = s.stat1Label;
+                if (s.stat2Num) document.getElementById('stat2Num').textContent = s.stat2Num;
+                if (s.stat2Label) document.getElementById('stat2Label').textContent = s.stat2Label;
+                if (s.stat3Num) document.getElementById('stat3Num').textContent = s.stat3Num;
+                if (s.stat3Label) document.getElementById('stat3Label').textContent = s.stat3Label;
+                if (s.stat4Num) document.getElementById('stat4Num').textContent = s.stat4Num;
+                if (s.stat4Label) document.getElementById('stat4Label').textContent = s.stat4Label;
+            }
+
+            if (map.features) {
+                var f = map.features;
+                if (f.title) {
+                    var ft = document.querySelector('#features .section-title');
+                    if (ft) ft.textContent = f.title;
+                }
+                if (f.description) {
+                    var fd = document.querySelector('#features .section-desc');
+                    if (fd) fd.textContent = f.description;
+                }
+                if (f.cards && f.cards.length) {
+                    var grid = document.querySelector('#features .features-grid');
+                    if (grid) {
+                        grid.innerHTML = f.cards.map(function(c) {
+                            return '<div class="feature-card">' +
+                                '<div class="feature-icon">' + escapeHtml(c.icon || '📖') + '</div>' +
+                                '<h3>' + escapeHtml(c.title || '') + '</h3>' +
+                                '<p>' + escapeHtml(c.description || '') + '</p>' +
+                            '</div>';
+                        }).join('');
+                    }
+                }
+            }
+
+            if (map.cta) {
+                var c = map.cta;
+                var ctaCard = document.querySelector('.cta-card');
+                if (ctaCard) {
+                    if (c.title) {
+                        var ctaH2 = ctaCard.querySelector('h2');
+                        if (ctaH2) ctaH2.textContent = c.title;
+                    }
+                    if (c.description) {
+                        var ctaP = ctaCard.querySelector('p');
+                        if (ctaP) ctaP.textContent = c.description;
+                    }
+                    var ctaBtn = ctaCard.querySelector('.btn-gold');
+                    if (ctaBtn) {
+                        if (c.btnText) ctaBtn.innerHTML = '<i class="fas fa-rocket"></i> ' + escapeHtml(c.btnText);
+                        if (c.btnLink) ctaBtn.href = c.btnLink;
+                    }
+                }
+            }
+
+            if (map.footer) {
+                var ft = map.footer;
+                var footerBrand = document.querySelector('.footer-brand span');
+                if (footerBrand && ft.brand) footerBrand.textContent = ft.brand;
+                var footerCopy = document.querySelector('.footer-copy');
+                if (footerCopy && ft.tagline) footerCopy.textContent = '© 2026 EchoStack — ' + ft.tagline;
+                var footerDev = document.querySelector('.footer-dev span');
+                if (footerDev && ft.credit) footerDev.textContent = ft.credit;
+            }
+        } catch(e) {
+            // Use defaults
+        }
+    }
+
+    loadHomeContent();
     loadRegions();
 })();
 </script>

@@ -4,15 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0D1B2A">
-    <title>Admin Dashboard - EchoStack</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>EchoStack — Content Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --ink: #0D1B2A;
             --ink2: #0f1e2d;
+            --ink3: #162a3e;
             --gold: #C8962E;
             --gold2: #E8B84B;
+            --cream: #FAF6EF;
+            --blue: #0077b6;
             --surface: #142030;
             --card: #1a2d40;
             --border: rgba(255,255,255,.07);
@@ -23,7 +26,7 @@
             --success: #22c55e;
             --warning: #f59e0b;
             --info: #0077b6;
-            --sidebar-w: 260px;
+            --sidebar-w: 240px;
             --main-bg: #f8fafc;
             --main-card: #ffffff;
             --main-border: #e2e8f0;
@@ -32,25 +35,18 @@
             --main-hover: #f1f5f9;
             --radius: 12px;
             --radius-lg: 16px;
+            --radius-xl: 24px;
             --radius-full: 9999px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { height: 100%; }
-        body {
-            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--main-bg);
-            color: var(--main-text);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-        }
+        body { font-family: 'DM Sans', sans-serif; background: var(--main-bg); color: var(--main-text); line-height: 1.6; }
         a { text-decoration: none; color: inherit; }
         button { font-family: inherit; border: none; background: none; cursor: pointer; }
         input, textarea, select { font-family: inherit; }
 
         /* Layout */
-        .admin-layout { display: flex; min-height: 100vh; }
-
-        /* Sidebar */
+        .cms-layout { display: flex; min-height: 100vh; }
         .sidebar {
             width: var(--sidebar-w);
             background: var(--ink);
@@ -63,14 +59,6 @@
             transition: transform 0.3s ease;
             overflow-y: auto;
         }
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 99;
-            backdrop-filter: blur(4px);
-        }
         .sidebar-header {
             padding: 16px 20px;
             border-bottom: 1px solid var(--border);
@@ -78,21 +66,9 @@
             align-items: center;
             gap: 10px;
         }
-        .sidebar-logo {
-            width: 28px; height: 28px;
-            border-radius: 6px;
-            flex-shrink: 0;
-        }
-        .sidebar-logo-text h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1rem;
-            color: var(--gold);
-        }
-        .sidebar-logo-text span {
-            font-size: 0.62rem;
-            color: var(--muted);
-            letter-spacing: 0.04em;
-        }
+        .sidebar-logo { width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; }
+        .sidebar-logo-text h1 { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--gold); }
+        .sidebar-logo-text span { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.04em; }
         .sidebar-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
         .sidebar-section { padding: 4px 0; }
         .sidebar-section-label {
@@ -117,106 +93,142 @@
         .sidebar-link:hover { background: rgba(255,255,255,0.05); }
         .sidebar-link.active { background: rgba(200,150,46,0.15); color: var(--gold); }
         .sidebar-link i { width: 18px; text-align: center; font-size: 0.95rem; }
-        .sidebar-link .count {
-            margin-left: auto;
-            padding: 2px 8px;
-            border-radius: var(--radius-full);
-            background: rgba(255,255,255,0.1);
-            font-size: 0.7rem;
-        }
         .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); }
         .sidebar-logout {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            width: 100%;
-            border-radius: var(--radius);
-            color: var(--text);
-            font-size: 0.85rem;
-            transition: all 0.15s;
+            display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+            width: 100%; border-radius: var(--radius); color: var(--text); font-size: 0.85rem;
         }
         .sidebar-logout:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            z-index: 99; backdrop-filter: blur(4px);
+        }
 
         /* Main */
         .main { flex: 1; margin-left: var(--sidebar-w); min-height: 100vh; }
         .topbar {
-            height: 60px;
-            background: var(--main-card);
-            border-bottom: 1px solid var(--main-border);
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            position: sticky;
-            top: 0;
-            z-index: 50;
+            height: 56px; background: var(--main-card); border-bottom: 1px solid var(--main-border);
+            display: flex; align-items: center; padding: 0 20px;
+            position: sticky; top: 0; z-index: 50;
         }
-        .hamburger {
-            display: none;
-            width: 40px; height: 40px;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: var(--main-text);
-            margin-right: 12px;
-        }
-        .topbar-title {
-            flex: 1;
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--ink);
-        }
+        .hamburger { display: none; width: 40px; height: 40px; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--main-text); margin-right: 12px; }
+        .topbar-title { flex: 1; font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--ink); }
         .topbar-actions { display: flex; gap: 8px; }
         .topbar-btn {
-            height: 38px;
-            padding: 0 14px;
-            border-radius: var(--radius-full);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--main-muted);
-            background: var(--main-hover);
-            transition: all 0.15s;
+            height: 36px; padding: 0 14px; border-radius: var(--radius-full);
+            display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600;
+            color: var(--main-muted); background: var(--main-hover); transition: all 0.15s;
         }
         .topbar-btn:hover { background: var(--main-border); color: var(--main-text); }
-        .topbar-btn.primary {
-            background: linear-gradient(135deg, var(--gold), var(--gold2));
-            color: var(--ink);
-        }
+        .topbar-btn.primary { background: linear-gradient(135deg, var(--gold), var(--gold2)); color: var(--ink); }
         .topbar-btn.primary:hover { opacity: 0.9; }
-        .content { padding: 20px; }
+        .content { padding: 20px; max-width: 1200px; margin: 0 auto; }
 
         /* Panels */
         .panel { display: none; }
         .panel.active { display: block; }
 
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .stat-card {
+        /* Section Editor */
+        .section-editor {
             background: var(--main-card);
             border: 1px solid var(--main-border);
             border-radius: var(--radius-lg);
-            padding: 20px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .section-editor-header {
             display: flex;
             align-items: center;
-            gap: 16px;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--main-border);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .section-editor-header:hover { background: var(--main-hover); }
+        .section-editor-header h3 {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--main-text);
+        }
+        .section-editor-header .toggle-icon {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: var(--main-hover);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--main-muted);
+            transition: transform 0.2s;
+        }
+        .section-editor-header.open .toggle-icon { transform: rotate(180deg); }
+        .section-editor-body {
+            padding: 20px;
+            display: none;
+        }
+        .section-editor-body.open { display: block; }
+        .section-editor-body .form-group { margin-bottom: 16px; }
+        .section-editor-body .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--main-muted);
+            margin-bottom: 6px;
+        }
+        .section-editor-body .form-input {
+            width: 100%;
+            padding: 11px 14px;
+            background: var(--main-bg);
+            border: 1.5px solid var(--main-border);
+            border-radius: var(--radius);
+            color: var(--main-text);
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .section-editor-body .form-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,150,46,0.1); }
+        textarea.form-input { min-height: 100px; resize: vertical; font-family: 'Merriweather', serif; line-height: 1.7; }
+        .section-editor-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--main-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--main-hover);
+        }
+        .section-editor-footer .status {
+            font-size: 0.78rem;
+            color: var(--main-muted);
+        }
+        .section-editor-footer .status.saved { color: var(--success); }
+        .section-editor-footer .btn { flex-shrink: 0; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 8px 14px; border-radius: var(--radius); font-size: 0.82rem; font-weight: 600;
+            transition: all 0.15s; min-height: 38px; white-space: nowrap;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--gold), var(--gold2)); color: var(--ink); }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary { background: var(--main-card); color: var(--main-text); border: 1px solid var(--main-border); }
+        .btn-secondary:hover { background: var(--main-hover); }
+        .btn-sm { padding: 6px 10px; font-size: 0.75rem; min-height: 32px; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+            background: var(--main-card); border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg); padding: 20px;
+            display: flex; align-items: center; gap: 16px;
         }
         .stat-icon {
-            width: 48px; height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            flex-shrink: 0;
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; flex-shrink: 0;
         }
         .stat-icon.gold { background: rgba(200,150,46,0.15); color: var(--gold); }
         .stat-icon.blue { background: rgba(0,119,182,0.15); color: var(--info); }
@@ -227,86 +239,32 @@
 
         /* Tables */
         .table-card {
-            background: var(--main-card);
-            border: 1px solid var(--main-border);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            margin-bottom: 20px;
+            background: var(--main-card); border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 20px;
         }
         .table-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--main-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; border-bottom: 1px solid var(--main-border);
         }
-        .table-header h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1rem;
-            font-weight: 700;
-        }
+        .table-header h3 { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; }
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
         th {
-            text-align: left;
-            padding: 12px 16px;
-            font-size: 0.68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--main-muted);
-            background: var(--main-hover);
-            border-bottom: 1px solid var(--main-border);
-            white-space: nowrap;
+            text-align: left; padding: 12px 16px; font-size: 0.68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.06em; color: var(--main-muted);
+            background: var(--main-hover); border-bottom: 1px solid var(--main-border); white-space: nowrap;
         }
         td {
-            padding: 12px 16px;
-            font-size: 0.88rem;
-            border-bottom: 1px solid var(--main-border);
+            padding: 12px 16px; font-size: 0.88rem; border-bottom: 1px solid var(--main-border);
             color: var(--main-text);
         }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: var(--main-hover); }
 
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 14px;
-            border-radius: var(--radius);
-            font-size: 0.82rem;
-            font-weight: 600;
-            transition: all 0.15s;
-            min-height: 38px;
-            white-space: nowrap;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--gold), var(--gold2));
-            color: var(--ink);
-        }
-        .btn-primary:hover { opacity: 0.9; }
-        .btn-secondary {
-            background: var(--main-card);
-            color: var(--main-text);
-            border: 1px solid var(--main-border);
-        }
-        .btn-secondary:hover { background: var(--main-hover); }
-        .btn-sm { padding: 6px 10px; font-size: 0.75rem; min-height: 32px; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-danger:hover { opacity: 0.9; }
-        .btn-success { background: var(--success); color: white; }
-
         /* Badges */
         .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 3px 10px;
-            border-radius: var(--radius-full);
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
+            display: inline-flex; align-items: center; padding: 3px 10px;
+            border-radius: var(--radius-full); font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
         }
         .badge-gold { background: rgba(200,150,46,0.15); color: var(--gold); }
         .badge-success { background: rgba(34,197,94,0.15); color: var(--success); }
@@ -314,247 +272,90 @@
         .badge-info { background: rgba(0,119,182,0.1); color: var(--info); }
         .badge-muted { background: var(--main-hover); color: var(--main-muted); }
 
-        /* Forms */
-        .form-group { margin-bottom: 16px; }
-        .form-group label {
-            display: block;
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--main-muted);
-            margin-bottom: 6px;
-        }
-        .form-input {
-            width: 100%;
-            padding: 11px 14px;
-            background: var(--main-card);
-            border: 1.5px solid var(--main-border);
-            border-radius: var(--radius);
-            color: var(--main-text);
-            font-size: 0.9rem;
-            outline: none;
-            transition: all 0.2s;
-        }
-        .form-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,150,46,0.1); }
-        textarea.form-input { min-height: 100px; resize: vertical; }
-        .form-row { display: flex; gap: 12px; }
-        .form-row .form-group { flex: 1; }
-
         /* File Grid */
-        .file-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 12px;
-            padding: 16px;
-        }
+        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 16px; }
         .file-card {
-            background: var(--main-card);
-            border: 1px solid var(--main-border);
-            border-radius: var(--radius);
-            overflow: hidden;
-            transition: all 0.2s;
+            background: var(--main-card); border: 1px solid var(--main-border);
+            border-radius: var(--radius); overflow: hidden; transition: all 0.2s;
         }
         .file-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); }
         .file-thumb {
-            width: 100%;
-            height: 100px;
-            background: var(--main-hover);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--main-muted);
-            font-size: 2rem;
-            overflow: hidden;
+            width: 100%; height: 100px; background: var(--main-hover);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--main-muted); font-size: 2rem; overflow: hidden;
         }
         .file-thumb img { width: 100%; height: 100%; object-fit: cover; }
         .file-info { padding: 10px; }
-        .file-name {
-            font-size: 0.78rem;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 4px;
-        }
+        .file-name { font-size: 0.78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
         .file-meta { font-size: 0.68rem; color: var(--main-muted); }
         .file-actions { display: flex; gap: 4px; padding: 8px 10px; border-top: 1px solid var(--main-border); }
         .file-actions .btn { flex: 1; padding: 6px; min-height: 30px; font-size: 0.7rem; }
 
         /* Upload Zone */
         .upload-zone {
-            border: 2px dashed var(--main-border);
-            border-radius: var(--radius-lg);
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 20px;
+            border: 2px dashed var(--main-border); border-radius: var(--radius-lg);
+            padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 20px;
         }
         .upload-zone:hover, .upload-zone.dragover { border-color: var(--gold); background: rgba(200,150,46,0.05); }
         .upload-zone i { font-size: 2.5rem; color: var(--main-muted); margin-bottom: 12px; }
         .upload-zone p { font-size: 0.9rem; color: var(--main-muted); }
         .upload-zone .highlight { color: var(--gold); font-weight: 600; }
 
-        /* Progress */
-        .progress-list { margin-bottom: 20px; }
-        .progress-item { margin-bottom: 12px; }
-        .progress-item-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.82rem; }
-        .progress-bar { height: 6px; background: var(--main-hover); border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2)); transition: width 0.3s; }
-
         /* Modal */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            z-index: 200;
-            backdrop-filter: blur(4px);
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            align-items: center; justify-content: center; padding: 20px; z-index: 200; backdrop-filter: blur(4px);
         }
         .modal-overlay.show { display: flex; }
         .modal {
-            background: var(--main-card);
-            border-radius: var(--radius-xl);
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 24px;
-            position: relative;
+            background: var(--main-card); border-radius: var(--radius-xl);
+            width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 24px;
         }
         .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
         .modal-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; }
         .modal-close {
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            background: var(--main-hover);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--main-muted);
-            font-size: 1rem;
+            width: 36px; height: 36px; border-radius: 50%; background: var(--main-hover);
+            display: flex; align-items: center; justify-content: center; color: var(--main-muted); font-size: 1rem;
         }
         .modal-close:hover { background: var(--main-border); }
-        .modal-media { width: 100%; border-radius: var(--radius); overflow: hidden; background: var(--main-hover); margin-bottom: 16px; }
-        .modal-media img { width: 100%; max-height: 300px; object-fit: contain; }
-        .modal-media video { width: 100%; }
         .modal-actions { display: flex; gap: 8px; }
         .modal-actions .btn { flex: 1; }
 
-        /* Tabs */
-        .inner-tabs {
-            display: flex;
-            gap: 4px;
-            padding: 12px 20px;
-            background: var(--main-hover);
-            border-bottom: 1px solid var(--main-border);
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .inner-tabs::-webkit-scrollbar { display: none; }
-        .inner-tab {
-            padding: 8px 16px;
-            border-radius: var(--radius-full);
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--main-muted);
-            white-space: nowrap;
-            transition: all 0.15s;
-        }
-        .inner-tab:hover { background: var(--main-card); }
-        .inner-tab.active { background: var(--main-card); color: var(--ink); }
-
-        /* Select */
-        .form-select {
-            width: 100%;
-            padding: 11px 14px;
-            background: var(--main-card);
-            border: 1.5px solid var(--main-border);
-            border-radius: var(--radius);
-            color: var(--main-text);
-            font-size: 0.9rem;
-            outline: none;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 36px;
-        }
-        .form-select:focus { border-color: var(--gold); }
-
-        /* Toggle */
-        .toggle {
-            width: 44px; height: 24px;
-            border-radius: 12px;
-            background: var(--main-border);
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        .toggle::after {
-            content: '';
-            position: absolute;
-            top: 3px; left: 3px;
-            width: 18px; height: 18px;
-            border-radius: 50%;
-            background: white;
-            transition: all 0.2s;
-        }
-        .toggle.active { background: var(--success); }
-        .toggle.active::after { left: 23px; }
-        .toggle.danger { background: var(--danger); }
-        .toggle.danger::after { left: 23px; }
-
         /* Toast */
         .toast {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: var(--ink);
-            color: white;
-            padding: 12px 20px;
-            border-radius: var(--radius);
-            font-size: 0.88rem;
-            font-weight: 500;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            transition: all 0.3s;
-            z-index: 300;
-            opacity: 0;
-            pointer-events: none;
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: var(--ink); color: white; padding: 12px 20px; border-radius: var(--radius);
+            font-size: 0.88rem; font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s; z-index: 300; opacity: 0; pointer-events: none;
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.success { background: var(--success); }
         .toast.error { background: var(--danger); }
 
         /* Empty state */
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 48px 24px;
-            text-align: center;
-        }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; text-align: center; }
         .empty-state i { font-size: 2.5rem; color: var(--main-muted); opacity: 0.4; margin-bottom: 12px; }
         .empty-state p { color: var(--main-muted); font-size: 0.9rem; }
 
         /* Loading */
         .loading { display: flex; align-items: center; justify-content: center; padding: 48px; }
         .spinner {
-            width: 32px; height: 32px;
-            border: 3px solid var(--main-border);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            width: 32px; height: 32px; border: 3px solid var(--main-border);
+            border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Toggle */
+        .toggle {
+            width: 44px; height: 24px; border-radius: 12px; background: var(--main-border);
+            position: relative; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+        }
+        .toggle::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 18px; height: 18px; border-radius: 50%; background: white; transition: all 0.2s;
+        }
+        .toggle.active { background: var(--success); }
+        .toggle.active::after { left: 23px; }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -566,7 +367,6 @@
             .topbar-title { font-size: 1rem; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .file-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-            .form-row { flex-direction: column; }
             .modal { max-width: 100%; margin: 10px; }
         }
         @media (max-width: 480px) {
@@ -576,8 +376,7 @@
     </style>
 </head>
 <body>
-<div class="admin-layout">
-    <!-- Sidebar -->
+<div class="cms-layout">
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="/echostack-logo.png" class="sidebar-logo" alt="EchoStack" onerror="this.style.display='none'">
@@ -588,33 +387,30 @@
         </div>
         <nav class="sidebar-nav">
             <div class="sidebar-section">
-                <div class="sidebar-section-label">Main</div>
+                <div class="sidebar-section-label">Overview</div>
                 <div class="sidebar-link active" data-panel="overview" onclick="showPanel('overview', this)">
                     <i class="fas fa-chart-pie"></i><span>Dashboard</span>
                 </div>
-                <div class="sidebar-link" data-panel="write" onclick="showPanel('write', this)">
-                    <i class="fas fa-pen"></i><span>Write Post</span>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Edit Pages</div>
+                <div class="sidebar-link" data-panel="edit-home" onclick="showPanel('edit-home', this)">
+                    <i class="fas fa-home"></i><span>Home Page</span>
+                </div>
+                <div class="sidebar-link" data-panel="edit-posts" onclick="showPanel('edit-posts', this)">
+                    <i class="fas fa-pen-fancy"></i><span>Write Post</span>
+                </div>
+                <div class="sidebar-link" data-panel="manage-posts" onclick="showPanel('manage-posts', this)">
+                    <i class="fas fa-newspaper"></i><span>All Posts</span>
                 </div>
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-label">Content</div>
-                <div class="sidebar-link" data-panel="posts" onclick="showPanel('posts', this)">
-                    <i class="fas fa-newspaper"></i><span>All Posts</span>
-                </div>
-                <div class="sidebar-link" data-panel="stories" onclick="showPanel('stories', this)">
-                    <i class="fas fa-book-open"></i><span>Stories</span>
-                </div>
                 <div class="sidebar-link" data-panel="files" onclick="showPanel('files', this)">
                     <i class="fas fa-folder"></i><span>File Manager</span>
                 </div>
-            </div>
-            <div class="sidebar-section">
-                <div class="sidebar-section-label">Heritage</div>
                 <div class="sidebar-link" data-panel="regions" onclick="showPanel('regions', this)">
                     <i class="fas fa-map"></i><span>Regions</span>
-                </div>
-                <div class="sidebar-link" data-panel="categories" onclick="showPanel('categories', this)">
-                    <i class="fas fa-tags"></i><span>Categories</span>
                 </div>
             </div>
             <div class="sidebar-section">
@@ -627,24 +423,9 @@
                 </div>
             </div>
             <div class="sidebar-section">
-                <div class="sidebar-section-label">Site</div>
-                <div class="sidebar-link" data-panel="newsletter" onclick="showPanel('newsletter', this)">
-                    <i class="fas fa-envelope"></i><span>Newsletter</span>
-                </div>
-                <div class="sidebar-link" data-panel="events" onclick="showPanel('events', this)">
-                    <i class="fas fa-calendar"></i><span>Events</span>
-                </div>
-                <div class="sidebar-link" data-panel="chat" onclick="showPanel('chat', this)">
-                    <i class="fas fa-comments"></i><span>Chat</span>
-                </div>
-            </div>
-            <div class="sidebar-section">
                 <div class="sidebar-section-label">System</div>
                 <div class="sidebar-link" data-panel="activity" onclick="showPanel('activity', this)">
                     <i class="fas fa-history"></i><span>Activity Logs</span>
-                </div>
-                <div class="sidebar-link" data-panel="settings" onclick="showPanel('settings', this)">
-                    <i class="fas fa-cog"></i><span>Settings</span>
                 </div>
             </div>
         </nav>
@@ -659,25 +440,18 @@
     </aside>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <!-- Main -->
     <div class="main">
         <header class="topbar">
-            <button class="hamburger" onclick="toggleSidebar()">
-                <i class="fas fa-bars"></i>
-            </button>
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
             <h1 class="topbar-title" id="topbarTitle">Dashboard</h1>
             <div class="topbar-actions">
-                <button class="topbar-btn" onclick="location.reload()">
-                    <i class="fas fa-sync-alt"></i><span>Refresh</span>
-                </button>
-                <a href="/" class="topbar-btn" target="_blank">
-                    <i class="fas fa-external-link-alt"></i><span>View Site</span>
-                </a>
+                <button class="topbar-btn" onclick="location.reload()"><i class="fas fa-sync-alt"></i><span>Refresh</span></button>
+                <a href="/" class="topbar-btn primary" target="_blank"><i class="fas fa-eye"></i><span>Preview</span></a>
             </div>
         </header>
 
         <div class="content">
-            <!-- Overview Panel -->
+            <!-- Overview -->
             <div class="panel active" id="panelOverview">
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -700,7 +474,7 @@
                 <div class="table-card">
                     <div class="table-header">
                         <h3>Recent Posts</h3>
-                        <button class="btn btn-sm btn-secondary" onclick="showPanel('posts', document.querySelector('[data-panel=posts]'))">View All</button>
+                        <button class="btn btn-sm btn-secondary" onclick="showPanel('manage-posts', document.querySelector('[data-panel=manage-posts]'))">View All</button>
                     </div>
                     <div class="table-wrap">
                         <table>
@@ -709,38 +483,200 @@
                         </table>
                     </div>
                 </div>
-                <div class="table-card">
-                    <div class="table-header">
-                        <h3>Recent Uploads</h3>
-                        <button class="btn btn-sm btn-secondary" onclick="showPanel('files', document.querySelector('[data-panel=files]'))">Manage Files</button>
+            </div>
+
+            <!-- Edit Home Page -->
+            <div class="panel" id="panelEditHome">
+                <div style="margin-bottom:20px">
+                    <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:4px">Edit Home Page</h2>
+                    <p style="color:var(--main-muted);font-size:0.88rem">Changes reflect immediately on the public site. Click Save on each section to publish.</p>
+                </div>
+
+                <!-- Hero Section -->
+                <div class="section-editor">
+                    <div class="section-editor-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-image" style="color:var(--gold);margin-right:8px"></i>Hero Section</h3>
+                        <div class="toggle-icon"><i class="fas fa-chevron-down"></i></div>
                     </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead><tr><th>File</th><th>Type</th><th>Size</th><th>Date</th><th>Actions</th></tr></thead>
-                            <tbody id="recentFilesTable"><tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr></tbody>
-                        </table>
+                    <div class="section-editor-body">
+                        <div class="form-group">
+                            <label>Badge Text</label>
+                            <input type="text" class="form-input" id="heroBadge" placeholder="e.g. Ghana Heritage Platform">
+                        </div>
+                        <div class="form-group">
+                            <label>Headline</label>
+                            <input type="text" class="form-input" id="heroHeadline" placeholder="e.g. Preserve the Culture. Share the Story.">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea class="form-input" id="heroDesc" placeholder="The paragraph under the headline..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Primary Button Text</label>
+                            <input type="text" class="form-input" id="heroBtnText" placeholder="e.g. Explore the Map">
+                        </div>
+                        <div class="form-group">
+                            <label>Primary Button Link</label>
+                            <input type="text" class="form-input" id="heroBtnLink" placeholder="e.g. /app">
+                        </div>
+                        <div class="form-group">
+                            <label>Secondary Button Text</label>
+                            <input type="text" class="form-input" id="heroBtn2Text" placeholder="e.g. Get Started">
+                        </div>
+                    </div>
+                    <div class="section-editor-footer">
+                        <span class="status" id="heroStatus">Not saved</span>
+                        <button class="btn btn-primary btn-sm" onclick="saveHomeSection('hero')"><i class="fas fa-save"></i> Save</button>
+                    </div>
+                </div>
+
+                <!-- Stats Section -->
+                <div class="section-editor">
+                    <div class="section-editor-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-chart-bar" style="color:var(--blue);margin-right:8px"></i>Stats Bar</h3>
+                        <div class="toggle-icon"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="section-editor-body">
+                        <div class="form-group">
+                            <label>Stat 1 — Number</label>
+                            <input type="text" class="form-input" id="stat1Num" placeholder="e.g. 16">
+                        </div>
+                        <div class="form-group">
+                            <label>Stat 1 — Label</label>
+                            <input type="text" class="form-input" id="stat1Label" placeholder="e.g. Regions Covered">
+                        </div>
+                        <div class="form-group">
+                            <label>Stat 2 — Number</label>
+                            <input type="text" class="form-input" id="stat2Num" placeholder="e.g. 50+">
+                        </div>
+                        <div class="form-group">
+                            <label>Stat 2 — Label</label>
+                            <input type="text" class="form-input" id="stat2Label" placeholder="e.g. Languages & Dialects">
+                        </div>
+                        <div class="form-group">
+                            <label>Stat 3 — Number</label>
+                            <input type="text" class="form-input" id="stat3Num" placeholder="e.g. 1000+">
+                        </div>
+                        <div class="form-group">
+                            <label>Stat 3 — Label</label>
+                            <input type="text" class="form-input" id="stat3Label" placeholder="e.g. Stories Archived">
+                        </div>
+                        <div class="form-group">
+                            <label>Stat 4 — Number</label>
+                            <input type="text" class="form-input" id="stat4Num" placeholder="e.g. ∞">
+                        </div>
+                        <div class="form-group">
+                            <label>Stat 4 — Label</label>
+                            <input type="text" class="form-input" id="stat4Label" placeholder="e.g. Heritage Preserved">
+                        </div>
+                    </div>
+                    <div class="section-editor-footer">
+                        <span class="status" id="statsStatus">Not saved</span>
+                        <button class="btn btn-primary btn-sm" onclick="saveHomeSection('stats')"><i class="fas fa-save"></i> Save</button>
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="section-editor">
+                    <div class="section-editor-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-th-large" style="color:var(--success);margin-right:8px"></i>Features Section</h3>
+                        <div class="toggle-icon"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="section-editor-body">
+                        <div class="form-group">
+                            <label>Section Title</label>
+                            <input type="text" class="form-input" id="featuresTitle" placeholder="e.g. More Than an Archive">
+                        </div>
+                        <div class="form-group">
+                            <label>Section Description</label>
+                            <textarea class="form-input" id="featuresDesc" placeholder="The description under the title..."></textarea>
+                        </div>
+                        <div style="border-top:1px solid var(--main-border);padding-top:16px;margin-top:8px">
+                            <p style="font-size:0.85rem;font-weight:600;margin-bottom:12px;color:var(--main-text)">Feature Cards</p>
+                            <div id="featuresCards"></div>
+                            <button class="btn btn-secondary btn-sm" onclick="addFeatureCard()" style="margin-top:12px"><i class="fas fa-plus"></i> Add Feature</button>
+                        </div>
+                    </div>
+                    <div class="section-editor-footer">
+                        <span class="status" id="featuresStatus">Not saved</span>
+                        <button class="btn btn-primary btn-sm" onclick="saveHomeSection('features')"><i class="fas fa-save"></i> Save</button>
+                    </div>
+                </div>
+
+                <!-- CTA Section -->
+                <div class="section-editor">
+                    <div class="section-editor-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-bullhorn" style="color:var(--warning);margin-right:8px"></i>Call to Action</h3>
+                        <div class="toggle-icon"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="section-editor-body">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" class="form-input" id="ctaTitle" placeholder="e.g. Be Part of the Archive">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea class="form-input" id="ctaDesc" placeholder="The paragraph..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Button Text</label>
+                            <input type="text" class="form-input" id="ctaBtnText" placeholder="e.g. Create Free Account">
+                        </div>
+                        <div class="form-group">
+                            <label>Button Link</label>
+                            <input type="text" class="form-input" id="ctaBtnLink" placeholder="e.g. /signup">
+                        </div>
+                    </div>
+                    <div class="section-editor-footer">
+                        <span class="status" id="ctaStatus">Not saved</span>
+                        <button class="btn btn-primary btn-sm" onclick="saveHomeSection('cta')"><i class="fas fa-save"></i> Save</button>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="section-editor">
+                    <div class="section-editor-header" onclick="toggleSection(this)">
+                        <h3><i class="fas fa-window-minimize" style="color:var(--muted);margin-right:8px"></i>Footer</h3>
+                        <div class="toggle-icon"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                    <div class="section-editor-body">
+                        <div class="form-group">
+                            <label>Footer Brand Name</label>
+                            <input type="text" class="form-input" id="footerBrand" placeholder="e.g. EchoStack Ghana">
+                        </div>
+                        <div class="form-group">
+                            <label>Footer Tagline</label>
+                            <input type="text" class="form-input" id="footerTagline" placeholder="e.g. Preserving Ghana's Stories">
+                        </div>
+                        <div class="form-group">
+                            <label>Footer Credit</label>
+                            <input type="text" class="form-input" id="footerCredit" placeholder="e.g. Built by Mireku Development">
+                        </div>
+                    </div>
+                    <div class="section-editor-footer">
+                        <span class="status" id="footerStatus">Not saved</span>
+                        <button class="btn btn-primary btn-sm" onclick="saveHomeSection('footer')"><i class="fas fa-save"></i> Save</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Write Post Panel -->
-            <div class="panel" id="panelWrite">
+            <!-- Write Post -->
+            <div class="panel" id="panelEditPosts">
                 <div class="table-card" style="padding:24px">
                     <h3 style="font-family:'Playfair Display',serif;margin-bottom:20px">Write New Post</h3>
-                    <div class="form-row">
-                        <div class="form-group" style="flex:2">
+                    <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
+                        <div class="form-group" style="flex:2;margin-bottom:0">
                             <label>Title</label>
                             <input type="text" class="form-input" id="writeTitle" placeholder="Enter post title...">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="margin-bottom:0">
                             <label>Content Type</label>
-                            <select class="form-select" id="writeType">
+                            <select class="form-input" id="writeType" style="cursor:pointer">
                                 <option value="article">Article</option>
                                 <option value="video">Video</option>
                                 <option value="reel">Reel</option>
                                 <option value="audio">Audio</option>
                                 <option value="photo">Photo Essay</option>
-                                <option value="story">Story</option>
                             </select>
                         </div>
                     </div>
@@ -750,12 +686,12 @@
                     </div>
                     <div class="form-group">
                         <label>Content</label>
-                        <textarea class="form-input" id="writeContent" placeholder="Write your content here..." style="min-height:200px"></textarea>
+                        <textarea class="form-input" id="writeContent" placeholder="Write your content here..." style="min-height:200px;font-family:'Merriweather',serif;line-height:1.8"></textarea>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
+                    <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
+                        <div class="form-group" style="margin-bottom:0">
                             <label>Region</label>
-                            <select class="form-select" id="writeRegion">
+                            <select class="form-input" id="writeRegion" style="cursor:pointer">
                                 <option value="">Select region...</option>
                                 <option value="Ashanti">Ashanti</option>
                                 <option value="Greater Accra">Greater Accra</option>
@@ -775,9 +711,9 @@
                                 <option value="Savannah">Savannah</option>
                             </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="margin-bottom:0">
                             <label>Status</label>
-                            <select class="form-select" id="writeStatus">
+                            <select class="form-input" id="writeStatus" style="cursor:pointer">
                                 <option value="published">Published</option>
                                 <option value="draft">Draft</option>
                             </select>
@@ -798,12 +734,12 @@
                 </div>
             </div>
 
-            <!-- Posts Panel -->
-            <div class="panel" id="panelPosts">
+            <!-- Manage Posts -->
+            <div class="panel" id="panelManagePosts">
                 <div class="table-card">
                     <div class="table-header">
                         <h3>All Posts</h3>
-                        <button class="btn btn-sm btn-primary" onclick="showPanel('write', document.querySelector('[data-panel=write]'))">
+                        <button class="btn btn-sm btn-primary" onclick="showPanel('edit-posts', document.querySelector('[data-panel=edit-posts]'))">
                             <i class="fas fa-plus"></i> New Post
                         </button>
                     </div>
@@ -816,45 +752,15 @@
                 </div>
             </div>
 
-            <!-- Stories Panel -->
-            <div class="panel" id="panelStories">
-                <div class="table-card">
-                    <div class="table-header"><h3>Story Submissions</h3></div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead><tr><th>Title</th><th>Author</th><th>Region</th><th>Date</th><th>Actions</th></tr></thead>
-                            <tbody id="storiesTable"><tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Files Panel -->
+            <!-- Files -->
             <div class="panel" id="panelFiles">
                 <div class="table-card" style="padding:20px;margin-bottom:16px">
-                    <div class="form-row" style="margin-bottom:16px">
-                        <div class="form-group" style="flex:1">
-                            <label>Search Files</label>
-                            <input type="text" class="form-input" id="fileSearch" placeholder="Search..." oninput="filterFiles()">
-                        </div>
-                        <div class="form-group">
-                            <label>Category</label>
-                            <select class="form-select" id="fileCategory" onchange="filterFiles()">
-                                <option value="">All</option>
-                                <option value="image">Images</option>
-                                <option value="video">Videos</option>
-                                <option value="audio">Audio</option>
-                                <option value="document">Documents</option>
-                            </select>
-                        </div>
-                    </div>
                     <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <p><span class="highlight">Click to upload</span> or drag and drop</p>
                         <p style="font-size:0.78rem;margin-top:4px">Max 50MB per file</p>
                     </div>
                     <input type="file" id="fileInput" multiple style="display:none" onchange="handleFileUpload(this.files)">
-                    <div class="progress-list" id="uploadProgress"></div>
                 </div>
                 <div class="table-card">
                     <div class="table-header">
@@ -865,7 +771,7 @@
                 </div>
             </div>
 
-            <!-- Regions Panel -->
+            <!-- Regions -->
             <div class="panel" id="panelRegions">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
                     <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem">Regions</h2>
@@ -879,25 +785,23 @@
                         </table>
                     </div>
                 </div>
-                <!-- Region Form (hidden) -->
                 <div class="table-card" id="regionForm" style="display:none;padding:24px;margin-top:20px">
                     <h3 style="font-family:'Playfair Display',serif;margin-bottom:20px" id="regionFormTitle">Add Region</h3>
                     <input type="hidden" id="regionId">
-                    <div class="form-row">
-                        <div class="form-group"><label>Name</label><input type="text" class="form-input" id="regionName" placeholder="Region name"></div>
-                        <div class="form-group"><label>Capital</label><input type="text" class="form-input" id="regionCapital" placeholder="Capital city"></div>
+                    <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
+                        <div class="form-group" style="margin-bottom:0"><label>Name</label><input type="text" class="form-input" id="regionName" placeholder="Region name"></div>
+                        <div class="form-group" style="margin-bottom:0"><label>Capital</label><input type="text" class="form-input" id="regionCapital" placeholder="Capital city"></div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group"><label>Population</label><input type="text" class="form-input" id="regionPopulation" placeholder="Population"></div>
-                        <div class="form-group"><label>Terrain</label><input type="text" class="form-input" id="regionTerrain" placeholder="Terrain type"></div>
+                    <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
+                        <div class="form-group" style="margin-bottom:0"><label>Population</label><input type="text" class="form-input" id="regionPopulation" placeholder="Population"></div>
+                        <div class="form-group" style="margin-bottom:0"><label>Terrain</label><input type="text" class="form-input" id="regionTerrain" placeholder="Terrain type"></div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group"><label>Category</label><input type="text" class="form-input" id="regionCategory" placeholder="Category"></div>
-                        <div class="form-group"><label>Tags</label><input type="text" class="form-input" id="regionTags" placeholder="tag1, tag2"></div>
+                    <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
+                        <div class="form-group" style="margin-bottom:0"><label>Category</label><input type="text" class="form-input" id="regionCategory" placeholder="Category"></div>
+                        <div class="form-group" style="margin-bottom:0"><label>Tags</label><input type="text" class="form-input" id="regionTags" placeholder="tag1, tag2"></div>
                     </div>
                     <div class="form-group"><label>Description</label><textarea class="form-input" id="regionDescription" placeholder="Region description"></textarea></div>
                     <div class="form-group"><label>Hero Image URL</label><input type="text" class="form-input" id="regionHero" placeholder="https://..."></div>
-                    <div class="form-group"><label>Gallery Images (comma separated URLs)</label><input type="text" class="form-input" id="regionGallery" placeholder="url1, url2, url3"></div>
                     <div style="display:flex;gap:12px">
                         <button class="btn btn-secondary" onclick="hideRegionForm()">Cancel</button>
                         <button class="btn btn-primary" onclick="saveRegion()"><i class="fas fa-save"></i> Save Region</button>
@@ -905,7 +809,7 @@
                 </div>
             </div>
 
-            <!-- Users Panel -->
+            <!-- Users -->
             <div class="panel" id="panelUsers">
                 <div class="table-card">
                     <div class="table-header"><h3>All Users</h3></div>
@@ -918,7 +822,7 @@
                 </div>
             </div>
 
-            <!-- Creators Panel -->
+            <!-- Creators -->
             <div class="panel" id="panelCreators">
                 <div class="table-card">
                     <div class="table-header"><h3>Creators</h3></div>
@@ -931,81 +835,7 @@
                 </div>
             </div>
 
-            <!-- Newsletter Panel -->
-            <div class="panel" id="panelNewsletter">
-                <div class="table-card">
-                    <div class="table-header"><h3>Newsletter Subscribers</h3></div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead><tr><th>Email</th><th>Subscribed</th><th>Actions</th></tr></thead>
-                            <tbody id="newsletterTable"><tr><td colspan="3" class="loading"><div class="spinner"></div></td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Events Panel -->
-            <div class="panel" id="panelEvents">
-                <div style="display:flex;gap:20px;flex-wrap:wrap">
-                    <div class="table-card" style="flex:1;min-width:300px;padding:20px">
-                        <h3 style="font-family:'Playfair Display',serif;margin-bottom:16px">Add Event</h3>
-                        <div class="form-group"><label>Title</label><input type="text" class="form-input" id="eventTitle" placeholder="Event title"></div>
-                        <div class="form-row">
-                            <div class="form-group"><label>Location</label><input type="text" class="form-input" id="eventLocation" placeholder="Location"></div>
-                            <div class="form-group"><label>Date</label><input type="date" class="form-input" id="eventDate"></div>
-                        </div>
-                        <div class="form-group"><label>Description</label><textarea class="form-input" id="eventDesc" placeholder="Event description"></textarea></div>
-                        <button class="btn btn-primary" onclick="addEvent()"><i class="fas fa-plus"></i> Add Event</button>
-                    </div>
-                    <div class="table-card" style="flex:1;min-width:300px">
-                        <div class="table-header"><h3>Events</h3></div>
-                        <div class="table-wrap">
-                            <table>
-                                <thead><tr><th>Title</th><th>Date</th><th>Actions</th></tr></thead>
-                                <tbody id="eventsTable"><tr><td colspan="3" class="loading"><div class="spinner"></div></td></tr></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Categories Panel -->
-            <div class="panel" id="panelCategories">
-                <div style="display:flex;gap:20px;flex-wrap:wrap">
-                    <div class="table-card" style="flex:1;min-width:280px;padding:20px">
-                        <h3 style="font-family:'Playfair Display',serif;margin-bottom:16px">Add Category</h3>
-                        <div class="form-group"><label>Name</label><input type="text" class="form-input" id="catName" placeholder="Category name"></div>
-                        <button class="btn btn-primary" onclick="addCategory()"><i class="fas fa-plus"></i> Add</button>
-                    </div>
-                    <div class="table-card" style="flex:1;min-width:280px">
-                        <div class="table-header"><h3>Categories</h3></div>
-                        <div class="table-wrap">
-                            <table>
-                                <thead><tr><th>Name</th><th>Actions</th></tr></thead>
-                                <tbody id="categoriesTable"><tr><td colspan="2" class="loading"><div class="spinner"></div></td></tr></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chat Panel -->
-            <div class="panel" id="panelChat">
-                <div class="table-card">
-                    <div class="table-header">
-                        <h3>Community Chat</h3>
-                        <button class="btn btn-sm btn-secondary" onclick="loadChat()"><i class="fas fa-sync-alt"></i> Refresh</button>
-                    </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead><tr><th>User</th><th>Message</th><th>Time</th></tr></thead>
-                            <tbody id="chatTable"><tr><td colspan="3" class="loading"><div class="spinner"></div></td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Activity Panel -->
+            <!-- Activity -->
             <div class="panel" id="panelActivity">
                 <div class="table-card">
                     <div class="table-header">
@@ -1020,15 +850,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Settings Panel -->
-            <div class="panel" id="panelSettings">
-                <div class="table-card" style="padding:40px;text-align:center">
-                    <i class="fas fa-cog" style="font-size:3rem;color:var(--main-muted);margin-bottom:16px;opacity:0.4"></i>
-                    <h3 style="font-family:'Playfair Display',serif;margin-bottom:8px">Settings</h3>
-                    <p style="color:var(--main-muted)">System configuration coming soon.</p>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -1040,7 +861,7 @@
             <h3 class="modal-title" id="mediaModalTitle">File Preview</h3>
             <button class="modal-close" onclick="closeMediaModal()"><i class="fas fa-times"></i></button>
         </div>
-        <div class="modal-media" id="mediaPreview"></div>
+        <div style="width:100%;border-radius:var(--radius);overflow:hidden;background:var(--main-hover);margin-bottom:16px" id="mediaPreview"></div>
         <div style="font-size:0.85rem;color:var(--main-muted);margin-bottom:16px" id="mediaInfo"></div>
         <div class="modal-actions">
             <button class="btn btn-secondary" onclick="copyMediaUrl()"><i class="fas fa-copy"></i> Copy URL</button>
@@ -1049,32 +870,14 @@
     </div>
 </div>
 
-<!-- Publish Modal -->
-<div class="modal-overlay" id="publishModal">
-    <div class="modal">
-        <div class="modal-header">
-            <h3 class="modal-title">Publish as Post</h3>
-            <button class="modal-close" onclick="closePublishModal()"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="form-group"><label>Title</label><input type="text" class="form-input" id="publishTitle" placeholder="Post title"></div>
-        <div class="form-group"><label>Description</label><textarea class="form-input" id="publishDesc" placeholder="Description" style="min-height:80px"></textarea></div>
-        <div class="form-group"><label>Region</label><select class="form-select" id="publishRegion"><option value="">Select region...</option></select></div>
-        <input type="hidden" id="publishFileId">
-        <div style="display:flex;gap:8px">
-            <button class="btn btn-secondary" onclick="closePublishModal()">Cancel</button>
-            <button class="btn btn-primary" style="flex:1" onclick="confirmPublish()"><i class="fas fa-upload"></i> Publish</button>
-        </div>
-    </div>
-</div>
-
-<!-- Confirm Delete Modal -->
+<!-- Delete Modal -->
 <div class="modal-overlay" id="deleteModal">
     <div class="modal">
         <div class="modal-header">
             <h3 class="modal-title">Confirm Delete</h3>
             <button class="modal-close" onclick="closeDeleteModal()"><i class="fas fa-times"></i></button>
         </div>
-        <p style="margin-bottom:20px;color:var(--main-muted)">Are you sure you want to delete this item? This action cannot be undone.</p>
+        <p style="margin-bottom:20px;color:var(--main-muted)">Are you sure? This cannot be undone.</p>
         <input type="hidden" id="deleteTarget">
         <input type="hidden" id="deleteType">
         <div style="display:flex;gap:8px">
@@ -1087,10 +890,42 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// Globals
 let currentFileUrl = '';
+let featureCards = [];
 
-// Helpers
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+function toggleSection(header) {
+    header.classList.toggle('open');
+    var body = header.nextElementSibling;
+    body.classList.toggle('open');
+}
+
+function showPanel(name, el) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    var panel = document.getElementById('panel' + name.split('-').map(function(s){return s.charAt(0).toUpperCase()+s.slice(1)}).join(''));
+    if (panel) panel.classList.add('active');
+    if (el) el.classList.add('active');
+    var titles = {
+        'overview': 'Dashboard', 'edit-home': 'Edit Home Page', 'edit-posts': 'Write Post',
+        'manage-posts': 'All Posts', 'files': 'File Manager', 'regions': 'Regions',
+        'users': 'Users', 'creators': 'Creators', 'activity': 'Activity Logs'
+    };
+    document.getElementById('topbarTitle').textContent = titles[name] || 'Dashboard';
+    if (window.innerWidth < 768) toggleSidebar();
+}
+
+function toast(msg, type) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + (type || '');
+    setTimeout(function() { t.className = 'toast'; }, 2500);
+}
+
 function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -1098,312 +933,351 @@ function escapeHtml(str) {
 
 function timeAgo(dateStr) {
     if (!dateStr) return '-';
-    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    var diff = (Date.now() - new Date(dateStr)) / 1000;
     if (diff < 60) return Math.floor(diff) + 's ago';
     if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
     if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
     return Math.floor(diff / 86400) + 'd ago';
 }
 
-function toast(msg, type = '') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast show ' + type;
-    setTimeout(() => t.className = 'toast', 3000);
-}
-
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('show');
-}
-
-function showPanel(panel, el) {
-    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-    if (el) el.classList.add('active');
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel' + panel.charAt(0).toUpperCase() + panel.slice(1)).classList.add('active');
-    
-    const titles = {
-        overview: 'Dashboard', write: 'Write Post', posts: 'All Posts', stories: 'Stories',
-        files: 'File Manager', regions: 'Regions', users: 'Users', creators: 'Creators',
-        newsletter: 'Newsletter', events: 'Events', categories: 'Categories',
-        chat: 'Chat', activity: 'Activity Logs', settings: 'Settings'
-    };
-    document.getElementById('topbarTitle').textContent = titles[panel] || 'Dashboard';
-    
-    // Load panel data
-    switch(panel) {
-        case 'overview': loadOverview(); break;
-        case 'posts': loadAllPosts(); break;
-        case 'stories': loadStories(); break;
-        case 'files': loadFiles(); break;
-        case 'regions': loadRegions(); break;
-        case 'users': loadUsers(); break;
-        case 'creators': loadCreators(); break;
-        case 'newsletter': loadNewsletter(); break;
-        case 'events': loadEvents(); break;
-        case 'categories': loadCategories(); break;
-        case 'chat': loadChat(); break;
-        case 'activity': loadActivity(); break;
-    }
-    
-    toggleSidebar();
-}
-
-// API calls
 async function apiGet(url) {
-    const res = await fetch(url, { credentials: 'include' });
-    if (!res.ok) throw new Error('API error');
+    var res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) throw new Error('API error ' + res.status);
     return res.json();
 }
 
 async function apiPost(url, data) {
-    const res = await fetch(url, {
+    var res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(data)
     });
-    if (!res.ok) throw new Error('API error');
+    if (!res.ok) throw new Error('API error ' + res.status);
     return res.json();
 }
 
-// Overview
+async function logout() {
+    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
+    location.href = '/user-login';
+}
+
+// ── HOME PAGE EDITOR ──
+async function loadHomeContent() {
+    try {
+        var pages = await apiGet('/api/admin/pages');
+        var home = pages.home || [];
+        var map = {};
+        home.forEach(function(s) { map[s.section] = s.content; });
+
+        if (map.hero) {
+            document.getElementById('heroBadge').value = map.hero.badge || '';
+            document.getElementById('heroHeadline').value = map.hero.headline || '';
+            document.getElementById('heroDesc').value = map.hero.description || '';
+            document.getElementById('heroBtnText').value = map.hero.btnText || '';
+            document.getElementById('heroBtnLink').value = map.hero.btnLink || '';
+            document.getElementById('heroBtn2Text').value = map.hero.btn2Text || '';
+        }
+        if (map.stats) {
+            document.getElementById('stat1Num').value = map.stats.stat1Num || '';
+            document.getElementById('stat1Label').value = map.stats.stat1Label || '';
+            document.getElementById('stat2Num').value = map.stats.stat2Num || '';
+            document.getElementById('stat2Label').value = map.stats.stat2Label || '';
+            document.getElementById('stat3Num').value = map.stats.stat3Num || '';
+            document.getElementById('stat3Label').value = map.stats.stat3Label || '';
+            document.getElementById('stat4Num').value = map.stats.stat4Num || '';
+            document.getElementById('stat4Label').value = map.stats.stat4Label || '';
+        }
+        if (map.features) {
+            document.getElementById('featuresTitle').value = map.features.title || '';
+            document.getElementById('featuresDesc').value = map.features.description || '';
+            featureCards = map.features.cards || [];
+            renderFeatureCards();
+        }
+        if (map.cta) {
+            document.getElementById('ctaTitle').value = map.cta.title || '';
+            document.getElementById('ctaDesc').value = map.cta.description || '';
+            document.getElementById('ctaBtnText').value = map.cta.btnText || '';
+            document.getElementById('ctaBtnLink').value = map.cta.btnLink || '';
+        }
+        if (map.footer) {
+            document.getElementById('footerBrand').value = map.footer.brand || '';
+            document.getElementById('footerTagline').value = map.footer.tagline || '';
+            document.getElementById('footerCredit').value = map.footer.credit || '';
+        }
+    } catch(e) { console.log('No saved home content yet'); }
+}
+
+async function saveHomeSection(section) {
+    try {
+        var content = {};
+        if (section === 'hero') {
+            content = {
+                badge: document.getElementById('heroBadge').value,
+                headline: document.getElementById('heroHeadline').value,
+                description: document.getElementById('heroDesc').value,
+                btnText: document.getElementById('heroBtnText').value,
+                btnLink: document.getElementById('heroBtnLink').value,
+                btn2Text: document.getElementById('heroBtn2Text').value
+            };
+        } else if (section === 'stats') {
+            content = {
+                stat1Num: document.getElementById('stat1Num').value,
+                stat1Label: document.getElementById('stat1Label').value,
+                stat2Num: document.getElementById('stat2Num').value,
+                stat2Label: document.getElementById('stat2Label').value,
+                stat3Num: document.getElementById('stat3Num').value,
+                stat3Label: document.getElementById('stat3Label').value,
+                stat4Num: document.getElementById('stat4Num').value,
+                stat4Label: document.getElementById('stat4Label').value
+            };
+        } else if (section === 'features') {
+            content = {
+                title: document.getElementById('featuresTitle').value,
+                description: document.getElementById('featuresDesc').value,
+                cards: featureCards
+            };
+        } else if (section === 'cta') {
+            content = {
+                title: document.getElementById('ctaTitle').value,
+                description: document.getElementById('ctaDesc').value,
+                btnText: document.getElementById('ctaBtnText').value,
+                btnLink: document.getElementById('ctaBtnLink').value
+            };
+        } else if (section === 'footer') {
+            content = {
+                brand: document.getElementById('footerBrand').value,
+                tagline: document.getElementById('footerTagline').value,
+                credit: document.getElementById('footerCredit').value
+            };
+        }
+
+        await apiPost('/api/admin/pages?section=' + section + '&page_name=home&display_order=0', content);
+        var statusEl = document.getElementById(section + 'Status');
+        if (statusEl) { statusEl.textContent = 'Saved ✓'; statusEl.className = 'status saved'; }
+        toast('Section saved! Changes are live.', 'success');
+    } catch(e) {
+        toast('Save failed: ' + e.message, 'error');
+    }
+}
+
+function renderFeatureCards() {
+    var container = document.getElementById('featuresCards');
+    if (!container) return;
+    container.innerHTML = featureCards.map(function(c, i) {
+        return '<div style="background:var(--main-bg);border:1px solid var(--main-border);border-radius:var(--radius);padding:16px;margin-bottom:12px">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+                '<span style="font-size:0.8rem;font-weight:700;color:var(--main-muted)">Feature ' + (i+1) + '</span>' +
+                '<button onclick="removeFeatureCard(' + i + ')" style="color:var(--danger);font-size:0.8rem"><i class="fas fa-trash"></i></button>' +
+            '</div>' +
+            '<div class="form-group" style="margin-bottom:8px"><label>Icon (emoji or class)</label><input type="text" class="form-input" value="' + escapeHtml(c.icon || '') + '" onchange="featureCards[' + i + '].icon=this.value" style="padding:8px 12px;font-size:0.85rem"></div>' +
+            '<div class="form-group" style="margin-bottom:8px"><label>Title</label><input type="text" class="form-input" value="' + escapeHtml(c.title || '') + '" onchange="featureCards[' + i + '].title=this.value" style="padding:8px 12px;font-size:0.85rem"></div>' +
+            '<div class="form-group" style="margin-bottom:0"><label>Description</label><textarea class="form-input" onchange="featureCards[' + i + '].description=this.value" style="padding:8px 12px;font-size:0.85rem;min-height:60px">' + escapeHtml(c.description || '') + '</textarea></div>' +
+        '</div>';
+    }).join('');
+}
+
+function addFeatureCard() {
+    featureCards.push({ icon: '📖', title: '', description: '' });
+    renderFeatureCards();
+}
+
+function removeFeatureCard(i) {
+    featureCards.splice(i, 1);
+    renderFeatureCards();
+}
+
+// ── OVERVIEW ──
 async function loadOverview() {
     try {
-        const [posts, files] = await Promise.all([
-            apiGet('/api/posts?limit=6').catch(() => []),
-            apiGet('/api/files?limit=6').catch(() => [])
-        ]);
-        
-        document.getElementById('statRegions').textContent = '16';
+        var posts = await apiGet('/api/posts?limit=6');
+        var regions = await apiGet('/api/regions');
+        var users = await apiGet('/api/admin/users').catch(function() { return []; });
+        var files = await apiGet('/api/files?limit=6').catch(function() { return []; });
+
+        document.getElementById('statRegions').textContent = regions.length || 0;
         document.getElementById('statPosts').textContent = posts.length || 0;
-        document.getElementById('statUsers').textContent = '-';
+        document.getElementById('statUsers').textContent = users.length || 0;
         document.getElementById('statFiles').textContent = files.length || 0;
-        
-        renderRecentPosts(posts);
-        renderRecentFiles(files);
-    } catch(e) {
-        toast('Failed to load dashboard data', 'error');
-    }
+
+        var tbody = document.getElementById('recentPostsTable');
+        if (posts.length) {
+            tbody.innerHTML = posts.slice(0, 5).map(function(p) {
+                return '<tr>' +
+                    '<td style="font-weight:600">' + escapeHtml(p.title) + '</td>' +
+                    '<td>' + escapeHtml(p.author_username) + '</td>' +
+                    '<td><span class="badge badge-gold">' + escapeHtml(p.content_type) + '</span></td>' +
+                    '<td>' + timeAgo(p.created_at) + '</td>' +
+                    '<td><a href="/post/' + p.id + '" target="_blank" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></a></td>' +
+                '</tr>';
+            }).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-newspaper"></i><p>No posts yet</p></td></tr>';
+        }
+    } catch(e) { toast('Failed to load overview', 'error'); }
 }
 
-function renderRecentPosts(posts) {
-    const tbody = document.getElementById('recentPostsTable');
-    if (!posts.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--main-muted)">No posts yet</td></tr>';
-        return;
-    }
-    tbody.innerHTML = posts.map(p => `
-        <tr>
-            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(p.title)}</td>
-            <td>${escapeHtml(p.author_username || 'User')}</td>
-            <td><span class="badge badge-muted">${p.content_type || 'article'}</span></td>
-            <td>${timeAgo(p.created_at)}</td>
-            <td><a href="/post/${p.id}" class="btn btn-sm btn-secondary" target="_blank">View</a></td>
-        </tr>
-    `).join('');
-}
-
-function renderRecentFiles(files) {
-    const tbody = document.getElementById('recentFilesTable');
-    if (!files.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--main-muted)">No files uploaded</td></tr>';
-        return;
-    }
-    tbody.innerHTML = files.map(f => `
-        <tr>
-            <td><i class="fas fa-${getFileIcon(f.type)}"></i> ${escapeHtml(f.name)}</td>
-            <td>${f.type || 'file'}</td>
-            <td>${formatFileSize(f.size)}</td>
-            <td>${timeAgo(f.created_at)}</td>
-            <td><button class="btn btn-sm btn-secondary" onclick="viewFile('${f.url || f.id}')">View</button></td>
-        </tr>
-    `).join('');
-}
-
-// All Posts
+// ── POSTS ──
 async function loadAllPosts() {
-    const tbody = document.getElementById('allPostsTable');
-    tbody.innerHTML = '<tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr>';
     try {
-        const posts = await apiGet('/api/posts?limit=50');
-        if (!posts.length) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--main-muted)">No posts found</td></tr>';
-            return;
+        var posts = await apiGet('/api/posts?limit=100');
+        var tbody = document.getElementById('allPostsTable');
+        if (posts.length) {
+            tbody.innerHTML = posts.map(function(p) {
+                return '<tr>' +
+                    '<td style="font-weight:600">' + escapeHtml(p.title) + '</td>' +
+                    '<td>' + escapeHtml(p.author_username) + '</td>' +
+                    '<td><span class="badge badge-gold">' + escapeHtml(p.content_type) + '</span></td>' +
+                    '<td><span class="badge ' + (p.status === 'published' ? 'badge-success' : 'badge-muted') + '">' + escapeHtml(p.status) + '</span></td>' +
+                    '<td>' + (p.views || 0) + '</td>' +
+                    '<td>' + timeAgo(p.created_at) + '</td>' +
+                    '<td><a href="/post/' + p.id + '" target="_blank" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></a></td>' +
+                '</tr>';
+            }).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fas fa-newspaper"></i><p>No posts yet</p></td></tr>';
         }
-        tbody.innerHTML = posts.map(p => `
-            <tr>
-                <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(p.title)}</td>
-                <td>${escapeHtml(p.author_username || 'User')}</td>
-                <td><span class="badge badge-muted">${p.content_type || 'article'}</span></td>
-                <td><span class="badge ${p.status === 'published' ? 'badge-success' : 'badge-muted'}">${p.status || 'published'}</span></td>
-                <td>${p.views || 0}</td>
-                <td>${timeAgo(p.created_at)}</td>
-                <td><a href="/post/${p.id}" class="btn btn-sm btn-secondary" target="_blank">View</a></td>
-            </tr>
-        `).join('');
-    } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--danger)">Failed to load posts</td></tr>';
-    }
+    } catch(e) { toast('Failed to load posts', 'error'); }
 }
 
-// Stories
-async function loadStories() {
-    const tbody = document.getElementById('storiesTable');
-    tbody.innerHTML = '<tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr>';
+async function publishPost() {
+    var title = document.getElementById('writeTitle').value.trim();
+    var content = document.getElementById('writeContent').value.trim();
+    if (!title || !content) { toast('Title and content required', 'error'); return; }
+    var formData = new FormData();
+    formData.append('title', title);
+    formData.append('content', content);
+    formData.append('excerpt', document.getElementById('writeExcerpt').value);
+    formData.append('content_type', document.getElementById('writeType').value);
+    formData.append('status', document.getElementById('writeStatus').value);
+    formData.append('region_id', document.getElementById('writeRegion').value);
+    formData.append('tags', document.getElementById('writeTags').value);
+    formData.append('cover_image', document.getElementById('writeCover').value);
     try {
-        const stories = await apiGet('/api/stories').catch(() => []);
-        if (!stories.length) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--main-muted)">No story submissions</td></tr>';
-            return;
-        }
-        tbody.innerHTML = stories.map(s => `
-            <tr>
-                <td>${escapeHtml(s.title)}</td>
-                <td>${escapeHtml(s.author_username || 'User')}</td>
-                <td>${escapeHtml(s.region || '-')}</td>
-                <td>${timeAgo(s.created_at)}</td>
-                <td><button class="btn btn-sm btn-secondary">Review</button></td>
-            </tr>
-        `).join('');
-    } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--main-muted)">No story submissions</td></tr>';
-    }
+        var res = await fetch('/api/posts', { method: 'POST', credentials: 'include', body: formData });
+        var data = await res.json();
+        if (data.success) {
+            toast('Published! 🚀', 'success');
+            document.getElementById('writeTitle').value = '';
+            document.getElementById('writeContent').value = '';
+            document.getElementById('writeExcerpt').value = '';
+            loadAllPosts();
+            loadOverview();
+        } else { toast(data.detail || 'Failed', 'error'); }
+    } catch(e) { toast('Publish failed', 'error'); }
 }
 
-// Files
-let allFiles = [];
+async function savePostDraft() {
+    var title = document.getElementById('writeTitle').value.trim();
+    var content = document.getElementById('writeContent').value.trim();
+    if (!title) { toast('Title required', 'error'); return; }
+    var formData = new FormData();
+    formData.append('title', title);
+    formData.append('content', content);
+    formData.append('excerpt', document.getElementById('writeExcerpt').value);
+    formData.append('content_type', document.getElementById('writeType').value);
+    formData.append('status', 'draft');
+    formData.append('region_id', document.getElementById('writeRegion').value);
+    formData.append('tags', document.getElementById('writeTags').value);
+    formData.append('cover_image', document.getElementById('writeCover').value);
+    try {
+        var res = await fetch('/api/posts', { method: 'POST', credentials: 'include', body: formData });
+        var data = await res.json();
+        if (data.success) { toast('Draft saved 💾', 'success'); }
+    } catch(e) { toast('Save failed', 'error'); }
+}
 
+// ── FILES ──
 async function loadFiles() {
-    const grid = document.getElementById('fileGrid');
-    grid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     try {
-        allFiles = await apiGet('/api/files').catch(() => []);
-        renderFiles(allFiles);
-    } catch(e) {
-        grid.innerHTML = '<div class="empty-state"><p>Failed to load files</p></div>';
-    }
-}
-
-function renderFiles(files) {
-    const grid = document.getElementById('fileGrid');
-    if (!files.length) {
-        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>No files uploaded yet</p></div>';
-        return;
-    }
-    grid.innerHTML = files.map(f => `
-        <div class="file-card">
-            <div class="file-thumb">
-                ${f.type === 'image' ? `<img src="${escapeHtml(f.url)}" alt="">` : `<i class="fas fa-${getFileIcon(f.type)}"></i>`}
-            </div>
-            <div class="file-info">
-                <div class="file-name">${escapeHtml(f.name)}</div>
-                <div class="file-meta">${formatFileSize(f.size)}</div>
-            </div>
-            <div class="file-actions">
-                <button class="btn btn-sm btn-secondary" onclick="viewFile('${escapeHtml(f.url || f.id)}')"><i class="fas fa-eye"></i></button>
-                <button class="btn btn-sm btn-secondary" onclick="showPublishModal('${f.id}')"><i class="fas fa-upload"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="showDelete('${f.id}', 'file')"><i class="fas fa-trash"></i></button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function filterFiles() {
-    const search = document.getElementById('fileSearch').value.toLowerCase();
-    const category = document.getElementById('fileCategory').value;
-    const filtered = allFiles.filter(f => {
-        const matchSearch = f.name.toLowerCase().includes(search);
-        const matchCat = !category || f.type === category;
-        return matchSearch && matchCat;
-    });
-    renderFiles(filtered);
+        var files = await apiGet('/api/files?limit=100');
+        var grid = document.getElementById('fileGrid');
+        if (files.length) {
+            grid.innerHTML = files.map(function(f) {
+                var isImg = f.mime_type && f.mime_type.startsWith('image');
+                var thumb = isImg ? '<img src="' + escapeHtml(f.url || f.file_path) + '" alt="">' : '<i class="fas fa-file"></i>';
+                return '<div class="file-card">' +
+                    '<div class="file-thumb">' + thumb + '</div>' +
+                    '<div class="file-info"><div class="file-name">' + escapeHtml(f.original_name || f.filename) + '</div><div class="file-meta">' + (f.mime_type || '') + '</div></div>' +
+                    '<div class="file-actions">' +
+                        '<button class="btn btn-sm btn-secondary" onclick="previewFile(\'' + escapeHtml(f.url || f.file_path) + '\',\'' + escapeHtml(f.original_name || '') + '\')"><i class="fas fa-eye"></i></button>' +
+                        '<button class="btn btn-sm btn-secondary" onclick="copyUrl(\'' + escapeHtml(f.url || f.file_path) + '\')"><i class="fas fa-copy"></i></button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        } else {
+            grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>No files uploaded</p></div>';
+        }
+    } catch(e) { toast('Failed to load files', 'error'); }
 }
 
 async function handleFileUpload(files) {
-    const progressEl = document.getElementById('uploadProgress');
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const itemId = 'upload-' + Date.now() + i;
-        progressEl.innerHTML += `
-            <div class="progress-item" id="${itemId}">
-                <div class="progress-item-header"><span>${escapeHtml(file.name)}</span><span id="${itemId}-pct">0%</span></div>
-                <div class="progress-bar"><div class="progress-fill" id="${itemId}-bar" style="width:0%"></div></div>
-            </div>
-        `;
-        
+    for (var i = 0; i < files.length; i++) {
+        var formData = new FormData();
+        formData.append('file', files[i]);
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('category', 'general');
-            formData.append('description', file.name);
-            
-            const xhr = new XMLHttpRequest();
-            xhr.upload.onprogress = (e) => {
-                if (e.lengthComputable) {
-                    const pct = Math.round((e.loaded / e.total) * 100);
-                    document.getElementById(itemId + '-pct').textContent = pct + '%';
-                    document.getElementById(itemId + '-bar').style.width = pct + '%';
-                }
-            };
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    document.getElementById(itemId).remove();
-                    if (!document.querySelector('.progress-item')) loadFiles();
-                } else {
-                    toast('Upload failed: ' + file.name, 'error');
-                }
-            };
-            xhr.open('POST', '/api/upload/file');
-            xhr.withCredentials = true;
-            xhr.send(formData);
-        } catch(e) {
-            toast('Upload error: ' + file.name, 'error');
-        }
+            await fetch('/api/files', { method: 'POST', credentials: 'include', body: formData });
+        } catch(e) { toast('Upload failed for ' + files[i].name, 'error'); }
     }
+    toast('Upload complete', 'success');
+    loadFiles();
 }
 
-// Regions
+function previewFile(url, name) {
+    currentFileUrl = url;
+    document.getElementById('mediaModalTitle').textContent = name;
+    var isImg = url.match(/\.(jpg|jpeg|png|gif|webp|svg)/i);
+    document.getElementById('mediaPreview').innerHTML = isImg ? '<img src="' + escapeHtml(url) + '" alt="">' : '<div style="padding:40px;text-align:center"><i class="fas fa-file" style="font-size:3rem;color:var(--main-muted)"></i></div>';
+    document.getElementById('mediaInfo').textContent = url;
+    document.getElementById('mediaModal').classList.add('show');
+}
+
+function closeMediaModal() { document.getElementById('mediaModal').classList.remove('show'); }
+function copyMediaUrl() { navigator.clipboard.writeText(currentFileUrl); toast('URL copied', 'success'); }
+function openMediaNewTab() { window.open(currentFileUrl, '_blank'); }
+function copyUrl(url) { navigator.clipboard.writeText(url); toast('URL copied', 'success'); }
+
+// ── REGIONS ──
 async function loadRegions() {
-    const tbody = document.getElementById('regionsTable');
-    tbody.innerHTML = '<tr><td colspan="4" class="loading"><div class="spinner"></div></td></tr>';
     try {
-        const regions = await apiGet('/api/regions').catch(() => []);
-        if (!regions.length) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--main-muted)">No regions found</td></tr>';
-            return;
-        }
-        tbody.innerHTML = regions.map(r => `
-            <tr>
-                <td>${escapeHtml(r.name)}</td>
-                <td>${escapeHtml(r.capital || '-')}</td>
-                <td>${escapeHtml(r.category || '-')}</td>
-                <td>
-                    <button class="btn btn-sm btn-secondary" onclick="editRegion('${r.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick="showDelete('${r.id}', 'region')"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        `).join('');
-    } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--main-muted)">No regions found</td></tr>';
-    }
+        var regions = await apiGet('/api/regions');
+        var tbody = document.getElementById('regionsTable');
+        tbody.innerHTML = regions.map(function(r) {
+            return '<tr>' +
+                '<td style="font-weight:600">' + escapeHtml(r.name) + '</td>' +
+                '<td>' + escapeHtml(r.capital) + '</td>' +
+                '<td><span class="badge badge-info">' + escapeHtml(r.category || '-') + '</span></td>' +
+                '<td><button class="btn btn-sm btn-secondary" onclick="editRegion(' + r.id + ')"><i class="fas fa-edit"></i></button> ' +
+                '<button class="btn btn-sm btn-danger" onclick="deleteItem(' + r.id + ',\'region\')"><i class="fas fa-trash"></i></button></td>' +
+            '</tr>';
+        }).join('');
+    } catch(e) { toast('Failed to load regions', 'error'); }
 }
 
-function showRegionForm() {
-    document.getElementById('regionForm').style.display = 'block';
-    document.getElementById('regionFormTitle').textContent = 'Add Region';
-    document.getElementById('regionId').value = '';
-    ['regionName','regionCapital','regionPopulation','regionTerrain','regionCategory','regionTags','regionDescription','regionHero','regionGallery'].forEach(id => document.getElementById(id).value = '');
-}
+function showRegionForm() { document.getElementById('regionForm').style.display = 'block'; document.getElementById('regionFormTitle').textContent = 'Add Region'; }
+function hideRegionForm() { document.getElementById('regionForm').style.display = 'none'; clearRegionForm(); }
+function clearRegionForm() { ['regionId','regionName','regionCapital','regionPopulation','regionTerrain','regionCategory','regionTags','regionDescription','regionHero'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; }); }
 
-function hideRegionForm() {
-    document.getElementById('regionForm').style.display = 'none';
+async function editRegion(id) {
+    try {
+        var r = await apiGet('/api/admin/regions/' + id);
+        document.getElementById('regionId').value = r.id;
+        document.getElementById('regionName').value = r.name || '';
+        document.getElementById('regionCapital').value = r.capital || '';
+        document.getElementById('regionPopulation').value = r.population || '';
+        document.getElementById('regionTerrain').value = r.terrain || '';
+        document.getElementById('regionCategory').value = r.category || '';
+        document.getElementById('regionTags').value = r.tags || '';
+        document.getElementById('regionDescription').value = r.description || '';
+        document.getElementById('regionHero').value = r.hero_image || '';
+        document.getElementById('regionFormTitle').textContent = 'Edit Region';
+        document.getElementById('regionForm').style.display = 'block';
+    } catch(e) { toast('Failed to load region', 'error'); }
 }
 
 async function saveRegion() {
-    const id = document.getElementById('regionId').value;
-    const data = {
+    var id = document.getElementById('regionId').value;
+    var data = {
         name: document.getElementById('regionName').value,
         capital: document.getElementById('regionCapital').value,
         population: document.getElementById('regionPopulation').value,
@@ -1411,432 +1285,119 @@ async function saveRegion() {
         category: document.getElementById('regionCategory').value,
         tags: document.getElementById('regionTags').value,
         description: document.getElementById('regionDescription').value,
-        hero_image: document.getElementById('regionHero').value,
-        gallery_images: document.getElementById('regionGallery').value
+        hero_image: document.getElementById('regionHero').value
     };
-    
-    if (!data.name) { toast('Name is required', 'error'); return; }
-    
     try {
-        const url = id ? `/api/admin/regions/${id}` : '/api/admin/regions';
-        const method = id ? 'PUT' : 'POST';
-        await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data) });
-        toast('Region saved!', 'success');
+        var url = id ? '/api/admin/regions/' + id : '/api/admin/regions';
+        var method = id ? 'PUT' : 'POST';
+        await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data) });
+        toast('Region saved', 'success');
         hideRegionForm();
         loadRegions();
-    } catch(e) {
-        toast('Failed to save region', 'error');
-    }
+    } catch(e) { toast('Save failed', 'error'); }
 }
 
-async function editRegion(id) {
-    try {
-        const r = await apiGet(`/api/admin/regions/${id}`);
-        document.getElementById('regionFormTitle').textContent = 'Edit Region';
-        document.getElementById('regionId').value = id;
-        document.getElementById('regionName').value = r.name || '';
-        document.getElementById('regionCapital').value = r.capital || '';
-        document.getElementById('regionPopulation').value = r.population || '';
-        document.getElementById('regionTerrain').value = r.terrain || '';
-        document.getElementById('regionCategory').value = r.category || '';
-        document.getElementById('regionTags').value = (r.tags || []).join(', ');
-        document.getElementById('regionDescription').value = r.description || '';
-        document.getElementById('regionHero').value = r.hero_image || '';
-        document.getElementById('regionGallery').value = (r.gallery_images || []).join(', ');
-        document.getElementById('regionForm').style.display = 'block';
-    } catch(e) {
-        toast('Failed to load region', 'error');
-    }
-}
-
-// Users
+// ── USERS ──
 async function loadUsers() {
-    const tbody = document.getElementById('usersTable');
-    tbody.innerHTML = '<tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr>';
     try {
-        const users = await apiGet('/api/admin/users').catch(() => []);
-        if (!users.length) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--main-muted)">No users found</td></tr>';
-            return;
-        }
-        tbody.innerHTML = users.map(u => `
-            <tr>
-                <td><strong>${escapeHtml(u.username)}</strong></td>
-                <td>${escapeHtml(u.email)}</td>
-                <td>
-                    <select class="form-select" style="padding:4px 8px;font-size:0.75rem;min-height:28px" onchange="changeRole('${u.id}', this.value)">
-                        <option value="user" ${u.role === 'user' ? 'selected' : ''}>User</option>
-                        <option value="creator" ${u.role === 'creator' ? 'selected' : ''}>Creator</option>
-                        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
-                    </select>
-                </td>
-                <td>
-                    <div class="toggle ${u.is_premium ? 'active' : ''}" onclick="togglePremium('${u.id}', this)"></div>
-                </td>
-                <td>${timeAgo(u.created_at)}</td>
-                <td>
-                    ${!u.email_verified ? `<button class="btn btn-sm btn-success" onclick="verifyUser('${u.id}')"><i class="fas fa-check"></i></button>` : ''}
-                    <button class="btn btn-sm btn-danger" onclick="showDelete('${u.id}', 'user')"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        `).join('');
-    } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--main-muted)">Failed to load users</td></tr>';
-    }
+        var users = await apiGet('/api/admin/users');
+        var tbody = document.getElementById('usersTable');
+        tbody.innerHTML = users.map(function(u) {
+            return '<tr>' +
+                '<td style="font-weight:600">' + escapeHtml(u.username) + '</td>' +
+                '<td>' + escapeHtml(u.email) + '</td>' +
+                '<td><span class="badge ' + (u.role === 'admin' ? 'badge-danger' : u.role === 'creator' ? 'badge-gold' : 'badge-muted') + '">' + escapeHtml(u.role) + '</span></td>' +
+                '<td><span class="badge ' + (u.is_premium ? 'badge-success' : 'badge-muted') + '">' + (u.is_premium ? 'Yes' : 'No') + '</span></td>' +
+                '<td>' + timeAgo(u.created_at) + '</td>' +
+                '<td><button class="btn btn-sm btn-secondary" onclick="toggleRole(\'' + u.id + '\',\'' + u.role + '\')"><i class="fas fa-user-edit"></i></button></td>' +
+            '</tr>';
+        }).join('');
+    } catch(e) { toast('Failed to load users', 'error'); }
 }
 
-async function changeRole(uid, role) {
+async function toggleRole(uid, role) {
+    var newRole = role === 'creator' ? 'user' : 'creator';
     try {
-        await fetch(`/api/admin/users/${uid}/role`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ role }) });
-        toast('Role updated', 'success');
-    } catch(e) { toast('Failed to update role', 'error'); }
-}
-
-async function togglePremium(uid, el) {
-    const active = el.classList.contains('active');
-    try {
-        await fetch(`/api/admin/users/${uid}/premium`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ is_premium: !active }) });
-        el.classList.toggle('active');
-        toast(active ? 'Premium removed' : 'Premium granted', 'success');
-    } catch(e) { toast('Failed to update premium', 'error'); }
-}
-
-async function verifyUser(uid) {
-    try {
-        await fetch(`/api/admin/users/${uid}/verify`, { method: 'POST', credentials: 'include' });
-        toast('User verified', 'success');
+        await fetch('/api/admin/users/' + uid + '/role', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ role: newRole }) });
+        toast('Role updated to ' + newRole, 'success');
         loadUsers();
-    } catch(e) { toast('Failed to verify user', 'error'); }
+    } catch(e) { toast('Failed', 'error'); }
 }
 
-// Creators
 async function loadCreators() {
-    const tbody = document.getElementById('creatorsTable');
-    tbody.innerHTML = '<tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr>';
     try {
-        const creators = await apiGet('/api/creators').catch(() => []);
-        if (!creators.length) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--main-muted)">No creators found</td></tr>';
-            return;
-        }
-        tbody.innerHTML = creators.map(c => `
-            <tr>
-                <td><strong>${escapeHtml(c.username)}</strong></td>
-                <td>${escapeHtml(c.email || '-')}</td>
-                <td>-</td>
-                <td>${timeAgo(c.created_at)}</td>
-                <td><a href="/creator/${c.id}" class="btn btn-sm btn-secondary" target="_blank">View Channel</a></td>
-            </tr>
-        `).join('');
-    } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--main-muted)">No creators found</td></tr>';
-    }
+        var creators = await apiGet('/api/creators');
+        var tbody = document.getElementById('creatorsTable');
+        tbody.innerHTML = creators.map(function(u) {
+            return '<tr>' +
+                '<td style="font-weight:600">' + escapeHtml(u.username) + '</td>' +
+                '<td>' + escapeHtml(u.email) + '</td>' +
+                '<td>' + (u.follower_count || 0) + '</td>' +
+                '<td>' + timeAgo(u.created_at) + '</td>' +
+                '<td><a href="/user/' + escapeHtml(u.username) + '" target="_blank" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></a></td>' +
+            '</tr>';
+        }).join('');
+    } catch(e) { toast('Failed to load creators', 'error'); }
 }
 
-// Newsletter
-async function loadNewsletter() {
-    const tbody = document.getElementById('newsletterTable');
-    tbody.innerHTML = '<tr><td colspan="3" class="loading"><div class="spinner"></div></td></tr>';
-    try {
-        const subs = await apiGet('/api/newsletter/subscribers').catch(() => []);
-        if (!subs.length) {
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--main-muted)">No subscribers</td></tr>';
-            return;
-        }
-        tbody.innerHTML = subs.map(s => `
-            <tr>
-                <td>${escapeHtml(s.email)}</td>
-                <td>${timeAgo(s.subscribed_at || s.created_at)}</td>
-                <td><button class="btn btn-sm btn-danger" onclick="showDelete('${s.id}', 'subscriber')"><i class="fas fa-trash"></i></button></td>
-            </tr>
-        `).join('');
-    } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--main-muted)">No subscribers</td></tr>';
-    }
-}
-
-// Events
-async function loadEvents() {
-    const tbody = document.getElementById('eventsTable');
-    tbody.innerHTML = '<tr><td colspan="3" class="loading"><div class="spinner"></div></td></tr>';
-    try {
-        const events = await apiGet('/api/events').catch(() => []);
-        if (!events.length) {
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--main-muted)">No events</td></tr>';
-            return;
-        }
-        tbody.innerHTML = events.map(e => `
-            <tr>
-                <td>${escapeHtml(e.title)}</td>
-                <td>${e.date || '-'}</td>
-                <td><button class="btn btn-sm btn-danger" onclick="showDelete('${e.id}', 'event')"><i class="fas fa-trash"></i></button></td>
-            </tr>
-        `).join('');
-    } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--main-muted)">No events</td></tr>';
-    }
-}
-
-async function addEvent() {
-    const data = {
-        title: document.getElementById('eventTitle').value,
-        location: document.getElementById('eventLocation').value,
-        date: document.getElementById('eventDate').value,
-        description: document.getElementById('eventDesc').value
-    };
-    if (!data.title) { toast('Title is required', 'error'); return; }
-    try {
-        await fetch('/api/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data) });
-        toast('Event added', 'success');
-        ['eventTitle','eventLocation','eventDate','eventDesc'].forEach(id => document.getElementById(id).value = '');
-        loadEvents();
-    } catch(e) { toast('Failed to add event', 'error'); }
-}
-
-// Categories
-async function loadCategories() {
-    const tbody = document.getElementById('categoriesTable');
-    tbody.innerHTML = '<tr><td colspan="2" class="loading"><div class="spinner"></div></td></tr>';
-    try {
-        const cats = await apiGet('/api/categories').catch(() => []);
-        if (!cats.length) {
-            tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:24px;color:var(--main-muted)">No categories</td></tr>';
-            return;
-        }
-        tbody.innerHTML = cats.map(c => `
-            <tr>
-                <td>${escapeHtml(c.name)}</td>
-                <td><button class="btn btn-sm btn-danger" onclick="showDelete('${c.id}', 'category')"><i class="fas fa-trash"></i></button></td>
-            </tr>
-        `).join('');
-    } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:24px;color:var(--main-muted)">No categories</td></tr>';
-    }
-}
-
-async function addCategory() {
-    const name = document.getElementById('catName').value;
-    if (!name) { toast('Name is required', 'error'); return; }
-    try {
-        await fetch('/api/categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name }) });
-        toast('Category added', 'success');
-        document.getElementById('catName').value = '';
-        loadCategories();
-    } catch(e) { toast('Failed to add category', 'error'); }
-}
-
-// Chat
-async function loadChat() {
-    const tbody = document.getElementById('chatTable');
-    tbody.innerHTML = '<tr><td colspan="3" class="loading"><div class="spinner"></div></td></tr>';
-    try {
-        const msgs = await apiGet('/api/chat').catch(() => []);
-        if (!msgs.length) {
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--main-muted)">No messages</td></tr>';
-            return;
-        }
-        tbody.innerHTML = msgs.map(m => `
-            <tr>
-                <td>${escapeHtml(m.username || m.user_username || 'User')}</td>
-                <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(m.content || m.message)}</td>
-                <td>${timeAgo(m.created_at)}</td>
-            </tr>
-        `).join('');
-    } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--main-muted)">No messages</td></tr>';
-    }
-}
-
-// Activity
+// ── ACTIVITY ──
 async function loadActivity() {
-    const tbody = document.getElementById('activityTable');
-    tbody.innerHTML = '<tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr>';
     try {
-        const logs = await apiGet('/api/admin/logs').catch(() => []);
-        if (!logs.length) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--main-muted)">No activity logs</td></tr>';
-            return;
+        var logs = await apiGet('/api/admin/logs').catch(function() { return []; });
+        var tbody = document.getElementById('activityTable');
+        if (logs.length) {
+            tbody.innerHTML = logs.slice(0, 50).map(function(l) {
+                return '<tr>' +
+                    '<td>' + timeAgo(l.created_at) + '</td>' +
+                    '<td>' + escapeHtml(l.admin_username || 'Admin') + '</td>' +
+                    '<td><span class="badge badge-info">' + escapeHtml(l.action) + '</span></td>' +
+                    '<td>' + escapeHtml(l.target_type + '/' + l.target_id) + '</td>' +
+                    '<td>' + escapeHtml(l.ip_address || '-') + '</td>' +
+                '</tr>';
+            }).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-history"></i><p>No activity yet</p></td></tr>';
         }
-        tbody.innerHTML = logs.map(l => `
-            <tr>
-                <td>${timeAgo(l.created_at)}</td>
-                <td>${escapeHtml(l.admin_username || 'Admin')}</td>
-                <td>${escapeHtml(l.action)}</td>
-                <td>${escapeHtml(l.target || '-')}</td>
-                <td><code style="font-size:0.75rem">${escapeHtml(l.ip || '-')}</code></td>
-            </tr>
-        `).join('');
-    } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--main-muted)">No activity logs</td></tr>';
-    }
+    } catch(e) { toast('Failed to load activity', 'error'); }
 }
 
-// Write Post
-async function publishPost() {
-    const data = {
-        title: document.getElementById('writeTitle').value,
-        excerpt: document.getElementById('writeExcerpt').value,
-        content: document.getElementById('writeContent').value,
-        content_type: document.getElementById('writeType').value,
-        status: document.getElementById('writeStatus').value,
-        region: document.getElementById('writeRegion').value,
-        tags: document.getElementById('writeTags').value.split(',').map(t => t.trim()).filter(Boolean),
-        media_url: document.getElementById('writeCover').value
-    };
-    if (!data.title || !data.content) { toast('Title and content are required', 'error'); return; }
-    try {
-        await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data) });
-        toast('Post published!', 'success');
-        ['writeTitle','writeExcerpt','writeContent','writeCover','writeTags'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('writeRegion').value = '';
-        document.getElementById('writeType').value = 'article';
-        document.getElementById('writeStatus').value = 'published';
-    } catch(e) { toast('Failed to publish post', 'error'); }
-}
-
-async function savePostDraft() {
-    toast('Draft saved!', 'success');
-}
-
-// Media Modal
-function viewFile(url) {
-    currentFileUrl = url;
-    const modal = document.getElementById('mediaModal');
-    const preview = document.getElementById('mediaPreview');
-    const info = document.getElementById('mediaInfo');
-    const title = document.getElementById('mediaModalTitle');
-    
-    title.textContent = 'File Preview';
-    info.textContent = '';
-    
-    const ext = url.split('.').pop().toLowerCase();
-    if (['jpg','jpeg','png','gif','webp','svg'].includes(ext)) {
-        preview.innerHTML = `<img src="${escapeHtml(url)}" alt="">`;
-    } else if (['mp4','webm','mov'].includes(ext)) {
-        preview.innerHTML = `<video src="${escapeHtml(url)}" controls></video>`;
-    } else {
-        preview.innerHTML = `<div style="padding:40px;text-align:center"><i class="fas fa-file" style="font-size:4rem;color:var(--main-muted)"></i></div>`;
-    }
-    
-    modal.classList.add('show');
-}
-
-function closeMediaModal() {
-    document.getElementById('mediaModal').classList.remove('show');
-}
-
-function copyMediaUrl() {
-    navigator.clipboard.writeText(currentFileUrl);
-    toast('URL copied!', 'success');
-}
-
-function openMediaNewTab() {
-    window.open(currentFileUrl, '_blank');
-}
-
-// Publish Modal
-function showPublishModal(fileId) {
-    document.getElementById('publishFileId').value = fileId;
-    document.getElementById('publishTitle').value = '';
-    document.getElementById('publishDesc').value = '';
-    document.getElementById('publishModal').classList.add('show');
-}
-
-function closePublishModal() {
-    document.getElementById('publishModal').classList.remove('show');
-}
-
-async function confirmPublish() {
-    const fileId = document.getElementById('publishFileId').value;
-    const data = {
-        title: document.getElementById('publishTitle').value,
-        description: document.getElementById('publishDesc').value,
-        region: document.getElementById('publishRegion').value
-    };
-    if (!data.title) { toast('Title is required', 'error'); return; }
-    try {
-        await fetch(`/api/admin/publish-file/${fileId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data) });
-        toast('File published as post!', 'success');
-        closePublishModal();
-    } catch(e) { toast('Failed to publish', 'error'); }
-}
-
-// Delete Modal
-function showDelete(id, type) {
+// ── DELETE ──
+function deleteItem(id, type) {
     document.getElementById('deleteTarget').value = id;
     document.getElementById('deleteType').value = type;
     document.getElementById('deleteModal').classList.add('show');
 }
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.remove('show');
-}
-
+function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('show'); }
 async function confirmDelete() {
-    const id = document.getElementById('deleteTarget').value;
-    const type = document.getElementById('deleteType').value;
-    
-    const endpoints = { file: '/api/files', region: '/api/admin/regions', user: '/api/admin/users', subscriber: '/api/newsletter', event: '/api/events', category: '/api/categories' };
-    const endpoint = endpoints[type];
-    if (!endpoint) { toast('Unknown type', 'error'); return; }
-    
+    var id = document.getElementById('deleteTarget').value;
+    var type = document.getElementById('deleteType').value;
+    var endpoints = { region: '/api/admin/regions', file: '/api/files' };
     try {
-        await fetch(`${endpoint}/${id}`, { method: 'DELETE', credentials: 'include' });
-        toast('Deleted successfully', 'success');
+        await fetch(endpoints[type] + '/' + id, { method: 'DELETE', credentials: 'include' });
+        toast('Deleted', 'success');
         closeDeleteModal();
-        // Reload current panel
-        const activePanel = document.querySelector('.sidebar-link.active');
-        if (activePanel) showPanel(activePanel.dataset.panel, activePanel);
+        if (type === 'region') loadRegions();
+        if (type === 'file') loadFiles();
     } catch(e) { toast('Delete failed', 'error'); }
 }
 
-// Logout
-async function logout() {
-    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
-    location.href = '/user-login';
-}
+// ── INIT ──
+loadOverview();
+loadHomeContent();
+loadAllPosts();
+loadFiles();
+loadRegions();
+loadUsers();
+loadCreators();
+loadActivity();
 
-// Utils
-function getFileIcon(type) {
-    switch(type) {
-        case 'image': return 'image';
-        case 'video': return 'video';
-        case 'audio': return 'music';
-        case 'pdf': return 'file-pdf';
-        case 'doc': return 'file-word';
-        default: return 'file';
-    }
+// Upload zone drag
+var zone = document.getElementById('uploadZone');
+if (zone) {
+    zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+    zone.addEventListener('drop', function(e) { e.preventDefault(); zone.classList.remove('dragover'); handleFileUpload(e.dataTransfer.files); });
 }
-
-function formatFileSize(bytes) {
-    if (!bytes) return '0 B';
-    const k = 1024;
-    const sizes = ['B','KB','MB','GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-}
-
-// Init
-document.addEventListener('DOMContentLoaded', () => {
-    loadOverview();
-    
-    // Drag and drop
-    const zone = document.getElementById('uploadZone');
-    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
-    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-    zone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        zone.classList.remove('dragover');
-        handleFileUpload(e.dataTransfer.files);
-    });
-    
-    // Close modals on overlay click
-    document.querySelectorAll('.modal-overlay').forEach(m => {
-        m.addEventListener('click', (e) => {
-            if (e.target === m) m.classList.remove('show');
-        });
-    });
-});
 </script>
 </body>
 </html>
