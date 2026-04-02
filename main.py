@@ -2669,6 +2669,150 @@ async def ai_chat(
         import traceback
         traceback.print_exc()
         return {"reply": "EchoBot is currently resting. Please try again in a few minutes.", "locked": False}
+
+# ─── ECHOBOT WITH SCREEN SHARE & DATABASE-FIRST LOGIC ───────────────────────
+@app.post("/api/chatbot")
+async def chatbot_endpoint(
+    request: Request,
+    data: dict,
+    db: Session = Depends(get_db)
+):
+    """
+    EchoBot endpoint with:
+    - Database-first answering logic
+    - Screen share image support
+    - Returns structured sources with URLs
+    """
+    message = data.get("message", "")
+    screen_image = data.get("screen_image")  # Base64 image from screen share
+    
+    # 1. DATABASE SEARCH - Always search first
+    sources = []
+    db_answer = ""
+    
+    try:
+        # Search posts
+        posts = db.query(models.Post).filter(
+            models.Post.status == "published",
+            or_(
+                models.Post.title.ilike(f"%{message}%"),
+                models.Post.content.ilike(f"%{message}%"),
+                models.Post.tags.ilike(f"%{message}%")
+            )
+        ).limit(3).all()
+        
+        for post in posts:
+            sources.append({
+                "title": f"📄 {post.title}",
+                "url": f"/read/{post.id}",
+                "type": "post",
+                "content_type": post.content_type
+            })
+            if not db_answer:
+                db_answer = f"According to our article '{post.title}': {post.content[:200]}..."
+        
+        # Search FAQ
+        faqs = db.query(models.FAQ).filter(
+            or_(
+                models.FAQ.question.ilike(f"%{message}%"),
+                models.FAQ.answer.ilike(f"%{message}%")
+            )
+        ).limit(2).all()
+        
+        for faq in faqs:
+            sources.append({
+                "title": f"❓ FAQ: {faq.question[:50]}",
+                "url": "/faq",
+                "type": "faq"
+            })
+            if not db_answer:
+                db_answer = faq.answer[:200]
+        
+        # Search users/creators
+        users = db.query(models.User).filter(
+            or_(
+                models.User.username.ilike(f"%{message}%"),
+                models.User.full_name.ilike(f"%{message}%")
+            )
+        ).limit(2).all()
+        
+        for user in users:
+            sources.append({
+                "title": f"👤 {user.full_name or user.username}",
+                "url": f"/user/{user.username}",
+                "type": "user"
+            })
+    
+    except Exception as e:
+        print(f"⚠️ Database search error: {e}")
+    
+    # 2. HANDLE SCREEN IMAGE (for future AI vision processing)
+    screen_context = ""
+    if screen_image:
+        # Log that screen was shared (can be processed by AI vision later)
+        print(f"📸 Screen image received: {len(screen_image)} bytes")
+        screen_context = "User has shared their screen. The image shows their current view."
+        # In future: Send screen_image to Gemini Vision API for analysis
+    
+    # 3. GENERATE RESPONSE
+    if db_answer and sources:
+        # Found in database - return with sources
+        response_text = f"I found this in our archives:\n\n{db_answer}"
+        return {
+            "response": response_text,
+            "sources": sources,
+            "used_database": True
+        }
+    
+    # 4. FALLBACK TO GENERAL KNOWLEDGE (via Gemini)
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    if GOOGLE_API_KEY:
+        try:
+            model_name = "gemini-2.5-flash"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GOOGLE_API_KEY}"
+            
+            system_prompt = (
+                "You are EchoBot, the friendly AI guide for EchoStack Ghana. "
+                "The user asked a question that wasn't found in our database. "
+                "Provide a helpful, concise answer about Ghana's culture, history, or general knowledge. "
+                "Use a touch of Ghanaian hospitality in your tone."
+            )
+            
+            if screen_context:
+                system_prompt += f"\n\n{screen_context}"
+            
+            payload = {
+                "contents": [{"parts": [{"text": f"{system_prompt}\n\nQuestion: {message}"}]}],
+                "generationConfig": {
+                    "temperature": 0.7,
+                    "topP": 0.8,
+                    "maxOutputTokens": 400,
+                }
+            }
+            
+            async with httpx.AsyncClient(timeout=30) as client:
+                response = await client.post(url, json=payload)
+                if response.status_code == 200:
+                    api_data = response.json()
+                    try:
+                        reply = api_data["candidates"][0]["content"]["parts"][0]["text"]
+                        return {
+                            "response": reply,
+                            "sources": [],
+                            "used_database": False,
+                            "note": "Answer from general knowledge (not in database)"
+                        }
+                    except (KeyError, IndexError):
+                        pass
+        except Exception as e:
+            print(f"⚠️ Gemini fallback error: {e}")
+    
+    # 5. FINAL FALLBACK
+    return {
+        "response": "I couldn't find information about that in our database, and I'm unable to access general knowledge right now. Try asking about Ghana's regions, traditions, festivals, or famous personalities!",
+        "sources": sources,
+        "used_database": False
+    }
         
 # ─── PAYMENTS ────────────────────────────────────────────────────────────────
 @app.post("/api/payments/initialize")
