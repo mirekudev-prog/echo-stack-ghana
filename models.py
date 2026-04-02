@@ -85,6 +85,8 @@ class Post(Base):
     audio_url = Column(String(500), default="")
     video_url = Column(String(500), default="")
     gallery = Column(Text, default="")
+    media_url = Column(String(500), default="")
+    media_path = Column(String(500), default="")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

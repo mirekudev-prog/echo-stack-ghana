@@ -671,7 +671,7 @@
                         </div>
                         <div class="form-group" style="margin-bottom:0">
                             <label>Content Type</label>
-                            <select class="form-input" id="writeType" style="cursor:pointer">
+                            <select class="form-input" id="writeType" style="cursor:pointer" onchange="toggleMediaTypeFields()">
                                 <option value="article">Article</option>
                                 <option value="video">Video</option>
                                 <option value="reel">Reel</option>
@@ -684,10 +684,41 @@
                         <label>Excerpt</label>
                         <input type="text" class="form-input" id="writeExcerpt" placeholder="Short summary for the feed...">
                     </div>
-                    <div class="form-group">
+                    
+                    <!-- Article Content -->
+                    <div class="form-group" id="articleContentGroup">
                         <label>Content</label>
-                        <textarea class="form-input" id="writeContent" placeholder="Write your content here..." style="min-height:200px;font-family:'Merriweather',serif;line-height:1.8"></textarea>
+                        <textarea class="form-input" id="writeContent" placeholder="Write your article content here..." style="min-height:200px;font-family:'Merriweather',serif;line-height:1.8"></textarea>
                     </div>
+                    
+                    <!-- Media Upload Section -->
+                    <div class="form-group" id="mediaUploadGroup" style="display:none">
+                        <label>Media File</label>
+                        <div class="upload-zone" id="postMediaUploadZone" onclick="document.getElementById('postMediaInput').click()" style="padding:20px;margin-bottom:0">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p><span class="highlight">Click to upload</span> or drag and drop</p>
+                            <p style="font-size:0.75rem;margin-top:4px" id="mediaUploadHint">Max 100MB per file</p>
+                        </div>
+                        <input type="file" id="postMediaInput" style="display:none" accept="" onchange="handlePostMediaSelect(this.files)">
+                        <div id="selectedMediaInfo" style="margin-top:12px;padding:12px;background:var(--main-hover);border-radius:var(--radius);display:none">
+                            <div style="display:flex;align-items:center;justify-content:space-between">
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <i class="fas fa-file" id="selectedMediaIcon" style="font-size:1.2rem;color:var(--gold)"></i>
+                                    <span id="selectedMediaName" style="font-size:0.85rem;font-weight:600"></span>
+                                </div>
+                                <button class="btn btn-sm btn-danger" onclick="clearSelectedMedia()"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="selectedMediaUrl">
+                        <input type="hidden" id="selectedMediaPath">
+                    </div>
+                    
+                    <!-- Video/Audio URL Alternative -->
+                    <div class="form-group" id="mediaUrlGroup" style="display:none">
+                        <label>Or provide media URL</label>
+                        <input type="text" class="form-input" id="writeMediaUrl" placeholder="https://example.com/video.mp4 or YouTube/Vimeo link">
+                    </div>
+                    
                     <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
                         <div class="form-group" style="margin-bottom:0">
                             <label>Region</label>
@@ -1142,17 +1173,53 @@ async function loadAllPosts() {
 
 async function publishPost() {
     var title = document.getElementById('writeTitle').value.trim();
-    var content = document.getElementById('writeContent').value.trim();
-    if (!title || !content) { toast('Title and content required', 'error'); return; }
+    var contentType = document.getElementById('writeType').value;
+    
+    // Validate based on content type
+    if (!title) { toast('Title required', 'error'); return; }
+    
+    var content = '';
+    var mediaUrl = '';
+    var mediaPath = '';
+    
+    if (contentType === 'article') {
+        content = document.getElementById('writeContent').value.trim();
+        if (!content) { toast('Article content required', 'error'); return; }
+    } else {
+        // For video, reel, audio, photo - need either uploaded file or URL
+        mediaUrl = document.getElementById('writeMediaUrl').value.trim();
+        mediaPath = document.getElementById('selectedMediaPath').value;
+        
+        if (!mediaUrl && !mediaPath && !window.selectedPostMediaFile) {
+            toast('Please upload a media file or provide a URL', 'error');
+            return;
+        }
+    }
+    
+    // Upload media file if selected
+    if (window.selectedPostMediaFile) {
+        toast('Uploading media...', 'info');
+        var uploadResult = await uploadPostMedia(window.selectedPostMediaFile);
+        if (uploadResult && uploadResult.success) {
+            mediaPath = uploadResult.file_path || uploadResult.url;
+        } else {
+            toast('Failed to upload media', 'error');
+            return;
+        }
+    }
+    
     var formData = new FormData();
     formData.append('title', title);
     formData.append('content', content);
     formData.append('excerpt', document.getElementById('writeExcerpt').value);
-    formData.append('content_type', document.getElementById('writeType').value);
+    formData.append('content_type', contentType);
     formData.append('status', document.getElementById('writeStatus').value);
     formData.append('region_id', document.getElementById('writeRegion').value);
     formData.append('tags', document.getElementById('writeTags').value);
     formData.append('cover_image', document.getElementById('writeCover').value);
+    if (mediaUrl) formData.append('media_url', mediaUrl);
+    if (mediaPath) formData.append('media_path', mediaPath);
+    
     try {
         var res = await fetch('/api/posts', { method: 'POST', credentials: 'include', body: formData });
         var data = await res.json();
@@ -1161,6 +1228,8 @@ async function publishPost() {
             document.getElementById('writeTitle').value = '';
             document.getElementById('writeContent').value = '';
             document.getElementById('writeExcerpt').value = '';
+            document.getElementById('writeMediaUrl').value = '';
+            clearSelectedMedia();
             loadAllPosts();
             loadOverview();
         } else { toast(data.detail || 'Failed', 'error'); }
@@ -1169,17 +1238,44 @@ async function publishPost() {
 
 async function savePostDraft() {
     var title = document.getElementById('writeTitle').value.trim();
-    var content = document.getElementById('writeContent').value.trim();
+    var contentType = document.getElementById('writeType').value;
     if (!title) { toast('Title required', 'error'); return; }
+    
+    var content = '';
+    var mediaUrl = '';
+    var mediaPath = '';
+    
+    if (contentType === 'article') {
+        content = document.getElementById('writeContent').value.trim();
+    } else {
+        mediaUrl = document.getElementById('writeMediaUrl').value.trim();
+        mediaPath = document.getElementById('selectedMediaPath').value;
+    }
+    
+    // Upload media file if selected
+    if (window.selectedPostMediaFile) {
+        toast('Uploading media...', 'info');
+        var uploadResult = await uploadPostMedia(window.selectedPostMediaFile);
+        if (uploadResult && uploadResult.success) {
+            mediaPath = uploadResult.file_path || uploadResult.url;
+        } else {
+            toast('Failed to upload media', 'error');
+            return;
+        }
+    }
+    
     var formData = new FormData();
     formData.append('title', title);
     formData.append('content', content);
     formData.append('excerpt', document.getElementById('writeExcerpt').value);
-    formData.append('content_type', document.getElementById('writeType').value);
+    formData.append('content_type', contentType);
     formData.append('status', 'draft');
     formData.append('region_id', document.getElementById('writeRegion').value);
     formData.append('tags', document.getElementById('writeTags').value);
     formData.append('cover_image', document.getElementById('writeCover').value);
+    if (mediaUrl) formData.append('media_url', mediaUrl);
+    if (mediaPath) formData.append('media_path', mediaPath);
+    
     try {
         var res = await fetch('/api/posts', { method: 'POST', credentials: 'include', body: formData });
         var data = await res.json();
@@ -1397,6 +1493,113 @@ if (zone) {
     zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
     zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
     zone.addEventListener('drop', function(e) { e.preventDefault(); zone.classList.remove('dragover'); handleFileUpload(e.dataTransfer.files); });
+}
+
+// Post media upload zone
+var postMediaZone = document.getElementById('postMediaUploadZone');
+if (postMediaZone) {
+    postMediaZone.addEventListener('dragover', function(e) { e.preventDefault(); postMediaZone.classList.add('dragover'); });
+    postMediaZone.addEventListener('dragleave', function() { postMediaZone.classList.remove('dragover'); });
+    postMediaZone.addEventListener('drop', function(e) { e.preventDefault(); postMediaZone.classList.remove('dragover'); handlePostMediaSelect(e.dataTransfer.files); });
+}
+
+// Toggle media type fields based on content type
+function toggleMediaTypeFields() {
+    var type = document.getElementById('writeType').value;
+    var articleGroup = document.getElementById('articleContentGroup');
+    var mediaUploadGroup = document.getElementById('mediaUploadGroup');
+    var mediaUrlGroup = document.getElementById('mediaUrlGroup');
+    var postMediaInput = document.getElementById('postMediaInput');
+    var mediaHint = document.getElementById('mediaUploadHint');
+    
+    if (type === 'article') {
+        articleGroup.style.display = 'block';
+        mediaUploadGroup.style.display = 'none';
+        mediaUrlGroup.style.display = 'none';
+    } else if (type === 'video' || type === 'reel') {
+        articleGroup.style.display = 'none';
+        mediaUploadGroup.style.display = 'block';
+        mediaUrlGroup.style.display = 'block';
+        postMediaInput.accept = 'video/*';
+        mediaHint.textContent = 'Max 100MB per video file';
+    } else if (type === 'audio') {
+        articleGroup.style.display = 'none';
+        mediaUploadGroup.style.display = 'block';
+        mediaUrlGroup.style.display = 'block';
+        postMediaInput.accept = 'audio/*';
+        mediaHint.textContent = 'Max 50MB per audio file';
+    } else if (type === 'photo') {
+        articleGroup.style.display = 'none';
+        mediaUploadGroup.style.display = 'block';
+        mediaUrlGroup.style.display = 'block';
+        postMediaInput.accept = 'image/*';
+        mediaHint.textContent = 'Max 20MB per image file';
+    }
+}
+
+// Handle post media file selection
+function handlePostMediaSelect(files) {
+    if (!files || files.length === 0) return;
+    var file = files[0];
+    var maxSize = 100 * 1024 * 1024; // 100MB default
+    
+    var type = document.getElementById('writeType').value;
+    if (type === 'video' || type === 'reel') maxSize = 100 * 1024 * 1024;
+    else if (type === 'audio') maxSize = 50 * 1024 * 1024;
+    else if (type === 'photo') maxSize = 20 * 1024 * 1024;
+    
+    if (file.size > maxSize) {
+        toast('File too large. Max size: ' + (maxSize / (1024*1024)) + 'MB', 'error');
+        return;
+    }
+    
+    // Show selected file info
+    var infoDiv = document.getElementById('selectedMediaInfo');
+    var nameSpan = document.getElementById('selectedMediaName');
+    var icon = document.getElementById('selectedMediaIcon');
+    
+    infoDiv.style.display = 'block';
+    nameSpan.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+    
+    // Set icon based on type
+    if (file.type.startsWith('video/')) {
+        icon.className = 'fas fa-video';
+    } else if (file.type.startsWith('audio/')) {
+        icon.className = 'fas fa-music';
+    } else if (file.type.startsWith('image/')) {
+        icon.className = 'fas fa-image';
+    } else {
+        icon.className = 'fas fa-file';
+    }
+    
+    // Store file for upload
+    window.selectedPostMediaFile = file;
+}
+
+function clearSelectedMedia() {
+    document.getElementById('selectedMediaInfo').style.display = 'none';
+    document.getElementById('postMediaInput').value = '';
+    document.getElementById('selectedMediaUrl').value = '';
+    document.getElementById('selectedMediaPath').value = '';
+    window.selectedPostMediaFile = null;
+}
+
+async function uploadPostMedia(file) {
+    var formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        var res = await fetch('/api/files/upload', { method: 'POST', credentials: 'include', body: formData });
+        var data = await res.json();
+        if (data.success) {
+            return data;
+        } else {
+            throw new Error(data.detail || 'Upload failed');
+        }
+    } catch(e) {
+        toast('Media upload failed: ' + e.message, 'error');
+        return null;
+    }
 }
 </script>
 </body>
