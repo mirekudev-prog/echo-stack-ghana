@@ -1322,7 +1322,10 @@ function timeAgo(dateStr) {
 }
 
 async function apiGet(url) {
-    var res = await fetch(url, { credentials: 'include' });
+    // Add admin_preview=true to all API calls from admin dashboard for bypass
+    var separator = url.indexOf('?') === -1 ? '?' : '&';
+    var previewUrl = url + separator + 'admin_preview=true';
+    var res = await fetch(previewUrl, { credentials: 'include' });
     if (!res.ok) throw new Error('API error ' + res.status);
     return res.json();
 }
@@ -1520,7 +1523,7 @@ function renderPostsTable(posts) {
                 '<td><span class="badge ' + (p.status === 'published' ? 'badge-success' : 'badge-muted') + '">' + escapeHtml(p.status) + '</span></td>' +
                 '<td>' + (p.views || 0) + '</td>' +
                 '<td>' + timeAgo(p.created_at) + '</td>' +
-                '<td style="white-space:nowrap"><a href="/post/' + p.id + '" target="_blank" class="btn btn-sm btn-secondary" style="margin-right:4px" title="View"><i class="fas fa-eye"></i></a>' +
+                '<td style="white-space:nowrap"><button class="btn btn-sm btn-secondary" onclick="viewPostPreview(' + p.id + ')" style="margin-right:4px" title="View"><i class="fas fa-eye"></i></button>' +
                 '<button class="btn btn-sm btn-primary" onclick="editPost(' + p.id + ')" style="margin-right:4px" title="Edit"><i class="fas fa-edit"></i></button>' +
                 '<button class="btn btn-sm btn-danger" onclick="deleteItem(' + p.id + ',\'post\')" title="Delete"><i class="fas fa-trash"></i></button></td>' +
             '</tr>';
@@ -1594,6 +1597,13 @@ async function editPost(postId) {
         console.error(e);
         toast('Failed to load post', 'error');
     }
+}
+
+// ── VIEW POST PREVIEW ──
+function viewPostPreview(postId) {
+    // Open post in new window with admin_preview=true to bypass verification
+    var url = '/post/' + postId + '?admin_preview=true';
+    window.open(url, '_blank');
 }
 
 async function publishPost() {
