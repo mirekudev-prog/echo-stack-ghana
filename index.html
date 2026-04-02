@@ -912,5 +912,165 @@
     loadRegions();
 })();
 </script>
+
+<!-- Cookie Consent Banner -->
+<div id="cookie-banner" class="cookie-banner" style="display:none;">
+    <div class="cookie-content">
+        <div class="cookie-icon">
+            <i class="fas fa-cookie-bite"></i>
+        </div>
+        <div class="cookie-text">
+            <h4>We Value Your Privacy</h4>
+            <p>We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. By continuing to use this site, you consent to our use of cookies.</p>
+            <a href="#" class="cookie-learn-more">Learn More</a>
+        </div>
+        <div class="cookie-actions">
+            <button id="cookie-decline" class="btn-cookie-secondary">Decline</button>
+            <button id="cookie-accept" class="btn-cookie-primary">Accept All</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #0D1B2A 0%, #1a2d40 100%);
+    border-top: 2px solid #C8962E;
+    padding: 20px 24px;
+    z-index: 9999;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+    animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.cookie-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.cookie-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: rgba(200,150,46,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #C8962E;
+    flex-shrink: 0;
+}
+.cookie-text {
+    flex: 1;
+}
+.cookie-text h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+}
+.cookie-text p {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+    margin-bottom: 4px;
+}
+.cookie-learn-more {
+    font-size: 0.75rem;
+    color: #C8962E;
+    text-decoration: underline;
+}
+.cookie-learn-more:hover { color: #E8B84B; }
+.cookie-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.btn-cookie-primary, .btn-cookie-secondary {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+}
+.btn-cookie-primary {
+    background: linear-gradient(135deg, #C8962E, #E8B84B);
+    color: #0D1B2A;
+}
+.btn-cookie-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(200,150,46,0.4);
+}
+.btn-cookie-secondary {
+    background: rgba(255,255,255,0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.btn-cookie-secondary:hover {
+    background: rgba(255,255,255,0.15);
+}
+@media (max-width: 768px) {
+    .cookie-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    .cookie-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    .cookie-banner {
+        padding: 16px;
+    }
+}
+</style>
+
+<script>
+(function() {
+    // Check if user has already made a choice
+    var cookieChoice = localStorage.getItem('cookie_consent');
+    if (!cookieChoice) {
+        // Show banner after a short delay
+        setTimeout(function() {
+            document.getElementById('cookie-banner').style.display = 'block';
+        }, 1500);
+    }
+
+    // Accept cookies
+    document.getElementById('cookie-accept').addEventListener('click', function() {
+        localStorage.setItem('cookie_consent', 'accepted');
+        document.getElementById('cookie-banner').style.animation = 'slideDown 0.3s ease forwards';
+        setTimeout(function() {
+            document.getElementById('cookie-banner').style.display = 'none';
+        }, 300);
+    });
+
+    // Decline cookies
+    document.getElementById('cookie-decline').addEventListener('click', function() {
+        localStorage.setItem('cookie_consent', 'declined');
+        document.getElementById('cookie-banner').style.animation = 'slideDown 0.3s ease forwards';
+        setTimeout(function() {
+            document.getElementById('cookie-banner').style.display = 'none';
+        }, 300);
+    });
+})();
+</script>
+
+<style>
+@keyframes slideDown {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(100%); opacity: 0; }
+}
+</style>
 </body>
 </html>
