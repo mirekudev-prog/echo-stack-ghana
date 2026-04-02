@@ -1420,6 +1420,8 @@ async def get_posts(
                 "audio_url": getattr(p, "audio_url", "") or "",
                 "video_url": getattr(p, "video_url", "") or "",
                 "gallery": getattr(p, "gallery", "") or "",
+                "media_url": getattr(p, "media_url", "") or "",
+                "media_path": getattr(p, "media_path", "") or "",
                 "created_at": str(getattr(p, "created_at", "")),
                 "comment_count": comment_count,                 # <-- added
                 "is_following": is_following,                   # <-- added
@@ -1486,6 +1488,8 @@ async def get_reels(
                 "title": p.title,
                 "description": description,
                 "video_url": p.video_url or "",
+                "media_url": p.media_url or "",
+                "media_path": p.media_path or "",
                 "author_id": str(p.author_id) if p.author_id else None,
                 "author_username": p.author_username or "Creator",
                 "author_avatar": author_avatar,
@@ -1643,6 +1647,8 @@ async def get_post(post_id: int, db: Session = Depends(get_db)):
             "audio_url": getattr(p, "audio_url", ""),
             "video_url": getattr(p, "video_url", ""),
             "gallery": getattr(p, "gallery", ""),
+            "media_url": getattr(p, "media_url", ""),
+            "media_path": getattr(p, "media_path", ""),
             "created_at": str(getattr(p, "created_at", "")),
         }
     except HTTPException:
@@ -1656,6 +1662,7 @@ async def update_post(
     title: str = Form(None), excerpt: str = Form(None), content: str = Form(None),
     status: str = Form(None), cover_image: str = Form(None), tags: str = Form(None),
     is_locked: str = Form(None), audio_url: str = Form(None), video_url: str = Form(None),
+    media_url: str = Form(None), media_path: str = Form(None),
     db: Session = Depends(get_db)
 ):
     # --- STALE SESSION CHECK ---
@@ -1680,7 +1687,7 @@ async def update_post(
                 setattr(p, attr, val.strip() if hasattr(val, "strip") else val)
         if is_locked is not None:
             p.is_locked = 1 if is_locked in ("true", "1") else 0
-        for attr, val in [("audio_url", audio_url), ("video_url", video_url)]:
+        for attr, val in [("audio_url", audio_url), ("video_url", video_url), ("media_url", media_url), ("media_path", media_path)]:
             if val is not None:
                 try: setattr(p, attr, val.strip())
                 except Exception: pass
