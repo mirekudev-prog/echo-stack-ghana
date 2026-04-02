@@ -500,7 +500,7 @@ try:
 except Exception:
     pass
 
-ADMIN_SECRET    = os.getenv("ADMIN_SECRET", "THE ADMIN")
+ADMIN_SECRET    = os.getenv("ADMIN_SECRET", "the admin")
 SUPABASE_URL    = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY    = os.getenv("SUPABASE_SERVICE_KEY", "")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "echostack-uploads")
@@ -655,84 +655,126 @@ def chat_page(): return _serve("community_chat.html")
 # ─── PROTECTED PAGES (user OR admin can access) ───────────────────────────────
 @app.get("/app")
 async def app_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("app.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("app.html")
     return RedirectResponse("/user-login")
 
 @app.get("/dashboard")
 async def dashboard_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("dashboard.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("dashboard.html")
     return RedirectResponse("/user-login")
     
 @app.get("/reels")
 async def reels_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("reels.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("reels.html")
     return RedirectResponse("/user-login")
 
 @app.get("/creator")
 async def creator_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("creator.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("creator.html")
     return RedirectResponse("/user-login")
 
 @app.get("/activity")
 async def activity_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("activity.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("activity.html")
     return RedirectResponse("/user-login")
 
 @app.get("/following")
 async def following_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("following.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("following.html")
     return RedirectResponse("/user-login")
 
 @app.get("/subscriptions")
 async def subscriptions_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("subscriptions.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("subscriptions.html")
     return RedirectResponse("/user-login")
 
 @app.get("/notifications")
 async def notifications_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("notifications.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("notifications.html")
     return RedirectResponse("/user-login")
 
 @app.get("/bookmarks")
 async def bookmarks_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("bookmarks.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("bookmarks.html")
     return RedirectResponse("/user-login")
 
 @app.get("/trending")
 async def trending_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("trending.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("trending.html")
     return RedirectResponse("/user-login")
 
 @app.get("/messages")
 async def messages_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("messages.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("messages.html")
     return RedirectResponse("/user-login")
 
 @app.get("/settings")
 async def settings_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("settings.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("settings.html")
     return RedirectResponse("/user-login")
 
 @app.get("/donate")
 async def donate_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("donate.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("donate.html")
     return RedirectResponse("/user-login")
 
 @app.get("/chatbot")
 async def chatbot_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("chatbot.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("chatbot.html")
     return RedirectResponse("/user-login")
@@ -747,30 +789,47 @@ async def read_redirect(request: Request):
 
 @app.get("/subscribers")
 async def subscribers_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("subscribers.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("subscribers.html")
     return RedirectResponse("/user-login")
 
 @app.get("/user")
 async def user_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("user_profile.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("user_profile.html")
     return RedirectResponse("/user-login")
 
 @app.get("/user/{uname}")
 async def user_publication_page(uname: str, request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("publication.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("publication.html")
     return RedirectResponse("/user-login")
 
 @app.get("/user-profile")
 async def user_profile_redirect(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        return _serve("user_profile.html")
     if _is_admin(request) or request.cookies.get("user_session"):
         return _serve("user_profile.html")
     return RedirectResponse("/user-login")
 
 @app.get("/user-settings")
 async def user_settings_page(request: Request):
+    # Admin preview bypasses email verification
+    if request.query_params.get("admin_preview") == "true" and _is_admin(request):
+        if os.path.exists("user_settings.html"):
+            return FileResponse("user_settings.html")
+        raise HTTPException(404, "user_settings.html not found")
     if _is_admin(request) or request.cookies.get("user_session"):
         if os.path.exists("user_settings.html"):
             return FileResponse("user_settings.html")
@@ -873,8 +932,8 @@ async def project_page(project_id: int, request: Request):
 async def admin_preview(request: Request, db: Session = Depends(get_db)):
     if not _is_admin(request):
         return JSONResponse({"error": "Unauthorized"}, status_code=401)
-    # Redirect to the live homepage with admin bypass
-    return RedirectResponse(url="/?admin_preview=true")
+    # Redirect to the live app page with admin bypass - opens in same window
+    return RedirectResponse(url="/app?admin_preview=true")
         
 @app.post("/api/auth/login")
 async def admin_login(answer: str = Form(...)):
