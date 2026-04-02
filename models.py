@@ -41,7 +41,8 @@ class User(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username = Column(String(100), unique=True, nullable=False)
     email = Column(String(200), unique=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
+    full_name = Column(String(255), default="")
+    hashed_password = Column(String(255), nullable=True) # allow null for OAuth
     bio = Column(Text, default="")
     avatar_url = Column(String(500), default="")
     channel_name = Column(String(200), default="")
@@ -51,6 +52,7 @@ class User(Base):
     is_suspended = Column(Integer, default=0)
     follower_count = Column(Integer, default=0)
     email_verified = Column(Boolean, default=False)
+    is_verified = Column(Boolean, default=False) # alias from init_db
     verification_token = Column(String(255), nullable=True)
     verification_token_expires = Column(DateTime, nullable=True)
     reset_token = Column(String(255), nullable=True)
@@ -74,14 +76,17 @@ class Post(Base):
     content = Column(Text, default="")
     cover_image = Column(String(500), default="")
     content_type = Column(String(50), default="article")
-    status = Column(String(50), default="draft")
+    media_type = Column(String(50), default="image") # alias from init_db
+    status = Column(String(50), default="published") # allow published by default
     is_locked = Column(Integer, default=0)
     author_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     author_username = Column(String(200), default="")
+    author_avatar = Column(String(500), default="")
     region_id = Column(Integer, ForeignKey("regions.id"), nullable=True)
     tags = Column(Text, default="")
     views = Column(Integer, default=0)
     likes = Column(Integer, default=0)
+    likes_count = Column(Integer, default=0) # alias from init_db
     audio_url = Column(String(500), default="")
     video_url = Column(String(500), default="")
     gallery = Column(Text, default="")
@@ -89,6 +94,18 @@ class Post(Base):
     media_path = Column(String(500), default="")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Story(Base):
+    __tablename__ = "stories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    media_url = Column(String(500), nullable=False)
+    media_type = Column(String(50), default="image")
+    caption = Column(Text, default="")
+    expires_at = Column(DateTime)
+    is_approved = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 
 # ─── COMMENT ──────────────────────────────────────────────────────────────────

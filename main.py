@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, Form, Request, UploadFile, 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import text, or_, and_, func
+from sqlalchemy import text, or_, and_, func, inspect
 import os, uuid, re, json, httpx, random
 from datetime import datetime, timedelta
 import secrets
@@ -49,7 +49,7 @@ try:
     EMAIL_ENABLED = True
 except Exception as _e:
     EMAIL_ENABLED = False
-    print(f"⚠️  email_utils not loaded: {_e} — email features disabled")
+    print(f"WARNING  email_utils not loaded: {_e} - email features disabled")
     def generate_token():
         return secrets.token_urlsafe(32)
     def send_verification_email(email, username, token):
@@ -394,7 +394,7 @@ def _run_startup_sql():
                         conn.commit()
                     except Exception:
                         pass
-        print("✅ EchoStack tables verified/created")
+        print("SUCCESS EchoStack tables verified/created")
     except Exception as e:
         print(f"Startup SQL note: {e}")
 
@@ -414,7 +414,7 @@ def _run_migrations():
         ("users","verification_token_expires","TIMESTAMP"),
         ("users","reset_token","VARCHAR(255)"),
         ("users","reset_token_expires","TIMESTAMP"),
-        # NEW columns for 6‑digit reset code
+        # NEW columns for 6-digit reset code
         ("users","reset_code","VARCHAR(6)"),
         ("users","reset_code_expires","TIMESTAMP"),
         ("posts","audio_url","VARCHAR(500) DEFAULT ''"),
@@ -425,29 +425,40 @@ def _run_migrations():
         ("posts","tags","TEXT DEFAULT ''"),
         ("posts","views","INTEGER DEFAULT 0"),
         ("posts","likes","INTEGER DEFAULT 0"),
+        ("posts","media_url","VARCHAR(500) DEFAULT ''"),
+        ("posts","media_path","VARCHAR(500) DEFAULT ''"),
+        ("users","full_name","VARCHAR(255) DEFAULT ''"),
+        ("users","is_verified","BOOLEAN DEFAULT FALSE"),
+        ("posts","media_type","VARCHAR(50) DEFAULT 'image'"),
+        ("posts","likes_count","INTEGER DEFAULT 0"),
+        ("posts","author_avatar","VARCHAR(500) DEFAULT ''"),
         ("regions","overview","TEXT DEFAULT ''"),
         ("regions","video_files","TEXT DEFAULT ''"),
         ("regions","documents","TEXT DEFAULT ''"),
         ("uploaded_files","file_path","VARCHAR(500) DEFAULT ''"),
         ("uploaded_files","uploaded_by","VARCHAR(200) DEFAULT 'user'"),
         ("uploaded_files","is_public","INTEGER DEFAULT 1"),
+        ("uploaded_files","description","TEXT DEFAULT ''"),
         ("story_submissions","region","VARCHAR(100) DEFAULT ''"),
     ]
     try:
+        inspector = inspect(engine)
         with engine.connect() as conn:
             for table, col, col_def in cols:
                 try:
-                    exists = conn.execute(text(
-                        "SELECT column_name FROM information_schema.columns "
-                        "WHERE table_name=:t AND column_name=:c"
-                    ), {"t": table, "c": col}).fetchone()
+                    # Cross-platform way to check column existence (SQLite & Postgres)
+                    columns = inspector.get_columns(table)
+                    exists = any(c['name'].lower() == col.lower() for c in columns)
+                    
                     if not exists:
-                        conn.execute(text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {col_def}"))
+                        print(f"Adding missing column: {table}.{col}")
+                        conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_def}"))
                         conn.commit()
-                except Exception:
-                    pass
+                except Exception as e:
+                    print(f"Migration note ({table}.{col}): {e}")
+        print("SUCCESS Migrations verified")
     except Exception as e:
-        print(f"Migration note: {e}")
+        print(f"Migration error: {e}")
 
 def _seed_topics():
     default_topics = [
@@ -465,7 +476,7 @@ def _seed_topics():
                     {"name": topic}
                 )
             conn.commit()
-        print("✅ Topics seeded")
+        print("SUCCESS Topics seeded")
     except Exception as e:
         print(f"Topics seeding note: {e}")
 
@@ -477,7 +488,7 @@ _seed_topics()
 def _create_cms_tables():
     try:
         CmsBase.metadata.create_all(bind=engine)
-        print("✅ CMS tables created/verified")
+        print("SUCCESS CMS tables created/verified")
     except Exception as e:
         print(f"CMS tables note: {e}")
 
@@ -1447,7 +1458,8 @@ async def get_posts(
             if author_id and author_id == own_id:
                 pass  # creator viewing own drafts
             else:
-                q = q.filter(models.Post.status == "published")
+                # Allow 'published' or empty status (for legacy/seeded data)
+                q = q.filter(or_(models.Post.status == "published", models.Post.status == "", models.Post.status == None))
 
         if content_type:
             q = q.filter(models.Post.content_type == content_type)
@@ -1586,7 +1598,30 @@ async def get_reels(
         }
     except Exception as e:
         print(f"GET /api/reels error: {e}")
-        return {"total": 0, "reels": []}        
+        return {"total": 0, "reels": []}
+
+@app.get("/api/stories")
+async def get_stories(db: Session = Depends(get_db)):
+    """Return all active platform stories."""
+    try:
+        # Show all approved stories that haven't expired
+        now = datetime.utcnow()
+        stories = db.query(models.Story).filter(
+            models.Story.is_approved == True,
+            or_(models.Story.expires_at == None, models.Story.expires_at > now)
+        ).order_by(models.Story.created_at.desc()).all()
+        
+        return [{
+            "id": s.id,
+            "user_id": str(s.user_id) if s.user_id else None,
+            "media_url": s.media_url,
+            "media_type": s.media_type,
+            "caption": s.caption,
+            "created_at": s.created_at.isoformat()
+        } for s in stories]
+    except Exception as e:
+        print(f"GET /api/stories error: {e}")
+        return []        
 
 @app.post("/api/posts")
 async def create_post(

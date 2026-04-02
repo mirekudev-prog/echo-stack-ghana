@@ -24,9 +24,9 @@ def init_database():
         if users_count.count == 0:
             print("📝 Seeding users...")
             sample_users = [
-                {"username": "echostack_admin", "email": "admin@echostack.com", "full_name": "Admin User", "avatar_url": "https://ui-avatars.com/api/?name=Admin+User&background=C8962E&color=fff", "bio": "Platform Administrator", "is_verified": True},
-                {"username": "creative_jane", "email": "jane@example.com", "full_name": "Jane Doe", "avatar_url": "https://ui-avatars.com/api/?name=Jane+Doe&background=0D1B2A&color=fff", "bio": "Digital Artist & Creator", "is_verified": True},
-                {"username": "tech_guru", "email": "tech@example.com", "full_name": "John Smith", "avatar_url": "https://ui-avatars.com/api/?name=John+Smith&background=FAF6EF&color=0D1B2A", "bio": "Tech Reviewer", "is_verified": False},
+                {"username": "echostack_admin", "email": "admin@echostack.com", "full_name": "Admin User", "avatar_url": "https://ui-avatars.com/api/?name=Admin+User&background=C8962E&color=fff", "bio": "Platform Administrator", "is_verified": True, "role": "admin"},
+                {"username": "creative_jane", "email": "jane@example.com", "full_name": "Jane Doe", "avatar_url": "https://ui-avatars.com/api/?name=Jane+Doe&background=0D1B2A&color=fff", "bio": "Digital Artist & Creator", "is_verified": True, "role": "creator"},
+                {"username": "tech_guru", "email": "tech@example.com", "full_name": "John Smith", "avatar_url": "https://ui-avatars.com/api/?name=John+Smith&background=FAF6EF&color=0D1B2A", "bio": "Tech Reviewer", "is_verified": False, "role": "user"},
             ]
             supabase.table("users").insert(sample_users).execute()
             print("✅ Users seeded.")
@@ -45,8 +45,30 @@ def init_database():
             
             if admin_id:
                 sample_posts = [
-                    {"author_id": admin_id, "content": "Welcome to EchoStack! 🚀 This is your new no-code enabled platform.", "media_url": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", "media_type": "image", "likes_count": 12, "comments_count": 3},
-                    {"author_id": admin_id, "content": "Check out our new Admin Dashboard. You can now edit the whole site without code!", "media_url": None, "media_type": None, "likes_count": 45, "comments_count": 8},
+                    {
+                        "author_id": admin_id, 
+                        "title": "Welcome to EchoStack!",
+                        "slug": "welcome-to-echostack",
+                        "content": "Welcome to EchoStack! 🚀 This is your new no-code enabled platform.", 
+                        "media_url": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", 
+                        "media_type": "image", 
+                        "content_type": "article",
+                        "status": "published",
+                        "likes_count": 12,
+                        "author_username": "echostack_admin"
+                    },
+                    {
+                        "author_id": admin_id, 
+                        "title": "New Admin Dashboard",
+                        "slug": "new-admin-dashboard",
+                        "content": "Check out our new Admin Dashboard. You can now edit the whole site without code!", 
+                        "media_url": None, 
+                        "media_type": None, 
+                        "content_type": "article",
+                        "status": "published",
+                        "likes_count": 45,
+                        "author_username": "echostack_admin"
+                    },
                 ]
                 supabase.table("posts").insert(sample_posts).execute()
                 print("✅ Posts seeded.")
@@ -68,8 +90,8 @@ def init_database():
             if admin_id:
                 expires_at = (datetime.now() + timedelta(hours=24)).isoformat()
                 sample_stories = [
-                    {"user_id": admin_id, "media_url": "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80", "media_type": "image", "expires_at": expires_at, "is_approved": True},
-                    {"user_id": admin_id, "media_url": "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-water-1164-large.mp4", "media_type": "video", "expires_at": expires_at, "is_approved": True},
+                    {"user_id": admin_id, "media_url": "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80", "media_type": "image", "expires_at": expires_at, "is_approved": True, "caption": "Morning in Ghana"},
+                    {"user_id": admin_id, "media_url": "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-water-1164-large.mp4", "media_type": "video", "expires_at": expires_at, "is_approved": True, "caption": "Waves"},
                 ]
                 supabase.table("stories").insert(sample_stories).execute()
                 print("✅ Stories seeded.")
