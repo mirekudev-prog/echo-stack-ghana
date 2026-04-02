@@ -405,12 +405,8 @@
                 if (data.success) {
                     showToast('Welcome back!', '');
                     setTimeout(function() {
-                        const role = data.role || data.user_role || '';
-                        if (role === 'admin' || role === 'superuser') {
-                            window.location.href = '/admin';
-                        } else {
-                            window.location.href = '/app';
-                        }
+                        // ALL users go to /app after login via public URL, regardless of role
+                        window.location.href = '/app';
                     }, 800);
                 } else {
                     if (data.unverified) {

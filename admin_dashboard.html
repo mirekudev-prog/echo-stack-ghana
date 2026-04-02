@@ -658,7 +658,7 @@
             <div class="topbar-actions">
                 <button class="topbar-btn" onclick="showPanel('edit-posts', document.querySelector('[data-panel=edit-posts]'))"><i class="fas fa-pen-fancy"></i><span>New Post</span></button>
                 <button class="topbar-btn" onclick="location.reload()"><i class="fas fa-sync-alt"></i><span>Refresh</span></button>
-                <a href="/admin-preview" class="topbar-btn primary" target="_blank"><i class="fas fa-external-link-alt"></i><span>View Live Site</span></a>
+                <a href="/admin-preview" class="topbar-btn primary" onclick="openAdminPreview(event)"><i class="fas fa-external-link-alt"></i><span>View Live Site</span></a>
             </div>
         </header>
 
@@ -2196,6 +2196,13 @@ async function uploadPostMedia(file) {
         toast('Media upload failed: ' + e.message, 'error');
         return null;
     }
+}
+
+// Open admin preview in a new window with bypass token
+function openAdminPreview(event) {
+    event.preventDefault();
+    var previewUrl = '/admin-preview?t=' + Date.now();
+    window.open(previewUrl, '_blank');
 }
 </script>
 </body>

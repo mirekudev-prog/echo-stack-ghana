@@ -932,8 +932,8 @@ async def project_page(project_id: int, request: Request):
 async def admin_preview(request: Request, db: Session = Depends(get_db)):
     if not _is_admin(request):
         return JSONResponse({"error": "Unauthorized"}, status_code=401)
-    # Redirect to the live homepage with admin bypass
-    return RedirectResponse(url="/?admin_preview=true")
+    # Redirect to the live app page with admin bypass - opens in same window
+    return RedirectResponse(url="/app?admin_preview=true")
         
 @app.post("/api/auth/login")
 async def admin_login(answer: str = Form(...)):
