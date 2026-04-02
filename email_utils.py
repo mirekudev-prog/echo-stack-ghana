@@ -5,7 +5,8 @@ import httpx
 # Brevo API settings
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 if not BREVO_API_KEY:
-    raise ValueError("BREVO_API_KEY environment variable not set")
+    # Use print instead of raising ValueError so the app can start even if key is missing locally
+    print("⚠️  WARNING: BREVO_API_KEY environment variable not set. Email verification will NOT work.")
 
 FROM_EMAIL = os.getenv("FROM_EMAIL", "noreply@yourdomain.com")  # Use your verified sender
 FROM_NAME = "EchoStack"

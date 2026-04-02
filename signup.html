@@ -367,10 +367,10 @@
             <!-- Step 2: Interests -->
             <div class="step" id="step-2">
                 <h2 class="step-title">Pick your interests</h2>
-                <p class="step-sub">Select <strong style="color:var(--gold)">3 topics</strong> — we'll tailor your feed</p>
+                <p class="step-sub">Select <strong style="color:var(--gold)">3 &ndash; 5 topics</strong> &mdash; we'll tailor your feed</p>
 
                 <div class="sel-count">
-                    <span id="sel-count-text">0 / 3 selected</span>
+                    <span id="sel-count-text">0 / 3-5 selected</span>
                     <button style="background:none;border:none;color:var(--gold);font-size:.82rem;cursor:pointer" onclick="goToStep1()">← Back</button>
                 </div>
 
@@ -480,7 +480,8 @@
             }
 
             grid.innerHTML = topics.map(function(t) {
-                return '<button class="topic-chip" onclick="toggleTopic(this,\'' + escapeAttr(t) + '\')">' + escapeHtml(t) + '</button>';
+                const name = (typeof t === 'object' && t !== null) ? (t.name || t) : t;
+                return '<button class="topic-chip" onclick="toggleTopic(this,\'' + escapeAttr(name) + '\')">' + escapeHtml(name) + '</button>';
             }).join('');
         }
 
@@ -500,14 +501,15 @@
             el.classList.toggle('sel');
             if (selectedTopics.includes(topic)) {
                 selectedTopics = selectedTopics.filter(function(t) { return t !== topic; });
-            } else if (selectedTopics.length < 3) {
+            } else if (selectedTopics.length < 5) {
                 selectedTopics.push(topic);
             } else {
-                showToast('Maximum 3 topics allowed', 'er');
+                showToast('Maximum 5 topics allowed', 'er');
+                el.classList.remove('sel');
                 return;
             }
-            document.getElementById('sel-count-text').textContent = selectedTopics.length + ' / 3 selected';
-            document.getElementById('create-btn').disabled = selectedTopics.length !== 3;
+            document.getElementById('sel-count-text').textContent = selectedTopics.length + ' / 3-5 selected';
+            document.getElementById('create-btn').disabled = (selectedTopics.length < 3 || selectedTopics.length > 5);
         }
 
         async function completeSignup() {
