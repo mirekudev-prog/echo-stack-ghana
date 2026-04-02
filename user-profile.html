@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Profile - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .profile-wrap{background:var(--main-card);border:1px solid var(--main-border);border-radius:var(--radius-lg);overflow:hidden;margin:16px}
+        .profile-header{padding:24px 16px;text-align:center;border-bottom:1px solid var(--main-border)}
+        .profile-avatar{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:700;color:var(--ink);margin:0 auto 16px;overflow:hidden}
+        .profile-avatar img{width:100%;height:100%;object-fit:cover}
+        .profile-name{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-bottom:4px;color:var(--main-text)}
+        .profile-username{color:var(--main-muted);font-size:.9rem;margin-bottom:16px}
+        .profile-stats{display:flex;justify-content:center;gap:32px;margin-bottom:20px}
+        .stat{text-align:center}
+        .stat-value{font-size:1.2rem;font-weight:700;color:var(--gold)}
+        .stat-label{font-size:.75rem;color:var(--main-muted);text-transform:uppercase;letter-spacing:.05em}
+        .profile-actions{display:flex;gap:12px;justify-content:center}
+        .profile-actions .btn{padding:10px 24px;font-size:.85rem}
+        .profile-bio{padding:16px;font-size:.9rem;color:var(--main-muted);line-height:1.6;border-bottom:1px solid var(--main-border)}
+        .profile-section{padding:16px}
+        .profile-section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--main-muted);margin-bottom:12px}
+    </style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </a>
+        </div>
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">User</div>
+                <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i><span>Feed</span></a>
+                <a href="/reels" class="sidebar-link"><i class="fas fa-film"></i><span>Reels</span></a>
+                <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i><span>Explore</span></a>
+                <a href="/archive" class="sidebar-link"><i class="fas fa-archive"></i><span>Archive</span></a>
+                <a href="/app" class="sidebar-link"><i class="fas fa-map-marked-alt"></i><span>Map</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Social</div>
+                <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
+                <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
+                <a href="/notifications" class="sidebar-link"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                <a href="/chatbot" class="sidebar-link"><i class="fas fa-comments"></i><span>Community Chat</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Create</div>
+                <a href="/creator" class="sidebar-link"><i class="fas fa-plus-circle"></i><span>Create Post</span></a>
+                <a href="/premium" class="sidebar-link"><i class="fas fa-crown"></i><span>Premium</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Account</div>
+                <a href="/user-profile" class="sidebar-link active"><i class="fas fa-user"></i><span>My Profile</span></a>
+                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="main-wrapper">
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-title">My Profile</div>
+            <div class="topbar-actions">
+                <a href="/settings" class="topbar-btn"><i class="fas fa-cog"></i></a>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div id="profileContent">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let currentUser = null;
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+async function logout() {
+    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
+    localStorage.removeItem('es_user');
+    location.href = '/';
+}
+
+function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.className = 'toast', 2500);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 60) return Math.floor(diff) + 's ago';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+}
+
+async function loadProfile() {
+    try {
+        const res = await fetch('/api/users/me', { credentials: 'include' });
+        if (!res.ok) throw new Error('Not logged in');
+        currentUser = await res.json();
+        const initial = (currentUser.username || 'U').charAt(0).toUpperCase();
+        if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
+        if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = currentUser.full_name || currentUser.username;
+        const badge = document.getElementById('sidebarBadge');
+        if (badge) {
+            if (currentUser.role === 'admin' || currentUser.role === 'superuser') { badge.className = 'sidebar-user-badge badge-admin'; badge.textContent = 'Admin'; }
+            else if (currentUser.role === 'creator') { badge.className = 'sidebar-user-badge badge-creator'; badge.textContent = 'Creator'; }
+            else if (currentUser.is_premium) { badge.className = 'sidebar-user-badge badge-premium'; badge.textContent = 'Premium'; }
+        }
+        renderProfile();
+    } catch(e) {
+        location.href = '/user-login';
+    }
+}
+
+async function renderProfile() {
+    const container = document.getElementById('profileContent');
+    const initial = (currentUser.username || 'U').charAt(0).toUpperCase();
+    const avatarUrl = currentUser.avatar_url || '';
+    
+    container.innerHTML = `
+        <div class="profile-wrap">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                ${avatarUrl ? `<img src="${escapeHtml(avatarUrl)}" alt="">` : initial}
+            </div>
+            <div class="profile-name">${escapeHtml(currentUser.full_name || currentUser.username)}</div>
+            <div class="profile-username">@${escapeHtml(currentUser.username)}</div>
+            <div class="profile-stats">
+                <div class="stat"><div class="stat-value" id="postCount">-</div><div class="stat-label">Posts</div></div>
+                <div class="stat"><div class="stat-value" id="followerCount">-</div><div class="stat-label">Followers</div></div>
+                <div class="stat"><div class="stat-value" id="followingCount">-</div><div class="stat-label">Following</div></div>
+            </div>
+            <div class="profile-actions">
+                <a href="/settings" class="btn btn-secondary"><i class="fas fa-edit"></i> Edit Profile</a>
+            </div>
+        </div>
+        ${currentUser.bio ? `<div class="profile-bio">${escapeHtml(currentUser.bio)}</div>` : ''}
+        <div class="profile-section">
+            <div class="profile-section-title">Your Posts</div>
+            <div id="userPosts"><div class="loading"><div class="spinner"></div></div></div>
+        </div>
+        </div>
+    `;
+    
+    loadUserPosts();
+    loadStats();
+}
+
+async function loadStats() {
+    try {
+        const [postsRes, followersRes, followingRes] = await Promise.all([
+            fetch(`/api/posts?user_id=${currentUser.id}&limit=0`),
+            fetch(`/api/users/${currentUser.id}/followers`),
+            fetch(`/api/users/${currentUser.id}/following`)
+        ]);
+        
+        const posts = await postsRes.json();
+        const followers = await followersRes.json();
+        const following = await followingRes.json();
+        
+        document.getElementById('postCount').textContent = posts.length || 0;
+        document.getElementById('followerCount').textContent = followers.length || 0;
+        document.getElementById('followingCount').textContent = following.length || 0;
+    } catch(e) {}
+}
+
+async function loadUserPosts() {
+    try {
+        const res = await fetch(`/api/posts?user_id=${currentUser.id}&limit=20`);
+        const posts = await res.json();
+        const container = document.getElementById('userPosts');
+        
+        if (!posts.length) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-pen-fancy"></i><h3>No posts yet</h3><p>Share your first story!</p></div>';
+            return;
+        }
+        
+        container.innerHTML = posts.map(post => `
+            <div class="post-card" onclick="location.href='/post/${post.id}'">
+                <h3 class="post-title">${escapeHtml(post.title)}</h3>
+                <p class="post-excerpt">${escapeHtml(post.excerpt || '')}</p>
+                <div class="post-time">${timeAgo(post.created_at)}</div>
+            </div>
+        `).join('');
+    } catch(e) {
+        document.getElementById('userPosts').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
+    }
+}
+
+loadProfile();
+</script>
+</body>
+</html>

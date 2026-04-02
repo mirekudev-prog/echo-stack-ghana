@@ -300,3 +300,133 @@ class NavigationItem(Base):
     display_order = Column(Integer, default=0)
     is_active = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── BOOKMARK ──────────────────────────────────────────────────────────────────
+class Bookmark(Base):
+    __tablename__ = "bookmarks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── NOTIFICATION ──────────────────────────────────────────────────────────────
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    type = Column(String(50), default="info")  # like, comment, follow, mention, system
+    title = Column(String(200), default="")
+    message = Column(Text, default="")
+    link = Column(String(500), default="")
+    is_read = Column(Integer, default=0)
+    actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    actor_username = Column(String(200), default="")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── DIRECT MESSAGE ───────────────────────────────────────────────────────────
+class DirectMessage(Base):
+    __tablename__ = "direct_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    sender_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    receiver_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    content = Column(Text, nullable=False)
+    is_read = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── COLLECTION ────────────────────────────────────────────────────────────────
+class Collection(Base):
+    __tablename__ = "collections"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    name = Column(String(200), nullable=False)
+    description = Column(Text, default="")
+    cover_image = Column(String(500), default="")
+    is_public = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ─── COLLECTION ITEM ───────────────────────────────────────────────────────────
+class CollectionItem(Base):
+    __tablename__ = "collection_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    collection_id = Column(Integer, ForeignKey("collections.id", ondelete="CASCADE"), nullable=True)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=True)
+    display_order = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── USER SETTINGS ───────────────────────────────────────────────────────────
+class UserSetting(Base):
+    __tablename__ = "user_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, unique=True)
+    dark_mode = Column(Integer, default=0)
+    language = Column(String(20), default="en")
+    email_notifications = Column(Integer, default=1)
+    push_notifications = Column(Integer, default=1)
+    show_follower_count = Column(Integer, default=1)
+    show_post_stats = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ─── TIP ───────────────────────────────────────────────────────────────────────
+class Tip(Base):
+    __tablename__ = "tips"
+
+    id = Column(Integer, primary_key=True, index=True)
+    sender_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    receiver_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    amount = Column(Integer, default=0)  # in smallest currency unit
+    message = Column(Text, default="")
+    status = Column(String(50), default="pending")  # pending, completed, failed
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── CREATOR SUBSCRIPTION ─────────────────────────────────────────────────────
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    tier = Column(String(50), default="free")  # free, basic, premium
+    amount = Column(Integer, default=0)
+    status = Column(String(50), default="active")  # active, cancelled, expired
+    starts_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── USER BADGE ───────────────────────────────────────────────────────────────
+class UserBadge(Base):
+    __tablename__ = "user_badges"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    badge_type = Column(String(50), nullable=False)  # verified, ambassador, top_contributor, etc.
+    badge_name = Column(String(100), default="")
+    badge_icon = Column(String(100), default="")
+    awarded_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── SHARE ─────────────────────────────────────────────────────────────────────
+class Share(Base):
+    __tablename__ = "shares"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=True)
+    platform = Column(String(50), default="internal")  # internal, twitter, facebook, whatsapp, link
+    created_at = Column(DateTime, default=datetime.utcnow)

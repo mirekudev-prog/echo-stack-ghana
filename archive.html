@@ -1,1021 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0D1B2A">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="Browse all published posts, stories, videos, and reels from EchoStack">
-<title>EchoStack — Archive</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-/* ===== CSS VARIABLES & RESET ===== */
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --ink:#0D1B2A;--ink2:#1a2744;--gold:#C8962E;--gold2:#E8B84B;--gold3:#F4D06F;
-  --surface:#fafafa;--surface2:#f5f5f5;--card:#ffffff;--border:#e5e5e5;--border2:#d1d1d1;
-  --text:#1a1a1a;--text2:#3a3a3a;--muted:#8e8e93;--muted2:#6b6b6b;
-  --danger:#ef4444;--danger2:#dc2626;--success:#22c55e;--success2:#16a34a;
-  --warning:#f59e0b;--info:#3b82f6;--purple:#8b5cf6;--pink:#ec4899;--cyan:#06b6d4;
-  --hover:#f0f0f0;--hover2:#e8e8e8;--shadow:0 1px 3px rgba(0,0,0,.08);
-  --shadow2:0 2px 8px rgba(0,0,0,.12);--shadow3:0 4px 16px rgba(0,0,0,.16);
-  --radius:12px;--radius2:16px;--radius3:20px;--sidebar-w:280px;--topbar-h:57px;
-  --transition:all .2s ease;
-}
-html,body{height:100%;overflow-x:hidden;scroll-behavior:smooth}
-body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--surface);color:var(--text);line-height:1.5;padding-bottom:env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased;}
-img,video{max-width:100%;height:auto;display:block}
-a{text-decoration:none;color:inherit}
-button{font-family:inherit;border:none;background:none;cursor:pointer}
-
-/* ===== SIDEBAR (Same as Dashboard) ===== */
-.sidebar{width:var(--sidebar-w);background:var(--card);color:var(--text);position:fixed;left:0;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;transform:translateX(-100%);transition:var(--transition);z-index:2000;-webkit-overflow-scrolling:touch;box-shadow:var(--shadow3);}
-.sidebar.open{transform:translateX(0)}
-.sb-header{padding:20px 16px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surface),var(--surface2));}
-.sb-brand{display:flex;align-items:center;gap:12px}
-.sb-brand img{width:40px;height:40px;border-radius:10px;object-fit:cover}
-.sb-brand-text strong{display:block;font-size:1.1rem;font-weight:700;color:var(--ink)}
-.sb-brand-text span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
-.sb-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.sb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;color:var(--text);text-decoration:none;transition:var(--transition);font-size:.95rem;font-weight:500;border-radius:8px;margin:2px 8px;min-height:48px;}
-.sb-item:hover{background:var(--hover)}
-.sb-item:active{transform:scale(.98)}
-.sb-item.active{background:rgba(200,150,46,.15);color:var(--gold);font-weight:600}
-.sb-item .icon{width:24px;text-align:center;font-size:1.1rem}
-.sb-item .badge{margin-left:auto;background:var(--danger);color:white;font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:700;}
-.sb-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);background:var(--surface2);}
-.sb-footer button{width:100%;padding:12px;border-radius:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--danger);font-size:.95rem;font-weight:600;cursor:pointer;min-height:48px;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:8px;}
-.sb-footer button:active{background:rgba(239,68,68,.2);transform:scale(.98)}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1999;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;transition:opacity .3s ease;}
-.sidebar-overlay.show{display:block;opacity:1}
-
-/* ===== TOPBAR ===== */
-.topbar{position:sticky;top:0;z-index:1000;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
-.topbar.scrolled{box-shadow:var(--shadow2)}
-.menu-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;font-size:1.4rem;color:var(--text);transition:var(--transition);}
-.menu-btn:active{background:var(--hover);transform:scale(.95)}
-.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--ink);letter-spacing:-.5px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.topbar-actions{display:flex;gap:8px;align-items:center}
-.topbar-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:20px;padding:8px 14px;font-size:.85rem;font-weight:600;transition:var(--transition);display:flex;align-items:center;gap:6px;}
-.topbar-btn:hover{background:var(--hover)}
-.topbar-btn:active{transform:scale(.96)}
-
-/* ===== MAIN CONTAINER ===== */
-.container{max-width:1200px;margin:0 auto;padding:20px 16px 80px}
-
-/* ===== PAGE HEADER ===== */
-.page-header{background:linear-gradient(135deg,var(--ink),var(--ink2));border-radius:var(--radius2);padding:24px;margin-bottom:24px;color:white;position:relative;overflow:hidden;}
-.page-header::after{content:'🗂️';position:absolute;right:24px;top:12px;font-size:60px;opacity:.1;pointer-events:none;}
-.page-header h1{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;margin-bottom:8px;}
-.page-header p{font-size:.95rem;opacity:.9;max-width:600px;line-height:1.6;}
-
-/* ===== FILTER BAR ===== */
-.filter-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:24px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-.filter-bar input{flex:1;min-width:200px;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:1rem;color:var(--text);outline:none;transition:border-color .15s;background:var(--surface2);min-height:44px;}
-.filter-bar input:focus{border-color:var(--gold);background:var(--card);}
-.filter-bar select{padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:1rem;color:var(--text);outline:none;background:var(--surface2);cursor:pointer;min-height:44px;}
-.filter-bar select:focus{border-color:var(--gold);}
-
-/* ===== TYPE PILLS ===== */
-.type-pills{display:flex;gap:8px;overflow-x:auto;padding:8px 0;margin-bottom:24px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.type-pills::-webkit-scrollbar{display:none}
-.type-pill{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:10px 20px;font-size:.9rem;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--muted);transition:var(--transition);min-height:44px;display:flex;align-items:center;gap:8px;}
-.type-pill:active{transform:scale(.98)}
-.type-pill.active{background:var(--ink);border-color:var(--ink);color:white;box-shadow:0 2px 8px rgba(13,27,42,.3)}
-
-/* ===== STATS STRIP ===== */
-.stats-strip{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
-@media(min-width:600px){.stats-strip{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:900px){.stats-strip{grid-template-columns:repeat(6,1fr)}}
-.stat-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;}
-.stat-val{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:4px;}
-.stat-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
-
-/* ===== POST CARDS ===== */
-.month-group{margin-bottom:32px}
-.month-label{font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px}
-.month-label i{color:var(--gold)}
-.posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
-
-.post-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;transition:var(--transition);cursor:pointer}
-.post-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--shadow2)}
-
-/* Post Header */
-.post-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
-.post-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:white;font-weight:700;flex-shrink:0}
-.post-author-info{flex:1;min-width:0}
-.post-author{font-weight:700;font-size:.95rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.post-time{font-size:.75rem;color:var(--muted);margin-top:2px}
-.post-type-badge{padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
-.post-type-badge.article{background:#EFF6FF;color:#2563EB}
-.post-type-badge.story{background:#F0FDF4;color:#16A34A}
-.post-type-badge.video{background:#FDF2F8;color:#9333EA}
-.post-type-badge.reel{background:#FCE7F3;color:#B21E6C}
-.post-type-badge.audio{background:#F0FDF4;color:#06B6D4}
-.post-type-badge.premium{background:rgba(200,150,46,.15);color:var(--gold);border:1px solid rgba(200,150,46,.3)}
-
-/* Post Content */
-.post-content{padding:12px 16px}
-.post-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.4;display:block}
-.post-excerpt{font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:8px}
-
-/* Media Preview */
-.post-media{position:relative;background:#000;overflow:hidden}
-.post-media img{width:100%;max-height:300px;object-fit:cover;display:block}
-.post-media video{width:100%;max-height:300px;display:block;background:#000}
-.post-media.reel video{max-height:480px;aspect-ratio:9/16;object-fit:cover;margin:0 auto}
-.play-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);border-radius:50%;width:52px;height:52px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.4rem;cursor:pointer;z-index:10;transition:var(--transition)}
-.play-overlay:hover{background:rgba(0,0,0,.8);transform:translate(-50%,-50%) scale(1.1)}
-.reel-watermark{position:absolute;bottom:12px;right:12px;background:rgba(13,27,42,.85);border-radius:20px;padding:6px 12px;display:flex;align-items:center;gap:6px;z-index:10;pointer-events:none;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.15)}
-.reel-watermark img{height:18px;width:auto;filter:brightness(0) invert(1)}
-.reel-watermark span{color:white;font-size:.7rem;font-weight:700;letter-spacing:.5px}
-
-/* Audio Card */
-.card-audio{background:var(--surface2);padding:16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.card-audio .audio-title{font-size:.9rem;font-weight:600;margin-bottom:10px;color:var(--text);display:flex;align-items:center;gap:8px}
-.card-audio .audio-title i{color:var(--gold)}
-.card-audio audio{width:100%;height:44px;border-radius:22px}
-
-/* Premium Banner */
-.premium-banner{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);padding:10px 16px;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px}
-.premium-banner i{font-size:1rem}
-
-/* Post Actions */
-.post-actions{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);flex-wrap:wrap}
-.action-btn{background:none;border:none;font-size:.85rem;font-weight:600;color:var(--muted);cursor:pointer;padding:8px 12px;border-radius:10px;transition:var(--transition);display:flex;align-items:center;gap:6px;min-height:40px}
-.action-btn:active{transform:scale(.98);background:var(--hover)}
-.action-btn.liked{color:var(--danger)}
-.action-btn .count{font-size:.8rem;font-weight:700}
-.read-btn{margin-left:auto;background:var(--gold);color:var(--ink);border:none;border-radius:10px;padding:8px 16px;font-weight:700;font-size:.85rem;cursor:pointer;transition:var(--transition);min-height:40px;display:flex;align-items:center;gap:6px}
-.read-btn:hover{background:var(--gold2)}
-.read-btn:active{transform:scale(.98)}
-
-/* ===== PREMIUM WALL ===== */
-.premium-wall{background:var(--card);border:2px solid rgba(200,150,46,.3);border-radius:var(--radius2);padding:32px;text-align:center;margin:24px 0;box-shadow:0 4px 16px rgba(200,150,46,.1)}
-.premium-wall i{font-size:3rem;color:var(--gold);margin-bottom:16px}
-.premium-wall h2{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--ink);margin-bottom:12px}
-.premium-wall p{font-size:.95rem;color:var(--muted);margin-bottom:20px;line-height:1.6}
-.premium-wall .btn{background:var(--gold);color:var(--ink);border:none;border-radius:10px;padding:12px 24px;font-weight:700;font-size:1rem;cursor:pointer;transition:var(--transition);min-height:48px;display:inline-flex;align-items:center;gap:8px}
-.premium-wall .btn:hover{background:var(--gold2)}
-.premium-wall .btn:active{transform:scale(.98)}
-
-/* ===== EMPTY/LOADING STATES ===== */
-.empty-state{text-align:center;padding:60px 20px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:var(--radius2)}
-.empty-state i{font-size:3rem;margin-bottom:16px;opacity:.5;color:var(--gold)}
-.empty-state p{font-size:1rem;font-weight:500;margin-bottom:8px}
-.empty-state a{color:var(--gold);font-weight:600}
-.loading{text-align:center;padding:40px 20px;color:var(--muted)}
-.loading i{font-size:2rem;margin-bottom:12px;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
-
-/* ===== TOAST ===== */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,26,26,.95);color:white;padding:14px 28px;border-radius:30px;font-size:.9rem;font-weight:600;z-index:9999;transition:all .3s;opacity:0;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap;max-width:90%;text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.ok{background:rgba(34,197,94,.95)}
-.toast.er{background:rgba(239,68,68,.95)}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:768px){
-  .sidebar{width:260px}
-  .container{padding:16px 12px 80px}
-  .page-header{padding:16px}
-  .page-header h1{font-size:1.5rem}
-  .filter-bar{flex-direction:column;align-items:stretch}
-  .filter-bar input,.filter-bar select{width:100%}
-  .type-pills{padding:8px 0}
-  .type-pill{padding:10px 14px;font-size:.85rem}
-  .stats-strip{grid-template-columns:repeat(3,1fr)}
-  .posts-grid{grid-template-columns:1fr}
-  .post-header{padding:12px 14px}
-  .post-avatar{width:36px;height:36px;font-size:1.1rem}
-  .post-content{padding:12px 14px}
-  .post-title{font-size:1rem}
-  .post-actions{padding:10px 14px}
-  .action-btn{padding:8px 10px;font-size:.8rem}
-  .read-btn{padding:8px 14px;font-size:.8rem}
-  .premium-wall{padding:24px 16px}
-}
-@media(max-width:480px){
-  .topbar{padding:10px 14px}
-  .logo{font-size:1.3rem}
-  .page-header h1{font-size:1.3rem}
-  .post-media img,.post-media video{max-height:250px}
-  .post-media.reel video{max-height:400px}
-  .stats-strip{grid-template-columns:repeat(2,1fr)}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Archive - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .archive-header { padding:32px 24px; background:linear-gradient(135deg,var(--ink),var(--ink2)); color:white; }
+        .archive-header h1 { font-family:'Playfair Display',serif; font-size:1.8rem; margin-bottom:8px; }
+        .archive-header p { color:var(--main-muted); font-size:0.95rem; }
+        .archive-filters { padding:20px 24px; background:var(--main-card); border-bottom:1px solid var(--main-border); display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+        .archive-search { flex:1; min-width:200px; padding:12px 16px; background:var(--main-bg); border:1px solid var(--main-border); border-radius:var(--radius-full); font-size:0.9rem; outline:none; }
+        .archive-search:focus { border-color:var(--gold); }
+        .archive-select { padding:10px 16px; background:var(--main-bg); border:1px solid var(--main-border); border-radius:var(--radius-full); font-size:0.85rem; outline:none; cursor:pointer; }
+        .archive-stats { display:flex; gap:24px; padding:20px 24px; background:var(--main-card); border-bottom:1px solid var(--main-border); flex-wrap:wrap; }
+        .stat-box { text-align:center; }
+        .stat-number { font-size:1.5rem; font-weight:700; color:var(--gold); }
+        .stat-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--main-muted); }
+        .archive-content { padding:24px; }
+        .month-header { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--ink); margin:24px 0 16px; padding-bottom:8px; border-bottom:1px solid var(--main-border); }
+        .month-header:first-child { margin-top:0; }
+        .premium-wall { background:linear-gradient(135deg,var(--gold),var(--gold2)); border-radius:var(--radius-lg); padding:24px; text-align:center; color:var(--ink); margin-top:24px; }
+        .premium-wall h3 { font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:8px; }
+        .premium-wall p { font-size:0.9rem; margin-bottom:16px; opacity:0.8; }
+    </style>
 </head>
 <body>
+<div class="app">
+    <!-- SIDEBAR (same as dashboard) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </a>
+        </div>
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">User</div>
+                <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i><span>Feed</span></a>
+                <a href="/reels" class="sidebar-link"><i class="fas fa-film"></i><span>Reels</span></a>
+                <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i><span>Explore</span></a>
+                <a href="/archive" class="sidebar-link active"><i class="fas fa-archive"></i><span>Archive</span></a>
+                <a href="/app" class="sidebar-link"><i class="fas fa-map-marked-alt"></i><span>Map</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Social</div>
+                <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
+                <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
+                <a href="/notifications" class="sidebar-link"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                <a href="/chatbot" class="sidebar-link"><i class="fas fa-comments"></i><span>Community Chat</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Create</div>
+                <a href="/creator" class="sidebar-link"><i class="fas fa-plus-circle"></i><span>Create Post</span></a>
+                <a href="/premium" class="sidebar-link"><i class="fas fa-crown"></i><span>Premium</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Account</div>
+                <a href="/user-profile" class="sidebar-link"><i class="fas fa-user"></i><span>My Profile</span></a>
+                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-<!-- SIDEBAR OVERLAY -->
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="main-wrapper">
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-title">Archive</div>
+            <div class="topbar-actions">
+                <a href="/dashboard" class="topbar-btn"><i class="fas fa-home"></i></a>
+            </div>
+        </header>
 
-<!-- SIDEBAR NAVIGATION -->
-<aside class="sidebar" id="sidebar">
-  <div class="sb-header">
-    <div class="sb-brand">
-      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-      <div class="sb-brand-text">
-        <strong>EchoStack</strong>
-        <span>Ghana's Heritage</span>
-      </div>
+        <main class="main-content">
+            <div class="archive-header">
+                <h1>Ghana Heritage Archive</h1>
+                <p>Explore stories, audio, videos and more from all 16 regions</p>
+            </div>
+            
+            <div class="archive-filters">
+                <input type="text" class="archive-search" placeholder="Search archive..." id="searchInput" oninput="debounceSearch()">
+                <select class="archive-select" id="typeFilter" onchange="loadPosts()">
+                    <option value="">All Types</option>
+                    <option value="article">Articles</option>
+                    <option value="video">Videos</option>
+                    <option value="reel">Reels</option>
+                    <option value="audio">Audio</option>
+                    <option value="photo">Photos</option>
+                </select>
+                <select class="archive-select" id="regionFilter" onchange="loadPosts()">
+                    <option value="">All Regions</option>
+                </select>
+            </div>
+
+            <div class="archive-stats">
+                <div class="stat-box"><div class="stat-number" id="statTotal">-</div><div class="stat-label">Total Posts</div></div>
+                <div class="stat-box"><div class="stat-number" id="statArticles">-</div><div class="stat-label">Articles</div></div>
+                <div class="stat-box"><div class="stat-number" id="statVideos">-</div><div class="stat-label">Videos</div></div>
+                <div class="stat-box"><div class="stat-number" id="statAudio">-</div><div class="stat-label">Audio</div></div>
+            </div>
+
+            <div class="archive-content" id="archiveContent">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </main>
     </div>
-  </div>
-  <div class="sb-section">Navigation</div>
-  <a href="/dashboard" class="sb-item"><span class="icon"><i class="fas fa-home"></i></span> Home Feed</a>
-  <a href="/explore" class="sb-item"><span class="icon"><i class="fas fa-compass"></i></span> Explore</a>
-  <a href="/reels.html" class="sb-item"><span class="icon"><i class="fas fa-video"></i></span> Reels</a>
-  <a href="/archive" class="sb-item active"><span class="icon"><i class="fas fa-book"></i></span> Archive</a>
-  <a href="/app" class="sb-item"><span class="icon"><i class="fas fa-map"></i></span> Map</a>
-  <div class="sb-section">Create</div>
-  <a href="/creator.html" class="sb-item"><span class="icon"><i class="fas fa-pen"></i></span> New Post</a>
-  <a href="/creator.html?type=story" class="sb-item"><span class="icon"><i class="fas fa-camera"></i></span> Add Story</a>
-  <div class="sb-section">Account</div>
-  <a href="/user_profile.html" class="sb-item"><span class="icon"><i class="fas fa-user"></i></span> Profile</a>
-  <a href="/user-settings.html" class="sb-item"><span class="icon"><i class="fas fa-cog"></i></span> Settings</a>
-  <a href="/premium.html" class="sb-item"><span class="icon"><i class="fas fa-crown"></i></span> Go Premium</a>
-  <div class="sb-footer">
-    <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-  </div>
-</aside>
-
-<!-- TOPBAR -->
-<div class="topbar" id="topbar">
-  <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
-    <i class="fas fa-bars"></i>
-  </button>
-  <div class="logo">EchoStack</div>
-  <div class="topbar-actions">
-    <a href="/dashboard" class="topbar-btn">
-      <i class="fas fa-home"></i> Feed
-    </a>
-    <a href="/creator.html" class="topbar-btn">
-      <i class="fas fa-plus"></i> Create
-    </a>
-  </div>
 </div>
-
-<!-- MAIN CONTAINER -->
-<div class="container" id="app">
-  
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <h1>🗂️ Archive</h1>
-    <p>Every published piece of Ghana's heritage — searchable, filterable, all in one place. Browse by date, creator, region, or content type.</p>
-  </div>
-
-  <!-- FILTER BAR -->
-  <div class="filter-bar">
-    <input type="text" id="search-input" placeholder="🔍 Search posts, creators, regions…" oninput="filterAll()">
-    <select id="author-filter" onchange="filterAll()">
-      <option value="">All creators</option>
-    </select>
-    <select id="region-filter" onchange="filterAll()">
-      <option value="">All regions</option>
-    </select>
-  </div>
-
-  <!-- PREMIUM WALL (for free users) -->
-  <div class="premium-wall" id="premium-wall" style="display:none">
-    <i class="fas fa-lock"></i>
-    <h2>Full Archive is a Premium Feature</h2>
-    <p>Premium members get access to the complete EchoStack archive — every article, story, video, and reel ever published about Ghana's heritage, searchable by date, creator, and region.</p>
-    <p><strong>Free members</strong> can read the 10 most recent posts. Upgrade to unlock everything.</p>
-    <button class="btn" onclick="window.location.href='/premium.html'">
-      <i class="fas fa-crown"></i> Upgrade to Premium — GH₵150/mo
-    </button>
-    <p style="font-size:.8rem;color:var(--muted);margin-top:12px">You can cancel anytime.</p>
-  </div>
-
-  <!-- TYPE PILLS -->
-  <div class="type-pills" id="type-pills">
-    <button class="type-pill active" data-type="all">
-      <i class="fas fa-globe-africa"></i> All
-    </button>
-    <button class="type-pill" data-type="article">
-      <i class="fas fa-newspaper"></i> Articles
-    </button>
-    <button class="type-pill" data-type="story">
-      <i class="fas fa-book-open"></i> Stories
-    </button>
-    <button class="type-pill" data-type="video">
-      <i class="fas fa-video"></i> Videos
-    </button>
-    <button class="type-pill" data-type="reel">
-      <i class="fas fa-film"></i> Reels
-    </button>
-    <button class="type-pill" data-type="audio">
-      <i class="fas fa-music"></i> Audio
-    </button>
-    <button class="type-pill" data-type="premium">
-      <i class="fas fa-crown"></i> Premium
-    </button>
-  </div>
-
-  <!-- STATS STRIP -->
-  <div class="stats-strip">
-    <div class="stat-item">
-      <div class="stat-val" id="stat-total">–</div>
-      <div class="stat-lbl">Total</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val" id="stat-articles">–</div>
-      <div class="stat-lbl">Articles</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val" id="stat-stories">–</div>
-      <div class="stat-lbl">Stories</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val" id="stat-videos">–</div>
-      <div class="stat-lbl">Videos</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val" id="stat-reels">–</div>
-      <div class="stat-lbl">Reels</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val" id="stat-premium">–</div>
-      <div class="stat-lbl">Premium</div>
-    </div>
-  </div>
-
-  <!-- LOADING STATE -->
-  <div class="loading" id="loading-state">
-    <i class="fas fa-spinner"></i>
-    <p>Loading archive…</p>
-  </div>
-
-  <!-- POSTS CONTAINER -->
-  <div id="posts-container" style="display:none"></div>
-
-</div>
-
-<!-- TOAST NOTIFICATION -->
-<div class="toast" id="toast"></div>
 
 <script>
-/**
- * ============================================
- * ECHOSTACK ARCHIVE - POST BROWSER
- * Complete JavaScript Implementation
- * ============================================
- */
+let user = null;
+let searchTimeout = null;
 
-// ===== GLOBAL STATE =====
-const ArchiveState = {
-  posts: [],
-  regions: [],
-  currentType: 'all',
-  currentSearch: '',
-  currentAuthor: '',
-  currentRegion: '',
-  isLoading: false,
-  isPremium: false,
-  currentUser: null,
-  FREE_LIMIT: 10
-};
-
-// ===== UTILS =====
-const Utils = {
-  escapeHtml(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  },
-  timeAgo(dateStr) {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    const diff = (Date.now() - d.getTime()) / 1000;
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  },
-  groupByMonth(posts) {
-    const groups = {};
-    posts.forEach(post => {
-      const date = new Date(post.created_at);
-      const key = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(post);
-    });
-    return groups;
-  },
-  debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-};
-
-// ===== TOAST =====
-const Toast = {
-  element: null,
-  timeout: null,
-  init() { this.element = document.getElementById('toast'); },
-  show(message, type = '') {
-    if (!this.element) this.init();
-    this.element.textContent = message;
-    this.element.className = `toast show ${type}`;
-    if (this.timeout) clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => this.element.classList.remove('show'), 3000);
-  },
-  ok(msg) { this.show(msg, 'ok'); },
-  error(msg) { this.show(msg, 'er'); }
-};
-
-// ===== SIDEBAR =====
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('show');
-  document.body.style.overflow = document.getElementById('sidebar').classList.contains('open') ? 'hidden' : '';
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
 }
 
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('show');
-  document.body.style.overflow = '';
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// ===== API HELPER =====
-async function apiFetch(endpoint, options = {}) {
-  const config = {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options
-  };
-  
-  try {
-    const response = await fetch(endpoint, config);
-    if (!response.ok) {
-      if (response.status === 401) {
-        window.location.href = '/user-login.html';
-        throw new Error('Unauthorized');
-      }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return await response.json();
-    }
-    return await response.text();
-  } catch (error) {
-    console.error(`API Error (${endpoint}):`, error);
-    Toast.error('Failed to load data');
-    throw error;
-  }
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
 }
 
-// ===== FETCH CURRENT USER =====
-async function fetchCurrentUser() {
-  try {
-    const user = await apiFetch('/api/users/me');
-    ArchiveState.currentUser = user;
-    ArchiveState.isPremium = user.is_premium || user.plan === 'premium' || ['creator', 'admin', 'superuser'].includes(user.role);
-    
-    // Update UI
-    document.getElementById('user-name').textContent = user.username || '';
-    document.getElementById('user-av').textContent = (user.username || '?')[0].toUpperCase();
-    document.getElementById('user-plan').textContent = ArchiveState.isPremium ? '⭐ Premium' : 'Free Plan';
-    
-    // Show premium wall for free users
-    if (!ArchiveState.isPremium) {
-      document.getElementById('premium-wall').style.display = 'block';
-    }
-    
-    // Show creator nav if applicable
-    if (['creator', 'admin', 'superuser'].includes(user.role)) {
-      document.querySelector('[href="/creator.html"]').style.display = 'flex';
-    }
-    
-  } catch (e) {
-    console.warn('Failed to fetch user:', e);
-    window.location.href = '/user-login.html';
-  }
+function debounceSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(loadPosts, 300);
 }
 
-// ===== LOAD ARCHIVE =====
-async function loadArchive() {
-  const container = document.getElementById('posts-container');
-  const loading = document.getElementById('loading-state');
-  
-  if (ArchiveState.isLoading) return;
-  ArchiveState.isLoading = true;
-  
-  loading.style.display = 'block';
-  container.style.display = 'none';
-  
-  try {
-    // Fetch posts with limit based on premium status
-    const limit = ArchiveState.isPremium ? 500 : ArchiveState.FREE_LIMIT;
-    const posts = await apiFetch(`/api/posts?status=published&limit=${limit}`);
-    ArchiveState.posts = posts;
-    
-    // Fetch regions for filter dropdown
+async function loadUser() {
     try {
-      const regions = await apiFetch('/api/regions');
-      ArchiveState.regions = regions;
-      populateRegionFilter(regions);
-    } catch (e) {
-      console.warn('Failed to load regions:', e);
+        const res = await fetch('/api/users/me', { credentials: 'include' });
+        if (res.ok) {
+            user = await res.json();
+            const initial = (user.username || 'U').charAt(0).toUpperCase();
+            if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
+            if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = user.full_name || user.username;
+            const badge = document.getElementById('sidebarBadge');
+            if (badge) {
+                if (user.role === 'admin' || user.role === 'superuser') { badge.className = 'sidebar-user-badge badge-admin'; badge.textContent = 'Admin'; }
+                else if (user.role === 'creator') { badge.className = 'sidebar-user-badge badge-creator'; badge.textContent = 'Creator'; }
+                else if (user.is_premium) { badge.className = 'sidebar-user-badge badge-premium'; badge.textContent = 'Premium'; }
+            }
+        } else {
+            location.href = '/user-login';
+        }
+    } catch(e) {
+        location.href = '/user-login';
     }
-    
-    // Populate author filter
-    populateAuthorFilter(posts);
-    
-    // Update stats
-    updateStats(posts);
-    
-    // Render posts
-    renderArchive(posts);
-    
-  } catch (e) {
-    console.error('Failed to load archive:', e);
-    loading.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-exclamation-circle"></i>
-        <p>Failed to load archive</p>
-        <span>Pull to refresh or check your connection</span>
-      </div>
-    `;
-  } finally {
-    ArchiveState.isLoading = false;
-  }
+    loadPosts();
+    loadRegions();
 }
 
-// ===== POPULATE FILTERS =====
-function populateAuthorFilter(posts) {
-  const select = document.getElementById('author-filter');
-  const authors = [...new Set(posts.map(p => p.author_username).filter(Boolean))];
-  
-  authors.forEach(author => {
-    const option = document.createElement('option');
-    option.value = author;
-    option.textContent = author;
-    select.appendChild(option);
-  });
-}
-
-function populateRegionFilter(regions) {
-  const select = document.getElementById('region-filter');
-  
-  regions.forEach(region => {
-    const option = document.createElement('option');
-    option.value = region.id;
-    option.textContent = region.name;
-    select.appendChild(option);
-  });
-}
-
-// ===== UPDATE STATS =====
-function updateStats(posts) {
-  document.getElementById('stat-total').textContent = posts.length + (ArchiveState.isPremium ? '' : '+');
-  document.getElementById('stat-articles').textContent = posts.filter(p => p.content_type === 'article').length;
-  document.getElementById('stat-stories').textContent = posts.filter(p => p.content_type === 'story').length;
-  document.getElementById('stat-videos').textContent = posts.filter(p => p.content_type === 'video').length;
-  document.getElementById('stat-reels').textContent = posts.filter(p => p.content_type === 'reel').length;
-  document.getElementById('stat-premium').textContent = posts.filter(p => p.is_premium).length;
-}
-
-// ===== RENDER ARCHIVE =====
-function renderArchive(posts) {
-  const container = document.getElementById('posts-container');
-  const loading = document.getElementById('loading-state');
-  
-  // Filter posts
-  let filtered = filterPosts(posts);
-  
-  // Apply free user limit
-  if (!ArchiveState.isPremium) {
-    filtered = filtered.slice(0, ArchiveState.FREE_LIMIT);
-  }
-  
-  if (!filtered.length) {
-    loading.style.display = 'none';
-    container.style.display = 'block';
-    container.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-search"></i>
-        <p>No posts found</p>
-        <span>Try adjusting your filters</span>
-      </div>
-    `;
-    return;
-  }
-  
-  // Group by month
-  const grouped = Utils.groupByMonth(filtered);
-  
-  // Render grouped posts
-  let html = '';
-  for (const [month, monthPosts] of Object.entries(grouped)) {
-    html += `
-      <div class="month-group">
-        <div class="month-label">
-          <i class="far fa-calendar"></i>
-          ${Utils.escapeHtml(month)}
-          <span style="font-weight:400;color:var(--muted);margin-left:8px">(${monthPosts.length} post${monthPosts.length !== 1 ? 's' : ''})</span>
-        </div>
-        <div class="posts-grid">
-          ${monthPosts.map(post => renderPostCard(post)).join('')}
-        </div>
-      </div>
-    `;
-  }
-  
-  // Add upgrade prompt for free users
-  if (!ArchiveState.isPremium && posts.length > ArchiveState.FREE_LIMIT) {
-    html += `
-      <div class="premium-wall" style="margin-top:24px">
-        <i class="fas fa-book-open"></i>
-        <h2>You're seeing the ${ArchiveState.FREE_LIMIT} most recent posts</h2>
-        <p>Upgrade to Premium to access the complete EchoStack archive with unlimited browsing, advanced filters, and exclusive content.</p>
-        <button class="btn" onclick="window.location.href='/premium.html'">
-          <i class="fas fa-crown"></i> Upgrade to Premium — GH₵150/mo
-        </button>
-      </div>
-    `;
-  }
-  
-  loading.style.display = 'none';
-  container.style.display = 'block';
-  container.innerHTML = html;
-}
-
-// ===== FILTER POSTS =====
-function filterPosts(posts) {
-  return posts.filter(post => {
-    // Search filter
-    if (ArchiveState.currentSearch) {
-      const search = ArchiveState.currentSearch.toLowerCase();
-      const matchesSearch = 
-        (post.title || '').toLowerCase().includes(search) ||
-        (post.excerpt || '').toLowerCase().includes(search) ||
-        (post.author_username || '').toLowerCase().includes(search);
-      if (!matchesSearch) return false;
-    }
-    
-    // Author filter
-    if (ArchiveState.currentAuthor && post.author_username !== ArchiveState.currentAuthor) {
-      return false;
-    }
-    
-    // Region filter
-    if (ArchiveState.currentRegion && String(post.region_id) !== String(ArchiveState.currentRegion)) {
-      return false;
-    }
-    
-    // Type filter
-    if (ArchiveState.currentType === 'premium') {
-      return post.is_premium;
-    } else if (ArchiveState.currentType !== 'all' && post.content_type !== ArchiveState.currentType) {
-      return false;
-    }
-    
-    return true;
-  });
-}
-
-// ===== RENDER POST CARD =====
-function renderPostCard(post) {
-  const typeClass = post.is_premium ? 'premium' : (post.content_type || 'article');
-  const typeLabel = post.is_premium ? 'Premium' : (post.content_type || 'Article');
-  const initials = (post.author_username || 'U')[0].toUpperCase();
-  const likeCount = post.likes || post.likes_count || 0;
-  const commentCount = post.comments || post.comment_count || 0;
-  const isLocked = post.is_premium && !ArchiveState.isPremium;
-  
-  // Media preview
-  let mediaHtml = '';
-  if (post.content_type === 'reel' && post.video_url) {
-    mediaHtml = `
-      <div class="post-media reel">
-        <video preload="none" poster="${Utils.escapeHtml(post.cover_image || '')}">
-          <source src="${Utils.escapeHtml(post.video_url)}" type="video/mp4">
-        </video>
-        <div class="play-overlay" onclick="event.stopPropagation();goPost(${post.id})">
-          <i class="fas fa-play"></i>
-        </div>
-        <div class="reel-watermark">
-          <img src="/echostack-logo.png" alt="" onerror="this.style.display='none'">
-          <span>EchoStack</span>
-        </div>
-      </div>
-    `;
-  } else if (post.content_type === 'video' && post.video_url) {
-    mediaHtml = `
-      <div class="post-media">
-        <video preload="none" poster="${Utils.escapeHtml(post.cover_image || '')}">
-          <source src="${Utils.escapeHtml(post.video_url)}" type="video/mp4">
-        </video>
-        <div class="play-overlay" onclick="event.stopPropagation();goPost(${post.id})">
-          <i class="fas fa-play"></i>
-        </div>
-      </div>
-    `;
-  } else if (post.content_type === 'audio' && post.audio_url) {
-    mediaHtml = `
-      <div class="card-audio">
-        <div class="audio-title">
-          <i class="fas fa-music"></i>
-          <span>${Utils.escapeHtml(post.title || 'Audio Recording')}</span>
-        </div>
-        <audio controls src="${Utils.escapeHtml(post.audio_url)}"></audio>
-      </div>
-    `;
-  } else if (post.cover_image) {
-    mediaHtml = `
-      <div class="post-media">
-        <img src="${Utils.escapeHtml(post.cover_image)}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\'fas fa-image\' style=\'font-size:2rem;color:var(--muted);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)\'></i>'">
-      </div>
-    `;
-  }
-  
-  // Premium banner
-  const premiumBanner = post.is_premium && !isLocked ? `
-    <div class="premium-banner">
-      <i class="fas fa-crown"></i>
-      <span>Premium Content</span>
-    </div>
-  ` : '';
-  
-  // Locked overlay
-  const lockedOverlay = isLocked ? `
-    <div style="position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:20;color:white;font-size:2rem">
-      <i class="fas fa-lock"></i>
-    </div>
-  ` : '';
-  
-  // Follow button (if not viewing own post)
-  const followButton = ArchiveState.currentUser && post.author_id && post.author_id !== ArchiveState.currentUser.id ? `
-    <button class="action-btn ${post.is_following ? 'following' : ''}" onclick="event.stopPropagation();toggleFollow(${post.author_id}, this)">
-      <i class="fas fa-user-plus"></i>
-      <span>${post.is_following ? 'Following' : 'Follow'}</span>
-    </button>
-  ` : '';
-  
-  // Delete button (for admins)
-  const deleteButton = ArchiveState.currentUser && ['admin', 'superuser'].includes(ArchiveState.currentUser.role) ? `
-    <button class="action-btn" style="color:var(--danger)" onclick="event.stopPropagation();deletePost(${post.id})">
-      <i class="fas fa-trash"></i>
-      <span>Delete</span>
-    </button>
-  ` : '';
-  
-  return `
-    <article class="post-card" onclick="${isLocked ? '' : `goPost(${post.id})`}">
-      <!-- Header -->
-      <div class="post-header">
-        <div class="post-avatar">${initials}</div>
-        <div class="post-author-info">
-          <div class="post-author">${Utils.escapeHtml(post.author_username || 'Creator')}</div>
-          <div class="post-time">${Utils.timeAgo(post.created_at)}</div>
-        </div>
-        <span class="post-type-badge ${typeClass}">${typeLabel}</span>
-      </div>
-      
-      <!-- Content -->
-      <div class="post-content">
-        <h3 class="post-title">
-          ${isLocked ? '<i class="fas fa-lock" style="margin-right:6px"></i>' : ''}
-          ${Utils.escapeHtml(post.title || 'Untitled')}
-        </h3>
-        ${post.excerpt ? `<p class="post-excerpt">${Utils.escapeHtml(post.excerpt.substring(0, 150))}${post.excerpt.length > 150 ? '…' : ''}</p>` : ''}
-      </div>
-      
-      <!-- Media -->
-      <div style="position:relative">
-        ${mediaHtml}
-        ${lockedOverlay}
-      </div>
-      
-      <!-- Premium Banner -->
-      ${premiumBanner}
-      
-      <!-- Actions -->
-      <div class="post-actions" onclick="event.stopPropagation()">
-        <button class="action-btn ${post.is_liked ? 'liked' : ''}" onclick="toggleLike(${post.id}, this)">
-          <i class="${post.is_liked ? 'fas' : 'far'} fa-heart"></i>
-          <span class="count">${likeCount}</span>
-        </button>
-        <button class="action-btn" onclick="event.stopPropagation();openComments(${post.id})">
-          <i class="far fa-comment"></i>
-          <span class="count">${commentCount}</span>
-        </button>
-        <button class="action-btn" onclick="event.stopPropagation();sharePost(${post.id})">
-          <i class="fas fa-share-alt"></i>
-          <span>Share</span>
-        </button>
-        ${followButton}
-        ${deleteButton}
-        ${!isLocked ? `
-          <button class="read-btn" onclick="event.stopPropagation();goPost(${post.id})">
-            Read <i class="fas fa-arrow-right"></i>
-          </button>
-        ` : ''}
-      </div>
-    </article>
-  `;
-}
-
-// ===== FILTER HANDLERS =====
-function setupFilters() {
-  // Type pills
-  document.getElementById('type-pills').addEventListener('click', e => {
-    const pill = e.target.closest('.type-pill');
-    if (!pill) return;
-    
-    document.querySelectorAll('.type-pill').forEach(p => p.classList.remove('active'));
-    pill.classList.add('active');
-    
-    ArchiveState.currentType = pill.dataset.type;
-    renderArchive(ArchiveState.posts);
-    
-    Toast.info(`Showing ${pill.textContent.trim()} posts`);
-  });
-  
-  // Search input
-  document.getElementById('search-input').addEventListener('input', Utils.debounce(e => {
-    ArchiveState.currentSearch = e.target.value;
-    renderArchive(ArchiveState.posts);
-  }, 300));
-  
-  // Author filter
-  document.getElementById('author-filter').addEventListener('change', e => {
-    ArchiveState.currentAuthor = e.target.value;
-    renderArchive(ArchiveState.posts);
-  });
-  
-  // Region filter
-  document.getElementById('region-filter').addEventListener('change', e => {
-    ArchiveState.currentRegion = e.target.value;
-    renderArchive(ArchiveState.posts);
-  });
-}
-
-// ===== POST INTERACTIONS =====
-function goPost(postId) {
-  window.location.href = `/post.html?id=${postId}`;
-}
-
-async function toggleLike(postId, btn) {
-  event.stopPropagation();
-  
-  if (!ArchiveState.currentUser) {
-    Toast.error('Please log in to like');
-    return;
-  }
-  
-  try {
-    const data = await apiFetch(`/api/posts/${postId}/like`, { method: 'POST' });
-    const countEl = btn.querySelector('.count');
-    if (countEl) countEl.textContent = data.likes || 0;
-    btn.classList.toggle('liked', data.liked);
-    btn.querySelector('i').className = data.liked ? 'fas fa-heart' : 'far fa-heart';
-    Toast.ok(data.liked ? '❤️ Liked!' : '🤍 Unliked');
-  } catch (e) {
-    Toast.error('Failed to like');
-  }
-}
-
-async function toggleFollow(authorId, btn) {
-  event.stopPropagation();
-  
-  if (!ArchiveState.currentUser) {
-    Toast.error('Please log in to follow');
-    return;
-  }
-  
-  try {
-    const data = await apiFetch(`/api/follow/${authorId}`, { method: 'POST' });
-    const isFollowing = data.following;
-    btn.textContent = isFollowing ? 'Following' : 'Follow';
-    btn.classList.toggle('following', isFollowing);
-    btn.querySelector('i').className = isFollowing ? 'fas fa-user-check' : 'fas fa-user-plus';
-    Toast.ok(isFollowing ? 'Following!' : 'Unfollowed');
-  } catch (e) {
-    Toast.error('Failed to follow');
-  }
-}
-
-function openComments(postId) {
-  window.location.href = `/post.html?id=${postId}#comments`;
-}
-
-function sharePost(postId) {
-  const url = `${window.location.origin}/post.html?id=${postId}`;
-  
-  if (navigator.share) {
-    navigator.share({
-      title: 'Check out this post on EchoStack',
-      url: url
-    }).catch(() => {
-      navigator.clipboard.writeText(url);
-      Toast.ok('📋 Link copied!');
-    });
-  } else {
-    navigator.clipboard.writeText(url);
-    Toast.ok('📋 Link copied!');
-  }
-}
-
-async function deletePost(postId) {
-  if (!confirm('Delete this post permanently?')) return;
-  
-  try {
-    await apiFetch(`/api/posts/${postId}`, { method: 'DELETE' });
-    Toast.ok('Post deleted');
-    loadArchive(); // Reload to reflect changes
-  } catch (e) {
-    Toast.error('Failed to delete post');
-  }
-}
-
-// ===== LOGOUT =====
 async function logout() {
-  if (!confirm('Are you sure you want to logout?')) return;
-  
-  try {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-  } catch (e) {
-    console.warn('Logout error:', e);
-  } finally {
+    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
     localStorage.removeItem('es_user');
-    window.location.href = '/user-login.html';
-  }
+    location.href = '/';
 }
 
-// ===== TOPBAR SCROLL EFFECT =====
-function setupTopbarScroll() {
-  const topbar = document.getElementById('topbar');
-  
-  window.addEventListener('scroll', Utils.debounce(() => {
-    if (window.scrollY > 10) {
-      topbar.classList.add('scrolled');
-    } else {
-      topbar.classList.remove('scrolled');
-    }
-  }, 100));
+async function loadRegions() {
+    try {
+        const res = await fetch('/api/regions');
+        const regions = await res.json();
+        const select = document.getElementById('regionFilter');
+        regions.forEach(r => {
+            select.innerHTML += `<option value="${r.id}">${escapeHtml(r.name)}</option>`;
+        });
+    } catch(e) {}
 }
 
-// ===== PULL TO REFRESH =====
-function setupPullToRefresh() {
-  let startY = 0;
-  
-  document.addEventListener('touchstart', e => {
-    if (window.scrollY === 0) startY = e.touches[0].clientY;
-  }, { passive: true });
-  
-  document.addEventListener('touchmove', e => {
-    if (window.scrollY === 0) {
-      const diff = e.touches[0].clientY - startY;
-      if (diff > 100) {
-        loadArchive();
-        Toast.info('🔄 Refreshed');
-        startY = 0;
-      }
+async function loadPosts() {
+    const type = document.getElementById('typeFilter').value;
+    const region = document.getElementById('regionFilter').value;
+    const search = document.getElementById('searchInput').value;
+    
+    let url = '/api/posts?limit=100';
+    if (type) url += `&type=${type}`;
+    if (region) url += `&region_id=${region}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    
+    try {
+        const res = await fetch(url);
+        const posts = await res.json();
+        renderArchive(posts);
+        updateStats(posts);
+    } catch(e) {
+        document.getElementById('archiveContent').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
     }
-  }, { passive: true });
 }
 
-// ===== INIT =====
-document.addEventListener('DOMContentLoaded', async () => {
-  // Initialize toast
-  Toast.init();
-  
-  // Fetch user first
-  await fetchCurrentUser();
-  
-  // Setup interactions
-  setupFilters();
-  setupTopbarScroll();
-  setupPullToRefresh();
-  
-  // Load archive
-  await loadArchive();
-  
-  // Handle online/offline
-  window.addEventListener('online', () => Toast.ok('🌐 Back online'));
-  window.addEventListener('offline', () => Toast.error('⚠️ You are offline'));
-  
-  // Close sidebar on scroll
-  document.querySelector('.container')?.addEventListener('scroll', () => {
-    if (document.getElementById('sidebar').classList.contains('open')) {
-      closeSidebar();
+function renderArchive(posts) {
+    const container = document.getElementById('archiveContent');
+    if (!posts.length) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-archive"></i><h3>No posts found</h3><p>Try adjusting your filters</p></div>';
+        return;
     }
-  });
-});
+    
+    // Group by month
+    const grouped = {};
+    posts.forEach(p => {
+        const d = new Date(p.created_at);
+        const key = d.toLocaleString('default', { month:'long', year:'numeric' });
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(p);
+    });
+    
+    let html = '';
+    for (const [month, monthPosts] of Object.entries(grouped)) {
+        html += `<h3 class="month-header">${month}</h3>`;
+        monthPosts.forEach(p => {
+            const author = p.author_username || 'User';
+            const initial = author.charAt(0).toUpperCase();
+            const typeBadge = p.content_type ? `<span class="post-type-badge ${p.content_type}">${p.content_type}</span>` : '';
+            
+            html += `
+                <article class="post-card" onclick="location.href='/post/${p.id}'">
+                    <div class="post-header">
+                        <div class="post-avatar">${initial}</div>
+                        <div class="post-author-info">
+                            <div class="post-author">${escapeHtml(author)}</div>
+                            <div class="post-meta"><span>${timeAgo(p.created_at)}</span>${typeBadge}</div>
+                        </div>
+                    </div>
+                    <h3 class="post-title">${escapeHtml(p.title)}</h3>
+                    ${p.excerpt ? `<p class="post-excerpt">${escapeHtml(p.excerpt)}</p>` : ''}
+                </article>
+            `;
+        });
+    }
+    
+    // Premium wall for free users
+    if (user && !user.is_premium && posts.length >= 10) {
+        html += `
+            <div class="premium-wall">
+                <h3>Unlock the Full Archive</h3>
+                <p>Free users can view 10 recent posts. Upgrade to Premium for unlimited access to Ghana's heritage archive.</p>
+                <a href="/premium" class="btn btn-secondary" style="background:var(--ink);color:white;border:none">Upgrade to Premium</a>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+function updateStats(posts) {
+    document.getElementById('statTotal').textContent = posts.length;
+    document.getElementById('statArticles').textContent = posts.filter(p => p.content_type === 'article').length;
+    document.getElementById('statVideos').textContent = posts.filter(p => p.content_type === 'video' || p.content_type === 'reel').length;
+    document.getElementById('statAudio').textContent = posts.filter(p => p.content_type === 'audio').length;
+}
+
+loadUser();
 </script>
 </body>
 </html>
-

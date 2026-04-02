@@ -1,464 +1,916 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0D1B2A">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="EchoStack">
-<meta name="description" content="Ghana's Living Heritage Archive — Discover the rich cultural stories, landscapes, and history of Ghana's 16 regions.">
-<link rel="icon" type="image/png" href="/echostack-logo.png">
-<link rel="apple-touch-icon" href="/echostack-logo.png">
-<link rel="manifest" href="/manifest.json">
-<title>EchoStack — Ghana's Living Heritage</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;
-  --muted:#94A3B8;--blue:#0077b6;--border:#E2E8F0
-}
-html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--ink);color:#fff;overflow-x:hidden;min-height:100vh}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EchoStack - Ghana's Living Heritage Archive">
+    <title>EchoStack — Ghana's Living Heritage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --ink: #0D1B2A;
+            --ink2: #0f1e2d;
+            --ink3: #162a3e;
+            --gold: #C8962E;
+            --gold2: #E8B84B;
+            --cream: #FAF6EF;
+            --blue: #0077b6;
+            --muted: #94A3B8;
+            --main-bg: #f8fafc;
+            --main-card: #ffffff;
+            --main-border: #e2e8f0;
+            --main-text: #1e293b;
+            --main-muted: #64748b;
+            --main-hover: #f1f5f9;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
 
-/* ── NOISE TEXTURE OVERLAY ── */
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:0;opacity:.4
-}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--main-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
+        a { text-decoration: none; color: inherit; }
 
-/* ── NAV ── */
-.nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  padding:16px 20px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:linear-gradient(180deg,rgba(13,27,42,.95) 0%,rgba(13,27,42,0) 100%);
-  transition:background .3s
-}
-.nav.scrolled{background:rgba(13,27,42,.97);border-bottom:1px solid rgba(200,150,46,.2);backdrop-filter:blur(12px)}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo img{width:32px;height:32px;border-radius:8px;object-fit:cover}
-.nav-logo span{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:-.01em}
-.nav-cta{display:flex;gap:8px;align-items:center}
-.btn-ghost{padding:7px 14px;border:1.5px solid rgba(255,255,255,.25);border-radius:24px;color:rgba(255,255,255,.85);font-size:.78rem;font-weight:600;text-decoration:none;transition:all .2s;font-family:'DM Sans',sans-serif}
-.btn-ghost:hover{border-color:#fff;color:#fff}
-.btn-solid{padding:8px 18px;background:var(--gold);border:none;border-radius:24px;color:#fff;font-size:.78rem;font-weight:700;text-decoration:none;transition:all .2s;font-family:'DM Sans',sans-serif}
-.btn-solid:hover,.btn-solid:active{background:#a97825;transform:scale(.98)}
+        /* ── NAV ── */
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            z-index: 200;
+            transition: all 0.3s;
+        }
+        .nav.scrolled {
+            background: rgba(13,27,42,0.95);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-brand img {
+            height: 32px;
+            width: auto;
+            border-radius: 6px;
+        }
+        .nav-brand span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+        .nav-links a {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.75);
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--gold2); }
+        .nav-cta {
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            color: var(--ink) !important;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(200,150,46,0.4);
+        }
 
-/* ── HERO ── */
-.hero{
-  min-height:100svh;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;
-  padding:100px 24px 60px;text-align:center
-}
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--ink);
+            overflow: hidden;
+            padding: 80px 24px 60px;
+        }
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200,150,46,0.12) 0%, transparent 70%);
+        }
+        .hero-bg::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -15%;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,119,182,0.08) 0%, transparent 70%);
+        }
+        .hero-pattern {
+            position: absolute;
+            inset: 0;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 780px;
+        }
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: rgba(200,150,46,0.1);
+            border: 1px solid rgba(200,150,46,0.25);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gold2);
+            margin-bottom: 32px;
+            letter-spacing: 0.04em;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 7vw, 4.2rem);
+            font-weight: 900;
+            line-height: 1.08;
+            color: white;
+            margin-bottom: 24px;
+        }
+        .hero h1 .gold { color: var(--gold2); font-style: italic; }
+        .hero-desc {
+            font-size: clamp(1rem, 2.5vw, 1.15rem);
+            color: rgba(255,255,255,0.65);
+            line-height: 1.7;
+            max-width: 560px;
+            margin: 0 auto 40px;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            color: var(--ink);
+            padding: 16px 36px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(200,150,46,0.35);
+        }
+        .btn-ghost {
+            background: transparent;
+            color: white;
+            padding: 16px 36px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1.5px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-ghost:hover {
+            border-color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.05);
+        }
+        .hero-scroll {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.35);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            animation: bounce 2s infinite;
+        }
+        .hero-scroll i { font-size: 1.2rem; }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
 
-/* Animated kente-inspired background */
-.hero-bg{
-  position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200,150,46,.18) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 80% at 20% 100%, rgba(0,119,182,.15) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(200,150,46,.1) 0%, transparent 50%),
-    linear-gradient(180deg,#0D1B2A 0%,#0a1520 100%);
-  z-index:0
-}
+        /* ── FLAG BAR ── */
+        .flag-bar {
+            display: flex;
+            height: 4px;
+        }
+        .flag-bar span { flex: 1; }
+        .flag-bar span:nth-child(1) { background: #CE1126; }
+        .flag-bar span:nth-child(2) { background: #FCD116; }
+        .flag-bar span:nth-child(3) { background: #006B3F; }
 
-/* Floating geometric shapes — kente pattern inspired */
-.hero-shapes{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.shape{position:absolute;border-radius:50%;opacity:.06;animation:float 8s ease-in-out infinite}
-.shape:nth-child(1){width:400px;height:400px;background:var(--gold);top:-100px;right:-80px;animation-delay:0s}
-.shape:nth-child(2){width:200px;height:200px;background:#0077b6;bottom:10%;left:-60px;animation-delay:2s}
-.shape:nth-child(3){width:140px;height:140px;background:var(--gold2);top:40%;right:8%;animation-delay:4s;border-radius:20px;transform:rotate(45deg)}
-.shape:nth-child(4){width:80px;height:80px;background:#fff;top:20%;left:10%;animation-delay:1s;border-radius:12px}
-@keyframes float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-24px) rotate(3deg)}}
+        /* ── STATS ── */
+        .stats-bar {
+            background: var(--main-card);
+            border-bottom: 1px solid var(--main-border);
+            padding: 40px 24px;
+        }
+        .stats-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            text-align: center;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stat-num {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--main-muted);
+            font-weight: 500;
+        }
 
-/* Adinkra symbol watermark */
-.adinkra{
-  position:absolute;bottom:5%;right:5%;font-size:120px;opacity:.04;
-  animation:spinSlow 30s linear infinite;user-select:none;z-index:0
-}
-@keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        /* ── REGIONS ── */
+        .regions-section {
+            padding: 80px 24px;
+            background: var(--cream);
+        }
+        .section-top {
+            max-width: 600px;
+            margin: 0 auto 40px;
+            text-align: center;
+        }
+        .section-pill {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(200,150,46,0.1);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 700;
+            color: var(--main-text);
+            margin-bottom: 12px;
+        }
+        .section-desc {
+            font-size: 0.95rem;
+            color: var(--main-muted);
+            line-height: 1.6;
+        }
+        .regions-grid {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 14px;
+        }
+        .region-card {
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg);
+            padding: 24px 12px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.25s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .region-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(200,150,46,0.1);
+        }
+        .region-icon {
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+        .region-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--main-text);
+            line-height: 1.3;
+        }
 
-.hero-content{position:relative;z-index:1;max-width:520px;margin:0 auto}
+        /* ── FEATURES ── */
+        .features-section {
+            padding: 80px 24px;
+            background: var(--main-card);
+        }
+        .features-grid {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .feature-card {
+            background: var(--cream);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-xl);
+            padding: 32px 24px;
+            transition: all 0.25s;
+        }
+        .feature-card:hover {
+            border-color: var(--gold);
+            box-shadow: 0 8px 24px rgba(200,150,46,0.08);
+            transform: translateY(-2px);
+        }
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--ink);
+            margin-bottom: 20px;
+        }
+        .feature-card h3 {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--main-text);
+            margin-bottom: 8px;
+        }
+        .feature-card p {
+            font-size: 0.875rem;
+            color: var(--main-muted);
+            line-height: 1.6;
+        }
 
-.hero-pill{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:5px 14px;border-radius:30px;
-  background:rgba(200,150,46,.15);border:1px solid rgba(200,150,46,.35);
-  font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--gold2);margin-bottom:24px;
-  animation:fadeUp .6s ease both
-}
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        /* ── HOW IT WORKS ── */
+        .how-section {
+            padding: 80px 24px;
+            background: var(--ink);
+            color: white;
+        }
+        .how-section .section-pill {
+            background: rgba(200,150,46,0.15);
+            color: var(--gold2);
+        }
+        .how-section .section-title { color: white; }
+        .how-section .section-desc { color: rgba(255,255,255,0.6); }
+        .how-steps {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+        .how-step {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: var(--radius-xl);
+            padding: 32px 24px;
+            text-align: center;
+            transition: all 0.25s;
+        }
+        .how-step:hover {
+            border-color: rgba(200,150,46,0.3);
+            background: rgba(255,255,255,0.06);
+        }
+        .step-num {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            color: var(--ink);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .how-step h3 {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .how-step p {
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.6;
+        }
 
-.hero h1{
-  font-family:'Playfair Display',serif;
-  font-size:clamp(2.4rem,10vw,4rem);
-  font-weight:900;line-height:1.1;
-  letter-spacing:-.02em;margin-bottom:20px;
-  animation:fadeUp .6s .1s ease both
-}
-.hero h1 em{font-style:italic;color:var(--gold2)}
+        /* ── CTA ── */
+        .cta-section {
+            padding: 100px 24px;
+            text-align: center;
+            background: var(--cream);
+            position: relative;
+        }
+        .cta-card {
+            max-width: 640px;
+            margin: 0 auto;
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-xl);
+            padding: 56px 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+        }
+        .cta-card h2 {
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-weight: 700;
+            color: var(--main-text);
+            margin-bottom: 12px;
+        }
+        .cta-card p {
+            font-size: 0.95rem;
+            color: var(--main-muted);
+            line-height: 1.6;
+            margin-bottom: 32px;
+            max-width: 440px;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-.hero-sub{
-  font-size:clamp(.9rem,3.5vw,1.05rem);color:rgba(255,255,255,.65);
-  line-height:1.7;margin-bottom:36px;font-weight:300;
-  animation:fadeUp .6s .2s ease both
-}
+        /* ── FOOTER ── */
+        .footer {
+            background: var(--ink);
+            color: rgba(255,255,255,0.5);
+            padding: 48px 24px 32px;
+        }
+        .footer-top {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 32px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .footer-brand img {
+            height: 28px;
+            width: auto;
+            border-radius: 6px;
+        }
+        .footer-brand span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+        }
+        .footer-nav {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .footer-nav a {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+            transition: color 0.2s;
+        }
+        .footer-nav a:hover { color: var(--gold2); }
+        .footer-bottom {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-top: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .footer-copy {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.35);
+        }
+        .footer-dev {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+        }
+        .footer-dev span {
+            color: var(--gold2);
+            font-weight: 600;
+        }
 
-.hero-btns{
-  display:flex;flex-direction:column;gap:12px;align-items:center;width:100%;max-width:320px;margin:0 auto;
-  animation:fadeUp .6s .3s ease both
-}
-.hero-btn-primary{
-  width:100%;padding:16px 28px;border-radius:50px;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  color:#0D1B2A;font-weight:700;font-size:1rem;text-decoration:none;
-  font-family:'DM Sans',sans-serif;
-  box-shadow:0 8px 32px rgba(200,150,46,.35);
-  transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer
-}
-.hero-btn-primary:hover,.hero-btn-primary:active{transform:translateY(-2px);box-shadow:0 12px 40px rgba(200,150,46,.5)}
-.hero-btn-secondary{
-  width:100%;padding:15px 28px;border-radius:50px;
-  background:transparent;border:1.5px solid rgba(255,255,255,.25);
-  color:rgba(255,255,255,.85);font-weight:600;font-size:.95rem;text-decoration:none;
-  font-family:'DM Sans',sans-serif;transition:all .25s;
-  display:flex;align-items:center;justify-content:center;gap:8px
-}
-.hero-btn-secondary:hover{border-color:#fff;color:#fff}
-
-.hero-stats{
-  display:flex;gap:28px;justify-content:center;margin-top:48px;
-  animation:fadeUp .6s .45s ease both
-}
-.hero-stat{text-align:center}
-.hero-stat-num{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--gold2);display:block;line-height:1}
-.hero-stat-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin-top:4px;display:block}
-.hero-stat-div{width:1px;background:rgba(255,255,255,.15);align-self:stretch}
-
-/* Scroll hint */
-.scroll-hint{
-  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1;
-  animation:fadeUp .6s .6s ease both
-}
-.scroll-hint span{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35)}
-.scroll-dot{width:6px;height:24px;border:1.5px solid rgba(255,255,255,.25);border-radius:3px;position:relative}
-.scroll-dot::after{content:'';position:absolute;top:3px;left:50%;transform:translateX(-50%);width:2px;height:6px;background:var(--gold);border-radius:1px;animation:scrollBounce 1.8s infinite}
-@keyframes scrollBounce{0%,100%{transform:translateX(-50%) translateY(0);opacity:1}80%{transform:translateX(-50%) translateY(10px);opacity:0}}
-
-/* ── FEATURES STRIP ── */
-.features{
-  background:rgba(255,255,255,.03);
-  border-top:1px solid rgba(255,255,255,.06);
-  border-bottom:1px solid rgba(255,255,255,.06);
-  padding:20px 0;overflow:hidden;position:relative
-}
-.features-track{
-  display:flex;gap:0;width:max-content;
-  animation:marquee 25s linear infinite
-}
-@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.feat-item{
-  display:flex;align-items:center;gap:8px;padding:0 32px;white-space:nowrap;
-  font-size:.78rem;font-weight:500;color:rgba(255,255,255,.5)
-}
-.feat-item strong{color:rgba(255,255,255,.85);font-weight:600}
-.feat-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);opacity:.6}
-
-/* ── SECTIONS ── */
-section{padding:64px 24px;position:relative;z-index:1}
-
-.section-label{
-  display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--gold);margin-bottom:12px
-}
-.section-title{
-  font-family:'Playfair Display',serif;font-size:clamp(1.6rem,6vw,2.4rem);
-  font-weight:700;line-height:1.2;color:#fff;margin-bottom:14px
-}
-.section-sub{font-size:.9rem;color:rgba(255,255,255,.55);line-height:1.7;max-width:460px}
-
-/* ── REGIONS GRID ── */
-.regions-section{background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(200,150,46,.04) 50%,rgba(0,0,0,0) 100%)}
-.regions-intro{margin-bottom:32px}
-.regions-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px
-}
-@media(min-width:600px){.regions-grid{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:900px){.regions-grid{grid-template-columns:repeat(4,1fr)}}
-
-.region-card{
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;padding:18px 16px;
-  cursor:pointer;transition:all .2s;position:relative;overflow:hidden
-}
-.region-card::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(200,150,46,.08) 0%,transparent 100%);
-  opacity:0;transition:opacity .2s
-}
-.region-card:hover,.region-card:active{
-  border-color:rgba(200,150,46,.4);
-  transform:translateY(-3px);
-  box-shadow:0 8px 24px rgba(0,0,0,.3)
-}
-.region-card:hover::before,.region-card:active::before{opacity:1}
-.region-num{font-size:.65rem;font-weight:700;letter-spacing:.08em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;opacity:.8}
-.region-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.25}
-.region-capital{font-size:.72rem;color:rgba(255,255,255,.45)}
-.region-arrow{position:absolute;bottom:14px;right:14px;font-size:.75rem;color:var(--gold);opacity:0;transition:opacity .2s,transform .2s}
-.region-card:hover .region-arrow{opacity:1;transform:translateX(3px)}
-
-/* ── FEATURES GRID ── */
-.why-section{background:rgba(0,0,0,.2)}
-.why-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:32px}
-@media(min-width:600px){.why-grid{grid-template-columns:repeat(2,1fr)}}
-.why-card{
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
-  border-radius:20px;padding:24px 22px;transition:border-color .2s
-}
-.why-card:hover{border-color:rgba(200,150,46,.3)}
-.why-icon{font-size:1.8rem;margin-bottom:12px;display:block}
-.why-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:7px}
-.why-desc{font-size:.83rem;color:rgba(255,255,255,.5);line-height:1.7}
-
-/* ── CTA SECTION ── */
-.cta-section{
-  background:linear-gradient(135deg,rgba(200,150,46,.12) 0%,rgba(0,119,182,.08) 100%);
-  border-top:1px solid rgba(200,150,46,.15);
-  border-bottom:1px solid rgba(200,150,46,.15);
-  text-align:center;padding:64px 24px
-}
-.cta-section .section-title{margin-bottom:8px}
-.cta-section .section-sub{margin:0 auto 32px;text-align:center}
-.cta-btns{display:flex;flex-direction:column;gap:12px;max-width:300px;margin:0 auto}
-
-/* ── FOOTER ── */
-footer{background:rgba(0,0,0,.4);border-top:1px solid rgba(255,255,255,.06);padding:40px 24px;text-align:center}
-.footer-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:8px}
-.footer-sub{font-size:.78rem;color:rgba(255,255,255,.35);margin-bottom:24px;line-height:1.6}
-.footer-links{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-bottom:24px}
-.footer-links a{font-size:.78rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s}
-.footer-links a:hover{color:var(--gold)}
-.footer-copy{font-size:.72rem;color:rgba(255,255,255,.2)}
-
-/* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(13,27,42,.95);color:#fff;padding:11px 20px;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:transform .3s;z-index:300;white-space:nowrap;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1)}
-.toast.on{transform:translateX(-50%) translateY(0)}
-
-@media(min-width:768px){
-  .hero-btns{flex-direction:row;max-width:400px}
-  .hero-btn-primary,.hero-btn-secondary{width:auto;flex:1}
-}
-</style>
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .nav { padding: 0 16px; }
+            .nav-links a:not(.nav-cta) { display: none; }
+            .hero { padding: 100px 16px 80px; min-height: auto; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero-actions { flex-direction: column; align-items: center; }
+            .hero-actions a { width: 100%; max-width: 280px; justify-content: center; }
+            .hero-scroll { display: none; }
+            .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .regions-section, .features-section, .how-section, .cta-section { padding: 60px 16px; }
+            .regions-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .how-steps { grid-template-columns: 1fr; }
+            .cta-card { padding: 40px 24px; }
+            .footer-top { flex-direction: column; text-align: center; }
+            .footer-nav { justify-content: center; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="nav" id="nav">
-  <a href="/" class="nav-logo">
-    <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-    <span>EchoStack</span>
-  </a>
-  <div class="nav-cta">
-    <a href="/user-login" class="btn-ghost">Sign In</a>
-    <a href="/signup" class="btn-solid">Join Free</a>
-  </div>
-</nav>
+    <!-- Nav -->
+    <nav class="nav" id="mainNav">
+        <a href="/" class="nav-brand">
+            <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+            <span>EchoStack</span>
+        </a>
+        <div class="nav-links">
+            <a href="#regions">Regions</a>
+            <a href="#features">Features</a>
+            <a href="#how">How It Works</a>
+            <a href="/user-login">Sign In</a>
+            <a href="/signup" class="nav-cta">Join Free</a>
+        </div>
+    </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-shapes">
-    <div class="shape"></div>
-    <div class="shape"></div>
-    <div class="shape"></div>
-    <div class="shape"></div>
-  </div>
-  <div class="adinkra">✦</div>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-bg">
+            <div class="hero-pattern"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-pill" id="heroPill">
+                <i class="fas fa-globe-africa"></i>
+                Ghana Heritage Platform
+            </div>
+            <h1 id="heroHeadline">Preserve the Culture.<br><span class="gold">Share the Story.</span></h1>
+            <p class="hero-desc" id="heroDesc">EchoStack is Ghana's living archive — where folklore, history, music, and traditions from all 16 regions are discovered, shared, and kept alive by the people who know them best.</p>
+            <div class="hero-actions">
+                <a href="/app" class="btn-gold" id="heroBtn"><i class="fas fa-map-marked-alt"></i> Explore the Map</a>
+                <a href="/signup" class="btn-ghost" id="heroBtn2"><i class="fas fa-play"></i> Get Started</a>
+            </div>
+        </div>
+        <div class="hero-scroll">
+            <span>Scroll</span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
 
-  <div class="hero-content">
-    <div class="hero-pill">🇬🇭 Ghana's Living Archive</div>
-    <h1>Where <em>Heritage</em><br>Comes Alive</h1>
-    <p class="hero-sub">Discover the stories, traditions, and landmarks of Ghana's 16 regions — created by locals, for the world.</p>
-    <div class="hero-btns">
-      <a href="/signup" class="hero-btn-primary">✨ Join EchoStack Free</a>
-      <a href="/user-login" class="hero-btn-secondary">Sign In</a>
+    <!-- Flag Bar -->
+    <div class="flag-bar"><span></span><span></span><span></span></div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stats-inner">
+            <div class="stat-item">
+                <div class="stat-num" id="stat1Num">16</div>
+                <div class="stat-label" id="stat1Label">Regions Covered</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="stat2Num">50+</div>
+                <div class="stat-label" id="stat2Label">Languages & Dialects</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="stat3Num">1000+</div>
+                <div class="stat-label" id="stat3Label">Stories Archived</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="stat4Num">∞</div>
+                <div class="stat-label" id="stat4Label">Heritage Preserved</div>
+            </div>
+        </div>
     </div>
-    <div class="hero-stats">
-      <div class="hero-stat">
-        <span class="hero-stat-num" id="stat-regions">16</span>
-        <span class="hero-stat-lbl">Regions</span>
-      </div>
-      <div class="hero-stat-div"></div>
-      <div class="hero-stat">
-        <span class="hero-stat-num" id="stat-stories">—</span>
-        <span class="hero-stat-lbl">Stories</span>
-      </div>
-      <div class="hero-stat-div"></div>
-      <div class="hero-stat">
-        <span class="hero-stat-num">100%</span>
-        <span class="hero-stat-lbl">Free</span>
-      </div>
-    </div>
-  </div>
 
-  <div class="scroll-hint">
-    <span>Explore</span>
-    <div class="scroll-dot"></div>
-  </div>
-</section>
+    <!-- Regions -->
+    <section class="regions-section" id="regions">
+        <div class="section-top">
+            <div class="section-pill">Discover</div>
+            <h2 class="section-title">Explore Every Region</h2>
+            <p class="section-desc">From the coastal forts of the Central Region to the drumming traditions of the North — every corner of Ghana has a story.</p>
+        </div>
+        <div class="regions-grid" id="regionsContainer">
+            <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--main-muted)">
+                <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;margin-bottom:12px;display:block"></i>
+                Loading regions...
+            </div>
+        </div>
+    </section>
 
-<!-- MARQUEE STRIP -->
-<div class="features">
-  <div class="features-track">
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Ashanti Region</strong> · The Golden Stool</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Greater Accra</strong> · Capital Stories</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Volta Region</strong> · Kente Weaving</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Northern Region</strong> · Dagomba Culture</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Western Region</strong> · Coastal Heritage</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Eastern Region</strong> · Krobo Traditions</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Brong-Ahafo</strong> · Forest Kingdom</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Upper East</strong> · Navrongo Murals</span></div>
-    <!-- Duplicate for seamless loop -->
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Ashanti Region</strong> · The Golden Stool</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Greater Accra</strong> · Capital Stories</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Volta Region</strong> · Kente Weaving</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Northern Region</strong> · Dagomba Culture</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Western Region</strong> · Coastal Heritage</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Eastern Region</strong> · Krobo Traditions</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Brong-Ahafo</strong> · Forest Kingdom</span></div>
-    <div class="feat-item"><span class="feat-dot"></span><span><strong>Upper East</strong> · Navrongo Murals</span></div>
-  </div>
-</div>
+    <!-- Features -->
+    <section class="features-section" id="features">
+        <div class="section-top">
+            <div class="section-pill">Features</div>
+            <h2 class="section-title">More Than an Archive</h2>
+            <p class="section-desc">EchoStack is a living platform where culture is experienced, not just stored.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-book-open"></i></div>
+                <h3>Living Archive</h3>
+                <p>Real stories from real Ghanaians — folklore, history, and contemporary culture preserved for generations.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-headphones-alt"></i></div>
+                <h3>Audio & Video</h3>
+                <p>Hear oral histories, drumming traditions, and highlife music from every corner of Ghana.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                <h3>Mobile First</h3>
+                <p>Designed for phones from the ground up. Works beautifully on any device, anywhere.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-pen-nib"></i></div>
+                <h3>Creator Platform</h3>
+                <p>Apply to become a creator and share your region's stories with the world.</p>
+            </div>
+        </div>
+    </section>
 
-<!-- REGIONS SECTION -->
-<section class="regions-section">
-  <div class="regions-intro">
-    <span class="section-label">🗺️ Explore</span>
-    <h2 class="section-title">Ghana's 16 Regions</h2>
-    <p class="section-sub">Tap any region to start your journey.</p>
-  </div>
-  <div class="regions-grid" id="regions-grid">
-    <!-- Skeleton placeholders -->
-    <div class="region-card" style="opacity:.3"><div class="region-num">Loading</div><div class="region-name">…</div></div>
-    <div class="region-card" style="opacity:.2"><div class="region-num">Loading</div><div class="region-name">…</div></div>
-    <div class="region-card" style="opacity:.15"><div class="region-num">Loading</div><div class="region-name">…</div></div>
-    <div class="region-card" style="opacity:.1"><div class="region-num">Loading</div><div class="region-name">…</div></div>
-  </div>
-</section>
+    <!-- How It Works -->
+    <section class="how-section" id="how">
+        <div class="section-top">
+            <div class="section-pill">How It Works</div>
+            <h2 class="section-title">Three Simple Steps</h2>
+            <p class="section-desc">Getting started takes less than a minute.</p>
+        </div>
+        <div class="how-steps">
+            <div class="how-step">
+                <div class="step-num">1</div>
+                <h3>Create Your Account</h3>
+                <p>Sign up for free and choose your home region and interests.</p>
+            </div>
+            <div class="how-step">
+                <div class="step-num">2</div>
+                <h3>Explore & Discover</h3>
+                <p>Browse stories, watch reels, listen to audio, and explore the interactive map.</p>
+            </div>
+            <div class="how-step">
+                <div class="step-num">3</div>
+                <h3>Share Your Story</h3>
+                <p>Become a creator and add your voice to Ghana's living heritage.</p>
+            </div>
+        </div>
+    </section>
 
-<!-- WHY SECTION -->
-<section class="why-section">
-  <span class="section-label">✦ Why EchoStack</span>
-  <h2 class="section-title">Built for Ghana's<br>Digital Generation</h2>
-  <div class="why-grid">
-    <div class="why-card">
-      <span class="why-icon">📖</span>
-      <div class="why-title">Living Archive</div>
-      <div class="why-desc">Real stories from real Ghanaians — not Wikipedia entries. Updated constantly by our creator community.</div>
-    </div>
-    <div class="why-card">
-      <span class="why-icon">🎵</span>
-      <div class="why-title">Audio & Video</div>
-      <div class="why-desc">Hear oral histories, drumming traditions, and regional languages in their authentic form.</div>
-    </div>
-    <div class="why-card">
-      <span class="why-icon">📱</span>
-      <div class="why-title">Mobile First</div>
-      <div class="why-desc">Designed for phones first. Fast, lightweight, works on any Android or iPhone. Offline coming soon.</div>
-    </div>
-    <div class="why-card">
-      <span class="why-icon">✍️</span>
-      <div class="why-title">Creator Platform</div>
-      <div class="why-desc">Apply to become a creator and share your region's stories with thousands of readers globally.</div>
-    </div>
-  </div>
-</section>
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="cta-card">
+            <div class="section-pill">Join Today</div>
+            <h2>Be Part of the Archive</h2>
+            <p>Join a growing community of storytellers, historians, and culture lovers preserving Ghana's heritage for future generations.</p>
+            <a href="/signup" class="btn-gold" style="width:100%;justify-content:center;max-width:320px">
+                <i class="fas fa-rocket"></i> Create Free Account
+            </a>
+        </div>
+    </section>
 
-<!-- CTA SECTION -->
-<section class="cta-section">
-  <span class="section-label">🚀 Get Started</span>
-  <h2 class="section-title">Be Part of the Archive</h2>
-  <p class="section-sub">Join thousands of Ghanaians preserving culture for the next generation.</p>
-  <div class="cta-btns">
-    <a href="/signup" class="hero-btn-primary">✨ Create Free Account</a>
-    <a href="/app" class="hero-btn-secondary">👁 Browse as Guest</a>
-  </div>
-</section>
+    <!-- Flag Bar -->
+    <div class="flag-bar"><span></span><span></span><span></span></div>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-logo">EchoStack</div>
-  <p class="footer-sub">Ghana's Living Heritage Archive<br>Preserving stories for the next generation</p>
-  <div class="footer-links">
-    <a href="/app">Explore</a>
-    <a href="/signup">Sign Up</a>
-    <a href="/user-login">Sign In</a>
-  </div>
-  <p class="footer-copy">© 2026 EchoStack Ghana. Built by <a href="#" style="color:var(--gold);text-decoration:none;font-weight:600">Mireku Development</a></p>
-</footer>
-
-<div class="toast" id="toast"></div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </div>
+            <nav class="footer-nav">
+                <a href="/">Home</a>
+                <a href="/app">Regions Map</a>
+                <a href="/explore">Explore</a>
+                <a href="/signup">Join</a>
+                <a href="/user-login">Sign In</a>
+            </nav>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copy">&copy; 2026 EchoStack — Preserving Ghana's Stories</p>
+            <p class="footer-dev">Built by <span>Mireku Development</span></p>
+        </div>
+    </footer>
 
 <script>
-// Nav scroll effect
-window.addEventListener('scroll', () => {
-  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
-}, {passive:true});
+(function() {
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
 
-// Load regions + stats
-let allRegions = [];
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const [regResp, statsResp] = await Promise.all([
-      fetch('/api/regions'),
-      fetch('/api/stats').catch(() => null)
-    ]);
-    allRegions = await regResp.json();
-    renderRegions(allRegions);
+    const regionIcons = {
+        'Ahafo': '🌾', 'Ashanti': '👑', 'Bono': '🎭', 'Bono East': '🌳',
+        'Central': '🏖️', 'Eastern': '⛰️', 'Greater Accra': '🏙️', 'Northern': '🌾',
+        'North East': '🏕️', 'North West': '🌾', 'Oti': '🏞️', 'Upper East': '🗿',
+        'Upper West': '🌾', 'Volta': '💧', 'Western': '🌊', 'Western North': '🌲',
+        'Savannah': '🌾', 'Obuasi': '⛏️'
+    };
 
-    // Update stats
-    document.getElementById('stat-stories').textContent = '1,000+';
-  } catch(e) {
-    document.getElementById('regions-grid').innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:.85rem;grid-column:1/-1;text-align:center;padding:20px">Failed to load regions. Please refresh.</p>';
-  }
-});
+    async function loadRegions() {
+        const container = document.getElementById('regionsContainer');
+        try {
+            const res = await fetch('/api/regions');
+            if (!res.ok) throw new Error('Failed');
+            const regions = await res.json();
+            if (!regions || !regions.length) {
+                container.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;color:var(--main-muted)">No regions found.</p>';
+                return;
+            }
+            container.innerHTML = regions.map(function(r) {
+                var name = r.name || r.region_name || 'Region';
+                var icon = regionIcons[name] || '📍';
+                return '<a href="/app?region=' + encodeURIComponent(name) + '" class="region-card">' +
+                    '<span class="region-icon">' + icon + '</span>' +
+                    '<div class="region-name">' + escapeHtml(name) + '</div>' +
+                '</a>';
+            }).join('');
+        } catch(e) {
+            container.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;color:var(--danger)"><i class="fas fa-exclamation-circle"></i> Could not load regions. <a href="/app" style="color:var(--gold)">View map</a></p>';
+        }
+    }
 
-function renderRegions(regions) {
-  const grid = document.getElementById('regions-grid');
-  if (!regions.length) {
-    grid.innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:.85rem;grid-column:1/-1;text-align:center;padding:20px">No regions yet.</p>';
-    return;
-  }
-  grid.innerHTML = regions.map((r, i) => `
-    <div class="region-card" onclick="window.location.href='/signup'" role="button" tabindex="0">
-      <div class="region-num">GH-${String(i+1).padStart(2,'0')}</div>
-      <div class="region-name">${r.name}</div>
-      <div class="region-capital">${r.capital || ''}</div>
-      <span class="region-arrow">→</span>
-    </div>`).join('');
-}
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
 
-// Service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
-}
+    async function loadHomeContent() {
+        try {
+            var res = await fetch('/api/admin/pages');
+            if (!res.ok) return;
+            var pages = await res.json();
+            var home = pages.home || [];
+            var map = {};
+            home.forEach(function(s) { map[s.section] = s.content; });
 
-let _t;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('on');
-  clearTimeout(_t); _t = setTimeout(() => t.classList.remove('on'), 3000);
-}
+            if (map.hero) {
+                var h = map.hero;
+                if (h.badge) {
+                    var pill = document.getElementById('heroPill');
+                    if (pill) pill.innerHTML = '<i class="fas fa-globe-africa"></i> ' + escapeHtml(h.badge);
+                }
+                if (h.headline) {
+                    var headline = document.getElementById('heroHeadline');
+                    if (headline) headline.innerHTML = escapeHtml(h.headline).replace(/\n/g, '<br>').replace(/(Share the Story\.)/g, '<span class="gold">$1</span>');
+                }
+                if (h.description) {
+                    var desc = document.getElementById('heroDesc');
+                    if (desc) desc.textContent = h.description;
+                }
+                if (h.btnText) {
+                    var btn = document.getElementById('heroBtn');
+                    if (btn) { btn.innerHTML = '<i class="fas fa-map-marked-alt"></i> ' + escapeHtml(h.btnText); }
+                }
+                if (h.btnLink) {
+                    var btn = document.getElementById('heroBtn');
+                    if (btn) btn.href = h.btnLink;
+                }
+                if (h.btn2Text) {
+                    var btn2 = document.getElementById('heroBtn2');
+                    if (btn2) btn2.innerHTML = '<i class="fas fa-play"></i> ' + escapeHtml(h.btn2Text);
+                }
+            }
+
+            if (map.stats) {
+                var s = map.stats;
+                if (s.stat1Num) document.getElementById('stat1Num').textContent = s.stat1Num;
+                if (s.stat1Label) document.getElementById('stat1Label').textContent = s.stat1Label;
+                if (s.stat2Num) document.getElementById('stat2Num').textContent = s.stat2Num;
+                if (s.stat2Label) document.getElementById('stat2Label').textContent = s.stat2Label;
+                if (s.stat3Num) document.getElementById('stat3Num').textContent = s.stat3Num;
+                if (s.stat3Label) document.getElementById('stat3Label').textContent = s.stat3Label;
+                if (s.stat4Num) document.getElementById('stat4Num').textContent = s.stat4Num;
+                if (s.stat4Label) document.getElementById('stat4Label').textContent = s.stat4Label;
+            }
+
+            if (map.features) {
+                var f = map.features;
+                if (f.title) {
+                    var ft = document.querySelector('#features .section-title');
+                    if (ft) ft.textContent = f.title;
+                }
+                if (f.description) {
+                    var fd = document.querySelector('#features .section-desc');
+                    if (fd) fd.textContent = f.description;
+                }
+                if (f.cards && f.cards.length) {
+                    var grid = document.querySelector('#features .features-grid');
+                    if (grid) {
+                        grid.innerHTML = f.cards.map(function(c) {
+                            return '<div class="feature-card">' +
+                                '<div class="feature-icon">' + escapeHtml(c.icon || '📖') + '</div>' +
+                                '<h3>' + escapeHtml(c.title || '') + '</h3>' +
+                                '<p>' + escapeHtml(c.description || '') + '</p>' +
+                            '</div>';
+                        }).join('');
+                    }
+                }
+            }
+
+            if (map.cta) {
+                var c = map.cta;
+                var ctaCard = document.querySelector('.cta-card');
+                if (ctaCard) {
+                    if (c.title) {
+                        var ctaH2 = ctaCard.querySelector('h2');
+                        if (ctaH2) ctaH2.textContent = c.title;
+                    }
+                    if (c.description) {
+                        var ctaP = ctaCard.querySelector('p');
+                        if (ctaP) ctaP.textContent = c.description;
+                    }
+                    var ctaBtn = ctaCard.querySelector('.btn-gold');
+                    if (ctaBtn) {
+                        if (c.btnText) ctaBtn.innerHTML = '<i class="fas fa-rocket"></i> ' + escapeHtml(c.btnText);
+                        if (c.btnLink) ctaBtn.href = c.btnLink;
+                    }
+                }
+            }
+
+            if (map.footer) {
+                var ft = map.footer;
+                var footerBrand = document.querySelector('.footer-brand span');
+                if (footerBrand && ft.brand) footerBrand.textContent = ft.brand;
+                var footerCopy = document.querySelector('.footer-copy');
+                if (footerCopy && ft.tagline) footerCopy.textContent = '© 2026 EchoStack — ' + ft.tagline;
+                var footerDev = document.querySelector('.footer-dev span');
+                if (footerDev && ft.credit) footerDev.textContent = ft.credit;
+            }
+        } catch(e) {
+            // Use defaults
+        }
+    }
+
+    loadHomeContent();
+    loadRegions();
+})();
 </script>
 </body>
 </html>

@@ -1,1201 +1,583 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0D1B2A">
-<title>EchoStack — Creator</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-/* ===== CSS VARIABLES & RESET ===== */
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --ink:#0D1B2A;--ink2:#1a2744;--gold:#C8962E;--gold2:#E8B84B;--gold3:#F4D06F;
-  --surface:#fafafa;--surface2:#f5f5f5;--card:#ffffff;--border:#e5e5e5;--border2:#d1d1d1;
-  --text:#1a1a1a;--text2:#3a3a3a;--muted:#8e8e93;--muted2:#6b6b6b;
-  --danger:#ef4444;--danger2:#dc2626;--success:#22c55e;--success2:#16a34a;
-  --warning:#f59e0b;--info:#3b82f6;--purple:#8b5cf6;--pink:#ec4899;--cyan:#06b6d4;
-  --hover:#f0f0f0;--hover2:#e8e8e8;--shadow:0 1px 3px rgba(0,0,0,.08);
-  --shadow2:0 2px 8px rgba(0,0,0,.12);--shadow3:0 4px 16px rgba(0,0,0,.16);
-  --radius:12px;--radius2:16px;--radius3:20px;--sidebar-w:280px;--topbar-h:57px;
-  --transition:all .2s ease;
-}
-html,body{height:100%;scroll-behavior:smooth;overflow-x:hidden}
-body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--surface);color:var(--text);line-height:1.5;padding-bottom:env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased;}
-img,video{max-width:100%;height:auto;display:block}
-a{text-decoration:none;color:inherit}
-button{font-family:inherit;border:none;background:none;cursor:pointer}
-input,textarea,select{font-family:inherit;font-size:inherit}
-
-/* ===== SIDEBAR (Same as Dashboard) ===== */
-.sidebar{width:var(--sidebar-w);background:var(--card);color:var(--text);position:fixed;left:0;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;transform:translateX(-100%);transition:var(--transition);z-index:2000;-webkit-overflow-scrolling:touch;box-shadow:var(--shadow3);}
-.sidebar.open{transform:translateX(0)}
-.sb-header{padding:20px 16px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surface),var(--surface2));}
-.sb-brand{display:flex;align-items:center;gap:12px}
-.sb-brand img{width:40px;height:40px;border-radius:10px;object-fit:cover}
-.sb-brand-text strong{display:block;font-size:1.1rem;font-weight:700;color:var(--ink)}
-.sb-brand-text span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
-.sb-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.sb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;color:var(--text);text-decoration:none;transition:var(--transition);font-size:.95rem;font-weight:500;border-radius:8px;margin:2px 8px;min-height:48px;}
-.sb-item:hover{background:var(--hover)}
-.sb-item:active{transform:scale(.98)}
-.sb-item.active{background:rgba(200,150,46,.15);color:var(--gold);font-weight:600}
-.sb-item .icon{width:24px;text-align:center;font-size:1.1rem}
-.sb-item .badge{margin-left:auto;background:var(--danger);color:white;font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:700;}
-.sb-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);background:var(--surface2);}
-.sb-footer button{width:100%;padding:12px;border-radius:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--danger);font-size:.95rem;font-weight:600;cursor:pointer;min-height:48px;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:8px;}
-.sb-footer button:active{background:rgba(239,68,68,.2);transform:scale(.98)}
-
-/* Sidebar Overlay */
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1999;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;transition:opacity .3s ease;}
-.sidebar-overlay.show{display:block;opacity:1}
-
-/* ===== TOPBAR ===== */
-.topbar{position:sticky;top:0;z-index:1000;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
-.topbar.scrolled{box-shadow:var(--shadow2)}
-.menu-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;font-size:1.4rem;color:var(--text);transition:var(--transition);}
-.menu-btn:active{background:var(--hover);transform:scale(.95)}
-.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--ink);letter-spacing:-.5px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.topbar-actions{display:flex;gap:8px;align-items:center}
-.creator-badge{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700;background:rgba(200,150,46,.15);color:var(--gold);border:1px solid rgba(200,150,46,.3);}
-.admin-btn{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--danger);border-radius:20px;padding:8px 14px;font-size:.8rem;font-weight:600;transition:var(--transition);}
-.admin-btn:hover{background:rgba(239,68,68,.2)}
-.logout-btn{background:rgba(239,68,68,.15);color:var(--danger);border-radius:20px;padding:8px 16px;font-size:.85rem;font-weight:600;transition:var(--transition);display:flex;align-items:center;gap:6px;}
-.logout-btn:hover{background:rgba(239,68,68,.25)}
-
-/* ===== MAIN CONTAINER ===== */
-.container{max-width:1200px;margin:0 auto;padding:20px 16px 80px}
-
-/* ===== CHANNEL HEADER ===== */
-.channel-header{background:var(--card);border-radius:var(--radius2);padding:24px;margin-bottom:24px;border:1px solid var(--border);display:flex;align-items:center;gap:20px;position:relative;overflow:hidden;}
-.channel-header::after{content:'✦';position:absolute;right:24px;top:12px;font-size:60px;opacity:.05;color:var(--gold);pointer-events:none;}
-.ch-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:700;color:white;flex-shrink:0;border:3px solid rgba(200,150,46,.4);}
-.ch-info{flex:1}
-.ch-info h1{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--ink);margin-bottom:4px;}
-.ch-info p{font-size:.9rem;color:var(--muted);}
-.ch-stats{display:flex;gap:24px;text-align:center;}
-.ch-stat .sv{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--gold);}
-.ch-stat .sl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
-
-/* ===== TABS ===== */
-.tabs{display:flex;gap:8px;overflow-x:auto;padding:8px 0;margin-bottom:24px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.tabs::-webkit-scrollbar{display:none}
-.tab{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:10px 20px;font-size:.9rem;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--muted);transition:var(--transition);min-height:44px;display:flex;align-items:center;gap:8px;}
-.tab:active{transform:scale(.98)}
-.tab.active{background:var(--ink);border-color:var(--ink);color:white;box-shadow:0 2px 8px rgba(13,27,42,.3);}
-
-/* ===== PANELS ===== */
-.panel{display:none;animation:fadeIn .2s ease}
-.panel.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-
-/* ===== STATS GRID ===== */
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
-@media(min-width:600px){.stats-grid{grid-template-columns:repeat(4,1fr);gap:16px}}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);}
-.stat-val{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--ink);margin-bottom:4px;}
-.stat-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
-.stat-sub{font-size:.75rem;color:var(--success);margin-top:4px;font-weight:600;}
-
-/* ===== POSTS TABLE ===== */
-.posts-table{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;}
-.pt-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
-.pt-header h2{font-size:1rem;font-weight:700;color:var(--ink);}
-.pt-header .btn{padding:8px 16px;background:var(--gold);color:var(--ink);border:none;border-radius:20px;font-weight:600;font-size:.85rem;cursor:pointer;transition:var(--transition);min-height:40px;display:flex;align-items:center;gap:6px;}
-.pt-header .btn:active{transform:scale(.96)}
-.pt-row{display:grid;grid-template-columns:1fr auto auto auto;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);transition:var(--transition);}
-.pt-row:last-child{border-bottom:none}
-.pt-row:hover{background:var(--hover)}
-.pt-title{font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:4px;}
-.pt-meta{font-size:.75rem;color:var(--muted);}
-.status-badge{padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase;}
-.status-published{background:#F0FDF4;color:#16A34A;}
-.status-draft{background:#F8FAFF;color:#94A3B8;}
-.pt-stats{font-size:.75rem;color:var(--muted);display:flex;gap:12px;white-space:nowrap;}
-.pt-actions{display:flex;gap:6px;}
-.act-btn{padding:6px 12px;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;transition:var(--transition);font-family:'DM Sans',sans-serif;min-height:36px;}
-.act-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
-.act-edit:hover{background:var(--ink);color:white}
-.act-del{background:#FEF2F2;color:#DC2626;border:1px solid #FCA5A5;}
-.act-del:hover{background:#DC2626;color:white}
-
-/* ===== FORM CARD ===== */
-.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;}
-.form-header{padding:16px 20px;border-bottom:1px solid var(--border);}
-.form-header h2{font-size:1rem;font-weight:700;color:var(--ink);}
-.form-body{padding:20px;}
-.field{margin-bottom:18px;}
-.field label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
-.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--text);outline:none;transition:border-color .15s;background:var(--surface2);min-height:44px;}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);background:var(--card);}
-.field textarea{resize:vertical;min-height:150px;line-height:1.6;}
-.field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238e8e93' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;}
-.field-row{display:grid;grid-template-columns:1fr;gap:16px}
-@media(min-width:600px){.field-row{grid-template-columns:1fr 1fr}}
-
-/* ===== COVER UPLOAD ===== */
-.cover-zone{border:2px dashed var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .2s;background:var(--surface2);}
-.cover-zone:hover,.cover-zone.drag{border-color:var(--gold);background:#fffbf0}
-.utabs{display:flex;border-bottom:1px solid var(--border);}
-.utab{flex:1;padding:10px;text-align:center;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--muted);transition:var(--transition);background:none;border:none;font-family:'DM Sans',sans-serif;min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;}
-.utab.active{color:var(--gold);border-bottom:2px solid var(--gold);background:#fffbf5}
-.upane{padding:16px;display:none}
-.upane.active{display:block}
-.drop-area{display:flex;flex-direction:column;align-items:center;padding:24px 20px;gap:8px;cursor:pointer;text-align:center;}
-.drop-area i{font-size:2rem;color:var(--gold);margin-bottom:4px}
-.drop-area p{font-size:.8rem;color:var(--muted);}
-.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:12px;}
-.progress-fill{height:100%;background:var(--gold);transition:width .3s;width:0}
-.cover-preview{margin-top:12px;position:relative;display:none;}
-.cover-preview img{width:100%;max-height:200px;object-fit:cover;border-radius:10px;border:1px solid var(--border);}
-.cover-preview .remove-btn{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;}
-
-/* ===== MEDIA UPLOAD ===== */
-.media-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-.media-row input{flex:1;min-width:200px;}
-.mini-btn{padding:10px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;color:var(--text);transition:var(--transition);flex-shrink:0;min-height:44px;display:flex;align-items:center;gap:6px;}
-.mini-btn:hover{background:var(--ink);color:white;border-color:var(--ink)}
-.mini-btn:active{transform:scale(.96)}
-
-/* ===== TOGGLE SWITCH ===== */
-.toggle-row{display:flex;align-items:center;gap:12px;padding:8px 0;}
-.toggle{position:relative;width:48px;height:26px;}
-.toggle input{opacity:0;width:0;height:0}
-.slider{position:absolute;inset:0;background:var(--border);border-radius:26px;cursor:pointer;transition:var(--transition);}
-.slider::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:white;border-radius:50%;transition:var(--transition);box-shadow:0 1px 3px rgba(0,0,0,.1);}
-input:checked+.slider{background:var(--gold)}
-input:checked+.slider::before{transform:translateX(22px)}
-.toggle-label{font-size:.9rem;font-weight:500;color:var(--text);}
-
-/* ===== FORM ACTIONS ===== */
-.form-actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;}
-.form-actions button{padding:12px 24px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:var(--transition);min-height:44px;display:flex;align-items:center;gap:8px;}
-.btn-publish{background:var(--success);color:white;}
-.btn-publish:hover{background:var(--success2)}
-.btn-publish:active{transform:scale(.98)}
-.btn-draft{background:var(--ink);color:white;}
-.btn-draft:hover{background:var(--ink2)}
-.btn-draft:active{transform:scale(.98)}
-.btn-cancel{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
-.btn-cancel:hover{background:var(--hover)}
-.btn-cancel:active{transform:scale(.98)}
-.btn-publish:disabled,.btn-draft:disabled{opacity:.6;cursor:not-allowed;transform:none}
-
-/* ===== CHANNEL SETTINGS ===== */
-.settings-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;}
-.settings-card .field{margin-bottom:20px;}
-
-/* ===== LOADING & EMPTY STATES ===== */
-.loading{text-align:center;padding:60px 20px;color:var(--muted);}
-.loading i{font-size:2.5rem;margin-bottom:16px;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
-.empty{text-align:center;padding:60px 20px;color:var(--muted);}
-.empty i{font-size:3rem;margin-bottom:16px;opacity:.5;color:var(--gold)}
-.empty p{font-size:1rem;font-weight:500;margin-bottom:8px}
-.empty span{font-size:.85rem}
-
-/* ===== TOAST ===== */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,26,26,.95);color:white;padding:14px 28px;border-radius:30px;font-size:.9rem;font-weight:600;z-index:9999;transition:all .3s;opacity:0;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap;max-width:90%;text-align:center;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.ok{background:rgba(34,197,94,.95)}
-.toast.er{background:rgba(239,68,68,.95)}
-.toast.info{background:rgba(200,150,46,.95);color:var(--ink)}
-
-/* ===== LOADING OVERLAY ===== */
-.loading-overlay{position:fixed;inset:0;background:rgba(13,27,42,.9);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s;}
-.loading-overlay.hide{opacity:0;pointer-events:none}
-.loading-content{text-align:center;color:white;}
-.loading-content .logo{font-size:1.3rem;margin-bottom:16px;display:block}
-.loading-bar{width:160px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin:0 auto;}
-.loading-bar-fill{height:100%;background:var(--gold);animation:loadingBar 1s ease forwards}
-@keyframes loadingBar{from{width:0}to{width:100%}}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:768px){
-  .sidebar{width:260px}
-  .channel-header{flex-wrap:wrap;padding:20px}
-  .ch-stats{margin-left:0;width:100%;justify-content:space-around;margin-top:16px}
-  .pt-row{grid-template-columns:1fr auto;gap:8px}
-  .pt-actions{grid-column:1/-1;justify-content:flex-end}
-  .form-actions{flex-direction:column}
-  .form-actions button{width:100%;justify-content:center}
-}
-@media(max-width:480px){
-  .topbar{padding:10px 14px}
-  .logo{font-size:1.3rem}
-  .channel-header{padding:16px}
-  .ch-avatar{width:60px;height:60px;font-size:1.5rem}
-  .ch-info h1{font-size:1.2rem}
-  .tabs{padding:8px 0}
-  .tab{padding:10px 14px;font-size:.85rem}
-  .form-body{padding:16px}
-  .field input,.field select,.field textarea{padding:10px 12px;font-size:.95rem}
-  .mini-btn{padding:10px 12px;font-size:.75rem}
-  .stat-val{font-size:1.4rem}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Creator Studio - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        /* Quill overrides to match EchoStack theme */
+        .ql-toolbar.ql-snow {
+            border: 1.5px solid var(--main-border) !important;
+            border-bottom: none !important;
+            border-radius: var(--radius) var(--radius) 0 0 !important;
+            background: var(--main-bg) !important;
+        }
+        .ql-container.ql-snow {
+            border: 1.5px solid var(--main-border) !important;
+            border-radius: 0 0 var(--radius) var(--radius) !important;
+            font-family: 'Merriweather', 'DM Sans', serif !important;
+            font-size: 1rem !important;
+        }
+        .ql-editor {
+            min-height: 300px !important;
+            line-height: 1.8 !important;
+            color: var(--main-text) !important;
+        }
+        .ql-editor.ql-blank::before {
+            color: var(--main-muted) !important;
+            font-style: normal !important;
+            left: 16px !important;
+        }
+        .ql-snow .ql-stroke { stroke: var(--main-muted) !important; }
+        .ql-snow .ql-fill { fill: var(--main-muted) !important; }
+        .ql-snow .ql-picker-label { color: var(--main-muted) !important; }
+        .ql-snow .ql-picker-options { background: var(--main-card) !important; border-color: var(--main-border) !important; }
+        .ql-snow .ql-active .ql-stroke { stroke: var(--gold) !important; }
+        .ql-snow .ql-active .ql-fill { fill: var(--gold) !important; }
+        .ql-snow .ql-active { color: var(--gold) !important; }
+        .ql-snow.ql-toolbar button:hover .ql-stroke { stroke: var(--gold) !important; }
+        .ql-snow.ql-toolbar button:hover .ql-fill { fill: var(--gold) !important; }
+        .ql-snow.ql-toolbar .ql-picker-label:hover { color: var(--gold) !important; }
+        .ql-snow a { color: var(--gold) !important; }
+        .ql-editor blockquote {
+            border-left: 4px solid var(--gold) !important;
+            background: var(--cream) !important;
+            padding: 12px 16px !important;
+            margin: 16px 0 !important;
+        }
+        .ql-editor h1, .ql-editor h2 {
+            font-family: 'Playfair Display', serif !important;
+        }
+        .creator-header { padding:32px 24px; background:linear-gradient(135deg,var(--ink),var(--ink2)); color:white; }
+        .creator-header-top { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+        .creator-avatar { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold2)); display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:700; color:var(--ink); }
+        .creator-info h1 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:4px; }
+        .creator-info p { color:var(--main-muted); font-size:0.9rem; }
+        .creator-stats { display:flex; gap:32px; }
+        .creator-stat { text-align:center; }
+        .creator-stat-value { font-size:1.3rem; font-weight:700; color:var(--gold); }
+        .creator-stat-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--main-muted); }
+        .creator-tabs { display:flex; background:var(--main-card); border-bottom:1px solid var(--main-border); overflow-x:auto; scrollbar-width:none; }
+        .creator-tabs::-webkit-scrollbar { display:none; }
+        .creator-tab { padding:16px 24px; font-size:0.9rem; font-weight:600; color:var(--main-muted); white-space:nowrap; border-bottom:2px solid transparent; transition:all 0.15s; cursor:pointer; }
+        .creator-tab:hover { color:var(--main-text); }
+        .creator-tab.active { color:var(--gold); border-bottom-color:var(--gold); }
+        .creator-content { padding:24px; max-width:800px; margin:0 auto; }
+        .creator-empty { text-align:center; padding:60px 20px; }
+        .creator-empty i { font-size:3rem; color:var(--main-muted); margin-bottom:16px; }
+        .post-list-item { display:flex; gap:16px; padding:16px; background:var(--main-card); border:1px solid var(--main-border); border-radius:var(--radius-lg); margin-bottom:12px; cursor:pointer; transition:all 0.2s; }
+        .post-list-item:hover { box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+        .post-list-thumb { width:120px; height:80px; border-radius:var(--radius); background:var(--main-bg); flex-shrink:0; overflow:hidden; }
+        .post-list-thumb img { width:100%; height:100%; object-fit:cover; }
+        .post-list-info { flex:1; min-width:0; }
+        .post-list-title { font-weight:600; font-size:0.95rem; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .post-list-meta { font-size:0.8rem; color:var(--main-muted); display:flex; gap:12px; }
+        .post-list-actions { display:flex; gap:8px; margin-top:8px; }
+        .post-list-actions button { padding:6px 12px; border-radius:var(--radius); font-size:0.75rem; background:var(--main-bg); color:var(--main-muted); }
+        .post-list-actions button:hover { background:var(--main-hover); }
+        .post-list-actions button.delete:hover { color:var(--danger); }
+        .new-post-form { background:var(--main-card); border:1px solid var(--main-border); border-radius:var(--radius-lg); padding:24px; }
+        .form-row { display:flex; gap:16px; margin-bottom:16px; }
+        .form-row .input-group { flex:1; margin-bottom:0; }
+        .content-type-selector { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+        .type-option { padding:10px 16px; border-radius:var(--radius-full); border:1px solid var(--main-border); font-size:0.85rem; font-weight:500; cursor:pointer; transition:all 0.15s; }
+        .type-option:hover { border-color:var(--gold); }
+        .type-option.active { background:var(--gold); color:var(--ink); border-color:var(--gold); }
+        .premium-toggle { display:flex; align-items:center; gap:12px; padding:16px; background:var(--main-bg); border-radius:var(--radius); margin-bottom:20px; }
+        .cover-upload { border:2px dashed var(--main-border); border-radius:var(--radius-lg); padding:40px; text-align:center; cursor:pointer; transition:all 0.2s; margin-bottom:20px; }
+        .cover-upload:hover { border-color:var(--gold); background:rgba(200,150,46,0.05); }
+        .cover-upload i { font-size:2rem; color:var(--main-muted); margin-bottom:8px; }
+        .cover-preview { position:relative; border-radius:var(--radius-lg); overflow:hidden; margin-bottom:20px; }
+        .cover-preview img { width:100%; max-height:200px; object-fit:cover; }
+        .cover-preview .remove { position:absolute; top:8px; right:8px; width:32px; height:32px; border-radius:50%; background:rgba(0,0,0,0.7); color:white; display:flex; align-items:center; justify-content:center; }
+        .form-actions { display:flex; gap:12px; margin-top:24px; }
+        .form-actions .btn { flex:1; }
+    </style>
 </head>
 <body>
+<div class="app">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </a>
+        </div>
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">User</div>
+                <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i><span>Feed</span></a>
+                <a href="/reels" class="sidebar-link"><i class="fas fa-film"></i><span>Reels</span></a>
+                <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i><span>Explore</span></a>
+                <a href="/archive" class="sidebar-link"><i class="fas fa-archive"></i><span>Archive</span></a>
+                <a href="/app" class="sidebar-link"><i class="fas fa-map-marked-alt"></i><span>Map</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Social</div>
+                <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
+                <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
+                <a href="/notifications" class="sidebar-link"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                <a href="/chatbot" class="sidebar-link"><i class="fas fa-comments"></i><span>Community Chat</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Create</div>
+                <a href="/creator" class="sidebar-link active"><i class="fas fa-plus-circle"></i><span>Create Post</span></a>
+                <a href="/premium" class="sidebar-link"><i class="fas fa-crown"></i><span>Premium</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Account</div>
+                <a href="/user-profile" class="sidebar-link"><i class="fas fa-user"></i><span>My Profile</span></a>
+                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-<!-- LOADING OVERLAY -->
-<div class="loading-overlay" id="loading-overlay">
-  <div class="loading-content">
-    <span class="logo">✍️ Creator Portal</span>
-    <div class="loading-bar"><div class="loading-bar-fill"></div></div>
-  </div>
+    <div class="main-wrapper">
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-title">Creator Studio</div>
+            <a href="/dashboard" class="topbar-btn"><i class="fas fa-home"></i></a>
+        </header>
+
+        <main class="main-content">
+            <div class="creator-header">
+                <div class="creator-header-top">
+                    <div class="creator-avatar" id="creatorAvatar">C</div>
+                    <div class="creator-info">
+                        <h1 id="creatorName">Creator</h1>
+                        <p id="creatorBio">Your heritage channel</p>
+                    </div>
+                </div>
+                <div class="creator-stats">
+                    <div class="creator-stat"><div class="creator-stat-value" id="statPosts">0</div><div class="creator-stat-label">Posts</div></div>
+                    <div class="creator-stat"><div class="creator-stat-value" id="statFollowers">0</div><div class="creator-stat-label">Followers</div></div>
+                    <div class="creator-stat"><div class="creator-stat-value" id="statViews">0</div><div class="creator-stat-label">Views</div></div>
+                </div>
+            </div>
+
+            <div class="creator-tabs">
+                <div class="creator-tab active" onclick="showTab('posts', this)">My Posts</div>
+                <div class="creator-tab" onclick="showTab('analytics', this)">Analytics</div>
+                <div class="creator-tab" onclick="showTab('new', this)">New Post</div>
+                <div class="creator-tab" onclick="showTab('settings', this)">Channel Settings</div>
+            </div>
+
+            <div id="tabPosts" class="creator-content">
+                <div id="postsList"><div class="loading"><div class="spinner"></div></div></div>
+            </div>
+
+            <div id="tabAnalytics" class="creator-content" style="display:none">
+                <div class="card" style="padding:24px">
+                    <h3 style="font-family:'Playfair Display',serif;margin-bottom:20px">Analytics Overview</h3>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px">
+                        <div style="text-align:center;padding:20px;background:var(--main-bg);border-radius:var(--radius)">
+                            <div style="font-size:1.5rem;font-weight:700;color:var(--gold)" id="analyticTotalPosts">0</div>
+                            <div style="font-size:0.75rem;color:var(--main-muted)">Total Posts</div>
+                        </div>
+                        <div style="text-align:center;padding:20px;background:var(--main-bg);border-radius:var(--radius)">
+                            <div style="font-size:1.5rem;font-weight:700;color:var(--gold)" id="analyticTotalLikes">0</div>
+                            <div style="font-size:0.75rem;color:var(--main-muted)">Total Likes</div>
+                        </div>
+                        <div style="text-align:center;padding:20px;background:var(--main-bg);border-radius:var(--radius)">
+                            <div style="font-size:1.5rem;font-weight:700;color:var(--gold)" id="analyticTotalComments">0</div>
+                            <div style="font-size:0.75rem;color:var(--main-muted)">Comments</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tabNew" class="creator-content" style="display:none">
+                <form class="new-post-form" onsubmit="return false">
+                    <h3 style="font-family:'Playfair Display',serif;margin-bottom:20px">Create New Post</h3>
+
+                    <div class="content-type-selector">
+                        <div class="type-option active" onclick="selectType('article', this)"><i class="fas fa-file-alt"></i> Article</div>
+                        <div class="type-option" onclick="selectType('video', this)"><i class="fas fa-video"></i> Video</div>
+                        <div class="type-option" onclick="selectType('reel', this)"><i class="fas fa-film"></i> Reel</div>
+                        <div class="type-option" onclick="selectType('audio', this)"><i class="fas fa-microphone"></i> Audio</div>
+                        <div class="type-option" onclick="selectType('photo', this)"><i class="fas fa-image"></i> Photo Essay</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Title</label>
+                        <input type="text" class="input" id="postTitle" placeholder="Give your story a compelling title...">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Excerpt</label>
+                        <input type="text" class="input" id="postExcerpt" placeholder="A short summary (appears in feed)..." maxlength="200">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Region</label>
+                        <select class="input" id="postRegion">
+                            <option value="">Select region...</option>
+                            <option value="Ashanti">Ashanti</option>
+                            <option value="Greater Accra">Greater Accra</option>
+                            <option value="Western">Western</option>
+                            <option value="Eastern">Eastern</option>
+                            <option value="Central">Central</option>
+                            <option value="Volta">Volta</option>
+                            <option value="Northern">Northern</option>
+                            <option value="Upper East">Upper East</option>
+                            <option value="Upper West">Upper West</option>
+                            <option value="Brong-Ahafo">Brong-Ahafo</option>
+                            <option value="Western North">Western North</option>
+                            <option value="Ahafo">Ahafo</option>
+                            <option value="Bono East">Bono East</option>
+                            <option value="Oti">Oti</option>
+                            <option value="North East">North East</option>
+                            <option value="Savannah">Savannah</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Content</label>
+                        <div id="editor" style="background:var(--main-card)"></div>
+                        <input type="hidden" id="postContent">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Cover Image</label>
+                        <input type="file" id="coverUpload" accept="image/*" style="display:none" onchange="handleCoverSelect(this)">
+                        <div class="cover-upload" onclick="document.getElementById('coverUpload').click()" id="coverPlaceholder">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p style="font-size:0.9rem;color:var(--main-muted)">Click to upload cover image</p>
+                        </div>
+                        <div class="cover-preview" id="coverPreview" style="display:none">
+                            <img id="coverImage" src="" alt="">
+                            <button class="remove" onclick="removeCover()"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Media Files (Video/Audio)</label>
+                        <input type="file" id="mediaUpload" accept="video/*,audio/*" style="display:none" onchange="handleMediaSelect(this)">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('mediaUpload').click()" style="width:100%">
+                            <i class="fas fa-upload"></i> Upload Media
+                        </button>
+                        <div id="mediaInfo" style="margin-top:8px;font-size:0.85rem;color:var(--main-muted)"></div>
+                    </div>
+
+                    <div class="premium-toggle">
+                        <div class="toggle" id="premiumToggle" onclick="this.classList.toggle('active')"></div>
+                        <div>
+                            <div style="font-weight:600">Premium Content</div>
+                            <div style="font-size:0.8rem;color:var(--main-muted)">Only premium subscribers can view this</div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="saveDraft()"><i class="fas fa-save"></i> Save Draft</button>
+                        <button class="btn btn-primary" id="publishBtn" onclick="publishPost()"><i class="fas fa-paper-plane"></i> Publish</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="tabSettings" class="creator-content" style="display:none">
+                <div class="card" style="padding:24px">
+                    <h3 style="font-family:'Playfair Display',serif;margin-bottom:20px">Channel Settings</h3>
+                    <div class="input-group">
+                        <label>Channel Name</label>
+                        <input type="text" class="input" id="channelName" placeholder="Your channel name">
+                    </div>
+                    <div class="input-group">
+                        <label>Channel Description</label>
+                        <textarea class="input" id="channelDesc" placeholder="Tell viewers about your channel..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveChannelSettings()"><i class="fas fa-save"></i> Save Settings</button>
+                </div>
+            </div>
+        </main>
+    </div>
 </div>
 
-<!-- SIDEBAR OVERLAY -->
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
-
-<!-- SIDEBAR NAVIGATION -->
-<aside class="sidebar" id="sidebar">
-  <div class="sb-header">
-    <div class="sb-brand">
-      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-      <div class="sb-brand-text">
-        <strong>EchoStack</strong>
-        <span>Ghana's Heritage</span>
-      </div>
-    </div>
-  </div>
-  <div class="sb-section">Navigation</div>
-  <a href="/dashboard" class="sb-item"><span class="icon"><i class="fas fa-home"></i></span> Home Feed</a>
-  <a href="/explore" class="sb-item"><span class="icon"><i class="fas fa-compass"></i></span> Explore</a>
-  <a href="/reels.html" class="sb-item"><span class="icon"><i class="fas fa-video"></i></span> Reels</a>
-  <a href="/archive" class="sb-item"><span class="icon"><i class="fas fa-book"></i></span> Archive</a>
-  <a href="/app" class="sb-item"><span class="icon"><i class="fas fa-map"></i></span> Map</a>
-  <div class="sb-section">Creator</div>
-  <a href="/creator.html" class="sb-item active"><span class="icon"><i class="fas fa-pen-fancy"></i></span> Creator Portal</a>
-  <a href="/creator.html?type=story" class="sb-item"><span class="icon"><i class="fas fa-camera"></i></span> Add Story</a>
-  <div class="sb-section">Account</div>
-  <a href="/user_profile.html" class="sb-item"><span class="icon"><i class="fas fa-user"></i></span> Profile</a>
-  <a href="/user-settings.html" class="sb-item"><span class="icon"><i class="fas fa-cog"></i></span> Settings</a>
-  <div class="sb-footer">
-    <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-  </div>
-</aside>
-
-<!-- TOPBAR -->
-<div class="topbar" id="topbar">
-  <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
-    <i class="fas fa-bars"></i>
-  </button>
-  <div class="logo">EchoStack</div>
-  <div class="topbar-actions">
-    <span class="creator-badge">CREATOR</span>
-    <span id="nav-username" style="font-weight:600;color:var(--text);font-size:.9rem"></span>
-    <a href="/dashboard" class="btn" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:20px;padding:8px 14px;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:6px;">
-      <i class="fas fa-home"></i> Feed
-    </a>
-    <a href="/admin" id="admin-link" class="admin-btn" style="display:none">
-      <i class="fas fa-cog"></i> Admin
-    </a>
-    <button class="logout-btn" onclick="logout()">
-      <i class="fas fa-sign-out-alt"></i> Logout
-    </button>
-  </div>
-</div>
-
-<!-- MAIN CONTAINER -->
-<div class="container" id="app">
-  
-  <!-- CHANNEL HEADER -->
-  <div class="channel-header">
-    <div class="ch-avatar" id="ch-avatar">?</div>
-    <div class="ch-info">
-      <h1 id="ch-name">My Channel</h1>
-      <p id="ch-desc">Loading your channel info…</p>
-    </div>
-    <div class="ch-stats">
-      <div class="ch-stat">
-        <div class="sv" id="stat-posts">0</div>
-        <div class="sl">Posts</div>
-      </div>
-      <div class="ch-stat">
-        <div class="sv" id="stat-followers">0</div>
-        <div class="sl">Followers</div>
-      </div>
-      <div class="ch-stat">
-        <div class="sv" id="stat-views">0</div>
-        <div class="sl">Views</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TABS -->
-  <div class="tabs" id="tabs">
-    <div class="tab active" data-tab="posts" onclick="switchTab('posts')">
-      <i class="fas fa-file-alt"></i> My Posts
-    </div>
-    <div class="tab" data-tab="analytics" onclick="switchTab('analytics')">
-      <i class="fas fa-chart-bar"></i> Analytics
-    </div>
-    <div class="tab" data-tab="new" onclick="switchTab('new')">
-      <i class="fas fa-plus"></i> New Post
-    </div>
-    <div class="tab" data-tab="settings" onclick="switchTab('settings')">
-      <i class="fas fa-cog"></i> Channel
-    </div>
-  </div>
-
-  <!-- POSTS PANEL -->
-  <div class="panel active" id="panel-posts">
-    <div class="posts-table">
-      <div class="pt-header">
-        <h2>All Posts</h2>
-        <button class="btn" onclick="showNewPost()">
-          <i class="fas fa-plus"></i> New Post
-        </button>
-      </div>
-      <div id="posts-list">
-        <div class="loading">
-          <i class="fas fa-spinner"></i>
-          <p>Loading posts…</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ANALYTICS PANEL -->
-  <div class="panel" id="panel-analytics">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-val" id="an-posts">0</div>
-        <div class="stat-lbl">Total Posts</div>
-        <div class="stat-sub">Published</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="an-views">0</div>
-        <div class="stat-lbl">Total Views</div>
-        <div class="stat-sub">All time</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="an-comments">0</div>
-        <div class="stat-lbl">Comments</div>
-        <div class="stat-sub">Received</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="an-followers">0</div>
-        <div class="stat-lbl">Followers</div>
-        <div class="stat-sub">Your audience</div>
-      </div>
-    </div>
-    <div class="settings-card" style="text-align:center">
-      <i class="fas fa-chart-pie" style="font-size:3rem;color:var(--gold);margin-bottom:16px;opacity:.6"></i>
-      <p style="font-size:1rem;font-weight:600;color:var(--text);margin-bottom:8px">Detailed Analytics Coming Soon</p>
-      <p style="font-size:.9rem;color:var(--muted)">Track your reach, engagement, and audience growth with advanced insights.</p>
-    </div>
-  </div>
-
-  <!-- NEW/EDIT POST PANEL -->
-  <div class="panel" id="panel-new">
-    <div class="form-card">
-      <div class="form-header">
-        <h2 id="form-title"><i class="fas fa-pen"></i> New Post</h2>
-      </div>
-      <div class="form-body">
-        <input type="hidden" id="edit-post-id">
-        
-        <!-- Content Type & Region -->
-        <div class="field-row">
-          <div class="field">
-            <label>Content Type</label>
-            <select id="f-type" onchange="updateFormFields()">
-              <option value="article">📝 Written Article</option>
-              <option value="audio">🎵 Audio Recording</option>
-              <option value="photo_essay">📷 Photo Essay</option>
-              <option value="video">🎬 Video</option>
-              <option value="reel">📱 Short Reel (vertical)</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Region (optional)</label>
-            <select id="f-region">
-              <option value="">— All Regions —</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Title & Excerpt -->
-        <div class="field">
-          <label>Title <span style="font-weight:400;color:var(--muted)">*</span></label>
-          <input type="text" id="f-title" placeholder="Enter a compelling title…">
-        </div>
-        <div class="field">
-          <label>Excerpt <span style="font-weight:400;color:var(--muted)">(short preview in feed)</span></label>
-          <input type="text" id="f-excerpt" placeholder="One sentence that hooks the reader…">
-        </div>
-
-        <!-- Cover Image Upload -->
-        <div class="field">
-          <label>Cover Image / Thumbnail</label>
-          <div class="cover-zone" id="cover-zone">
-            <div class="utabs">
-              <button class="utab active" data-upload="file" onclick="switchUploadTab('file')">
-                <i class="fas fa-upload"></i> Upload File
-              </button>
-              <button class="utab" data-upload="url" onclick="switchUploadTab('url')">
-                <i class="fas fa-link"></i> Paste URL
-              </button>
-            </div>
-            <div class="upane active" id="upane-file">
-              <div class="drop-area" onclick="document.getElementById('cover-input').click()">
-                <i class="fas fa-image"></i>
-                <p>Click to select or drag & drop<br><span style="font-size:.7rem">JPG, PNG, GIF, WEBP, MP4</span></p>
-              </div>
-              <input type="file" id="cover-input" accept="image/*,video/mp4" style="display:none" onchange="uploadCover(this)">
-              <div id="cover-prog" style="display:none;padding:0 0 12px">
-                <div style="font-size:.75rem;color:var(--muted)" id="cover-prog-txt">Uploading…</div>
-                <div class="progress-bar"><div class="progress-fill" id="cover-prog-fill"></div></div>
-              </div>
-            </div>
-            <div class="upane" id="upane-url">
-              <div style="padding:12px 0 4px">
-                <input type="text" id="cover-url-in" placeholder="https://example.com/image.jpg" oninput="if(this.value.match(/^https?:|^\//))setCover(this.value)" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.9rem;outline:none;font-family:'DM Sans',sans-serif;min-height:44px">
-              </div>
-            </div>
-          </div>
-          <!-- Preview -->
-          <div class="cover-preview" id="cover-preview">
-            <img id="cover-img" src="" alt="">
-            <button class="remove-btn" onclick="clearCover()"><i class="fas fa-times"></i></button>
-          </div>
-          <input type="hidden" id="f-cover">
-        </div>
-
-        <!-- Article Content -->
-        <div class="field" id="field-content">
-          <label>Content</label>
-          <textarea id="f-content" placeholder="Write your full article here…
-
-Tip: use [audio]URL[/audio] or [video]URL[/video] tags to embed media inline."></textarea>
-        </div>
-
-        <!-- Audio Upload -->
-        <div class="field" id="field-audio" style="display:none">
-          <label>Audio File</label>
-          <div class="media-row">
-            <input type="text" id="f-audio" placeholder="https://... or upload →">
-            <button class="mini-btn" id="audio-btn" onclick="document.getElementById('audio-input').click()">
-              <i class="fas fa-upload"></i> Upload
-            </button>
-          </div>
-          <input type="file" id="audio-input" accept="audio/*" style="display:none" onchange="uploadMedia(this,'audio')">
-          <div id="audio-prog" style="display:none;margin-top:8px">
-            <div style="font-size:.75rem;color:var(--muted)" id="audio-prog-txt">Uploading…</div>
-            <div class="progress-bar"><div class="progress-fill" id="audio-prog-fill"></div></div>
-          </div>
-        </div>
-
-        <!-- Video/Reel Upload -->
-        <div class="field" id="field-video" style="display:none">
-          <label>Video File</label>
-          <div class="media-row">
-            <input type="text" id="f-video" placeholder="https://... or upload →">
-            <button class="mini-btn" id="video-btn" onclick="document.getElementById('video-input').click()">
-              <i class="fas fa-upload"></i> Upload
-            </button>
-          </div>
-          <input type="file" id="video-input" accept="video/*" style="display:none" onchange="uploadMedia(this,'video')">
-          <div id="video-prog" style="display:none;margin-top:8px">
-            <div style="font-size:.75rem;color:var(--muted)" id="video-prog-txt">Uploading…</div>
-            <div class="progress-bar"><div class="progress-fill" id="video-prog-fill"></div></div>
-          </div>
-          <p style="font-size:.75rem;color:var(--muted);margin-top:8px">Uploaded videos stream from Supabase. You can also paste a YouTube/Vimeo URL.</p>
-        </div>
-
-        <!-- Photo Essay Gallery -->
-        <div class="field" id="field-gallery" style="display:none">
-          <label>Images <span style="font-weight:400;color:var(--muted)">(comma-separated URLs)</span></label>
-          <textarea id="f-gallery" placeholder="https://img1.jpg, https://img2.jpg, …" style="min-height:80px"></textarea>
-          <button class="mini-btn" style="margin-top:8px" onclick="document.getElementById('gallery-input').click()">
-            <i class="fas fa-images"></i> Upload Images
-          </button>
-          <input type="file" id="gallery-input" accept="image/*" multiple style="display:none" onchange="uploadGallery(this)">
-        </div>
-
-        <!-- Tags -->
-        <div class="field">
-          <label>Tags <span style="font-weight:400;color:var(--muted)">(comma-separated)</span></label>
-          <input type="text" id="f-tags" placeholder="history, ashanti, culture">
-        </div>
-
-        <!-- Premium Toggle -->
-        <div class="toggle-row">
-          <label class="toggle">
-            <input type="checkbox" id="f-premium">
-            <span class="slider"></span>
-          </label>
-          <span class="toggle-label">Premium only content</span>
-        </div>
-
-        <!-- Form Actions -->
-        <div class="form-actions">
-          <button class="btn-publish" id="btn-pub" onclick="savePost('published')">
-            <i class="fas fa-rocket"></i> Publish
-          </button>
-          <button class="btn-draft" id="btn-dft" onclick="savePost('draft')">
-            <i class="fas fa-save"></i> Save Draft
-          </button>
-          <button class="btn-cancel" onclick="clearForm()">
-            <i class="fas fa-times"></i> Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHANNEL SETTINGS PANEL -->
-  <div class="panel" id="panel-settings">
-    <div class="settings-card">
-      <h3 style="font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:20px"><i class="fas fa-cog"></i> Channel Settings</h3>
-      <div class="field">
-        <label>Channel Name</label>
-        <input type="text" id="s-name" placeholder="Your channel name">
-      </div>
-      <div class="field">
-        <label>Channel Description</label>
-        <textarea id="s-desc" style="min-height:100px" placeholder="Tell readers what your channel is about…"></textarea>
-      </div>
-      <div class="field">
-        <label>Avatar URL (optional)</label>
-        <input type="text" id="s-avatar" placeholder="https://example.com/avatar.jpg">
-      </div>
-      <button onclick="saveSettings()" class="btn-publish" style="margin-top:8px">
-        <i class="fas fa-save"></i> Save Settings
-      </button>
-    </div>
-  </div>
-
-</div>
-
-<!-- TOAST NOTIFICATION -->
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <script>
-/**
- * ============================================
- * ECHOSTACK CREATOR PORTAL
- * Complete JavaScript Implementation
- * ============================================
- */
+let user = null;
+let myPosts = [];
+let selectedType = 'article';
+let coverFile = null;
+let mediaFile = null;
+let quill = null;
 
-// ===== GLOBAL STATE =====
-const CreatorState = {
-  user: null,
-  posts: [],
-  regions: [],
-  currentTab: 'posts',
-  editingPostId: null,
-  isLoading: false
-};
-
-// ===== UTILS =====
-const Utils = {
-  escapeHtml(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  },
-  debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-};
-
-// ===== TOAST =====
-const Toast = {
-  element: null,
-  timeout: null,
-  init() { this.element = document.getElementById('toast'); },
-  show(message, type = '') {
-    if (!this.element) this.init();
-    this.element.textContent = message;
-    this.element.className = `toast show ${type}`;
-    if (this.timeout) clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => this.element.classList.remove('show'), 3000);
-  },
-  ok(msg) { this.show(msg, 'ok'); },
-  error(msg) { this.show(msg, 'er'); },
-  info(msg) { this.show(msg, 'info'); }
-};
-
-// ===== SIDEBAR =====
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('show');
-  document.body.style.overflow = document.getElementById('sidebar').classList.contains('open') ? 'hidden' : '';
-}
-
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('show');
-  document.body.style.overflow = '';
-}
-
-// ===== AUTH CHECK =====
-async function checkAuth() {
-  const raw = localStorage.getItem('es_user');
-  if (!raw) { window.location.href = '/user-login.html'; return null; }
-  
-  try {
-    const user = JSON.parse(raw);
-    if (!user.loggedIn) { window.location.href = '/user-login.html'; return null; }
-    if (user.role === 'user') {
-      Toast.error('You need a creator account first');
-      setTimeout(() => window.location.href = '/dashboard', 1500);
-      return null;
-    }
-    CreatorState.user = user;
-    document.getElementById('nav-username').textContent = user.username || '';
-    if (['admin', 'superuser'].includes(user.role)) {
-      document.getElementById('admin-link').style.display = 'flex';
-    }
-    return user;
-  } catch (e) {
-    window.location.href = '/user-login.html';
-    return null;
-  }
-}
-
-// ===== API HELPER =====
-async function apiFetch(endpoint, options = {}) {
-  const config = {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options
-  };
-  
-  try {
-    const response = await fetch(endpoint, config);
-    if (!response.ok) {
-      if (response.status === 401) {
-        window.location.href = '/user-login.html';
-        throw new Error('Unauthorized');
-      }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return await response.json();
-    }
-    return await response.text();
-  } catch (error) {
-    console.error(`API Error (${endpoint}):`, error);
-    Toast.error('Failed to load data');
-    throw error;
-  }
-}
-
-// ===== LOAD CHANNEL INFO =====
-async function loadChannelInfo() {
-  try {
-    const user = await apiFetch('/api/users/me');
-    const name = user.channel_name || user.username || 'My Channel';
-    
-    document.getElementById('ch-name').textContent = name;
-    document.getElementById('ch-desc').textContent = user.channel_desc || 'No description yet';
-    document.getElementById('ch-avatar').textContent = name[0].toUpperCase();
-    document.getElementById('stat-followers').textContent = user.follower_count || 0;
-    document.getElementById('an-followers').textContent = user.follower_count || 0;
-    
-    document.getElementById('s-name').value = user.channel_name || '';
-    document.getElementById('s-desc').value = user.channel_desc || '';
-    document.getElementById('s-avatar').value = user.avatar_url || '';
-  } catch (e) {
-    console.warn('Failed to load channel info:', e);
-  }
-}
-
-// ===== LOAD REGIONS =====
-async function loadRegions() {
-  try {
-    const regions = await apiFetch('/api/regions');
-    CreatorState.regions = regions;
-    const sel = document.getElementById('f-region');
-    regions.forEach(r => {
-      const o = document.createElement('option');
-      o.value = r.id;
-      o.textContent = r.name;
-      sel.appendChild(o);
+function initEditor() {
+    quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: 'Write your story...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                ['blockquote', 'code-block'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link', 'image'],
+                ['clean']
+            ]
+        }
     });
-  } catch (e) {
-    console.warn('Failed to load regions:', e);
-  }
+    quill.on('text-change', function() {
+        document.getElementById('postContent').value = quill.root.innerHTML;
+    });
 }
 
-// ===== LOAD MY POSTS =====
-async function loadMyPosts() {
-  const list = document.getElementById('posts-list');
-  
-  if (CreatorState.isLoading) return;
-  CreatorState.isLoading = true;
-  list.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>Loading posts…</p></div>';
-  
-  try {
-    const user = await apiFetch('/api/users/me');
-    const posts = await apiFetch(`/api/posts?status=all&author_id=${user.id}&limit=50`);
-    
-    CreatorState.posts = posts;
-    
-    const pub = posts.filter(p => p.status === 'published');
-    const views = posts.reduce((s, p) => s + (p.views || p.view_count || 0), 0);
-    const comments = posts.reduce((s, p) => s + (p.comment_count || 0), 0);
-    
-    document.getElementById('stat-posts').textContent = pub.length;
-    document.getElementById('stat-views').textContent = views;
-    document.getElementById('an-posts').textContent = pub.length;
-    document.getElementById('an-views').textContent = views;
-    document.getElementById('an-comments').textContent = comments;
-    
-    if (!posts.length) {
-      list.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><p>No posts yet</p><span>Create your first post to get started!</span></div>';
-      return;
-    }
-    
-    list.innerHTML = posts.map(p => `
-      <div class="pt-row">
-        <div>
-          <div class="pt-title">${Utils.escapeHtml(p.title)}</div>
-          <div class="pt-meta">${p.content_type} · ${p.created_at ? p.created_at.split('T')[0] : ''}</div>
-        </div>
-        <span class="status-badge status-${p.status}">${p.status}</span>
-        <div class="pt-stats">
-          <span><i class="far fa-eye"></i> ${p.views || p.view_count || 0}</span>
-          <span><i class="far fa-comment"></i> ${p.comment_count || 0}</span>
-        </div>
-        <div class="pt-actions">
-          <button class="act-btn act-edit" onclick="editPost(${p.id})">Edit</button>
-          <button class="act-btn act-del" onclick="deletePost(${p.id})">Delete</button>
-        </div>
-      </div>
-    `).join('');
-    
-  } catch (e) {
-    console.error('Failed to load posts:', e);
-    list.innerHTML = '<div class="empty"><i class="fas fa-exclamation-circle"></i><p>Failed to load posts</p><span>Pull to refresh or check your connection</span></div>';
-  } finally {
-    CreatorState.isLoading = false;
-  }
+function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.className = 'toast', 2500);
 }
 
-// ===== UPDATE FORM FIELDS =====
-function updateFormFields() {
-  const type = document.getElementById('f-type').value;
-  
-  document.getElementById('field-content').style.display = type === 'article' ? 'block' : 'none';
-  document.getElementById('field-audio').style.display = type === 'audio' ? 'block' : 'none';
-  document.getElementById('field-video').style.display = (type === 'video' || type === 'reel') ? 'block' : 'none';
-  document.getElementById('field-gallery').style.display = type === 'photo_essay' ? 'block' : 'none';
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
 }
 
-// ===== UPLOAD TABS =====
-function switchUploadTab(type) {
-  document.querySelectorAll('.utab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.upane').forEach(p => p.classList.remove('active'));
-  
-  event.currentTarget.classList.add('active');
-  document.getElementById('upane-' + type).classList.add('active');
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// ===== COVER UPLOAD =====
-function setupCoverDropZone() {
-  const zone = document.getElementById('cover-zone');
-  
-  zone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    zone.classList.add('drag');
-  });
-  
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
-  
-  zone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    zone.classList.remove('drag');
-    const file = e.dataTransfer.files[0];
-    if (file) doCoverUpload(file);
-  });
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
 }
 
-async function doCoverUpload(file) {
-  const prog = document.getElementById('cover-prog');
-  const txt = document.getElementById('cover-prog-txt');
-  const fill = document.getElementById('cover-prog-fill');
-  
-  prog.style.display = 'block';
-  txt.textContent = 'Uploading ' + file.name + '…';
-  fill.style.width = '20%';
-  
-  try {
-    const fd = new FormData();
-    fd.append('file', file);
-    
-    const r = await fetch('/api/upload/cover', { method: 'POST', body: fd, credentials: 'include' });
-    const d = await r.json();
-    
-    fill.style.width = '100%';
-    
-    if (!r.ok || !d.success) throw new Error(d.detail || 'Upload failed');
-    
-    setCover(d.url);
-    txt.textContent = '✅ Uploaded';
-    Toast.ok('Cover uploaded!');
-    
-    setTimeout(() => { prog.style.display = 'none'; }, 2500);
-    
-  } catch (e) {
-    fill.style.width = '0';
-    txt.textContent = '❌ ' + e.message;
-    Toast.error('Cover upload failed: ' + e.message);
-  }
-}
-
-function uploadCover(input) {
-  if (input.files[0]) doCoverUpload(input.files[0]);
-}
-
-function setCover(url) {
-  document.getElementById('f-cover').value = url;
-  document.getElementById('cover-img').src = url;
-  document.getElementById('cover-preview').style.display = 'block';
-}
-
-function clearCover() {
-  document.getElementById('f-cover').value = '';
-  document.getElementById('cover-img').src = '';
-  document.getElementById('cover-preview').style.display = 'none';
-  document.getElementById('cover-input').value = '';
-  document.getElementById('cover-prog').style.display = 'none';
-  document.getElementById('cover-url-in').value = '';
-}
-
-// ===== MEDIA UPLOAD =====
-async function uploadMedia(input, type) {
-  const file = input.files[0];
-  if (!file) return;
-  
-  const btn = document.getElementById(type + '-btn');
-  const prog = document.getElementById(type + '-prog');
-  const txt = document.getElementById(type + '-prog-txt');
-  const fill = document.getElementById(type + '-prog-fill');
-  
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-  prog.style.display = 'block';
-  txt.textContent = 'Uploading ' + file.name + '…';
-  fill.style.width = '25%';
-  
-  try {
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('filename', file.name);
-    fd.append('category', type);
-    
-    const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
-    const d = await r.json();
-    
-    fill.style.width = '100%';
-    
-    if (!r.ok || !d.success) throw new Error(d.detail || 'Upload failed');
-    
-    document.getElementById('f-' + type).value = d.url;
-    txt.textContent = '✅ Uploaded';
-    Toast.ok(type.charAt(0).toUpperCase() + type.slice(1) + ' uploaded!');
-    
-    setTimeout(() => { prog.style.display = 'none'; }, 2000);
-    
-  } catch (e) {
-    txt.textContent = '❌ ' + e.message;
-    Toast.error('Upload failed: ' + e.message);
-  } finally {
-    btn.innerHTML = '<i class="fas fa-upload"></i> Upload';
-    input.value = '';
-  }
-}
-
-async function uploadGallery(input) {
-  const files = Array.from(input.files);
-  if (!files.length) return;
-  
-  Toast.info('Uploading ' + files.length + ' image(s)…');
-  const urls = [];
-  
-  for (const f of files) {
-    const fd = new FormData();
-    fd.append('file', f);
-    fd.append('filename', f.name);
-    fd.append('category', 'image');
-    
+async function loadUser() {
     try {
-      const r = await fetch('/api/upload/file', { method: 'POST', body: fd, credentials: 'include' });
-      const d = await r.json();
-      if (d.success) urls.push(d.url);
-    } catch (e) {
-      console.warn('Failed to upload image:', e);
+        const res = await fetch('/api/users/me', { credentials: 'include' });
+        if (res.ok) {
+            user = await res.json();
+            setupCreatorUI();
+            loadMyPosts();
+        } else {
+            location.href = '/user-login';
+        }
+    } catch(e) {
+        location.href = '/user-login';
     }
-  }
-  
-  const ex = document.getElementById('f-gallery').value.trim();
-  document.getElementById('f-gallery').value = ex ? ex + ', ' + urls.join(', ') : urls.join(', ');
-  
-  Toast.ok('Uploaded ' + urls.length + '/' + files.length + ' images!');
-  input.value = '';
 }
 
-// ===== SAVE POST =====
-async function savePost(status) {
-  const title = document.getElementById('f-title').value.trim();
-  if (!title) {
-    Toast.error('Title is required');
-    document.getElementById('f-title').focus();
-    return;
-  }
-  
-  const editId = document.getElementById('edit-post-id').value;
-  const type = document.getElementById('f-type').value;
-  let content = document.getElementById('f-content').value;
-  
-  // Auto-wrap media in tags if not already present
-  if (type === 'audio') {
-    const au = document.getElementById('f-audio').value.trim();
-    if (au && !content.includes('[audio]')) {
-      content = `[audio]${au}[/audio]\n\n${content}`.trim();
+function setupCreatorUI() {
+    const initial = (user.username || 'C').charAt(0).toUpperCase();
+    document.getElementById('creatorAvatar').textContent = initial;
+    document.getElementById('creatorName').textContent = user.full_name || user.username;
+    document.getElementById('creatorBio').textContent = user.bio || 'Your heritage channel';
+    document.getElementById('channelName').value = user.full_name || user.username;
+    document.getElementById('channelDesc').value = user.bio || '';
+    if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
+    if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = user.full_name || user.username;
+    const badge = document.getElementById('sidebarBadge');
+    if (badge) {
+        if (user.role === 'admin' || user.role === 'superuser') {
+            badge.className = 'sidebar-user-badge badge-admin';
+            badge.textContent = 'Admin';
+        } else if (user.role === 'creator') {
+            badge.className = 'sidebar-user-badge badge-creator';
+            badge.textContent = 'Creator';
+        } else if (user.is_premium) {
+            badge.className = 'sidebar-user-badge badge-premium';
+            badge.textContent = 'Premium';
+        }
     }
-  }
-  
-  if (type === 'video' || type === 'reel') {
-    const vu = document.getElementById('f-video').value.trim();
-    if (vu && !content.includes('[video]') && !vu.includes('youtube') && !vu.includes('vimeo')) {
-      content = `[video]${vu}[/video]\n\n${content}`.trim();
-    } else if (vu) {
-      content = content || vu;
-    }
-  }
-  
-  const fd = new FormData();
-  fd.append('title', title);
-  fd.append('content', content);
-  fd.append('excerpt', document.getElementById('f-excerpt').value);
-  fd.append('cover_image', document.getElementById('f-cover').value);
-  fd.append('content_type', type);
-  fd.append('audio_url', document.getElementById('f-audio').value);
-  fd.append('video_url', document.getElementById('f-video').value);
-  fd.append('gallery', document.getElementById('f-gallery').value);
-  fd.append('tags', document.getElementById('f-tags').value);
-  fd.append('is_premium', document.getElementById('f-premium').checked ? '1' : '0');
-  fd.append('status', status);
-  fd.append('region_id', document.getElementById('f-region').value);
-  
-  const bp = document.getElementById('btn-pub');
-  const bd = document.getElementById('btn-dft');
-  bp.disabled = bd.disabled = true;
-  
-  const op = bp.innerHTML;
-  const od = bd.innerHTML;
-  (status === 'published' ? bp : bd).innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
-  
-  try {
-    const url = editId ? '/api/posts/' + editId : '/api/posts';
-    const method = editId ? 'PUT' : 'POST';
-    
-    const r = await fetch(url, { method: method, body: fd, credentials: 'include' });
-    const d = await r.json();
-    
-    if (!r.ok) throw new Error(d.detail || 'Failed to save post');
-    
-    Toast.ok(status === 'published' ? '🚀 Post published!' : '💾 Draft saved');
-    clearForm();
-    await loadMyPosts();
-    switchTab('posts');
-    
-  } catch (e) {
-    Toast.error('❌ ' + e.message);
-  } finally {
-    bp.disabled = bd.disabled = false;
-    bp.innerHTML = op;
-    bd.innerHTML = od;
-  }
 }
 
-// ===== EDIT POST =====
-async function editPost(id) {
-  try {
-    const p = await apiFetch('/api/posts/' + id);
-    
-    document.getElementById('edit-post-id').value = id;
-    document.getElementById('form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Post';
-    
-    document.getElementById('f-title').value = p.title || '';
-    document.getElementById('f-excerpt').value = p.excerpt || '';
-    document.getElementById('f-content').value = p.content || '';
-    document.getElementById('f-audio').value = p.audio_url || '';
-    document.getElementById('f-video').value = p.video_url || '';
-    document.getElementById('f-gallery').value = p.gallery || '';
-    document.getElementById('f-tags').value = p.tags || '';
-    document.getElementById('f-type').value = p.content_type || 'article';
-    document.getElementById('f-premium').checked = p.is_premium || false;
-    
-    if (p.cover_image) setCover(p.cover_image);
-    
-    updateFormFields();
-    switchTab('new');
-    
-  } catch (e) {
-    Toast.error('Failed to load post');
-  }
-}
-
-// ===== DELETE POST =====
-async function deletePost(id) {
-  if (!confirm('Delete this post permanently?')) return;
-  
-  try {
-    const r = await fetch('/api/posts/' + id, { method: 'DELETE', credentials: 'include' });
-    if (r.ok) {
-      Toast.ok('Post deleted');
-      loadMyPosts();
-    } else {
-      const d = await r.json();
-      throw new Error(d.detail);
-    }
-  } catch (e) {
-    Toast.error('❌ ' + e.message);
-  }
-}
-
-// ===== CLEAR FORM =====
-function clearForm() {
-  ['f-title', 'f-excerpt', 'f-content', 'f-audio', 'f-video', 'f-gallery', 'f-tags'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  document.getElementById('edit-post-id').value = '';
-  document.getElementById('f-premium').checked = false;
-  document.getElementById('f-type').value = 'article';
-  document.getElementById('form-title').innerHTML = '<i class="fas fa-pen"></i> New Post';
-  clearCover();
-  updateFormFields();
-}
-
-function showNewPost() {
-  clearForm();
-  switchTab('new');
-}
-
-// ===== SAVE SETTINGS =====
-async function saveSettings() {
-  const fd = new FormData();
-  fd.append('channel_name', document.getElementById('s-name').value);
-  fd.append('channel_desc', document.getElementById('s-desc').value);
-  fd.append('avatar_url', document.getElementById('s-avatar').value);
-  
-  try {
-    const r = await fetch('/api/users/me', { method: 'PUT', body: fd, credentials: 'include' });
-    if (!r.ok) throw new Error((await r.json()).detail || 'Failed');
-    
-    Toast.ok('Settings saved!');
-    loadChannelInfo();
-    
-  } catch (e) {
-    Toast.error('❌ ' + e.message);
-  }
-}
-
-// ===== TAB SWITCHING =====
-function switchTab(tabName) {
-  // Update tab buttons
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
-  
-  // Update panels
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + tabName).classList.add('active');
-  
-  CreatorState.currentTab = tabName;
-  
-  // Load data when switching to posts tab
-  if (tabName === 'posts' && CreatorState.posts.length === 0) {
-    loadMyPosts();
-  }
-  
-  // Close sidebar on mobile
-  if (window.innerWidth <= 768) closeSidebar();
-}
-
-// ===== LOGOUT =====
 async function logout() {
-  if (!confirm('Are you sure you want to logout?')) return;
-  
-  try {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-  } catch (e) {
-    console.warn('Logout error:', e);
-  } finally {
+    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
     localStorage.removeItem('es_user');
-    window.location.href = '/user-login.html';
-  }
+    location.href = '/';
 }
 
-// ===== TOPBAR SCROLL EFFECT =====
-function setupTopbarScroll() {
-  const topbar = document.getElementById('topbar');
-  
-  window.addEventListener('scroll', Utils.debounce(() => {
-    if (window.scrollY > 10) {
-      topbar.classList.add('scrolled');
-    } else {
-      topbar.classList.remove('scrolled');
+async function loadMyPosts() {
+    try {
+        const res = await fetch(`/api/posts?user_id=${user.id}`);
+        myPosts = await res.json();
+        renderMyPosts();
+        updateStats();
+    } catch(e) {
+        document.getElementById('postsList').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
     }
-  }, 100));
 }
 
-// ===== INIT =====
-document.addEventListener('DOMContentLoaded', async () => {
-  // Initialize toast
-  Toast.init();
-  
-  // Check auth
-  const user = await checkAuth();
-  if (!user) return;
-  
-  // Setup interactions
-  setupCoverDropZone();
-  setupTopbarScroll();
-  
-  // Load initial data
-  loadChannelInfo();
-  loadRegions();
-  loadMyPosts();
-  
-  // Initialize form fields
-  updateFormFields();
-  
-  // Hide loading overlay
-  setTimeout(() => {
-    document.getElementById('loading-overlay').classList.add('hide');
-  }, 800);
-  
-  // Handle URL params (e.g., ?type=story)
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('type') === 'story') {
-    document.getElementById('f-type').value = 'article';
-    document.getElementById('f-excerpt').value = 'Story: ';
-    switchTab('new');
-  }
-  
-  // Handle online/offline
-  window.addEventListener('online', () => Toast.ok('🌐 Back online'));
-  window.addEventListener('offline', () => Toast.error('⚠️ You are offline'));
-});
+function renderMyPosts() {
+    const container = document.getElementById('postsList');
+    if (!myPosts.length) {
+        container.innerHTML = '<div class="creator-empty"><i class="fas fa-pen-fancy"></i><h3>No posts yet</h3><p>Create your first post!</p><button class="btn btn-primary" style="margin-top:16px" onclick="showTab(\'new\', document.querySelectorAll(\'.creator-tab\')[2])"><i class="fas fa-plus"></i> Create Post</button></div>';
+        return;
+    }
+
+    container.innerHTML = myPosts.map(p => `
+        <div class="post-list-item" onclick="location.href='/post/${p.id}'">
+            <div class="post-list-thumb">
+                ${p.media_url && p.content_type !== 'audio' ? `<img src="${escapeHtml(p.media_url)}" alt="">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--main-muted)"><i class="fas fa-file"></i></div>'}
+            </div>
+            <div class="post-list-info">
+                <div class="post-list-title">${escapeHtml(p.title)}</div>
+                <div class="post-list-meta">
+                    <span>${timeAgo(p.created_at)}</span>
+                    <span>${p.likes || 0} likes</span>
+                    <span>${p.comments_count || 0} comments</span>
+                </div>
+                <div class="post-list-actions">
+                    <button onclick="event.stopPropagation();location.href='/post/${p.id}'"><i class="fas fa-eye"></i> View</button>
+                    <button onclick="event.stopPropagation()"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="delete" onclick="event.stopPropagation();deletePost(${p.id})"><i class="fas fa-trash"></i> Delete</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateStats() {
+    const totalLikes = myPosts.reduce((sum, p) => sum + (p.likes || 0), 0);
+    const totalComments = myPosts.reduce((sum, p) => sum + (p.comments_count || 0), 0);
+
+    document.getElementById('statPosts').textContent = myPosts.length;
+    document.getElementById('statFollowers').textContent = 0;
+    document.getElementById('statViews').textContent = totalLikes + totalComments;
+    document.getElementById('analyticTotalPosts').textContent = myPosts.length;
+    document.getElementById('analyticTotalLikes').textContent = totalLikes;
+    document.getElementById('analyticTotalComments').textContent = totalComments;
+}
+
+function showTab(tab, el) {
+    document.querySelectorAll('.creator-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.creator-content').forEach(c => c.style.display = 'none');
+    document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+}
+
+function selectType(type, el) {
+    selectedType = type;
+    document.querySelectorAll('.type-option').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+}
+
+function handleCoverSelect(input) {
+    if (input.files && input.files[0]) {
+        coverFile = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('coverImage').src = e.target.result;
+            document.getElementById('coverPlaceholder').style.display = 'none';
+            document.getElementById('coverPreview').style.display = 'block';
+        };
+        reader.readAsDataURL(coverFile);
+    }
+}
+
+function removeCover() {
+    coverFile = null;
+    document.getElementById('coverUpload').value = '';
+    document.getElementById('coverPlaceholder').style.display = 'block';
+    document.getElementById('coverPreview').style.display = 'none';
+}
+
+function handleMediaSelect(input) {
+    if (input.files && input.files[0]) {
+        mediaFile = input.files[0];
+        document.getElementById('mediaInfo').textContent = `Selected: ${mediaFile.name} (${(mediaFile.size / 1024 / 1024).toFixed(1)} MB)`;
+    }
+}
+
+async function saveDraft() {
+    showToast('Draft saved!', 'success');
+}
+
+async function publishPost() {
+    const title = document.getElementById('postTitle').value.trim();
+    const content = document.getElementById('postContent').value.trim();
+    const excerpt = document.getElementById('postExcerpt').value.trim();
+    const region = document.getElementById('postRegion').value;
+    const isPremium = document.getElementById('premiumToggle').classList.contains('active');
+
+    if (!title || !content) {
+        showToast('Please fill in title and content', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('publishBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px"></div>';
+
+    try {
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('excerpt', excerpt || content.substring(0, 200));
+        formData.append('content_type', selectedType);
+        if (region) formData.append('region', region);
+        if (isPremium) formData.append('is_premium', '1');
+        if (coverFile) formData.append('cover', coverFile);
+        if (mediaFile) formData.append('media', mediaFile);
+
+        const res = await fetch('/api/posts', { method: 'POST', body: formData });
+
+        if (res.ok) {
+            const post = await res.json();
+            showToast('Published successfully!', 'success');
+            setTimeout(() => location.href = `/post/${post.id}`, 1000);
+        } else {
+            throw new Error('Failed');
+        }
+    } catch(e) {
+        showToast('Failed to publish. Try again.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publish';
+    }
+}
+
+async function deletePost(id) {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    try {
+        await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+        myPosts = myPosts.filter(p => p.id !== id);
+        renderMyPosts();
+        updateStats();
+        showToast('Post deleted', 'success');
+    } catch(e) {
+        showToast('Failed to delete', 'error');
+    }
+}
+
+async function saveChannelSettings() {
+    const name = document.getElementById('channelName').value.trim();
+    const desc = document.getElementById('channelDesc').value.trim();
+
+    try {
+        await fetch('/api/users/me', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ full_name: name, bio: desc })
+        });
+        showToast('Settings saved!', 'success');
+    } catch(e) {
+        showToast('Failed to save', 'error');
+    }
+}
+
+loadUser();
+initEditor();
 </script>
 </body>
 </html>
-

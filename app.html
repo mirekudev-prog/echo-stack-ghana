@@ -1,763 +1,970 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0D1B2A">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Explore Ghana's 16 regions with EchoStack">
-  <title>EchoStack — Explore Ghana</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    /* ===== CSS VARIABLES & RESET ===== */
-    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    :root{
-      --ink:#0D1B2A;--ink2:#1a2744;--gold:#C8962E;--gold2:#E8B84B;--gold3:#F4D06F;
-      --surface:#fafafa;--surface2:#f5f5f5;--card:#ffffff;--border:#e5e5e5;--border2:#d1d1d1;
-      --text:#1a1a1a;--text2:#3a3a3a;--muted:#8e8e93;--muted2:#6b6b6b;
-      --danger:#ef4444;--danger2:#dc2626;--success:#22c55e;--success2:#16a34a;
-      --warning:#f59e0b;--info:#3b82f6;--purple:#8b5cf6;--pink:#ec4899;--cyan:#06b6d4;
-      --hover:#f0f0f0;--hover2:#e8e8e8;--shadow:0 1px 3px rgba(0,0,0,.08);
-      --shadow2:0 2px 8px rgba(0,0,0,.12);--shadow3:0 4px 16px rgba(0,0,0,.16);
-      --radius:12px;--radius2:16px;--radius3:20px;--sidebar-w:280px;--topbar-h:57px;
-      --transition:all .2s ease;
-    }
-    html,body{height:100%;overflow-x:hidden;scroll-behavior:smooth}
-    body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--surface);color:var(--text);line-height:1.5;padding-bottom:env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased;}
-    img,video{max-width:100%;height:auto;display:block}
-    a{text-decoration:none;color:inherit}
-    button{font-family:inherit;border:none;background:none;cursor:pointer}
-    
-    /* ===== SIDEBAR (Same as Dashboard) ===== */
-    .sidebar{width:var(--sidebar-w);background:var(--card);color:var(--text);position:fixed;left:0;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;transform:translateX(-100%);transition:var(--transition);z-index:2000;-webkit-overflow-scrolling:touch;box-shadow:var(--shadow3);}
-    .sidebar.open{transform:translateX(0)}
-    .sb-header{padding:20px 16px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surface),var(--surface2));}
-    .sb-brand{display:flex;align-items:center;gap:12px}
-    .sb-brand img{width:40px;height:40px;border-radius:10px;object-fit:cover}
-    .sb-brand-text strong{display:block;font-size:1.1rem;font-weight:700;color:var(--ink)}
-    .sb-brand-text span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
-    .sb-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-    .sb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;color:var(--text);text-decoration:none;transition:var(--transition);font-size:.95rem;font-weight:500;border-radius:8px;margin:2px 8px;min-height:48px;}
-    .sb-item:hover{background:var(--hover)}
-    .sb-item:active{transform:scale(.98)}
-    .sb-item.active{background:rgba(200,150,46,.15);color:var(--gold);font-weight:600}
-    .sb-item .icon{width:24px;text-align:center;font-size:1.1rem}
-    .sb-item .badge{margin-left:auto;background:var(--danger);color:white;font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:700;}
-    .sb-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);background:var(--surface2);}
-    .sb-footer button{width:100%;padding:12px;border-radius:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--danger);font-size:.95rem;font-weight:600;cursor:pointer;min-height:48px;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:8px;}
-    .sb-footer button:active{background:rgba(239,68,68,.2);transform:scale(.98)}
-    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1999;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;transition:opacity .3s ease;}
-    .sidebar-overlay.show{display:block;opacity:1}
-    
-    /* ===== TOPBAR ===== */
-    .topbar{position:sticky;top:0;z-index:1000;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
-    .topbar.scrolled{box-shadow:var(--shadow2)}
-    .menu-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;font-size:1.4rem;color:var(--text);transition:var(--transition);}
-    .menu-btn:active{background:var(--hover);transform:scale(.95)}
-    .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--ink);letter-spacing:-.5px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-    .topbar-actions{display:flex;gap:8px;align-items:center}
-    .topbar-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:20px;padding:8px 14px;font-size:.85rem;font-weight:600;transition:var(--transition);display:flex;align-items:center;gap:6px;}
-    .topbar-btn:hover{background:var(--hover)}
-    .topbar-btn:active{transform:scale(.96)}
-    
-    /* ===== MAIN CONTAINER ===== */
-    .container{max-width:1200px;margin:0 auto;padding:20px 16px 80px}
-    
-    /* ===== HERO BANNER ===== */
-    .hero-banner{background:linear-gradient(135deg,var(--ink),var(--ink2));border-radius:var(--radius2);padding:24px;margin-bottom:24px;color:white;position:relative;overflow:hidden;}
-    .hero-banner::after{content:'🇬🇭';position:absolute;right:24px;top:12px;font-size:60px;opacity:.1;pointer-events:none;}
-    .hero-banner h1{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;margin-bottom:8px;}
-    .hero-banner p{font-size:.95rem;opacity:.9;max-width:600px;line-height:1.6;}
-    
-    /* ===== MAP SECTION ===== */
-    .section-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--ink);margin:24px 0 16px;display:flex;align-items:center;gap:8px;}
-    .section-title i{color:var(--gold)}
-    .map-wrapper{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;margin-bottom:24px;overflow-x:auto;}
-    .map-container{position:relative;width:100%;min-height:400px;display:flex;align-items:center;justify-content:center;}
-    .ghana-map{width:100%;max-width:500px;height:auto;max-height:500px;}
-    .region-path{fill:var(--surface2);stroke:var(--border);stroke-width:1.5;cursor:pointer;transition:var(--transition);}
-    .region-path:hover{fill:var(--gold);stroke:var(--gold2);stroke-width:2;filter:drop-shadow(0 2px 8px rgba(200,150,46,.3));}
-    .region-path.active{fill:var(--gold);stroke:var(--gold2);stroke-width:2.5;filter:drop-shadow(0 4px 12px rgba(200,150,46,.4));}
-    .region-label{font-size:.7rem;font-weight:600;fill:var(--text);pointer-events:none;text-anchor:middle;}
-    
-    /* ===== REGIONS GRID ===== */
-    .regions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:24px;}
-    .region-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:var(--transition);display:flex;flex-direction:column;gap:12px;}
-    .region-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--shadow2);}
-    .region-card.active{border-color:var(--gold);background:rgba(200,150,46,.05);}
-    .region-header{display:flex;align-items:center;gap:12px;}
-    .region-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:white;flex-shrink:0;}
-    .region-info{flex:1;min-width:0}
-    .region-name{font-weight:700;font-size:1rem;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .region-capital{font-size:.8rem;color:var(--muted);}
-    .region-stats{display:flex;gap:12px;font-size:.75rem;color:var(--muted);}
-    .region-stats span{display:flex;align-items:center;gap:4px;}
-    
-    /* ===== DETAIL PANEL (MODAL) ===== */
-    .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
-    .detail-overlay.active{display:flex}
-    .detail-panel{background:var(--card);border-radius:var(--radius2);max-width:600px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow3);animation:slideIn .3s ease;}
-    @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    .detail-header{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--card);z-index:10;}
-    .detail-header h2{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--ink);}
-    .detail-close{width:36px;height:36px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--muted);cursor:pointer;transition:var(--transition);}
-    .detail-close:hover{background:var(--hover);color:var(--text)}
-    .detail-body{padding:20px;}
-    .detail-section{margin-bottom:24px;}
-    .detail-section h3{font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
-    .detail-section h3 i{color:var(--gold)}
-    .detail-description{font-size:.95rem;line-height:1.6;color:var(--text2);margin-bottom:16px;}
-    .detail-facts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
-    .fact-item{background:var(--surface2);padding:12px;border-radius:10px;}
-    .fact-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
-    .fact-value{font-weight:600;color:var(--text);}
-    .detail-media{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:16px;}
-    .media-item{border-radius:8px;overflow:hidden;aspect-ratio:1;position:relative;background:var(--surface2);}
-    .media-item img{width:100%;height:100%;object-fit:cover;}
-    .media-item audio{width:100%;padding:8px;}
-    .detail-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
-    .tag{background:var(--surface2);color:var(--muted);padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:500;}
-    .detail-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;}
-    .detail-actions button{padding:10px 20px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:var(--transition);min-height:44px;display:flex;align-items:center;gap:6px;}
-    .btn-primary{background:var(--gold);color:var(--ink);border:none;}
-    .btn-primary:hover{background:var(--gold2)}
-    .btn-primary:active{transform:scale(.98)}
-    .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
-    .btn-secondary:hover{background:var(--hover)}
-    .btn-secondary:active{transform:scale(.98)}
-    
-    /* ===== EMPTY/LOADING STATES ===== */
-    .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
-    .empty-state i{font-size:3rem;margin-bottom:16px;opacity:.5;color:var(--gold)}
-    .empty-state p{font-size:1rem;font-weight:500;margin-bottom:8px}
-    .empty-state a{color:var(--gold);font-weight:600}
-    .loading{text-align:center;padding:40px 20px;color:var(--muted);}
-    .loading i{font-size:2rem;margin-bottom:12px;animation:pulse 2s infinite}
-    @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
-    
-    /* ===== TOAST ===== */
-    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,26,26,.95);color:white;padding:14px 28px;border-radius:30px;font-size:.9rem;font-weight:600;z-index:9999;transition:all .3s;opacity:0;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap;max-width:90%;text-align:center;}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-    .toast.ok{background:rgba(34,197,94,.95)}
-    .toast.er{background:rgba(239,68,68,.95)}
-    
-    /* ===== RESPONSIVE ===== */
-    @media(max-width:768px){
-      .sidebar{width:260px}
-      .hero-banner{padding:16px}
-      .hero-banner h1{font-size:1.4rem}
-      .regions-grid{grid-template-columns:1fr}
-      .detail-facts{grid-template-columns:1fr}
-      .detail-panel{max-width:100%;margin:0 16px}
-    }
-    @media(max-width:480px){
-      .topbar{padding:10px 14px}
-      .logo{font-size:1.3rem}
-      .section-title{font-size:1.1rem}
-      .region-card{padding:12px}
-      .region-icon{width:40px;height:40px;font-size:1.2rem}
-      .region-name{font-size:.95rem}
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Explore Ghana — EchoStack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        :root {
+            --ink: #0D1B2A;
+            --ink2: #0f1e2d;
+            --gold: #C8962E;
+            --gold2: #E8B84B;
+            --cream: #FAF6EF;
+            --blue: #0077b6;
+            --muted: #94A3B8;
+            --main-bg: #f8fafc;
+            --main-card: #ffffff;
+            --main-border: #e2e8f0;
+            --main-text: #1e293b;
+            --main-muted: #64748b;
+            --main-hover: #f1f5f9;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--main-text);
+            min-height: 100vh;
+        }
+
+        /* ── TOP BAR ────────────────────────────────────── */
+        .top-bar {
+            background: var(--ink);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-bar-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .top-bar-logo img { height: 28px; width: auto; }
+        .top-bar-logo span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .top-bar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            color: rgba(255,255,255,.7);
+        }
+
+        .top-bar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-bar-right a {
+            color: rgba(255,255,255,.7);
+            text-decoration: none;
+            font-size: .85rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all .2s;
+        }
+
+        .top-bar-right a:hover { color: white; background: rgba(255,255,255,.1); }
+
+        .btn-nav {
+            background: rgba(200,150,46,.15);
+            border: 1px solid rgba(200,150,46,.3);
+            color: var(--gold2) !important;
+            border-radius: 8px;
+            padding: 6px 14px !important;
+            font-weight: 600;
+        }
+
+        .btn-nav:hover { background: rgba(200,150,46,.25) !important }
+
+        /* ── HERO BANNER ───────────────────────────────── */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--ink), var(--ink2));
+            color: white;
+            text-align: center;
+            padding: 28px 24px 24px;
+        }
+
+        .hero-banner h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .hero-banner h1 span { color: var(--gold2) }
+
+        .hero-banner p {
+            font-size: .88rem;
+            color: rgba(255,255,255,.65);
+            max-width: 480px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* ── MAP SECTION ───────────────────────────────── */
+        .map-section {
+            display: flex;
+            gap: 0;
+            min-height: calc(100vh - 56px);
+        }
+
+        .map-area {
+            flex: 1;
+            background: var(--main-card);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+            overflow-y: auto;
+        }
+
+        .map-wrapper {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .ghana-map {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .ghana-map .region-path {
+            fill: #eef2f7;
+            stroke: #c0c0c0;
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: fill .2s, stroke .2s, stroke-width .2s;
+        }
+
+        .ghana-map .region-path:hover {
+            fill: var(--blue);
+            stroke: var(--ink);
+        }
+
+        .ghana-map .region-path.active {
+            fill: var(--blue);
+            stroke: var(--ink);
+            stroke-width: 2.5;
+        }
+
+        .ghana-map .region-label {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 8px;
+            font-weight: 700;
+            fill: var(--ink);
+            pointer-events: none;
+            text-anchor: middle;
+        }
+
+        .ghana-map .region-label-bg {
+            fill: white;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* ── DETAIL PANEL ──────────────────────────────── */
+        .detail-panel {
+            width: 360px;
+            flex-shrink: 0;
+            background: var(--main-card);
+            border-left: 1px solid var(--main-border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform .3s ease;
+        }
+
+        .detail-panel.hidden {
+            display: none;
+        }
+
+        .panel-head {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--ink), var(--ink2));
+            color: white;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .panel-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(255,255,255,.1);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .8rem;
+            transition: background .2s;
+        }
+
+        .panel-close:hover { background: rgba(255,255,255,.2); }
+
+        .panel-head h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            margin-bottom: 2px;
+            padding-right: 36px;
+        }
+
+        .panel-head .panel-capital {
+            font-size: .8rem;
+            color: var(--gold2);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .panel-head .panel-terrain {
+            font-size: .75rem;
+            color: rgba(255,255,255,.5);
+            margin-top: 4px;
+        }
+
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .panel-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-chip {
+            padding: 4px 10px;
+            background: var(--main-bg);
+            border: 1px solid var(--main-border);
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--main-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .meta-chip i { color: var(--gold); font-size: .7rem; }
+
+        .panel-block {
+            margin-bottom: 20px;
+        }
+
+        .panel-block-title {
+            font-size: .7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--gold);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .panel-block p {
+            font-size: .85rem;
+            color: var(--main-muted);
+            line-height: 1.65;
+        }
+
+        .panel-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .panel-gallery img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 8px;
+            background: var(--main-bg);
+            border: 1px solid var(--main-border);
+            cursor: pointer;
+            transition: border-color .2s;
+        }
+
+        .panel-gallery img:hover { border-color: var(--gold); }
+
+        .panel-audio {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .audio-item {
+            padding: 10px 12px;
+            background: var(--main-bg);
+            border: 1px solid var(--main-border);
+            border-radius: 10px;
+        }
+
+        .audio-item-title {
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--main-text);
+            margin-bottom: 6px;
+        }
+
+        .audio-item audio {
+            width: 100%;
+            height: 28px;
+            border-radius: 4px;
+        }
+
+        .panel-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .panel-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--main-bg);
+            border: 1px solid var(--main-border);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--main-text);
+            font-size: .82rem;
+            font-weight: 500;
+            transition: all .2s;
+        }
+
+        .panel-link:hover { border-color: var(--gold); color: var(--gold); }
+        .panel-link i { color: var(--gold); width: 18px; text-align: center }
+
+        /* Panel empty */
+        .panel-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--main-muted);
+        }
+
+        .panel-empty i {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            opacity: .35;
+            color: var(--gold);
+        }
+
+        .panel-empty h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: var(--main-text);
+            margin-bottom: 8px;
+        }
+
+        .panel-empty p { font-size: .85rem; line-height: 1.5 }
+
+        /* ── REGION CARDS ─────────────────────────────── */
+        .cards-section {
+            padding: 20px;
+            background: var(--cream);
+            border-top: 1px solid var(--main-border);
+        }
+
+        .cards-title {
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+
+        .region-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .region-card {
+            background: var(--main-card);
+            border: 1.5px solid var(--main-border);
+            border-radius: 12px;
+            padding: 14px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .region-card:hover, .region-card.active {
+            border-color: var(--gold);
+            box-shadow: 0 4px 16px rgba(200,150,46,.12);
+            transform: translateY(-2px);
+        }
+
+        .region-card .card-icon { font-size: 1.6rem; margin-bottom: 6px; display: block }
+        .region-card .card-name { font-size: .75rem; font-weight: 600; color: var(--main-text); line-height: 1.2 }
+        .region-card .card-capital { font-size: .65rem; color: var(--main-muted); margin-top: 2px }
+
+        /* ── LOADING ──────────────────────────────────── */
+        .loading-row { display: flex; align-items: center; justify-content: center; padding: 30px; }
+        .spinner {
+            width: 22px; height: 22px;
+            border: 2.5px solid var(--main-border);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg) } }
+
+        /* ── RESPONSIVE ───────────────────────────────── */
+        @media (max-width: 900px) {
+            .map-section { flex-direction: column; }
+            .detail-panel {
+                position: fixed;
+                top: 56px;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid var(--main-border);
+                z-index: 200;
+                transform: translateX(100%);
+                transition: transform .3s ease;
+            }
+            .detail-panel.mobile-open {
+                transform: translateX(0);
+            }
+            .panel-overlay {
+                display: block;
+                position: fixed;
+                inset: 56px 0 0 0;
+                background: rgba(0,0,0,.4);
+                z-index: 199;
+            }
+            .region-cards-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+        }
+
+        @media (min-width: 901px) {
+            .panel-overlay { display: none !important; }
+        }
+
+        @media (max-width: 480px) {
+            .top-bar { padding: 0 12px; }
+            .top-bar-right a:not(.btn-nav) { display: none; }
+            .map-area { padding: 16px 8px; }
+            .cards-section { padding: 16px 12px; }
+            .panel-gallery { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
 </head>
 <body>
+<div class="app">
 
-<!-- SIDEBAR OVERLAY -->
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </a>
+        </div>
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">User</div>
+                <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i><span>Feed</span></a>
+                <a href="/reels" class="sidebar-link"><i class="fas fa-film"></i><span>Reels</span></a>
+                <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i><span>Explore</span></a>
+                <a href="/archive" class="sidebar-link"><i class="fas fa-archive"></i><span>Archive</span></a>
+                <a href="/app" class="sidebar-link active"><i class="fas fa-map-marked-alt"></i><span>Map</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Social</div>
+                <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
+                <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
+                <a href="/notifications" class="sidebar-link"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                <a href="/chatbot" class="sidebar-link"><i class="fas fa-comments"></i><span>Community Chat</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Create</div>
+                <a href="/creator" class="sidebar-link" id="createLink"><i class="fas fa-plus-circle"></i><span>Create Post</span></a>
+                <a href="/premium" class="sidebar-link"><i class="fas fa-crown"></i><span>Premium</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Account</div>
+                <a href="/user-profile" class="sidebar-link"><i class="fas fa-user"></i><span>My Profile</span></a>
+                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<!-- SIDEBAR NAVIGATION -->
-<aside class="sidebar" id="sidebar">
-  <div class="sb-header">
-    <div class="sb-brand">
-      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-      <div class="sb-brand-text">
-        <strong>EchoStack</strong>
-        <span>Ghana's Heritage</span>
-      </div>
+    <!-- Main content -->
+    <div class="main-wrapper">
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-title">Interactive Map</div>
+            <div class="topbar-actions">
+                <a href="/notifications" class="topbar-btn"><i class="fas fa-bell"></i></a>
+                <a href="/chatbot" class="topbar-btn"><i class="fas fa-robot"></i></a>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Hero Banner -->
+            <div class="hero-banner">
+                <h1>Explore Ghana's Heritage <span>🗺️</span></h1>
+                <p>Click any region on the map or select a card below to discover stories, traditions, and landmarks.</p>
+            </div>
+
+            <!-- Main layout -->
+            <div class="map-section">
+
+                <!-- Map + Cards -->
+                <div class="map-area">
+                    <div class="map-wrapper">
+                        <svg class="ghana-map" id="ghanaSvg" viewBox="0 0 400 620">
+                            <!-- Paths and labels injected by JS -->
+                        </svg>
+                    </div>
+
+                    <!-- Region Cards -->
+                    <div class="cards-section">
+                        <div class="cards-title">All 16 Regions</div>
+                        <div class="region-cards-grid" id="regionCardsGrid">
+                            <div class="loading-row"><div class="spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detail Panel -->
+                <div class="detail-panel hidden" id="detailPanel">
+                    <div class="panel-head" id="panelHead">
+                        <button class="panel-close" onclick="closePanel()"><i class="fas fa-times"></i></button>
+                        <h2 id="panelName">Region Name</h2>
+                        <div class="panel-capital" id="panelCapital"><i class="fas fa-map-marker-alt"></i> Capital</div>
+                        <div class="panel-terrain" id="panelTerrain"></div>
+                    </div>
+                    <div class="panel-body" id="panelBody">
+                        <div class="panel-empty">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <h3>Select a Region</h3>
+                            <p>Click a region on the map or card to view details</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Mobile overlay for detail panel -->
+            <div class="panel-overlay" id="panelOverlay" onclick="closePanel()" style="display:none"></div>
+        </main>
     </div>
-  </div>
-  <div class="sb-section">Navigation</div>
-  <a href="/dashboard" class="sb-item"><span class="icon"><i class="fas fa-home"></i></span> Home Feed</a>
-  <a href="/explore" class="sb-item"><span class="icon"><i class="fas fa-compass"></i></span> Explore</a>
-  <a href="/reels.html" class="sb-item"><span class="icon"><i class="fas fa-video"></i></span> Reels</a>
-  <a href="/archive" class="sb-item"><span class="icon"><i class="fas fa-book"></i></span> Archive</a>
-  <a href="/app" class="sb-item active"><span class="icon"><i class="fas fa-map-marked-alt"></i></span> Regions Map</a>
-  <div class="sb-section">Create</div>
-  <a href="/creator.html" class="sb-item"><span class="icon"><i class="fas fa-pen"></i></span> New Post</a>
-  <a href="/creator.html?type=story" class="sb-item"><span class="icon"><i class="fas fa-camera"></i></span> Add Story</a>
-  <div class="sb-section">Account</div>
-  <a href="/user_profile.html" class="sb-item"><span class="icon"><i class="fas fa-user"></i></span> Profile</a>
-  <a href="/user-settings.html" class="sb-item"><span class="icon"><i class="fas fa-cog"></i></span> Settings</a>
-  <a href="/premium.html" class="sb-item"><span class="icon"><i class="fas fa-crown"></i></span> Go Premium</a>
-  <div class="sb-footer">
-    <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-  </div>
-</aside>
-
-<!-- TOPBAR -->
-<div class="topbar" id="topbar">
-  <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
-    <i class="fas fa-bars"></i>
-  </button>
-  <div class="logo">EchoStack</div>
-  <div class="topbar-actions">
-    <a href="/dashboard" class="topbar-btn">
-      <i class="fas fa-home"></i> Feed
-    </a>
-    <a href="/creator.html" class="topbar-btn">
-      <i class="fas fa-plus"></i> Create
-    </a>
-  </div>
 </div>
 
-<!-- MAIN CONTAINER -->
-<div class="container" id="app">
-  
-  <!-- HERO BANNER -->
-  <div class="hero-banner">
-    <h1>🗺️ Explore Ghana's Heritage</h1>
-    <p>Click any region on the interactive map or browse the cards below to discover stories, culture, and traditions from all 16 regions of Ghana.</p>
-  </div>
+    <script>
+        (function() {
+            var svgPaths = {
+                'upper-west':    'M60,40 L160,50 L165,130 L100,140 L50,110 Z',
+                'upper-east':    'M160,50 L280,25 L290,100 L165,130 Z',
+                'north-east':    'M165,130 L290,100 L350,130 L340,190 L180,195 Z',
+                'savannah':      'M50,110 L100,140 L165,130 L180,195 L220,260 L180,340 L80,340 L40,250 Z',
+                'northern':      'M180,195 L340,190 L370,300 L320,320 L220,260 Z',
+                'bono':          'M80,340 L180,340 L160,420 L70,420 Z',
+                'bono-east':     'M180,340 L220,260 L320,320 L330,410 L190,410 L160,420 Z',
+                'ahafo':         'M70,420 L160,420 L140,470 L60,470 Z',
+                'ashanti':       'M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z',
+                'oti':           'M320,320 L370,300 L380,450 L340,450 L330,410 Z',
+                'volta':         'M340,450 L380,450 L400,560 L360,570 L340,510 Z',
+                'eastern':       'M310,510 L330,410 L340,450 L340,510 L360,570 L300,580 L280,510 Z',
+                'western-north': 'M60,470 L140,470 L130,530 L50,530 Z',
+                'western':       'M50,530 L130,530 L110,610 L40,590 Z',
+                'central':       'M130,530 L180,510 L280,510 L250,600 L110,610 Z',
+                'greater-accra': 'M300,580 L360,570 L375,600 L290,610 Z'
+            };
 
-  <!-- MAP SECTION -->
-  <h2 class="section-title"><i class="fas fa-map"></i> Interactive Map</h2>
-  <div class="map-wrapper">
-    <div class="map-container">
-      <svg class="ghana-map" viewBox="0 0 400 600" id="ghana-map">
-        <!-- Ghana regions will be rendered here by JavaScript -->
-        <text x="200" y="300" text-anchor="middle" fill="var(--muted)" font-size=".9rem">Loading map…</text>
-      </svg>
-    </div>
-  </div>
+            var regionLabels = {
+                'upper-west':    {x: 105, y: 100},
+                'upper-east':    {x: 210, y: 80},
+                'north-east':   {x: 255, y: 155},
+                'savannah':     {x: 120, y: 240},
+                'northern':     {x: 265, y: 255},
+                'bono':         {x: 120, y: 390},
+                'bono-east':    {x: 245, y: 360},
+                'ahafo':        {x: 105, y: 455},
+                'ashanti':      {x: 240, y: 475},
+                'oti':          {x: 355, y: 385},
+                'volta':        {x: 370, y: 525},
+                'eastern':      {x: 320, y: 555},
+                'western-north':{x: 90,  y: 505},
+                'western':      {x: 80,  y: 580},
+                'central':      {x: 200, y: 570},
+                'greater-accra':{x: 315, y: 602}
+            };
 
-  <!-- REGIONS GRID -->
-  <h2 class="section-title"><i class="fas fa-th-large"></i> All Regions</h2>
-  <div class="regions-grid" id="regions-grid">
-    <div class="loading">
-      <i class="fas fa-spinner"></i>
-      <p>Loading regions…</p>
-    </div>
-  </div>
+            var regionIcons = {
+                'upper west':    '🌾', 'upper west': '🌾',
+                'upper east':    '🗿', 'north east':  '🏕️',
+                'savannah':      '🌾', 'northern':     '🌄',
+                'bono':          '🎭', 'bono east':    '🌳',
+                'ahafo':         '🌾', 'ashanti':      '👑',
+                'oti':           '🏞️', 'volta':        '💧',
+                'eastern':       '⛰️', 'western north':'🌲',
+                'western':       '🌊', 'central':      '🏖️',
+                'greater accra': '🏙️'
+            };
 
-</div>
+            var displayNames = {
+                'upper-west':    'Upper West',
+                'upper-east':    'Upper East',
+                'north-east':    'North East',
+                'savannah':      'Savannah',
+                'northern':      'Northern',
+                'bono':          'Bono',
+                'bono-east':     'Bono East',
+                'ahafo':         'Ahafo',
+                'ashanti':       'Ashanti',
+                'oti':           'Oti',
+                'volta':         'Volta',
+                'eastern':       'Eastern',
+                'western-north': 'Western North',
+                'western':       'Western',
+                'central':       'Central',
+                'greater-accra': 'Greater Accra'
+            };
 
-<!-- DETAIL PANEL (MODAL) -->
-<div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this)closeDetail()">
-  <div class="detail-panel">
-    <div class="detail-header">
-      <h2 id="detail-title">Region Name</h2>
-      <button class="detail-close" onclick="closeDetail()"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="detail-body" id="detail-body">
-      <div class="loading">
-        <i class="fas fa-spinner"></i>
-        <p>Loading details…</p>
-      </div>
-    </div>
-  </div>
-</div>
+            var defaultRegions = [
+                {id: 1, name: 'Greater Accra', capital: 'Accra', population: '5.4M', terrain: 'Coastal / Urban'},
+                {id: 2, name: 'Ashanti', capital: 'Kumasi', population: '4.0M', terrain: 'Forest / Urban'},
+                {id: 3, name: 'Central', capital: 'Cape Coast', population: '2.2M', terrain: 'Coastal / Forest'},
+                {id: 4, name: 'Eastern', capital: 'Koforidua', population: '2.9M', terrain: 'Highland / Forest'},
+                {id: 5, name: 'Western', capital: 'Sekondi-Takoradi', population: '2.4M', terrain: 'Coastal / Forest'},
+                {id: 6, name: 'Western North', capital: 'Prestea', population: '0.9M', terrain: 'Forest'},
+                {id: 7, name: 'Volta', capital: 'Ho', population: '2.1M', terrain: 'Lake / Highland'},
+                {id: 8, name: 'Oti', capital: 'Dambai', population: '0.7M', terrain: 'Mountainous'},
+                {id: 9, name: 'Northern', capital: 'Tamale', population: '2.5M', terrain: 'Savanna'},
+                {id: 10, name: 'Savannah', capital: 'Damongo', population: '0.7M', terrain: 'Savanna'},
+                {id: 11, name: 'North East', capital: 'Nalerigu', population: '0.6M', terrain: 'Savanna'},
+                {id: 12, name: 'Upper East', capital: 'Bolgatanga', population: '1.0M', terrain: 'Semi-arid'},
+                {id: 13, name: 'Upper West', capital: 'Wa', population: '0.8M', terrain: 'Semi-arid'},
+                {id: 14, name: 'Bono', capital: 'Sunyani', population: '1.2M', terrain: 'Forest'},
+                {id: 15, name: 'Bono East', capital: 'Techiman', population: '0.9M', terrain: 'Forest'},
+                {id: 16, name: 'Ahafo', capital: 'Tano', population: '0.6M', terrain: 'Forest'}
+            ];
 
-<!-- TOAST NOTIFICATION -->
-<div class="toast" id="toast"></div>
+            var allRegions = defaultRegions;
+            var activeKey = null;
 
-<script>
-/**
- * ============================================
- * ECHOSTACK EXPLORE - GHANA REGIONS MAP
- * Complete JavaScript Implementation
- * ============================================
- */
+            function toggleSidebar() {
+                var sidebar = document.getElementById('sidebar');
+                var overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.toggle('open');
+                if (overlay) overlay.classList.toggle('show');
+            }
 
-// ===== GLOBAL STATE =====
-const ExploreState = {
-  regions: [],
-  currentRegion: null,
-  isLoading: false
-};
+            function closeSidebar() {
+                var sidebar = document.getElementById('sidebar');
+                var overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('show');
+            }
 
-// ===== UTILS =====
-const Utils = {
-  escapeHtml(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  },
-  debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-};
+            async function checkAuth() {
+                try {
+                    var res = await fetch('/api/users/me', { credentials: 'include' });
+                    if (res.ok) {
+                        var user = await res.json();
+                        var initial = (user.username || 'U').charAt(0).toUpperCase();
+                        if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
+                        if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = user.full_name || user.username;
+                        var badge = document.getElementById('sidebarBadge');
+                        if (badge) {
+                            if (user.role === 'admin' || user.role === 'superuser') { badge.className = 'sidebar-user-badge badge-admin'; badge.textContent = 'Admin'; }
+                            else if (user.role === 'creator') { badge.className = 'sidebar-user-badge badge-creator'; badge.textContent = 'Creator'; }
+                            else if (user.is_premium) { badge.className = 'sidebar-user-badge badge-premium'; badge.textContent = 'Premium'; }
+                        }
+                    } else {
+                        location.href = '/user-login';
+                    }
+                } catch (e) {
+                    location.href = '/user-login';
+                }
+            }
 
-// ===== TOAST =====
-const Toast = {
-  element: null,
-  timeout: null,
-  init() { this.element = document.getElementById('toast'); },
-  show(message, type = '') {
-    if (!this.element) this.init();
-    this.element.textContent = message;
-    this.element.className = `toast show ${type}`;
-    if (this.timeout) clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => this.element.classList.remove('show'), 3000);
-  },
-  ok(msg) { this.show(msg, 'ok'); },
-  error(msg) { this.show(msg, 'er'); }
-};
+            async function logout() {
+                await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
+                localStorage.removeItem('es_user');
+                location.href = '/';
+            }
 
-// ===== SIDEBAR =====
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('show');
-  document.body.style.overflow = document.getElementById('sidebar').classList.contains('open') ? 'hidden' : '';
-}
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+            }
 
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('show');
-  document.body.style.overflow = '';
-}
+            function capitalize(str) {
+                if (!str) return '';
+                return str.replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+            }
 
-// ===== API HELPER =====
-async function apiFetch(endpoint, options = {}) {
-  const config = {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options
-  };
-  
-  try {
-    const response = await fetch(endpoint, config);
-    if (!response.ok) {
-      if (response.status === 401) {
-        window.location.href = '/user-login.html';
-        throw new Error('Unauthorized');
-      }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return await response.json();
-    }
-    return await response.text();
-  } catch (error) {
-    console.error(`API Error (${endpoint}):`, error);
-    Toast.error('Failed to load data');
-    throw error;
-  }
-}
+            function keyToName(key) {
+                return capitalize(key.replace(/-/g, ' '));
+            }
 
-// ===== GHANA REGIONS DATA (for map rendering) =====
-const GhanaRegions = [
-  { id: 1, name: 'Ashanti', capital: 'Kumasi', emoji: '👑', color: '#C8962E', path: 'M160,420 L190,410 L330,410 L310,510 L180,510 L140,470 Z', label: { x: 240, y: 475 } },
-  { id: 2, name: 'Brong-Ahafo', capital: 'Sunyani', emoji: '🌾', color: '#22c55e', path: 'M80,340 L180,340 L160,420 L70,420 Z', label: { x: 120, y: 390 } },
-  { id: 3, name: 'Central', capital: 'Cape Coast', emoji: '🏛️', color: '#3b82f6', path: 'M130,530 L180,510 L280,510 L250,600 L110,610 Z', label: { x: 200, y: 570 } },
-  { id: 4, name: 'Eastern', capital: 'Koforidua', emoji: '🏔️', color: '#10b981', path: 'M310,510 L330,410 L340,450 L340,510 L360,570 L300,580 L280,510 Z', label: { x: 320, y: 555 } },
-  { id: 5, name: 'Greater Accra', capital: 'Accra', emoji: '🏙️', color: '#ef4444', path: 'M300,580 L360,570 L375,600 L290,610 Z', label: { x: 315, y: 602 } },
-  { id: 6, name: 'Northern', capital: 'Tamale', emoji: '🦁', color: '#f59e0b', path: 'M180,195 L340,190 L370,300 L320,320 L220,260 Z', label: { x: 265, y: 255 } },
-  { id: 7, name: 'Upper East', capital: 'Bolgatanga', emoji: '🌅', color: '#f97316', path: 'M160,50 L280,25 L290,100 L165,130 Z', label: { x: 210, y: 80 } },
-  { id: 8, name: 'Upper West', capital: 'Wa', emoji: '🌄', color: '#8b5cf6', path: 'M60,40 L160,50 L165,130 L100,140 L50,110 Z', label: { x: 105, y: 100 } },
-  { id: 9, name: 'Volta', capital: 'Ho', emoji: '🌊', color: '#06b6d4', path: 'M340,450 L380,450 L400,560 L360,570 L340,510 Z', label: { x: 370, y: 525 } },
-  { id: 10, name: 'Western', capital: 'Sekondi-Takoradi', emoji: '🌴', color: '#14b8a6', path: 'M50,530 L130,530 L110,610 L40,590 Z', label: { x: 80, y: 580 } },
-  { id: 11, name: 'Ahafo', capital: 'Goaso', emoji: '🌳', color: '#84cc16', path: 'M70,420 L160,420 L140,470 L60,470 Z', label: { x: 105, y: 455 } },
-  { id: 12, name: 'Bono', capital: 'Sunyani', emoji: '🪘', color: '#eab308', path: 'M80,340 L180,340 L160,420 L70,420 Z', label: { x: 120, y: 390 } },
-  { id: 13, name: 'Bono East', capital: 'Techiman', emoji: '🌻', color: '#fbbf24', path: 'M180,340 L220,260 L320,320 L330,410 L190,410 L160,420 Z', label: { x: 245, y: 360 } },
-  { id: 14, name: 'North East', capital: 'Nalerigu', emoji: '☀️', color: '#fb923c', path: 'M165,130 L290,100 L350,130 L340,190 L180,195 Z', label: { x: 255, y: 155 } },
-  { id: 15, name: 'Oti', capital: 'Dambai', emoji: '🦋', color: '#a78bfa', path: 'M320,320 L370,300 L380,450 L340,450 L330,410 Z', label: { x: 355, y: 385 } },
-  { id: 16, name: 'Savannah', capital: 'Damongo', emoji: '🌾', color: '#34d399', path: 'M50,110 L100,140 L165,130 L180,195 L220,260 L180,340 L80,340 L40,250 Z', label: { x: 120, y: 240 } },
-  { id: 17, name: 'Western North', capital: 'Sefwi Wiawso', emoji: '🏞️', color: '#2dd4bf', path: 'M60,470 L140,470 L130,530 L50,530 Z', label: { x: 90, y: 505 } }
-];
+            function nameToKey(name) {
+                return name.toLowerCase().replace(/\s+/g, '-');
+            }
 
-// ===== LOAD REGIONS =====
-async function loadRegions() {
-  const grid = document.getElementById('regions-grid');
-  
-  if (ExploreState.isLoading) return;
-  ExploreState.isLoading = true;
-  
-  grid.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>Loading regions…</p></div>';
-  
-  try {
-    const regions = await apiFetch('/api/regions');
-    ExploreState.regions = regions;
-    renderMap();
-    renderRegionsGrid(regions);
-  } catch (e) {
-    console.error('Failed to load regions:', e);
-    grid.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-exclamation-circle"></i>
-        <p>Failed to load regions</p>
-        <span>Pull to refresh or check your connection</span>
-      </div>
-    `;
-  } finally {
-    ExploreState.isLoading = false;
-  }
-}
+            // ── DRAW MAP ─────────────────────────────────
+            function initMap() {
+                var svg = document.getElementById('ghanaSvg');
 
-// ===== RENDER MAP =====
-function renderMap() {
-  const svg = document.getElementById('ghana-map');
-  if (!svg) return;
-  
-  // Clear existing content
-  svg.innerHTML = '';
-  
-  // Add region paths
-  GhanaRegions.forEach(region => {
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', region.path);
-    path.setAttribute('class', 'region-path');
-    path.setAttribute('data-region-id', region.id);
-    path.setAttribute('data-region-name', region.name);
-    path.setAttribute('fill', 'var(--surface2)');
-    path.setAttribute('stroke', 'var(--border)');
-    path.setAttribute('stroke-width', '1.5');
-    path.style.cursor = 'pointer';
-    path.style.transition = 'all .2s ease';
-    
-    path.addEventListener('click', () => openRegionDetail(region.id));
-    path.addEventListener('mouseenter', () => {
-      path.setAttribute('fill', 'var(--gold)');
-      path.setAttribute('stroke', 'var(--gold2)');
-      path.setAttribute('stroke-width', '2');
-    });
-    path.addEventListener('mouseleave', () => {
-      if (ExploreState.currentRegion?.id !== region.id) {
-        path.setAttribute('fill', 'var(--surface2)');
-        path.setAttribute('stroke', 'var(--border)');
-        path.setAttribute('stroke-width', '1.5');
-      }
-    });
-    
-    svg.appendChild(path);
-    
-    // Add label
-    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    text.setAttribute('x', region.label.x);
-    text.setAttribute('y', region.label.y);
-    text.setAttribute('class', 'region-label');
-    text.setAttribute('text-anchor', 'middle');
-    text.textContent = region.name.length > 10 ? region.name.substring(0, 9) + '…' : region.name;
-    text.style.pointerEvents = 'none';
-    
-    svg.appendChild(text);
-  });
-}
+                Object.keys(svgPaths).forEach(function(key) {
+                    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', svgPaths[key]);
+                    path.setAttribute('class', 'region-path');
+                    path.setAttribute('data-key', key);
+                    path.setAttribute('onclick', "showRegionDetail('" + key + "')");
+                    svg.appendChild(path);
 
-// ===== RENDER REGIONS GRID =====
-function renderRegionsGrid(regions) {
-  const grid = document.getElementById('regions-grid');
-  
-  if (!regions.length) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-inbox"></i>
-        <p>No regions available yet</p>
-        <span>Check back later for updates</span>
-      </div>
-    `;
-    return;
-  }
-  
-  grid.innerHTML = regions.map(region => {
-    const ghanaRegion = GhanaRegions.find(r => r.id === region.id) || {};
-    const emoji = ghanaRegion.emoji || '📍';
-    const posts = region.post_count || 0;
-    const stories = region.story_count || 0;
-    
-    return `
-      <div class="region-card" onclick="openRegionDetail(${region.id})" data-region-id="${region.id}">
-        <div class="region-header">
-          <div class="region-icon">${emoji}</div>
-          <div class="region-info">
-            <div class="region-name">${Utils.escapeHtml(region.name)}</div>
-            <div class="region-capital">${Utils.escapeHtml(region.capital || 'Capital TBD')}</div>
-          </div>
-        </div>
-        <div class="region-stats">
-          <span><i class="far fa-file-alt"></i> ${posts} posts</span>
-          <span><i class="fas fa-book-open"></i> ${stories} stories</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
+                    // Label background + text
+                    var lbl = regionLabels[key];
+                    if (lbl) {
+                        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        text.setAttribute('x', lbl.x);
+                        text.setAttribute('y', lbl.y);
+                        text.setAttribute('class', 'region-label');
+                        text.setAttribute('text-anchor', 'middle');
+                        text.textContent = displayNames[key] || keyToName(key);
+                        svg.appendChild(text);
+                    }
+                });
+            }
 
-// ===== OPEN REGION DETAIL =====
-async function openRegionDetail(regionId) {
-  const region = ExploreState.regions.find(r => r.id === regionId);
-  if (!region) return;
-  
-  ExploreState.currentRegion = region;
-  
-  // Update map highlight
-  document.querySelectorAll('.region-path').forEach(path => {
-    if (path.dataset.regionId == regionId) {
-      path.setAttribute('fill', 'var(--gold)');
-      path.setAttribute('stroke', 'var(--gold2)');
-      path.setAttribute('stroke-width', '2.5');
-      path.classList.add('active');
-    } else {
-      path.setAttribute('fill', 'var(--surface2)');
-      path.setAttribute('stroke', 'var(--border)');
-      path.setAttribute('stroke-width', '1.5');
-      path.classList.remove('active');
-    }
-  });
-  
-  // Update grid highlight
-  document.querySelectorAll('.region-card').forEach(card => {
-    if (card.dataset.regionId == regionId) {
-      card.classList.add('active');
-    } else {
-      card.classList.remove('active');
-    }
-  });
-  
-  // Show detail panel
-  const overlay = document.getElementById('detail-overlay');
-  const body = document.getElementById('detail-body');
-  const title = document.getElementById('detail-title');
-  
-  title.textContent = region.name;
-  body.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>Loading details…</p></div>';
-  overlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
-  
-  try {
-    // Fetch full region details
-    const details = await apiFetch(`/api/regions/${regionId}`);
-    renderRegionDetail(details);
-  } catch (e) {
-    console.error('Failed to load region details:', e);
-    body.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-exclamation-circle"></i>
-        <p>Failed to load region details</p>
-        <span>Try again later</span>
-      </div>
-    `;
-  }
-}
+            // ── REGION CARDS ────────────────────────────
+            function buildRegionCards() {
+                var container = document.getElementById('regionCardsGrid');
+                var html = '';
 
-// ===== RENDER REGION DETAIL =====
-function renderRegionDetail(region) {
-  const body = document.getElementById('detail-body');
-  const ghanaRegion = GhanaRegions.find(r => r.id === region.id) || {};
-  
-  // Parse media arrays
-  const images = Array.isArray(region.gallery_images) ? region.gallery_images : (region.gallery_images || '').split(',').filter(s => s.trim());
-  const audios = Array.isArray(region.audio_files) ? region.audio_files : (region.audio_files || '').split(',').filter(s => s.trim());
-  const tags = Array.isArray(region.tags) ? region.tags : (region.tags || '').split(',').filter(s => s.trim());
-  
-  body.innerHTML = `
-    <!-- Description -->
-    <div class="detail-section">
-      <h3><i class="fas fa-book-open"></i> About ${Utils.escapeHtml(region.name)}</h3>
-      <p class="detail-description">${Utils.escapeHtml(region.description || 'No description available yet.')}</p>
-    </div>
-    
-    <!-- Quick Facts -->
-    <div class="detail-section">
-      <h3><i class="fas fa-info-circle"></i> Quick Facts</h3>
-      <div class="detail-facts">
-        <div class="fact-item">
-          <div class="fact-label">Capital</div>
-          <div class="fact-value">${Utils.escapeHtml(region.capital || 'N/A')}</div>
-        </div>
-        <div class="fact-item">
-          <div class="fact-label">Population</div>
-          <div class="fact-value">${Utils.escapeHtml(region.population || 'N/A')}</div>
-        </div>
-        <div class="fact-item">
-          <div class="fact-label">Terrain</div>
-          <div class="fact-value">${Utils.escapeHtml(region.terrain || 'N/A')}</div>
-        </div>
-        <div class="fact-item">
-          <div class="fact-label">Category</div>
-          <div class="fact-value">${Utils.escapeHtml(region.category || 'Uncategorized')}</div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Gallery -->
-    ${images.length ? `
-    <div class="detail-section">
-      <h3><i class="fas fa-images"></i> Photo Gallery</h3>
-      <div class="detail-media">
-        ${images.map(img => `<div class="media-item"><img src="${Utils.escapeHtml(img.trim())}" alt="Gallery" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\'fas fa-image\' style=\'font-size:2rem;color:var(--muted)\'></i>'"></div>`).join('')}
-      </div>
-    </div>
-    ` : ''}
-    
-    <!-- Audio -->
-    ${audios.length ? `
-    <div class="detail-section">
-      <h3><i class="fas fa-headphones"></i> Audio Archives</h3>
-      ${audios.map(audio => `
-        <div style="margin-bottom:12px">
-          <audio controls style="width:100%">
-            <source src="${Utils.escapeHtml(audio.trim())}" type="audio/mpeg">
-            Your browser does not support the audio element.
-          </audio>
-        </div>
-      `).join('')}
-    </div>
-    ` : ''}
-    
-    <!-- Tags -->
-    ${tags.length ? `
-    <div class="detail-section">
-      <h3><i class="fas fa-tags"></i> Topics</h3>
-      <div class="detail-tags">
-        ${tags.map(tag => `<span class="tag">#${Utils.escapeHtml(tag.trim())}</span>`).join('')}
-      </div>
-    </div>
-    ` : ''}
-    
-    <!-- Actions -->
-    <div class="detail-actions">
-      <button class="btn-primary" onclick="viewRegionPosts(${region.id})">
-        <i class="fas fa-file-alt"></i> View Posts
-      </button>
-      <button class="btn-secondary" onclick="shareRegion(${region.id})">
-        <i class="fas fa-share-alt"></i> Share
-      </button>
-    </div>
-  `;
-}
+                Object.keys(svgPaths).forEach(function(key) {
+                    var name = displayNames[key] || keyToName(key);
+                    var icon = regionIcons[name.toLowerCase()] || '📍';
+                    var regData = allRegions.find(function(r) { return nameToKey(r.name) === key || r.name.toLowerCase() === name.toLowerCase(); });
+                    var capital = regData ? regData.capital : '';
 
-// ===== CLOSE DETAIL PANEL =====
-function closeDetail() {
-  document.getElementById('detail-overlay').classList.remove('active');
-  document.body.style.overflow = '';
-  ExploreState.currentRegion = null;
-  
-  // Reset map highlights
-  document.querySelectorAll('.region-path').forEach(path => {
-    path.setAttribute('fill', 'var(--surface2)');
-    path.setAttribute('stroke', 'var(--border)');
-    path.setAttribute('stroke-width', '1.5');
-    path.classList.remove('active');
-  });
-  
-  // Reset grid highlights
-  document.querySelectorAll('.region-card').forEach(card => {
-    card.classList.remove('active');
-  });
-}
+                    html += '<a href="#" class="region-card" data-key="' + key + '" onclick="showRegionDetail(\'' + key + '\');return false">' +
+                        '<span class="card-icon">' + icon + '</span>' +
+                        '<div class="card-name">' + escapeHtml(name) + '</div>' +
+                        (capital ? '<div class="card-capital">' + escapeHtml(capital) + '</div>' : '') +
+                    '</a>';
+                });
 
-// ===== VIEW REGION POSTS =====
-function viewRegionPosts(regionId) {
-  window.location.href = `/archive?region=${regionId}`;
-}
+                container.innerHTML = html;
+            }
 
-// ===== SHARE REGION =====
-function shareRegion(regionId) {
-  const region = ExploreState.regions.find(r => r.id === regionId);
-  if (!region) return;
-  
-  const url = `${window.location.origin}/app?region=${regionId}`;
-  const title = `Explore ${region.name} on EchoStack`;
-  
-  if (navigator.share) {
-    navigator.share({ title, text: `Discover stories from ${region.name}, Ghana`, url }).catch(() => {
-      navigator.clipboard.writeText(url);
-      Toast.ok('📋 Link copied!');
-    });
-  } else {
-    navigator.clipboard.writeText(url);
-    Toast.ok('📋 Link copied!');
-  }
-}
+            // ── DETAIL PANEL ────────────────────────────
+            function showRegionDetail(key) {
+                activeKey = key;
+                var name = displayNames[key] || keyToName(key);
 
-// ===== LOGOUT =====
-async function logout() {
-  if (!confirm('Are you sure you want to logout?')) return;
-  
-  try {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-  } catch (e) {
-    console.warn('Logout error:', e);
-  } finally {
-    localStorage.removeItem('es_user');
-    window.location.href = '/user-login.html';
-  }
-}
+                // Highlight map path
+                document.querySelectorAll('.region-path').forEach(function(p) {
+                    p.classList.toggle('active', p.dataset.key === key);
+                });
 
-// ===== TOPBAR SCROLL EFFECT =====
-function setupTopbarScroll() {
-  const topbar = document.getElementById('topbar');
-  
-  window.addEventListener('scroll', Utils.debounce(() => {
-    if (window.scrollY > 10) {
-      topbar.classList.add('scrolled');
-    } else {
-      topbar.classList.remove('scrolled');
-    }
-  }, 100));
-}
+                // Highlight cards
+                document.querySelectorAll('.region-card').forEach(function(c) {
+                    c.classList.toggle('active', c.dataset.key === key);
+                });
 
-// ===== PULL TO REFRESH =====
-function setupPullToRefresh() {
-  let startY = 0;
-  
-  document.addEventListener('touchstart', e => {
-    if (window.scrollY === 0) startY = e.touches[0].clientY;
-  }, { passive: true });
-  
-  document.addEventListener('touchmove', e => {
-    if (window.scrollY === 0) {
-      const diff = e.touches[0].clientY - startY;
-      if (diff > 100) {
-        loadRegions();
-        Toast.info('🔄 Refreshed');
-        startY = 0;
-      }
-    }
-  }, { passive: true });
-}
+                // Find region data
+                var regData = allRegions.find(function(r) {
+                    return nameToKey(r.name) === key || r.name.toLowerCase() === name.toLowerCase();
+                });
 
-// ===== INIT =====
-document.addEventListener('DOMContentLoaded', async () => {
-  // Initialize toast
-  Toast.init();
-  
-  // Setup interactions
-  setupTopbarScroll();
-  setupPullToRefresh();
-  
-  // Load regions
-  await loadRegions();
-  
-  // Handle online/offline
-  window.addEventListener('online', () => Toast.ok('🌐 Back online'));
-  window.addEventListener('offline', () => Toast.error('⚠️ You are offline'));
-  
-  // Close sidebar on scroll
-  document.querySelector('.container')?.addEventListener('scroll', () => {
-    if (document.getElementById('sidebar').classList.contains('open')) {
-      closeSidebar();
-    }
-  });
-  
-  // Handle escape key to close detail
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeDetail();
-  });
-});
-</script>
+                if (!regData) {
+                    regData = { name: name, capital: '', population: '', terrain: '', description: '', overview: '' };
+                }
+
+                // Populate panel head
+                document.getElementById('panelName').textContent = regData.name || name;
+                document.getElementById('panelCapital').innerHTML =
+                    '<i class="fas fa-map-marker-alt"></i> ' + (regData.capital || 'Ghana');
+                document.getElementById('panelTerrain').textContent = regData.terrain || '';
+
+                // Build panel body
+                var body = document.getElementById('panelBody');
+                var html = '';
+
+                // Meta chips
+                var chips = [];
+                if (regData.population) chips.push('<span class="meta-chip"><i class="fas fa-users"></i> ' + escapeHtml(regData.population) + '</span>');
+                if (regData.terrain) chips.push('<span class="meta-chip"><i class="fas fa-mountain"></i> ' + escapeHtml(regData.terrain) + '</span>');
+                if (chips.length) {
+                    html += '<div class="panel-meta">' + chips.join('') + '</div>';
+                }
+
+                // Overview
+                var desc = regData.description || regData.overview || '';
+                if (desc) {
+                    html += '<div class="panel-block">' +
+                        '<div class="panel-block-title"><i class="fas fa-info-circle"></i> Overview</div>' +
+                        '<p>' + escapeHtml(desc) + '</p>' +
+                    '</div>';
+                } else {
+                    html += '<div class="panel-block">' +
+                        '<div class="panel-block-title"><i class="fas fa-info-circle"></i> Overview</div>' +
+                        '<p>Explore the rich cultural heritage, traditions, and stories of ' + escapeHtml(name) + '. Discover local customs, landmarks, and community voices from this region.</p>' +
+                    '</div>';
+                }
+
+                // Gallery (if images in data)
+                var images = regData.images || regData.gallery || [];
+                if (images.length) {
+                    html += '<div class="panel-block">' +
+                        '<div class="panel-block-title"><i class="fas fa-images"></i> Gallery</div>' +
+                        '<div class="panel-gallery">';
+                    images.slice(0, 6).forEach(function(img) {
+                        html += '<img src="' + escapeAttr(img) + '" alt="Gallery" onclick="openImage(\'' + escapeAttr(img) + '\')">';
+                    });
+                    html += '</div></div>';
+                }
+
+                // Audio (if audio in data)
+                var audioFiles = regData.audio || regData.audio_files || [];
+                if (audioFiles.length) {
+                    html += '<div class="panel-block">' +
+                        '<div class="panel-block-title"><i class="fas fa-microphone"></i> Audio</div>' +
+                        '<div class="panel-audio">';
+                    audioFiles.slice(0, 3).forEach(function(a) {
+                        html += '<div class="audio-item">' +
+                            '<div class="audio-item-title">' + escapeHtml(a.title || 'Audio Recording') + '</div>' +
+                            '<audio controls preload="none"><source src="' + escapeAttr(a.url || a.src || '') + '" type="audio/mpeg"></audio>' +
+                        '</div>';
+                    });
+                    html += '</div></div>';
+                }
+
+                // Quick links
+                html += '<div class="panel-block">' +
+                    '<div class="panel-block-title"><i class="fas fa-link"></i> Explore</div>' +
+                    '<div class="panel-links">' +
+                    '<a class="panel-link" href="/explore?region=' + encodeURIComponent(name) + '"><i class="fas fa-compass"></i> Browse stories</a>' +
+                    '<a class="panel-link" href="/archive?region=' + encodeURIComponent(name) + '"><i class="fas fa-archive"></i> View archive</a>' +
+                    '<a class="panel-link" href="/reels?region=' + encodeURIComponent(name) + '"><i class="fas fa-video"></i> Watch reels</a>' +
+                    '</div>' +
+                '</div>';
+
+                body.innerHTML = html;
+
+                // Open panel
+                var panel = document.getElementById('detailPanel');
+                panel.classList.remove('hidden');
+                document.getElementById('panelOverlay').style.display = 'block';
+
+                if (window.innerWidth <= 900) {
+                    panel.classList.add('mobile-open');
+                }
+            }
+
+            function closePanel() {
+                document.querySelectorAll('.region-path').forEach(function(p) { p.classList.remove('active'); });
+                document.querySelectorAll('.region-card').forEach(function(c) { c.classList.remove('active'); });
+
+                var panel = document.getElementById('detailPanel');
+                panel.classList.add('hidden');
+                panel.classList.remove('mobile-open');
+                document.getElementById('panelOverlay').style.display = 'none';
+                activeKey = null;
+            }
+
+            function escapeAttr(str) {
+                if (!str) return '';
+                return String(str).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+            }
+
+            function openImage(url) {
+                var win = window.open(url, '_blank');
+                if (win) win.focus();
+            }
+
+            // ── LOAD REGIONS FROM API ────────────────────
+            async function loadRegions() {
+                try {
+                    var res = await fetch('/api/regions', { credentials: 'include' });
+                    if (res.ok) {
+                        var data = await res.json();
+                        if (Array.isArray(data) && data.length) {
+                            allRegions = data;
+                        }
+                    }
+                } catch (e) {
+                    // Use defaults
+                }
+
+                buildRegionCards();
+
+                // Check URL param
+                var params = new URLSearchParams(location.search);
+                var regionParam = params.get('region');
+                if (regionParam) {
+                    var key = nameToKey(regionParam);
+                    if (svgPaths[key]) {
+                        setTimeout(function() { showRegionDetail(key); }, 200);
+                    }
+                }
+            }
+
+            // ── INIT ───────────────────────────────────
+            checkAuth();
+            initMap();
+            loadRegions();
+        })();
+    </script>
 </body>
 </html>
-

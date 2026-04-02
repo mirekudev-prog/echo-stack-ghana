@@ -4,43 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0D1B2A">
-    <title>Following - EchoStack</title>
+    <title>Settings - EchoStack</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/base.css">
     <style>
-        .following-wrap { padding: 16px; }
-        .creator-card {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 16px;
-            background: var(--main-card);
-            border: 1px solid var(--main-border);
-            border-radius: var(--radius-lg);
-            margin-bottom: 10px;
-            transition: all .2s;
-        }
-        .creator-card:hover { border-color: var(--gold); box-shadow: 0 2px 8px rgba(200,150,46,.08); }
-        .creator-avatar {
-            width: 48px; height: 48px; border-radius: 50%;
-            background: linear-gradient(135deg,var(--gold),var(--gold2));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; font-weight: 700; color: var(--ink); flex-shrink: 0;
-        }
-        .creator-info { flex: 1; min-width: 0; }
-        .creator-name { font-weight: 600; font-size: .95rem; color: var(--main-text); }
-        .creator-handle { font-size: .8rem; color: var(--main-muted); }
-        .creator-posts { font-size: .75rem; color: var(--main-muted); margin-top: 2px; }
-        .btn-follow {
-            padding: 8px 18px; border-radius: 50px;
-            background: linear-gradient(135deg,var(--gold),var(--gold2));
-            color: var(--ink); font-weight: 600; font-size: .8rem;
-            border: none; cursor: pointer; transition: all .2s; min-height: 36px;
-        }
-        .btn-follow.following {
-            background: var(--main-bg); color: var(--main-muted); border: 1px solid var(--main-border);
-        }
+        .settings-content { max-width:600px; margin:0 auto; padding:24px; }
+        .settings-section { background:var(--main-card); border:1px solid var(--main-border); border-radius:var(--radius-lg); padding:24px; margin-bottom:20px; }
+        .settings-section h3 { font-family:'Playfair Display',serif; font-size:1.2rem; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--main-border); }
+        .setting-item { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--main-border); }
+        .setting-item:last-child { border-bottom:none; }
+        .setting-label { font-weight:500; }
+        .setting-desc { font-size:0.8rem; color:var(--main-muted); }
+        .toggle { width:48px; height:26px; border-radius:13px; background:var(--main-border); position:relative; cursor:pointer; transition:all 0.2s; }
+        .toggle.active { background:var(--gold); }
+        .toggle::after { content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:white; transition:all 0.2s; }
+        .toggle.active::after { left:25px; }
     </style>
 </head>
 <body>
@@ -69,7 +48,7 @@
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-label">Social</div>
-                <a href="/following" class="sidebar-link active"><i class="fas fa-user-friends"></i><span>Following</span></a>
+                <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
                 <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
                 <a href="/notifications" class="sidebar-link"><i class="fas fa-bell"></i><span>Notifications</span></a>
                 <a href="/chatbot" class="sidebar-link"><i class="fas fa-comments"></i><span>Community Chat</span></a>
@@ -82,28 +61,72 @@
             <div class="sidebar-section">
                 <div class="sidebar-section-label">Account</div>
                 <a href="/user-profile" class="sidebar-link"><i class="fas fa-user"></i><span>My Profile</span></a>
-                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+                <a href="/settings" class="sidebar-link active"><i class="fas fa-cog"></i><span>Settings</span></a>
             </div>
         </nav>
         <div class="sidebar-footer">
             <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
         </div>
     </aside>
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
     <div class="main-wrapper">
         <header class="topbar">
             <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-            <div class="topbar-title">Following</div>
-            <div class="topbar-actions">
-                <a href="/notifications" class="topbar-btn"><i class="fas fa-bell"></i></a>
-                <a href="/chatbot" class="topbar-btn"><i class="fas fa-robot"></i></a>
-            </div>
+            <div class="topbar-title">Settings</div>
+            <a href="/dashboard" class="topbar-btn"><i class="fas fa-home"></i></a>
         </header>
-
+        
         <main class="main-content">
-            <div class="following-wrap" id="followingList">
-                <div class="loading"><div class="spinner"></div></div>
+            <div class="settings-content">
+                <div class="settings-section">
+                    <h3>Notifications</h3>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Email Notifications</div>
+                            <div class="setting-desc">Receive updates via email</div>
+                        </div>
+                        <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Push Notifications</div>
+                            <div class="setting-desc">Get notified about new content</div>
+                        </div>
+                        <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Privacy</h3>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Show Follower Count</div>
+                            <div class="setting-desc">Display your follower count on profile</div>
+                        </div>
+                        <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Show Post Stats</div>
+                            <div class="setting-desc">Display likes and comments counts</div>
+                        </div>
+                        <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Account</h3>
+                    <a href="/user-profile" class="btn btn-secondary" style="width:100%;margin-bottom:12px">
+                        <i class="fas fa-user"></i> Edit Profile
+                    </a>
+                    <a href="/premium" class="btn btn-secondary" style="width:100%;margin-bottom:12px">
+                        <i class="fas fa-crown"></i> Manage Subscription
+                    </a>
+                    <button class="btn btn-danger" style="width:100%" onclick="confirmDelete()">
+                        <i class="fas fa-trash"></i> Delete Account
+                    </button>
+                </div>
             </div>
         </main>
     </div>
@@ -112,13 +135,12 @@
 <script>
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('show');
 }
 
-async function logout() {
-    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
-    localStorage.removeItem('es_user');
-    location.href = '/';
+function confirmDelete() {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+        alert('Account deletion requested. This will be processed within 24 hours.');
+    }
 }
 
 async function checkAuth() {
@@ -135,7 +157,6 @@ async function checkAuth() {
                 else if (user.role === 'creator') { badge.className = 'sidebar-user-badge badge-creator'; badge.textContent = 'Creator'; }
                 else if (user.is_premium) { badge.className = 'sidebar-user-badge badge-premium'; badge.textContent = 'Premium'; }
             }
-            loadFollowing(user.id);
         } else {
             location.href = '/user-login';
         }
@@ -144,45 +165,10 @@ async function checkAuth() {
     }
 }
 
-async function loadFollowing(userId) {
-    const container = document.getElementById('followingList');
-    try {
-        const res = await fetch(`/api/users/${userId}/following`, { credentials: 'include' });
-        if (!res.ok) throw new Error();
-        const users = await res.json();
-
-        if (!users.length) {
-            container.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><h3>Not following anyone yet</h3><p>Discover creators from the Explore page!</p></div>';
-            return;
-        }
-
-        container.innerHTML = users.map(u => {
-            const initial = (u.username || 'U').charAt(0).toUpperCase();
-            return '<div class="creator-card">' +
-                '<div class="creator-avatar">' + initial + '</div>' +
-                '<div class="creator-info">' +
-                    '<div class="creator-name">' + escapeHtml(u.full_name || u.username) + '</div>' +
-                    '<div class="creator-handle">@' + escapeHtml(u.username) + '</div>' +
-                    '<div class="creator-posts">' + (u.post_count || 0) + ' posts</div>' +
-                '</div>' +
-                '<button class="btn-follow following" onclick="unfollow(\'' + (u.id || '') + '\', this)">Following</button>' +
-            '</div>';
-        }).join('');
-    } catch(e) {
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
-    }
-}
-
-async function unfollow(userId, btn) {
-    try {
-        await fetch('/api/follow/' + userId, { method: 'DELETE', credentials: 'include' });
-        btn.closest('.creator-card').remove();
-    } catch(e) {}
-}
-
-function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+async function logout() {
+    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
+    localStorage.removeItem('es_user');
+    location.href = '/';
 }
 
 checkAuth();

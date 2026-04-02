@@ -1,658 +1,233 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0D1B2A">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="Discover stories, creators, and heritage from all 16 regions of Ghana">
-<title>EchoStack — Explore</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-/* ===== CSS VARIABLES & RESET ===== */
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --ink:#0D1B2A;--ink2:#1a2744;--gold:#C8962E;--gold2:#E8B84B;--gold3:#F4D06F;
-  --surface:#fafafa;--surface2:#f5f5f5;--card:#ffffff;--border:#e5e5e5;--border2:#d1d1d1;
-  --text:#1a1a1a;--text2:#3a3a3a;--muted:#8e8e93;--muted2:#6b6b6b;
-  --danger:#ef4444;--danger2:#dc2626;--success:#22c55e;--success2:#16a34a;
-  --warning:#f59e0b;--info:#3b82f6;--purple:#8b5cf6;--pink:#ec4899;--cyan:#06b6d4;
-  --hover:#f0f0f0;--hover2:#e8e8e8;--shadow:0 1px 3px rgba(0,0,0,.08);
-  --shadow2:0 2px 8px rgba(0,0,0,.12);--shadow3:0 4px 16px rgba(0,0,0,.16);
-  --radius:12px;--radius2:16px;--radius3:20px;--sidebar-w:280px;--topbar-h:57px;
-  --transition:all .2s ease;
-}
-html,body{height:100%;overflow-x:hidden;scroll-behavior:smooth}
-body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--surface);color:var(--text);line-height:1.5;padding-bottom:env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased;}
-img,video{max-width:100%;height:auto;display:block}
-a{text-decoration:none;color:inherit}
-button{font-family:inherit;border:none;background:none;cursor:pointer}
-
-/* ===== SIDEBAR (Same as Dashboard) ===== */
-.sidebar{width:var(--sidebar-w);background:var(--card);color:var(--text);position:fixed;left:0;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;transform:translateX(-100%);transition:var(--transition);z-index:2000;-webkit-overflow-scrolling:touch;box-shadow:var(--shadow3);}
-.sidebar.open{transform:translateX(0)}
-.sb-header{padding:20px 16px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surface),var(--surface2));}
-.sb-brand{display:flex;align-items:center;gap:12px}
-.sb-brand img{width:40px;height:40px;border-radius:10px;object-fit:cover}
-.sb-brand-text strong{display:block;font-size:1.1rem;font-weight:700;color:var(--ink)}
-.sb-brand-text span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
-.sb-section{padding:16px 12px 8px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.sb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;color:var(--text);text-decoration:none;transition:var(--transition);font-size:.95rem;font-weight:500;border-radius:8px;margin:2px 8px;min-height:48px;}
-.sb-item:hover{background:var(--hover)}
-.sb-item:active{transform:scale(.98)}
-.sb-item.active{background:rgba(200,150,46,.15);color:var(--gold);font-weight:600}
-.sb-item .icon{width:24px;text-align:center;font-size:1.1rem}
-.sb-item .badge{margin-left:auto;background:var(--danger);color:white;font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:700;}
-.sb-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);background:var(--surface2);}
-.sb-footer button{width:100%;padding:12px;border-radius:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--danger);font-size:.95rem;font-weight:600;cursor:pointer;min-height:48px;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:8px;}
-.sb-footer button:active{background:rgba(239,68,68,.2);transform:scale(.98)}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1999;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;transition:opacity .3s ease;}
-.sidebar-overlay.show{display:block;opacity:1}
-
-/* ===== TOPBAR ===== */
-.topbar{position:sticky;top:0;z-index:1000;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
-.topbar.scrolled{box-shadow:var(--shadow2)}
-.menu-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;font-size:1.4rem;color:var(--text);transition:var(--transition);}
-.menu-btn:active{background:var(--hover);transform:scale(.95)}
-.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--ink);letter-spacing:-.5px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.topbar-actions{display:flex;gap:8px;align-items:center}
-.topbar-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:20px;padding:8px 14px;font-size:.85rem;font-weight:600;transition:var(--transition);display:flex;align-items:center;gap:6px;}
-.topbar-btn:hover{background:var(--hover)}
-.topbar-btn:active{transform:scale(.96)}
-
-/* ===== MAIN CONTAINER ===== */
-.container{max-width:900px;margin:0 auto;padding:20px 16px 80px}
-
-/* ===== PAGE HEADER ===== */
-.page-header{margin-bottom:24px}
-.page-header h1{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--ink);margin-bottom:8px}
-.page-header p{font-size:1rem;color:var(--muted);line-height:1.6}
-
-/* ===== FILTER TABS ===== */
-.filter-tabs{display:flex;gap:8px;overflow-x:auto;padding:8px 0;margin-bottom:24px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.filter-tabs::-webkit-scrollbar{display:none}
-.filter-tab{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:10px 20px;font-size:.9rem;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--muted);transition:var(--transition);min-height:44px;display:flex;align-items:center;gap:8px;}
-.filter-tab:active{transform:scale(.98)}
-.filter-tab.active{background:var(--ink);border-color:var(--ink);color:white;box-shadow:0 2px 8px rgba(13,27,42,.3)}
-
-/* ===== POST CARDS ===== */
-.posts-grid{display:flex;flex-direction:column;gap:16px}
-.post-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;transition:var(--transition);cursor:pointer}
-.post-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--shadow2)}
-
-/* Post Header */
-.post-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
-.post-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:white;font-weight:700;flex-shrink:0}
-.post-author-info{flex:1;min-width:0}
-.post-author{font-weight:700;font-size:.95rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.post-time{font-size:.75rem;color:var(--muted);margin-top:2px}
-.post-type-badge{padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
-.post-type-badge.article{background:#EFF6FF;color:#2563EB}
-.post-type-badge.story{background:#F0FDF4;color:#16A34A}
-.post-type-badge.video{background:#FDF2F8;color:#9333EA}
-.post-type-badge.reel{background:#FCE7F3;color:#B21E6C}
-.post-type-badge.audio{background:#F0FDF4;color:#06B6D4}
-.post-type-badge.premium{background:rgba(200,150,46,.15);color:var(--gold);border:1px solid rgba(200,150,46,.3)}
-
-/* Post Content */
-.post-content{padding:12px 16px}
-.post-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.4;display:block}
-.post-excerpt{font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:8px}
-
-/* Media Preview */
-.post-media{position:relative;background:#000;overflow:hidden}
-.post-media img{width:100%;max-height:300px;object-fit:cover;display:block}
-.post-media video{width:100%;max-height:300px;display:block;background:#000}
-.post-media.reel video{max-height:480px;aspect-ratio:9/16;object-fit:cover;margin:0 auto}
-.play-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);border-radius:50%;width:52px;height:52px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.4rem;cursor:pointer;z-index:10;transition:var(--transition)}
-.play-overlay:hover{background:rgba(0,0,0,.8);transform:translate(-50%,-50%) scale(1.1)}
-.reel-watermark{position:absolute;bottom:12px;right:12px;background:rgba(13,27,42,.85);border-radius:20px;padding:6px 12px;display:flex;align-items:center;gap:6px;z-index:10;pointer-events:none;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.15)}
-.reel-watermark img{height:18px;width:auto;filter:brightness(0) invert(1)}
-.reel-watermark span{color:white;font-size:.7rem;font-weight:700;letter-spacing:.5px}
-
-/* Premium Banner */
-.premium-banner{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);padding:10px 16px;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px}
-.premium-banner i{font-size:1rem}
-
-/* Post Actions */
-.post-actions{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);flex-wrap:wrap}
-.action-btn{background:none;border:none;font-size:.85rem;font-weight:600;color:var(--muted);cursor:pointer;padding:8px 12px;border-radius:10px;transition:var(--transition);display:flex;align-items:center;gap:6px;min-height:40px}
-.action-btn:active{transform:scale(.98);background:var(--hover)}
-.action-btn.liked{color:var(--danger)}
-.action-btn .count{font-size:.8rem;font-weight:700}
-.read-btn{margin-left:auto;background:var(--gold);color:var(--ink);border:none;border-radius:10px;padding:8px 16px;font-weight:700;font-size:.85rem;cursor:pointer;transition:var(--transition);min-height:40px;display:flex;align-items:center;gap:6px}
-.read-btn:hover{background:var(--gold2)}
-.read-btn:active{transform:scale(.98)}
-
-/* ===== EMPTY/LOADING STATES ===== */
-.empty-state{text-align:center;padding:60px 20px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:var(--radius2)}
-.empty-state i{font-size:3rem;margin-bottom:16px;opacity:.5;color:var(--gold)}
-.empty-state p{font-size:1rem;font-weight:500;margin-bottom:8px}
-.empty-state a{color:var(--gold);font-weight:600}
-.loading{text-align:center;padding:40px 20px;color:var(--muted)}
-.loading i{font-size:2rem;margin-bottom:12px;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
-
-/* ===== TOAST ===== */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,26,26,.95);color:white;padding:14px 28px;border-radius:30px;font-size:.9rem;font-weight:600;z-index:9999;transition:all .3s;opacity:0;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap;max-width:90%;text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.ok{background:rgba(34,197,94,.95)}
-.toast.er{background:rgba(239,68,68,.95)}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:768px){
-  .sidebar{width:260px}
-  .container{padding:16px 12px 80px}
-  .page-header h1{font-size:1.5rem}
-  .filter-tabs{padding:8px 0}
-  .filter-tab{padding:10px 14px;font-size:.85rem}
-  .post-header{padding:12px 14px}
-  .post-avatar{width:36px;height:36px;font-size:1.1rem}
-  .post-content{padding:12px 14px}
-  .post-title{font-size:1rem}
-  .post-actions{padding:10px 14px}
-  .action-btn{padding:8px 10px;font-size:.8rem}
-  .read-btn{padding:8px 14px;font-size:.8rem}
-}
-@media(max-width:480px){
-  .topbar{padding:10px 14px}
-  .logo{font-size:1.3rem}
-  .page-header h1{font-size:1.3rem}
-  .post-media img,.post-media video{max-height:250px}
-  .post-media.reel video{max-height:400px}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Explore - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
 </head>
 <body>
+<div class="app">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </a>
+        </div>
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">User</div>
+                <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i><span>Feed</span></a>
+                <a href="/reels" class="sidebar-link"><i class="fas fa-film"></i><span>Reels</span></a>
+                <a href="/explore" class="sidebar-link active"><i class="fas fa-compass"></i><span>Explore</span></a>
+                <a href="/archive" class="sidebar-link"><i class="fas fa-archive"></i><span>Archive</span></a>
+                <a href="/app" class="sidebar-link"><i class="fas fa-map-marked-alt"></i><span>Map</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Social</div>
+                <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
+                <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
+                <a href="/notifications" class="sidebar-link"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                <a href="/chatbot" class="sidebar-link"><i class="fas fa-comments"></i><span>Community Chat</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Create</div>
+                <a href="/creator" class="sidebar-link"><i class="fas fa-plus-circle"></i><span>Create Post</span></a>
+                <a href="/premium" class="sidebar-link"><i class="fas fa-crown"></i><span>Premium</span></a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Account</div>
+                <a href="/user-profile" class="sidebar-link"><i class="fas fa-user"></i><span>My Profile</span></a>
+                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-<!-- SIDEBAR OVERLAY -->
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="main-wrapper">
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-title">Explore</div>
+            <div class="topbar-actions">
+                <a href="/notifications" class="topbar-btn"><i class="fas fa-bell"></i></a>
+                <a href="/chatbot" class="topbar-btn"><i class="fas fa-robot"></i></a>
+            </div>
+        </header>
 
-<!-- SIDEBAR NAVIGATION -->
-<aside class="sidebar" id="sidebar">
-  <div class="sb-header">
-    <div class="sb-brand">
-      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-      <div class="sb-brand-text">
-        <strong>EchoStack</strong>
-        <span>Ghana's Heritage</span>
-      </div>
+        <main class="main-content">
+            <!-- SEARCH -->
+            <div style="padding:12px 16px;border-bottom:1px solid var(--main-border);background:var(--main-card)">
+                <div style="display:flex;align-items:center;gap:12px;background:var(--main-bg);border:1px solid var(--main-border);border-radius:var(--radius-full);padding:10px 16px">
+                    <i class="fas fa-search" style="color:var(--main-muted)"></i>
+                    <input type="text" id="searchInput" placeholder="Search stories, creators, regions..." style="flex:1;background:none;border:none;color:var(--main-text);font-size:.95rem;outline:none" oninput="debounceSearch(this.value)">
+                </div>
+            </div>
+
+            <!-- FILTERS -->
+            <div style="display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none">
+                <button class="tab active" onclick="setFilter(this,'')">All</button>
+                <button class="tab" onclick="setFilter(this,'article')">Articles</button>
+                <button class="tab" onclick="setFilter(this,'audio')">Audio</button>
+                <button class="tab" onclick="setFilter(this,'video')">Videos</button>
+            </div>
+
+            <!-- CONTENT -->
+            <div style="padding:16px" id="content">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </main>
     </div>
-  </div>
-  <div class="sb-section">Navigation</div>
-  <a href="/dashboard" class="sb-item"><span class="icon"><i class="fas fa-home"></i></span> Home Feed</a>
-  <a href="/explore" class="sb-item active"><span class="icon"><i class="fas fa-compass"></i></span> Explore</a>
-  <a href="/reels.html" class="sb-item"><span class="icon"><i class="fas fa-video"></i></span> Reels</a>
-  <a href="/archive" class="sb-item"><span class="icon"><i class="fas fa-book"></i></span> Archive</a>
-  <a href="/app" class="sb-item"><span class="icon"><i class="fas fa-map"></i></span> Map</a>
-  <div class="sb-section">Create</div>
-  <a href="/creator.html" class="sb-item"><span class="icon"><i class="fas fa-pen"></i></span> New Post</a>
-  <a href="/creator.html?type=story" class="sb-item"><span class="icon"><i class="fas fa-camera"></i></span> Add Story</a>
-  <div class="sb-section">Account</div>
-  <a href="/user_profile.html" class="sb-item"><span class="icon"><i class="fas fa-user"></i></span> Profile</a>
-  <a href="/user-settings.html" class="sb-item"><span class="icon"><i class="fas fa-cog"></i></span> Settings</a>
-  <a href="/premium.html" class="sb-item"><span class="icon"><i class="fas fa-crown"></i></span> Go Premium</a>
-  <div class="sb-footer">
-    <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-  </div>
-</aside>
-
-<!-- TOPBAR -->
-<div class="topbar" id="topbar">
-  <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
-    <i class="fas fa-bars"></i>
-  </button>
-  <div class="logo">EchoStack</div>
-  <div class="topbar-actions">
-    <a href="/dashboard" class="topbar-btn">
-      <i class="fas fa-home"></i> Feed
-    </a>
-    <a href="/creator.html" class="topbar-btn">
-      <i class="fas fa-plus"></i> Create
-    </a>
-  </div>
 </div>
-
-<!-- MAIN CONTAINER -->
-<div class="container" id="app">
-  
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <h1>🔍 Explore</h1>
-    <p>Discover new stories, creators, and heritage from all 16 regions of Ghana. Filter by content type or browse everything.</p>
-  </div>
-
-  <!-- FILTER TABS -->
-  <div class="filter-tabs" id="filter-tabs">
-    <button class="filter-tab active" data-filter="all">
-      <i class="fas fa-globe-africa"></i> All
-    </button>
-    <button class="filter-tab" data-filter="article">
-      <i class="fas fa-newspaper"></i> Articles
-    </button>
-    <button class="filter-tab" data-filter="story">
-      <i class="fas fa-book-open"></i> Stories
-    </button>
-    <button class="filter-tab" data-filter="video">
-      <i class="fas fa-video"></i> Videos
-    </button>
-    <button class="filter-tab" data-filter="reel">
-      <i class="fas fa-film"></i> Reels
-    </button>
-    <button class="filter-tab" data-filter="audio">
-      <i class="fas fa-music"></i> Audio
-    </button>
-    <button class="filter-tab" data-filter="premium">
-      <i class="fas fa-crown"></i> Premium
-    </button>
-  </div>
-
-  <!-- LOADING STATE -->
-  <div class="loading" id="loading-state">
-    <i class="fas fa-spinner"></i>
-    <p>Loading posts…</p>
-  </div>
-
-  <!-- POSTS CONTAINER -->
-  <div class="posts-grid" id="posts-container" style="display:none"></div>
-
-</div>
-
-<!-- TOAST NOTIFICATION -->
-<div class="toast" id="toast"></div>
 
 <script>
-/**
- * ============================================
- * ECHOSTACK EXPLORE - DISCOVERY PAGE
- * Complete JavaScript Implementation
- * ============================================
- */
+let currentFilter = '';
+let user = null;
 
-// ===== GLOBAL STATE =====
-const ExploreState = {
-  posts: [],
-  currentFilter: 'all',
-  isLoading: false
-};
-
-// ===== UTILS =====
-const Utils = {
-  escapeHtml(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  },
-  timeAgo(dateStr) {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    const diff = (Date.now() - d.getTime()) / 1000;
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  },
-  debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-};
-
-// ===== TOAST =====
-const Toast = {
-  element: null,
-  timeout: null,
-  init() { this.element = document.getElementById('toast'); },
-  show(message, type = '') {
-    if (!this.element) this.init();
-    this.element.textContent = message;
-    this.element.className = `toast show ${type}`;
-    if (this.timeout) clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => this.element.classList.remove('show'), 3000);
-  },
-  ok(msg) { this.show(msg, 'ok'); },
-  error(msg) { this.show(msg, 'er'); }
-};
-
-// ===== SIDEBAR =====
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('show');
-  document.body.style.overflow = document.getElementById('sidebar').classList.contains('open') ? 'hidden' : '';
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
 }
 
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('show');
-  document.body.style.overflow = '';
-}
-
-// ===== API HELPER =====
-async function apiFetch(endpoint, options = {}) {
-  const config = {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options
-  };
-  
-  try {
-    const response = await fetch(endpoint, config);
-    if (!response.ok) {
-      if (response.status === 401) {
-        window.location.href = '/user-login.html';
-        throw new Error('Unauthorized');
-      }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return await response.json();
-    }
-    return await response.text();
-  } catch (error) {
-    console.error(`API Error (${endpoint}):`, error);
-    Toast.error('Failed to load data');
-    throw error;
-  }
-}
-
-// ===== LOAD POSTS =====
-async function loadPosts() {
-  const container = document.getElementById('posts-container');
-  const loading = document.getElementById('loading-state');
-  
-  if (ExploreState.isLoading) return;
-  ExploreState.isLoading = true;
-  
-  loading.style.display = 'block';
-  container.style.display = 'none';
-  
-  try {
-    const posts = await apiFetch('/api/posts?status=published&limit=50');
-    ExploreState.posts = posts;
-    renderPosts(posts);
-  } catch (e) {
-    console.error('Failed to load posts:', e);
-    loading.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-exclamation-circle"></i>
-        <p>Failed to load posts</p>
-        <span>Pull to refresh or check your connection</span>
-      </div>
-    `;
-  } finally {
-    ExploreState.isLoading = false;
-  }
-}
-
-// ===== RENDER POSTS =====
-function renderPosts(posts) {
-  const container = document.getElementById('posts-container');
-  const loading = document.getElementById('loading-state');
-  
-  // Filter posts
-  let filtered = posts;
-  if (ExploreState.currentFilter === 'premium') {
-    filtered = posts.filter(p => p.is_premium);
-  } else if (ExploreState.currentFilter !== 'all') {
-    filtered = posts.filter(p => p.content_type === ExploreState.currentFilter);
-  }
-  
-  if (!filtered.length) {
-    loading.style.display = 'none';
-    container.style.display = 'block';
-    container.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-search"></i>
-        <p>No posts found</p>
-        <span>Try a different filter or check back later</span>
-      </div>
-    `;
-    return;
-  }
-  
-  container.innerHTML = filtered.map(post => {
-    const typeClass = post.is_premium ? 'premium' : (post.content_type || 'article');
-    const typeLabel = post.is_premium ? 'Premium' : (post.content_type || 'Article');
-    const initials = (post.author_username || 'U')[0].toUpperCase();
-    const likeCount = post.likes || post.likes_count || 0;
-    const commentCount = post.comments || post.comment_count || 0;
-    
-    // Media preview
-    let mediaHtml = '';
-    if (post.content_type === 'reel' && post.video_url) {
-      mediaHtml = `
-        <div class="post-media reel">
-          <video preload="none" poster="${Utils.escapeHtml(post.cover_image || '')}">
-            <source src="${Utils.escapeHtml(post.video_url)}" type="video/mp4">
-          </video>
-          <div class="play-overlay" onclick="event.stopPropagation();goPost(${post.id})">
-            <i class="fas fa-play"></i>
-          </div>
-          <div class="reel-watermark">
-            <img src="/echostack-logo.png" alt="" onerror="this.style.display='none'">
-            <span>EchoStack</span>
-          </div>
-        </div>
-      `;
-    } else if (post.content_type === 'video' && post.video_url) {
-      mediaHtml = `
-        <div class="post-media">
-          <video preload="none" poster="${Utils.escapeHtml(post.cover_image || '')}">
-            <source src="${Utils.escapeHtml(post.video_url)}" type="video/mp4">
-          </video>
-          <div class="play-overlay" onclick="event.stopPropagation();goPost(${post.id})">
-            <i class="fas fa-play"></i>
-          </div>
-        </div>
-      `;
-    } else if (post.cover_image) {
-      mediaHtml = `
-        <div class="post-media">
-          <img src="${Utils.escapeHtml(post.cover_image)}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\'fas fa-image\' style=\'font-size:2rem;color:var(--muted);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)\'></i>'">
-        </div>
-      `;
-    }
-    
-    // Premium banner
-    const premiumBanner = post.is_premium && post.is_locked ? `
-      <div class="premium-banner">
-        <i class="fas fa-crown"></i>
-        <span>Premium Content — Subscribe to read</span>
-      </div>
-    ` : '';
-    
-    return `
-      <article class="post-card" onclick="goPost(${post.id})">
-        <!-- Header -->
-        <div class="post-header">
-          <div class="post-avatar">${initials}</div>
-          <div class="post-author-info">
-            <div class="post-author">${Utils.escapeHtml(post.author_username || 'Creator')}</div>
-            <div class="post-time">${Utils.timeAgo(post.created_at)}</div>
-          </div>
-          <span class="post-type-badge ${typeClass}">${typeLabel}</span>
-        </div>
-        
-        <!-- Content -->
-        <div class="post-content">
-          <h3 class="post-title">${Utils.escapeHtml(post.title || 'Untitled')}</h3>
-          ${post.excerpt ? `<p class="post-excerpt">${Utils.escapeHtml(post.excerpt.substring(0, 150))}${post.excerpt.length > 150 ? '…' : ''}</p>` : ''}
-        </div>
-        
-        <!-- Media -->
-        ${mediaHtml}
-        
-        <!-- Premium Banner -->
-        ${premiumBanner}
-        
-        <!-- Actions -->
-        <div class="post-actions" onclick="event.stopPropagation()">
-          <button class="action-btn ${post.is_liked ? 'liked' : ''}" onclick="toggleLike(${post.id}, this)">
-            <i class="${post.is_liked ? 'fas' : 'far'} fa-heart"></i>
-            <span class="count">${likeCount}</span>
-          </button>
-          <button class="action-btn" onclick="event.stopPropagation();openComments(${post.id})">
-            <i class="far fa-comment"></i>
-            <span class="count">${commentCount}</span>
-          </button>
-          <button class="action-btn" onclick="event.stopPropagation();sharePost(${post.id})">
-            <i class="fas fa-share-alt"></i>
-            <span>Share</span>
-          </button>
-          <button class="read-btn" onclick="event.stopPropagation();goPost(${post.id})">
-            Read <i class="fas fa-arrow-right"></i>
-          </button>
-        </div>
-      </article>
-    `;
-  }).join('');
-  
-  loading.style.display = 'none';
-  container.style.display = 'block';
-}
-
-// ===== FILTER TABS =====
-function setupFilters() {
-  document.getElementById('filter-tabs').addEventListener('click', e => {
-    const tab = e.target.closest('.filter-tab');
-    if (!tab) return;
-    
-    // Update active state
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    
-    // Update filter and re-render
-    ExploreState.currentFilter = tab.dataset.filter;
-    renderPosts(ExploreState.posts);
-    
-    Toast.info(`Showing ${tab.textContent.trim()} posts`);
-  });
-}
-
-// ===== POST INTERACTIONS =====
-function goPost(postId) {
-  window.location.href = `/post.html?id=${postId}`;
-}
-
-async function toggleLike(postId, btn) {
-  event.stopPropagation();
-  
-  try {
-    const data = await apiFetch(`/api/posts/${postId}/like`, { method: 'POST' });
-    const countEl = btn.querySelector('.count');
-    if (countEl) countEl.textContent = data.likes || 0;
-    btn.classList.toggle('liked', data.liked);
-    btn.querySelector('i').className = data.liked ? 'fas fa-heart' : 'far fa-heart';
-    Toast.ok(data.liked ? '❤️ Liked!' : '🤍 Unliked');
-  } catch (e) {
-    Toast.error('Failed to like');
-  }
-}
-
-function openComments(postId) {
-  window.location.href = `/post.html?id=${postId}#comments`;
-}
-
-function sharePost(postId) {
-  const url = `${window.location.origin}/post.html?id=${postId}`;
-  
-  if (navigator.share) {
-    navigator.share({
-      title: 'Check out this post on EchoStack',
-      url: url
-    }).catch(() => {
-      navigator.clipboard.writeText(url);
-      Toast.ok('📋 Link copied!');
-    });
-  } else {
-    navigator.clipboard.writeText(url);
-    Toast.ok('📋 Link copied!');
-  }
-}
-
-// ===== LOGOUT =====
 async function logout() {
-  if (!confirm('Are you sure you want to logout?')) return;
-  
-  try {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-  } catch (e) {
-    console.warn('Logout error:', e);
-  } finally {
+    await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
     localStorage.removeItem('es_user');
-    window.location.href = '/user-login.html';
-  }
+    location.href = '/';
 }
 
-// ===== TOPBAR SCROLL EFFECT =====
-function setupTopbarScroll() {
-  const topbar = document.getElementById('topbar');
-  
-  window.addEventListener('scroll', Utils.debounce(() => {
-    if (window.scrollY > 10) {
-      topbar.classList.add('scrolled');
-    } else {
-      topbar.classList.remove('scrolled');
+async function loadUser() {
+    try {
+        const res = await fetch('/api/users/me', { credentials: 'include' });
+        if (res.ok) {
+            user = await res.json();
+            const initial = (user.username || 'U').charAt(0).toUpperCase();
+            if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = initial;
+            if (document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = user.full_name || user.username;
+            const badge = document.getElementById('sidebarBadge');
+            if (badge) {
+                if (user.role === 'admin' || user.role === 'superuser') { badge.className = 'sidebar-user-badge badge-admin'; badge.textContent = 'Admin'; }
+                else if (user.role === 'creator') { badge.className = 'sidebar-user-badge badge-creator'; badge.textContent = 'Creator'; }
+                else if (user.is_premium) { badge.className = 'sidebar-user-badge badge-premium'; badge.textContent = 'Premium'; }
+            }
+            loadPosts();
+        } else {
+            location.href = '/user-login';
+        }
+    } catch(e) {
+        location.href = '/user-login';
     }
-  }, 100));
 }
 
-// ===== PULL TO REFRESH =====
-function setupPullToRefresh() {
-  let startY = 0;
-  
-  document.addEventListener('touchstart', e => {
-    if (window.scrollY === 0) startY = e.touches[0].clientY;
-  }, { passive: true });
-  
-  document.addEventListener('touchmove', e => {
-    if (window.scrollY === 0) {
-      const diff = e.touches[0].clientY - startY;
-      if (diff > 100) {
-        loadPosts();
-        Toast.info('🔄 Refreshed');
-        startY = 0;
-      }
-    }
-  }, { passive: true });
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// ===== INIT =====
-document.addEventListener('DOMContentLoaded', async () => {
-  // Initialize toast
-  Toast.init();
-  
-  // Setup interactions
-  setupFilters();
-  setupTopbarScroll();
-  setupPullToRefresh();
-  
-  // Load posts
-  await loadPosts();
-  
-  // Handle online/offline
-  window.addEventListener('online', () => Toast.ok('🌐 Back online'));
-  window.addEventListener('offline', () => Toast.error('⚠️ You are offline'));
-  
-  // Close sidebar on scroll
-  document.querySelector('.container')?.addEventListener('scroll', () => {
-    if (document.getElementById('sidebar').classList.contains('open')) {
-      closeSidebar();
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 60) return Math.floor(diff) + 's';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h';
+    return Math.floor(diff / 86400) + 'd';
+}
+
+function setFilter(el, filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    loadPosts();
+}
+
+let searchTimeout;
+function debounceSearch(query) {
+    clearTimeout(searchTimeout);
+    if (query.length < 2) { loadPosts(); return; }
+    searchTimeout = setTimeout(() => performSearch(query), 300);
+}
+
+async function performSearch(query) {
+    const container = document.getElementById('content');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        let url = `/api/search?q=${encodeURIComponent(query)}&sort=recent&limit=20`;
+        if (currentFilter) url += `&content_type=${currentFilter}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        renderResults(data);
+    } catch(e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Search failed</h3></div>'; }
+}
+
+async function loadPosts() {
+    const container = document.getElementById('content');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    try {
+        let url = '/api/posts?limit=20&status=published';
+        if (currentFilter) url += `&content_type=${currentFilter}`;
+        const res = await fetch(url);
+        const posts = await res.json();
+        renderPosts(posts);
+    } catch(e) { container.innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Load failed</h3></div>'; }
+}
+
+function renderResults(data) {
+    const container = document.getElementById('content');
+    let html = '';
+    
+    if (data.users?.length) {
+        html += '<h3 style="margin-bottom:12px;font-size:.85rem;color:var(--main-muted);text-transform:uppercase">Creators</h3>';
+        data.users.forEach(u => {
+            html += `<div class="card" style="margin-bottom:10px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="location.href='/user/${u.username}'">
+                <div class="post-avatar">${u.username.charAt(0).toUpperCase()}</div>
+                <div style="flex:1"><div style="font-weight:600">${escapeHtml(u.channel_name || u.username)}</div><div style="font-size:.8rem;color:var(--main-muted)">@${escapeHtml(u.username)} · ${u.follower_count || 0} followers</div></div>
+            </div>`;
+        });
     }
-  });
-});
+    
+    if (data.posts?.length) {
+        html += '<h3 style="margin:20px 0 12px;font-size:.85rem;color:var(--main-muted);text-transform:uppercase">Stories</h3>';
+        renderPosts(data.posts, container, html);
+        return;
+    }
+    
+    if (!html) html = '<div class="empty-state"><i class="fas fa-search"></i><h3>No results</h3></div>';
+    container.innerHTML = html;
+}
+
+function renderPosts(posts, container, prefix = '') {
+    const c = container || document.getElementById('content');
+    if (!posts?.length) { c.innerHTML = prefix + '<div class="empty-state"><i class="fas fa-newspaper"></i><h3>No stories</h3></div>'; return; }
+    
+    c.innerHTML = prefix + posts.map(p => `
+        <article class="post-card" onclick="location.href='/post/${p.id}'">
+            <div class="post-header">
+                <div class="post-avatar">${(p.author_username || 'U').charAt(0).toUpperCase()}</div>
+                <div style="flex:1">
+                    <div class="post-author">${escapeHtml(p.author_username || 'Unknown')} <span class="badge badge-gold">${p.content_type || 'article'}</span></div>
+                    <div class="post-time">${timeAgo(p.created_at)}</div>
+                </div>
+            </div>
+            <h3 class="post-title">${escapeHtml(p.title)}</h3>
+            <p class="post-excerpt">${escapeHtml(p.excerpt || '')}</p>
+            ${p.cover_image ? `<div class="post-media"><img src="${escapeHtml(p.cover_image)}" onerror="this.parentElement.style.display='none'" alt=""></div>` : ''}
+        </article>
+    `).join('');
+}
+
+loadUser();
 </script>
 </body>
 </html>
-

@@ -1,1856 +1,508 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<meta name="theme-color" content="#0D1B2A">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="EchoStack – Ghana's Living Heritage. Explore stories, audio, videos, and reels from all 16 regions of Ghana.">
-<title>EchoStack – Ghana's Living Heritage</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/png" href="/echostack-logo.png">
-<link rel="apple-touch-icon" href="/echostack-logo.png">
-<style>
-/* ============================================
-   CSS RESET & BASE STYLES
-   ============================================ */
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
-:root{
-  --ink:#0D1B2A;
-  --ink2:#1a2744;
-  --gold:#C8962E;
-  --gold2:#E8B84B;
-  --gold3:#F4D06F;
-  --cream:#FAF6EF;
-  --surface:#0D1B2A;
-  --surface2:#1a2744;
-  --card:#0D1B2A;
-  --feed-bg:#ffffff;
-  --feed-card:#ffffff;
-  --border:rgba(255,255,255,.08);
-  --border2:rgba(255,255,255,.12);
-  --feed-border:#e5e5e5;
-  --text:#ffffff;
-  --text2:rgba(255,255,255,.85);
-  --feed-text:#1a1a1a;
-  --feed-text2:#3a3a3a;
-  --muted:#94A3B8;
-  --muted2:#6b7b8a;
-  --danger:#ef4444;
-  --danger2:#dc2626;
-  --success:#22c55e;
-  --success2:#16a34a;
-  --warning:#f59e0b;
-  --info:#3b82f6;
-  --purple:#8b5cf6;
-  --pink:#ec4899;
-  --cyan:#06b6d4;
-  --hover:rgba(255,255,255,.06);
-  --hover2:rgba(255,255,255,.1);
-  --shadow:0 1px 3px rgba(0,0,0,.2);
-  --shadow2:0 2px 8px rgba(0,0,0,.3);
-  --shadow3:0 4px 16px rgba(0,0,0,.4);
-  --radius:12px;
-  --radius2:16px;
-  --radius3:20px;
-  --sidebar-w:280px;
-  --topbar-h:57px;
-  --transition:all .2s ease;
-}
-html,body{height:100%;scroll-behavior:smooth;overflow-x:hidden}
-body{
-  font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
-  background:var(--ink);
-  color:var(--text);
-  line-height:1.5;
-  padding-bottom:env(safe-area-inset-bottom);
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:0;opacity:.4
-}
-img,video{max-width:100%;height:auto;display:block}
-a{text-decoration:none;color:inherit}
-button{font-family:inherit;border:none;background:none;cursor:pointer}
-input,textarea,select{font-family:inherit;font-size:inherit}
-
-/* ============================================
-   SCROLLBAR STYLING
-   ============================================ */
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--muted);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
-.stories-container::-webkit-scrollbar,
-.filter-tabs::-webkit-scrollbar{display:none}
-.stories-container,.filter-tabs{scrollbar-width:none}
-
-/* ============================================
-   TOP BAR - STICKY NAVIGATION
-   ============================================ */
-.topbar{
-  position:sticky;
-  top:0;
-  z-index:1000;
-  background:var(--ink);
-  border-bottom:1px solid var(--border);
-  padding:12px 16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  box-shadow:var(--shadow);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-}
-.topbar.scrolled{box-shadow:var(--shadow2)}
-.menu-btn{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:44px;
-  height:44px;
-  border-radius:10px;
-  font-size:1.4rem;
-  color:var(--text);
-  transition:var(--transition);
-}
-.menu-btn:active{background:var(--hover);transform:scale(.95)}
-.logo{
-  font-family:'Playfair Display',serif;
-  font-size:1.5rem;
-  font-weight:900;
-  color:#fff;
-  letter-spacing:-.5px;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-}
-.create-btn{
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  color:var(--ink);
-  border-radius:30px;
-  padding:10px 22px;
-  font-weight:700;
-  font-size:.9rem;
-  min-height:44px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  transition:var(--transition);
-  box-shadow:0 2px 8px rgba(200,150,46,.3);
-}
-.create-btn:active{transform:scale(.96);box-shadow:0 1px 4px rgba(200,150,46,.2)}
-.create-btn i{font-size:1rem}
-
-/* ============================================
-   STORIES BAR - ALL 16 REGIONS + USER STORIES
-   ============================================ */
-.stories-container{
-  background:var(--ink);
-  border-bottom:1px solid var(--border);
-  padding:16px 0;
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-  margin-bottom:8px;
-}
-.stories-list{
-  display:flex;
-  gap:14px;
-  padding:0 16px;
-  min-width:max-content;
-}
-.story{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  width:72px;
-  cursor:pointer;
-  transition:var(--transition);
-}
-.story:active{transform:scale(.95)}
-.story-ring{
-  width:68px;
-  height:68px;
-  border-radius:50%;
-  padding:3px;
-  background:linear-gradient(45deg,var(--gold),var(--gold2));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:var(--transition);
-  position:relative;
-}
-.story.seen .story-ring{background:var(--border)}
-.story.seen .story-ring::after{
-  content:'';
-  position:absolute;
-  inset:3px;
-  border-radius:50%;
-  border:2px solid var(--ink);
-}
-.story-avatar{
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:1.7rem;
-  border:3px solid var(--ink);
-  object-fit:cover;
-  overflow:hidden;
-}
-.story-avatar img{width:100%;height:100%;object-fit:cover}
-.story-name{
-  font-size:.7rem;
-  font-weight:500;
-  margin-top:6px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:72px;
-  color:var(--text);
-}
-.story.add-story .story-ring{
-  background:var(--surface2);
-  border:2px dashed var(--gold);
-}
-.story.add-story .story-avatar{
-  background:var(--surface2);
-  border:2px solid var(--ink);
-}
-
-/* ============================================
-   CREATE POST INPUT
-   ============================================ */
-.create-post{
-  background:var(--ink);
-  border-bottom:1px solid var(--border);
-  padding:14px 16px;
-  display:flex;
-  gap:12px;
-  align-items:center;
-}
-.create-post-avatar{
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:1.3rem;
-  color:white;
-  flex-shrink:0;
-}
-.create-post-input{
-  flex:1;
-  background:var(--surface2);
-  border:none;
-  border-radius:24px;
-  padding:12px 18px;
-  font-size:1rem;
-  outline:none;
-  min-height:44px;
-  color:var(--text);
-  transition:var(--transition);
-}
-.create-post-input:focus{background:var(--hover);box-shadow:inset 0 0 0 2px var(--gold)}
-.create-post-input::placeholder{color:var(--muted)}
-.create-post-actions{
-  display:flex;
-  gap:8px;
-  margin-left:8px;
-}
-.create-post-btn{
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  color:var(--ink);
-  border:none;
-  border-radius:24px;
-  padding:10px 18px;
-  font-weight:700;
-  font-size:.9rem;
-  cursor:pointer;
-  min-height:44px;
-  transition:var(--transition);
-}
-.create-post-btn:active{transform:scale(.96)}
-
-/* ============================================
-   FILTER TABS - CONTENT TYPES
-   ============================================ */
-.filter-tabs{
-  display:flex;
-  gap:8px;
-  overflow-x:auto;
-  padding:12px 16px;
-  -webkit-overflow-scrolling:touch;
-  background:var(--ink);
-  border-bottom:1px solid var(--border);
-  position:sticky;
-  top:var(--topbar-h);
-  z-index:900;
-}
-.filter-tab{
-  background:var(--surface2);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:8px 18px;
-  font-size:.85rem;
-  font-weight:600;
-  cursor:pointer;
-  white-space:nowrap;
-  color:var(--muted);
-  transition:var(--transition);
-  min-height:40px;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.filter-tab i{font-size:.8rem}
-.filter-tab:active{transform:scale(.98)}
-.filter-tab.active{
-  background:var(--gold);
-  border-color:var(--gold);
-  color:var(--ink);
-  box-shadow:0 2px 8px rgba(200,150,46,.3);
-}
-
-/* ============================================
-   POST CARD - SOCIAL MEDIA STYLE
-   ============================================ */
-.feed{padding:16px 0;max-width:650px;margin:0 auto}
-.post-card{
-  background:var(--feed-card);
-  border-bottom:1px solid var(--feed-border);
-  border-radius:var(--radius2);
-  margin:0 16px 16px;
-  transition:var(--transition);
-  overflow:hidden;
-  box-shadow:var(--shadow);
-}
-.post-card:active{background:var(--hover)}
-
-/* Post Header */
-.post-header{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px 16px;
-}
-.post-avatar{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:1.3rem;
-  color:white;
-  flex-shrink:0;
-  cursor:pointer;
-  transition:var(--transition);
-}
-.post-avatar:active{transform:scale(.95)}
-.post-author-info{flex:1;min-width:0}
-.post-author{
-  font-weight:700;
-  font-size:.95rem;
-  color:var(--feed-text);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  cursor:pointer;
-}
-.post-author:hover{color:var(--gold)}
-.post-meta{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  margin-top:2px;
-}
-.post-time{font-size:.75rem;color:var(--muted)}
-.post-region{
-  font-size:.7rem;
-  background:var(--surface2);
-  padding:2px 8px;
-  border-radius:10px;
-  color:var(--muted2);
-}
-.post-more{
-  color:var(--muted);
-  font-size:1.2rem;
-  cursor:pointer;
-  padding:8px;
-  min-width:44px;
-  min-height:44px;
-  border-radius:8px;
-  transition:var(--transition);
-}
-.post-more:active{background:var(--hover);color:var(--feed-text)}
-
-/* Post Media Container */
-.post-media{
-  width:100%;
-  position:relative;
-  background:#000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-.post-media img{
-  width:100%;
-  display:block;
-  max-height:600px;
-  object-fit:cover;
-}
-.post-media video{
-  width:100%;
-  display:block;
-  max-height:600px;
-  object-fit:cover;
-  background:#000;
-}
-
-/* Audio Card - Separate Container */
-.card-audio{
-  background:var(--surface2);
-  padding:16px;
-  border-top:1px solid var(--feed-border);
-  border-bottom:1px solid var(--feed-border);
-}
-.card-audio .audio-title{
-  font-size:.95rem;
-  font-weight:600;
-  margin-bottom:12px;
-  color:var(--feed-text);
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.card-audio .audio-title i{color:var(--gold)}
-.card-audio audio{
-  width:100%;
-  height:44px;
-  border-radius:22px;
-  outline:none;
-}
-.card-audio audio::-webkit-media-controls-panel{
-  background:var(--feed-card);
-}
-
-/* Post Content */
-.post-content{padding:12px 16px}
-.post-title{
-  font-size:1.15rem;
-  font-weight:700;
-  margin-bottom:8px;
-  color:var(--feed-text);
-  line-height:1.3;
-}
-.post-excerpt{
-  color:var(--feed-text2);
-  font-size:.95rem;
-  line-height:1.6;
-  word-wrap:break-word;
-  white-space:pre-wrap;
-}
-.post-caption{
-  margin-top:12px;
-  font-size:.95rem;
-  color:var(--feed-text);
-  line-height:1.5;
-}
-.post-caption .author{
-  font-weight:700;
-  margin-right:6px;
-  color:var(--ink);
-}
-.post-hashtags{
-  margin-top:8px;
-  color:var(--info);
-  font-weight:500;
-  line-height:1.6;
-}
-.post-hashtags a{color:var(--info);margin-right:6px}
-.post-hashtags a:hover{text-decoration:underline}
-
-/* Post Actions */
-.post-actions{
-  display:flex;
-  gap:4px;
-  padding:8px 12px;
-  flex-wrap:wrap;
-}
-.action-btn{
-  background:none;
-  border:none;
-  font-size:1.4rem;
-  color:var(--feed-text);
-  cursor:pointer;
-  padding:8px;
-  min-width:44px;
-  min-height:44px;
-  border-radius:8px;
-  transition:var(--transition);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-}
-.action-btn:active{transform:scale(1.15);background:var(--hover)}
-.action-btn.liked{color:var(--danger);animation:likePulse .3s ease}
-.action-btn.saved{color:var(--gold)}
-@keyframes likePulse{
-  0%{transform:scale(1)}
-  50%{transform:scale(1.3)}
-  100%{transform:scale(1)}
-}
-
-/* Post Stats */
-.post-stats{
-  padding:0 16px 8px;
-  font-size:.85rem;
-  font-weight:600;
-  color:var(--muted2);
-  display:flex;
-  gap:12px;
-}
-.post-stats .likes{color:var(--feed-text)}
-.post-stats .comments{color:var(--feed-text)}
-.post-stats .views{color:var(--feed-text)}
-
-/* Reel Watermark */
-.reel-container{position:relative}
-.watermark{
-  position:absolute;
-  bottom:12px;
-  right:12px;
-  background:rgba(13,27,42,.85);
-  color:white;
-  padding:6px 14px;
-  border-radius:20px;
-  font-size:.75rem;
-  font-weight:700;
-  backdrop-filter:blur(4px);
-  -webkit-backdrop-filter:blur(4px);
-  z-index:10;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-
-/* ============================================
-   SIDEBAR NAVIGATION
-   ============================================ */
-.sidebar{
-  width:var(--sidebar-w);
-  background:var(--ink);
-  color:var(--text);
-  position:fixed;
-  left:0;
-  top:0;
-  height:100vh;
-  overflow-y:auto;
-  overflow-x:hidden;
-  transform:translateX(-100%);
-  transition:var(--transition);
-  z-index:2000;
-  -webkit-overflow-scrolling:touch;
-  box-shadow:var(--shadow3);
-}
-.sidebar.open{transform:translateX(0)}
-.sb-header{
-  padding:20px 16px;
-  border-bottom:1px solid var(--border);
-  background:linear-gradient(135deg,var(--surface),var(--surface2));
-}
-.sb-brand{display:flex;align-items:center;gap:12px}
-.sb-brand img{width:40px;height:40px;border-radius:10px;object-fit:cover}
-.sb-brand-text strong{display:block;font-size:1.1rem;font-weight:700;color:#fff}
-.sb-brand-text span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
-.sb-section{
-  padding:16px 12px 8px;
-  font-size:.65rem;
-  font-weight:700;
-  letter-spacing:.1em;
-  text-transform:uppercase;
-  color:var(--muted);
-}
-.sb-item{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px 16px;
-  color:var(--text);
-  text-decoration:none;
-  transition:var(--transition);
-  font-size:.95rem;
-  font-weight:500;
-  border-radius:8px;
-  margin:2px 8px;
-  min-height:48px;
-}
-.sb-item:hover{background:var(--hover)}
-.sb-item:active{transform:scale(.98)}
-.sb-item.active{background:rgba(200,150,46,.25);color:var(--gold2);font-weight:600}
-.sb-item .icon{width:24px;text-align:center;font-size:1.1rem}
-.sb-item .badge{
-  margin-left:auto;
-  background:var(--danger);
-  color:white;
-  font-size:.7rem;
-  padding:2px 8px;
-  border-radius:10px;
-  font-weight:700;
-}
-.sb-footer{
-  margin-top:auto;
-  padding:16px;
-  border-top:1px solid var(--border);
-  background:var(--surface2);
-}
-.sb-footer button{
-  width:100%;
-  padding:12px;
-  border-radius:8px;
-  background:rgba(239,68,68,.15);
-  border:1px solid rgba(239,68,68,.3);
-  color:#ff6b6b;
-  font-size:.95rem;
-  font-weight:600;
-  cursor:pointer;
-  min-height:48px;
-  transition:var(--transition);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-}
-.sb-footer button:active{background:rgba(239,68,68,.25);transform:scale(.98)}
-
-/* Sidebar Overlay */
-.sidebar-overlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  z-index:1999;
-  backdrop-filter:blur(2px);
-  -webkit-backdrop-filter:blur(2px);
-  opacity:0;
-  transition:opacity .3s ease;
-}
-.sidebar-overlay.show{display:block;opacity:1}
-
-/* ============================================
-   TOAST NOTIFICATIONS
-   ============================================ */
-.toast{
-  position:fixed;
-  bottom:24px;
-  left:50%;
-  transform:translateX(-50%) translateY(20px);
-  background:rgba(13,27,42,.95);
-  color:white;
-  padding:14px 28px;
-  border-radius:30px;
-  font-size:.9rem;
-  font-weight:600;
-  z-index:9999;
-  transition:all .3s ease;
-  opacity:0;
-  pointer-events:none;
-  box-shadow:0 4px 20px rgba(0,0,0,.3);
-  white-space:nowrap;
-  max-width:90%;
-  text-align:center;
-  border:1px solid rgba(255,255,255,.1);
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.ok{background:rgba(34,197,94,.95)}
-.toast.er{background:rgba(239,68,68,.95)}
-.toast.info{background:var(--gold);color:var(--ink)}
-
-/* ============================================
-   LOADING STATES
-   ============================================ */
-.loading{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:60px 20px;
-  gap:12px;
-}
-.loading-spinner{
-  width:36px;
-  height:36px;
-  border:3px solid var(--border);
-  border-top-color:var(--gold);
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:.95rem;color:var(--muted);font-weight:500}
-
-/* Skeleton Loading */
-.skeleton{
-  background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
-  background-size:200% 100%;
-  animation:skeletonLoading 1.5s ease-in-out infinite;
-  border-radius:8px;
-}
-@keyframes skeletonLoading{
-  0%{background-position:200% 0}
-  100%{background-position:-200% 0}
-}
-.skeleton-post{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:var(--radius2);
-  padding:16px;
-  margin-bottom:16px;
-}
-.skeleton-header{display:flex;gap:12px;margin-bottom:12px}
-.skeleton-avatar{width:42px;height:42px;border-radius:50%}
-.skeleton-text{height:18px;margin-bottom:10px;border-radius:4px}
-.skeleton-text.short{width:40%}
-.skeleton-text.medium{width:70%}
-.skeleton-text.long{width:100%}
-.skeleton-media{height:220px;border-radius:12px;margin-bottom:12px}
-
-/* ============================================
-   EMPTY STATES
-   ============================================ */
-.empty-state{
-  text-align:center;
-  padding:80px 20px;
-  color:var(--muted);
-  background:var(--card);
-  border-radius:var(--radius2);
-  margin:16px;
-  border:1px solid var(--border);
-}
-.empty-state i{
-  font-size:4rem;
-  margin-bottom:20px;
-  color:var(--gold);
-  opacity:.6;
-}
-.empty-state p{
-  font-size:1.1rem;
-  font-weight:600;
-  margin-bottom:8px;
-  color:var(--text);
-}
-.empty-state span{
-  font-size:.9rem;
-  color:var(--muted);
-}
-
-/* ============================================
-   MODAL DIALOGS
-   ============================================ */
-.modal-overlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  z-index:3000;
-  align-items:center;
-  justify-content:center;
-  padding:16px;
-  backdrop-filter:blur(4px);
-  -webkit-backdrop-filter:blur(4px);
-}
-.modal-overlay.active{display:flex}
-.modal-content{
-  background:var(--card);
-  border-radius:var(--radius2);
-  max-width:500px;
-  width:100%;
-  max-height:85vh;
-  overflow-y:auto;
-  box-shadow:var(--shadow3);
-}
-.modal-header{
-  padding:16px 20px;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.modal-header h3{font-size:1.1rem;font-weight:700;color:var(--text)}
-.modal-close{
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  background:var(--surface2);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:1.2rem;
-  color:var(--muted);
-  cursor:pointer;
-  transition:var(--transition);
-}
-.modal-close:active{background:var(--hover);transform:scale(.95)}
-.modal-body{padding:20px}
-.modal-footer{
-  padding:16px 20px;
-  border-top:1px solid var(--border);
-  display:flex;
-  gap:12px;
-  justify-content:flex-end;
-}
-
-/* ============================================
-   RESPONSIVE BREAKPOINTS
-   ============================================ */
-@media(max-width:480px){
-  :root{--topbar-h:53px}
-  .topbar{padding:10px 14px}
-  .logo{font-size:1.3rem}
-  .stories-list{padding:0 14px;gap:12px}
-  .story{width:68px}
-  .story-ring{width:64px;height:64px}
-  .story-avatar{font-size:1.5rem}
-  .story-name{font-size:.65rem}
-  .create-post{padding:12px 14px}
-  .create-post-avatar{width:40px;height:40px}
-  .filter-tabs{padding:10px 14px}
-  .filter-tab{padding:8px 14px;font-size:.8rem}
-  .post-header{padding:10px 14px}
-  .post-avatar{width:38px;height:38px;font-size:1.2rem}
-  .post-content{padding:10px 14px}
-  .post-title{font-size:1.05rem}
-  .post-excerpt{font-size:.9rem}
-  .action-btn{font-size:1.3rem;padding:6px;min-width:40px;min-height:40px}
-  .post-stats{font-size:.8rem}
-  .sidebar{width:260px}
-}
-
-@media(min-width:768px){
-  .feed{padding:20px 0}
-  .post-card{
-    border-radius:var(--radius2);
-    border:1px solid var(--border);
-    margin-bottom:16px;
-    overflow:hidden;
-    box-shadow:var(--shadow);
-  }
-  .post-card:hover{box-shadow:var(--shadow2)}
-  .stories-container{
-    border-radius:var(--radius2) var(--radius2) 0 0;
-    border:1px solid var(--border);
-    border-bottom:none;
-  }
-  .create-post{
-    border:1px solid var(--border);
-    border-radius:0 0 var(--radius2) var(--radius2);
-  }
-  .filter-tabs{border-radius:0 0 var(--radius2) var(--radius2)}
-}
-
-@media(min-width:1024px){
-  .feed{max-width:700px}
-  .post-media img,.post-media video{max-height:500px}
-}
-
-/* ============================================
-   PRINT STYLES
-   ============================================ */
-@media print{
-  .topbar,.sidebar,.stories-container,.filter-tabs,.post-actions{display:none}
-  .post-card{break-inside:avoid;margin-bottom:20px}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Feed - EchoStack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .feed-container { max-width: 680px; margin: 0 auto; }
+        .create-prompt {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--main-card);
+            border-bottom: 1px solid var(--main-border);
+            cursor: pointer;
+        }
+        .create-prompt-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .create-prompt-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--main-bg);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-full);
+            color: var(--main-muted);
+            font-size: 0.9rem;
+        }
+        .create-prompt-icons { display: flex; gap: 12px; }
+        .create-prompt-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--main-muted);
+            transition: all 0.15s;
+        }
+        .create-prompt-icon:hover { background: var(--main-hover); }
+        .post-follow-btn {
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            background: var(--blue);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .right-panel {
+            width: 320px;
+            flex-shrink: 0;
+            padding: 24px;
+            position: sticky;
+            top: 84px;
+            height: fit-content;
+        }
+        .right-panel-section { margin-bottom: 24px; }
+        .right-panel-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--main-muted);
+            margin-bottom: 12px;
+        }
+        .region-list { display: flex; flex-direction: column; gap: 8px; }
+        .region-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .region-item:hover { background: var(--main-hover); }
+        .region-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink);
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .region-name { font-weight: 500; font-size: 0.9rem; color: var(--main-text); }
+        @media (max-width: 1024px) {
+            .right-panel { display: none; }
+        }
+    </style>
 </head>
 <body>
+<div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">
+                <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+                <span>EchoStack</span>
+            </a>
+        </div>
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">User</div>
+                <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <a href="/dashboard" class="sidebar-link active">
+                    <i class="fas fa-home"></i>
+                    <span>Feed</span>
+                </a>
+                <a href="/reels" class="sidebar-link">
+                    <i class="fas fa-film"></i>
+                    <span>Reels</span>
+                </a>
+                <a href="/explore" class="sidebar-link">
+                    <i class="fas fa-compass"></i>
+                    <span>Explore</span>
+                </a>
+                <a href="/archive" class="sidebar-link">
+                    <i class="fas fa-archive"></i>
+                    <span>Archive</span>
+                </a>
+                <a href="/app" class="sidebar-link">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Map</span>
+                </a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Social</div>
+                <a href="/following" class="sidebar-link">
+                    <i class="fas fa-user-friends"></i>
+                    <span>Following</span>
+                </a>
+                <a href="/messages" class="sidebar-link">
+                    <i class="fas fa-envelope"></i>
+                    <span>Messages</span>
+                </a>
+                <a href="/notifications" class="sidebar-link">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    <span class="badge-count" id="notifCount" style="display:none">0</span>
+                </a>
+                <a href="/chat" class="sidebar-link">
+                    <i class="fas fa-comments"></i>
+                    <span>Community Chat</span>
+                </a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Create</div>
+                <a href="/creator" class="sidebar-link" id="createLink">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Create Post</span>
+                </a>
+                <a href="/premium" class="sidebar-link" id="premiumLink">
+                    <i class="fas fa-crown"></i>
+                    <span>Premium</span>
+                </a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Account</div>
+                <a href="/user-profile" class="sidebar-link">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="/settings" class="sidebar-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign Out</span>
+            </button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-<!-- SIDEBAR OVERLAY -->
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <!-- MAIN -->
+    <div class="main-wrapper">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="topbar-title">Feed</div>
+            <div class="topbar-actions">
+                <a href="/notifications" class="topbar-btn" style="position:relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge-dot" id="topNotifDot" style="display:none"></span>
+                </a>
+                <a href="/chatbot" class="topbar-btn" title="EchoBot">
+                    <i class="fas fa-robot"></i>
+                </a>
+            </div>
+        </header>
 
-<!-- SIDEBAR NAVIGATION -->
-<aside class="sidebar" id="sidebar">
-  <div class="sb-header">
-    <div class="sb-brand">
-      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="EchoStack Logo">
-      <div class="sb-brand-text">
-        <strong>EchoStack</strong>
-        <span>Ghana's Heritage</span>
-      </div>
+        <!-- CONTENT -->
+        <main class="main-content">
+            <div style="display:flex">
+                <div class="feed-container" style="flex:1">
+                    <!-- STORIES BAR -->
+                    <div class="stories-bar" id="storiesBar">
+                        <div class="story-item" onclick="location.href='/story'">
+                            <div class="story-create"><i class="fas fa-plus"></i></div>
+                            <span class="story-name">Your Story</span>
+                        </div>
+                        <div id="storiesList"></div>
+                    </div>
+
+                    <!-- CREATE PROMPT -->
+                    <div class="create-prompt" onclick="location.href='/creator'">
+                        <div class="create-prompt-avatar" id="createAvatar">U</div>
+                        <div class="create-prompt-input">What's on your mind?</div>
+                        <div class="create-prompt-icons">
+                            <div class="create-prompt-icon"><i class="fas fa-image" style="color:#22c55e"></i></div>
+                            <div class="create-prompt-icon"><i class="fas fa-video" style="color:#9333ea"></i></div>
+                            <div class="create-prompt-icon"><i class="fas fa-microphone" style="color:#059669"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- FILTER TABS -->
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" onclick="setFilter(this, '')">All</button>
+                        <button class="filter-tab" onclick="setFilter(this, 'article')">Articles</button>
+                        <button class="filter-tab" onclick="setFilter(this, 'video')">Videos</button>
+                        <button class="filter-tab" onclick="setFilter(this, 'reel')">Reels</button>
+                        <button class="filter-tab" onclick="setFilter(this, 'audio')">Audio</button>
+                        <button class="filter-tab" onclick="setFilter(this, 'photo')">Photos</button>
+                    </div>
+
+                    <!-- POSTS -->
+                    <div style="padding:20px" id="postsContainer">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL (Desktop) -->
+                <div class="right-panel">
+                    <div class="right-panel-section">
+                        <div class="right-panel-title">Explore Regions</div>
+                        <div class="region-list" id="regionList"></div>
+                    </div>
+                    <div class="footer" style="margin-top:40px;padding:20px 0;border:none">
+                        <div class="footer-brand">EchoStack Ghana</div>
+                        <p class="footer-dev">Built by Mireku Development</p>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-  </div>
-  
-  <div class="sb-section">Navigation</div>
-  <a href="/dashboard" class="sb-item active" id="nav-home">
-    <span class="icon"><i class="fas fa-home"></i></span>
-    <span>Home Feed</span>
-  </a>
-  <a href="/explore" class="sb-item" id="nav-explore">
-    <span class="icon"><i class="fas fa-compass"></i></span>
-    <span>Explore</span>
-  </a>
-  <a href="/reels.html" class="sb-item" id="nav-reels">
-    <span class="icon"><i class="fas fa-video"></i></span>
-    <span>Reels</span>
-  </a>
-  <a href="/archive" class="sb-item" id="nav-archive">
-    <span class="icon"><i class="fas fa-book"></i></span>
-    <span>Archive</span>
-  </a>
-  <a href="/app" class="sb-item" id="nav-map">
-    <span class="icon"><i class="fas fa-map-marked-alt"></i></span>
-    <span>Regions Map</span>
-  </a>
-  
-  <div class="sb-section">Content</div>
-  <a href="/creator.html" class="sb-item" id="nav-create">
-    <span class="icon"><i class="fas fa-pen-fancy"></i></span>
-    <span>Create Post</span>
-  </a>
-  <a href="/creator.html?type=story" class="sb-item" id="nav-story">
-    <span class="icon"><i class="fas fa-camera"></i></span>
-    <span>Add Story</span>
-  </a>
-  <a href="/stories" class="sb-item" id="nav-stories">
-    <span class="icon"><i class="fas fa-book-open"></i></span>
-    <span>Stories</span>
-  </a>
-  
-  <div class="sb-section">Community</div>
-  <a href="/chat" class="sb-item" id="nav-chat">
-    <span class="icon"><i class="fas fa-comments"></i></span>
-    <span>Community Chat</span>
-  </a>
-  <a href="/following" class="sb-item" id="nav-following">
-    <span class="icon"><i class="fas fa-user-friends"></i></span>
-    <span>Following</span>
-  </a>
-  
-  <div class="sb-section">Account</div>
-  <a href="/user_profile.html" class="sb-item" id="nav-profile">
-    <span class="icon"><i class="fas fa-user"></i></span>
-    <span>My Profile</span>
-  </a>
-  <a href="/user-settings.html" class="sb-item" id="nav-settings">
-    <span class="icon"><i class="fas fa-cog"></i></span>
-    <span>Settings</span>
-  </a>
-  <a href="/premium.html" class="sb-item" id="nav-premium">
-    <span class="icon"><i class="fas fa-crown"></i></span>
-    <span>Go Premium</span>
-    <span class="badge">NEW</span>
-  </a>
-  
-  <div class="sb-footer">
-    <button onclick="logout()">
-      <i class="fas fa-sign-out-alt"></i>
-      <span>Logout</span>
-    </button>
-  </div>
-</aside>
-
-<!-- TOP BAR -->
-<div class="topbar" id="topbar">
-  <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
-    <i class="fas fa-bars"></i>
-  </button>
-  <div class="logo">EchoStack</div>
-  <button class="create-btn" onclick="window.location.href='/creator.html'">
-    <i class="fas fa-plus"></i>
-    <span>Create</span>
-  </button>
 </div>
 
-<!-- STORIES - ALL 16 REGIONS + USER STORIES -->
-<div class="stories-container">
-  <div class="stories-list" id="stories-list">
-    <!-- Loading Skeleton -->
-    <div class="story"><div class="story-ring"><div class="story-avatar skeleton"></div></div></div>
-    <div class="story"><div class="story-ring"><div class="story-avatar skeleton"></div></div></div>
-    <div class="story"><div class="story-ring"><div class="story-avatar skeleton"></div></div></div>
-    <div class="story"><div class="story-ring"><div class="story-avatar skeleton"></div></div></div>
-    <div class="story"><div class="story-ring"><div class="story-avatar skeleton"></div></div></div>
-  </div>
-</div>
+<!-- ECHOBOT BUTTON -->
+<a href="/chatbot" class="echobot-btn" title="EchoBot">
+    <i class="fas fa-robot"></i>
+</a>
 
-<!-- CREATE POST INPUT -->
-<div class="create-post">
-  <div class="create-post-avatar" onclick="window.location.href='/user_profile.html'">
-    <i class="fas fa-user"></i>
-  </div>
-  <input 
-    type="text" 
-    class="create-post-input" 
-    id="create-prompt-input" 
-    placeholder="What's on your mind? Share a story..."
-    onkeypress="handleCreatePostKey(event)"
-  >
-  <div class="create-post-actions">
-    <button class="create-post-btn" onclick="openCreatePost()">
-      <i class="fas fa-paper-plane"></i>
-    </button>
-  </div>
-</div>
-
-<!-- FILTER TABS -->
-<div class="filter-tabs" id="filter-tabs">
-  <div class="filter-tab active" data-filter="all">
-    <i class="fas fa-sparkles"></i>
-    <span>For You</span>
-  </div>
-  <div class="filter-tab" data-filter="following">
-    <i class="fas fa-user-friends"></i>
-    <span>Following</span>
-  </div>
-  <div class="filter-tab" data-filter="audio">
-    <i class="fas fa-music"></i>
-    <span>Audio</span>
-  </div>
-  <div class="filter-tab" data-filter="video">
-    <i class="fas fa-video"></i>
-    <span>Video</span>
-  </div>
-  <div class="filter-tab" data-filter="reel">
-    <i class="fas fa-film"></i>
-    <span>Reels</span>
-  </div>
-  <div class="filter-tab" data-filter="article">
-    <i class="fas fa-newspaper"></i>
-    <span>Articles</span>
-  </div>
-</div>
-
-<!-- MAIN FEED -->
-<div class="feed" id="posts-feed">
-  <!-- Loading Skeleton -->
-  <div class="skeleton-post">
-    <div class="skeleton-header">
-      <div class="skeleton skeleton-avatar"></div>
-      <div style="flex:1">
-        <div class="skeleton skeleton-text short"></div>
-        <div class="skeleton skeleton-text short" style="width:30%"></div>
-      </div>
-    </div>
-    <div class="skeleton skeleton-media"></div>
-    <div class="skeleton skeleton-text long"></div>
-    <div class="skeleton skeleton-text medium"></div>
-  </div>
-  <div class="skeleton-post">
-    <div class="skeleton-header">
-      <div class="skeleton skeleton-avatar"></div>
-      <div style="flex:1">
-        <div class="skeleton skeleton-text short"></div>
-        <div class="skeleton skeleton-text short" style="width:30%"></div>
-      </div>
-    </div>
-    <div class="skeleton skeleton-media"></div>
-    <div class="skeleton skeleton-text long"></div>
-    <div class="skeleton skeleton-text medium"></div>
-  </div>
-</div>
-
-<!-- TOAST NOTIFICATIONS -->
 <div class="toast" id="toast"></div>
 
-<!-- SHARE MODAL -->
-<div class="modal-overlay" id="share-modal" onclick="if(event.target===this)closeShareModal()">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Share Post</h3>
-      <div class="modal-close" onclick="closeShareModal()"><i class="fas fa-times"></i></div>
-    </div>
-    <div class="modal-body">
-      <p style="margin-bottom:16px;color:var(--muted)">Share this post with your friends</p>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center">
-        <div onclick="shareToWhatsApp()" style="cursor:pointer">
-          <div style="width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;color:white;font-size:1.5rem">
-            <i class="fab fa-whatsapp"></i>
-          </div>
-          <span style="font-size:.8rem;font-weight:500">WhatsApp</span>
-        </div>
-        <div onclick="shareToTwitter()" style="cursor:pointer">
-          <div style="width:56px;height:56px;background:#1DA1F2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;color:white;font-size:1.5rem">
-            <i class="fab fa-twitter"></i>
-          </div>
-          <span style="font-size:.8rem;font-weight:500">Twitter</span>
-        </div>
-        <div onclick="shareToFacebook()" style="cursor:pointer">
-          <div style="width:56px;height:56px;background:#1877F2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;color:white;font-size:1.5rem">
-            <i class="fab fa-facebook-f"></i>
-          </div>
-          <span style="font-size:.8rem;font-weight:500">Facebook</span>
-        </div>
-        <div onclick="copyLink()" style="cursor:pointer">
-          <div style="width:56px;height:56px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;color:white;font-size:1.5rem">
-            <i class="fas fa-link"></i>
-          </div>
-          <span style="font-size:.8rem;font-weight:500">Copy Link</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-/**
- * ============================================
- * ECHOSTACK DASHBOARD - MAIN FEED
- * Complete JavaScript Implementation
- * ============================================
- */
+let user = null;
+let currentFilter = '';
+let allPosts = [];
 
-// ===== GLOBAL STATE MANAGEMENT =====
-const AppState = {
-  currentFilter: 'all',
-  posts: [],
-  stories: [],
-  user: null,
-  isLoading: false,
-  currentPage: 1,
-  hasMore: true,
-  sharePostId: null
-};
+function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.className = 'toast', 2500);
+}
 
-// ===== UTILITY FUNCTIONS =====
-const Utils = {
-  escapeHtml(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  },
-  
-  timeAgo(dateStr) {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diff = Math.floor((now - date) / 1000);
-    
-    if (diff < 60) return `${diff}s`;
-    if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-    if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
-    return date.toLocaleDateString();
-  },
-  
-  formatNumber(num) {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return num.toString();
-  },
-  
-  debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-};
-
-// ===== TOAST NOTIFICATIONS =====
-const Toast = {
-  element: null,
-  timeout: null,
-  
-  init() {
-    this.element = document.getElementById('toast');
-  },
-  
-  show(message, type = '') {
-    if (!this.element) this.init();
-    this.element.textContent = message;
-    this.element.className = `toast show ${type}`;
-    
-    if (this.timeout) clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => {
-      this.element.classList.remove('show');
-    }, 3000);
-  },
-  
-  ok(message) { this.show(message, 'ok'); },
-  error(message) { this.show(message, 'er'); },
-  info(message) { this.show(message, 'info'); }
-};
-
-// ===== SIDEBAR NAVIGATION =====
 function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  sidebar.classList.toggle('open');
-  overlay.classList.toggle('show');
-  document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
 }
 
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('show');
-  document.body.style.overflow = '';
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// ===== API HELPER =====
-async function apiFetch(endpoint, options = {}) {
-  const config = {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers
-    },
-    ...options
-  };
-  
-  try {
-    const response = await fetch(endpoint, config);
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 60) return Math.floor(diff) + 's';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h';
+    return Math.floor(diff / 86400) + 'd';
+}
+
+async function loadUser() {
+    try {
+        const res = await fetch('/api/users/me', { credentials: 'include' });
+        if (res.ok) {
+            user = await res.json();
+            setupUserUI();
+            loadPosts();
+            loadStories();
+            loadRegions();
+        } else {
+            location.href = '/user-login';
+        }
+    } catch(e) {
+        location.href = '/user-login';
+    }
+}
+
+function setupUserUI() {
+    const initial = (user.username || 'U').charAt(0).toUpperCase();
+    document.getElementById('sidebarAvatar').textContent = initial;
+    document.getElementById('sidebarName').textContent = user.full_name || user.username;
+    document.getElementById('createAvatar').textContent = initial;
     
-    if (!response.ok) {
-      if (response.status === 401) {
-        window.location.href = '/user-login.html';
-        throw new Error('Unauthorized');
-      }
-      throw new Error(`HTTP ${response.status}`);
+    const badge = document.getElementById('sidebarBadge');
+    if (user.role === 'admin' || user.role === 'superuser') {
+        badge.className = 'sidebar-user-badge badge-admin';
+        badge.textContent = 'Admin';
+    } else if (user.role === 'creator') {
+        badge.className = 'sidebar-user-badge badge-creator';
+        badge.textContent = 'Creator';
+    } else if (user.is_premium) {
+        badge.className = 'sidebar-user-badge badge-premium';
+        badge.textContent = 'Premium';
     }
     
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return await response.json();
-    }
-    
-    return await response.text();
-  } catch (error) {
-    console.error(`API Error (${endpoint}):`, error);
-    Toast.error('Failed to load data');
-    throw error;
-  }
+    // Hidden admin access — no public link
 }
 
-// ===== ALL 16 REGIONS OF GHANA =====
-const GhanaRegions = [
-  { id: 1, name: 'Ashanti', emoji: '👑', color: '#C8962E' },
-  { id: 2, name: 'Brong-Ahafo', emoji: '🌾', color: '#22c55e' },
-  { id: 3, name: 'Central', emoji: '🏛️', color: '#3b82f6' },
-  { id: 4, name: 'Eastern', emoji: '🏔️', color: '#10b981' },
-  { id: 5, name: 'Greater Accra', emoji: '🏙️', color: '#ef4444' },
-  { id: 6, name: 'Northern', emoji: '🦁', color: '#f59e0b' },
-  { id: 7, name: 'Upper East', emoji: '🌅', color: '#f97316' },
-  { id: 8, name: 'Upper West', emoji: '🌄', color: '#8b5cf6' },
-  { id: 9, name: 'Volta', emoji: '🌊', color: '#06b6d4' },
-  { id: 10, name: 'Western', emoji: '🌴', color: '#14b8a6' },
-  { id: 11, name: 'Ahafo', emoji: '🌳', color: '#84cc16' },
-  { id: 12, name: 'Bono', emoji: '🪘', color: '#eab308' },
-  { id: 13, name: 'Bono East', emoji: '🌻', color: '#fbbf24' },
-  { id: 14, name: 'North East', emoji: '☀️', color: '#fb923c' },
-  { id: 15, name: 'Oti', emoji: '🦋', color: '#a78bfa' },
-  { id: 16, name: 'Savannah', emoji: '🌾', color: '#34d399' },
-  { id: 17, name: 'Western North', emoji: '🏞️', color: '#2dd4bf' }
-];
-
-// ===== LOAD STORIES =====
-async function loadStories() {
-  const list = document.getElementById('stories-list');
-  
-  try {
-    // Try to fetch actual user stories from API
-    const response = await apiFetch('/api/stories/active');
-    AppState.stories = response.stories || response || [];
-  } catch (error) {
-    console.warn('Stories API not available, using default regions');
-    AppState.stories = [];
-  }
-  
-  // Build stories HTML
-  let html = '';
-  
-  // Add "Your Story" (Add Story button)
-  html += `
-    <div class="story add-story" onclick="openYourStory()">
-      <div class="story-ring">
-        <div class="story-avatar">
-          <i class="fas fa-plus" style="color:var(--gold);font-size:1.2rem"></i>
-        </div>
-      </div>
-      <div class="story-name">Your Story</div>
-    </div>
-  `;
-  
-  // Add all 16 regions
-  GhanaRegions.forEach((region, index) => {
-    const unseen = index < 5 ? 'unseen' : 'seen';
-    const displayName = region.name.length > 10 ? region.name.substring(0, 9) + '..' : region.name;
-    
-    html += `
-      <div class="story ${unseen}" onclick="viewRegion(${region.id}, '${region.name}')">
-        <div class="story-ring" style="background:linear-gradient(45deg,${region.color},var(--gold2))">
-          <div class="story-avatar" style="font-size:1.6rem">${region.emoji}</div>
-        </div>
-        <div class="story-name">${Utils.escapeHtml(displayName)}</div>
-      </div>
-    `;
-  });
-  
-  // Add user stories if available
-  if (AppState.stories.length > 0) {
-    AppState.stories.forEach(story => {
-      html += `
-        <div class="story unseen" onclick="viewStory(${story.id})">
-          <div class="story-ring">
-            <div class="story-avatar">
-              ${story.user?.avatar 
-                ? `<img src="${Utils.escapeHtml(story.user.avatar)}" alt="${Utils.escapeHtml(story.user.username)}">`
-                : '<i class="fas fa-user"></i>'
-              }
-            </div>
-          </div>
-          <div class="story-name">${Utils.escapeHtml(story.user?.username || 'User')}</div>
-        </div>
-      `;
-    });
-  }
-  
-  list.innerHTML = html;
-}
-
-// ===== LOAD POSTS =====
 async function loadPosts() {
-  const feed = document.getElementById('posts-feed');
-  
-  if (AppState.isLoading) return;
-  AppState.isLoading = true;
-  
-  // Show loading skeleton
-  if (AppState.currentPage === 1) {
-    feed.innerHTML = `
-      <div class="loading">
-        <div class="loading-spinner"></div>
-        <span class="loading-text">Loading posts...</span>
-      </div>
-    `;
-  }
-  
-  try {
-    const endpoint = AppState.currentFilter === 'following' 
-      ? '/api/posts/following' 
-      : `/api/posts?filter=${AppState.currentFilter}&page=${AppState.currentPage}`;
-    
-    const response = await apiFetch(endpoint);
-    const newPosts = response.posts || response || [];
-    
-    if (newPosts.length === 0) {
-      AppState.hasMore = false;
-      if (AppState.currentPage === 1) {
-        feed.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>No posts yet</p>
-            <span>Follow creators or check back later</span>
-          </div>
-        `;
-      }
-      return;
+    try {
+        const url = currentFilter ? `/api/posts?type=${currentFilter}` : '/api/posts';
+        const res = await fetch(url);
+        allPosts = await res.json();
+        renderPosts();
+    } catch(e) {
+        document.getElementById('postsContainer').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
     }
-    
-    AppState.posts = AppState.currentPage === 1 ? newPosts : [...AppState.posts, ...newPosts];
-    AppState.currentPage++;
-    
-    renderPosts();
-    
-  } catch (error) {
-    console.error('Failed to load posts:', error);
-    if (AppState.currentPage === 1) {
-      feed.innerHTML = `
-        <div class="empty-state">
-          <i class="fas fa-wifi"></i>
-          <p>Failed to load posts</p>
-          <span>Pull down to refresh</span>
-        </div>
-      `;
-    }
-  } finally {
-    AppState.isLoading = false;
-  }
 }
 
-// ===== RENDER POSTS =====
 function renderPosts() {
-  const feed = document.getElementById('posts-feed');
-  
-  if (AppState.posts.length === 0) {
-    feed.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-inbox"></i>
-        <p>No posts yet</p>
-        <span>Follow creators or check back later</span>
-      </div>
-    `;
-    return;
-  }
-  
-  feed.innerHTML = AppState.posts.map(post => {
-    const isReel = post.content_type === 'reel';
-    const isAudio = post.content_type === 'audio';
-    const isVideo = post.content_type === 'video';
-    const mediaUrl = post.media_url || post.video_url || post.audio_url || post.cover_image;
-    const likeCount = post.likes_count || 0;
-    const commentCount = post.comments_count || 0;
-    const viewCount = post.views_count || 0;
-    
-    // Media HTML based on content type
-    let mediaHtml = '';
-    
-    if (isReel && mediaUrl) {
-      mediaHtml = `
-        <div class="post-media reel-container">
-          <video src="${Utils.escapeHtml(mediaUrl)}" controls playsinline 
-                 style="width:100%;max-height:500px;object-fit:contain"
-                 poster="${Utils.escapeHtml(post.cover_image || '')}">
-          </video>
-          <div class="watermark">
-            <i class="fas fa-water"></i> EchoStack
-          </div>
-        </div>
-      `;
-    } else if (isVideo && mediaUrl) {
-      mediaHtml = `
-        <div class="post-media">
-          <video src="${Utils.escapeHtml(mediaUrl)}" controls 
-                 style="width:100%;max-height:500px;object-fit:cover"
-                 poster="${Utils.escapeHtml(post.cover_image || '')}">
-          </video>
-        </div>
-      `;
-    } else if (isAudio && mediaUrl) {
-      mediaHtml = `
-        <div class="card-audio">
-          <div class="audio-title">
-            <i class="fas fa-music"></i>
-            <span>${Utils.escapeHtml(post.title || 'Audio Post')}</span>
-          </div>
-          <audio controls src="${Utils.escapeHtml(mediaUrl)}"></audio>
-        </div>
-      `;
-    } else if (post.cover_image) {
-      mediaHtml = `
-        <div class="post-media">
-          <img src="${Utils.escapeHtml(mediaUrl)}" 
-               alt="${Utils.escapeHtml(post.title || 'Post image')}" 
-               loading="lazy"
-               style="width:100%;max-height:500px;object-fit:cover"
-               onerror="this.style.display='none'">
-        </div>
-      `;
+    const container = document.getElementById('postsContainer');
+    if (!allPosts.length) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Be the first to share a story!</p></div>';
+        return;
     }
     
-    // Hashtags
-    const hashtagsHtml = post.tags && post.tags.length > 0
-      ? `<div class="post-hashtags">${post.tags.map(t => `<a href="/explore?tag=${encodeURIComponent(t)}">#${Utils.escapeHtml(t)}</a>`).join(' ')}</div>`
-      : '';
-    
-    return `
-      <article class="post-card" data-post-id="${post.id}" onclick="openPost(${post.id})">
-        <!-- Post Header -->
-        <div class="post-header">
-          <div class="post-avatar" onclick="event.stopPropagation();viewProfile(${post.author_id})">
-            <i class="fas fa-user"></i>
-          </div>
-          <div class="post-author-info">
-            <div class="post-author" onclick="event.stopPropagation();viewProfile(${post.author_id})">
-              ${Utils.escapeHtml(post.author_username || 'User')}
-            </div>
-            <div class="post-meta">
-              <span class="post-time">${Utils.timeAgo(post.created_at)}</span>
-              ${post.region_name ? `<span class="post-region">${Utils.escapeHtml(post.region_name)}</span>` : ''}
-            </div>
-          </div>
-          <button class="post-more" onclick="event.stopPropagation();showPostMenu(${post.id})">
-            <i class="fas fa-ellipsis"></i>
-          </button>
-        </div>
+    container.innerHTML = allPosts.map(post => {
+        const author = post.author_username || 'User';
+        const initial = author.charAt(0).toUpperCase();
+        const typeBadge = post.content_type ? `<span class="post-type-badge ${post.content_type}">${post.content_type}</span>` : '';
+        const followBtn = user && post.author_id !== user.id ? `<button class="post-follow-btn" onclick="event.stopPropagation();toggleFollow('${post.author_id}')">Follow</button>` : '';
         
-        <!-- Post Media -->
-        ${mediaHtml}
+        let mediaHtml = '';
+        if (post.media_url) {
+            if (post.content_type === 'video' || post.content_type === 'reel') {
+                mediaHtml = `<div class="post-media"><video src="${escapeHtml(post.media_url)}" controls preload="metadata"></video></div>`;
+            } else if (post.content_type === 'audio') {
+                mediaHtml = `<div class="audio-card"><div class="audio-header"><div class="audio-icon"><i class="fas fa-headphones"></i></div><div class="audio-info"><h4>${escapeHtml(post.title)}</h4><p>${escapeHtml(author)}</p></div></div><audio controls preload="none"><source src="${escapeHtml(post.media_url)}" type="audio/mpeg"></audio></div>`;
+            } else {
+                mediaHtml = `<div class="post-media"><img src="${escapeHtml(post.media_url)}" alt="" loading="lazy"></div>`;
+            }
+        }
         
-        <!-- Post Actions -->
-        <div class="post-actions" onclick="event.stopPropagation()">
-          <button class="action-btn like-btn ${post.is_liked ? 'liked' : ''}" 
-                  onclick="toggleLike(${post.id}, this)">
-            <i class="fas fa-heart"></i>
-          </button>
-          <button class="action-btn" onclick="openComments(${post.id})">
-            <i class="fas fa-comment"></i>
-          </button>
-          <button class="action-btn" onclick="openShareModal(${post.id})">
-            <i class="fas fa-share"></i>
-          </button>
-          <button class="action-btn save-btn ${post.is_saved ? 'saved' : ''}" 
-                  onclick="toggleSave(${post.id}, this)" 
-                  style="margin-left:auto">
-            <i class="fas fa-bookmark"></i>
-          </button>
-        </div>
-        
-        <!-- Post Stats -->
-        <div class="post-stats">
-          <span class="likes">${Utils.formatNumber(likeCount)} likes</span>
-          <span class="comments">${Utils.formatNumber(commentCount)} comments</span>
-          ${viewCount > 0 ? `<span class="views">${Utils.formatNumber(viewCount)} views</span>` : ''}
-        </div>
-        
-        <!-- Post Content -->
-        <div class="post-content">
-          <div class="post-caption">
-            <span class="author">${Utils.escapeHtml(post.author_username || 'User')}</span>
-            <span>${Utils.escapeHtml(post.excerpt || post.content?.substring(0, 200) || '')}</span>
-          </div>
-          ${hashtagsHtml}
-          <div class="post-time" style="margin-top:8px;text-transform:uppercase;font-size:.7rem">
-            ${Utils.timeAgo(post.created_at)} ago
-          </div>
-        </div>
-      </article>
-    `;
-  }).join('');
-  
-  // Add loading indicator at bottom if more posts available
-  if (AppState.hasMore) {
-    feed.innerHTML += `
-      <div class="loading" id="feed-loading">
-        <div class="loading-spinner"></div>
-      </div>
-    `;
-  }
+        return `
+            <article class="post-card" onclick="location.href='/post/${post.id}'">
+                <div class="post-header">
+                    <div class="post-avatar">${initial}</div>
+                    <div class="post-author-info">
+                        <div class="post-author">${escapeHtml(author)} ${followBtn}</div>
+                        <div class="post-meta">
+                            <span>${timeAgo(post.created_at)}</span>
+                            ${typeBadge}
+                        </div>
+                    </div>
+                </div>
+                <h3 class="post-title">${escapeHtml(post.title)}</h3>
+                ${post.excerpt ? `<p class="post-excerpt">${escapeHtml(post.excerpt)}</p>` : ''}
+                ${mediaHtml}
+                <div class="post-actions">
+                    <button class="post-action ${post.user_liked ? 'liked' : ''}" onclick="event.stopPropagation();toggleLike(${post.id}, this)">
+                        <i class="fas fa-heart"></i>
+                        <span>${post.likes || 0}</span>
+                    </button>
+                    <button class="post-action" onclick="event.stopPropagation();location.href='/post/${post.id}'">
+                        <i class="fas fa-comment"></i>
+                        <span>${post.comments_count || 0}</span>
+                    </button>
+                    <button class="post-action" onclick="event.stopPropagation();sharePost(${post.id})">
+                        <i class="fas fa-share"></i>
+                    </button>
+                    <button class="post-action ${post.user_saved ? 'saved' : ''}" onclick="event.stopPropagation();toggleSave(${post.id}, this)">
+                        <i class="fas fa-bookmark"></i>
+                    </button>
+                </div>
+            </article>
+        `;
+    }).join('');
 }
 
-// ===== POST INTERACTIONS =====
-function openPost(postId) {
-  window.location.href = `/post.html?id=${postId}`;
+async function loadStories() {
+    try {
+        const res = await fetch('/api/creators?limit=8');
+        const creators = await res.json();
+        const container = document.getElementById('storiesList');
+        
+        container.innerHTML = creators.slice(0, 8).map(c => {
+            const initial = (c.username || 'C').charAt(0).toUpperCase();
+            return `
+                <div class="story-item" onclick="location.href='/user/${c.id}'">
+                    <div class="story-ring">
+                        <div class="story-ring-inner">
+                            <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;color:var(--ink);font-weight:700">${initial}</div>
+                        </div>
+                    </div>
+                    <span class="story-name">${escapeHtml(c.username)}</span>
+                </div>
+            `;
+        }).join('');
+    } catch(e) {}
 }
 
-function viewProfile(userId) {
-  window.location.href = `/user_profile.html?id=${userId}`;
+async function loadRegions() {
+    try {
+        const res = await fetch('/api/regions');
+        const regions = await res.json();
+        const container = document.getElementById('regionList');
+        
+        container.innerHTML = regions.slice(0, 6).map(r => `
+            <div class="region-item" onclick="location.href='/app?region=${r.id}'">
+                <div class="region-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="region-name">${escapeHtml(r.name)}</div>
+            </div>
+        `).join('');
+    } catch(e) {}
+}
+
+function setFilter(btn, filter) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = filter;
+    loadPosts();
 }
 
 async function toggleLike(postId, btn) {
-  event.stopPropagation();
-  
-  try {
-    const response = await apiFetch(`/api/posts/${postId}/like`, { method: 'POST' });
-    const isLiked = response.liked || !btn.classList.contains('liked');
-    
-    btn.classList.toggle('liked', isLiked);
-    const countEl = btn.parentElement.parentElement.querySelector('.likes');
-    if (countEl) {
-      const current = parseInt(countEl.textContent) || 0;
-      countEl.textContent = `${current + (isLiked ? 1 : -1)} likes`;
-    }
-    
-    Toast.ok(isLiked ? '❤️ Liked!' : '🤍 Unliked');
-  } catch (error) {
-    Toast.error('Failed to like post');
-  }
+    try {
+        const res = await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
+        const data = await res.json();
+        btn.classList.toggle('liked');
+        btn.querySelector('span').textContent = data.likes || 0;
+    } catch(e) {}
 }
 
 async function toggleSave(postId, btn) {
-  event.stopPropagation();
-  
-  try {
-    const response = await apiFetch(`/api/posts/${postId}/save`, { method: 'POST' });
-    const isSaved = response.saved || !btn.classList.contains('saved');
-    
-    btn.classList.toggle('saved', isSaved);
-    Toast.ok(isSaved ? '💾 Saved' : '🔖 Unsaved');
-  } catch (error) {
-    Toast.error('Failed to save post');
-  }
+    btn.classList.toggle('saved');
+    showToast(btn.classList.contains('saved') ? 'Saved!' : 'Removed from saved');
 }
 
-function openComments(postId) {
-  window.location.href = `/post.html?id=${postId}#comments`;
+async function toggleFollow(userId) {
+    try {
+        await fetch(`/api/follow/${userId}`, { method: 'POST' });
+        showToast('Followed!');
+    } catch(e) {}
 }
 
-function openShareModal(postId) {
-  event.stopPropagation();
-  AppState.sharePostId = postId;
-  document.getElementById('share-modal').classList.add('active');
-}
-
-function closeShareModal() {
-  document.getElementById('share-modal').classList.remove('active');
-  AppState.sharePostId = null;
-}
-
-function shareToWhatsApp() {
-  const url = encodeURIComponent(`${window.location.origin}/post.html?id=${AppState.sharePostId}`);
-  window.open(`https://wa.me/?text=${url}`, '_blank');
-  closeShareModal();
-  Toast.info('Opening WhatsApp...');
-}
-
-function shareToTwitter() {
-  const url = encodeURIComponent(`${window.location.origin}/post.html?id=${AppState.sharePostId}`);
-  window.open(`https://twitter.com/intent/tweet?url=${url}`, '_blank');
-  closeShareModal();
-  Toast.info('Opening Twitter...');
-}
-
-function shareToFacebook() {
-  const url = encodeURIComponent(`${window.location.origin}/post.html?id=${AppState.sharePostId}`);
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-  closeShareModal();
-  Toast.info('Opening Facebook...');
-}
-
-function copyLink() {
-  const url = `${window.location.origin}/post.html?id=${AppState.sharePostId}`;
-  navigator.clipboard.writeText(url).then(() => {
-    Toast.ok('📋 Link copied!');
-    closeShareModal();
-  }).catch(() => {
-    Toast.error('Failed to copy');
-  });
-}
-
-function showPostMenu(postId) {
-  const actions = ['Report Post', 'Mute User', 'Copy Link', 'Cancel'];
-  const selected = prompt(`Post #${postId}\nActions:\n1. Report\n2. Mute\n3. Copy Link\n4. Cancel\n\nEnter number:`);
-  
-  if (selected === '3') {
-    copyLink();
-  } else if (selected === '1') {
-    Toast.info('Report submitted');
-  } else if (selected === '2') {
-    Toast.info('User muted');
-  }
-}
-
-// ===== STORY INTERACTIONS =====
-function openYourStory() {
-  Toast.info('📸 Opening camera...');
-  window.location.href = '/creator.html?type=story';
-}
-
-function viewStory(storyId) {
-  Toast.info('📖 Opening story...');
-  window.location.href = `/story.html?id=${storyId}`;
-}
-
-function viewRegion(regionId, regionName) {
-  Toast.info(`📍 Exploring ${regionName}...`);
-  window.location.href = `/app?region=${regionId}`;
-}
-
-// ===== CREATE POST =====
-function handleCreatePostKey(event) {
-  if (event.key === 'Enter') {
-    openCreatePost();
-  }
-}
-
-function openCreatePost() {
-  const input = document.getElementById('create-prompt-input');
-  const content = input.value.trim();
-  
-  if (!content) {
-    Toast.error('✍️ Write something first');
-    input.focus();
-    return;
-  }
-  
-  // Store draft in sessionStorage
-  sessionStorage.setItem('draft_content', content);
-  window.location.href = '/creator.html';
-}
-
-// ===== FILTER TABS =====
-function setupFilters() {
-  const tabsContainer = document.getElementById('filter-tabs');
-  
-  tabsContainer.addEventListener('click', (e) => {
-    const tab = e.target.closest('.filter-tab');
-    if (!tab) return;
-    
-    // Update active state
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    
-    // Update filter and reload posts
-    AppState.currentFilter = tab.dataset.filter;
-    AppState.currentPage = 1;
-    AppState.posts = [];
-    loadPosts();
-    
-    Toast.info(`Showing ${tab.dataset.filter} posts`);
-  });
-}
-
-// ===== INFINITE SCROLL =====
-function setupInfiniteScroll() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting && AppState.hasMore && !AppState.isLoading) {
-        loadPosts();
-      }
-    });
-  }, { rootMargin: '200px' });
-  
-  // Observe the loading indicator at bottom of feed
-  const observeLoading = () => {
-    const loadingEl = document.getElementById('feed-loading');
-    if (loadingEl) {
-      observer.observe(loadingEl);
-    }
-  };
-  
-  // Re-observe after posts render
-  const originalRenderPosts = renderPosts;
-  renderPosts = function() {
-    originalRenderPosts();
-    setTimeout(observeLoading, 100);
-  };
-}
-
-// ===== PULL TO REFRESH =====
-function setupPullToRefresh() {
-  let startY = 0;
-  let currentY = 0;
-  let isPulling = false;
-  
-  document.addEventListener('touchstart', (e) => {
-    if (window.scrollY === 0) {
-      startY = e.touches[0].clientY;
-      isPulling = true;
-    }
-  }, { passive: true });
-  
-  document.addEventListener('touchmove', (e) => {
-    if (!isPulling) return;
-    currentY = e.touches[0].clientY;
-    const diff = currentY - startY;
-    
-    if (diff > 100) {
-      refreshFeed();
-      isPulling = false;
-    }
-  }, { passive: true });
-  
-  document.addEventListener('touchend', () => {
-    isPulling = false;
-  });
-}
-
-async function refreshFeed() {
-  Toast.info('🔄 Refreshing...');
-  AppState.currentPage = 1;
-  AppState.posts = [];
-  await loadPosts();
-  await loadStories();
-  Toast.ok('Feed refreshed!');
-}
-
-// ===== TOPBAR SCROLL EFFECT =====
-function setupTopbarScroll() {
-  const topbar = document.getElementById('topbar');
-  
-  window.addEventListener('scroll', Utils.debounce(() => {
-    if (window.scrollY > 10) {
-      topbar.classList.add('scrolled');
+function sharePost(postId) {
+    const url = `${location.origin}/post/${postId}`;
+    if (navigator.share) {
+        navigator.share({ title: 'EchoStack', url });
     } else {
-      topbar.classList.remove('scrolled');
+        navigator.clipboard.writeText(url);
+        showToast('Link copied!');
     }
-  }, 100));
 }
 
-// ===== LOGOUT =====
 async function logout() {
-  if (!confirm('Are you sure you want to logout?')) return;
-  
-  try {
-    await apiFetch('/api/auth/logout', { method: 'POST' });
-  } catch (error) {
-    console.error('Logout error:', error);
-  } finally {
-    window.location.href = '/user-login.html';
-  }
+    await fetch('/api/users/logout', { method: 'POST' });
+    localStorage.removeItem('es_user');
+    location.href = '/user-login';
 }
 
-// ===== SERVICE WORKER REGISTRATION (PWA) =====
-function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('ServiceWorker registered:', registration.scope);
-      })
-      .catch(error => {
-        console.log('ServiceWorker registration failed:', error);
-      });
-  }
-}
-
-// ===== INITIALIZE APP =====
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize components
-  Toast.init();
-  
-  // Load initial data
-  loadStories();
-  loadPosts();
-  
-  // Setup interactions
-  setupFilters();
-  setupInfiniteScroll();
-  setupPullToRefresh();
-  setupTopbarScroll();
-  
-  // Register service worker for PWA
-  registerServiceWorker();
-  
-  // Check for draft content
-  const draft = sessionStorage.getItem('draft_content');
-  if (draft) {
-    document.getElementById('create-prompt-input').value = draft;
-  }
-  
-  // Handle online/offline status
-  window.addEventListener('online', () => Toast.ok('🌐 Back online'));
-  window.addEventListener('offline', () => Toast.error('⚠️ You are offline'));
-  
-  // Keyboard shortcuts
-  document.addEventListener('keydown', (e) => {
-    if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
-      e.preventDefault();
-      document.getElementById('create-prompt-input').focus();
-    }
-  });
-});
-
-// ===== HANDLE VISIBILITY CHANGE =====
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) {
-    // Refresh when user returns to tab
-    loadStories();
-  }
-});
+loadUser();
 </script>
 </body>
 </html>
-
