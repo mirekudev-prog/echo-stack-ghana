@@ -1,0 +1,22 @@
+{
+  "name": "EchoStack - Ghana Heritage Archive",
+  "short_name": "EchoStack",
+  "description": "Discover Ghana's rich cultural heritage across 16 regions",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF6EF",
+  "theme_color": "#0D1B2A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/echostack-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/echostack-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

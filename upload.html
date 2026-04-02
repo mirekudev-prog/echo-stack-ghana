@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0D1B2A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Upload Test</title>
+</head>
+<body>
+    <h1>File Upload Test</h1>
+    <input type="file" id="fileInput"><br><br>
+    <button onclick="testUpload()">Test Upload</button>
+    
+    <script>
+        async function testUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Select a file first!');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('filename', file.name);
+            formData.append('category', 'test');
+            
+            try {
+                const response = await fetch('/api/upload/file', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                alert(data.success ? '✅ Success!' : '❌ Failed: ' + data.detail);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

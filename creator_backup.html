@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0D1B2A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Write Post — EchoStack</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;
+  --border:#E2E8F0;--muted:#94A3B8;--white:#ffffff;
+  --surface:#F8FAFB;--success:#16A34A;--danger:#DC2626
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--ink);display:flex;flex-direction:column}
+
+/* ── TOP BAR ── */
+.topbar{
+  background:var(--ink);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;height:52px;flex-shrink:0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  position:relative;z-index:50
+}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.menu-btn{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.menu-btn:hover{background:rgba(255,255,255,.08)}
+.topbar-title{color:#fff;font-weight:700;font-size:.95rem}
+.topbar-actions{display:flex;gap:7px;align-items:center}
+.btn-draft{
+  padding:7px 13px;border-radius:20px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.8);font-size:.75rem;font-weight:600;
+  cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;
+  display:flex;align-items:center;gap:5px
+}
+.btn-draft:hover{background:rgba(255,255,255,.15)}
+.btn-publish{
+  padding:7px 15px;border-radius:20px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border:none;color:var(--ink);font-size:.75rem;font-weight:700;
+  cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;
+  display:flex;align-items:center;gap:5px;
+  box-shadow:0 2px 12px rgba(200,150,46,.35)
+}
+.btn-publish:active{transform:scale(.97)}
+
+/* ── TABS (mobile: Editor / Preview) ── */
+.tab-bar{
+  background:#fff;border-bottom:1px solid var(--border);
+  display:flex;flex-shrink:0
+}
+.tab{
+  flex:1;padding:11px;text-align:center;
+  font-size:.8rem;font-weight:600;color:var(--muted);
+  cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .15s;position:relative
+}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;margin-left:4px;vertical-align:middle;opacity:0;transition:opacity .2s}
+.tab-dot.vis{opacity:1}
+
+/* ── MAIN LAYOUT ── */
+.editor-wrap{
+  flex:1;overflow:hidden;display:flex;background:#fff;
+  position:relative
+}
+
+/* ── EDITOR PANEL ── */
+.editor-panel{
+  display:flex;flex-direction:column;
+  width:100%;flex-shrink:0;overflow:hidden;
+  transition:transform .25s ease
+}
+.editor-panel.hide{transform:translateX(-100%);position:absolute;inset:0;pointer-events:none}
+
+/* Type selector */
+.type-strip{
+  display:flex;gap:6px;padding:10px 14px;
+  border-bottom:1px solid var(--border);background:var(--surface);
+  overflow-x:auto;flex-shrink:0;scrollbar-width:none
+}
+.type-strip::-webkit-scrollbar{display:none}
+.type-chip{
+  flex-shrink:0;padding:5px 12px;border-radius:30px;
+  border:1.5px solid var(--border);background:#fff;
+  font-size:.72rem;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:all .15s;white-space:nowrap
+}
+.type-chip.sel{border-color:var(--gold);background:rgba(200,150,46,.08);color:var(--gold)}
+
+/* Fields area — scrollable */
+.fields{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 0}
+
+.field-group{margin-bottom:16px}
+.field-label{
+  font-size:.68rem;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block
+}
+.field-label .req{color:var(--danger);margin-left:2px}
+.field-input{
+  width:100%;padding:12px 14px;
+  border:1.5px solid var(--border);border-radius:12px;
+  font-family:'DM Sans',sans-serif;font-size:.95rem;
+  color:var(--ink);background:#fff;outline:none;
+  transition:border-color .2s;
+  -webkit-appearance:none
+}
+.field-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,150,46,.1)}
+.field-input.large{font-size:1.05rem;font-weight:600;min-height:52px}
+.field-textarea{
+  width:100%;padding:12px 14px;
+  border:1.5px solid var(--border);border-radius:12px;
+  font-family:'DM Sans',sans-serif;font-size:.88rem;
+  color:var(--ink);background:#fff;outline:none;
+  transition:border-color .2s;resize:none;
+  -webkit-appearance:none;line-height:1.6
+}
+.field-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,150,46,.1)}
+.char-count{text-align:right;font-size:.65rem;color:var(--muted);margin-top:3px}
+
+/* COVER IMAGE UPLOAD */
+.cover-zone{
+  border:2px dashed var(--border);border-radius:14px;
+  padding:18px;text-align:center;cursor:pointer;
+  transition:all .2s;background:var(--surface);
+  position:relative;overflow:hidden
+}
+.cover-zone:hover,.cover-zone.drag{border-color:var(--gold);background:rgba(200,150,46,.04)}
+.cover-zone-icon{font-size:2rem;margin-bottom:6px;display:block}
+.cover-zone p{font-size:.78rem;color:var(--muted);line-height:1.5}
+.cover-zone strong{color:var(--gold);font-weight:600}
+.cover-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.cover-preview{
+  width:100%;height:140px;object-fit:cover;
+  border-radius:12px;display:none
+}
+.cover-remove{
+  display:none;margin-top:6px;padding:5px 12px;
+  border-radius:20px;border:1px solid var(--danger);
+  background:none;color:var(--danger);font-size:.72rem;
+  font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif
+}
+
+/* MARKDOWN TOOLBAR */
+.md-toolbar{
+  display:flex;gap:2px;padding:8px 10px;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:var(--surface);overflow-x:auto;flex-shrink:0;
+  scrollbar-width:none;
+  /* sticky at bottom when keyboard open */
+  position:sticky;bottom:0;z-index:10
+}
+.md-toolbar::-webkit-scrollbar{display:none}
+.md-btn{
+  flex-shrink:0;min-width:38px;height:34px;
+  border-radius:8px;border:none;
+  background:none;color:var(--ink);
+  font-size:.78rem;font-weight:700;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;gap:3px;
+  padding:0 7px;font-family:'DM Sans',sans-serif
+}
+.md-btn:hover,.md-btn:active{background:rgba(200,150,46,.12);color:var(--gold)}
+.md-divider{width:1px;background:var(--border);margin:4px 3px;flex-shrink:0}
+.content-field{
+  flex:1;width:100%;padding:14px;
+  border:none;outline:none;resize:none;
+  font-family:'DM Sans',sans-serif;font-size:.92rem;
+  color:var(--ink);line-height:1.75;
+  -webkit-overflow-scrolling:touch;
+  min-height:200px
+}
+
+/* MEDIA UPLOAD MINI STRIP */
+.media-strip{
+  display:flex;gap:8px;padding:10px 14px;
+  border-top:1px solid var(--border);background:var(--surface);
+  overflow-x:auto;flex-shrink:0;scrollbar-width:none
+}
+.media-strip::-webkit-scrollbar{display:none}
+.media-chip{
+  flex-shrink:0;display:flex;align-items:center;gap:6px;
+  padding:7px 13px;border-radius:20px;
+  border:1.5px solid var(--border);background:#fff;
+  font-size:.75rem;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:all .15s;position:relative;overflow:hidden
+}
+.media-chip input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.media-chip:hover{border-color:var(--gold);color:var(--gold)}
+.media-chip.uploaded{border-color:var(--success);color:var(--success);background:rgba(22,163,74,.05)}
+
+/* ── PREVIEW PANEL ── */
+.preview-panel{
+  width:100%;flex-shrink:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:20px 16px 60px;display:none
+}
+.preview-panel.show{display:block}
+.preview-pill{
+  display:inline-block;padding:3px 10px;border-radius:20px;
+  font-size:.68rem;font-weight:700;text-transform:uppercase;
+  background:#EFF6FF;color:#2563EB;margin-bottom:12px
+}
+.preview-title{
+  font-family:'Playfair Display',serif;
+  font-size:1.7rem;font-weight:900;color:var(--ink);
+  line-height:1.25;margin-bottom:10px
+}
+.preview-excerpt{font-size:.9rem;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.preview-img{width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:18px;display:none}
+.preview-slug{
+  font-size:.72rem;color:var(--muted);font-family:monospace;
+  background:var(--surface);padding:5px 10px;border-radius:6px;margin-bottom:18px;display:block
+}
+.preview-body{font-size:.9rem;line-height:1.85;color:#374151}
+.preview-body p{margin-bottom:1rem}
+.preview-body h2{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--ink);margin:1.5rem 0 .6rem;font-weight:700}
+.preview-body h3{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--ink);margin:1.25rem 0 .5rem;font-weight:700}
+.preview-body strong{font-weight:700}
+.preview-body em{font-style:italic}
+.preview-body blockquote{border-left:4px solid var(--gold);padding:.8rem 1rem;background:rgba(200,150,46,.05);border-radius:0 8px 8px 0;margin:1rem 0;color:#475569;font-style:italic}
+.preview-body code{background:var(--surface);border:1px solid var(--border);padding:2px 6px;border-radius:4px;font-size:.83rem;font-family:monospace}
+.preview-body pre{background:#1e293b;color:#e2e8f0;padding:14px;border-radius:10px;overflow-x:auto;margin:1rem 0}
+.preview-body pre code{background:none;border:none;color:inherit}
+.preview-body hr{border:none;border-top:2px solid var(--border);margin:1.5rem 0}
+.preview-body ul,.preview-body ol{padding-left:1.5rem;margin-bottom:1rem}
+.preview-body li{margin-bottom:.4rem}
+.preview-body a{color:var(--gold);text-decoration:underline}
+.preview-body img{width:100%;border-radius:8px;margin:.5rem 0}
+
+/* ── SIDE DRAWER (mobile) ── */
+.drawer-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90;
+  display:none;backdrop-filter:blur(2px)
+}
+.drawer-overlay.open{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.drawer{
+  position:fixed;left:0;top:0;bottom:0;width:260px;
+  background:var(--ink);z-index:95;
+  padding:16px 0;display:flex;flex-direction:column;
+  transform:translateX(-100%);transition:transform .25s ease
+}
+.drawer.open{transform:translateX(0)}
+.drawer-header{padding:4px 16px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.drawer-logo{display:flex;align-items:center;gap:8px}
+.drawer-logo img{width:28px;height:28px;border-radius:6px}
+.drawer-logo span{font-family:'Playfair Display',serif;color:#fff;font-size:1rem}
+.drawer-section{padding:12px 0}
+.drawer-lbl{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:0 16px;margin-bottom:6px}
+.drawer-item{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 16px;color:rgba(255,255,255,.7);
+  font-size:.88rem;font-weight:500;cursor:pointer;
+  text-decoration:none;transition:all .15s
+}
+.drawer-item:hover,.drawer-item.active{background:rgba(255,255,255,.06);color:#fff}
+.drawer-item-icon{font-size:1.1rem;width:22px;text-align:center}
+.drawer-item.danger{color:rgba(248,113,113,.8)}
+.drawer-item.danger:hover{background:rgba(248,113,113,.08);color:#f87171}
+.drawer-bottom{margin-top:auto;padding:12px 0;border-top:1px solid rgba(255,255,255,.08)}
+
+/* ── META SHEET (bottom sheet for region/tags) ── */
+.meta-btn{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;border-radius:12px;border:1.5px solid var(--border);
+  background:var(--surface);cursor:pointer;margin-bottom:12px;
+  transition:border-color .2s
+}
+.meta-btn:hover{border-color:var(--gold)}
+.meta-btn-lbl{font-size:.82rem;font-weight:600;color:var(--ink)}
+.meta-btn-val{font-size:.78rem;color:var(--muted)}
+.meta-sheet-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
+  display:none;align-items:flex-end;backdrop-filter:blur(2px)
+}
+.meta-sheet-overlay.open{display:flex;animation:fadeIn .15s ease}
+.meta-sheet{
+  background:#fff;border-radius:20px 20px 0 0;width:100%;
+  max-height:70svh;overflow-y:auto;padding:0 0 32px;
+  animation:slideUp .25s ease
+}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.meta-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:10px auto 16px}
+.meta-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;padding:0 16px 12px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.meta-list-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--border)
+}
+.meta-list-item:hover{background:var(--surface)}
+.meta-list-item span{font-size:.88rem;font-weight:500}
+.meta-list-item .check{color:var(--gold);font-size:1rem;opacity:0}
+.meta-list-item.sel .check{opacity:1}
+.meta-list-item.sel span{color:var(--gold);font-weight:700}
+.tag-input-row{display:flex;gap:8px;padding:12px 16px}
+.tag-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.88rem;outline:none;font-family:'DM Sans',sans-serif}
+.tag-input:focus{border-color:var(--gold)}
+.tag-add-btn{padding:10px 16px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;font-family:'DM Sans',sans-serif}
+.tags-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:4px 16px 8px}
+.tag-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;
+  background:rgba(200,150,46,.1);border:1px solid rgba(200,150,46,.3);
+  font-size:.75rem;font-weight:600;color:var(--gold)
+}
+.tag-pill button{background:none;border:none;cursor:pointer;color:var(--gold);font-size:.75rem;line-height:1;padding:0}
+
+/* ── UPLOAD PROGRESS ── */
+.upload-bar{
+  height:3px;background:var(--border);border-radius:2px;overflow:hidden;
+  display:none;margin-top:6px
+}
+.upload-fill{height:100%;background:var(--gold);border-radius:2px;width:0;transition:width .3s}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;
+  font-size:.82rem;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.25);
+  transition:all .25s;z-index:500;opacity:0;white-space:nowrap;pointer-events:none;
+  border:1px solid rgba(255,255,255,.1)
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:#1A7A4A}
+.toast.er{background:#C0392B}
+
+/* ── LOADING OVERLAY ── */
+.loading-overlay{
+  position:fixed;inset:0;background:rgba(13,27,42,.85);
+  z-index:1000;display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:12px;backdrop-filter:blur(4px)
+}
+.loading-overlay.open{display:flex}
+.spinner{
+  width:36px;height:36px;border:3px solid rgba(255,255,255,.15);
+  border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:rgba(255,255,255,.7);font-size:.85rem}
+
+@media(min-width:768px){
+  /* Desktop: side by side */
+  .tab-bar{display:none}
+  .editor-wrap{flex-direction:row}
+  .editor-panel{width:50%;border-right:1px solid var(--border)}
+  .editor-panel.hide{transform:none;position:static;pointer-events:auto}
+  .preview-panel{width:50%;display:block;border-left:1px solid var(--border)}
+  .menu-btn{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="menu-btn" onclick="openDrawer()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="topbar-title">✍️ Write Post</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn-draft" onclick="savePost('draft')">💾 Draft</button>
+    <button class="btn-publish" onclick="savePost('published')">🚀 Publish Now</button>
+  </div>
+</div>
+
+<!-- TAB BAR (mobile only) -->
+<div class="tab-bar">
+  <div class="tab active" id="tab-write" onclick="switchTab('write')">✏️ Write</div>
+  <div class="tab" id="tab-preview" onclick="switchTab('preview')">👁 Preview<span class="tab-dot" id="preview-dot"></span></div>
+  <div class="tab" id="tab-settings" onclick="switchTab('settings')">⚙️ Settings</div>
+</div>
+
+<!-- EDITOR WRAP -->
+<div class="editor-wrap">
+
+  <!-- EDITOR PANEL -->
+  <div class="editor-panel" id="editor-panel">
+
+    <!-- Content type strip -->
+    <div class="type-strip">
+      <div class="type-chip sel" data-type="article" onclick="setType(this)">📝 Article</div>
+      <div class="type-chip" data-type="video" onclick="setType(this)">🎬 Video</div>
+      <div class="type-chip" data-type="audio" onclick="setType(this)">🎵 Audio</div>
+      <div class="type-chip" data-type="photo_essay" onclick="setType(this)">📷 Photo Essay</div>
+      <div class="type-chip" data-type="story" onclick="setType(this)">✨ Story</div>
+    </div>
+
+    <!-- Scrollable fields -->
+    <div class="fields" id="fields-area">
+
+      <!-- Title -->
+      <div class="field-group">
+        <label class="field-label">Title <span class="req">*</span></label>
+        <input type="text" class="field-input large" id="f-title" placeholder="Give your post a great title…" oninput="updatePreview();updateSlug()">
+      </div>
+
+      <!-- Excerpt -->
+      <div class="field-group">
+        <label class="field-label">Excerpt</label>
+        <textarea class="field-textarea" id="f-excerpt" rows="2" placeholder="One-sentence summary shown in the feed…" oninput="updatePreview();this.parentElement.querySelector('.char-count').textContent=this.value.length+'/160'"></textarea>
+        <div class="char-count">0/160</div>
+      </div>
+
+      <!-- Cover image -->
+      <div class="field-group">
+        <label class="field-label">Cover Image</label>
+        <div class="cover-zone" id="cover-zone" ondragover="e.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
+          <img id="cover-preview" class="cover-preview" src="" alt="">
+          <span class="cover-zone-icon" id="cover-icon">🖼️</span>
+          <p id="cover-hint"><strong>Tap to upload</strong> your cover photo<br><span style="font-size:.7rem">JPG, PNG, WebP · max 5MB</span></p>
+          <input type="file" accept="image/*" onchange="handleCoverUpload(this)">
+        </div>
+        <button class="cover-remove" id="cover-remove" onclick="removeCover()">✕ Remove cover</button>
+        <div class="upload-bar" id="cover-bar"><div class="upload-fill" id="cover-fill"></div></div>
+      </div>
+
+      <!-- Region -->
+      <div class="field-group">
+        <label class="field-label">Region</label>
+        <div class="meta-btn" onclick="openSheet('region')">
+          <span class="meta-btn-lbl">📍 <span id="region-display">Select a region</span></span>
+          <span style="color:var(--muted);font-size:.85rem">›</span>
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="field-group">
+        <label class="field-label">Tags</label>
+        <div class="meta-btn" onclick="openSheet('tags')">
+          <span class="meta-btn-lbl">🏷️ <span id="tags-display">Add tags</span></span>
+          <span style="color:var(--muted);font-size:.85rem">›</span>
+        </div>
+      </div>
+
+      <!-- Audio / Video URL (shown when type = audio/video) -->
+      <div class="field-group" id="media-url-group" style="display:none">
+        <label class="field-label" id="media-url-label">Media URL</label>
+        <input type="url" class="field-input" id="f-media-url" placeholder="Paste URL or upload below…" oninput="updatePreview()">
+        <div style="margin-top:6px">
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--muted);background:var(--surface);position:relative;overflow:hidden">
+            ⬆️ Upload file
+            <input type="file" id="media-file-input" style="position:absolute;inset:0;opacity:0;cursor:pointer" onchange="handleMediaUpload(this)">
+          </label>
+        </div>
+        <div class="upload-bar" id="media-bar"><div class="upload-fill" id="media-fill"></div></div>
+      </div>
+
+      <!-- Padding so content field isn't below keyboard -->
+      <div style="height:12px"></div>
+    </div><!-- /fields -->
+
+    <!-- Content markdown editor -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;border-top:1px solid var(--border)">
+      <div style="padding:8px 14px 6px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0">
+        <span style="font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)">Full Content <span style="font-size:.6rem;font-weight:500;color:rgba(148,163,184,.7)">(Markdown)</span></span>
+      </div>
+      <textarea class="content-field" id="f-content" placeholder="Write your full story here…&#10;&#10;Use **bold**, *italic*, ## Heading, > Quote, - List…"
+        oninput="updatePreview();document.getElementById('preview-dot').classList.toggle('vis',this.value.length>10)"></textarea>
+
+      <!-- Markdown toolbar (sticky) -->
+      <div class="md-toolbar">
+        <button class="md-btn" onclick="insertMd('**','**')" title="Bold"><b>B</b></button>
+        <button class="md-btn" onclick="insertMd('*','*')" title="Italic"><i>I</i></button>
+        <div class="md-divider"></div>
+        <button class="md-btn" onclick="insertMdLine('## ')" title="H2">H2</button>
+        <button class="md-btn" onclick="insertMdLine('### ')" title="H3">H3</button>
+        <div class="md-divider"></div>
+        <button class="md-btn" onclick="insertMdLink()" title="Link">🔗</button>
+        <button class="md-btn" onclick="insertMdLine('- ')" title="List">• List</button>
+        <button class="md-btn" onclick="insertMdLine('> ')" title="Quote">❝</button>
+        <button class="md-btn" onclick="insertMd('`','`')" title="Code">&lt;/&gt;</button>
+        <div class="md-divider"></div>
+        <button class="md-btn" onclick="insertMdLine('\n---\n')" title="Divider">—</button>
+        <button class="md-btn" onclick="insertMdImage()" title="Image">🖼</button>
+      </div>
+
+      <!-- Media quick-attach strip -->
+      <div class="media-strip">
+        <label class="media-chip" id="chip-audio">
+          🎵 Audio
+          <input type="file" accept="audio/*" onchange="handleQuickMedia(this,'audio')">
+        </label>
+        <label class="media-chip" id="chip-video">
+          🎬 Video
+          <input type="file" accept="video/*" onchange="handleQuickMedia(this,'video')">
+        </label>
+        <label class="media-chip" id="chip-img">
+          📷 Image
+          <input type="file" accept="image/*" onchange="handleQuickMedia(this,'image')">
+        </label>
+        <label class="media-chip">
+          📎 File
+          <input type="file" onchange="handleQuickMedia(this,'file')">
+        </label>
+      </div>
+    </div>
+
+  </div><!-- /editor-panel -->
+
+  <!-- PREVIEW PANEL -->
+  <div class="preview-panel" id="preview-panel">
+    <span class="preview-pill" id="pv-type">ARTICLE</span>
+    <h1 class="preview-title" id="pv-title">Title here…</h1>
+    <p class="preview-excerpt" id="pv-excerpt">Excerpt here…</p>
+    <img id="pv-cover" class="preview-img" src="" alt="">
+    <code class="preview-slug" id="pv-slug">/post/slug-preview</code>
+    <div class="preview-body" id="pv-body">
+      <p style="color:var(--muted);font-style:italic">Your content will appear here as you write…</p>
+    </div>
+  </div>
+
+  <!-- SETTINGS PANEL (mobile tab) -->
+  <div class="preview-panel" id="settings-panel" style="display:none">
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:20px;color:var(--ink)">Post Settings</h2>
+    <div class="field-group">
+      <label class="field-label">Premium / Locked</label>
+      <label style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;cursor:pointer">
+        <span style="font-size:.88rem;font-weight:500">Lock behind premium</span>
+        <input type="checkbox" id="f-locked" style="width:18px;height:18px;accent-color:var(--gold)">
+      </label>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Custom Slug</label>
+      <input type="text" class="field-input" id="f-slug" placeholder="auto-generated-from-title">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Featured Image URL (alternative)</label>
+      <input type="text" class="field-input" id="f-cover-url" placeholder="https://…" oninput="setCoverFromUrl(this.value)">
+    </div>
+    <div style="margin-top:12px;background:rgba(200,150,46,.06);border:1px solid rgba(200,150,46,.2);border-radius:12px;padding:14px">
+      <p style="font-size:.82rem;color:#92400e;line-height:1.6">💡 <strong>Tip:</strong> A great title + cover image = 3× more reads. Keep excerpts under 120 characters for the best mobile preview.</p>
+    </div>
+  </div>
+
+</div><!-- /editor-wrap -->
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-logo">
+      <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
+      <span>EchoStack</span>
+    </div>
+  </div>
+  <div class="drawer-section">
+    <div class="drawer-lbl">Creator</div>
+    <a href="/creator" class="drawer-item active"><span class="drawer-item-icon">✍️</span> Write Post</a>
+    <a href="/dashboard" class="drawer-item"><span class="drawer-item-icon">📰</span> Feed</a>
+    <a href="/creator" class="drawer-item"><span class="drawer-item-icon">📊</span> My Channel</a>
+    <a href="/activity" class="drawer-item"><span class="drawer-item-icon">🔔</span> Activity</a>
+  </div>
+  <div class="drawer-section">
+    <div class="drawer-lbl">Account</div>
+    <a href="/premium" class="drawer-item"><span class="drawer-item-icon">⭐</span> Go Premium</a>
+    <a href="/dashboard" class="drawer-item danger" onclick="logout()"><span class="drawer-item-icon">🚪</span> Sign Out</a>
+  </div>
+</div>
+
+<!-- REGION SHEET -->
+<div class="meta-sheet-overlay" id="region-sheet" onclick="closeSheet('region',event)">
+  <div class="meta-sheet">
+    <div class="meta-handle"></div>
+    <div class="meta-title">📍 Select Region</div>
+    <div id="region-list">
+      <div style="padding:20px;text-align:center;color:var(--muted);font-size:.85rem">Loading regions…</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAGS SHEET -->
+<div class="meta-sheet-overlay" id="tags-sheet" onclick="closeSheet('tags',event)">
+  <div class="meta-sheet">
+    <div class="meta-handle"></div>
+    <div class="meta-title">🏷️ Add Tags</div>
+    <div class="tag-input-row">
+      <input type="text" class="tag-input" id="tag-input" placeholder="Type a tag and press Add…" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag()}">
+      <button class="tag-add-btn" onclick="addTag()">Add</button>
+    </div>
+    <div class="tags-wrap" id="tags-display-area"></div>
+    <div style="padding:8px 16px">
+      <div class="drawer-lbl" style="margin-bottom:6px">Suggested</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${['Culture','Heritage','History','Tradition','Food','Music','Festival','Language','Art','Nature','Religion','Royalty'].map(t=>
+          `<div onclick="addTagDirect('${t}')" style="padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);font-size:.75rem;font-weight:600;color:var(--muted);cursor:pointer;background:#fff;transition:all .15s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">${t}</div>`
+        ).join('')}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Publishing…</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let currentType = 'article';
+let selectedRegionId = null;
+let selectedRegionName = '';
+let tags = [];
+let coverUrl = '';
+let audioUrl = '';
+let videoUrl = '';
+let currentUser = null;
+let regions = [];
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const r = await fetch('/api/users/me');
+    if (r.ok) currentUser = await r.json();
+  } catch(e) {}
+  try {
+    const r = await fetch('/api/regions');
+    regions = await r.json();
+    renderRegionList();
+  } catch(e) {}
+});
+
+// ── TABS (mobile) ──
+function switchTab(tab) {
+  ['write','preview','settings'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+  });
+  const ep = document.getElementById('editor-panel');
+  const pp = document.getElementById('preview-panel');
+  const sp = document.getElementById('settings-panel');
+  if (tab === 'write') {
+    ep.classList.remove('hide'); pp.style.display = 'none'; sp.style.display = 'none';
+  } else if (tab === 'preview') {
+    ep.classList.add('hide'); pp.style.display = 'block'; sp.style.display = 'none';
+    updatePreview();
+  } else {
+    ep.classList.add('hide'); pp.style.display = 'none'; sp.style.display = 'block';
+  }
+}
+
+// ── TYPE SELECT ──
+function setType(el) {
+  document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  currentType = el.dataset.type;
+  const mg = document.getElementById('media-url-group');
+  const ml = document.getElementById('media-url-label');
+  if (currentType === 'audio') {
+    mg.style.display = 'block';
+    ml.textContent = '🎵 Audio URL';
+    document.getElementById('media-file-input').accept = 'audio/*';
+  } else if (currentType === 'video') {
+    mg.style.display = 'block';
+    ml.textContent = '🎬 Video URL';
+    document.getElementById('media-file-input').accept = 'video/*';
+  } else {
+    mg.style.display = 'none';
+  }
+  updatePreview();
+}
+
+// ── COVER UPLOAD ──
+async function handleCoverUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('Image too large (max 5MB)', 'er'); return; }
+
+  // Show local preview immediately
+  const reader = new FileReader();
+  reader.onload = e => setCoverPreview(e.target.result);
+  reader.readAsDataURL(file);
+
+  // Upload
+  showUploadBar('cover', 0);
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('filename', file.name);
+  fd.append('category', 'cover');
+  try {
+    animateBar('cover-fill', 0, 80, 1200);
+    const r = await fetch('/api/upload/cover', {method:'POST', body:fd});
+    const d = await r.json();
+    animateBar('cover-fill', 80, 100, 300);
+    setTimeout(() => hideUploadBar('cover'), 800);
+    if (d.url || d.file_url) {
+      coverUrl = d.url || d.file_url;
+      setCoverPreview(coverUrl);
+      showToast('Cover uploaded! ✓', 'ok');
+    }
+  } catch(e) { hideUploadBar('cover'); showToast('Upload failed', 'er'); }
+}
+function setCoverPreview(url) {
+  const img = document.getElementById('cover-preview');
+  img.src = url; img.style.display = 'block';
+  document.getElementById('cover-icon').style.display = 'none';
+  document.getElementById('cover-hint').style.display = 'none';
+  document.getElementById('cover-remove').style.display = 'inline-block';
+  document.getElementById('pv-cover').src = url;
+  document.getElementById('pv-cover').style.display = 'block';
+}
+function removeCover() {
+  coverUrl = '';
+  document.getElementById('cover-preview').style.display = 'none';
+  document.getElementById('cover-icon').style.display = 'block';
+  document.getElementById('cover-hint').style.display = 'block';
+  document.getElementById('cover-remove').style.display = 'none';
+  document.getElementById('pv-cover').style.display = 'none';
+}
+function setCoverFromUrl(url) {
+  if (url) { coverUrl = url; setCoverPreview(url); }
+}
+
+// ── MEDIA UPLOAD ──
+async function handleMediaUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  showUploadBar('media', 0);
+  const fd = new FormData();
+  fd.append('file', file); fd.append('filename', file.name); fd.append('category', currentType);
+  try {
+    animateBar('media-fill', 0, 90, 2000);
+    const r = await fetch('/api/upload/file', {method:'POST', body:fd});
+    const d = await r.json();
+    animateBar('media-fill', 90, 100, 300);
+    setTimeout(() => hideUploadBar('media'), 800);
+    const url = d.url || d.file_url || '';
+    document.getElementById('f-media-url').value = url;
+    if (currentType === 'audio') audioUrl = url;
+    else if (currentType === 'video') videoUrl = url;
+    showToast('File uploaded! ✓', 'ok');
+    updatePreview();
+  } catch(e) { hideUploadBar('media'); showToast('Upload failed', 'er'); }
+}
+
+async function handleQuickMedia(input, type) {
+  const file = input.files[0];
+  if (!file) return;
+  showToast('Uploading…');
+  const fd = new FormData();
+  fd.append('file', file); fd.append('filename', file.name); fd.append('category', type);
+  try {
+    const r = await fetch('/api/upload/file', {method:'POST', body:fd});
+    const d = await r.json();
+    const url = d.url || d.file_url || '';
+    const ta = document.getElementById('f-content');
+    const tag = type === 'audio' ? `[audio]${url}[/audio]` :
+                type === 'video' ? `[video]${url}[/video]` :
+                type === 'image' ? `![image](${url})` : `[${file.name}](${url})`;
+    insertAtCursor(ta, '\n' + tag + '\n');
+    input.parentElement.classList.add('uploaded');
+    showToast(`${type} added! ✓`, 'ok');
+    updatePreview();
+  } catch(e) { showToast('Upload failed', 'er'); }
+}
+
+// ── MARKDOWN TOOLBAR ──
+function insertMd(before, after) {
+  const ta = document.getElementById('f-content');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.substring(s, e) || 'text';
+  insertAtCursor(ta, before + sel + after, before.length, sel.length);
+  updatePreview();
+}
+function insertMdLine(prefix) {
+  const ta = document.getElementById('f-content');
+  const s = ta.selectionStart;
+  const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+  ta.focus();
+  ta.setSelectionRange(lineStart, lineStart);
+  insertAtCursor(ta, prefix);
+  updatePreview();
+}
+function insertMdLink() {
+  const ta = document.getElementById('f-content');
+  const sel = ta.value.substring(ta.selectionStart, ta.selectionEnd) || 'link text';
+  insertAtCursor(ta, `[${sel}](https://)`);
+  updatePreview();
+}
+function insertMdImage() {
+  const ta = document.getElementById('f-content');
+  insertAtCursor(ta, '![alt text](https://)');
+  updatePreview();
+}
+function insertAtCursor(ta, text, selOffset, selLen) {
+  ta.focus();
+  const s = ta.selectionStart;
+  ta.value = ta.value.substring(0, s) + text + ta.value.substring(ta.selectionEnd);
+  const pos = selOffset != null ? s + selOffset : s + text.length;
+  ta.setSelectionRange(pos, selLen != null ? pos + selLen : pos);
+}
+
+// ── PREVIEW ──
+function updatePreview() {
+  const title = document.getElementById('f-title').value || 'Title here…';
+  const excerpt = document.getElementById('f-excerpt').value || 'Excerpt here…';
+  const content = document.getElementById('f-content').value;
+  document.getElementById('pv-title').textContent = title;
+  document.getElementById('pv-excerpt').textContent = excerpt;
+  document.getElementById('pv-type').textContent = currentType.replace('_',' ').toUpperCase();
+  document.getElementById('pv-body').innerHTML = parseMarkdown(content);
+}
+
+function parseMarkdown(md) {
+  if (!md) return '<p style="color:var(--muted);font-style:italic">Your content will appear here…</p>';
+  let h = md
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    // BBCode media
+    .replace(/\[video\](.*?)\[\/video\]/gi,'<video controls style="width:100%;border-radius:10px;margin:.5rem 0"><source src="$1"></video>')
+    .replace(/\[audio\](.*?)\[\/audio\]/gi,'<audio controls style="width:100%;margin:.5rem 0"><source src="$1"></audio>')
+    // Headings
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    // Bold/italic
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    // Blockquote
+    .replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>')
+    // Code block
+    .replace(/```([\s\S]*?)```/g,'<pre><code>$1</code></pre>')
+    .replace(/`(.+?)`/g,'<code>$1</code>')
+    // Images
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1">')
+    // Links
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2">$1</a>')
+    // Unordered list
+    .replace(/^- (.+)$/gm,'<li>$1</li>')
+    // HR
+    .replace(/^---$/gm,'<hr>')
+    // Paragraphs
+    .split('\n').map(line => {
+      if (/^<(h[23]|li|blockquote|pre|video|audio|img|hr)/.test(line.trim()) || line.trim() === '') return line;
+      return `<p>${line}</p>`;
+    }).join('\n')
+    // Wrap list items
+    .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
+  return h;
+}
+
+function updateSlug() {
+  const title = document.getElementById('f-title').value;
+  const slug = title.toLowerCase().replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,'-').substring(0,60) || 'slug-preview';
+  document.getElementById('pv-slug').textContent = '/post/' + slug;
+  document.getElementById('f-slug').value = slug;
+}
+
+// ── REGION SHEET ──
+function renderRegionList() {
+  const list = document.getElementById('region-list');
+  if (!regions.length) { list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:.85rem">No regions found.</div>'; return; }
+  list.innerHTML = regions.map(r => `
+    <div class="meta-list-item ${r.id === selectedRegionId ? 'sel' : ''}" id="region-item-${r.id}" onclick="selectRegion(${r.id},'${r.name}')">
+      <span>${r.name}</span>
+      <span class="check">✓</span>
+    </div>`).join('');
+}
+function selectRegion(id, name) {
+  selectedRegionId = id; selectedRegionName = name;
+  document.getElementById('region-display').textContent = name;
+  document.querySelectorAll('.meta-list-item').forEach(el => el.classList.remove('sel'));
+  const el = document.getElementById('region-item-'+id);
+  if (el) el.classList.add('sel');
+  closeSheet('region');
+  showToast('Region: ' + name, 'ok');
+}
+
+// ── TAGS ──
+function addTag() {
+  const input = document.getElementById('tag-input');
+  const val = input.value.trim().replace(/,/g,'');
+  if (!val || tags.includes(val)) { input.value = ''; return; }
+  tags.push(val);
+  input.value = '';
+  renderTags();
+}
+function addTagDirect(t) {
+  if (!tags.includes(t)) { tags.push(t); renderTags(); }
+  showToast('Added: ' + t, 'ok');
+}
+function removeTag(t) {
+  tags = tags.filter(x => x !== t);
+  renderTags();
+}
+function renderTags() {
+  document.getElementById('tags-display-area').innerHTML = tags.map(t =>
+    `<div class="tag-pill">${t}<button onclick="removeTag('${t}')">×</button></div>`).join('');
+  document.getElementById('tags-display').textContent = tags.length ? tags.join(', ') : 'Add tags';
+}
+
+// ── SHEETS ──
+function openSheet(type) {
+  document.getElementById(type+'-sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSheet(type, e) {
+  if (e && !e.target.classList.contains('meta-sheet-overlay')) return;
+  document.getElementById(type+'-sheet').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── DRAWER ──
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── SAVE / PUBLISH ──
+async function savePost(status) {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { showToast('Please enter a title', 'er'); return; }
+
+  const loadOverlay = document.getElementById('loading-overlay');
+  document.getElementById('loading-text').textContent = status === 'published' ? 'Publishing…' : 'Saving draft…';
+  loadOverlay.classList.add('open');
+
+  try {
+    const fd = new FormData();
+    fd.append('title', title);
+    fd.append('excerpt', document.getElementById('f-excerpt').value.trim());
+    fd.append('content', document.getElementById('f-content').value);
+    fd.append('content_type', currentType);
+    fd.append('status', status);
+    fd.append('is_locked', document.getElementById('f-locked').checked ? 'true' : 'false');
+    if (coverUrl) fd.append('cover_image', coverUrl);
+    if (selectedRegionId) fd.append('region_id', selectedRegionId);
+    if (tags.length) fd.append('tags', tags.join(','));
+    if (audioUrl) fd.append('audio_url', audioUrl);
+    if (videoUrl) fd.append('video_url', videoUrl);
+    const mediaUrlVal = document.getElementById('f-media-url').value.trim();
+    if (mediaUrlVal && currentType === 'audio') fd.append('audio_url', mediaUrlVal);
+    if (mediaUrlVal && currentType === 'video') fd.append('video_url', mediaUrlVal);
+
+    const r = await fetch('/api/posts', {method:'POST', body:fd});
+    const d = await r.json();
+    loadOverlay.classList.remove('open');
+
+    if (d.id || d.success) {
+      showToast(status === 'published' ? '🚀 Published!' : '💾 Saved as draft', 'ok');
+      setTimeout(() => {
+        if (status === 'published' && d.id) window.location.href = '/post/' + d.id;
+        else window.location.href = '/creator';
+      }, 1200);
+    } else {
+      showToast(d.detail || 'Error saving post', 'er');
+    }
+  } catch(e) {
+    loadOverlay.classList.remove('open');
+    showToast('Failed to save. Check connection.', 'er');
+  }
+}
+
+// ── UPLOAD BAR HELPERS ──
+function showUploadBar(which, pct) {
+  document.getElementById(which+'-bar').style.display = 'block';
+  document.getElementById(which+'-fill').style.width = pct + '%';
+}
+function hideUploadBar(which) {
+  document.getElementById(which+'-bar').style.display = 'none';
+  document.getElementById(which+'-fill').style.width = '0%';
+}
+function animateBar(fillId, from, to, duration) {
+  const el = document.getElementById(fillId);
+  const start = Date.now();
+  const tick = () => {
+    const prog = Math.min((Date.now()-start)/duration, 1);
+    el.style.width = (from + (to-from)*prog) + '%';
+    if (prog < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// ── TOAST ──
+let _t;
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast on' + (type ? ' '+type : '');
+  clearTimeout(_t);
+  _t = setTimeout(() => el.className = 'toast', 2800);
+}
+
+// ── LOGOUT ──
+function logout() {
+  fetch('/api/users/logout',{method:'POST'}).finally(() => { window.location.href = '/'; });
+}
+
+// ── KEYBOARD: keep toolbar visible ──
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    const delta = window.innerHeight - window.visualViewport.height;
+    document.querySelector('.md-toolbar').style.transform = delta > 100 ? `translateY(-${delta}px)` : '';
+  });
+}
+</script>
+</body>
+</html>

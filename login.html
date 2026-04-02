@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0D1B2A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoStack Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 420px;
+            width: 100%;
+        }
+        .btn-submit {
+            background: #0f172a !important;
+            color: white !important;
+            transition: all 0.3s;
+        }
+        .btn-submit:hover {
+            background: #1e40af !important;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(30, 64, 175, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-2" style="color: #0f172a;">🇬🇭 EchoStack</h1>
+            <p class="text-gray-500 text-sm">Administrative Access</p>
+        </div>
+        
+        <form id="admin-login-form" class="space-y-6">
+            <div>
+                <input 
+                    type="password" 
+                    id="answer" 
+                    required 
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-600 transition"
+                    placeholder="Enter access credentials"
+                    autocomplete="off"
+                >
+            </div>
+            
+            <button 
+                type="submit" 
+                id="submit-btn"
+                class="w-full btn-submit py-3 rounded-lg font-semibold text-lg"
+            >
+                Access Dashboard →
+            </button>
+            
+            <p id="error-message" class="text-red-600 text-sm text-center hidden"></p>
+        </form>
+        
+        <p class="text-center text-xs text-gray-400 mt-6">
+            Restricted area • Authorized access only
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const answer = document.getElementById('answer').value;
+            const errorMsg = document.getElementById('error-message');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Verifying...';
+            errorMsg.classList.add('hidden');
+            
+            try {
+                const formData = new URLSearchParams();
+                formData.append('answer', answer);
+                
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    window.location.href = '/admin';
+                } else {
+                    throw new Error('Access denied');
+                }
+            } catch (error) {
+                errorMsg.textContent = '❌ Invalid credentials';
+                errorMsg.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Access Dashboard →';
+                document.getElementById('answer').value = '';
+                document.getElementById('answer').focus();
+            }
+        });
+    </script>
+</body>
+</html>

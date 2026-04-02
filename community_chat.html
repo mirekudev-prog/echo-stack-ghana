@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0D1B2A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Chat — EchoStack</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ink:#0D1B2A;--gold:#C8962E;--gold2:#E8B84B;--cream:#FAF6EF;--muted:#94A3B8;--blue:#0077b6;--border:#E2E8F0;--surface:#0f1e2d;--success:#16A34A;--danger:#DC2626;--sidebar-w:260px
+}
+body{font-family:Georgia,serif;background:var(--cream);color:var(--ink);}
+.sidebar{position:fixed;left:0;top:0;height:100vh;width:var(--sidebar-w);background:var(--ink);color:white;display:flex;flex-direction:column;z-index:1000;transition:transform 0.3s;overflow-y:auto;}
+.sidebar-header{padding:1.25rem 1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;}
+.sidebar-logo{display:flex;align-items:center;gap:.6rem;text-decoration:none;}
+.sidebar-logo img{width:36px;height:36px;border-radius:7px;object-fit:contain;}
+.sidebar-logo span{font-size:1.2rem;font-weight:bold;color:white;}
+.sidebar-close{display:none;background:none;border:none;color:rgba(255,255,255,.5);font-size:1.6rem;cursor:pointer;padding:2px 6px;}
+@media(max-width:768px){.sidebar-close{display:block;}}
+.user-pill{margin:1rem 1.25rem 0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.user-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#C8962E,#E8B84B);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:var(--ink);flex-shrink:0;}
+.user-info{min-width:0;}
+.user-name{font-size:.82rem;font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-plan{font-size:.68rem;color:rgba(255,255,255,.4);margin-top:1px;}
+.sidebar-nav{flex:1;padding:.75rem;}
+.nav-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:.75rem .75rem .4rem;}
+.sidebar-nav a{display:flex;align-items:center;gap:.75rem;padding:.7rem .9rem;color:rgba(255,255,255,.6);text-decoration:none;border-radius:8px;margin-bottom:2px;font-size:.88rem;transition:all .2s;}
+.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.08);color:white;}
+.sidebar-nav a svg{width:18px;height:18px;flex-shrink:0;}
+.sidebar-footer{padding:1rem 1.25rem 1.5rem;border-top:1px solid rgba(255,255,255,.08);}
+.btn-logout{width:100%;background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);color:#f87171;padding:.7rem 1rem;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:all .2s;}
+.btn-logout:hover{background:rgba(220,38,38,.3);color:#fff;}
+.main-wrapper{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column;}
+.mobile-bar{display:none;position:sticky;top:0;z-index:900;background:var(--ink);padding:.75rem 1rem;align-items:center;justify-content:space-between;border-bottom:2px solid var(--gold);}
+.mobile-bar-logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.mobile-bar-logo img{width:28px;height:28px;border-radius:6px;}
+.mobile-bar-logo span{font-weight:bold;color:white;font-size:1rem;}
+.burger{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:4px;display:flex;align-items:center;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;}
+.overlay.show{display:block;}
+@media(max-width:768px){.sidebar{transform:translateX(-100%);}
+.sidebar.open{transform:translateX(0);}
+.main-wrapper{margin-left:0;}
+.mobile-bar{display:flex;}}
+.main{max-width:1000px;margin:0 auto;padding:1.5rem 1rem 3rem;flex:1;}
+.page-title{font-size:1.4rem;font-weight:bold;margin-bottom:1.5rem;padding-left:.85rem;border-left:4px solid var(--blue);}
+.card{background:white;border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:1.5rem;}
+.empty-state{text-align:center;padding:3rem 1rem;}
+.empty-state .icon{font-size:3rem;margin-bottom:1rem;}
+.empty-state h3{color:var(--ink);margin-bottom:.5rem;}
+.empty-state p{color:#888;font-size:.9rem;line-height:1.6;max-width:300px;margin:0 auto;}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.25rem;border-radius:8px;font-weight:600;font-size:.88rem;text-decoration:none;border:none;cursor:pointer;transition:all .2s;}
+.btn-blue{background:var(--blue);color:white;}
+.btn-blue:hover{opacity:.9;}
+.btn-gold{background:linear-gradient(135deg,#c9933a,#e8b45a);color:var(--ink);}
+.user-card{display:flex;align-items:center;gap:1rem;padding:1rem;border:1.5px solid var(--border);border-radius:10px;background:white;margin-bottom:.75rem;transition:all .2s;}
+.user-card:hover{border-color:var(--blue);box-shadow:0 4px 12px rgba(0,119,182,.1);}
+.user-card-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#C8962E,#E8B84B);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:var(--ink);flex-shrink:0;}
+.user-card-info{flex:1;min-width:0;}
+.user-card-name{font-weight:600;font-size:.95rem;color:var(--ink);}
+.user-card-meta{font-size:.78rem;color:#888;margin-top:2px;}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.badge-creator{background:rgba(201,147,58,.15);color:#c9933a;}
+.badge-admin{background:rgba(0,119,182,.1);color:var(--blue);}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <a href="/app" class="sidebar-logo">
+            <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
+            <span>EchoStack</span>
+        </a>
+        <button class="sidebar-close" onclick="closeSidebar()">×</button>
+    </div>
+    <div class="user-pill">
+        <div class="user-av" id="user-av">?</div>
+        <div class="user-info">
+            <div class="user-name" id="user-name">Loading…</div>
+            <div class="user-plan" id="user-plan">Free Plan</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Explore</div>
+        <a href="/app"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Map &amp; Regions</a>
+        <a href="/dashboard"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v12a2 2 0 01-2 2z"/></svg>News Feed</a>
+        <a href="/archive"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 8v13H3V8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg>Archive</a>
+        <a href="/explore"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Explore</a>
+        <div class="nav-label">Community</div>
+        <a href="/chat" id="nav-chat" class="active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Community Chat</a>
+        <a href="/subscriptions" id="nav-subscriptions"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Subscriptions</a>
+        <a href="/subscribers" id="nav-subscribers" style="display:none"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="23" y2="8"/><line x1="21" y1="6" x2="21" y2="10"/></svg>My Subscribers</a>
+        <a href="/following" id="nav-following"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><polyline points="16,11 18,13 22,9"/></svg>Following</a>
+        <a href="/activity" id="nav-activity"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Activity</a>
+        <div class="nav-label">Account</div>
+        <a href="/user-profile"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile</a>
+        <a href="/creator" id="nav-creator" style="display:none"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Creator Studio</a>
+        <a href="/user-settings"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="/premium" id="upgrade-cta" style="display:none;text-decoration:none;margin-bottom:10px;">
+            <div style="background:linear-gradient(135deg,rgba(201,147,58,0.18),rgba(201,147,58,0.08));border:1px solid rgba(201,147,58,0.3);border-radius:10px;padding:12px 14px;text-align:center;">
+                <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#c9933a;margin-bottom:4px;">⭐ Upgrade to Premium</div>
+                <div style="font-size:0.75rem;color:rgba(255,255,255,0.45);">EchoBot AI + Creator Studio</div>
+                <div style="font-size:0.72rem;color:#c9933a;margin-top:4px;font-weight:600;">GH₵150/month →</div>
+            </div>
+        </a>
+        <button onclick="logout()" class="btn-logout">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign Out
+        </button>
+    </div>
+</aside>
+<div class="main-wrapper">
+<div class="mobile-bar">
+    <a href="/app" class="mobile-bar-logo"><img src="/echostack-logo.png" onerror="this.style.display='none'"><span>EchoStack</span></a>
+    <button class="burger" onclick="openSidebar()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+</div>
+<main class="main">
+
+<h2 class="page-title">Community Chat</h2>
+<p style="color:#888;font-size:.88rem;margin-bottom:1.5rem;">Discuss Ghana's heritage with the EchoStack community.</p>
+<div style="background:white;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;height:60vh;min-height:400px;">
+    <div id="chat-messages" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem;">
+        <div style="text-align:center;color:#aaa;font-size:.8rem;padding:1rem;">Loading messages…</div>
+    </div>
+    <div style="padding:.75rem 1rem;border-top:1.5px solid var(--border);display:flex;gap:.5rem;">
+        <input type="text" id="chat-input" placeholder="Share a thought about Ghana's heritage…" 
+            style="flex:1;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:8px;font-size:.88rem;outline:none;"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}">
+        <button onclick="sendChat()" style="background:var(--blue);color:white;border:none;border-radius:8px;padding:.7rem 1.2rem;font-weight:600;cursor:pointer;">Send</button>
+    </div>
+</div>
+</main>
+<footer style="background:white;border-top:1px solid var(--border);padding:1rem;text-align:center;font-size:.8rem;color:#888;">
+© 2026 EchoStack — Preserving Ghana's Stories
+</footer>
+</div>
+<script>
+
+    var currentUser = {};
+    try { currentUser = JSON.parse(localStorage.getItem('es_user')) || {}; } catch(e) {}
+    if (currentUser.username) {
+        document.getElementById('user-name').textContent = currentUser.username;
+        document.getElementById('user-av').textContent = currentUser.username.charAt(0).toUpperCase();
+        var isCreator = ['creator','admin','superuser'].includes(currentUser.role);
+        var isPremium = currentUser.is_premium == 1 || currentUser.plan === 'premium' || isCreator;
+        document.getElementById('user-plan').textContent = isPremium ? (isCreator ? '✨ Creator' : '⭐ Premium') : 'Free Plan';
+        if (isCreator) {
+            var el = document.getElementById('nav-creator');
+            var el2 = document.getElementById('nav-subscribers');
+            if(el) el.style.display='flex';
+            if(el2) el2.style.display='flex';
+        }
+        if (!isPremium) {
+            var cta = document.getElementById('upgrade-cta');
+            if(cta) cta.style.display='block';
+        }
+    }
+    function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('show');document.body.style.overflow='hidden';}
+    function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');document.body.style.overflow='';}
+    function logout(){fetch('/api/users/logout',{method:'POST'}).catch(()=>{});localStorage.removeItem('es_user');document.cookie='user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';window.location.href='/';}
+
+
+async function loadChat() {
+    const box = document.getElementById('chat-messages');
+    try {
+        const res = await fetch('/api/chat');
+        const msgs = await res.json();
+        if (!msgs.length) {
+            box.innerHTML = '<div style="text-align:center;color:#aaa;font-size:.85rem;padding:2rem;">No messages yet. Be the first to start the conversation!</div>';
+            return;
+        }
+        const me = currentUser.username;
+        box.innerHTML = msgs.map(m => {
+            const isMe = m.username === me;
+            return `<div style="display:flex;flex-direction:${isMe?'row-reverse':'row'};gap:.5rem;align-items:flex-end;">
+                <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#C8962E,#E8B84B);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#1a1e29;flex-shrink:0;">${(m.username||'?').charAt(0).toUpperCase()}</div>
+                <div style="max-width:70%;">
+                    ${!isMe ? `<div style="font-size:.68rem;color:#888;margin-bottom:2px;">${m.username}</div>` : ''}
+                    <div style="background:${isMe?'var(--blue)':'#f0f4f8'};color:${isMe?'white':'var(--ink)'};padding:.5rem .85rem;border-radius:${isMe?'12px 4px 12px 12px':'4px 12px 12px 12px'};font-size:.875rem;line-height:1.5;">${m.message || m.content || ''}</div>
+                </div>
+            </div>`;
+        }).join('');
+        box.scrollTop = box.scrollHeight;
+    } catch(e) {
+        box.innerHTML = '<div style="text-align:center;color:#aaa;padding:2rem;">Failed to load messages.</div>';
+    }
+}
+async function sendChat() {
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    try {
+        const fd = new FormData();
+        fd.append('message', msg);
+        await fetch('/api/chat', {method:'POST', body:fd});
+        loadChat();
+    } catch(e) {}
+}
+loadChat();
+setInterval(loadChat, 10000); // auto-refresh every 10s
+
+</script>
+</body>
+</html>
