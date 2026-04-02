@@ -124,6 +124,8 @@ CREATE TABLE IF NOT EXISTS posts (
     audio_url VARCHAR(500) DEFAULT '',
     video_url VARCHAR(500) DEFAULT '',
     gallery TEXT DEFAULT '',
+    media_url VARCHAR(500) DEFAULT '',
+    media_path VARCHAR(500) DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -1519,6 +1521,8 @@ async def create_post(
     audio_url:    str = Form(""),
     video_url:    str = Form(""),
     gallery:      str = Form(""),
+    media_url:    str = Form(""),
+    media_path:   str = Form(""),
     db: Session = Depends(get_db)
 ):
     try:
@@ -1573,7 +1577,7 @@ async def create_post(
             author_id=author_id, author_username=author_username,
             region_id=rid, tags=tags.strip(), views=0, likes=0,
         )
-        for attr, val in [("audio_url", audio_url), ("video_url", video_url), ("gallery", gallery)]:
+        for attr, val in [("audio_url", audio_url), ("video_url", video_url), ("gallery", gallery), ("media_url", media_url), ("media_path", media_path)]:
             try: setattr(post, attr, val.strip())
             except Exception: pass
 
