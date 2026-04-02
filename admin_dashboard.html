@@ -658,7 +658,7 @@
             <div class="topbar-actions">
                 <button class="topbar-btn" onclick="showPanel('edit-posts', document.querySelector('[data-panel=edit-posts]'))"><i class="fas fa-pen-fancy"></i><span>New Post</span></button>
                 <button class="topbar-btn" onclick="location.reload()"><i class="fas fa-sync-alt"></i><span>Refresh</span></button>
-                <a href="/" class="topbar-btn primary" target="_blank"><i class="fas fa-eye"></i><span>Preview</span></a>
+                <a href="/admin-preview" class="topbar-btn primary" target="_blank"><i class="fas fa-external-link-alt"></i><span>View Live Site</span></a>
             </div>
         </header>
 
@@ -1196,8 +1196,8 @@
                     <div class="table-header"><h3>All Users</h3></div>
                     <div class="table-wrap">
                         <table>
-                            <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Premium</th><th>Joined</th><th>Actions</th></tr></thead>
-                            <tbody id="usersTable"><tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr></tbody>
+                            <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Premium</th><th>Verified</th><th>Joined</th><th>Actions</th></tr></thead>
+                            <tbody id="usersTable"><tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -1868,10 +1868,16 @@ async function loadUsers() {
             return '<tr>' +
                 '<td style="font-weight:600">' + escapeHtml(u.username) + '</td>' +
                 '<td>' + escapeHtml(u.email) + '</td>' +
-                '<td><span class="badge ' + (u.role === 'admin' ? 'badge-danger' : u.role === 'creator' ? 'badge-gold' : 'badge-muted') + '">' + escapeHtml(u.role) + '</span></td>' +
+                '<td><span class="badge ' + (u.role === 'admin' ? 'badge-danger' : u.role === 'creator' ? 'badge-gold' : u.role === 'superuser' ? 'badge-success' : 'badge-muted') + '">' + escapeHtml(u.role) + '</span></td>' +
                 '<td><span class="badge ' + (u.is_premium ? 'badge-success' : 'badge-muted') + '">' + (u.is_premium ? 'Yes' : 'No') + '</span></td>' +
+                '<td><span class="badge ' + (u.email_verified ? 'badge-success' : 'badge-muted') + '">' + (u.email_verified ? 'Yes' : 'No') + '</span></td>' +
                 '<td>' + timeAgo(u.created_at) + '</td>' +
-                '<td><button class="btn btn-sm btn-secondary" onclick="toggleRole(\'' + u.id + '\',\'' + u.role + '\')"><i class="fas fa-user-edit"></i></button></td>' +
+                '<td><div style="display:flex;gap:4px;">' +
+                    '<button class="btn btn-sm btn-secondary" onclick="toggleRole(\'' + u.id + '\',\'' + u.role + '\')" title="Toggle Role"><i class="fas fa-user-edit"></i></button>' +
+                    '<button class="btn btn-sm btn-secondary" onclick="togglePremium(\'' + u.id + '\')" title="Toggle Premium"><i class="fas fa-crown"></i></button>' +
+                    '<button class="btn btn-sm btn-secondary" onclick="toggleSuspend(\'' + u.id + '\')" title="Toggle Suspend"><i class="fas fa-ban"></i></button>' +
+                    '<button class="btn btn-sm btn-secondary" onclick="verifyUser(\'' + u.id + '\')" title="Verify Email"><i class="fas fa-check-circle"></i></button>' +
+                '</div></td>' +
             '</tr>';
         }).join('');
     } catch(e) { toast('Failed to load users', 'error'); }
@@ -1879,9 +1885,36 @@ async function loadUsers() {
 
 async function toggleRole(uid, role) {
     var newRole = role === 'creator' ? 'user' : 'creator';
+    if (role === 'user') newRole = 'creator';
+    else if (role === 'creator') newRole = 'admin';
+    else if (role === 'admin') newRole = 'user';
     try {
         await fetch('/api/admin/users/' + uid + '/role', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ role: newRole }) });
         toast('Role updated to ' + newRole, 'success');
+        loadUsers();
+    } catch(e) { toast('Failed', 'error'); }
+}
+
+async function togglePremium(uid) {
+    try {
+        await fetch('/api/admin/users/' + uid + '/premium', { method: 'PUT', credentials: 'include' });
+        toast('Premium status toggled', 'success');
+        loadUsers();
+    } catch(e) { toast('Failed', 'error'); }
+}
+
+async function toggleSuspend(uid) {
+    try {
+        await fetch('/api/admin/users/' + uid + '/suspend', { method: 'PUT', credentials: 'include' });
+        toast('Suspension status toggled', 'success');
+        loadUsers();
+    } catch(e) { toast('Failed', 'error'); }
+}
+
+async function verifyUser(uid) {
+    try {
+        await fetch('/api/admin/users/' + uid + '/verify', { method: 'PUT', credentials: 'include' });
+        toast('User verified', 'success');
         loadUsers();
     } catch(e) { toast('Failed', 'error'); }
 }
