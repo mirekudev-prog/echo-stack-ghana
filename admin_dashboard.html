@@ -301,6 +301,217 @@
         .upload-zone p { font-size: 0.9rem; color: var(--main-muted); }
         .upload-zone .highlight { color: var(--gold); font-weight: 600; }
 
+        /* ─── Write Post Studio ─── */
+        .post-studio {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            align-items: start;
+        }
+        .post-studio-main {}
+        .post-studio-sidebar {}
+        .studio-card {
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .studio-card-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--main-border);
+            background: var(--main-hover);
+        }
+        .studio-card-header i { color: var(--gold); font-size: 0.95rem; width: 18px; text-align: center; }
+        .studio-card-header span { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--main-muted); }
+        .studio-card-body { padding: 20px; }
+        .studio-title-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--ink);
+            background: transparent;
+            line-height: 1.3;
+            resize: none;
+            overflow: hidden;
+        }
+        .studio-title-input::placeholder { color: #c8d0dc; }
+        .studio-excerpt-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            color: var(--main-muted);
+            background: transparent;
+            resize: none;
+            line-height: 1.6;
+        }
+        .studio-excerpt-input::placeholder { color: #c8d0dc; }
+        .studio-divider { height: 1px; background: var(--main-border); margin: 0 20px; }
+        .studio-content-area {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-family: 'Merriweather', serif;
+            font-size: 0.95rem;
+            line-height: 1.9;
+            color: var(--main-text);
+            background: transparent;
+            resize: none;
+            min-height: 280px;
+            padding: 20px;
+        }
+        .studio-content-area::placeholder { color: #c8d0dc; }
+        .char-counter { font-size: 0.72rem; color: var(--main-muted); text-align: right; padding: 4px 20px 12px; }
+        /* Media type pill selector */
+        .type-pills {
+            display: flex; gap: 8px; flex-wrap: wrap; padding: 16px 20px;
+        }
+        .type-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 14px; border-radius: var(--radius-full);
+            font-size: 0.78rem; font-weight: 600;
+            border: 1.5px solid var(--main-border);
+            color: var(--main-muted);
+            background: var(--main-card);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .type-pill:hover { border-color: var(--gold); color: var(--gold); }
+        .type-pill.active { background: linear-gradient(135deg, var(--gold), var(--gold2)); color: var(--ink); border-color: transparent; box-shadow: 0 2px 8px rgba(200,150,46,0.3); }
+        /* Media Drop Zone */
+        .media-drop-zone {
+            border: 2px dashed var(--main-border);
+            border-radius: var(--radius-lg);
+            padding: 36px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .media-drop-zone:hover, .media-drop-zone.dragover {
+            border-color: var(--gold);
+            background: rgba(200,150,46,0.04);
+        }
+        .media-drop-zone .dz-icon {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(200,150,46,0.12), rgba(200,150,46,0.05));
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 1.4rem; color: var(--gold);
+        }
+        .media-drop-zone h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+        .media-drop-zone p { font-size: 0.78rem; color: var(--main-muted); }
+        .media-drop-zone .dz-types {
+            display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 12px;
+        }
+        .media-drop-zone .dz-type-tag {
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            padding: 3px 8px; border-radius: 4px;
+            background: var(--main-hover); color: var(--main-muted);
+        }
+        /* Media preview in post */
+        .media-preview-box {
+            border: 1px solid var(--main-border); border-radius: var(--radius-lg);
+            overflow: hidden; background: var(--main-bg); display: none;
+        }
+        .media-preview-box.show { display: block; }
+        .media-preview-box video, .media-preview-box audio, .media-preview-box img {
+            width: 100%; display: block;
+        }
+        .media-preview-box audio { padding: 16px; background: var(--main-hover); }
+        .media-preview-meta {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; border-top: 1px solid var(--main-border);
+        }
+        .media-preview-name { font-size: 0.82rem; font-weight: 600; }
+        .media-preview-size { font-size: 0.72rem; color: var(--main-muted); }
+        /* Upload Progress */
+        .upload-progress-bar {
+            height: 4px; background: var(--main-border); border-radius: 2px; overflow: hidden; margin: 10px 0;
+        }
+        .upload-progress-fill {
+            height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2));
+            border-radius: 2px; width: 0; transition: width 0.3s ease;
+        }
+        /* Cover uploader */
+        .cover-uploader {
+            width: 100%; aspect-ratio: 16/9;
+            border: 2px dashed var(--main-border);
+            border-radius: var(--radius);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+            background: var(--main-hover);
+        }
+        .cover-uploader:hover { border-color: var(--gold); background: rgba(200,150,46,0.04); }
+        .cover-uploader img {
+            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+        }
+        .cover-uploader .cover-overlay {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.2s; color: white;
+        }
+        .cover-uploader:hover .cover-overlay { opacity: 1; }
+        .cover-uploader .cover-placeholder {
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+        }
+        .cover-uploader .cover-placeholder i { font-size: 1.6rem; color: var(--main-muted); }
+        .cover-uploader .cover-placeholder span { font-size: 0.78rem; color: var(--main-muted); font-weight: 600; }
+        /* Sidebar form inputs */
+        .sb-label {
+            display: block; font-size: 0.68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--main-muted); margin-bottom: 6px;
+        }
+        .sb-input {
+            width: 100%; padding: 9px 12px;
+            background: var(--main-bg);
+            border: 1.5px solid var(--main-border);
+            border-radius: var(--radius);
+            color: var(--main-text); font-size: 0.85rem; outline: none; transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .sb-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,150,46,0.1); }
+        .sb-group { margin-bottom: 16px; }
+        /* Status bar at bottom */
+        .studio-action-bar {
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg);
+            padding: 16px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        }
+        .studio-action-bar .action-info { font-size: 0.78rem; color: var(--main-muted); }
+        .studio-action-bar .action-btns { display: flex; gap: 10px; }
+        .btn-publish {
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            color: var(--ink); font-weight: 700; font-size: 0.88rem;
+            padding: 10px 24px; border-radius: var(--radius-full);
+            display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 14px rgba(200,150,46,0.35);
+            transition: all 0.2s;
+        }
+        .btn-publish:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,150,46,0.45); }
+        .btn-draft {
+            background: var(--main-card); color: var(--main-text);
+            border: 1.5px solid var(--main-border);
+            font-size: 0.85rem; padding: 10px 18px;
+            border-radius: var(--radius-full);
+            display: inline-flex; align-items: center; gap: 6px;
+            transition: all 0.15s;
+        }
+        .btn-draft:hover { background: var(--main-hover); }
+        @media (max-width: 900px) {
+            .post-studio { grid-template-columns: 1fr; }
+        }
+
         /* Modal */
         .modal-overlay {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
@@ -662,105 +873,210 @@
 
             <!-- Write Post -->
             <div class="panel" id="panelEditPosts">
-                <div class="table-card" style="padding:24px">
-                    <h3 style="font-family:'Playfair Display',serif;margin-bottom:20px">Write New Post</h3>
-                    <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
-                        <div class="form-group" style="flex:2;margin-bottom:0">
-                            <label>Title</label>
-                            <input type="text" class="form-input" id="writeTitle" placeholder="Enter post title...">
-                        </div>
-                        <div class="form-group" style="margin-bottom:0">
-                            <label>Content Type</label>
-                            <select class="form-input" id="writeType" style="cursor:pointer" onchange="toggleMediaTypeFields()">
-                                <option value="article">Article</option>
-                                <option value="video">Video</option>
-                                <option value="reel">Reel</option>
-                                <option value="audio">Audio</option>
-                                <option value="photo">Photo Essay</option>
-                            </select>
-                        </div>
+                <!-- Page Header -->
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+                    <div>
+                        <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--ink);margin-bottom:2px">Post Studio</h2>
+                        <p style="font-size:0.82rem;color:var(--main-muted)">Create and publish content to the live EchoStack feed.</p>
                     </div>
-                    <div class="form-group">
-                        <label>Excerpt</label>
-                        <input type="text" class="form-input" id="writeExcerpt" placeholder="Short summary for the feed...">
+                    <div style="display:flex;gap:8px">
+                        <button class="btn-draft" onclick="resetPostForm()"><i class="fas fa-redo"></i> Clear</button>
+                        <button class="btn-draft" onclick="savePostDraft()"><i class="fas fa-save"></i> Save Draft</button>
+                        <button class="btn-publish" onclick="publishPost()"><i class="fas fa-rocket"></i> Publish Now</button>
                     </div>
-                    
-                    <!-- Article Content -->
-                    <div class="form-group" id="articleContentGroup">
-                        <label>Content</label>
-                        <textarea class="form-input" id="writeContent" placeholder="Write your article content here..." style="min-height:200px;font-family:'Merriweather',serif;line-height:1.8"></textarea>
+                </div>
+
+                <!-- Content Type Selector -->
+                <div class="studio-card" style="margin-bottom:16px">
+                    <div class="studio-card-header">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Content Type</span>
                     </div>
-                    
-                    <!-- Media Upload Section -->
-                    <div class="form-group" id="mediaUploadGroup" style="display:none">
-                        <label>Media File</label>
-                        <div class="upload-zone" id="postMediaUploadZone" onclick="document.getElementById('postMediaInput').click()" style="padding:20px;margin-bottom:0">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p><span class="highlight">Click to upload</span> or drag and drop</p>
-                            <p style="font-size:0.75rem;margin-top:4px" id="mediaUploadHint">Max 100MB per file</p>
-                        </div>
-                        <input type="file" id="postMediaInput" style="display:none" accept="" onchange="handlePostMediaSelect(this.files)">
-                        <div id="selectedMediaInfo" style="margin-top:12px;padding:12px;background:var(--main-hover);border-radius:var(--radius);display:none">
-                            <div style="display:flex;align-items:center;justify-content:space-between">
-                                <div style="display:flex;align-items:center;gap:10px">
-                                    <i class="fas fa-file" id="selectedMediaIcon" style="font-size:1.2rem;color:var(--gold)"></i>
-                                    <span id="selectedMediaName" style="font-size:0.85rem;font-weight:600"></span>
-                                </div>
-                                <button class="btn btn-sm btn-danger" onclick="clearSelectedMedia()"><i class="fas fa-trash"></i></button>
+                    <div class="type-pills" id="typePillsContainer">
+                        <button class="type-pill active" data-type="article" onclick="selectContentType('article', this)">
+                            <i class="fas fa-align-left"></i> Article
+                        </button>
+                        <button class="type-pill" data-type="video" onclick="selectContentType('video', this)">
+                            <i class="fas fa-video"></i> Video
+                        </button>
+                        <button class="type-pill" data-type="reel" onclick="selectContentType('reel', this)">
+                            <i class="fas fa-film"></i> Reel
+                        </button>
+                        <button class="type-pill" data-type="audio" onclick="selectContentType('audio', this)">
+                            <i class="fas fa-microphone"></i> Audio
+                        </button>
+                        <button class="type-pill" data-type="photo" onclick="selectContentType('photo', this)">
+                            <i class="fas fa-images"></i> Photo Essay
+                        </button>
+                    </div>
+                    <input type="hidden" id="writeType" value="article">
+                </div>
+
+                <div class="post-studio">
+                    <!-- ── Left: Main Content ── -->
+                    <div class="post-studio-main">
+
+                        <!-- Title + Excerpt card -->
+                        <div class="studio-card">
+                            <div class="studio-card-body" style="padding:20px 24px 0">
+                                <textarea id="writeTitle" class="studio-title-input" rows="2" placeholder="Post title goes here…" oninput="autoResize(this)"></textarea>
+                            </div>
+                            <div class="studio-divider"></div>
+                            <div class="studio-card-body" style="padding:14px 24px">
+                                <textarea id="writeExcerpt" class="studio-excerpt-input" rows="2" placeholder="Write a short summary for the feed preview…" oninput="autoResize(this)"></textarea>
                             </div>
                         </div>
-                        <input type="hidden" id="selectedMediaUrl">
-                        <input type="hidden" id="selectedMediaPath">
-                    </div>
-                    
-                    <!-- Video/Audio URL Alternative -->
-                    <div class="form-group" id="mediaUrlGroup" style="display:none">
-                        <label>Or provide media URL</label>
-                        <input type="text" class="form-input" id="writeMediaUrl" placeholder="https://example.com/video.mp4 or YouTube/Vimeo link">
-                    </div>
-                    
-                    <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
-                        <div class="form-group" style="margin-bottom:0">
-                            <label>Region</label>
-                            <select class="form-input" id="writeRegion" style="cursor:pointer">
-                                <option value="">Select region...</option>
-                                <option value="Ashanti">Ashanti</option>
-                                <option value="Greater Accra">Greater Accra</option>
-                                <option value="Western">Western</option>
-                                <option value="Eastern">Eastern</option>
-                                <option value="Central">Central</option>
-                                <option value="Volta">Volta</option>
-                                <option value="Northern">Northern</option>
-                                <option value="Upper East">Upper East</option>
-                                <option value="Upper West">Upper West</option>
-                                <option value="Brong-Ahafo">Brong-Ahafo</option>
-                                <option value="Western North">Western North</option>
-                                <option value="Ahafo">Ahafo</option>
-                                <option value="Bono East">Bono East</option>
-                                <option value="Oti">Oti</option>
-                                <option value="North East">North East</option>
-                                <option value="Savannah">Savannah</option>
-                            </select>
+
+                        <!-- Article content -->
+                        <div class="studio-card" id="articleContentGroup">
+                            <div class="studio-card-header">
+                                <i class="fas fa-pen-nib"></i>
+                                <span>Article Body</span>
+                            </div>
+                            <textarea id="writeContent" class="studio-content-area" placeholder="Start writing your story here…&#10;&#10;Format your content clearly. Each paragraph will appear on the live post." oninput="updateCharCount(this)"></textarea>
+                            <div class="char-counter" id="charCounter">0 characters</div>
                         </div>
-                        <div class="form-group" style="margin-bottom:0">
-                            <label>Status</label>
-                            <select class="form-input" id="writeStatus" style="cursor:pointer">
-                                <option value="published">Published</option>
-                                <option value="draft">Draft</option>
-                            </select>
+
+                        <!-- Media upload block -->
+                        <div class="studio-card" id="mediaUploadGroup" style="display:none">
+                            <div class="studio-card-header">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span id="mediaUploadLabel">Upload Media</span>
+                            </div>
+                            <div class="studio-card-body">
+                                <!-- Drop zone -->
+                                <div class="media-drop-zone" id="postMediaUploadZone" onclick="document.getElementById('postMediaInput').click()">
+                                    <div class="dz-icon"><i class="fas fa-cloud-upload-alt" id="dzIcon"></i></div>
+                                    <h4 id="dzTitle">Drop your file here, or click to browse</h4>
+                                    <p id="dzSubtitle">Supports MP4, MOV, WebM</p>
+                                    <div class="dz-types" id="dzTypes">
+                                        <span class="dz-type-tag">MP4</span>
+                                        <span class="dz-type-tag">MOV</span>
+                                        <span class="dz-type-tag">WebM</span>
+                                        <span class="dz-type-tag">AVI</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="postMediaInput" style="display:none" accept="video/*" onchange="handlePostMediaSelect(this.files)">
+
+                                <!-- Upload progress -->
+                                <div id="uploadProgressWrap" style="display:none;margin-top:14px">
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                                        <span style="font-size:0.78rem;font-weight:600">Uploading…</span>
+                                        <span style="font-size:0.78rem;color:var(--main-muted)" id="uploadProgressPct">0%</span>
+                                    </div>
+                                    <div class="upload-progress-bar"><div class="upload-progress-fill" id="uploadProgressFill"></div></div>
+                                </div>
+
+                                <!-- Media preview -->
+                                <div class="media-preview-box" id="mediaPreviewBox" style="margin-top:14px">
+                                    <div id="mediaPreviewContent"></div>
+                                    <div class="media-preview-meta">
+                                        <div>
+                                            <div class="media-preview-name" id="mediaPreviewName"></div>
+                                            <div class="media-preview-size" id="mediaPreviewSize"></div>
+                                        </div>
+                                        <button class="btn btn-sm btn-danger" onclick="clearSelectedMedia()"><i class="fas fa-trash"></i> Remove</button>
+                                    </div>
+                                </div>
+
+                                <!-- URL alternative -->
+                                <div style="margin-top:16px">
+                                    <label class="sb-label">Or paste a media URL (YouTube, Vimeo, direct link)</label>
+                                    <div style="display:flex;gap:8px">
+                                        <input type="text" class="sb-input" id="writeMediaUrl" placeholder="https://youtube.com/watch?v=… or direct file URL" style="flex:1">
+                                    </div>
+                                </div>
+                                <input type="hidden" id="selectedMediaUrl">
+                                <input type="hidden" id="selectedMediaPath">
+                            </div>
                         </div>
+
                     </div>
-                    <div class="form-group">
-                        <label>Tags (comma separated)</label>
-                        <input type="text" class="form-input" id="writeTags" placeholder="heritage, tradition, music">
-                    </div>
-                    <div class="form-group">
-                        <label>Cover Image URL</label>
-                        <input type="text" class="form-input" id="writeCover" placeholder="https://...">
-                    </div>
-                    <div style="display:flex;gap:12px;margin-top:8px">
-                        <button class="btn btn-secondary" onclick="savePostDraft()"><i class="fas fa-save"></i> Save Draft</button>
-                        <button class="btn btn-primary" style="flex:1" onclick="publishPost()"><i class="fas fa-paper-plane"></i> Publish</button>
+
+                    <!-- ── Right: Settings Sidebar ── -->
+                    <div class="post-studio-sidebar">
+
+                        <!-- Cover Image -->
+                        <div class="studio-card">
+                            <div class="studio-card-header">
+                                <i class="fas fa-image"></i>
+                                <span>Cover Image</span>
+                            </div>
+                            <div class="studio-card-body">
+                                <div class="cover-uploader" id="coverUploader" onclick="document.getElementById('coverFileInput').click()">
+                                    <img id="coverPreviewImg" src="" alt="" style="display:none">
+                                    <div class="cover-overlay">
+                                        <i class="fas fa-camera" style="font-size:1.2rem;margin-bottom:4px"></i>
+                                        <span style="font-size:0.75rem;font-weight:600">Change Image</span>
+                                    </div>
+                                    <div class="cover-placeholder" id="coverPlaceholder">
+                                        <i class="fas fa-image"></i>
+                                        <span>Upload cover image</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="coverFileInput" accept="image/*" style="display:none" onchange="handleCoverImageSelect(this.files)">
+                                <div style="margin-top:10px">
+                                    <label class="sb-label">Or paste image URL</label>
+                                    <input type="text" class="sb-input" id="writeCover" placeholder="https://…" oninput="previewCoverFromUrl(this.value)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Publishing Options -->
+                        <div class="studio-card">
+                            <div class="studio-card-header">
+                                <i class="fas fa-cog"></i>
+                                <span>Publishing</span>
+                            </div>
+                            <div class="studio-card-body">
+                                <div class="sb-group">
+                                    <label class="sb-label">Status</label>
+                                    <select class="sb-input" id="writeStatus" style="cursor:pointer">
+                                        <option value="published">🟢 Published (Live)</option>
+                                        <option value="draft">🟡 Draft (Hidden)</option>
+                                    </select>
+                                </div>
+                                <div class="sb-group">
+                                    <label class="sb-label">Region</label>
+                                    <select class="sb-input" id="writeRegion" style="cursor:pointer">
+                                        <option value="">— No region —</option>
+                                        <option value="Ashanti">Ashanti</option>
+                                        <option value="Greater Accra">Greater Accra</option>
+                                        <option value="Western">Western</option>
+                                        <option value="Eastern">Eastern</option>
+                                        <option value="Central">Central</option>
+                                        <option value="Volta">Volta</option>
+                                        <option value="Northern">Northern</option>
+                                        <option value="Upper East">Upper East</option>
+                                        <option value="Upper West">Upper West</option>
+                                        <option value="Brong-Ahafo">Brong-Ahafo</option>
+                                        <option value="Western North">Western North</option>
+                                        <option value="Ahafo">Ahafo</option>
+                                        <option value="Bono East">Bono East</option>
+                                        <option value="Oti">Oti</option>
+                                        <option value="North East">North East</option>
+                                        <option value="Savannah">Savannah</option>
+                                    </select>
+                                </div>
+                                <div class="sb-group" style="margin-bottom:0">
+                                    <label class="sb-label">Tags <span style="font-weight:400;text-transform:none">(comma separated)</span></label>
+                                    <input type="text" class="sb-input" id="writeTags" placeholder="heritage, culture, music">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Publish card -->
+                        <div style="background:linear-gradient(135deg,var(--ink),var(--ink3));border-radius:var(--radius-lg);padding:20px;">
+                            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);margin-bottom:8px">Ready to go live?</div>
+                            <p style="font-size:0.82rem;color:rgba(255,255,255,0.6);line-height:1.5;margin-bottom:16px">Your post will appear immediately on the public feed after publishing.</p>
+                            <button class="btn-publish" style="width:100%;justify-content:center" onclick="publishPost()">
+                                <i class="fas fa-rocket"></i> Publish to EchoStack
+                            </button>
+                            <button class="btn-draft" style="width:100%;justify-content:center;margin-top:8px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.1)" onclick="savePostDraft()">
+                                <i class="fas fa-save"></i> Save as Draft
+                            </button>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -1503,84 +1819,180 @@ if (postMediaZone) {
     postMediaZone.addEventListener('drop', function(e) { e.preventDefault(); postMediaZone.classList.remove('dragover'); handlePostMediaSelect(e.dataTransfer.files); });
 }
 
-// Toggle media type fields based on content type
-function toggleMediaTypeFields() {
-    var type = document.getElementById('writeType').value;
+// ── New Content Type Pill Selector ──
+function selectContentType(type, el) {
+    // Update pills
+    document.querySelectorAll('.type-pill').forEach(function(p) { p.classList.remove('active'); });
+    el.classList.add('active');
+    document.getElementById('writeType').value = type;
+
     var articleGroup = document.getElementById('articleContentGroup');
     var mediaUploadGroup = document.getElementById('mediaUploadGroup');
-    var mediaUrlGroup = document.getElementById('mediaUrlGroup');
     var postMediaInput = document.getElementById('postMediaInput');
-    var mediaHint = document.getElementById('mediaUploadHint');
-    
+    var dzIcon = document.getElementById('dzIcon');
+    var dzTitle = document.getElementById('dzTitle');
+    var dzSubtitle = document.getElementById('dzSubtitle');
+    var dzTypes = document.getElementById('dzTypes');
+    var mediaUploadLabel = document.getElementById('mediaUploadLabel');
+
     if (type === 'article') {
         articleGroup.style.display = 'block';
         mediaUploadGroup.style.display = 'none';
-        mediaUrlGroup.style.display = 'none';
-    } else if (type === 'video' || type === 'reel') {
+    } else {
         articleGroup.style.display = 'none';
         mediaUploadGroup.style.display = 'block';
-        mediaUrlGroup.style.display = 'block';
-        postMediaInput.accept = 'video/*';
-        mediaHint.textContent = 'Max 100MB per video file';
-    } else if (type === 'audio') {
-        articleGroup.style.display = 'none';
-        mediaUploadGroup.style.display = 'block';
-        mediaUrlGroup.style.display = 'block';
-        postMediaInput.accept = 'audio/*';
-        mediaHint.textContent = 'Max 50MB per audio file';
-    } else if (type === 'photo') {
-        articleGroup.style.display = 'none';
-        mediaUploadGroup.style.display = 'block';
-        mediaUrlGroup.style.display = 'block';
-        postMediaInput.accept = 'image/*';
-        mediaHint.textContent = 'Max 20MB per image file';
+        if (type === 'video' || type === 'reel') {
+            postMediaInput.accept = 'video/*';
+            dzIcon.className = 'fas fa-video';
+            dzTitle.textContent = type === 'reel' ? 'Drop your Reel here, or click to browse' : 'Drop your video here, or click to browse';
+            dzSubtitle.textContent = 'Max 100MB · MP4, MOV, WebM, AVI';
+            dzTypes.innerHTML = '<span class="dz-type-tag">MP4</span><span class="dz-type-tag">MOV</span><span class="dz-type-tag">WebM</span><span class="dz-type-tag">AVI</span>';
+            mediaUploadLabel.textContent = type === 'reel' ? 'Upload Reel' : 'Upload Video';
+        } else if (type === 'audio') {
+            postMediaInput.accept = 'audio/*';
+            dzIcon.className = 'fas fa-microphone';
+            dzTitle.textContent = 'Drop your audio file here, or click to browse';
+            dzSubtitle.textContent = 'Max 50MB · MP3, WAV, AAC, OGG, M4A';
+            dzTypes.innerHTML = '<span class="dz-type-tag">MP3</span><span class="dz-type-tag">WAV</span><span class="dz-type-tag">AAC</span><span class="dz-type-tag">OGG</span><span class="dz-type-tag">M4A</span>';
+            mediaUploadLabel.textContent = 'Upload Audio';
+        } else if (type === 'photo') {
+            postMediaInput.accept = 'image/*';
+            dzIcon.className = 'fas fa-images';
+            dzTitle.textContent = 'Drop your photo here, or click to browse';
+            dzSubtitle.textContent = 'Max 20MB · JPG, PNG, WebP, GIF, HEIC';
+            dzTypes.innerHTML = '<span class="dz-type-tag">JPG</span><span class="dz-type-tag">PNG</span><span class="dz-type-tag">WebP</span><span class="dz-type-tag">GIF</span>';
+            mediaUploadLabel.textContent = 'Upload Photo';
+        }
     }
+    // Clear any previously selected media when switching types
+    clearSelectedMedia();
+}
+
+// Keep toggleMediaTypeFields as alias (used by publish/draft logic)
+function toggleMediaTypeFields() {
+    var type = document.getElementById('writeType').value;
+    var activeEl = document.querySelector('.type-pill[data-type="' + type + '"]');
+    if (activeEl) selectContentType(type, activeEl);
+}
+
+// Auto-resize textareas
+function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+}
+
+// Char counter
+function updateCharCount(el) {
+    var len = el.value.length;
+    document.getElementById('charCounter').textContent = len.toLocaleString() + ' characters';
+    autoResize(el);
+}
+
+// Cover image handling
+function handleCoverImageSelect(files) {
+    if (!files || !files[0]) return;
+    var file = files[0];
+    if (file.size > 10 * 1024 * 1024) { toast('Cover image too large. Max 10MB.', 'error'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var img = document.getElementById('coverPreviewImg');
+        img.src = e.target.result;
+        img.style.display = 'block';
+        document.getElementById('coverPlaceholder').style.display = 'none';
+        document.getElementById('writeCover').value = '';
+        window.selectedCoverFile = file;
+    };
+    reader.readAsDataURL(file);
+}
+
+function previewCoverFromUrl(url) {
+    if (!url) { 
+        document.getElementById('coverPreviewImg').style.display = 'none';
+        document.getElementById('coverPlaceholder').style.display = 'flex';
+        return;
+    }
+    var img = document.getElementById('coverPreviewImg');
+    img.src = url;
+    img.style.display = 'block';
+    document.getElementById('coverPlaceholder').style.display = 'none';
+    window.selectedCoverFile = null;
+}
+
+// Reset post form
+function resetPostForm() {
+    document.getElementById('writeTitle').value = '';
+    document.getElementById('writeExcerpt').value = '';
+    document.getElementById('writeContent').value = '';
+    document.getElementById('writeMediaUrl').value = '';
+    document.getElementById('writeCover').value = '';
+    document.getElementById('writeTags').value = '';
+    document.getElementById('writeStatus').value = 'published';
+    document.getElementById('writeRegion').value = '';
+    document.getElementById('charCounter').textContent = '0 characters';
+    document.getElementById('coverPreviewImg').style.display = 'none';
+    document.getElementById('coverPlaceholder').style.display = 'flex';
+    window.selectedCoverFile = null;
+    clearSelectedMedia();
+    // Reset to article type
+    var articlePill = document.querySelector('.type-pill[data-type="article"]');
+    if (articlePill) selectContentType('article', articlePill);
+    toast('Form cleared', '');
 }
 
 // Handle post media file selection
 function handlePostMediaSelect(files) {
     if (!files || files.length === 0) return;
     var file = files[0];
-    var maxSize = 100 * 1024 * 1024; // 100MB default
-    
     var type = document.getElementById('writeType').value;
-    if (type === 'video' || type === 'reel') maxSize = 100 * 1024 * 1024;
-    else if (type === 'audio') maxSize = 50 * 1024 * 1024;
-    else if (type === 'photo') maxSize = 20 * 1024 * 1024;
-    
+    var maxSize = type === 'audio' ? 50 * 1024 * 1024 : type === 'photo' ? 20 * 1024 * 1024 : 100 * 1024 * 1024;
+
     if (file.size > maxSize) {
-        toast('File too large. Max size: ' + (maxSize / (1024*1024)) + 'MB', 'error');
+        toast('File too large. Max: ' + (maxSize / (1024 * 1024)) + 'MB', 'error');
         return;
     }
-    
-    // Show selected file info
-    var infoDiv = document.getElementById('selectedMediaInfo');
-    var nameSpan = document.getElementById('selectedMediaName');
-    var icon = document.getElementById('selectedMediaIcon');
-    
-    infoDiv.style.display = 'block';
-    nameSpan.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
-    
-    // Set icon based on type
+
+    // Show preview
+    var previewBox = document.getElementById('mediaPreviewBox');
+    var previewContent = document.getElementById('mediaPreviewContent');
+    var previewName = document.getElementById('mediaPreviewName');
+    var previewSize = document.getElementById('mediaPreviewSize');
+
+    previewName.textContent = file.name;
+    previewSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+    previewBox.classList.add('show');
+
     if (file.type.startsWith('video/')) {
-        icon.className = 'fas fa-video';
+        var videoUrl = URL.createObjectURL(file);
+        previewContent.innerHTML = '<video src="' + videoUrl + '" controls style="max-height:260px"></video>';
     } else if (file.type.startsWith('audio/')) {
-        icon.className = 'fas fa-music';
+        var audioUrl = URL.createObjectURL(file);
+        previewContent.innerHTML = '<audio src="' + audioUrl + '" controls style="width:100%;padding:16px"></audio>';
     } else if (file.type.startsWith('image/')) {
-        icon.className = 'fas fa-image';
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            previewContent.innerHTML = '<img src="' + e.target.result + '" style="max-height:280px;object-fit:contain">';
+        };
+        reader.readAsDataURL(file);
     } else {
-        icon.className = 'fas fa-file';
+        previewContent.innerHTML = '<div style="padding:32px;text-align:center"><i class="fas fa-file" style="font-size:2.5rem;color:var(--main-muted)"></i><p style="margin-top:8px;font-size:0.85rem">' + file.name + '</p></div>';
     }
-    
-    // Store file for upload
+
+    // Hide the drop zone
+    document.getElementById('postMediaUploadZone').style.display = 'none';
     window.selectedPostMediaFile = file;
 }
 
 function clearSelectedMedia() {
-    document.getElementById('selectedMediaInfo').style.display = 'none';
-    document.getElementById('postMediaInput').value = '';
-    document.getElementById('selectedMediaUrl').value = '';
-    document.getElementById('selectedMediaPath').value = '';
+    var previewBox = document.getElementById('mediaPreviewBox');
+    if (previewBox) { previewBox.classList.remove('show'); document.getElementById('mediaPreviewContent').innerHTML = ''; }
+    var dzZone = document.getElementById('postMediaUploadZone');
+    if (dzZone) dzZone.style.display = '';
+    var inp = document.getElementById('postMediaInput');
+    if (inp) inp.value = '';
+    var su = document.getElementById('selectedMediaUrl');
+    if (su) su.value = '';
+    var sp = document.getElementById('selectedMediaPath');
+    if (sp) sp.value = '';
     window.selectedPostMediaFile = null;
 }
 
