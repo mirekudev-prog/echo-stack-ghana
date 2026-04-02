@@ -981,6 +981,8 @@
                     var res = await fetch('/api/posts?region_id=' + regionId + '&limit=5', { credentials: 'include' });
                     if (res.ok) {
                         var posts = await res.json();
+                        // Filter to only published posts on public app.html
+                        posts = posts.filter(function(p) { return p.status === 'published'; });
                         if (Array.isArray(posts) && posts.length > 0) {
                             var html = '<div style="display:flex;flex-direction:column;gap:8px;">';
                             posts.forEach(function(post) {
