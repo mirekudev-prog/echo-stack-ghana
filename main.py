@@ -2514,41 +2514,55 @@ async def submit_story(
         db.rollback(); raise HTTPException(500, str(e))
 
 # ─── SEARCH FUNCTION FOR ECHOBOT ────────────────────────────────────────────
-def search_database(query: str, db: Session) -> str:
-    """Search posts and regions for keywords and return a context string."""
+def search_database(query: str, db: Session) -> list:
+    """Search posts, regions, and FAQ for keywords and return structured results with links."""
     # simple keyword extraction: split and keep words longer than 3 characters
     keywords = [word.lower() for word in query.split() if len(word) > 3]
     if not keywords:
-        return ""
-
-    # Build conditions for posts (title, content, excerpt)
+        return []
+    
     from sqlalchemy import or_
+    results = []
+    
+    # Search posts (title, content, excerpt)
     post_conditions = []
     for kw in keywords:
         post_conditions.append(models.Post.title.ilike(f"%{kw}%"))
         post_conditions.append(models.Post.content.ilike(f"%{kw}%"))
         post_conditions.append(models.Post.excerpt.ilike(f"%{kw}%"))
-    posts = db.query(models.Post).filter(or_(*post_conditions)).limit(3).all()
-
-    # Build conditions for regions (name, description, overview)
+    
+    if post_conditions:
+        posts = db.query(models.Post).filter(or_(*post_conditions)).limit(5).all()
+        for p in posts:
+            snippet = (p.content or "")[:150] + "..." if len(p.content or "") > 150 else (p.content or "")
+            results.append({
+                "type": "post",
+                "title": p.title,
+                "snippet": snippet,
+                "url": f"/post/{p.id}",
+                "content_type": p.content_type or "article"
+            })
+    
+    # Search regions (name, description, overview)
     region_conditions = []
     for kw in keywords:
         region_conditions.append(models.Region.name.ilike(f"%{kw}%"))
         region_conditions.append(models.Region.description.ilike(f"%{kw}%"))
         region_conditions.append(models.Region.overview.ilike(f"%{kw}%"))
-    regions = db.query(models.Region).filter(or_(*region_conditions)).limit(3).all()
-
-    context_parts = []
-    for p in posts:
-        snippet = (p.title + ": " + p.content)[:200] + "..."
-        context_parts.append(f"Post: {snippet}")
-    for r in regions:
-        snippet = (r.name + ": " + (r.description or r.overview or ""))[:200] + "..."
-        context_parts.append(f"Region: {snippet}")
-
-    if context_parts:
-        return "Relevant information from our archive:\n" + "\n".join(context_parts)
-    return ""
+    
+    if region_conditions:
+        regions = db.query(models.Region).filter(or_(*region_conditions)).limit(5).all()
+        for r in regions:
+            snippet = (r.description or r.overview or "")[:150] + "..." if len(r.description or r.overview or "") > 150 else (r.description or r.overview or "")
+            results.append({
+                "type": "region",
+                "title": r.name,
+                "snippet": snippet,
+                "url": f"/app#region-{r.id}",
+                "content_type": "region"
+            })
+    
+    return results
 
 # ─── AI ECHOBOT (Gemini 2.5 Flash) with Database Context ────────────────── =
 @app.post("/api/ai/chat")
@@ -2606,11 +2620,11 @@ async def ai_chat(
         "You are EchoBot, the official AI guide for EchoStack Ghana. "
         "Your goal is to promote Ghanaian culture, history, and regions and everything about Ghana. "
         "INSTRUCTIONS:\n"
-        "1. PRIORITY: Use the 'DATABASE CONTEXT' provided below to answer. "
-        "If the answer is in the context, treat it as the absolute truth.\n"
-        "2. BLEND: If the database context is empty or insufficient, use your general "
-        "knowledge about Ghana to provide a helpful, warm, and professional response.\n"
-        "3. STYLE: Use a touch of Ghanaian hospitality,be friendly and jovial but always be profesional. Keep answers concise."
+        "1. PRIORITY: FIRST check if DATABASE CONTEXT contains the answer. If YES, use ONLY that information and provide the link(s).\n"
+        "2. If database context is EMPTY or does NOT contain the answer, THEN use your general knowledge about Ghana.\n"
+        "3. When providing database answers, ALWAYS include the clickable link in format: [Title](url)\n"
+        "4. STYLE: Use a touch of Ghanaian hospitality, be friendly and jovial but always be professional. Keep answers concise.\n"
+        "5. If you found database results, start with 'I found this in our archives:' and list the relevant items with links."
     )
 
     full_prompt = f"{system_instruction}\n\nDATABASE CONTEXT:\n{db_context}\n\nUSER QUESTION: {message}"
@@ -2642,7 +2656,13 @@ async def ai_chat(
                 print(f"⚠️ Unexpected API structure: {data}")
                 reply = "I'm here, but I couldn't process that question. Ask me something else about Ghana!"
 
-            return {"reply": reply, "locked": False}
+            # Return database results separately for UI to display links nicely
+            return {
+                "reply": reply, 
+                "locked": False,
+                "database_results": db_context if db_context else [],
+                "used_database": bool(db_context)
+            }
 
     except Exception as e:
         print(f"🚨 Critical EchoBot Failure: {e}")
