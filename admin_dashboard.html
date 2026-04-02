@@ -656,6 +656,7 @@
             <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
             <h1 class="topbar-title" id="topbarTitle">Dashboard</h1>
             <div class="topbar-actions">
+                <button class="topbar-btn" onclick="showPanel('edit-posts', document.querySelector('[data-panel=edit-posts]'))"><i class="fas fa-pen-fancy"></i><span>New Post</span></button>
                 <button class="topbar-btn" onclick="location.reload()"><i class="fas fa-sync-alt"></i><span>Refresh</span></button>
                 <a href="/" class="topbar-btn primary" target="_blank"><i class="fas fa-eye"></i><span>Preview</span></a>
             </div>
@@ -1085,10 +1086,27 @@
             <div class="panel" id="panelManagePosts">
                 <div class="table-card">
                     <div class="table-header">
-                        <h3>All Posts</h3>
-                        <button class="btn btn-sm btn-primary" onclick="showPanel('edit-posts', document.querySelector('[data-panel=edit-posts]'))">
-                            <i class="fas fa-plus"></i> New Post
-                        </button>
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <h3>All Posts</h3>
+                            <span id="postCountBadge" style="font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:50px;background:rgba(200,150,46,0.12);color:var(--gold)"></span>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center">
+                            <div style="position:relative">
+                                <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:0.75rem;color:var(--main-muted)"></i>
+                                <input type="text" id="postSearchInput" placeholder="Search posts…" oninput="filterPosts()" style="padding:7px 12px 7px 30px;border:1.5px solid var(--main-border);border-radius:50px;font-size:0.78rem;outline:none;width:180px;font-family:'DM Sans',sans-serif;background:var(--main-bg);transition:border-color 0.15s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--main-border)'">
+                            </div>
+                            <select id="postFilterType" onchange="filterPosts()" style="padding:7px 10px;border:1.5px solid var(--main-border);border-radius:50px;font-size:0.78rem;outline:none;cursor:pointer;font-family:'DM Sans',sans-serif;background:var(--main-bg)">
+                                <option value="">All Types</option>
+                                <option value="article">Article</option>
+                                <option value="video">Video</option>
+                                <option value="reel">Reel</option>
+                                <option value="audio">Audio</option>
+                                <option value="photo">Photo</option>
+                            </select>
+                            <button class="btn btn-sm btn-primary" onclick="showPanel('edit-posts', document.querySelector('[data-panel=edit-posts]'))">
+                                <i class="fas fa-plus"></i> New Post
+                            </button>
+                        </div>
                     </div>
                     <div class="table-wrap">
                         <table>
@@ -1465,26 +1483,45 @@ async function loadOverview() {
 }
 
 // ── POSTS ──
+var allPostsCache = [];
 async function loadAllPosts() {
     try {
-        var posts = await apiGet('/api/posts?limit=100');
-        var tbody = document.getElementById('allPostsTable');
-        if (posts.length) {
-            tbody.innerHTML = posts.map(function(p) {
-                return '<tr>' +
-                    '<td style="font-weight:600">' + escapeHtml(p.title) + '</td>' +
-                    '<td>' + escapeHtml(p.author_username) + '</td>' +
-                    '<td><span class="badge badge-gold">' + escapeHtml(p.content_type) + '</span></td>' +
-                    '<td><span class="badge ' + (p.status === 'published' ? 'badge-success' : 'badge-muted') + '">' + escapeHtml(p.status) + '</span></td>' +
-                    '<td>' + (p.views || 0) + '</td>' +
-                    '<td>' + timeAgo(p.created_at) + '</td>' +
-                    '<td><a href="/post/' + p.id + '" target="_blank" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></a></td>' +
-                '</tr>';
-            }).join('');
-        } else {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fas fa-newspaper"></i><p>No posts yet</p></td></tr>';
-        }
+        allPostsCache = await apiGet('/api/posts?limit=100');
+        var badge = document.getElementById('postCountBadge');
+        if (badge) badge.textContent = allPostsCache.length + ' posts';
+        renderPostsTable(allPostsCache);
     } catch(e) { toast('Failed to load posts', 'error'); }
+}
+
+function renderPostsTable(posts) {
+    var tbody = document.getElementById('allPostsTable');
+    if (posts.length) {
+        tbody.innerHTML = posts.map(function(p) {
+            return '<tr data-title="' + escapeHtml(p.title).toLowerCase() + '" data-type="' + escapeHtml(p.content_type) + '">' +
+                '<td style="font-weight:600;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(p.title) + '</td>' +
+                '<td>' + escapeHtml(p.author_username) + '</td>' +
+                '<td><span class="badge badge-gold">' + escapeHtml(p.content_type) + '</span></td>' +
+                '<td><span class="badge ' + (p.status === 'published' ? 'badge-success' : 'badge-muted') + '">' + escapeHtml(p.status) + '</span></td>' +
+                '<td>' + (p.views || 0) + '</td>' +
+                '<td>' + timeAgo(p.created_at) + '</td>' +
+                '<td style="white-space:nowrap"><a href="/post/' + p.id + '" target="_blank" class="btn btn-sm btn-secondary" style="margin-right:4px"><i class="fas fa-eye"></i></a>' +
+                '<button class="btn btn-sm btn-danger" onclick="deleteItem(' + p.id + ',\'post\')" title="Delete post"><i class="fas fa-trash"></i></button></td>' +
+            '</tr>';
+        }).join('');
+    } else {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fas fa-newspaper"></i><p>No posts yet</p></td></tr>';
+    }
+}
+
+function filterPosts() {
+    var query = (document.getElementById('postSearchInput').value || '').toLowerCase().trim();
+    var typeFilter = document.getElementById('postFilterType').value;
+    var filtered = allPostsCache.filter(function(p) {
+        var matchesSearch = !query || (p.title || '').toLowerCase().indexOf(query) !== -1 || (p.author_username || '').toLowerCase().indexOf(query) !== -1;
+        var matchesType = !typeFilter || p.content_type === typeFilter;
+        return matchesSearch && matchesType;
+    });
+    renderPostsTable(filtered);
 }
 
 async function publishPost() {
@@ -1783,13 +1820,14 @@ function closeDeleteModal() { document.getElementById('deleteModal').classList.r
 async function confirmDelete() {
     var id = document.getElementById('deleteTarget').value;
     var type = document.getElementById('deleteType').value;
-    var endpoints = { region: '/api/admin/regions', file: '/api/files' };
+    var endpoints = { region: '/api/admin/regions', file: '/api/files', post: '/api/posts' };
     try {
         await fetch(endpoints[type] + '/' + id, { method: 'DELETE', credentials: 'include' });
         toast('Deleted', 'success');
         closeDeleteModal();
         if (type === 'region') loadRegions();
         if (type === 'file') loadFiles();
+        if (type === 'post') { loadAllPosts(); loadOverview(); }
     } catch(e) { toast('Delete failed', 'error'); }
 }
 
