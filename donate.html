@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Support EchoStack - Donate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .donate-container { max-width: 680px; margin: 0 auto; }
+        .donate-card {
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .donate-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink);
+            font-size: 2rem;
+        }
+        .donate-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 10px;
+        }
+        .donate-desc {
+            color: var(--main-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .amount-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .amount-btn {
+            padding: 16px;
+            border: 2px solid var(--main-border);
+            border-radius: var(--radius);
+            background: var(--main-bg);
+            color: var(--main-text);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .amount-btn:hover {
+            border-color: var(--gold);
+            background: rgba(200,150,46,0.05);
+        }
+        .amount-btn.selected {
+            border-color: var(--gold);
+            background: rgba(200,150,46,0.15);
+            color: var(--ink);
+        }
+        .custom-amount {
+            margin-bottom: 20px;
+        }
+        .donate-form {
+            background: var(--main-bg);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            margin-top: 20px;
+        }
+        .tier-card {
+            background: linear-gradient(135deg, var(--ink), var(--ink2));
+            color: var(--text);
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .tier-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+        .tier-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .tier-benefits {
+            list-style: none;
+            padding: 0;
+        }
+        .tier-benefits li {
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tier-benefits li i {
+            color: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="/echostack-logo.png" alt="EchoStack">
+                    <span>EchoStack</span>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="sidebar-avatar" id="userAvatar"></div>
+                <div>
+                    <div class="sidebar-user-name" id="userName">Loading...</div>
+                    <span class="sidebar-user-badge badge-free" id="userBadge">Free</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i> Feed</a>
+                    <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i> Explore</a>
+                    <a href="/reels" class="sidebar-link"><i class="fas fa-video"></i> Reels</a>
+                    <a href="/archive" class="sidebar-link"><i class="fas fa-landmark"></i> Archive</a>
+                </div>
+                <div class="sidebar-section">
+                    <a href="/activity" class="sidebar-link"><i class="fas fa-bell"></i> Activity</a>
+                    <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i> Following</a>
+                    <a href="/bookmarks" class="sidebar-link"><i class="fas fa-bookmark"></i> Bookmarks</a>
+                    <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i> Messages</a>
+                </div>
+                <div class="sidebar-section">
+                    <a href="/creator" class="sidebar-link"><i class="fas fa-pen-fancy"></i> Creator</a>
+                    <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <!-- Main Content -->
+        <div class="main-wrapper">
+            <header class="topbar">
+                <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <h1 class="topbar-title">Support EchoStack</h1>
+            </header>
+
+            <main class="section">
+                <div class="donate-container">
+                    <div class="donate-card">
+                        <div class="donate-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h1 class="donate-title">Keep Ghana's Stories Alive</h1>
+                        <p class="donate-desc">
+                            Your support helps us preserve and share Ghana's rich cultural heritage. 
+                            Every contribution goes towards maintaining our platform and supporting local creators.
+                        </p>
+
+                        <div class="amount-grid">
+                            <button class="amount-btn" data-amount="5">₵5</button>
+                            <button class="amount-btn selected" data-amount="10">₵10</button>
+                            <button class="amount-btn" data-amount="20">₵20</button>
+                            <button class="amount-btn" data-amount="50">₵50</button>
+                            <button class="amount-btn" data-amount="100">₵100</button>
+                        </div>
+
+                        <div class="custom-amount">
+                            <input type="number" id="customAmount" class="input" placeholder="Or enter custom amount (₵)" min="1">
+                        </div>
+
+                        <button class="btn btn-primary" style="width: 100%;" onclick="processDonation()">
+                            <i class="fas fa-gift"></i> Donate Now
+                        </button>
+                    </div>
+
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--ink); margin: 30px 0 20px;">Membership Tiers</h2>
+                    
+                    <div class="tier-card">
+                        <div class="tier-name">🥉 Supporter</div>
+                        <div class="tier-price">₵15/month</div>
+                        <ul class="tier-benefits">
+                            <li><i class="fas fa-check"></i> Ad-free experience</li>
+                            <li><i class="fas fa-check"></i> Early access to new features</li>
+                            <li><i class="fas fa-check"></i> Supporter badge on profile</li>
+                        </ul>
+                    </div>
+
+                    <div class="tier-card">
+                        <div class="tier-name">🥈 Patron</div>
+                        <div class="tier-price">₵30/month</div>
+                        <ul class="tier-benefits">
+                            <li><i class="fas fa-check"></i> All Supporter benefits</li>
+                            <li><i class="fas fa-check"></i> Exclusive content access</li>
+                            <li><i class="fas fa-check"></i> Priority customer support</li>
+                            <li><i class="fas fa-check"></i> Monthly newsletter</li>
+                        </ul>
+                    </div>
+
+                    <div class="tier-card">
+                        <div class="tier-name">🥇 Guardian</div>
+                        <div class="tier-price">₵50/month</div>
+                        <ul class="tier-benefits">
+                            <li><i class="fas fa-check"></i> All Patron benefits</li>
+                            <li><i class="fas fa-check"></i> Direct creator support</li>
+                            <li><i class="fas fa-check"></i> Exclusive events access</li>
+                            <li><i class="fas fa-check"></i> Name in credits</li>
+                        </ul>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let selectedAmount = 10;
+
+        // Toggle sidebar on mobile
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').style.display = 
+                document.getElementById('sidebar').classList.contains('open') ? 'block' : 'none';
+        }
+
+        // Logout
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/user-login';
+        }
+
+        // Load user data
+        async function loadUser() {
+            try {
+                const res = await fetch('/api/users/me');
+                if (!res.ok) throw new Error('Not authenticated');
+                currentUser = await res.json();
+                document.getElementById('userName').textContent = currentUser.username;
+                
+                if (currentUser.avatar_url) {
+                    document.getElementById('userAvatar').innerHTML = `<img src="${currentUser.avatar_url}" alt="${currentUser.username}">`;
+                } else {
+                    document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+                }
+
+                const badge = document.getElementById('userBadge');
+                if (currentUser.is_premium) {
+                    badge.className = 'sidebar-user-badge badge-premium';
+                    badge.textContent = 'Premium';
+                } else if (currentUser.role === 'admin') {
+                    badge.className = 'sidebar-user-badge badge-admin';
+                    badge.textContent = 'Admin';
+                } else if (currentUser.role === 'creator') {
+                    badge.className = 'sidebar-user-badge badge-creator';
+                    badge.textContent = 'Creator';
+                }
+            } catch (err) {
+                window.location.href = '/user-login';
+            }
+        }
+
+        // Amount selection
+        document.querySelectorAll('.amount-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedAmount = parseInt(btn.dataset.amount);
+                document.getElementById('customAmount').value = '';
+            });
+        });
+
+        // Process donation
+        async function processDonation() {
+            const customAmount = document.getElementById('customAmount').value;
+            const amount = customAmount ? parseFloat(customAmount) : selectedAmount;
+
+            if (!amount || amount < 1) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            alert(`Thank you for your generous donation of ₵${amount}! Payment integration coming soon.`);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUser();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Read - EchoStack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .article-container { max-width: 720px; margin: 0 auto; padding: 20px 0; }
+        .article-header { margin-bottom: 30px; }
+        .article-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        .article-author { display: flex; align-items: center; gap: 12px; }
+        .author-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold2)); display: flex; align-items: center; justify-content: center; color: var(--ink); font-weight: 700; font-size: 1.2rem; }
+        .author-info h3 { font-size: 1rem; font-weight: 600; color: var(--ink); }
+        .author-info p { font-size: 0.8rem; color: var(--main-muted); }
+        .article-title { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: var(--ink); line-height: 1.2; margin-bottom: 15px; }
+        .article-type-badge { display: inline-block; padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: white; margin-bottom: 15px; }
+        .article-type-badge.article { background: var(--badge-article); }
+        .article-type-badge.video { background: var(--badge-video); }
+        .article-type-badge.reel { background: var(--badge-reel); }
+        .article-type-badge.audio { background: var(--badge-audio); }
+        .article-type-badge.photo { background: var(--badge-photo); }
+        .article-media { width: 100%; border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 25px; background: var(--main-bg); }
+        .article-media img, .article-media video { width: 100%; display: block; }
+        .article-content { font-family: 'Merriweather', serif; font-size: 1.05rem; line-height: 1.8; color: var(--main-text); }
+        .article-content p { margin-bottom: 20px; }
+        .article-content h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--ink); margin: 35px 0 15px; }
+        .article-actions { display: flex; gap: 12px; padding: 20px 0; border-top: 1px solid var(--main-border); margin-top: 30px; }
+        .action-btn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: var(--radius-full); background: var(--main-bg); color: var(--main-muted); font-size: 0.9rem; font-weight: 600; transition: all 0.2s; cursor: pointer; }
+        .action-btn:hover { background: var(--main-hover); color: var(--main-text); }
+        .action-btn.active { color: var(--danger); }
+        .action-btn.saved { color: var(--gold); }
+        .comments-section { margin-top: 40px; }
+        .comments-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--ink); margin-bottom: 20px; }
+        .comment-form { display: flex; gap: 12px; margin-bottom: 25px; }
+        .comment-input { flex: 1; padding: 14px 18px; border: 1px solid var(--main-border); border-radius: var(--radius); font-size: 0.95rem; outline: none; }
+        .comment-input:focus { border-color: var(--gold); }
+        .comment-list { display: flex; flex-direction: column; gap: 15px; }
+        .comment-item { background: var(--main-bg); padding: 16px; border-radius: var(--radius); }
+        .comment-author { font-weight: 600; font-size: 0.9rem; color: var(--ink); margin-bottom: 6px; }
+        .comment-text { font-size: 0.9rem; color: var(--main-text); line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="/echostack-logo.png" alt="EchoStack">
+                    <span>EchoStack</span>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="sidebar-avatar" id="userAvatar"></div>
+                <div>
+                    <div class="sidebar-user-name" id="userName">Loading...</div>
+                    <span class="sidebar-user-badge badge-free" id="userBadge">Free</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i> Feed</a>
+                    <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i> Explore</a>
+                    <a href="/reels" class="sidebar-link"><i class="fas fa-video"></i> Reels</a>
+                    <a href="/archive" class="sidebar-link"><i class="fas fa-landmark"></i> Archive</a>
+                </div>
+                <div class="sidebar-section">
+                    <a href="/activity" class="sidebar-link"><i class="fas fa-bell"></i> Activity</a>
+                    <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i> Following</a>
+                    <a href="/bookmarks" class="sidebar-link"><i class="fas fa-bookmark"></i> Bookmarks</a>
+                    <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i> Messages</a>
+                </div>
+                <div class="sidebar-section">
+                    <a href="/creator" class="sidebar-link"><i class="fas fa-pen-fancy"></i> Creator</a>
+                    <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <!-- Main Content -->
+        <div class="main-wrapper">
+            <header class="topbar">
+                <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <h1 class="topbar-title">Reading</h1>
+                <div class="topbar-actions">
+                    <a href="/dashboard" class="topbar-btn"><i class="fas fa-arrow-left"></i></a>
+                </div>
+            </header>
+
+            <main class="section">
+                <article class="article-container" id="articleContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading article...</p>
+                    </div>
+                </article>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentPost = null;
+        const postId = window.location.pathname.split('/').pop();
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').style.display = 
+                document.getElementById('sidebar').classList.contains('open') ? 'block' : 'none';
+        }
+
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/user-login';
+        }
+
+        async function loadUser() {
+            try {
+                const res = await fetch('/api/users/me');
+                if (!res.ok) throw new Error('Not authenticated');
+                currentUser = await res.json();
+                document.getElementById('userName').textContent = currentUser.username;
+                
+                if (currentUser.avatar_url) {
+                    document.getElementById('userAvatar').innerHTML = `<img src="${currentUser.avatar_url}" alt="${currentUser.username}">`;
+                } else {
+                    document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+                }
+
+                const badge = document.getElementById('userBadge');
+                if (currentUser.is_premium) {
+                    badge.className = 'sidebar-user-badge badge-premium';
+                    badge.textContent = 'Premium';
+                } else if (currentUser.role === 'admin') {
+                    badge.className = 'sidebar-user-badge badge-admin';
+                    badge.textContent = 'Admin';
+                }
+            } catch (err) {
+                window.location.href = '/user-login';
+            }
+        }
+
+        async function loadPost() {
+            try {
+                const res = await fetch(`/api/posts/${postId}`);
+                if (!res.ok) throw new Error('Post not found');
+                currentPost = await res.json();
+                renderPost();
+            } catch (err) {
+                document.getElementById('articleContainer').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file-alt"></i>
+                        <h3>Article not found</h3>
+                        <p>This post may have been removed or doesn't exist.</p>
+                        <a href="/dashboard" class="btn btn-primary" style="margin-top: 15px;">Back to Feed</a>
+                    </div>
+                `;
+            }
+        }
+
+        function renderPost() {
+            const container = document.getElementById('articleContainer');
+            const authorInitial = currentPost.author_username?.charAt(0).toUpperCase() || '?';
+            
+            let mediaHtml = '';
+            if (currentPost.media_url) {
+                if (currentPost.content_type === 'video' || currentPost.content_type === 'reel') {
+                    mediaHtml = `<div class="article-media"><video controls><source src="${currentPost.media_url}" type="video/mp4">Your browser does not support video.</video></div>`;
+                } else if (currentPost.content_type === 'audio') {
+                    mediaHtml = `<div class="article-media" style="padding: 20px;"><audio controls style="width: 100%;"><source src="${currentPost.media_url}" type="audio/mpeg">Your browser does not support audio.</audio></div>`;
+                } else {
+                    mediaHtml = `<div class="article-media"><img src="${currentPost.media_url}" alt="${currentPost.title}"></div>`;
+                }
+            }
+
+            container.innerHTML = `
+                <div class="article-header">
+                    <span class="article-type-badge ${currentPost.content_type || 'article'}">${currentPost.content_type || 'Article'}</span>
+                    <div class="article-meta">
+                        <div class="article-author">
+                            <div class="author-avatar">${authorInitial}</div>
+                            <div class="author-info">
+                                <h3>${currentPost.author_username || 'Unknown Author'}</h3>
+                                <p>${new Date(currentPost.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="article-title">${currentPost.title || 'Untitled'}</h1>
+                </div>
+                
+                ${mediaHtml}
+                
+                <div class="article-content">
+                    ${currentPost.content || '<p>No content available.</p>'}
+                </div>
+                
+                <div class="article-actions">
+                    <button class="action-btn" id="likeBtn" onclick="toggleLike()">
+                        <i class="${currentPost.is_liked ? 'fas' : 'far'} fa-heart"></i> ${currentPost.like_count || 0}
+                    </button>
+                    <button class="action-btn">
+                        <i class="far fa-comment"></i> ${currentPost.comment_count || 0}
+                    </button>
+                    <button class="action-btn" id="saveBtn" onclick="toggleBookmark()">
+                        <i class="${currentPost.is_bookmarked ? 'fas' : 'far'} fa-bookmark"></i> ${currentPost.is_bookmarked ? 'Saved' : 'Save'}
+                    </button>
+                    <button class="action-btn" onclick="sharePost()">
+                        <i class="fas fa-share"></i> Share
+                    </button>
+                </div>
+                
+                <div class="comments-section">
+                    <h2 class="comments-title">Comments (${currentPost.comment_count || 0})</h2>
+                    <div class="comment-form">
+                        <input type="text" class="comment-input" id="commentInput" placeholder="Write a comment...">
+                        <button class="btn btn-primary btn-sm" onclick="postComment()">Post</button>
+                    </div>
+                    <div class="comment-list" id="commentList">
+                        <p style="color: var(--main-muted); text-align: center;">No comments yet. Be the first!</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function toggleLike() {
+            if (!currentUser) return;
+            try {
+                await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
+                loadPost();
+            } catch (err) { console.error('Like error:', err); }
+        }
+
+        async function toggleBookmark() {
+            if (!currentUser) return;
+            try {
+                await fetch(`/api/bookmarks/${postId}`, { method: 'POST' });
+                loadPost();
+            } catch (err) { console.error('Bookmark error:', err); }
+        }
+
+        async function sharePost() {
+            const url = `${window.location.origin}/read/${postId}`;
+            if (navigator.share) {
+                await navigator.share({ title: currentPost.title, url });
+            } else {
+                await navigator.clipboard.writeText(url);
+                alert('Link copied to clipboard!');
+            }
+        }
+
+        async function postComment() {
+            const input = document.getElementById('commentInput');
+            const text = input.value.trim();
+            if (!text || !currentUser) return;
+            
+            try {
+                await fetch(`/api/posts/${postId}/comments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: text })
+                });
+                input.value = '';
+                loadPost();
+            } catch (err) { console.error('Comment error:', err); }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUser();
+            loadPost();
+        });
+    </script>
+</body>
+</html>
