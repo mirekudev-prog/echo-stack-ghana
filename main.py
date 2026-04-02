@@ -1120,12 +1120,15 @@ async def user_login(
             role = "superuser"
             # Also set admin_session cookie for admin dashboard access
             admin_cookie = True
+            # Superusers bypass email verification automatically
+            email_verified_for_login = True
         else:
             admin_cookie = False
+            email_verified_for_login = getattr(u, "email_verified", False)
         # ---------------------------------
 
         # Check email verification (skip for admins/superusers)
-        if not getattr(u, "email_verified", False) and role not in ("admin", "superuser"):
+        if not email_verified_for_login and role not in ("admin", "superuser"):
             raise HTTPException(403, "UNVERIFIED: Please verify your email before logging in. Check your inbox.")
 
         resp = JSONResponse({
