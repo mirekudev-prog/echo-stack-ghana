@@ -372,6 +372,12 @@
         .panel-link:hover { border-color: var(--gold); color: var(--gold); }
         .panel-link i { color: var(--gold); width: 18px; text-align: center }
 
+        .region-posts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
         /* Panel empty */
         .panel-empty {
             text-align: center;
@@ -908,7 +914,18 @@
                     '</div>' +
                 '</div>';
 
+                // Posts from this region
+                html += '<div class="panel-block">' +
+                    '<div class="panel-block-title"><i class="fas fa-newspaper"></i> Recent Stories</div>' +
+                    '<div id="regionPosts-' + key + '" class="region-posts-list">' +
+                    '<div class="loading-row"><div class="spinner"></div></div>' +
+                    '</div>' +
+                '</div>';
+
                 body.innerHTML = html;
+                
+                // Load posts for this region
+                loadRegionPosts(key, name);
 
                 // Open panel
                 var panel = document.getElementById('detailPanel');
@@ -934,6 +951,62 @@
             function escapeAttr(str) {
                 if (!str) return '';
                 return String(str).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+            }
+
+            // ── LOAD POSTS FOR REGION ────────────────────
+            async function loadRegionPosts(key, regionName) {
+                var container = document.getElementById('regionPosts-' + key);
+                if (!container) return;
+                
+                try {
+                    // Find region ID from allRegions
+                    var regData = allRegions.find(function(r) {
+                        return nameToKey(r.name) === key || r.name.toLowerCase() === regionName.toLowerCase();
+                    });
+                    var regionId = regData ? regData.id : null;
+                    
+                    if (!regionId) {
+                        container.innerHTML = '<p style="font-size:.8rem;color:var(--main-muted);padding:10px;">No posts found</p>';
+                        return;
+                    }
+                    
+                    var res = await fetch('/api/posts?region_id=' + regionId + '&limit=5', { credentials: 'include' });
+                    if (res.ok) {
+                        var posts = await res.json();
+                        if (Array.isArray(posts) && posts.length > 0) {
+                            var html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+                            posts.forEach(function(post) {
+                                var cover = post.cover_image || '';
+                                var title = post.title || 'Untitled';
+                                var excerpt = post.excerpt || '';
+                                var type = post.content_type || 'article';
+                                var typeIcon = 'fa-newspaper';
+                                if (type === 'video') typeIcon = 'fa-video';
+                                else if (type === 'reel') typeIcon = 'fa-film';
+                                else if (type === 'audio') typeIcon = 'fa-music';
+                                else if (type === 'photo') typeIcon = 'fa-image';
+                                
+                                html += '<a href="/read/' + (post.slug || post.id) + '" style="text-decoration:none;display:flex;gap:10px;padding:8px;background:var(--main-bg);border-radius:8px;border:1px solid var(--main-border);transition:border-color .2s;" onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--main-border)\'">' +
+                                    (cover ? '<img src="' + escapeAttr(cover) + '" style="width:60px;height:60px;object-fit:cover;border-radius:6px;" alt="">' : '<div style="width:60px;height:60px;background:var(--main-border);border-radius:6px;display:flex;align-items:center;justify-content:center;"><i class="fas ' + typeIcon + '" style="color:var(--gold);"></i></div>') +
+                                    '<div style="flex:1;min-width:0;">' +
+                                    '<div style="font-size:.78rem;font-weight:600;color:var(--main-text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(title) + '</div>' +
+                                    '<div style="font-size:.7rem;color:var(--main-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(excerpt || 'Click to read more') + '</div>' +
+                                    '<div style="font-size:.65rem;color:var(--gold);margin-top:4px;text-transform:capitalize;"><i class="fas ' + typeIcon + '"></i> ' + escapeHtml(type) + '</div>' +
+                                    '</div>' +
+                                    '</a>';
+                            });
+                            html += '</div>';
+                            container.innerHTML = html;
+                        } else {
+                            container.innerHTML = '<p style="font-size:.8rem;color:var(--main-muted);padding:10px;text-align:center;"><i class="fas fa-inbox" style="display:block;font-size:1.5rem;margin-bottom:6px;opacity:.3;"></i>No stories yet for this region</p>';
+                        }
+                    } else {
+                        container.innerHTML = '<p style="font-size:.8rem;color:var(--main-muted);padding:10px;">Unable to load posts</p>';
+                    }
+                } catch (e) {
+                    console.error('Error loading region posts:', e);
+                    container.innerHTML = '<p style="font-size:.8rem;color:var(--main-muted);padding:10px;">Error loading posts</p>';
+                }
             }
 
             function openImage(url) {
