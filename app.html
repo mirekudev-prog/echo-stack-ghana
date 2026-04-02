@@ -1031,7 +1031,24 @@
                     if (res.ok) {
                         var data = await res.json();
                         if (Array.isArray(data) && data.length) {
-                            allRegions = data;
+                            // Merge database regions with defaults, preferring DB data
+                            var dbRegions = {};
+                            data.forEach(function(r) { dbRegions[r.id] = r; });
+                            
+                            // Update default regions with DB data where IDs match
+                            for (var i = 0; i < defaultRegions.length; i++) {
+                                var def = defaultRegions[i];
+                                if (dbRegions[def.id]) {
+                                    // Merge DB data into default
+                                    defaultRegions[i] = Object.assign({}, def, dbRegions[def.id]);
+                                    delete dbRegions[def.id];
+                                }
+                            }
+                            // Add any new regions from DB not in defaults
+                            Object.keys(dbRegions).forEach(function(id) {
+                                defaultRegions.push(dbRegions[id]);
+                            });
+                            allRegions = defaultRegions;
                         }
                     }
                 } catch (e) {

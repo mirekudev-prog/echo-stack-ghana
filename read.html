@@ -152,7 +152,13 @@
 
         async function loadPost() {
             try {
-                const res = await fetch(`/api/posts/${postId}`);
+                // Check if admin preview mode is active
+                const urlParams = new URLSearchParams(window.location.search);
+                const adminPreview = urlParams.get('admin_preview') === 'true';
+                
+                const res = await fetch(`/api/posts/${postId}${adminPreview ? '?admin_preview=true' : ''}`, {
+                    credentials: 'include'
+                });
                 if (!res.ok) throw new Error('Post not found');
                 currentPost = await res.json();
                 renderPost();
@@ -235,7 +241,12 @@
         async function toggleLike() {
             if (!currentUser) return;
             try {
-                await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
+                const urlParams = new URLSearchParams(window.location.search);
+                const adminPreview = urlParams.get('admin_preview') === 'true';
+                await fetch(`/api/posts/${postId}/like${adminPreview ? '?admin_preview=true' : ''}`, { 
+                    method: 'POST',
+                    credentials: 'include'
+                });
                 loadPost();
             } catch (err) { console.error('Like error:', err); }
         }
@@ -243,13 +254,15 @@
         async function toggleBookmark() {
             if (!currentUser) return;
             try {
-                await fetch(`/api/bookmarks/${postId}`, { method: 'POST' });
+                await fetch(`/api/bookmarks/${postId}`, { method: 'POST', credentials: 'include' });
                 loadPost();
             } catch (err) { console.error('Bookmark error:', err); }
         }
 
         async function sharePost() {
-            const url = `${window.location.origin}/read/${postId}`;
+            const urlParams = new URLSearchParams(window.location.search);
+            const adminPreview = urlParams.get('admin_preview') === 'true';
+            const url = `${window.location.origin}/read/${postId}${adminPreview ? '?admin_preview=true' : ''}`;
             if (navigator.share) {
                 await navigator.share({ title: currentPost.title, url });
             } else {
@@ -264,10 +277,13 @@
             if (!text || !currentUser) return;
             
             try {
-                await fetch(`/api/posts/${postId}/comments`, {
+                const urlParams = new URLSearchParams(window.location.search);
+                const adminPreview = urlParams.get('admin_preview') === 'true';
+                await fetch(`/api/posts/${postId}/comments${adminPreview ? '?admin_preview=true' : ''}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: text })
+                    body: JSON.stringify({ content: text }),
+                    credentials: 'include'
                 });
                 input.value = '';
                 loadPost();
