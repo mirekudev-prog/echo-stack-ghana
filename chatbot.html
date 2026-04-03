@@ -289,6 +289,13 @@
         this.style.height = Math.min(this.scrollHeight, 120) + 'px';
     });
 
+    // ── EXPOSE TO GLOBAL SCOPE ─────────────────
+    window.toggleSidebar = toggleSidebar;
+    window.logout = logout;
+    window.shareScreen = shareScreen;
+    window.sendMessage = sendMessage;
+    window.sendSuggestion = sendSuggestion;
+
     loadUser();
 })();
 </script>
