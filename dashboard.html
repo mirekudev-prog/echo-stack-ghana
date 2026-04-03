@@ -103,63 +103,8 @@
         }
         .region-name { font-weight: 500; font-size: 0.9rem; color: var(--main-text); }
         
-        /* ── SUBSTACK-STYLE CARDS ── */
-        .post-card {
-            display: grid;
-            grid-template-columns: 1fr 120px;
-            gap: 20px;
-            padding: 24px 0;
-            border-bottom: 1px solid var(--main-border);
-            cursor: pointer;
-            transition: opacity 0.2s;
-            border-radius: 0;
-            background: none;
-            margin-bottom: 0;
-        }
-        .post-card:hover { transform: none; box-shadow: none; opacity: 0.8; }
-        .post-card-content { display: flex; flex-direction: column; gap: 8px; }
-        .post-card-thumb {
-            width: 120px;
-            height: 120px;
-            border-radius: 8px;
-            overflow: hidden;
-            background: var(--main-bg);
-            flex-shrink: 0;
-        }
-        .post-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .post-card-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
-            font-weight: 800;
-            line-height: 1.25;
-            color: var(--ink);
-            margin: 0;
-        }
-        .post-card-excerpt {
-            font-size: 0.95rem;
-            color: var(--main-muted);
-            line-height: 1.5;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .post-card-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.8rem;
-            color: var(--main-muted);
-            margin-top: auto;
-        }
-        .post-card-author-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; font-size: 0.85rem; }
-        .post-card-author-avatar { width: 20px; height: 20px; border-radius: 50%; background: var(--gold); }
-        
-        @media (max-width: 640px) {
-            .post-card { grid-template-columns: 1fr 80px; gap: 12px; }
-            .post-card-thumb { width: 80px; height: 80px; }
-            .post-card-title { font-size: 1.1rem; }
+        @media (max-width: 1024px) {
+            .right-panel { display: none; }
         }
         @media (max-width: 1024px) {
             .right-panel { display: none; }
@@ -257,6 +202,7 @@
         </div>
     </aside>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="toast" id="toast"></div>
 
     <!-- MAIN -->
     <div class="main-wrapper">
@@ -291,9 +237,9 @@
                     </div>
 
                     <!-- CREATE PROMPT -->
-                    <div class="create-prompt" onclick="location.href='/creator'">
+                    <div class="create-prompt" onclick="location.href='/creator'" style="margin:20px; border:1px solid var(--main-border); border-radius:var(--radius-lg); background:var(--main-card); box-shadow:0 4px 12px rgba(0,0,0,0.03); transition:all 0.2s;">
                         <div class="create-prompt-avatar" id="createAvatar">U</div>
-                        <div class="create-prompt-input">What's on your mind?</div>
+                        <div class="create-prompt-input" style="background:var(--main-bg); border-color:transparent; color:var(--main-muted);">Share something with the community...</div>
                         <div class="create-prompt-icons">
                             <div class="create-prompt-icon"><i class="fas fa-image" style="color:#22c55e"></i></div>
                             <div class="create-prompt-icon"><i class="fas fa-video" style="color:#9333ea"></i></div>
@@ -407,13 +353,11 @@ function setupUserUI() {
         badge.className = 'sidebar-user-badge badge-premium';
         badge.textContent = 'Premium';
     }
-    
-    // Hidden admin access — no public link
 }
 
 async function loadPosts() {
     try {
-        const url = currentFilter ? `/api/posts?type=${currentFilter}` : '/api/posts';
+        const url = currentFilter ? `/api/posts?content_type=${currentFilter}` : '/api/posts';
         const res = await fetch(url);
         allPosts = await res.json();
         renderPosts();
@@ -421,6 +365,7 @@ async function loadPosts() {
         document.getElementById('postsContainer').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
     }
 }
+
 
 function renderPosts() {
     const container = document.getElementById('postsContainer');
@@ -433,37 +378,77 @@ function renderPosts() {
         const author = post.author_username || 'User';
         const initial = author.charAt(0).toUpperCase();
         const typeBadge = post.content_type ? `<span class="post-type-badge ${post.content_type}">${post.content_type}</span>` : '';
-        const followBtn = user && post.author_id !== user.id ? `<button class="post-follow-btn" onclick="event.stopPropagation();toggleFollow('${post.author_id}')">Follow</button>` : '';
+        const isVerified = (post.author_role === 'admin' || post.author_role === 'creator' || post.is_verified);
         
         let mediaHtml = '';
         if (post.media_url) {
             if (post.content_type === 'video' || post.content_type === 'reel') {
-                mediaHtml = `<div class="post-media" onclick="event.stopPropagation()" style="margin-top:12px;"><video src="${escapeHtml(post.media_url)}" controls preload="metadata" style="max-height:300px;width:100%;object-fit:cover;border-radius:12px;"></video></div>`;
+                mediaHtml = `
+                    <div class="post-media" onclick="event.stopPropagation()">
+                        <video src="${escapeHtml(post.media_url)}" controls preload="metadata"></video>
+                    </div>`;
             } else if (post.content_type === 'audio') {
-                mediaHtml = `<div class="audio-card" onclick="event.stopPropagation()" style="margin-top:12px;padding:12px;background:rgba(0,0,0,0.02);border:1px solid var(--main-border);border-radius:12px;"><div class="audio-header" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><div class="audio-icon" style="width:40px;height:40px;border-radius:50%;background:rgba(200,150,46,0.1);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.2rem;"><i class="fas fa-headphones"></i></div><div class="audio-info"><h4 style="margin:0;font-size:0.95rem;color:var(--main-text);">${escapeHtml(post.title)}</h4><p style="margin:0;font-size:0.8rem;color:var(--main-muted);">${escapeHtml(author)}</p></div></div><audio controls preload="none" style="width:100%"><source src="${escapeHtml(post.media_url)}" type="audio/mpeg"></audio></div>`;
+                mediaHtml = `
+                    <div class="audio-card" onclick="event.stopPropagation()">
+                        <div class="audio-header">
+                            <div class="audio-icon"><i class="fas fa-headphones"></i></div>
+                            <div class="audio-info">
+                                <h4>${escapeHtml(post.title)}</h4>
+                                <p>${escapeHtml(author)}</p>
+                            </div>
+                        </div>
+                        <audio controls preload="none"><source src="${escapeHtml(post.media_url)}" type="audio/mpeg"></audio>
+                    </div>`;
             } else {
-                mediaHtml = `<div class="post-media" style="margin-top:12px;"><img src="${escapeHtml(post.media_url)}" alt="" loading="lazy" style="width:100%;max-height:300px;object-fit:cover;border-radius:12px;"></div>`;
+                mediaHtml = `
+                    <div class="post-media">
+                        <img src="${escapeHtml(post.media_url)}" alt="" loading="lazy">
+                    </div>`;
             }
         }
         
         return `
-            <article class="post-card" onclick="location.href='/post/${post.id}'" style="display:flex;flex-direction:column;">
-                <div class="post-card-content" style="width:100%;">
-                    <div class="post-card-author-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                        <div class="post-card-author-avatar" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg, var(--gold), var(--gold2));display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:var(--ink);font-weight:700;">${initial}</div>
-                        <span style="font-weight:600;font-size:0.95rem;">${escapeHtml(author)}</span>
-                        ${typeBadge}
+            <article class="post-card" onclick="location.href='/post/${post.id}'">
+                <div class="post-header">
+                    <div class="post-avatar">${initial}</div>
+                    <div class="post-author-info">
+                        <div class="post-author">
+                            ${escapeHtml(author)}
+                            ${isVerified ? '<i class="fas fa-check-circle verified" title="Verified Creator"></i>' : ''}
+                        </div>
+                        <div class="post-meta">
+                            <span>${timeAgo(post.created_at)}</span>
+                            <span>•</span>
+                            ${typeBadge}
+                        </div>
                     </div>
+                </div>
+
+                <div class="post-card-content">
                     <h3 class="post-card-title">${escapeHtml(post.title)}</h3>
-                    ${post.excerpt ? `<p class="post-card-excerpt" style="margin-top:6px;font-size:0.9rem;line-height:1.5;color:var(--main-muted);">${escapeHtml(post.excerpt)}</p>` : ''}
+                    ${post.excerpt ? `<p class="post-card-excerpt">${escapeHtml(post.excerpt)}</p>` : ''}
                     
                     ${mediaHtml}
 
-                    <div class="post-card-meta" style="margin-top:14px;display:flex;gap:16px;font-size:0.85rem;color:var(--main-muted);">
-                        <span>${timeAgo(post.created_at)}</span>
-                        <span><i class="fas fa-heart"></i> ${post.likes || 0}</span>
-                        <span><i class="fas fa-comment"></i> ${post.comments_count || 0}</span>
-                        ${post.is_locked ? '<i class="fas fa-crown" style="color:var(--gold)"></i>' : ''}
+                    <div class="post-actions">
+                        <div class="post-action-group">
+                            <button class="post-action" onclick="event.stopPropagation();toggleLike(${post.id}, this)">
+                                <i class="fas fa-heart"></i>
+                                <span>${post.likes || 0}</span>
+                            </button>
+                            <button class="post-action" onclick="event.stopPropagation();location.href='/post/${post.id}#comments'">
+                                <i class="fas fa-comment"></i>
+                                <span>${post.comments_count || 0}</span>
+                            </button>
+                        </div>
+                        <div class="post-action-group">
+                            <button class="post-action" onclick="event.stopPropagation();sharePost(${post.id})">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            <button class="post-action" onclick="event.stopPropagation();toggleSave(${post.id}, this)">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </article>
@@ -550,6 +535,13 @@ async function logout() {
     await fetch('/api/users/logout', { method: 'POST' });
     localStorage.removeItem('es_user');
     location.href = '/user-login';
+}
+
+function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.className = 'toast', 2500);
 }
 
 loadUser();

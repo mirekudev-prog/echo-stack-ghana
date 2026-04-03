@@ -1447,35 +1447,36 @@ async def get_posts(
     db: Session = Depends(get_db)
 ):
     try:
-        q = db.query(models.Post)
-        is_admin = _is_admin(request) or (request.query_params.get("admin_preview") == "true" and _is_admin(request))
+        is_admin = _is_admin(request)
         own_id   = request.cookies.get("user_session")
-
-        # Admin preview mode bypasses status filter completely
         admin_preview_mode = request.query_params.get("admin_preview") == "true" and is_admin
+
+        # Optimized query: join with User to get role and verification status
+        posts_with_authors = db.query(models.Post, models.User.role, models.User.is_verified, models.User.avatar_url).join(
+            models.User, models.Post.author_id == models.User.id
+        )
         
         if not is_admin and not admin_preview_mode:
             if author_id and author_id == own_id:
-                pass  # creator viewing own drafts
+                pass
             else:
-                # Allow 'published' or empty status (for legacy/seeded data)
-                q = q.filter(or_(models.Post.status == "published", models.Post.status == "", models.Post.status == None))
+                posts_with_authors = posts_with_authors.filter(or_(models.Post.status == "published", models.Post.status == "", models.Post.status == None))
 
         if content_type:
-            q = q.filter(models.Post.content_type == content_type)
+            posts_with_authors = posts_with_authors.filter(models.Post.content_type == content_type)
         if region_id and region_id.isdigit():
-            q = q.filter(models.Post.region_id == int(region_id))
+            posts_with_authors = posts_with_authors.filter(models.Post.region_id == int(region_id))
         if author_id:
-            q = q.filter(models.Post.author_id == author_id)
+            posts_with_authors = posts_with_authors.filter(models.Post.author_id == author_id)
 
-        posts = q.order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
+        results_data = posts_with_authors.order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
 
         # Get current user id from cookie for follow status
         sid = request.cookies.get("user_session")
         current_user_id = sid if sid else None
 
         result = []
-        for p in posts:
+        for p, a_role, a_verified, a_avatar in results_data:
             # Comment count (excluding "__like__" entries)
             comment_count = db.query(models.Comment).filter(
                 models.Comment.post_id == p.id,
@@ -1502,6 +1503,9 @@ async def get_posts(
                 "is_locked": getattr(p, "is_locked", 0) or 0,
                 "author_id": str(p.author_id) if p.author_id else "",
                 "author_username": getattr(p, "author_username", "") or "",
+                "author_role": a_role,
+                "is_verified": a_verified,
+                "author_avatar": a_avatar,
                 "region_id": getattr(p, "region_id", None),
                 "tags": getattr(p, "tags", "") or "",
                 "views": getattr(p, "views", 0) or 0,
@@ -1513,8 +1517,8 @@ async def get_posts(
                 "media_url": getattr(p, "media_url", "") or "",
                 "media_path": getattr(p, "media_path", "") or "",
                 "created_at": str(getattr(p, "created_at", "")),
-                "comment_count": comment_count,                 # <-- added
-                "is_following": is_following,                   # <-- added
+                "comment_count": comment_count,
+                "is_following": is_following,
             })
         return result
 
