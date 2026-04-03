@@ -211,20 +211,35 @@ function renderPosts(posts, container, prefix = '') {
     const c = container || document.getElementById('content');
     if (!posts?.length) { c.innerHTML = prefix + '<div class="empty-state"><i class="fas fa-newspaper"></i><h3>No stories</h3></div>'; return; }
     
-    c.innerHTML = prefix + posts.map(p => `
-        <article class="post-card" onclick="location.href='/post/${p.id}'">
-            <div class="post-header">
-                <div class="post-avatar">${(p.author_username || 'U').charAt(0).toUpperCase()}</div>
+    c.innerHTML = prefix + posts.map(p => {
+        let mediaHtml = '';
+        if (p.media_url) {
+            if (p.content_type === 'video' || p.content_type === 'reel') {
+                mediaHtml = `<div class="post-media" onclick="event.stopPropagation()" style="margin-top:12px;"><video src="${escapeHtml(p.media_url)}" controls preload="metadata" style="max-height:300px;width:100%;object-fit:cover;border-radius:12px;"></video></div>`;
+            } else if (p.content_type === 'audio') {
+                mediaHtml = `<div class="audio-card" onclick="event.stopPropagation()" style="margin-top:12px;padding:12px;background:rgba(0,0,0,0.02);border:1px solid var(--main-border);border-radius:12px;"><div class="audio-header" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><div class="audio-icon" style="width:40px;height:40px;border-radius:50%;background:rgba(200,150,46,0.1);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.2rem;"><i class="fas fa-headphones"></i></div><div class="audio-info"><h4 style="margin:0;font-size:0.95rem;color:var(--main-text);">${escapeHtml(p.title)}</h4><p style="margin:0;font-size:0.8rem;color:var(--main-muted);">${escapeHtml(p.author_username || 'Unknown')}</p></div></div><audio controls preload="none" style="width:100%"><source src="${escapeHtml(p.media_url)}" type="audio/mpeg"></audio></div>`;
+            } else {
+                mediaHtml = `<div class="post-media" style="margin-top:12px;"><img src="${escapeHtml(p.media_url)}" alt="" loading="lazy" style="width:100%;max-height:300px;object-fit:cover;border-radius:12px;"></div>`;
+            }
+        } else if (p.cover_image) {
+            mediaHtml = `<div class="post-media" style="margin-top:12px;"><img src="${escapeHtml(p.cover_image)}" onerror="this.parentElement.style.display='none'" style="width:100%;max-height:300px;object-fit:cover;border-radius:12px;" alt=""></div>`;
+        }
+
+        return `
+        <article class="post-card" onclick="location.href='/post/${p.id}'" style="display:flex;flex-direction:column;width:100%;">
+            <div class="post-header" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <div class="post-avatar" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg, var(--gold), var(--gold2));display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:var(--ink);font-weight:700;">${(p.author_username || 'U').charAt(0).toUpperCase()}</div>
                 <div style="flex:1">
-                    <div class="post-author">${escapeHtml(p.author_username || 'Unknown')} <span class="badge badge-gold">${p.content_type || 'article'}</span></div>
-                    <div class="post-time">${timeAgo(p.created_at)}</div>
+                    <div class="post-author" style="font-weight:600;font-size:0.95rem;">${escapeHtml(p.author_username || 'Unknown')} <span class="badge badge-gold" style="font-size:0.7rem;padding:2px 6px;">${p.content_type || 'article'}</span></div>
+                    <div class="post-time" style="font-size:0.8rem;color:var(--main-muted);">${timeAgo(p.created_at)}</div>
                 </div>
             </div>
             <h3 class="post-title">${escapeHtml(p.title)}</h3>
-            <p class="post-excerpt">${escapeHtml(p.excerpt || '')}</p>
-            ${p.cover_image ? `<div class="post-media"><img src="${escapeHtml(p.cover_image)}" onerror="this.parentElement.style.display='none'" alt=""></div>` : ''}
+            ${p.excerpt ? `<p class="post-excerpt" style="margin-top:6px;font-size:0.9rem;line-height:1.5;color:var(--main-muted);">${escapeHtml(p.excerpt)}</p>` : ''}
+            ${mediaHtml}
         </article>
-    `).join('');
+        `;
+    }).join('');
 }
 
 loadUser();

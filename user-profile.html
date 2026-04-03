@@ -211,13 +211,28 @@ async function loadUserPosts() {
             return;
         }
         
-        container.innerHTML = posts.map(post => `
-            <div class="post-card" onclick="location.href='/post/${post.id}'">
+        container.innerHTML = posts.map(post => {
+            let mediaHtml = '';
+            if (post.media_url) {
+                if (post.content_type === 'video' || post.content_type === 'reel') {
+                    mediaHtml = `<div class="post-media" onclick="event.stopPropagation()" style="margin-top:12px;"><video src="${escapeHtml(post.media_url)}" controls preload="metadata" style="max-height:300px;width:100%;object-fit:cover;border-radius:12px;"></video></div>`;
+                } else if (post.content_type === 'audio') {
+                    mediaHtml = `<div class="audio-card" onclick="event.stopPropagation()" style="margin-top:12px;padding:12px;background:rgba(0,0,0,0.02);border:1px solid var(--main-border);border-radius:12px;"><div class="audio-header" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><div class="audio-icon" style="width:40px;height:40px;border-radius:50%;background:rgba(200,150,46,0.1);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.2rem;"><i class="fas fa-headphones"></i></div><div class="audio-info"><h4 style="margin:0;font-size:0.95rem;color:var(--main-text);">${escapeHtml(post.title)}</h4></div></div><audio controls preload="none" style="width:100%"><source src="${escapeHtml(post.media_url)}" type="audio/mpeg"></audio></div>`;
+                } else {
+                    mediaHtml = `<div class="post-media" style="margin-top:12px;"><img src="${escapeHtml(post.media_url)}" alt="" loading="lazy" style="width:100%;max-height:300px;object-fit:cover;border-radius:12px;"></div>`;
+                }
+            } else if (post.cover_image) {
+                mediaHtml = `<div class="post-media" style="margin-top:12px;"><img src="${escapeHtml(post.cover_image)}" onerror="this.parentElement.style.display='none'" style="width:100%;max-height:300px;object-fit:cover;border-radius:12px;" alt=""></div>`;
+            }
+            return `
+            <div class="post-card" onclick="location.href='/post/${post.id}'" style="display:flex;flex-direction:column;width:100%;">
                 <h3 class="post-title">${escapeHtml(post.title)}</h3>
-                <p class="post-excerpt">${escapeHtml(post.excerpt || '')}</p>
-                <div class="post-time">${timeAgo(post.created_at)}</div>
+                ${post.excerpt ? `<p class="post-excerpt" style="margin-top:6px;font-size:0.9rem;line-height:1.5;color:var(--main-muted);">${escapeHtml(post.excerpt)}</p>` : ''}
+                ${mediaHtml}
+                <div class="post-time" style="margin-top:12px;font-size:0.85rem;color:var(--main-muted);">${timeAgo(post.created_at)}</div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     } catch(e) {
         document.getElementById('userPosts').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
     }
