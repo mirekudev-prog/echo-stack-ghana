@@ -1068,6 +1068,14 @@
                 }
             }
 
+            // ── EXPOSE TO GLOBAL SCOPE ─────────────────
+            window.toggleSidebar = toggleSidebar;
+            window.closeSidebar = closeSidebar;
+            window.logout = logout;
+            window.showRegionDetail = showRegionDetail;
+            window.closePanel = closePanel;
+            window.openImage = openImage;
+
             // ── INIT ───────────────────────────────────
             checkAuth();
             initMap();
