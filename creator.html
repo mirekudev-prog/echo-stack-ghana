@@ -635,6 +635,14 @@ async function saveChannelSettings() {
 
 loadUser();
 initEditor();
+
+// Check for type=story in URL
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('type') === 'story') {
+    const storyOption = Array.from(document.querySelectorAll('.type-option'))
+        .find(el => el.textContent.trim().toLowerCase() === 'story');
+    if (storyOption) selectType('story', storyOption);
+}
 </script>
 </body>
 </html>
