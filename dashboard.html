@@ -32,6 +32,21 @@
             font-weight: 700;
             flex-shrink: 0;
         }
+        .app {
+            display: flex;
+            min-height: 100vh;
+            max-width: 100vw;
+            overflow-x: hidden;
+            background: var(--main-bg);
+        }
+        
+        .main-wrapper {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
         .create-prompt-input {
             flex: 1;
             padding: 12px 16px;
@@ -60,6 +75,15 @@
             color: white;
             font-size: 0.75rem;
             font-weight: 600;
+        }
+        .stories-bar {
+            display: flex;
+            gap: 16px;
+            padding: 8px 4px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
         }
         .right-panel {
             width: 320px;
@@ -106,9 +130,15 @@
         @media (max-width: 1024px) {
             .right-panel { display: none; }
         }
-        @media (max-width: 1024px) {
-            .right-panel { display: none; }
+        .story-viewer {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            z-index: 2000; align-items: center; justify-content: center;
         }
+        .story-viewer.show { display: flex; }
+        .story-viewer-content { max-width: 100%; max-height: 100%; display: flex; flex-direction: column; align-items: center; }
+        .story-viewer-media { max-width: 100vw; max-height: 80vh; object-fit: contain; }
+        .story-viewer-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 2rem; cursor: pointer; }
+        .story-viewer-caption { color: white; margin-top: 20px; padding: 0 20px; text-align: center; font-family: 'Playfair Display', serif; }
     </style>
 </head>
 <body>
@@ -121,7 +151,7 @@
                 <span>EchoStack</span>
             </a>
         </div>
-        <div class="sidebar-user" id="sidebarUser">
+        <div class="sidebar-user" id="sidebarUser" style="cursor:pointer" onclick="location.href='/user-profile'">
             <div class="sidebar-avatar" id="sidebarAvatar">U</div>
             <div class="sidebar-user-info">
                 <div class="sidebar-user-name" id="sidebarName">User</div>
@@ -167,8 +197,12 @@
                     <span class="badge-count" id="notifCount" style="display:none">0</span>
                 </a>
                 <a href="/chat" class="sidebar-link">
-                    <i class="fas fa-comments"></i>
+                    <i class="fas fa-users"></i>
                     <span>Community Chat</span>
+                </a>
+                <a href="/chatbot" class="sidebar-link">
+                    <i class="fas fa-robot"></i>
+                    <span>EchoBot AI</span>
                 </a>
             </div>
             <div class="sidebar-section">
@@ -286,7 +320,17 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+    <!-- STORY VIEWER MODAL -->
+    <div class="story-viewer" id="storyViewer">
+        <div class="story-viewer-close" onclick="closeStory()"><i class="fas fa-times"></i></div>
+        <div class="story-viewer-content">
+            <div id="storyViewerMedia"></div>
+            <div class="story-viewer-caption" id="storyViewerCaption"></div>
+        </div>
+    </div>
+
+    <script src="/js/common.js"></script>
+    <script>
 let user = null;
 let currentFilter = '';
 let allPosts = [];
@@ -458,24 +502,62 @@ function renderPosts() {
 
 async function loadStories() {
     try {
-        const res = await fetch('/api/creators?limit=8');
-        const creators = await res.json();
+        const res = await fetch('/api/stories');
+        const stories = await res.json();
         const container = document.getElementById('storiesList');
         
-        container.innerHTML = creators.slice(0, 8).map(c => {
-            const initial = (c.username || 'C').charAt(0).toUpperCase();
+        if (!stories.length) {
+            // Fallback to creators if no stories
+            const cres = await fetch('/api/creators?limit=8');
+            const creators = await cres.json();
+            container.innerHTML = creators.slice(0, 8).map(c => {
+                const initial = (c.username || 'C').charAt(0).toUpperCase();
+                return `
+                    <div class="story-item" onclick="location.href='/user/${c.id}'">
+                        <div class="story-ring">
+                            <div class="story-ring-inner">
+                                <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;color:var(--ink);font-weight:700">${initial}</div>
+                            </div>
+                        </div>
+                        <span class="story-name">${escapeHtml(c.username)}</span>
+                    </div>
+                `;
+            }).join('');
+            return;
+        }
+
+        container.innerHTML = stories.slice(0, 15).map(s => {
+            const initial = (s.username || 'U').charAt(0).toUpperCase();
             return `
-                <div class="story-item" onclick="location.href='/user/${c.id}'">
+                <div class="story-item" onclick="viewStory('${s.media_url}', '${s.media_type}', '${escapeHtml(s.caption)}')">
                     <div class="story-ring">
                         <div class="story-ring-inner">
-                            <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;color:var(--ink);font-weight:700">${initial}</div>
+                            ${s.avatar_url ? `<img src="${escapeHtml(s.avatar_url)}" alt="">` : `<div style="width:100%;height:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;color:var(--ink);font-weight:700">${initial}</div>`}
                         </div>
                     </div>
-                    <span class="story-name">${escapeHtml(c.username)}</span>
+                    <span class="story-name">${escapeHtml(s.username)}</span>
                 </div>
             `;
         }).join('');
-    } catch(e) {}
+    } catch(e) {
+        console.error('Story load error:', e);
+    }
+}
+
+function viewStory(url, type, caption) {
+    const viewer = document.getElementById('storyViewer');
+    const content = document.getElementById('storyViewerMedia');
+    content.innerHTML = type === 'video' 
+        ? `<video src="${url}" class="story-viewer-media" autoplay controls></video>`
+        : `<img src="${url}" class="story-viewer-media" alt="">`;
+    document.getElementById('storyViewerCaption').textContent = caption || '';
+    viewer.classList.add('show');
+}
+
+function closeStory() {
+    const viewer = document.getElementById('storyViewer');
+    document.getElementById('storyViewerMedia').innerHTML = '';
+    viewer.classList.remove('show');
 }
 
 async function loadRegions() {

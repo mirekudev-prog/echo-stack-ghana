@@ -55,13 +55,14 @@
 
 /* ── RESET & BASE ──────────────────────────────────────────────── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { min-height: 100vh; }
+html, body { min-height: 100vh; max-width: 100vw; overflow-x: hidden; }
 body {
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--cream);
   color: var(--main-text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 a { text-decoration: none; color: inherit; }
 button { font-family: inherit; border: none; background: none; cursor: pointer; }
@@ -82,7 +83,7 @@ img { max-width: 100%; height: auto; }
 input, textarea, select { font-family: inherit; }
 
 /* ── LAYOUT ────────────────────────────────────────────────────── */
-.app { display: flex; min-height: 100vh; }
+.app { display: flex; min-height: 100vh; max-width: 100vw; overflow-x: hidden; }
 
 /* ── SIDEBAR ───────────────────────────────────────────────────── */
 .sidebar {
@@ -413,6 +414,7 @@ textarea.input { min-height: 120px; resize: vertical; line-height: 1.6; }
   margin-bottom: 16px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

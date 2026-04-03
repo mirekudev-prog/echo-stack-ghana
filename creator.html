@@ -53,6 +53,13 @@
         .ql-editor h1, .ql-editor h2 {
             font-family: 'Playfair Display', serif !important;
         }
+        .main-wrapper {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
         .creator-header { padding:32px 24px; background:linear-gradient(135deg,var(--ink),var(--ink2)); color:white; }
         .creator-header-top { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
         .creator-avatar { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold2)); display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:700; color:var(--ink); }
@@ -67,7 +74,7 @@
         .creator-tab { padding:16px 24px; font-size:0.9rem; font-weight:600; color:var(--main-muted); white-space:nowrap; border-bottom:2px solid transparent; transition:all 0.15s; cursor:pointer; }
         .creator-tab:hover { color:var(--main-text); }
         .creator-tab.active { color:var(--gold); border-bottom-color:var(--gold); }
-        .creator-content { padding:24px; max-width:800px; margin:0 auto; }
+        .creator-content { padding:24px; max-width:100%; margin:0 auto; overflow-x: hidden; }
         .creator-empty { text-align:center; padding:60px 20px; }
         .creator-empty i { font-size:3rem; color:var(--main-muted); margin-bottom:16px; }
         .post-list-item { display:flex; gap:16px; padding:16px; background:var(--main-card); border:1px solid var(--main-border); border-radius:var(--radius-lg); margin-bottom:12px; cursor:pointer; transition:all 0.2s; }
@@ -127,9 +134,8 @@
                 <div class="sidebar-section-label">Social</div>
                 <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
                 <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
-                <a href="/notifications" class="sidebar-link"><i class="fas fa-bell"></i><span>Notifications</span></a>
-                <a href="/chatbot" class="sidebar-link"><i class="fas fa-comments"></i><span>Community Chat</span></a>
-            </div>
+                <a href="/chat" class="sidebar-link"><i class="fas fa-users"></i><span>Community Chat</span></a>
+                <a href="/chatbot" class="sidebar-link"><i class="fas fa-robot"></i><span>EchoBot AI</span></a>
             <div class="sidebar-section">
                 <div class="sidebar-section-label">Create</div>
                 <a href="/creator" class="sidebar-link active"><i class="fas fa-plus-circle"></i><span>Create Post</span></a>
@@ -211,6 +217,7 @@
                         <div class="type-option" onclick="selectType('reel', this)"><i class="fas fa-film"></i> Reel</div>
                         <div class="type-option" onclick="selectType('audio', this)"><i class="fas fa-microphone"></i> Audio</div>
                         <div class="type-option" onclick="selectType('photo', this)"><i class="fas fa-image"></i> Photo Essay</div>
+                        <div class="type-option" onclick="selectType('story', this)"><i class="fas fa-history"></i> Story</div>
                     </div>
 
                     <div class="input-group">
@@ -504,6 +511,17 @@ async function saveDraft() {
     showToast('Draft saved!', 'success');
 }
 
+async function uploadFile(file, type = 'image') {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`/api/upload/${type}`, { method: 'POST', body: formData });
+    if (res.ok) {
+        const data = await res.json();
+        return data.url || data.path;
+    }
+    return null;
+}
+
 async function publishPost() {
     const title = document.getElementById('postTitle').value.trim();
     const content = document.getElementById('postContent').value.trim();
@@ -511,39 +529,78 @@ async function publishPost() {
     const region = document.getElementById('postRegion').value;
     const isPremium = document.getElementById('premiumToggle').classList.contains('active');
 
-    if (!title || !content) {
+    if (selectedType !== 'story' && (!title || !content)) {
         showToast('Please fill in title and content', 'error');
         return;
     }
 
     const btn = document.getElementById('publishBtn');
     btn.disabled = true;
-    btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px"></div>';
+    const originalBtnHtml = btn.innerHTML;
+    btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></div>';
 
     try {
+        let coverUrl = '';
+        if (coverFile) {
+            coverUrl = await uploadFile(coverFile, 'image');
+        }
+
+        let mediaUrl = '';
+        if (mediaFile) {
+            const mType = mediaFile.type.startsWith('video') ? 'video' : (mediaFile.type.startsWith('audio') ? 'audio' : 'image');
+            mediaUrl = await uploadFile(mediaFile, mType);
+        }
+
         const formData = new FormData();
-        formData.append('title', title);
-        formData.append('content', content);
-        formData.append('excerpt', excerpt || content.substring(0, 200));
-        formData.append('content_type', selectedType);
-        if (region) formData.append('region', region);
-        if (isPremium) formData.append('is_premium', '1');
-        if (coverFile) formData.append('cover', coverFile);
-        if (mediaFile) formData.append('media', mediaFile);
 
-        const res = await fetch('/api/posts', { method: 'POST', body: formData });
-
-        if (res.ok) {
-            const post = await res.json();
-            showToast('Published successfully!', 'success');
-            setTimeout(() => location.href = `/post/${post.id}`, 1000);
+        if (selectedType === 'story') {
+            if (!mediaUrl && !coverUrl) {
+                showToast('Please upload an image or video for your story', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+                return;
+            }
+            formData.append('media_url', mediaUrl || coverUrl);
+            formData.append('media_type', mediaFile && mediaFile.type.startsWith('video') ? 'video' : 'image');
+            formData.append('caption', title || excerpt || '');
+            
+            const res = await fetch('/api/stories', { method: 'POST', body: formData });
+            if (res.ok) {
+                showToast('Story published successfully!', 'success');
+                setTimeout(() => showTab('posts', document.querySelectorAll('.creator-tab')[0]), 1500);
+            } else {
+                throw new Error('Story publish failed');
+            }
         } else {
-            throw new Error('Failed');
+            formData.append('title', title);
+            formData.append('content', content);
+            formData.append('excerpt', excerpt);
+            formData.append('region_id', region);
+            formData.append('content_type', selectedType);
+            formData.append('status', 'published');
+            formData.append('is_locked', isPremium ? '1' : '0');
+            if (coverUrl) formData.append('cover_image', coverUrl);
+            if (mediaUrl) {
+                if (selectedType === 'video') formData.append('video_url', mediaUrl);
+                else if (selectedType === 'audio') formData.append('audio_url', mediaUrl);
+                else formData.append('media_url', mediaUrl);
+            }
+
+            const res = await fetch('/api/posts', { method: 'POST', body: formData });
+            if (res.ok) {
+                const data = await res.json();
+                showToast('Published successfully!', 'success');
+                setTimeout(() => location.href = `/post/${data.id}`, 1500);
+            } else {
+                throw new Error('Publish failed');
+            }
         }
     } catch(e) {
+        console.error(e);
         showToast('Failed to publish. Try again.', 'error');
+    } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publish';
+        btn.innerHTML = originalBtnHtml;
     }
 }
 

@@ -2622,7 +2622,9 @@ def get_active_stories(db: Session = Depends(get_db)):
 @app.post("/api/stories")
 async def submit_story(
     request: Request, title: str = Form(...), content: str = Form(...),
-    region: str = Form(""), db: Session = Depends(get_db)
+    region: str = Form(""), 
+    media: UploadFile = File(None),
+    db: Session = Depends(get_db)
 ):
     sid = request.cookies.get("user_session")
     author = "Anonymous"
@@ -2632,8 +2634,24 @@ async def submit_story(
             if u: author = u.username
         except Exception:
             pass
+            
     try:
-        db.add(models.StorySubmission(title=title, content=content,
+        # Handle media upload if provided
+        media_url = ""
+        if media:
+            upload_res = await _do_upload(media, "stories", db)
+            if upload_res.get("success"):
+                media_url = upload_res.get("url")
+        
+        # Inject media_url into the content JSON
+        try:
+            data = json.loads(content)
+            data["media_url"] = media_url or data.get("media_url", "")
+            final_content = json.dumps(data)
+        except:
+            final_content = content
+
+        db.add(models.StorySubmission(title=title, content=final_content,
                                       region=region, author_name=author, status="pending"))
         db.commit()
         return {"success": True}
@@ -2819,6 +2837,7 @@ async def chatbot_endpoint(
     
     try:
         # Search posts
+        from sqlalchemy import or_
         posts = db.query(models.Post).filter(
             models.Post.status == "published",
             or_(
@@ -2873,25 +2892,20 @@ async def chatbot_endpoint(
     except Exception as e:
         print(f"⚠️ Database search error: {e}")
     
-    # 2. HANDLE SCREEN IMAGE (for future AI vision processing)
-    screen_context = ""
-    if screen_image:
-        # Log that screen was shared (can be processed by AI vision later)
-        print(f"📸 Screen image received: {len(screen_image)} bytes")
-        screen_context = "User has shared their screen. The image shows their current view."
-        # In future: Send screen_image to Gemini Vision API for analysis
-    
-    # 3. GENERATE RESPONSE
+    # 2. IF FOUND IN DATABASE - Early Return
     if db_answer and sources:
-        # Found in database - return with sources
-        response_text = f"I found this in our archives:\n\n{db_answer}"
         return {
-            "response": response_text,
+            "success": True,
+            "response": f"I found this in our archives:\n\n{db_answer}",
             "sources": sources,
             "used_database": True
         }
     
-    # 4. FALLBACK TO GENERAL KNOWLEDGE (via Gemini)
+    # 3. FALLBACK TO GEMINI (General Knowledge)
+    screen_context = ""
+    if screen_image:
+        screen_context = "User has shared their screen. The image shows their current view."
+
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     if GOOGLE_API_KEY:
         try:
@@ -2924,23 +2938,33 @@ async def chatbot_endpoint(
                     try:
                         reply = api_data["candidates"][0]["content"]["parts"][0]["text"]
                         return {
+                            "success": True,
                             "response": reply,
-                            "sources": [],
+                            "sources": sources,
                             "used_database": False,
-                            "note": "Answer from general knowledge (not in database)"
+                            "note": "Answer from general knowledge"
                         }
                     except (KeyError, IndexError):
                         pass
         except Exception as e:
             print(f"⚠️ Gemini fallback error: {e}")
-    
-    # 5. FINAL FALLBACK
+            
+    # 4. FINAL PERSONALITY FALLBACK (If DB not found and Gemini fails/missing)
+    final_reply = ""
+    if "hello" in message.lower() or "hi" in message.lower():
+        final_reply = "Akwaaba! I am EchoBot AI, your digital guardian of Ghanaian heritage. How can I assist you today? You can ask me about regional history, festivals, or even Kente weaving!"
+    elif message:
+        final_reply = f"I've searched our heritage archives for information on '{message}', but I couldn't find a direct match. However, I'm constantly learning! You might try searching for major regions like Ashanti or Greater Accra."
+    else:
+        final_reply = "I'm here to help you explore Ghana! What would you like to know?"
+
     return {
-        "response": "I couldn't find information about that in our database, and I'm unable to access general knowledge right now. Try asking about Ghana's regions, traditions, festivals, or famous personalities!",
+        "success": True,
+        "response": final_reply,
         "sources": sources,
         "used_database": False
     }
-        
+
 # ─── PAYMENTS ────────────────────────────────────────────────────────────────
 @app.post("/api/payments/initialize")
 async def init_payment(
@@ -3594,6 +3618,68 @@ async def search(
         return {"posts": [], "users": [], "regions": []}
 
 # ─── TRENDING ────────────────────────────────────────────────────────────────
+# ─── STORIES ──────────────────────────────────────────────────────────────────
+@app.get("/api/stories")
+async def get_stories(db: Session = Depends(get_db)):
+    try:
+        now = datetime.utcnow()
+        # Fetch stories that are not expired
+        stories = db.query(models.Story).filter(
+            or_(models.Story.expires_at > now, models.Story.expires_at == None)
+        ).order_by(models.Story.created_at.desc()).all()
+        
+        result = []
+        for s in stories:
+            user = db.query(models.User).filter(models.User.id == s.user_id).first()
+            result.append({
+                "id": s.id,
+                "user_id": str(s.user_id),
+                "username": user.username if user else "Unknown",
+                "avatar_url": getattr(user, "avatar_url", "") if user else "",
+                "media_url": s.media_url,
+                "media_type": s.media_type,
+                "caption": s.caption,
+                "created_at": str(s.created_at)
+            })
+        return result
+    except Exception as e:
+        print(f"Error fetching stories: {e}")
+        return []
+
+@app.post("/api/stories")
+async def create_story(
+    request: Request,
+    media_url: str = Form(...),
+    media_type: str = Form("image"),
+    caption: str = Form(""),
+    db: Session = Depends(get_db)
+):
+    sid = request.cookies.get("user_session")
+    if not sid:
+        raise HTTPException(401, "Login to post stories")
+    
+    try:
+        # Check if user exists
+        user = db.query(models.User).filter(models.User.id == sid).first()
+        if not user:
+            raise HTTPException(401, "Invalid session")
+
+        expires_at = datetime.utcnow() + timedelta(hours=24)
+        new_story = models.Story(
+            user_id=sid,
+            media_url=media_url,
+            media_type=media_type,
+            caption=caption,
+            expires_at=expires_at,
+            is_approved=True
+        )
+        db.add(new_story)
+        db.commit()
+        return {"success": True, "story_id": new_story.id}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, str(e))
+
 @app.get("/api/trending")
 async def get_trending(limit: int = 10, db: Session = Depends(get_db)):
     """Get trending posts (most liked/shared in last 7 days)."""

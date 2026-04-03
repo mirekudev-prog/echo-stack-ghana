@@ -170,6 +170,7 @@
             outline: none;
             transition: border-color .2s;
             -webkit-appearance: none;
+            appearance: none;
         }
         .field input:focus { border-color: var(--gold); background: var(--main-card) }
         .field input::placeholder { color: var(--main-muted) }
@@ -344,15 +345,17 @@
                     <div class="field-error" id="err-email"></div>
                 </div>
 
-                <div class="field" id="field-password">
+                <div class="field" id="field-password" style="position:relative">
                     <label>Password *</label>
                     <input type="password" id="password" placeholder="Minimum 6 characters" autocomplete="new-password">
+                    <i class="fas fa-eye" id="togglePw1" onclick="togglePassword('password', 'togglePw1')" style="position:absolute;right:16px;top:38px;color:var(--main-muted);cursor:pointer"></i>
                     <div class="field-error" id="err-password"></div>
                 </div>
 
-                <div class="field" id="field-confirm">
+                <div class="field" id="field-confirm" style="position:relative">
                     <label>Confirm Password *</label>
                     <input type="password" id="confirmPassword" placeholder="Repeat your password" autocomplete="new-password">
+                    <i class="fas fa-eye" id="togglePw2" onclick="togglePassword('confirmPassword', 'togglePw2')" style="position:absolute;right:16px;top:38px;color:var(--main-muted);cursor:pointer"></i>
                     <div class="field-error" id="err-confirm"></div>
                 </div>
 
@@ -391,6 +394,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script>
+        function togglePassword(id, iconId) {
+            const input = document.getElementById(id);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
         const defaultTopics = [
             'Ashanti Culture', 'Ga Traditions', 'Oral History', 'Music & Dance',
             'Festivals', 'Languages', 'Cuisine', 'Art & Crafts',
