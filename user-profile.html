@@ -220,13 +220,19 @@ async function loadUserPosts() {
             const isVerified = (currentUser.role === 'admin' || currentUser.role === 'creator' || currentUser.is_verified);
 
             let mediaHtml = '';
-            if (post.media_url) {
-                if (post.content_type === 'video' || post.content_type === 'reel') {
+            const vUrl = post.video_url || post.media_url;
+            const aUrl = post.audio_url || post.media_url;
+            const mUrl = post.media_url || post.cover_image;
+
+            if (post.content_type === 'video' || post.content_type === 'reel') {
+                if (vUrl) {
                     mediaHtml = `
                         <div class="post-media" onclick="event.stopPropagation()">
-                            <video src="${escapeHtml(post.media_url)}" controls preload="metadata"></video>
+                            <video src="${escapeHtml(vUrl)}" controls preload="metadata"></video>
                         </div>`;
-                } else if (post.content_type === 'audio') {
+                }
+            } else if (post.content_type === 'audio') {
+                if (aUrl) {
                     mediaHtml = `
                         <div class="audio-card" onclick="event.stopPropagation()">
                             <div class="audio-header">
@@ -236,16 +242,14 @@ async function loadUserPosts() {
                                     <p>${escapeHtml(author)}</p>
                                 </div>
                             </div>
-                            <audio controls preload="none"><source src="${escapeHtml(post.media_url)}" type="audio/mpeg"></audio>
-                        </div>`;
-                } else {
-                    mediaHtml = `
-                        <div class="post-media">
-                            <img src="${escapeHtml(post.media_url)}" alt="" loading="lazy">
+                            <audio controls preload="none"><source src="${escapeHtml(aUrl)}" type="audio/mpeg"></audio>
                         </div>`;
                 }
-            } else if (post.cover_image) {
-                mediaHtml = `<div class="post-media"><img src="${escapeHtml(post.cover_image)}" onerror="this.parentElement.style.display='none'" alt=""></div>`;
+            } else if (mUrl) {
+                mediaHtml = `
+                    <div class="post-media">
+                        <img src="${escapeHtml(mUrl)}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'">
+                    </div>`;
             }
             return `
             <article class="post-card" onclick="location.href='/post/${post.id}'">

@@ -245,6 +245,20 @@ function renderArchive(posts) {
                     </div>
                     <h3 class="post-title">${escapeHtml(p.title)}</h3>
                     ${p.excerpt ? `<p class="post-excerpt">${escapeHtml(p.excerpt)}</p>` : ''}
+                    
+                    ${(() => {
+                        const vUrl = p.video_url || p.media_url;
+                        const aUrl = p.audio_url || p.media_url;
+                        const mUrl = p.media_url || p.cover_image;
+                        if (p.content_type === 'video' || p.content_type === 'reel') {
+                            return vUrl ? `<div class="post-media" onclick="event.stopPropagation()"><video src="${escapeHtml(vUrl)}" controls preload="metadata"></video></div>` : '';
+                        } else if (p.content_type === 'audio') {
+                            return aUrl ? `<div class="audio-card" onclick="event.stopPropagation()"><audio controls preload="none"><source src="${escapeHtml(aUrl)}" type="audio/mpeg"></audio></div>` : '';
+                        } else if (mUrl) {
+                            return `<div class="post-media"><img src="${escapeHtml(mUrl)}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`;
+                        }
+                        return '';
+                    })()}
                 </article>
             `;
         });
