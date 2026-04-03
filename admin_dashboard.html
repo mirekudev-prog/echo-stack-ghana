@@ -1885,8 +1885,13 @@ async function loadUsers() {
                 '<td><span class="badge ' + (u.is_premium ? 'badge-success' : 'badge-muted') + '">' + (u.is_premium ? 'Yes' : 'No') + '</span></td>' +
                 '<td><span class="badge ' + (u.email_verified ? 'badge-success' : 'badge-muted') + '">' + (u.email_verified ? 'Yes' : 'No') + '</span></td>' +
                 '<td>' + timeAgo(u.created_at) + '</td>' +
-                '<td><div style="display:flex;gap:4px;">' +
-                    '<button class="btn btn-sm btn-secondary" onclick="toggleRole(\'' + u.id + '\',\'' + u.role + '\')" title="Toggle Role"><i class="fas fa-user-edit"></i></button>' +
+                '<td><div style="display:flex;gap:4px;align-items:center;">' +
+                    '<select class="form-input" style="padding:4px 8px; font-size:0.8rem; margin-right:4px; max-width:100px;" onchange="changeRole(\'' + u.id + '\', this.value)" title="Change Role">' +
+                        '<option value="user"' + (u.role === 'user' ? ' selected' : '') + '>User</option>' +
+                        '<option value="creator"' + (u.role === 'creator' ? ' selected' : '') + '>Creator</option>' +
+                        '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>Admin</option>' +
+                        '<option value="superuser"' + (u.role === 'superuser' ? ' selected' : '') + ' disabled>Superuser</option>' +
+                    '</select>' +
                     '<button class="btn btn-sm btn-secondary" onclick="togglePremium(\'' + u.id + '\')" title="Toggle Premium"><i class="fas fa-crown"></i></button>' +
                     '<button class="btn btn-sm btn-secondary" onclick="toggleSuspend(\'' + u.id + '\')" title="Toggle Suspend"><i class="fas fa-ban"></i></button>' +
                     '<button class="btn btn-sm btn-secondary" onclick="verifyUser(\'' + u.id + '\')" title="Verify Email"><i class="fas fa-check-circle"></i></button>' +
@@ -1896,11 +1901,7 @@ async function loadUsers() {
     } catch(e) { toast('Failed to load users', 'error'); }
 }
 
-async function toggleRole(uid, role) {
-    var newRole = role === 'creator' ? 'user' : 'creator';
-    if (role === 'user') newRole = 'creator';
-    else if (role === 'creator') newRole = 'admin';
-    else if (role === 'admin') newRole = 'user';
+async function changeRole(uid, newRole) {
     try {
         await fetch('/api/admin/users/' + uid + '/role', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ role: newRole }) });
         toast('Role updated to ' + newRole, 'success');
