@@ -1451,8 +1451,8 @@ async def get_posts(
         own_id   = request.cookies.get("user_session")
         admin_preview_mode = request.query_params.get("admin_preview") == "true" and is_admin
 
-        # Optimized query: join with User to get role and verification status
-        posts_with_authors = db.query(models.Post, models.User.role, models.User.is_verified, models.User.avatar_url).join(
+        # Optimized query with outerjoin to prevent filtering out posts without authors
+        posts_with_authors = db.query(models.Post, models.User.role, models.User.is_verified, models.User.avatar_url).outerjoin(
             models.User, models.Post.author_id == models.User.id
         )
         
@@ -1503,9 +1503,9 @@ async def get_posts(
                 "is_locked": getattr(p, "is_locked", 0) or 0,
                 "author_id": str(p.author_id) if p.author_id else "",
                 "author_username": getattr(p, "author_username", "") or "",
-                "author_role": a_role,
-                "is_verified": a_verified,
-                "author_avatar": a_avatar,
+                "author_role": a_role or "user",
+                "is_verified": bool(a_verified),
+                "author_avatar": a_avatar or "",
                 "region_id": getattr(p, "region_id", None),
                 "tags": getattr(p, "tags", "") or "",
                 "views": getattr(p, "views", 0) or 0,
@@ -1517,7 +1517,7 @@ async def get_posts(
                 "media_url": getattr(p, "media_url", "") or "",
                 "media_path": getattr(p, "media_path", "") or "",
                 "created_at": str(getattr(p, "created_at", "")),
-                "comment_count": comment_count,
+                "comments_count": comment_count,
                 "is_following": is_following,
             })
         return result
@@ -1525,6 +1525,7 @@ async def get_posts(
     except Exception as e:
         print(f"GET /api/posts error: {e}")
         return []
+
         
 @app.get("/api/reels")
 async def get_reels(

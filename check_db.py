@@ -5,13 +5,13 @@ from database import engine, SessionLocal
 import models
 
 def check_diagnostics():
-    print("🔍 --- EchoStack Diagnostics ---")
+    print("--- EchoStack Diagnostics ---")
     
     # 1. Check Environment
     db_url = os.environ.get("DATABASE_URL", "sqlite:///./echostack.db")
     is_supabase = "supabase" in db_url.lower() or "postgresql" in db_url.lower()
     
-    print(f"📡 Database Type: {'PRODUCTION (Supabase/Postgres)' if is_supabase else 'LOCAL (SQLite)'}")
+    print(f"Database Type: {'PRODUCTION (Supabase/Postgres)' if is_supabase else 'LOCAL (SQLite)'}")
     if not is_supabase:
         print("⚠️  Warning: Currently using local SQLite. You will not see your live Supabase data.")
     
