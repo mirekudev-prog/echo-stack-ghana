@@ -683,7 +683,7 @@ textarea.input { min-height: 120px; resize: vertical; line-height: 1.6; }
 .ghana-map { max-width: 100%; max-height: 65vh; }
 .ghana-map path { fill: var(--main-border); stroke: white; stroke-width: 1; cursor: pointer; transition: all 0.2s; }
 .ghana-map path:hover, .ghana-map path.active { fill: var(--gold); }
-.region-panel { width: 360px; flex-shrink: 0; background: var(--main-card); border-left: 1px solid var(--main-border); overflow-y: auto; }
+.region-panel { width: 360px; max-width: 100%; flex-shrink: 0; background: var(--main-card); border-left: 1px solid var(--main-border); overflow-y: auto; }
 .panel-header { padding: 24px; background: linear-gradient(135deg, var(--ink), var(--ink2)); color: white; }
 .panel-header h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 4px; }
 .panel-header p { color: var(--text-secondary); font-size: 0.88rem; }
@@ -776,4 +776,68 @@ textarea.input { min-height: 120px; resize: vertical; line-height: 1.6; }
 @media (max-width: 640px) {
   .post-actions { flex-wrap: wrap; gap: 6px; }
   .reel-container { height: 56vh; border-radius: 0; max-width: 100%; }
+}
+/* ── MOBILE RESPONSIVENESS - PREVENT HORIZONTAL SCROLL ───────── */
+@media (max-width: 768px) {
+  * { box-sizing: border-box; }
+  html, body { overflow-x: hidden; width: 100%; }
+  .app, .main-wrapper, .page-container { max-width: 100vw; overflow-x: hidden; }
+  .feed, .grid, .card-grid { grid-template-columns: 1fr !important; }
+  .row, .flex-row { flex-wrap: wrap; }
+  [class*="col-"] { width: 100% !important; max-width: 100% !important; }
+  .container, .page-content, .content-area { padding-left: 16px !important; padding-right: 16px !important; }
+  table { display: block; overflow-x: auto; max-width: 100%; }
+  .data-table { min-width: 600px; }
+  .modal { width: calc(100% - 32px) !important; max-width: none !important; }
+  .sidebar-panel, .aside-panel { width: 100% !important; max-width: 100% !important; }
+  input, textarea, select { max-width: 100% !important; }
+  .btn-group { flex-wrap: wrap; gap: 8px; }
+  .nav-links { flex-wrap: wrap; }
+  .profile-header, .user-card { flex-direction: column; text-align: center; }
+  .avatar-lg { margin: 0 auto 12px !important; }
+  .stats-row { flex-wrap: wrap; justify-content: center; }
+  .stat-item { min-width: 80px; flex: 1 1 auto; }
+  .header-actions { gap: 8px; }
+  .search-bar { width: 100%; }
+  .filter-bar { flex-wrap: wrap; gap: 8px; }
+  .tag-list, .category-list { flex-wrap: wrap; }
+  .comment-section { padding: 12px !important; }
+  .post-content { word-wrap: break-word; overflow-wrap: break-word; }
+  pre, code { max-width: 100%; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; }
+  img, video, iframe { max-width: 100% !important; height: auto !important; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .carousel-inner { max-width: 100%; }
+  .dropdown-menu { left: 0 !important; right: 0 !important; }
+  .tooltip { max-width: 200px; word-wrap: break-word; }
+  .pagination { flex-wrap: wrap; justify-content: center; }
+  .form-row { flex-direction: column; gap: 12px; }
+  .input-group { flex-wrap: wrap; }
+  .input-group-append, .input-group-prepend { width: 100%; }
+  .toast { left: 16px !important; right: 16px !important; transform: none !important; width: auto !important; max-width: none !important; }
+  .toast.show { transform: translateY(0) !important; }
+  .notification-panel { width: 100% !important; max-width: 100% !important; right: 0 !important; }
+  .chat-sidebar { display: none; }
+  .message-bubble { max-width: 85% !important; }
+  .video-player { width: 100% !important; max-width: 100% !important; }
+  .reel-container, .story-container { width: 100% !important; max-width: 100% !important; }
+  .map-page { flex-direction: column; }
+  .region-panel { width: 100% !important; max-height: 40vh; }
+  .echobot-btn { bottom: 16px !important; right: 16px !important; width: 48px !important; height: 48px !important; }
+}
+@media (max-width: 480px) {
+  .container, .page-content { padding-left: 12px !important; padding-right: 12px !important; }
+  h1, .h1 { font-size: 1.5rem !important; }
+  h2, .h2 { font-size: 1.25rem !important; }
+  h3, .h3 { font-size: 1.1rem !important; }
+  .card, .panel { border-radius: 8px !important; }
+  .btn { padding: 10px 16px !important; font-size: 0.9rem !important; }
+  .btn-icon { width: 40px !important; height: 40px !important; }
+  .avatar, .avatar-md { width: 40px !important; height: 40px !important; }
+  .avatar-lg { width: 64px !important; height: 64px !important; }
+  .post-image { max-height: 280px !important; object-fit: cover; }
+  .comment-avatar { width: 32px !important; height: 32px !important; }
+  .footer { padding: 20px 16px !important; }
+  .bottom-nav { padding-bottom: env(safe-area-inset-bottom) !important; }
+  .tab-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab-item { min-width: 80px; flex-shrink: 0; }
 }
