@@ -2857,22 +2857,24 @@ async def chatbot_endpoint(
             if not db_answer:
                 db_answer = f"According to our article '{post.title}': {post.content[:200]}..."
         
-        # Search FAQ
-        faqs = db.query(models.FAQ).filter(
+        # Search regions
+        regions = db.query(models.Region).filter(
             or_(
-                models.FAQ.question.ilike(f"%{message}%"),
-                models.FAQ.answer.ilike(f"%{message}%")
+                models.Region.name.ilike(f"%{message}%"),
+                models.Region.description.ilike(f"%{message}%"),
+                models.Region.capital.ilike(f"%{message}%"),
+                models.Region.tags.ilike(f"%{message}%")
             )
         ).limit(2).all()
         
-        for faq in faqs:
+        for region in regions:
             sources.append({
-                "title": f"❓ FAQ: {faq.question[:50]}",
-                "url": "/faq",
-                "type": "faq"
+                "title": f"🌍 Region: {region.name}",
+                "url": f"/region/{region.id}",
+                "type": "region"
             })
             if not db_answer:
-                db_answer = faq.answer[:200]
+                db_answer = f"Found information about {region.name}: {region.description[:200] if region.description else region.overview[:200] if region.overview else '...'}"
         
         # Search users/creators
         users = db.query(models.User).filter(
