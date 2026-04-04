@@ -1,1 +1,1 @@
-Nothing should be ignored based on the provided file changes. The changes only involve HTML files (admin.html deletion and admin_dashboard.html modification), which are source files that should be tracked in version control. No build artifacts, dependencies, temporary files, or other ignorable content is present in the change list.
+Nothing should be ignored based on the provided file changes. The only modified file is `main.py`, which is a source code file and should not be added to .gitignore.
