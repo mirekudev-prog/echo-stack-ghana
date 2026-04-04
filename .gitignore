@@ -1,34 +1,37 @@
 ```
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# Database files
+*.sqlite
+*.db
 
-# Database
-echoverse.db
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
+# Dependencies
+node_modules/
+package-lock.json
 
 # Environment
 .env
 .env.local
 *.env.*
 
+# Logs and temp files
+*.log
+*.tmp
+
 # Editors
 .vscode/
 .idea/
 
-# Dependencies
-.venv/
-venv/
-node_modules/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# Build artifacts
+# Build outputs
 dist/
 build/
-target/
+*.egg-info/
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```
