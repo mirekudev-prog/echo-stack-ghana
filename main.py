@@ -1446,13 +1446,17 @@ async def get_posts(
     content_type: str = "", region_id: str = "", author_id: str = "",
     db: Session = Depends(get_db)
 ):
+    """
+    Optimized posts endpoint using batch queries instead of N+1 queries.
+    Uses subqueries for comment counts and bulk loading for follow relationships.
+    """
     try:
         is_admin = _is_admin(request)
         own_id   = request.cookies.get("user_session")
         admin_preview_mode = request.query_params.get("admin_preview") == "true" and is_admin
 
-        # Optimized query with outerjoin to prevent filtering out posts without authors
-        posts_with_authors = db.query(models.Post, models.User.role, models.User.is_verified, models.User.avatar_url).outerjoin(
+        # Build base query with optimized joins
+        posts_query = db.query(models.Post).outerjoin(
             models.User, models.Post.author_id == models.User.id
         )
         
@@ -1460,38 +1464,51 @@ async def get_posts(
             if author_id and author_id == own_id:
                 pass
             else:
-                posts_with_authors = posts_with_authors.filter(or_(models.Post.status == "published", models.Post.status == "", models.Post.status == None))
+                posts_query = posts_query.filter(
+                    or_(models.Post.status == "published", models.Post.status == "", models.Post.status == None)
+                )
 
         if content_type:
-            posts_with_authors = posts_with_authors.filter(models.Post.content_type == content_type)
+            posts_query = posts_query.filter(models.Post.content_type == content_type)
         if region_id and region_id.isdigit():
-            posts_with_authors = posts_with_authors.filter(models.Post.region_id == int(region_id))
+            posts_query = posts_query.filter(models.Post.region_id == int(region_id))
         if author_id:
-            posts_with_authors = posts_with_authors.filter(models.Post.author_id == author_id)
+            posts_query = posts_query.filter(models.Post.author_id == author_id)
 
-        results_data = posts_with_authors.order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
+        # Execute main query
+        posts = posts_query.order_by(models.Post.created_at.desc()).offset(offset).limit(limit).all()
+        
+        if not posts:
+            return []
 
-        # Get current user id from cookie for follow status
-        sid = request.cookies.get("user_session")
-        current_user_id = sid if sid else None
-
-        result = []
-        for p, a_role, a_verified, a_avatar in results_data:
-            # Comment count (excluding "__like__" entries)
-            comment_count = db.query(models.Comment).filter(
-                models.Comment.post_id == p.id,
+        # Batch load comment counts using a single query with GROUP BY
+        post_ids = [p.id for p in posts]
+        comment_counts = {
+            cp.post_id: cp.count 
+            for cp in db.query(
+                models.Comment.post_id, 
+                func.count(models.Comment.id).label('count')
+            ).filter(
+                models.Comment.post_id.in_(post_ids),
                 models.Comment.content != "__like__"
-            ).count()
+            ).group_by(models.Comment.post_id).all()
+        }
 
-            # Check if current user follows the author
-            is_following = False
-            if current_user_id and p.author_id:
-                follow = db.query(models.Follow).filter(
+        # Batch load follow relationships
+        current_user_id = own_id if own_id else None
+        following_set = set()
+        if current_user_id:
+            author_ids = {p.author_id for p in posts if p.author_id}
+            if author_ids:
+                follows = db.query(models.Follow.following_id).filter(
                     models.Follow.follower_id == current_user_id,
-                    models.Follow.following_id == p.author_id
-                ).first()
-                is_following = follow is not None
+                    models.Follow.following_id.in_(author_ids)
+                ).all()
+                following_set = {f.following_id for f in follows}
 
+        # Build result with pre-loaded data
+        result = []
+        for p in posts:
             result.append({
                 "id": p.id,
                 "title": getattr(p, "title", "") or "",
@@ -1503,9 +1520,9 @@ async def get_posts(
                 "is_locked": getattr(p, "is_locked", 0) or 0,
                 "author_id": str(p.author_id) if p.author_id else "",
                 "author_username": getattr(p, "author_username", "") or "",
-                "author_role": a_role or "user",
-                "is_verified": bool(a_verified),
-                "author_avatar": a_avatar or "",
+                "author_role": getattr(p, "role", "user") or "user",
+                "is_verified": bool(getattr(p, "is_verified", False)),
+                "author_avatar": getattr(p, "avatar_url", "") or "",
                 "region_id": getattr(p, "region_id", None),
                 "tags": getattr(p, "tags", "") or "",
                 "views": getattr(p, "views", 0) or 0,
@@ -1517,8 +1534,8 @@ async def get_posts(
                 "media_url": getattr(p, "media_url", "") or "",
                 "media_path": getattr(p, "media_path", "") or "",
                 "created_at": str(getattr(p, "created_at", "")),
-                "comments_count": comment_count,
-                "is_following": is_following,
+                "comments_count": comment_counts.get(p.id, 0),
+                "is_following": p.author_id in following_set if p.author_id else False,
             })
         return result
 
@@ -1535,49 +1552,59 @@ async def get_reels(
     db: Session = Depends(get_db)
 ):
     """
-    Return a list of published reels (content_type='reel').
-    Ordered by newest first.
-    Includes comment count, follow status, author details, and description.
+    Optimized reels endpoint using batch queries instead of N+1 queries.
+    Uses subqueries for comment counts and bulk loading for user data.
     """
     try:
+        # Base query for reels
         q = db.query(models.Post).filter(
             models.Post.status == "published",
             models.Post.content_type == "reel"
         ).order_by(models.Post.created_at.desc())
+        
         total = q.count()
         reels = q.offset(offset).limit(limit).all()
+        
+        if not reels:
+            return {"total": 0, "offset": offset, "limit": limit, "reels": []}
 
-        # Get current user id from cookie for follow status
-        sid = request.cookies.get("user_session")
-        current_user_id = sid if sid else None
+        # Batch load comment counts
+        post_ids = [p.id for p in reels]
+        comment_counts = {
+            cp.post_id: cp.count 
+            for cp in db.query(
+                models.Comment.post_id,
+                func.count(models.Comment.id).label('count')
+            ).filter(
+                models.Comment.post_id.in_(post_ids),
+                models.Comment.content != "__like__"
+            ).group_by(models.Comment.post_id).all()
+        }
 
+        # Batch load user avatars
+        author_ids = {p.author_id for p in reels if p.author_id}
+        user_avatars = {}
+        if author_ids:
+            users = db.query(models.User.id, models.User.avatar_url).filter(
+                models.User.id.in_(author_ids)
+            ).all()
+            user_avatars = {u.id: u.avatar_url or "" for u in users}
+
+        # Batch load follow relationships
+        current_user_id = request.cookies.get("user_session")
+        following_set = set()
+        if current_user_id and author_ids:
+            follows = db.query(models.Follow.following_id).filter(
+                models.Follow.follower_id == current_user_id,
+                models.Follow.following_id.in_(author_ids)
+            ).all()
+            following_set = {f.following_id for f in follows}
+
+        # Build result with pre-loaded data
         reel_list = []
         for p in reels:
-            # Comment count (excluding "__like__" entries)
-            comment_count = db.query(models.Comment).filter(
-                models.Comment.post_id == p.id,
-                models.Comment.content != "__like__"   # <-- fixed quote
-            ).count()
-
-            # Check if current user follows the author
-            is_following = False
-            if current_user_id and p.author_id:
-                follow = db.query(models.Follow).filter(
-                    models.Follow.follower_id == current_user_id,
-                    models.Follow.following_id == p.author_id
-                ).first()
-                is_following = follow is not None
-
-            # Fetch author avatar (optional)
-            author_avatar = ""
-            if p.author_id:
-                user = db.query(models.User).filter(models.User.id == p.author_id).first()
-                if user:
-                    author_avatar = user.avatar_url or ""
-
-            # Build description from excerpt or content snippet
             description = p.excerpt or (p.content[:100] + "..." if p.content else "")
-
+            
             reel_list.append({
                 "id": p.id,
                 "title": p.title,
@@ -1587,12 +1614,12 @@ async def get_reels(
                 "media_path": p.media_path or "",
                 "author_id": str(p.author_id) if p.author_id else None,
                 "author_username": p.author_username or "Creator",
-                "author_avatar": author_avatar,
+                "author_avatar": user_avatars.get(p.author_id, ""),
                 "likes": p.likes or 0,
-                "comment_count": comment_count,
+                "comment_count": comment_counts.get(p.id, 0),
                 "views": p.views or 0,
                 "created_at": p.created_at.isoformat(),
-                "is_following": is_following
+                "is_following": p.author_id in following_set if p.author_id else False
             })
 
         return {
@@ -1879,20 +1906,30 @@ async def add_comment(
 
 @app.get("/api/posts/{post_id}/comments")
 async def get_comments(post_id: int, db: Session = Depends(get_db)):
+    """
+    Optimized comments endpoint using batch queries instead of N+1 queries.
+    Loads all comments and replies in a single query each.
+    """
     try:
-        # Get top-level comments (parent_id is NULL)
-        comments = db.query(models.Comment).filter(
+        # Get all comments for this post in a single query
+        all_comments = db.query(models.Comment).filter(
             models.Comment.post_id == post_id,
-            models.Comment.parent_id == None,
             models.Comment.content != "__like__"
-        ).order_by(models.Comment.created_at.desc()).all()
-        # Build nested structure
+        ).order_by(models.Comment.created_at.asc()).all()
+        
+        # Separate top-level and replies
+        top_level = [c for c in all_comments if c.parent_id is None]
+        replies_by_parent = {}
+        for c in all_comments:
+            if c.parent_id is not None:
+                if c.parent_id not in replies_by_parent:
+                    replies_by_parent[c.parent_id] = []
+                replies_by_parent[c.parent_id].append(c)
+        
+        # Build nested structure without additional queries
         result = []
-        for c in comments:
-            replies = db.query(models.Comment).filter(
-                models.Comment.parent_id == c.id,
-                models.Comment.content != "__like__"
-            ).order_by(models.Comment.created_at.asc()).all()
+        for c in top_level:
+            replies = replies_by_parent.get(c.id, [])
             result.append({
                 "id": c.id,
                 "user_id": str(c.user_id) if c.user_id else None,
@@ -3992,7 +4029,10 @@ async def update_user_settings(
 # ─── DIRECT MESSAGES ─────────────────────────────────────────────────────────
 @app.get("/api/messages")
 async def get_conversations(request: Request, db: Session = Depends(get_db)):
-    """Get list of conversations."""
+    """
+    Optimized conversations endpoint using batch queries.
+    Loads all users in a single query instead of N+1 queries.
+    """
     sid = request.cookies.get("user_session")
     if not sid:
         raise HTTPException(401, "Login required")
@@ -4004,21 +4044,34 @@ async def get_conversations(request: Request, db: Session = Depends(get_db)):
             )
         ).order_by(models.DirectMessage.created_at.desc()).all()
         
+        # Collect all unique user IDs first
+        other_ids = set()
+        for m in messages:
+            other_id = m.receiver_id if m.sender_id == sid else m.sender_id
+            other_ids.add(other_id)
+        
+        # Batch load all users in a single query
+        users = {}
+        if other_ids:
+            user_list = db.query(models.User.id, models.User.username, models.User.avatar_url).filter(
+                models.User.id.in_(other_ids)
+            ).all()
+            users = {u.id: {"username": u.username, "avatar_url": u.avatar_url or ""} for u in user_list}
+        
+        # Build conversations without additional queries
         conversations = {}
         for m in messages:
             other_id = m.receiver_id if m.sender_id == sid else m.sender_id
-            if other_id not in conversations:
-                other_user = db.query(models.User).filter(models.User.id == other_id).first()
-                if other_user:
-                    conversations[other_id] = {
-                        "user_id": str(other_id),
-                        "username": other_user.username,
-                        "avatar_url": other_user.avatar_url or "",
-                        "last_message": m.content,
-                        "last_message_at": str(m.created_at),
-                        "unread_count": 0
-                    }
-            if m.sender_id != sid and not m.is_read:
+            if other_id not in conversations and other_id in users:
+                conversations[other_id] = {
+                    "user_id": str(other_id),
+                    "username": users[other_id]["username"],
+                    "avatar_url": users[other_id]["avatar_url"],
+                    "last_message": m.content,
+                    "last_message_at": str(m.created_at),
+                    "unread_count": 0
+                }
+            if m.sender_id != sid and not m.is_read and other_id in conversations:
                 conversations[other_id]["unread_count"] = conversations[other_id].get("unread_count", 0) + 1
         
         return list(conversations.values())
@@ -4392,25 +4445,31 @@ async def get_share_url(post_id: int, request: Request, db: Session = Depends(ge
 
 # ─── USER PROFILE ─────────────────────────────────────────────────────────────
 @app.get("/api/users/{username}")
-async def get_user_profile(username: str, db: Session = Depends(get_db)):
-    """Get public user profile."""
+async def get_user_profile(username: str, request: Request, db: Session = Depends(get_db)):
+    """
+    Optimized user profile endpoint using batch queries.
+    Loads posts, badges, and follow status efficiently.
+    """
     try:
         user = db.query(models.User).filter(models.User.username == username).first()
         if not user:
             raise HTTPException(404, "User not found")
         
+        # Batch load posts
         posts = db.query(models.Post).filter(
             models.Post.author_id == user.id,
             models.Post.status == "published"
         ).order_by(models.Post.created_at.desc()).limit(20).all()
         
+        # Batch load badges
         badges = db.query(models.UserBadge).filter(
             models.UserBadge.user_id == user.id
         ).all()
         
+        # Check follow status
         is_following = False
         sid = request.cookies.get("user_session")
-        if sid:
+        if sid and user.id:
             follow = db.query(models.Follow).filter(
                 models.Follow.follower_id == sid,
                 models.Follow.following_id == user.id

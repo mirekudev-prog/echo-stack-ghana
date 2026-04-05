@@ -1,2 +1,1 @@
-# Documentation
-SUPABASE_SETUP.md
+Nothing should be ignored since the changes only include HTML, CSS, and other source/config files without any build artifacts, dependencies, or temporary files.
