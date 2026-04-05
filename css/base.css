@@ -55,18 +55,37 @@
 
 /* ── RESET & BASE ──────────────────────────────────────────────── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { min-height: 100vh; max-width: 100vw; overflow-x: hidden; }
+html { max-width: 100vw; overflow-x: hidden; position: relative; }
 body {
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--cream);
   color: var(--main-text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  max-width: 100vw;
   overflow-x: hidden;
+  position: relative;
 }
 a { text-decoration: none; color: inherit; }
 button { font-family: inherit; border: none; background: none; cursor: pointer; }
-img { max-width: 100%; height: auto; }
+img, video, canvas, svg { max-width: 100%; height: auto; display: block; }
+
+/* Global overflow protection - prevent horizontal scroll */
+div, section, article, main, header, footer, nav, aside { max-width: 100%; }
+
+/* Force all elements to respect viewport width */
+* { max-width: 100%; box-sizing: border-box; }
+
+/* Text wrapping for all content */
+h1, h2, h3, h4, h5, h6, p, span, a, li, td, th { 
+  overflow-wrap: break-word; 
+  word-wrap: break-word; 
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Prevent inline elements from causing overflow */
+img, iframe, embed, object, video, audio { max-width: 100%; height: auto; }
 
 /* Global logo constraint — keep all logo images small and readable */
 .nav-logo img,
@@ -80,7 +99,7 @@ img { max-width: 100%; height: auto; }
     max-width: 100% !important;
     border-radius: 6px;
 }
-input, textarea, select { font-family: inherit; }
+input, textarea, select { font-family: inherit; max-width: 100%; }
 
 /* ── LAYOUT ────────────────────────────────────────────────────── */
 .app { display: flex; min-height: 100vh; max-width: 100vw; overflow-x: hidden; }
@@ -409,6 +428,8 @@ textarea.input { min-height: 120px; resize: vertical; line-height: 1.6; }
   color: var(--ink);
   margin-bottom: 8px;
   line-height: 1.25;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 .post-excerpt {
   font-size: 0.92rem;
@@ -420,6 +441,8 @@ textarea.input { min-height: 120px; resize: vertical; line-height: 1.6; }
   line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 .post-media {
   width: 100%;
@@ -645,8 +668,10 @@ textarea.input { min-height: 120px; resize: vertical; line-height: 1.6; }
   padding: 18px;
   margin-bottom: 14px;
   color: var(--text);
+  overflow: hidden;
+  max-width: 100%;
 }
-.audio-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.audio-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
 .audio-icon {
   width: 48px; height: 48px;
   border-radius: 50%;
@@ -654,9 +679,10 @@ textarea.input { min-height: 120px; resize: vertical; line-height: 1.6; }
   display: flex; align-items: center; justify-content: center;
   color: var(--ink); font-size: 1.2rem; flex-shrink: 0;
 }
-.audio-info h4 { font-weight: 600; font-size: 0.95rem; }
-.audio-info p { font-size: 0.78rem; color: var(--text-secondary); }
-.audio-card audio { width: 100%; height: 36px; border-radius: 8px; }
+.audio-info { flex: 1; min-width: 0; }
+.audio-info h4 { font-weight: 600; font-size: 0.95rem; overflow-wrap: break-word; word-wrap: break-word; }
+.audio-info p { font-size: 0.78rem; color: var(--text-secondary); overflow-wrap: break-word; word-wrap: break-word; }
+.audio-card audio { width: 100%; height: 36px; border-radius: 8px; max-width: 100%; }
 
 /* ── REELS ─────────────────────────────────────────────────────── */
 .reel-container {
@@ -838,7 +864,7 @@ textarea.input { min-height: 120px; resize: vertical; line-height: 1.6; }
   .profile-header, .user-card { flex-direction: column; text-align: center; }
   .avatar-lg { margin: 0 auto 12px !important; }
   .stats-row { flex-wrap: wrap; justify-content: center; }
-  .stat-item { min-width: 80px; flex: 1 1 auto; }
+  .stat-item { min-width: 0; flex: 1 1 auto; }
   .header-actions { gap: 8px; }
   .search-bar { width: 100%; }
   .filter-bar, .filter-tabs { flex-wrap: wrap; gap: 8px; }
