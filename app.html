@@ -90,6 +90,104 @@
 
         .top-bar-right a:hover { color: white; background: rgba(255,255,255,.1); }
 
+        .top-bar-menu-btn {
+            background: rgba(255,255,255,.1);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 900px) {
+            .top-bar-menu-btn { display: flex; }
+        }
+
+        /* ── TOPBAR (new header) ───────────────────── */
+        .topbar {
+            background: var(--ink);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .hamburger {
+            background: rgba(255,255,255,.1);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hamburger:hover { background: rgba(255,255,255,.2); }
+
+        .topbar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            color: rgba(255,255,255,.7);
+        }
+
+        .topbar-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .topbar-btn {
+            color: rgba(255,255,255,.7);
+            text-decoration: none;
+            font-size: .9rem;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all .2s;
+        }
+
+        .topbar-btn:hover { color: white; background: rgba(255,255,255,.1); }
+
+        @media (max-width: 900px) {
+            .topbar-title { display: none; }
+            .topbar-actions { display: none; }
+        }
+
+        /* ── MAIN WRAPPER ───────────────────────────── */
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin-left: 260px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 900px) {
+            .main-wrapper { margin-left: 0; }
+        }
+
         .btn-nav {
             background: rgba(200,150,46,.15);
             border: 1px solid rgba(200,150,46,.3);
@@ -100,6 +198,192 @@
         }
 
         .btn-nav:hover { background: rgba(200,150,46,.25) !important }
+
+        /* ── MENU TOGGLE BUTTON ─────────────────────── */
+        .menu-toggle {
+            display: none;
+            background: rgba(255,255,255,.1);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 900px) {
+            .menu-toggle { display: flex; }
+        }
+
+        /* ── SIDEBAR NAVIGATION ─────────────────────── */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: var(--ink);
+            display: flex;
+            flex-direction: column;
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform .3s ease;
+        }
+
+        .sidebar.open { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .sidebar-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .sidebar-logo img { height: 28px; width: auto; }
+        .sidebar-logo span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .sidebar-user {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .sidebar-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gold);
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .sidebar-user-name {
+            color: white;
+            font-size: .9rem;
+            font-weight: 600;
+        }
+
+        .sidebar-user-badge {
+            font-size: .65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255,255,255,.1);
+            color: rgba(255,255,255,.6);
+        }
+
+        .sidebar-user-badge.badge-admin {
+            background: rgba(200,150,46,.2);
+            color: var(--gold2);
+        }
+
+        .sidebar-user-badge.badge-creator {
+            background: rgba(34,197,94,.2);
+            color: #22c55e;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar { width: 280px; }
+            .sidebar:not(.open) { transform: translateX(-100%); }
+        }
+
+        @media (min-width: 901px) {
+            .sidebar { transform: translateX(0) !important; }
+            .sidebar-overlay { display: none !important; }
+            .hamburger { display: none; }
+        }
+
+        .sidebar-user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 0;
+        }
+
+        .sidebar-section { margin-bottom: 16px; }
+
+        .sidebar-section-label {
+            padding: 8px 16px 6px;
+            font-size: .65rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            color: rgba(255,255,255,.7);
+            text-decoration: none;
+            font-size: .9rem;
+            transition: all .2s;
+        }
+
+        .sidebar-link:hover { background: rgba(255,255,255,.05); color: white; }
+        .sidebar-link.active { background: rgba(200,150,46,.15); color: var(--gold2); border-right: 3px solid var(--gold); }
+
+        .sidebar-link i { width: 20px; text-align: center; }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,.08);
+        }
+
+        .sidebar-logout {
+            width: 100%;
+            padding: 10px;
+            background: rgba(239,68,68,.1);
+            border: 1px solid rgba(239,68,68,.3);
+            border-radius: 8px;
+            color: #ef4444;
+            font-size: .85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all .2s;
+        }
+
+        .sidebar-logout:hover { background: rgba(239,68,68,.2); }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.5);
+            z-index: 150;
+        }
+
+        .sidebar-overlay.show { display: block; }
+
+        @media (max-width: 900px) {
+            .sidebar { width: 280px; }
+        }
 
         /* ── HERO BANNER ───────────────────────────────── */
         .hero-banner {
