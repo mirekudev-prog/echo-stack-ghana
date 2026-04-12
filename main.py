@@ -1564,10 +1564,14 @@ async def get_reels(
     Uses subqueries for comment counts and bulk loading for user data.
     """
     try:
-        # Base query for reels
+        # Base query for reels (including videos)
+        from sqlalchemy import or_
         q = db.query(models.Post).filter(
             models.Post.status == "published",
-            models.Post.content_type == "reel"
+            or_(
+                models.Post.content_type == "reel",
+                models.Post.content_type == "video"
+            )
         ).order_by(models.Post.created_at.desc())
         
         total = q.count()

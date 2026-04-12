@@ -179,14 +179,27 @@
             const authorInitial = currentPost.author_username?.charAt(0).toUpperCase() || '?';
             
             let mediaHtml = '';
-            if (currentPost.media_url) {
-                if (currentPost.content_type === 'video' || currentPost.content_type === 'reel') {
-                    mediaHtml = `<div class="article-media"><video controls><source src="${currentPost.media_url}" type="video/mp4">Your browser does not support video.</video></div>`;
-                } else if (currentPost.content_type === 'audio') {
-                    mediaHtml = `<div class="article-media" style="padding: 20px;"><audio controls style="width: 100%;"><source src="${currentPost.media_url}" type="audio/mpeg">Your browser does not support audio.</audio></div>`;
-                } else {
-                    mediaHtml = `<div class="article-media"><img src="${currentPost.media_url}" alt="${currentPost.title}"></div>`;
-                }
+            const vUrl = currentPost.video_url || (currentPost.content_type === 'video' || currentPost.content_type === 'reel' ? currentPost.media_url : '');
+            const aUrl = currentPost.audio_url || (currentPost.content_type === 'audio' ? currentPost.media_url : '');
+
+            if (currentPost.content_type === 'audio' && aUrl) {
+                mediaHtml = `
+                    <div class="article-media" style="padding: 30px; background: var(--ink); color: white; border-radius: 20px;">
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; color: var(--ink);">
+                                <i class="fas fa-headphones"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; font-family: 'Playfair Display', serif;">Audio Story</h4>
+                                <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;">Oral heritage recording</p>
+                            </div>
+                        </div>
+                        <audio controls style="width: 100%;"><source src="${aUrl}" type="audio/mpeg"></audio>
+                    </div>`;
+            } else if ((currentPost.content_type === 'video' || currentPost.content_type === 'reel') && vUrl) {
+                mediaHtml = `<div class="article-media"><video controls style="width: 100%; border-radius: var(--radius-lg);" preload="metadata"><source src="${vUrl}" type="video/mp4"></video></div>`;
+            } else if (currentPost.media_url || currentPost.cover_image) {
+                mediaHtml = `<div class="article-media"><img src="${currentPost.media_url || currentPost.cover_image}" alt="${currentPost.title}"></div>`;
             }
 
             container.innerHTML = `

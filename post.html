@@ -450,23 +450,38 @@ async function loadPost() {
 function renderPost() {
     var p = currentPost;
     var authorInitial = (p.author_username || 'A').charAt(0).toUpperCase();
-    var coverHtml = p.cover_image ? '<div class="post-cover"><img src="' + escapeHtml(p.cover_image) + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>' : '';
-    var tagsHtml = '';
-    if (p.tags) {
-        var tags = p.tags.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
-        if (tags.length) {
-            tagsHtml = '<div class="post-tags">' + tags.map(function(t) { return '<span class="post-tag">#' + escapeHtml(t) + '</span>'; }).join('') + '</div>';
-        }
-    }
-    var regionHtml = p.region ? '<span style="color:rgba(255,255,255,0.5);font-size:0.8rem"><i class="fas fa-map-marker-alt"></i> ' + escapeHtml(p.region) + '</span>' : '';
-    var lockedHtml = '';
-    if (p.is_locked) {
-        lockedHtml = '<div class="post-locked-banner"><i class="fas fa-crown"></i><h3>Premium Content</h3><p>This post is available to premium subscribers only.</p><a href="/premium" class="btn btn-primary btn-sm"><i class="fas fa-crown"></i> Upgrade to Premium</a></div>';
-    }
-
     var contentHtml = p.content || '';
     if (p.is_locked && (!currentUser || !currentUser.is_premium)) {
-        contentHtml = '<p style="text-align:center;color:var(--main-muted);padding:40px 0"><i class="fas fa-lock" style="font-size:2rem;color:var(--gold);margin-bottom:16px;display:block"></i>This content is locked. Upgrade to premium to read.</p>';
+        contentHtml = '<div class="post-locked-banner"><i class="fas fa-lock" style="font-size:2rem;color:var(--gold);margin-bottom:16px;display:block"></i><h3>Content Locked</h3><p>This heritage moment is reserved for Premium members. Upgrade to get full access.</p><a href="/premium" class="btn btn-primary btn-sm"><i class="fas fa-crown"></i> Upgrade Now</a></div>';
+    }
+
+    var mediaHtml = '';
+    const vUrl = p.video_url || (p.content_type === 'video' || p.content_type === 'reel' ? p.media_url : '');
+    const aUrl = p.audio_url || (p.content_type === 'audio' ? p.media_url : '');
+
+    if (p.content_type === 'audio' && aUrl) {
+        mediaHtml = `
+            <div class="audio-card" style="margin: 30px auto 0; max-width: 800px; padding: 0 24px;">
+                <div style="background: linear-gradient(135deg, var(--ink), var(--ink2)); border-radius: 20px; padding: 30px; color: white;">
+                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; color: var(--ink); font-size: 1.5rem;">
+                            <i class="fas fa-headphones"></i>
+                        </div>
+                        <div>
+                            <h4 style="font-family:'Playfair Display', serif; font-size: 1.2rem; margin: 0;">Audio Story</h4>
+                            <p style="font-size: 0.9rem; opacity: 0.7; margin: 0;">Listen to the oral tradition</p>
+                        </div>
+                    </div>
+                    <audio controls style="width: 100%;"><source src="${escapeHtml(aUrl)}" type="audio/mpeg"></audio>
+                </div>
+            </div>`;
+    } else if ((p.content_type === 'video' || p.content_type === 'reel') && vUrl) {
+        mediaHtml = `
+            <div class="post-cover" style="background: #000; border-radius: var(--radius-xl); overflow: hidden;">
+                <video src="${escapeHtml(vUrl)}" controls style="width: 100%; max-height: 70vh; display: block;" preload="metadata"></video>
+            </div>`;
+    } else if (p.cover_image || (p.content_type === 'photo' && p.media_url)) {
+        mediaHtml = '<div class="post-cover"><img src="' + escapeHtml(p.cover_image || p.media_url) + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>';
     }
 
     document.getElementById('postContent').innerHTML =
@@ -484,7 +499,7 @@ function renderPost() {
                 '</div>' +
             '</div>' +
         '</div>' +
-        coverHtml +
+        mediaHtml +
         '<div class="post-body-wrap">' +
             '<div class="post-body">' + contentHtml + '</div>' +
             tagsHtml +
