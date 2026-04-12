@@ -139,6 +139,14 @@ CREATE TABLE IF NOT EXISTS comments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS faqs (
+    id SERIAL PRIMARY KEY,
+    question VARCHAR(500) NOT NULL,
+    answer TEXT NOT NULL,
+    category VARCHAR(100) DEFAULT 'General',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS follows (
     id SERIAL PRIMARY KEY,
     follower_id UUID REFERENCES users(id),
@@ -1622,12 +1630,7 @@ async def get_reels(
                 "is_following": p.author_id in following_set if p.author_id else False
             })
 
-        return {
-            "total": total,
-            "offset": offset,
-            "limit": limit,
-            "reels": reel_list
-        }
+        return reel_list
     except Exception as e:
         print(f"GET /api/reels error: {e}")
         return {"total": 0, "reels": []}
@@ -2562,7 +2565,6 @@ async def post_creator_chat(
     if not creator:
         raise HTTPException(404, "Creator not found")
 
-    # Determine username
     username = "Guest"
     user_id = None
     if sid:
@@ -2576,18 +2578,10 @@ async def post_creator_chat(
     if _is_admin(request) and not user_id:
         username = "Admin"
 
-    # Permission: creator themself, admin, or follower can post
     if sid:
-        if sid == creator_id or _is_admin(request) or is_following(sid, creator_id, db):
-            pass  # allowed
-        else:
+        if sid != creator_id and not _is_admin(request) and not is_following(sid, creator_id, db):
             raise HTTPException(403, "You must follow this creator to chat")
-    elif _is_admin(request):
-        pass
-    else:
-        raise HTTPException(403, "Not authorized")
 
-    # Create message
     msg = models.CreatorChatMessage(
         creator_id=creator_id,
         user_id=user_id,
@@ -2599,62 +2593,6 @@ async def post_creator_chat(
     db.refresh(msg)
     return {"success": True, "id": msg.id}
 
-# ─── STORIES ─────────────────────────────────────────────────────────────────
-@app.get("/api/stories")
-def get_stories(db: Session = Depends(get_db)):
-    try:
-        s = db.query(models.StorySubmission).filter(
-            models.StorySubmission.status == "approved"
-        ).order_by(models.StorySubmission.created_at.desc()).limit(20).all()
-        return [{"id": x.id, "title": x.title, "content": getattr(x, "content", ""),
-                 "author_name": getattr(x, "author_name", ""),
-                 "region": getattr(x, "region", ""),
-                 "created_at": str(x.created_at)} for x in s]
-    except Exception:
-        return []
-
-@app.get("/api/stories/active")
-def get_active_stories(db: Session = Depends(get_db)):
-    """Get active stories with media for the story viewer."""
-    try:
-        s = db.query(models.StorySubmission).filter(
-            models.StorySubmission.status == "approved"
-        ).order_by(models.StorySubmission.created_at.desc()).limit(20).all()
-        
-        stories = []
-        for x in s:
-            # Parse content to extract media_url and media_type
-            content = getattr(x, "content", "") or ""
-            media_url = ""
-            media_type = "image"
-            
-            # Try to parse JSON content or extract from text
-            try:
-                data = json.loads(content) if content else {}
-                media_url = data.get("media_url", "")
-                media_type = data.get("media_type", "image")
-            except:
-                # Fallback: check if content is a URL
-                if content.startswith('http'):
-                    media_url = content
-                    if content.endswith('.mp4'):
-                        media_type = "video"
-            
-            stories.append({
-                "id": x.id,
-                "title": x.title,
-                "content": content,
-                "media_url": media_url,
-                "media_type": media_type,
-                "author_name": getattr(x, "author_name", ""),
-                "region": getattr(x, "region", ""),
-                "created_at": str(x.created_at)
-            })
-        
-        return {"stories": stories}
-    except Exception as e:
-        print(f"Error getting active stories: {e}")
-        return {"stories": []}
 
 @app.post("/api/stories")
 async def submit_story(
@@ -2668,191 +2606,36 @@ async def submit_story(
     if sid:
         try:
             u = db.query(models.User).filter(models.User.id == sid).first()
-            if u: author = u.username
+            if u:
+                author = u.username
         except Exception:
             pass
             
     try:
-        # Handle media upload if provided
         media_url = ""
         if media:
             upload_res = await _do_upload(media, "stories", db)
             if upload_res.get("success"):
                 media_url = upload_res.get("url")
         
-        # Inject media_url into the content JSON
         try:
             data = json.loads(content)
             data["media_url"] = media_url or data.get("media_url", "")
             final_content = json.dumps(data)
-        except:
+        except Exception:
             final_content = content
 
-        db.add(models.StorySubmission(title=title, content=final_content,
-                                      region=region, author_name=author, status="pending"))
+        db.add(models.StorySubmission(
+            title=title, content=final_content,
+            region=region, author_name=author, status="pending"
+        ))
         db.commit()
         return {"success": True}
     except Exception as e:
-        db.rollback(); raise HTTPException(500, str(e))
+        db.rollback()
+        raise HTTPException(500, str(e))
 
-# ─── SEARCH FUNCTION FOR ECHOBOT ────────────────────────────────────────────
-def search_database(query: str, db: Session) -> list:
-    """Search posts, regions, and FAQ for keywords and return structured results with links."""
-    # simple keyword extraction: split and keep words longer than 3 characters
-    keywords = [word.lower() for word in query.split() if len(word) > 3]
-    if not keywords:
-        return []
-    
-    from sqlalchemy import or_
-    results = []
-    
-    # Search posts (title, content, excerpt)
-    post_conditions = []
-    for kw in keywords:
-        post_conditions.append(models.Post.title.ilike(f"%{kw}%"))
-        post_conditions.append(models.Post.content.ilike(f"%{kw}%"))
-        post_conditions.append(models.Post.excerpt.ilike(f"%{kw}%"))
-    
-    if post_conditions:
-        posts = db.query(models.Post).filter(or_(*post_conditions)).limit(5).all()
-        for p in posts:
-            snippet = (p.content or "")[:150] + "..." if len(p.content or "") > 150 else (p.content or "")
-            results.append({
-                "type": "post",
-                "title": p.title,
-                "snippet": snippet,
-                "url": f"/post/{p.id}",
-                "content_type": p.content_type or "article"
-            })
-    
-    # Search regions (name, description, overview)
-    region_conditions = []
-    for kw in keywords:
-        region_conditions.append(models.Region.name.ilike(f"%{kw}%"))
-        region_conditions.append(models.Region.description.ilike(f"%{kw}%"))
-        region_conditions.append(models.Region.overview.ilike(f"%{kw}%"))
-    
-    if region_conditions:
-        regions = db.query(models.Region).filter(or_(*region_conditions)).limit(5).all()
-        for r in regions:
-            snippet = (r.description or r.overview or "")[:150] + "..." if len(r.description or r.overview or "") > 150 else (r.description or r.overview or "")
-            results.append({
-                "type": "region",
-                "title": r.name,
-                "snippet": snippet,
-                "url": f"/app#region-{r.id}",
-                "content_type": "region"
-            })
-    
-    return results
 
-# ─── AI ECHOBOT (Gemini 2.5 Flash) with Database Context ────────────────── =
-@app.post("/api/ai/chat")
-async def ai_chat(
-    request: Request, 
-    message: str = Form(...),
-    region_context: str = Form(""), 
-    db: Session = Depends(get_db)
-):
-    # 1. AUTHENTICATION & PREMIUM CHECK
-    sid = request.cookies.get("user_session")
-    is_authorized = False
-    user_info = "No user session"
-    
-    if sid:
-        user = db.query(models.User).filter(models.User.id == sid).first()
-        if user:
-            user_info = f"User: {user.username}, role: {user.role}, is_premium: {user.is_premium}"
-            print(f"🔍 EchoBot user check: {user_info}")
-            
-            # Grant access to Admins, Creators, and Premium users (is_premium = 1)
-            if user.role in ["admin", "superuser", "creator"] or user.is_premium == 1:
-                is_authorized = True
-        else:
-            user_info = "Stale session – user not found"
-            print(f"⚠️ Stale session cookie for sid: {sid}")
-    else:
-        print("🔍 No user session cookie")
-    
-    if not is_authorized:
-        return {
-            "reply": "EchoBot is a Premium feature. Upgrade your plan to chat with our Heritage AI! ⭐", 
-            "locked": True
-        }
-
-    # 2. DATABASE CONTEXT INJECTION
-    db_context = ""
-    try:
-        # search_database is defined earlier in main.py
-        db_context = search_database(message, db)
-    except Exception as e:
-        print(f"⚠️ Context search failed: {e}")
-
-    # 3. API CONFIGURATION – using Gemini 2.5 Flash
-    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-    if not GOOGLE_API_KEY:
-        return {"reply": "API Key missing in environment.", "locked": False}
-
-    # Use v1beta endpoint with model "gemini-2.5-flash"
-    model_name = "gemini-2.5-flash"  # or "gemini-2.5-flash-lite" if you prefer
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GOOGLE_API_KEY}"
-
-    # 4. SYSTEM PROMPT
-    system_instruction = (
-        "You are EchoBot, the official AI guide for EchoStack Ghana. "
-        "Your goal is to promote Ghanaian culture, history, and regions and everything about Ghana. "
-        "INSTRUCTIONS:\n"
-        "1. PRIORITY: FIRST check if DATABASE CONTEXT contains the answer. If YES, use ONLY that information and provide the link(s).\n"
-        "2. If database context is EMPTY or does NOT contain the answer, THEN use your general knowledge about Ghana.\n"
-        "3. When providing database answers, ALWAYS include the clickable link in format: [Title](url)\n"
-        "4. STYLE: Use a touch of Ghanaian hospitality, be friendly and jovial but always be professional. Keep answers concise.\n"
-        "5. If you found database results, start with 'I found this in our archives:' and list the relevant items with links."
-    )
-
-    full_prompt = f"{system_instruction}\n\nDATABASE CONTEXT:\n{db_context}\n\nUSER QUESTION: {message}"
-
-    payload = {
-        "contents": [{"parts": [{"text": full_prompt}]}],
-        "generationConfig": {
-            "temperature": 0.7,
-            "topP": 0.8,
-            "maxOutputTokens": 500,
-        }
-    }
-
-    # 5. EXECUTION & LOGGING
-    try:
-        async with httpx.AsyncClient(timeout=30) as client:
-            response = await client.post(url, json=payload)
-            
-            if response.status_code != 200:
-                print(f"❌ Gemini Error {response.status_code}: {response.text}")
-                return {"reply": "I'm having trouble connecting to my heritage database. Try again soon!", "locked": False}
-
-            data = response.json()
-            
-            # Safe extraction
-            try:
-                reply = data["candidates"][0]["content"]["parts"][0]["text"]
-            except (KeyError, IndexError):
-                print(f"⚠️ Unexpected API structure: {data}")
-                reply = "I'm here, but I couldn't process that question. Ask me something else about Ghana!"
-
-            # Return database results separately for UI to display links nicely
-            return {
-                "reply": reply, 
-                "locked": False,
-                "database_results": db_context if db_context else [],
-                "used_database": bool(db_context)
-            }
-
-    except Exception as e:
-        print(f"🚨 Critical EchoBot Failure: {e}")
-        import traceback
-        traceback.print_exc()
-        return {"reply": "EchoBot is currently resting. Please try again in a few minutes.", "locked": False}
-
-# ─── ECHOBOT WITH SCREEN SHARE & DATABASE-FIRST LOGIC ───────────────────────
 @app.post("/api/chatbot")
 async def chatbot_endpoint(
     request: Request,
@@ -2860,149 +2643,50 @@ async def chatbot_endpoint(
     db: Session = Depends(get_db)
 ):
     """
-    EchoBot endpoint with:
-    - Database-first answering logic
-    - Screen share image support
-    - Returns structured sources with URLs
+    Premium EchoBot AI: Context-aware synthesis.
     """
-    message = data.get("message", "")
-    screen_image = data.get("screen_image")  # Base64 image from screen share
+    sid = request.cookies.get("user_session")
+    user = db.query(models.User).filter(models.User.id == sid).first() if sid else None
+    is_premium = user and (user.role in ["admin", "creator"] or user.is_premium == 1)
     
-    # 1. DATABASE SEARCH - Always search first
-    sources = []
-    db_answer = ""
-    
-    try:
-        # Search posts
-        from sqlalchemy import or_
-        posts = db.query(models.Post).filter(
-            models.Post.status == "published",
-            or_(
-                models.Post.title.ilike(f"%{message}%"),
-                models.Post.content.ilike(f"%{message}%"),
-                models.Post.tags.ilike(f"%{message}%")
-            )
-        ).limit(3).all()
-        
-        for post in posts:
-            sources.append({
-                "title": f"📄 {post.title}",
-                "url": f"/read/{post.id}",
-                "type": "post",
-                "content_type": post.content_type
-            })
-            if not db_answer:
-                db_answer = f"According to our article '{post.title}': {post.content[:200]}..."
-        
-        # Search regions
-        regions = db.query(models.Region).filter(
-            or_(
-                models.Region.name.ilike(f"%{message}%"),
-                models.Region.description.ilike(f"%{message}%"),
-                models.Region.capital.ilike(f"%{message}%"),
-                models.Region.tags.ilike(f"%{message}%")
-            )
-        ).limit(2).all()
-        
-        for region in regions:
-            sources.append({
-                "title": f"🌍 Region: {region.name}",
-                "url": f"/region/{region.id}",
-                "type": "region"
-            })
-            if not db_answer:
-                db_answer = f"Found information about {region.name}: {region.description[:200] if region.description else region.overview[:200] if region.overview else '...'}"
-        
-        # Search users/creators
-        users = db.query(models.User).filter(
-            or_(
-                models.User.username.ilike(f"%{message}%"),
-                models.User.full_name.ilike(f"%{message}%")
-            )
-        ).limit(2).all()
-        
-        for user in users:
-            sources.append({
-                "title": f"👤 {user.full_name or user.username}",
-                "url": f"/user/{user.username}",
-                "type": "user"
-            })
-    
-    except Exception as e:
-        print(f"⚠️ Database search error: {e}")
-    
-    # 2. IF FOUND IN DATABASE - Early Return
-    if db_answer and sources:
-        return {
-            "success": True,
-            "response": f"I found this in our archives:\n\n{db_answer}",
-            "sources": sources,
-            "used_database": True
-        }
-    
-    # 3. FALLBACK TO GEMINI (General Knowledge)
-    screen_context = ""
-    if screen_image:
-        screen_context = "User has shared their screen. The image shows their current view."
+    if not is_premium:
+        return {"success": False, "response": "EchoBot is Premium. Upgrade to chat!", "locked": True}
 
+    message = data.get("message", "")
+    if not message:
+        return {"success": True, "response": "Akwaaba! How can I help?"}
+
+    # Search Context
+    search_context = []
+    sources = []
+    try:
+        posts = db.query(models.Post).filter(models.Post.status == "published", or_(models.Post.title.ilike(f"%{message}%"), models.Post.content.ilike(f"%{message}%"))).limit(3).all()
+        for p in posts:
+            search_context.append(f"POST: {p.title}\n{p.content[:500]}")
+            sources.append({"title": f"📖 {p.title}", "url": f"/read/{p.id}", "type": "article"})
+        
+        faqs = db.query(models.FAQ).filter(or_(models.FAQ.question.ilike(f"%{message}%"), models.FAQ.answer.ilike(f"%{message}%"))).limit(2).all()
+        for f in faqs:
+            search_context.append(f"FAQ: {f.question}\n{f.answer}")
+            sources.append({"title": f"❓ FAQ: {f.question[:40]}", "url": "/explore", "type": "faq"})
+    except Exception as e:
+        print(f"Chatbot Error: {e}")
+
+    # Call Gemini
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     if GOOGLE_API_KEY:
         try:
-            model_name = "gemini-2.5-flash"
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GOOGLE_API_KEY}"
-            
-            system_prompt = (
-                "You are EchoBot, the friendly AI guide for EchoStack Ghana. "
-                "The user asked a question that wasn't found in our database. "
-                "Provide a helpful, concise answer about Ghana's culture, history, or general knowledge. "
-                "Use a touch of Ghanaian hospitality in your tone."
-            )
-            
-            if screen_context:
-                system_prompt += f"\n\n{screen_context}"
-            
-            payload = {
-                "contents": [{"parts": [{"text": f"{system_prompt}\n\nQuestion: {message}"}]}],
-                "generationConfig": {
-                    "temperature": 0.7,
-                    "topP": 0.8,
-                    "maxOutputTokens": 400,
-                }
-            }
-            
+            api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}"
+            system_prompt = "You are EchoBot, Ghana's premium AI guide. Answer based on context if available. Be precise and warm."
+            user_input = f"CONTEXT:\n{chr(10).join(search_context)}\n\nUSER: {message}"
+            payload = {"contents": [{"parts": [{"text": f"{system_prompt}\n\n{user_input}"}]}], "generationConfig": {"temperature": 0.4, "maxOutputTokens": 600}}
             async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.post(url, json=payload)
-                if response.status_code == 200:
-                    api_data = response.json()
-                    try:
-                        reply = api_data["candidates"][0]["content"]["parts"][0]["text"]
-                        return {
-                            "success": True,
-                            "response": reply,
-                            "sources": sources,
-                            "used_database": False,
-                            "note": "Answer from general knowledge"
-                        }
-                    except (KeyError, IndexError):
-                        pass
-        except Exception as e:
-            print(f"⚠️ Gemini fallback error: {e}")
-            
-    # 4. FINAL PERSONALITY FALLBACK (If DB not found and Gemini fails/missing)
-    final_reply = ""
-    if "hello" in message.lower() or "hi" in message.lower():
-        final_reply = "Akwaaba! I am EchoBot AI, your digital guardian of Ghanaian heritage. How can I assist you today? You can ask me about regional history, festivals, or even Kente weaving!"
-    elif message:
-        final_reply = f"I've searched our heritage archives for information on '{message}', but I couldn't find a direct match. However, I'm constantly learning! You might try searching for major regions like Ashanti or Greater Accra."
-    else:
-        final_reply = "I'm here to help you explore Ghana! What would you like to know?"
+                res = await client.post(api_url, json=payload)
+                if res.status_code == 200:
+                    return {"success": True, "response": res.json()["candidates"][0]["content"]["parts"][0]["text"], "sources": sources}
+        except Exception: pass
 
-    return {
-        "success": True,
-        "response": final_reply,
-        "sources": sources,
-        "used_database": False
-    }
+    return {"success": True, "response": "Mema wo akye! I found some relevant info in our archives. Check the sources!", "sources": sources}
 
 # ─── PAYMENTS ────────────────────────────────────────────────────────────────
 @app.post("/api/payments/initialize")

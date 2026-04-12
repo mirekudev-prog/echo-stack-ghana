@@ -11,6 +11,17 @@ import uuid
 from database import Base
 
 
+# ─── FAQ ──────────────────────────────────────────────────────────────────────
+class FAQ(Base):
+    __tablename__ = "faqs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    question = Column(String(500), nullable=False)
+    answer = Column(Text, nullable=False)
+    category = Column(String(100), default="General")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 # ─── REGION ───────────────────────────────────────────────────────────────────
 class Region(Base):
     __tablename__ = "regions"

@@ -10,34 +10,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/base.css">
     <style>
-        .feed-container { max-width: 680px; margin: 0 auto; }
-        .create-prompt {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 20px;
-            background: var(--main-card);
-            border-bottom: 1px solid var(--main-border);
-            cursor: pointer;
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --premium-shadow: 0 10px 40px -10px rgba(13, 27, 42, 0.1);
         }
-        .create-prompt-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold), var(--gold2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--ink);
-            font-weight: 700;
-            flex-shrink: 0;
-        }
+
         .app {
             display: flex;
             min-height: 100vh;
             max-width: 100vw;
             overflow-x: hidden;
             background: var(--main-bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(200, 150, 46, 0.03) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 119, 182, 0.03) 0px, transparent 50%);
         }
         
         .main-wrapper {
@@ -47,44 +34,144 @@
             flex-direction: column;
             overflow-x: hidden;
         }
+
+        .topbar {
+            backdrop-filter: blur(12px);
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .feed-container { 
+            max-width: 720px; 
+            margin: 0 auto; 
+            padding-top: 24px;
+        }
+
+        .create-prompt {
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            margin: 0 20px 32px;
+            box-shadow: var(--premium-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .create-prompt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 50px -12px rgba(13, 27, 42, 0.15);
+            border-color: var(--gold2);
+        }
+
+        .create-prompt-top {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .create-prompt-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink);
+            font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(200, 150, 46, 0.2);
+        }
+
         .create-prompt-input {
             flex: 1;
-            padding: 12px 16px;
+            padding: 14px 20px;
             background: var(--main-bg);
             border: 1px solid var(--main-border);
             border-radius: var(--radius-full);
             color: var(--main-muted);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            transition: all 0.2s;
         }
-        .create-prompt-icons { display: flex; gap: 12px; }
-        .create-prompt-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+
+        .create-prompt-actions {
+            display: flex;
+            padding-top: 16px;
+            border-top: 1px solid var(--main-border);
+            justify-content: space-around;
+        }
+
+        .create-action {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
             color: var(--main-muted);
-            transition: all 0.15s;
-        }
-        .create-prompt-icon:hover { background: var(--main-hover); }
-        .post-follow-btn {
-            padding: 4px 12px;
-            border-radius: var(--radius-full);
-            background: var(--blue);
-            color: white;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             font-weight: 600;
+            padding: 8px 16px;
+            border-radius: var(--radius-lg);
+            transition: all 0.2s;
         }
+
+        .create-action:hover {
+            background: var(--main-hover);
+            color: var(--ink);
+        }
+
+        .create-action i { font-size: 1.1rem; }
+
         .stories-bar {
             display: flex;
-            gap: 16px;
+            gap: 20px;
             padding: 8px 4px;
-            margin-bottom: 24px;
+            margin-bottom: 32px;
             overflow-x: auto;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
         }
+
+        .story-item {
+            width: 72px;
+            gap: 10px;
+        }
+
+        .story-ring {
+            width: 72px;
+            height: 72px;
+            padding: 4px;
+        }
+
+        .filter-tabs {
+            margin: 0 20px 24px;
+            background: var(--main-card);
+            padding: 8px;
+            border-radius: var(--radius-full);
+            box-shadow: var(--premium-shadow);
+            border: 1px solid var(--main-border);
+        }
+
+        .filter-tab {
+            background: transparent;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            font-weight: 700;
+            color: var(--main-muted);
+        }
+
+        .filter-tab.active {
+            background: var(--ink);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
         .right-panel {
             width: 320px;
             flex-shrink: 0;
@@ -93,52 +180,62 @@
             top: 84px;
             height: fit-content;
         }
-        .right-panel-section { margin-bottom: 24px; }
-        .right-panel-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--main-muted);
-            margin-bottom: 12px;
+
+        .premium-card {
+            background: linear-gradient(135deg, var(--ink), var(--ink2));
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: 0 12px 30px rgba(13, 27, 42, 0.2);
         }
-        .region-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .premium-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(200, 150, 46, 0.2) 0%, transparent 70%);
+            z-index: 0;
+        }
+
+        .premium-card-content { position: relative; z-index: 1; }
+        .premium-card-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+        .premium-card-text { font-size: 0.85rem; opacity: 0.8; margin-bottom: 16px; }
+
         .region-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all 0.15s;
+            background: var(--main-card);
+            border: 1px solid var(--main-border);
+            border-radius: var(--radius-lg);
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .region-item:hover { background: var(--main-hover); }
-        .region-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, var(--gold), var(--gold2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--ink);
-            font-size: 0.9rem;
-            flex-shrink: 0;
+
+        .region-item:hover {
+            border-color: var(--gold);
+            transform: translateX(4px);
         }
-        .region-name { font-weight: 500; font-size: 0.9rem; color: var(--main-text); }
-        
+
+        .story-viewer {
+            backdrop-filter: blur(20px);
+            background: rgba(0,0,0,0.9);
+        }
+
         @media (max-width: 1024px) {
             .right-panel { display: none; }
         }
-        .story-viewer {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-            z-index: 2000; align-items: center; justify-content: center;
+
+        /* Post Card specific refinements */
+        .post-card {
+            margin: 0 20px 24px;
+            border: 1px solid var(--main-border);
+            box-shadow: var(--premium-shadow);
         }
-        .story-viewer.show { display: flex; }
-        .story-viewer-content { max-width: 100%; max-height: 100%; display: flex; flex-direction: column; align-items: center; }
-        .story-viewer-media { max-width: 100vw; max-height: 80vh; object-fit: contain; }
-        .story-viewer-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 2rem; cursor: pointer; }
-        .story-viewer-caption { color: white; margin-top: 20px; padding: 0 20px; text-align: center; font-family: 'Playfair Display', serif; }
     </style>
 </head>
 <body>
@@ -271,41 +368,54 @@
                     </div>
 
                     <!-- CREATE PROMPT -->
-                    <div class="create-prompt" onclick="location.href='/creator'" style="margin:20px; border:1px solid var(--main-border); border-radius:var(--radius-lg); background:var(--main-card); box-shadow:0 4px 12px rgba(0,0,0,0.03); transition:all 0.2s;">
-                        <div class="create-prompt-avatar" id="createAvatar">U</div>
-                        <div class="create-prompt-input" style="background:var(--main-bg); border-color:transparent; color:var(--main-muted);">Share something with the community...</div>
-                        <div class="create-prompt-icons">
-                            <div class="create-prompt-icon"><i class="fas fa-image" style="color:#22c55e"></i></div>
-                            <div class="create-prompt-icon"><i class="fas fa-video" style="color:#9333ea"></i></div>
-                            <div class="create-prompt-icon"><i class="fas fa-microphone" style="color:#059669"></i></div>
+                    <div class="create-prompt" onclick="location.href='/creator'">
+                        <div class="create-prompt-top">
+                            <div class="create-prompt-avatar" id="createAvatar">U</div>
+                            <div class="create-prompt-input">What's happening in your region?</div>
+                        </div>
+                        <div class="create-prompt-actions">
+                            <div class="create-action"><i class="fas fa-image" style="color:#22c55e"></i> <span>Photo</span></div>
+                            <div class="create-action"><i class="fas fa-video" style="color:#9333ea"></i> <span>Video</span></div>
+                            <div class="create-action"><i class="fas fa-microphone" style="color:#059669"></i> <span>Audio</span></div>
+                            <div class="create-action"><i class="fas fa-newspaper" style="color:#2563eb"></i> <span>Article</span></div>
                         </div>
                     </div>
 
                     <!-- FILTER TABS -->
                     <div class="filter-tabs">
-                        <button class="filter-tab active" onclick="setFilter(this, '')">All</button>
+                        <button class="filter-tab active" onclick="setFilter(this, '')">All Feed</button>
                         <button class="filter-tab" onclick="setFilter(this, 'article')">Articles</button>
                         <button class="filter-tab" onclick="setFilter(this, 'video')">Videos</button>
                         <button class="filter-tab" onclick="setFilter(this, 'reel')">Reels</button>
                         <button class="filter-tab" onclick="setFilter(this, 'audio')">Audio</button>
-                        <button class="filter-tab" onclick="setFilter(this, 'photo')">Photos</button>
                     </div>
 
                     <!-- POSTS -->
-                    <div id="postsContainer" style="padding:0 20px 40px">
+                    <div id="postsContainer" style="padding-bottom: 60px;">
                         <div class="loading"><div class="spinner"></div></div>
                     </div>
                 </div>
 
                 <!-- RIGHT PANEL (Desktop) -->
                 <div class="right-panel">
+                    <div class="premium-card">
+                        <div class="premium-card-content">
+                            <div class="premium-card-title">EchoStack Premium</div>
+                            <div class="premium-card-text">Support local creators and unlock exclusive cultural archives.</div>
+                            <button class="btn btn-primary btn-sm" onclick="location.href='/premium'">Upgrade Now</button>
+                        </div>
+                    </div>
+
                     <div class="right-panel-section">
-                        <div class="right-panel-title">Explore Regions</div>
+                        <div class="section-header">
+                            <h3 class="section-title">Explore Regions</h3>
+                        </div>
                         <div class="region-list" id="regionList"></div>
                     </div>
-                    <div class="footer" style="margin-top:40px;padding:20px 0;border:none">
+
+                    <div class="footer">
                         <div class="footer-brand">EchoStack Ghana</div>
-                        <p class="footer-dev">Built by Mireku Development</p>
+                        <p class="footer-dev">© 2026 Mireku Development</p>
                     </div>
                 </div>
             </div>
