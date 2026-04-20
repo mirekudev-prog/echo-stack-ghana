@@ -3463,7 +3463,7 @@ async def submit_story(
 @app.post("/api/chatbot")
 async def chatbot_endpoint(request: Request, data: dict, db: Session = Depends(get_db)):
     """
-    Premium EchoBot AI: Context-aware synthesis.
+    Premium EchoBot AI: Context-aware synthesis with relevant post linking.
     """
     sid = request.cookies.get("user_session")
     user = db.query(models.User).filter(models.User.id == sid).first() if sid else None
@@ -3472,17 +3472,45 @@ async def chatbot_endpoint(request: Request, data: dict, db: Session = Depends(g
     if not is_premium:
         return {
             "success": False,
-            "response": "EchoBot is Premium. Upgrade to chat!",
+            "response": "EchoBot is a Premium feature. Upgrade your account to chat with me!",
             "locked": True,
         }
 
-    message = data.get("message", "")
+    message = data.get("message", "").strip()
     if not message:
-        return {"success": True, "response": "Akwaaba! How can I help?"}
+        return {"success": True, "response": "Akwaaba! I'm EchoBot, your guide to Ghana's rich cultural heritage. Ask me about traditions, languages, history, or any of Ghana's 16 regions!"}
 
-    # Search Context
+    # ── Greeting detection – respond instantly without database search ──────────
+    greetings = [
+        'hi', 'hello', 'hey', 'akwaaba', 'meda ase', 'thank you', 'thanks',
+        'good morning', 'good afternoon', 'good evening', 'how are you',
+        'who are you', 'what can you do', 'help'
+    ]
+    msg_lower = message.lower()
+    is_greeting = any(msg_lower == g or msg_lower.startswith(g + ' ') for g in greetings)
+
+     if is_greeting:
+         # Customize greeting based on time of day
+         hour = datetime.now().hour
+        if 5 <= hour < 12:
+            greeting_time = "Good morning!"
+        elif 12 <= hour < 17:
+            greeting_time = "Good afternoon!"
+        else:
+            greeting_time = "Good evening!"
+
+        return {
+            "success": True,
+            "response": f"{greeting_time} Akwaaba! I'm EchoBot, your AI guide to Ghana's heritage. I can answer questions about traditions, festivals, history, languages, and connect you with relevant posts in our archive. What would you like to explore?",
+            "sources": []
+        }
+
+    # ── Search Context ──────────────────────────────────────────────────────────
     search_context = []
     sources = []
+    posts_found = 0
+    faqs_found = 0
+
     try:
         posts = (
             db.query(models.Post)
@@ -3499,8 +3527,9 @@ async def chatbot_endpoint(request: Request, data: dict, db: Session = Depends(g
         for p in posts:
             search_context.append(f"POST: {p.title}\n{p.content[:500]}")
             sources.append(
-                {"title": f"📖 {p.title}", "url": f"/read/{p.id}", "type": "article"}
+                {"title": f"📖 {p.title}", "url": f"/post/{p.id}", "type": "post"}
             )
+            posts_found += 1
 
         faqs = (
             db.query(models.FAQ)
@@ -3516,44 +3545,72 @@ async def chatbot_endpoint(request: Request, data: dict, db: Session = Depends(g
         for f in faqs:
             search_context.append(f"FAQ: {f.question}\n{f.answer}")
             sources.append(
-                {
-                    "title": f"❓ FAQ: {f.question[:40]}",
-                    "url": "/explore",
-                    "type": "faq",
-                }
+                {"title": f"❓ {f.question[:40]}", "url": f"/post/{f.post_id}" if f.post_id else "/explore", "type": "faq"}
             )
+            faqs_found += 1
     except Exception as e:
-        print(f"Chatbot Error: {e}")
+        print(f"Chatbot search error: {e}")
 
-    # Call Gemini
+    # ── Build System Prompt ─────────────────────────────────────────────────────
+    has_context = bool(search_context)
+    if has_context:
+        context_block = "\n\n".join(search_context)
+        system_prompt = (
+            "You are EchoBot, Ghana's premium cultural AI assistant. "
+            "Use the provided archive excerpts to answer the user's question. "
+            "Be warm, conversational, and informative. "
+            "Always cite relevant sources naturally in your response (e.g., 'According to our archives...'). "
+            "Keep responses concise but thorough (3-5 sentences typically). "
+            "If the context doesn't fully answer, supplement with general knowledge about Ghanaian culture. "
+            "Never mention 'I found X results' – just weave the information naturally."
+        )
+        user_input = f"USER QUERY: {message}\n\nARCHIVE EXCERPTS:\n{context_block}"
+    else:
+        system_prompt = (
+            "You are EchoBot, a friendly AI guide to Ghanaian heritage. "
+            "No specific posts in our archive match this query. "
+            "Respond conversationally with general knowledge about Ghanaian culture, traditions, history, or regions. "
+            "You may suggest exploring a broad topic or ask a clarifying question. "
+            "Do NOT claim to have checked archives or found information that wasn't provided."
+        )
+        user_input = f"USER QUERY: {message}"
+
+    # ── Try External AI (Gemini) ─────────────────────────────────────────────────
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     if GOOGLE_API_KEY:
         try:
             api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}"
-            system_prompt = "You are EchoBot, Ghana's premium AI guide. Answer based on context if available. Be precise and warm."
-            user_input = f"CONTEXT:\n{chr(10).join(search_context)}\n\nUSER: {message}"
             payload = {
                 "contents": [{"parts": [{"text": f"{system_prompt}\n\n{user_input}"}]}],
-                "generationConfig": {"temperature": 0.4, "maxOutputTokens": 600},
+                "generationConfig": {"temperature": 0.5, "maxOutputTokens": 600},
             }
             async with httpx.AsyncClient(timeout=30) as client:
                 res = await client.post(api_url, json=payload)
                 if res.status_code == 200:
-                    return {
-                        "success": True,
-                        "response": res.json()["candidates"][0]["content"]["parts"][0][
-                            "text"
-                        ],
-                        "sources": sources,
-                    }
-        except Exception:
-            pass
+                    ai_text = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+                    return {"success": True, "response": ai_text, "sources": sources}
+        except Exception as e:
+            print(f"Gemini error: {e}")
 
-    return {
-        "success": True,
-        "response": "Mema wo akye! I found some relevant info in our archives. Check the sources!",
-        "sources": sources,
-    }
+    # ── Fallback Local Response ─────────────────────────────────────────────────
+    if has_context:
+        # We have sources but AI failed; summarize what was found
+        response = (
+            f"I found {posts_found} post(s) and {faqs_found} FAQ(s) that might help:\n\n"
+            f"Here's what our archives contain:\n"
+        )
+        for i, src in enumerate(sources, 1):
+            response += f"{i}. {src['title']}\n"
+        response += "\nClick on any source above to read more."
+    else:
+        # No relevant content in archives
+        response = (
+            "I couldn't find specific information about that in our archives yet. "
+            "Would you like to ask about another aspect of Ghanaian culture? "
+            "I'm great with questions about traditions, festivals, history, languages, or the 16 regions!"
+        )
+
+    return {"success": True, "response": response, "sources": sources}
 
 
 # ─── PAYMENTS ────────────────────────────────────────────────────────────────
