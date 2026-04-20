@@ -2255,15 +2255,15 @@ async def create_post(
 
 @app.get("/api/posts/{post_id}")
 async def get_post(post_id: int, request: Request, db: Session = Depends(get_db)):
-    try:
-        p = db.query(models.Post).filter(models.Post.id == post_id).first()
-        if not p:
-            raise HTTPException(404, "Post not found")
+     try:
+         p = db.query(models.Post).filter(models.Post.id == post_id).first()
+         if not p:
+             raise HTTPException(404, "Post not found")
 
-        is_admin = _is_admin(request)
-        admin_preview_mode = (
-            request.query_params.get("admin_preview") == "true" and is_admin
-        )
+         is_admin = _is_admin(request)
+         admin_preview_mode = (
+             request.query_params.get("admin_preview") == "true" and is_admin
+         )
 
          # Only show published posts to non-admins (unless admin preview mode)
          if not is_admin and not admin_preview_mode:
@@ -3480,30 +3480,30 @@ async def chatbot_endpoint(request: Request, data: dict, db: Session = Depends(g
     if not message:
         return {"success": True, "response": "Akwaaba! I'm EchoBot, your guide to Ghana's rich cultural heritage. Ask me about traditions, languages, history, or any of Ghana's 16 regions!"}
 
-    # ── Greeting detection – respond instantly without database search ──────────
-    greetings = [
-        'hi', 'hello', 'hey', 'akwaaba', 'meda ase', 'thank you', 'thanks',
-        'good morning', 'good afternoon', 'good evening', 'how are you',
-        'who are you', 'what can you do', 'help'
-    ]
-    msg_lower = message.lower()
-    is_greeting = any(msg_lower == g or msg_lower.startswith(g + ' ') for g in greetings)
+     # ── Greeting detection – respond instantly without database search ──────────
+     greetings = [
+         'hi', 'hello', 'hey', 'akwaaba', 'meda ase', 'thank you', 'thanks',
+         'good morning', 'good afternoon', 'good evening', 'how are you',
+         'who are you', 'what can you do', 'help'
+     ]
+     msg_lower = message.lower()
+     is_greeting = any(msg_lower == g or msg_lower.startswith(g + ' ') for g in greetings)
 
      if is_greeting:
          # Customize greeting based on time of day
          hour = datetime.now().hour
-        if 5 <= hour < 12:
-            greeting_time = "Good morning!"
-        elif 12 <= hour < 17:
-            greeting_time = "Good afternoon!"
-        else:
-            greeting_time = "Good evening!"
+         if 5 <= hour < 12:
+             greeting_time = "Good morning!"
+         elif 12 <= hour < 17:
+             greeting_time = "Good afternoon!"
+         else:
+             greeting_time = "Good evening!"
 
-        return {
-            "success": True,
-            "response": f"{greeting_time} Akwaaba! I'm EchoBot, your AI guide to Ghana's heritage. I can answer questions about traditions, festivals, history, languages, and connect you with relevant posts in our archive. What would you like to explore?",
-            "sources": []
-        }
+         return {
+             "success": True,
+             "response": f"{greeting_time} Akwaaba! I'm EchoBot, your AI guide to Ghana's heritage. I can answer questions about traditions, festivals, history, languages, and connect you with relevant posts in our archive. What would you like to explore?",
+             "sources": []
+         }
 
     # ── Search Context ──────────────────────────────────────────────────────────
     search_context = []
