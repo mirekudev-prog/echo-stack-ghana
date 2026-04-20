@@ -2265,10 +2265,11 @@ async def get_post(post_id: int, request: Request, db: Session = Depends(get_db)
             request.query_params.get("admin_preview") == "true" and is_admin
         )
 
-        # Only show published posts to non-admins (unless admin preview mode)
-        if not is_admin and not admin_preview_mode:
-            if p.status != "published":
-                raise HTTPException(404, "Post not found")
+         # Only show published posts to non-admins (unless admin preview mode)
+         if not is_admin and not admin_preview_mode:
+             # Feed endpoint treats "" and None as published, so match that logic here
+             if p.status not in ("published", "", None):
+                 raise HTTPException(404, "Post not found")
 
         try:
             p.views = (getattr(p, "views", 0) or 0) + 1

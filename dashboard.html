@@ -904,8 +904,8 @@ function renderPosts() {
         return;
     }
     
-    container.innerHTML = allPosts.map(post => {
-        const author = post.author_username || 'User';
+     container.innerHTML = allPosts.map(post => {
+         const author = post.author_username || 'User';
         const initial = author.charAt(0).toUpperCase();
         const typeBadge = post.content_type ? `<span class="post-type-badge ${post.content_type}">${post.content_type}</span>` : '';
         const isVerified = (post.author_role === 'admin' || post.author_role === 'creator' || post.is_verified);
