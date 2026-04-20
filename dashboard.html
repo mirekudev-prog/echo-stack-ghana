@@ -742,6 +742,19 @@ function showToast(msg, type = '') {
     setTimeout(() => t.className = 'toast', 2500);
 }
 
+// ─── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+                console.log('ServiceWorker registered');
+            })
+            .catch(function(err) {
+                console.log('SW registration failed:', err);
+            });
+    });
+}
+
 loadUser();
 </script>
 </body>

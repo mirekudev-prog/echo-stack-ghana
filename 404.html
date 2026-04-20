@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B2A">
+    <title>Page Not Found — EchoStack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        :root {
+            --ink: #0D1B2A;
+            --gold: #C8962E;
+            --gold2: #E8B84B;
+            --cream: #FAF6EF;
+            --main-bg: #f8fafc;
+            --main-card: #ffffff;
+            --main-border: #e2e8f0;
+            --main-text: #1e293b;
+            --main-muted: #64748b;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            overflow-x: hidden;
+        }
+        
+        .error-container {
+            max-width: 600px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .error-code {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(6rem, 20vw, 12rem);
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--ink), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -4px;
+        }
+        
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 2rem;
+            color: var(--ink);
+            box-shadow: 0 8px 24px rgba(200,150,46,0.25);
+        }
+        
+        .error-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--ink);
+        }
+        
+        .error-message {
+            font-size: 1rem;
+            color: var(--main-muted);
+            line-height: 1.7;
+            margin-bottom: 32px;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .error-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .error-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 13px 26px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            min-height: 48px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .error-btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            color: var(--ink);
+            box-shadow: 0 4px 12px rgba(200,150,46,0.3);
+        }
+        
+        .error-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(200,150,46,0.4);
+        }
+        
+        .error-btn-secondary {
+            background: var(--main-card);
+            color: var(--main-text);
+            border: 1.5px solid var(--main-border);
+        }
+        
+        .error-btn-secondary:hover {
+            background: var(--main-bg);
+            border-color: var(--gold);
+        }
+        
+        .error-suggestions {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--main-border);
+            text-align: left;
+        }
+        
+        .error-suggestions h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--ink);
+        }
+        
+        .error-suggestions ul {
+            list-style: none;
+            font-size: 0.85rem;
+            color: var(--main-muted);
+            line-height: 2;
+        }
+        
+        .error-suggestions li {
+            padding-left: 24px;
+            position: relative;
+        }
+        
+        .error-suggestions li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--gold);
+            font-weight: bold;
+        }
+        
+        .error-suggestions a {
+            color: var(--ink);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+        
+        .error-suggestions a:hover {
+            border-bottom-color: var(--gold);
+        }
+        
+        .error-path {
+            margin-top: 32px;
+            font-size: 0.78rem;
+            color: var(--main-muted);
+            font-family: monospace;
+            background: var(--main-bg);
+            padding: 8px 16px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 480px) {
+            .error-icon {
+                width: 64px;
+                height: 64px;
+                font-size: 1.75rem;
+            }
+            
+            .error-code {
+                letter-spacing: -2px;
+            }
+            
+            .error-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .error-suggestions {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-compass"></i>
+        </div>
+        
+        <div class="error-code">404</div>
+        
+        <h1 class="error-title">Page Not Found</h1>
+        
+        <p class="error-message">
+            The page you're looking for seems to have wandered off into the digital void. 
+            It might have been moved, deleted, or never existed.
+        </p>
+        
+        <div class="error-actions">
+            <a href="/" class="error-btn error-btn-primary">
+                <i class="fas fa-home"></i>
+                Go Home
+            </a>
+            <button onclick="history.back()" class="error-btn error-btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Go Back
+            </button>
+        </div>
+        
+        <div class="error-suggestions">
+            <h4><i class="fas fa-search" style="color: var(--gold); margin-right: 8px;"></i>Try these instead:</h4>
+            <ul>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/explore">Explore Content</a></li>
+                <li><a href="/archive">Archives</a></li>
+                <li><a href="/premium">Premium Features</a></li>
+            </ul>
+        </div>
+        
+        <div class="error-path">
+            <i class="fas fa-link" style="margin-right: 6px;"></i>
+            <span id="current-path"></span>
+        </div>
+    </div>
+    
+    <script>
+        // Display the attempted URL
+        document.getElementById('current-path').textContent = window.location.pathname;
+        
+        // Log 404 to console for debugging
+        console.warn('404 - Page not found:', window.location.pathname);
+        
+        // ─── SERVICE WORKER REGISTRATION ───────────────────────────────────────────
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .catch(function(err) {
+                    console.log('SW registration failed:', err);
+                });
+        }
+    </script>
+</body>
+</html>
