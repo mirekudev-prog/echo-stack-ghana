@@ -2636,15 +2636,6 @@
                     <button class="btn btn-primary" onclick="showRegionForm()"><i class="fas fa-plus"></i> Add Region</button>
                 </div>
                 
-                <!-- Create New Region Button -->
-                <div class="mb-6 flex justify-end">
-                    <button onclick="showNewRegionForm()" 
-                            style="background-color: #0077b6 !important; color: white !important;"
-                            class="px-6 py-3 rounded-lg font-bold transition hover:opacity-80">
-                        ➕ Create New Region
-                    </button>
-                </div>
-                
                 <div class="table-card">
                     <div class="table-wrap">
                         <table>
@@ -2653,62 +2644,40 @@
                         </table>
                     </div>
                 </div>
-                <div class="table-card" id="regionForm" style="display:none;padding:24px;margin-top:20px">
-                    <h3 style="font-family:'Playfair Display',serif;margin-bottom:20px" id="regionFormTitle">Add Region</h3>
-                    <input type="hidden" id="regionId">
-                    <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
-                        <div class="form-group" style="margin-bottom:0"><label>Name</label><input type="text" class="form-input" id="regionName" placeholder="Region name"></div>
-                        <div class="form-group" style="margin-bottom:0"><label>Capital</label><input type="text" class="form-input" id="regionCapital" placeholder="Capital city"></div>
-                    </div>
-                    <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
-                        <div class="form-group" style="margin-bottom:0"><label>Population</label><input type="text" class="form-input" id="regionPopulation" placeholder="Population"></div>
-                        <div class="form-group" style="margin-bottom:0"><label>Terrain</label><input type="text" class="form-input" id="regionTerrain" placeholder="Terrain type"></div>
-                    </div>
-                    <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
-                        <div class="form-group" style="margin-bottom:0"><label>Category</label><input type="text" class="form-input" id="regionCategory" placeholder="Category"></div>
-                        <div class="form-group" style="margin-bottom:0"><label>Tags</label><input type="text" class="form-input" id="regionTags" placeholder="tag1, tag2"></div>
-                    </div>
-                    <div class="form-group"><label>Description</label><textarea class="form-input" id="regionDescription" placeholder="Region description"></textarea></div>
-                    <div class="form-group"><label>Hero Image URL</label><input type="text" class="form-input" id="regionHero" placeholder="https://..."></div>
-                    <div style="display:flex;gap:12px">
-                        <button class="btn btn-secondary" onclick="hideRegionForm()">Cancel</button>
-                        <button class="btn btn-primary" onclick="saveRegion()"><i class="fas fa-save"></i> Save Region</button>
-                    </div>
-                </div>
             </div>
             
-            <!-- New Region Form Modal -->
-            <div id="new-region-form" class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm hidden" style="border-color: #e0e0e0 !important; margin-top: 20px;">
+            <!-- Region Form Modal -->
+            <div id="region-modal" class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm hidden" style="border-color: #e0e0e0 !important; margin-top: 20px;">
                 <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-2xl font-bold" style="color: #1a1e29 !important;">Create New Region</h2>
-                    <button onclick="hideNewRegionForm()" class="text-gray-500 hover:text-black text-2xl">×</button>
+                    <h2 class="text-2xl font-bold" style="color: #1a1e29 !important;" id="regionModalTitle">Create New Region</h2>
+                    <button onclick="hideRegionForm()" class="text-gray-500 hover:text-black text-2xl">×</button>
                 </div>
                 
-                <input type="hidden" id="region-id-new">
+                <input type="hidden" id="regionId">
                 
                 <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
-                    <div class="form-group" style="margin-bottom:0"><label>Name</label><input type="text" class="form-input" id="newRegionName" placeholder="Region name"></div>
-                    <div class="form-group" style="margin-bottom:0"><label>Capital</label><input type="text" class="form-input" id="newRegionCapital" placeholder="Capital city"></div>
+                    <div class="form-group" style="margin-bottom:0"><label>Name</label><input type="text" class="form-input" id="regionName" placeholder="Region name"></div>
+                    <div class="form-group" style="margin-bottom:0"><label>Capital</label><input type="text" class="form-input" id="regionCapital" placeholder="Capital city"></div>
                 </div>
                 <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
-                    <div class="form-group" style="margin-bottom:0"><label>Population</label><input type="text" class="form-input" id="newRegionPopulation" placeholder="Population"></div>
-                    <div class="form-group" style="margin-bottom:0"><label>Terrain</label><input type="text" class="form-input" id="newRegionTerrain" placeholder="Terrain type"></div>
+                    <div class="form-group" style="margin-bottom:0"><label>Population</label><input type="text" class="form-input" id="regionPopulation" placeholder="Population"></div>
+                    <div class="form-group" style="margin-bottom:0"><label>Terrain</label><input type="text" class="form-input" id="regionTerrain" placeholder="Terrain type"></div>
                 </div>
                 <div class="form-row" style="display:flex;gap:12px;margin-bottom:16px">
-                    <div class="form-group" style="margin-bottom:0"><label>Category</label><input type="text" class="form-input" id="newRegionCategory" placeholder="Category"></div>
-                    <div class="form-group" style="margin-bottom:0"><label>Tags</label><input type="text" class="form-input" id="newRegionTags" placeholder="tag1, tag2"></div>
+                    <div class="form-group" style="margin-bottom:0"><label>Category</label><input type="text" class="form-input" id="regionCategory" placeholder="Category"></div>
+                    <div class="form-group" style="margin-bottom:0"><label>Tags</label><input type="text" class="form-input" id="regionTags" placeholder="tag1, tag2"></div>
                 </div>
-                <div class="form-group"><label>Description</label><textarea class="form-input" id="newRegionDescription" placeholder="Region description"></textarea></div>
-                <div class="form-group"><label>Hero Image URL</label><input type="text" class="form-input" id="newRegionHero" placeholder="https://..."></div>
+                <div class="form-group"><label>Description</label><textarea class="form-input" id="regionDescription" placeholder="Region description"></textarea></div>
+                <div class="form-group"><label>Hero Image URL</label><input type="text" class="form-input" id="regionHero" placeholder="https://..."></div>
                 
                 <!-- ACTION BUTTONS -->
                 <div class="flex gap-4 mt-8 pt-6 border-t border-gray-200" style="border-color: #e0e0e0 !important;">
-                    <button onclick="saveNewRegion()" 
+                    <button onclick="saveRegion()" 
                             style="background-color: #1a1e29 !important; color: white !important;"
-                            class="flex-1 py-3 rounded-lg font-bold transition hover:opacity-80">
-                        💾 Save New Region
+                            class="flex-1 py-3 rounded-lg font-bold transition hover:opacity-80" id="regionSubmitBtn">
+                        💾 Save Region
                     </button>
-                    <button onclick="hideNewRegionForm()" 
+                    <button onclick="hideRegionForm()" 
                             style="border-color: #1a1e29 !important; color: #1a1e29 !important;"
                             class="py-3 px-6 rounded-lg font-bold transition hover:bg-gray-50 border">
                         Cancel
@@ -3726,66 +3695,30 @@ async function loadRegions() {
     } catch(e) { toast('Failed to load regions', 'error'); }
 }
 
-function showRegionForm() { document.getElementById('regionForm').style.display = 'block'; document.getElementById('regionFormTitle').textContent = 'Add Region'; }
-function hideRegionForm() { document.getElementById('regionForm').style.display = 'none'; clearRegionForm(); }
-function clearRegionForm() { ['regionId','regionName','regionCapital','regionPopulation','regionTerrain','regionCategory','regionTags','regionDescription','regionHero'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; }); }
+// Region Form Functions (unified modal)
+function showRegionForm(mode = 'create') { 
+    document.getElementById('region-modal').classList.remove('hidden'); 
+    document.getElementById('region-modal').style.display = 'block';
+    if (mode === 'create') {
+        document.getElementById('regionId').value = '';
+        document.getElementById('regionModalTitle').textContent = 'Create New Region';
+        document.getElementById('regionSubmitBtn').textContent = '💾 Save Region';
+        clearRegionForm();
+    }
+    // edit mode is configured by editRegion() before calling this
+}
 
-// New Region Form Functions
-function showNewRegionForm() { 
-    document.getElementById('new-region-form').classList.remove('hidden'); 
-    document.getElementById('new-region-form').style.display = 'block';
+function hideRegionForm() { 
+    document.getElementById('region-modal').classList.add('hidden'); 
+    document.getElementById('region-modal').style.display = 'none';
+    clearRegionForm(); 
 }
-function hideNewRegionForm() { 
-    document.getElementById('new-region-form').classList.add('hidden'); 
-    document.getElementById('new-region-form').style.display = 'none';
-    clearNewRegionForm(); 
-}
-function clearNewRegionForm() { 
-    ['region-id-new','newRegionName','newRegionCapital','newRegionPopulation','newRegionTerrain','newRegionCategory','newRegionTags','newRegionDescription','newRegionHero'].forEach(function(id) { 
+
+function clearRegionForm() { 
+    ['regionId','regionName','regionCapital','regionPopulation','regionTerrain','regionCategory','regionTags','regionDescription','regionHero'].forEach(function(id) { 
         var el = document.getElementById(id); 
         if (el) el.value = ''; 
     }); 
-}
-
-async function saveNewRegion() {
-    var data = {
-        name: document.getElementById('newRegionName').value,
-        capital: document.getElementById('newRegionCapital').value,
-        population: document.getElementById('newRegionPopulation').value,
-        terrain: document.getElementById('newRegionTerrain').value,
-        category: document.getElementById('newRegionCategory').value,
-        tags: document.getElementById('newRegionTags').value,
-        description: document.getElementById('newRegionDescription').value,
-        hero_image: document.getElementById('newRegionHero').value
-    };
-    try {
-        await fetch('/api/admin/regions', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            credentials: 'include', 
-            body: JSON.stringify(data) 
-        });
-        toast('Region created', 'success');
-        hideNewRegionForm();
-        loadRegions();
-    } catch(e) { toast('Create failed', 'error'); }
-}
-
-async function editRegion(id) {
-    try {
-        var r = await apiGet('/api/admin/regions/' + id);
-        document.getElementById('regionId').value = r.id;
-        document.getElementById('regionName').value = r.name || '';
-        document.getElementById('regionCapital').value = r.capital || '';
-        document.getElementById('regionPopulation').value = r.population || '';
-        document.getElementById('regionTerrain').value = r.terrain || '';
-        document.getElementById('regionCategory').value = r.category || '';
-        document.getElementById('regionTags').value = r.tags || '';
-        document.getElementById('regionDescription').value = r.description || '';
-        document.getElementById('regionHero').value = r.hero_image || '';
-        document.getElementById('regionFormTitle').textContent = 'Edit Region';
-        document.getElementById('regionForm').style.display = 'block';
-    } catch(e) { toast('Failed to load region', 'error'); }
 }
 
 async function saveRegion() {
@@ -3801,13 +3734,36 @@ async function saveRegion() {
         hero_image: document.getElementById('regionHero').value
     };
     try {
-        var url = id ? '/api/admin/regions/' + id : '/api/admin/regions';
+        var url = id ? '/api/regions/' + id : '/api/regions';
         var method = id ? 'PUT' : 'POST';
-        await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data) });
-        toast('Region saved', 'success');
+        await fetch(url, { 
+            method: method, 
+            headers: { 'Content-Type': 'application/json' }, 
+            credentials: 'include', 
+            body: JSON.stringify(data) 
+        });
+        toast(id ? 'Region updated' : 'Region created', 'success');
         hideRegionForm();
         loadRegions();
-    } catch(e) { toast('Save failed', 'error'); }
+    } catch(e) { toast('Save failed: ' + e.message, 'error'); }
+}
+
+async function editRegion(id) {
+    try {
+        var r = await apiGet('/api/regions/' + id);
+        document.getElementById('regionId').value = r.id;
+        document.getElementById('regionName').value = r.name || '';
+        document.getElementById('regionCapital').value = r.capital || '';
+        document.getElementById('regionPopulation').value = r.population || '';
+        document.getElementById('regionTerrain').value = r.terrain || '';
+        document.getElementById('regionCategory').value = r.category || '';
+        document.getElementById('regionTags').value = r.tags || '';
+        document.getElementById('regionDescription').value = r.description || '';
+        document.getElementById('regionHero').value = r.hero_image || '';
+        document.getElementById('regionModalTitle').textContent = 'Edit Region';
+        document.getElementById('regionSubmitBtn').textContent = '💾 Update Region';
+        showRegionForm('edit');
+    } catch(e) { toast('Failed to load region', 'error'); }
 }
 
 // ── USERS ──
@@ -3918,7 +3874,7 @@ function closeDeleteModal() { document.getElementById('deleteModal').classList.r
 async function confirmDelete() {
     var id = document.getElementById('deleteTarget').value;
     var type = document.getElementById('deleteType').value;
-    var endpoints = { region: '/api/admin/regions', file: '/api/files', post: '/api/posts' };
+    var endpoints = { region: '/api/regions', file: '/api/files', post: '/api/posts' };
     try {
         await fetch(endpoints[type] + '/' + id, { method: 'DELETE', credentials: 'include' });
         toast('Deleted', 'success');

@@ -5,6 +5,7 @@ httpx
 passlib
 psycopg2-binary
 pydantic==1.10.17
+python-dotenv
 python-multipart
 resend
 starlette<0.28.0

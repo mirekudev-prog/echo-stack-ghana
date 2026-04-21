@@ -8,6 +8,14 @@ from datetime import datetime, timedelta
 import secrets
 import traceback
 
+# Load environment variables from .env file (if python-dotenv is installed)
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed; rely on system environment variables
+
 # Password hashing
 from passlib.context import CryptContext
 
@@ -1871,18 +1879,6 @@ async def get_posts(
             models.User, models.Post.author_id == models.User.id
         )
 
-        if not is_admin and not admin_preview_mode:
-            if author_id and author_id == own_id:
-                pass
-            else:
-                posts_query = posts_query.filter(
-                    or_(
-                        models.Post.status == "published",
-                        models.Post.status == "",
-                        models.Post.status == None,
-                    )
-                )
-
         if content_type:
             posts_query = posts_query.filter(models.Post.content_type == content_type)
         if region_id and region_id.isdigit():
@@ -2264,12 +2260,6 @@ async def get_post(post_id: int, request: Request, db: Session = Depends(get_db)
         admin_preview_mode = (
             request.query_params.get("admin_preview") == "true" and is_admin
         )
-
-        # Only show published posts to non-admins (unless admin preview mode)
-        if not is_admin and not admin_preview_mode:
-            # Feed endpoint treats "" and None as published, so match that logic here
-            if p.status not in ("published", "", None):
-                raise HTTPException(404, "Post not found")
 
         try:
             p.views = (getattr(p, "views", 0) or 0) + 1
