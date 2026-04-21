@@ -33,6 +33,9 @@
         .benefit-card h4 { font-weight:600; margin-bottom:8px; }
         .benefit-card p { font-size:0.85rem; color:var(--main-muted); }
     </style>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <div class="app">
@@ -204,6 +207,13 @@ async function logout() {
 }
 
 checkAuth();
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
+}
 </script>
 </body>
 </html>

@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Upload Test</title>
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
     <h1>File Upload Test</h1>
@@ -34,12 +35,21 @@
                     body: formData
                 });
                 
-                const data = await response.json();
-                alert(data.success ? '✅ Success!' : '❌ Failed: ' + data.detail);
-            } catch (error) {
-                alert('Error: ' + error.message);
-            }
-        }
-    </script>
+                 const data = await response.json();
+                 alert(data.success ? '✅ Success!' : '❌ Failed: ' + data.detail);
+             } catch(e) {
+                 alert('Error: ' + e.message);
+             }
+         }
+     </script>
+
+     <!-- Service Worker Registration -->
+     <script>
+     if ('serviceWorker' in navigator) {
+         navigator.serviceWorker.register('/sw.js')
+             .then(reg => console.log('SW registered:', reg.scope))
+             .catch(err => console.warn('SW registration failed:', err));
+     }
+     </script>
 </body>
 </html>

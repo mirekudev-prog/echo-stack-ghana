@@ -303,11 +303,14 @@ body{font-family:'DM Sans',sans-serif;color:var(--text)}
   transition:all .3s ease;
   box-shadow:var(--shadow2);
 }
-.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
-.toast.info{background:rgba(13,27,42,.95)}
-.toast.success{background:rgba(34,197,94,.95)}
-.toast.error{background:rgba(239,68,68,.95)}
+ .toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+ .toast.info{background:rgba(13,27,42,.95)}
+ .toast.success{background:rgba(34,197,94,.95)}
+ .toast.error{background:rgba(239,68,68,.95)}
 </style>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <div class="story-viewer" id="story-viewer">
@@ -664,11 +667,17 @@ function setupEventListeners() {
   
   // Keyboard navigation
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') nextStory();
-    if (e.key === 'ArrowLeft') prevStory();
-    if (e.key === 'Escape') goBack();
+      if (e.key === 'ArrowRight') nextStory();
+      if (e.key === 'ArrowLeft') prevStory();
+      if (e.key === 'Escape') goBack();
   });
-}
+
+  // Service Worker Registration
+  if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.warn('SW registration failed:', err));
+  }
 </script>
 </body>
 </html>

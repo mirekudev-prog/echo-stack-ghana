@@ -272,6 +272,9 @@
             .right-panel { padding: 28px 20px }
         }
     </style>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 
@@ -561,15 +564,24 @@
                 showToast('Network error. Please check your connection.', 'er');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-sparkles"></i> Create Free Account';
-            }
         }
-
+        }
+        
         function showToast(msg, type) {
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.className = 'toast on ' + (type || '');
             setTimeout(function() { t.classList.remove('on'); }, 3500);
         }
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registered:', reg.scope))
+            .catch(err => console.warn('SW registration failed:', err));
+    }
     </script>
 </body>
 </html>

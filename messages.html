@@ -35,6 +35,9 @@
         .back-to-list:hover{color:var(--main-text)}
         .list-view-wrap{background:var(--main-card);border:1px solid var(--main-border);border-radius:var(--radius-lg);overflow:hidden;margin:16px}
     </style>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <div class="app">
@@ -254,6 +257,13 @@ async function sendMsg() {
 }
 
 loadUser();
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
+}
 </script>
 </body>
 </html>

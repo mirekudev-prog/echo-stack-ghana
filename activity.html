@@ -31,6 +31,9 @@
         .activity-text strong { font-weight: 600; }
         .activity-time { font-size: .75rem; color: var(--main-muted); margin-top: 4px; }
     </style>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <div class="app">
@@ -176,6 +179,13 @@ async function loadActivity() {
 }
 
 checkAuth();
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
+}
 </script>
 </body>
 </html>

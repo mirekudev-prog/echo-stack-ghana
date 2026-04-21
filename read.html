@@ -43,8 +43,11 @@
         .comment-list { display: flex; flex-direction: column; gap: 15px; }
         .comment-item { background: var(--main-bg); padding: 16px; border-radius: var(--radius); }
         .comment-author { font-weight: 600; font-size: 0.9rem; color: var(--ink); margin-bottom: 6px; }
-        .comment-text { font-size: 0.9rem; color: var(--main-text); line-height: 1.5; }
-    </style>
+         .comment-text { font-size: 0.9rem; color: var(--main-text); line-height: 1.5; }
+     </style>
+
+     <!-- PWA Manifest -->
+     <link rel="manifest" href="/manifest.json">
 </head>
 <body>
     <div class="app">
@@ -307,6 +310,13 @@
             loadUser();
             loadPost();
         });
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('SW registered:', reg.scope))
+                .catch(err => console.warn('SW registration failed:', err));
+        }
     </script>
 </body>
 </html>

@@ -610,6 +610,9 @@
             .filter-tab { padding: 4px 8px; font-size: 0.75rem; }
         }
      </style>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <div class="app">
@@ -1131,7 +1134,14 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-loadUser();
-</script>
+    loadUser();
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registered:', reg.scope))
+            .catch(err => console.warn('SW registration failed:', err));
+    }
+    </script>
 </body>
 </html>

@@ -105,6 +105,9 @@
         .form-actions { display:flex; gap:12px; margin-top:24px; }
         .form-actions .btn { flex:1; }
     </style>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <div class="app">
@@ -642,6 +645,13 @@ if (urlParams.get('type') === 'story') {
     const storyOption = Array.from(document.querySelectorAll('.type-option'))
         .find(el => el.textContent.trim().toLowerCase() === 'story');
     if (storyOption) selectType('story', storyOption);
+}
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
 }
 </script>
 </body>

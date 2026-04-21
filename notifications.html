@@ -28,6 +28,9 @@
         .notif-header h2{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--main-text)}
         .mark-read{font-size:.8rem;color:var(--gold);cursor:pointer}
     </style>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <div class="app">
@@ -219,6 +222,13 @@ async function markAllRead() {
 }
 
 loadUser();
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
+}
 </script>
 </body>
 </html>

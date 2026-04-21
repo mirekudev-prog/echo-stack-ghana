@@ -285,6 +285,9 @@
             z-index: 5;
         }
     </style>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 
@@ -467,6 +470,13 @@ function shareReel(id) {
 
 checkAuth();
 loadReels();
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
+}
 </script>
 </body>
 </html>

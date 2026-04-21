@@ -23,8 +23,11 @@
         .profile-actions .btn{padding:10px 24px;font-size:.85rem}
         .profile-bio{padding:16px;font-size:.9rem;color:var(--main-muted);line-height:1.6;border-bottom:1px solid var(--main-border)}
         .profile-section{padding:16px}
-        .profile-section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--main-muted);margin-bottom:12px}
-    </style>
+         .profile-section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--main-muted);margin-bottom:12px}
+     </style>
+
+     <!-- PWA Manifest -->
+     <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <div class="app">
@@ -301,6 +304,13 @@ async function loadUserPosts() {
 }
 
 loadProfile();
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
+}
 </script>
 </body>
 </html>

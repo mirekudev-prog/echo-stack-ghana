@@ -65,10 +65,13 @@ th{padding:10px 14px;text-align:left;font-size:.7rem;font-weight:700;color:#555;
 td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:#f8fbff;}
-.spinner{display:inline-block;width:20px;height:20px;border:2px solid #ddd;border-top:2px solid var(--gold);border-radius:50%;animation:spin 1s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.loading-box{text-align:center;padding:3rem;color:#888;}
+ .spinner{display:inline-block;width:20px;height:20px;border:2px solid #ddd;border-top:2px solid var(--gold);border-radius:50%;animation:spin 1s linear infinite;}
+ @keyframes spin{to{transform:rotate(360deg)}}
+ .loading-box{text-align:center;padding:3rem;color:#888}
 </style>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.json">
 </head>
 <body>
 
@@ -271,6 +274,13 @@ function formatDate(d) {
   } catch(e) {
     return String(d).slice(0, 10);
   }
+}
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
 }
 </script>
 </body>

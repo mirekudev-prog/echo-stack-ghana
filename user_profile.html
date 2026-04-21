@@ -181,9 +181,12 @@ input,textarea,select{font-family:inherit;font-size:inherit}
   .info-card{padding:16px}
   .edit-card{padding:16px}
   .post-thumb{width:50px;height:50px;font-size:1.2rem}
-  .post-title{font-size:.95rem}
-}
+   .post-title{font-size:.95rem}
+   }
 </style>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.json">
 </head>
 <body>
 
@@ -279,4 +282,17 @@ input,textarea,select{font-family:inherit;font-size:inherit}
     <div class="info-card">
       Perfect! I can see your `user_profile.html` needs a complete redesign to match the new dashboard system. Here's the **complete rewrite** with all features, matching design system, sidebar navigation, and mobile optimization:
 
+    </div>
+  </div>
+
+  <!-- Service Worker Registration -->
+  <script>
+  if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.warn('SW registration failed:', err));
+  }
+  </script>
+</body>
+</html>
 
