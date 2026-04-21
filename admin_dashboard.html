@@ -2824,10 +2824,6 @@ const API_TIMEOUT = 15000; // 15 seconds
 const MAX_RETRIES = 2;
 
 async function apiGet(url, options = {}) {
-    // Add admin_preview=true to all API calls from admin dashboard for bypass
-    var separator = url.indexOf('?') === -1 ? '?' : '&';
-    var previewUrl = url + separator + 'admin_preview=true';
-    
     // Show loading state if requested
     if (options.showLoading !== false) {
         showLoadingState(url);
@@ -2839,7 +2835,7 @@ async function apiGet(url, options = {}) {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
             
-            const res = await fetch(previewUrl, {
+            const res = await fetch(url, {
                 credentials: 'include',
                 signal: controller.signal,
                 cache: 'no-store'
@@ -3278,24 +3274,6 @@ async function loadAllPosts() {
             </tr>
         `).join('');
     }
-    
-    try {
-        allPostsCache = await apiGet('/api/posts?limit=100', { showLoading: false });
-        
-        var badge = document.getElementById('postCountBadge');
-        if (badge) badge.textContent = allPostsCache.length + ' posts';
-        
-        renderPostsTable(allPostsCache);
-        
-    } catch(e) {
-        console.error('Posts load error:', e);
-        toast('Failed to load posts list', 'error');
-        
-        if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fas fa-bolt"></i><p>Connection error.<br><button onclick="loadAllPosts()" class="btn btn-sm btn-secondary" style="margin-top:8px">Retry</button></p></td></tr>';
-        }
-    }
-}
     
     try {
         allPostsCache = await apiGet('/api/posts?limit=100', { showLoading: false });
