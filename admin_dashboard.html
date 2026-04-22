@@ -2768,9 +2768,34 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
-let currentFileUrl = '';
-let featureCards = [];
+    <script src="/js/common.js"></script>
+    <script>
+    // ── ADMIN AUTH GUARD & INITIALIZATION ──
+    async function initAdmin() {
+        try {
+            const res = await fetch('/api/users/me', { credentials: 'include' });
+            if (!res.ok) throw new Error('Unauthorized');
+            const user = await res.json();
+            if (user.role !== 'admin' && user.role !== 'superuser') {
+                location.href = '/login';
+                return;
+            }
+            // Initialize all panels after successful auth
+            loadOverview();
+            loadHomeContent();
+            loadAllPosts();
+            loadFiles();
+            loadRegions();
+            loadUsers();
+            loadCreators();
+            loadActivity();
+        } catch(e) {
+            location.href = '/login';
+        }
+    }
+
+    let currentFileUrl = '';
+    let featureCards = [];
 
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
@@ -3867,14 +3892,7 @@ async function confirmDelete() {
 }
 
 // ── INIT ──
-loadOverview();
-loadHomeContent();
-loadAllPosts();
-loadFiles();
-loadRegions();
-loadUsers();
-loadCreators();
-loadActivity();
+initAdmin();
 
 // Upload zone drag
 var zone = document.getElementById('uploadZone');
