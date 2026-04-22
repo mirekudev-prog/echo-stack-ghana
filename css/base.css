@@ -2325,7 +2325,8 @@ small, .text-sm {
     transform: translateX(0);
   }
 
-  .main-wrapper {
+  .main-wrapper,
+  .main {
     margin-left: 0;
   }
 
@@ -2473,16 +2474,17 @@ small, .text-sm {
     box-shadow: var(--shadow-xl);
   }
 
-  .sidebar.open {
-    transform: translateX(0);
-    box-shadow: var(--shadow-2xl);
-  }
+   .sidebar.open {
+     transform: translateX(0);
+     box-shadow: var(--shadow-2xl);
+   }
 
-  .main-wrapper {
-    margin-left: 0;
-  }
+   .main-wrapper,
+   .main {
+     margin-left: 0;
+   }
 
-  /* Hide nav links on mobile, show hamburger */
+   /* Hide nav links on mobile, show hamburger */
   .nav-links {
     display: none;
   }
