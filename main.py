@@ -562,10 +562,18 @@ try:
     app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 except Exception:
     pass
-try:
-    app.mount("/css", StaticFiles(directory="css"), name="css")
-except Exception:
-    pass
+ try:
+     app.mount("/css", StaticFiles(directory="css"), name="css")
+ except Exception:
+     pass
+ try:
+     app.mount("/icons", StaticFiles(directory="icons"), name="icons")
+ except Exception:
+     pass
+ try:
+     app.mount("/js", StaticFiles(directory="js"), name="js")
+ except Exception:
+     pass
 
 ADMIN_SECRET = os.getenv("ADMIN_SECRET", "the admin")
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
@@ -1095,9 +1103,9 @@ async def user_publication_page(uname: str, request: Request):
 async def user_profile_redirect(request: Request):
     # Admin preview bypasses email verification
     if request.query_params.get("admin_preview") == "true" and _is_admin(request):
-        return _serve("user_profile.html")
+        return _serve("user-profile.html")
     if _is_admin(request) or request.cookies.get("user_session"):
-        return _serve("user_profile.html")
+        return _serve("user-profile.html")
     return RedirectResponse("/user-login")
 
 
