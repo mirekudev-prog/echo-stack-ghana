@@ -562,18 +562,18 @@ try:
     app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 except Exception:
     pass
- try:
-     app.mount("/css", StaticFiles(directory="css"), name="css")
- except Exception:
-     pass
- try:
-     app.mount("/icons", StaticFiles(directory="icons"), name="icons")
- except Exception:
-     pass
- try:
-     app.mount("/js", StaticFiles(directory="js"), name="js")
- except Exception:
-     pass
+try:
+    app.mount("/css", StaticFiles(directory="css"), name="css")
+except Exception:
+    pass
+try:
+    app.mount("/icons", StaticFiles(directory="icons"), name="icons")
+except Exception:
+    pass
+try:
+    app.mount("/js", StaticFiles(directory="js"), name="js")
+except Exception:
+    pass
 
 ADMIN_SECRET = os.getenv("ADMIN_SECRET", "the admin")
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
