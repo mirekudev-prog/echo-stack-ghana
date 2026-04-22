@@ -119,4 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof setActiveNavLink !== 'undefined') setActiveNavLink();
     if (typeof setupSidebarAutoClose !== 'undefined') setupSidebarAutoClose();
     closeSidebar();
+    // Ensure desktop layout has proper spacing if CSS didn't load
+    if (window.innerWidth >= 1025) {
+        const sidebar = document.getElementById('sidebar');
+        const main = document.querySelector('.main-wrapper, .app, main');
+        if (sidebar && main) {
+            sidebar.style.transform = 'translateX(0)';
+            main.style.marginLeft = 'var(--sidebar-width, 280px)';
+            main.style.width = 'calc(100% - var(--sidebar-width, 280px))';
+        }
+    }
 });

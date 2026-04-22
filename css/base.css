@@ -2367,16 +2367,31 @@ small, .text-sm {
 /* Desktop and larger screens */
 @media (min-width: 1025px) {
   .sidebar {
+    transform: translateX(-100%);
+    width: 280px;
+  }
+
+  .sidebar.open {
     transform: translateX(0);
   }
 
-  .main-wrapper {
+  .main-wrapper,
+  .main {
     margin-left: var(--sidebar-width);
     width: calc(100% - var(--sidebar-width));
   }
 
   .hamburger {
-    display: none;
+    display: flex;
+  }
+
+  /* When sidebar open on desktop, push content */
+  .sidebar.open ~ .main-wrapper,
+  .sidebar.open ~ .main,
+  .main-wrapper.sidebar-open,
+  .main.sidebar-open {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
   }
 
   .sidebar-overlay {
@@ -2385,6 +2400,31 @@ small, .text-sm {
 
   .feed-container {
     max-width: 720px;
+  }
+}
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-wrapper {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  /* When sidebar open on desktop, push content */
+  .sidebar.open ~ .main-wrapper,
+  .main-wrapper.sidebar-open {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+  }
+
+  .sidebar-overlay {
+    display: none !important;
   }
 }
 
