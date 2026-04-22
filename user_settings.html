@@ -1,10 +1,11 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <link rel="stylesheet" href="/css/base.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Account Settings Î“Ã‡Ã¶ EchoStack</title>
+<title>Account Settings GÇö EchoStack</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" href="/echostack-logo.png">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -45,21 +46,21 @@ textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); b
 <aside class="sidebar">
   <a href="/" class="logo">EchoStack<span>Preserving Ghana's Stories</span></a>
   <nav>
-    <a href="/app" class="menu-item">â‰¡Æ’Ã…Ã¡ Home</a>
-    <a href="/explore" class="menu-item">â‰¡Æ’Ã¶Ã¬ Explore</a>
-    <a href="/dashboard" class="menu-item">â‰¡Æ’Ã´Ã¨ Dashboard</a>
-    <a href="/creator" class="menu-item">Î“Â£Ã¬âˆ©â••Ã… Write Post</a>
-    <a href="/activity" class="menu-item">â‰¡Æ’Ã´Ãª Activity</a>
-    <a href="/following" class="menu-item">â‰¡Æ’Ã¦Ã‘ Following</a>
-    <a href="/subscriptions" class="menu-item active">Î“ÃœÃ–âˆ©â••Ã… Settings</a>
-    <a href="/premium" class="menu-item">Î“Â¡Ã‰ Premium</a>
+    <a href="/app" class="menu-item">=ƒÅá Home</a>
+    <a href="/explore" class="menu-item">=ƒöì Explore</a>
+    <a href="/dashboard" class="menu-item">=ƒôè Dashboard</a>
+    <a href="/creator" class="menu-item">G£ìn+Å Write Post</a>
+    <a href="/activity" class="menu-item">=ƒôê Activity</a>
+    <a href="/following" class="menu-item">=ƒæÑ Following</a>
+    <a href="/subscriptions" class="menu-item active">GÜÖn+Å Settings</a>
+    <a href="/premium" class="menu-item">G¡É Premium</a>
   </nav>
-  <a href="/" onclick="logout()" class="logout-btn">â‰¡Æ’ÃœÂ¬ Sign Out</a>
+  <a href="/" onclick="logout()" class="logout-btn">=ƒÜ¬ Sign Out</a>
 </aside>
 
 <!-- Main Content -->
 <div class="main-wrapper">
-  <h1 class="page-title">Î“ÃœÃ–âˆ©â••Ã… Account Settings</h1>
+  <h1 class="page-title">GÜÖn+Å Account Settings</h1>
   
   <!-- Success/Error Messages -->
   <div id="success-message" class="success-msg"></div>
@@ -81,7 +82,7 @@ textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); b
         <label>Bio</label>
         <textarea id="bio" rows="4" placeholder="Tell us about yourself and your interests..."></textarea>
       </div>
-      <button type="submit" class="btn btn-primary">â‰¡Æ’Ã†â•› Save Profile Changes</button>
+      <button type="submit" class="btn btn-primary">=ƒÆ+ Save Profile Changes</button>
       <button type="button" class="btn btn-outline" onclick="location.href='/app'">Cancel</button>
     </form>
   </div>
@@ -102,7 +103,7 @@ textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); b
         <label>Confirm New Password</label>
         <input type="password" id="confirm-password" placeholder="Re-enter new password">
       </div>
-      <button type="submit" class="btn btn-gold">â‰¡Æ’Ã¶Ã‰ Update Password</button>
+      <button type="submit" class="btn btn-gold">=ƒöÉ Update Password</button>
       <button type="button" class="btn btn-outline" onclick="location.href='/app'">Cancel</button>
     </form>
   </div>
@@ -114,7 +115,7 @@ textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); b
       <span style="font-weight:600;font-size:0.9rem;">Current Plan:</span>
       <span id="plan-badge" style="padding:4px 12px;border-radius:12px;font-size:0.8rem;font-weight:600;" class="badge-free">Free Plan</span>
     </div>
-    <button onclick="window.location.href='/premium'" class="btn btn-gold">Î“Â¡Ã‰ Upgrade to Premium</button>
+    <button onclick="window.location.href='/premium'" class="btn btn-gold">G¡É Upgrade to Premium</button>
   </div>
 </div>
 
@@ -162,7 +163,7 @@ document.getElementById('profile-form').addEventListener('submit', async (e) => 
     });
     
     if (res.ok) {
-      showSuccessMessage('Î“Â£Ã  Profile updated successfully!');
+      showSuccessMessage('G£à Profile updated successfully!');
       setTimeout(() => {
         document.getElementById('success-message').style.display = 'none';
       }, 3000);
@@ -197,7 +198,7 @@ document.getElementById('password-form').addEventListener('submit', async (e) =>
   
   // For now, this is client-side validation only
   // A real password change would require a backend endpoint
-  showSuccessMessage('Î“ÃœÃ¡âˆ©â••Ã… Password changes require admin verification. Contact support or upgrade to enable self-service.');
+  showSuccessMessage('GÜán+Å Password changes require admin verification. Contact support or upgrade to enable self-service.');
 });
 
 // Logout function
