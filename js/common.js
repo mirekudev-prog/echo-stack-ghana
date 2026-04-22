@@ -105,11 +105,8 @@ function setActiveNavLink() {
 function setupSidebarAutoClose() {
     const sidebar = document.getElementById('sidebar');
     if (!sidebar) return;
-    const nav = sidebar.querySelector('.sidebar-nav, nav');
-    if (!nav) return;
-    
-    // Event delegation: close sidebar when any link is clicked
-    nav.addEventListener('click', (e) => {
+    // Close sidebar when any link inside it is clicked (event delegation)
+    sidebar.addEventListener('click', (e) => {
         const link = e.target.closest('a');
         if (link && link.href) {
             closeSidebar();
