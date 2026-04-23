@@ -630,84 +630,37 @@
             <div class="sidebar-user-info">
                 <div class="sidebar-user-name" id="sidebarName">User</div>
                 <div class="sidebar-user-badge badge-free" id="sidebarBadge">Free</div>
-                 </div>
-             </div>
-         </main>
+            </div>
+        </div>
         <nav class="sidebar-nav">
             <div class="sidebar-section">
-                <a href="/dashboard" class="sidebar-link active">
-                    <i class="fas fa-home"></i>
-                    <span>Feed</span>
-                </a>
-                <a href="/reels" class="sidebar-link">
-                    <i class="fas fa-film"></i>
-                    <span>Reels</span>
-                </a>
-                <a href="/explore" class="sidebar-link">
-                    <i class="fas fa-compass"></i>
-                    <span>Explore</span>
-                </a>
-                <a href="/archive" class="sidebar-link">
-                    <i class="fas fa-archive"></i>
-                    <span>Archive</span>
-                </a>
-                <a href="/app" class="sidebar-link">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <span>Map</span>
-                </a>
+                <a href="/dashboard" class="sidebar-link active"><i class="fas fa-home"></i><span>Feed</span></a>
+                <a href="/reels" class="sidebar-link"><i class="fas fa-film"></i><span>Reels</span></a>
+                <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i><span>Explore</span></a>
+                <a href="/archive" class="sidebar-link"><i class="fas fa-archive"></i><span>Archive</span></a>
+                <a href="/app" class="sidebar-link"><i class="fas fa-map-marked-alt"></i><span>Map</span></a>
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-label">Social</div>
-                <a href="/following" class="sidebar-link">
-                    <i class="fas fa-user-friends"></i>
-                    <span>Following</span>
-                </a>
-                <a href="/messages" class="sidebar-link">
-                    <i class="fas fa-envelope"></i>
-                    <span>Messages</span>
-                </a>
-                <a href="/notifications" class="sidebar-link">
-                    <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
-                    <span class="badge-count" id="notifCount" style="display:none">0</span>
-                </a>
-                <a href="/chat" class="sidebar-link">
-                    <i class="fas fa-users"></i>
-                    <span>Community Chat</span>
-                </a>
-                <a href="/chatbot" class="sidebar-link">
-                    <i class="fas fa-robot"></i>
-                    <span>EchoBot AI</span>
-                </a>
+                <a href="/following" class="sidebar-link"><i class="fas fa-user-friends"></i><span>Following</span></a>
+                <a href="/messages" class="sidebar-link"><i class="fas fa-envelope"></i><span>Messages</span></a>
+                <a href="/notifications" class="sidebar-link"><i class="fas fa-bell"></i><span>Notifications</span><span class="badge-count" id="notifCount" style="display:none">0</span></a>
+                <a href="/chat" class="sidebar-link"><i class="fas fa-users"></i><span>Community Chat</span></a>
+                <a href="/chatbot" class="sidebar-link"><i class="fas fa-robot"></i><span>EchoBot AI</span></a>
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-label">Create</div>
-                <a href="/creator" class="sidebar-link" id="createLink">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Create Post</span>
-                </a>
-                <a href="/premium" class="sidebar-link" id="premiumLink">
-                    <i class="fas fa-crown"></i>
-                    <span>Premium</span>
-                </a>
+                <a href="/creator" class="sidebar-link" id="createLink"><i class="fas fa-plus-circle"></i><span>Create Post</span></a>
+                <a href="/premium" class="sidebar-link" id="premiumLink"><i class="fas fa-crown"></i><span>Premium</span></a>
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-label">Account</div>
-                <a href="/user-profile" class="sidebar-link">
-                    <i class="fas fa-user"></i>
-                    <span>My Profile</span>
-                </a>
-                <a href="/settings" class="sidebar-link">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
-                </a>
+                <a href="/user-profile" class="sidebar-link"><i class="fas fa-user"></i><span>My Profile</span></a>
+                <a href="/settings" class="sidebar-link"><i class="fas fa-cog"></i><span>Settings</span></a>
             </div>
         </nav>
         <div class="sidebar-footer">
-            <button class="sidebar-logout" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Sign Out</span>
-            </button>
+            <button class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
         </div>
     </aside>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -1056,20 +1009,38 @@ function closeStory() {
     viewer.classList.remove('show');
 }
 
-async function loadRegions() {
-    try {
-        const res = await fetch('/api/regions');
-        const regions = await res.json();
-        const container = document.getElementById('regionList');
-        
-        container.innerHTML = regions.slice(0, 6).map(r => `
-            <div class="region-item" onclick="location.href='/app?region=${r.id}'">
-                <div class="region-icon"><i class="fas fa-map-marker-alt"></i></div>
-                <div class="region-name">${escapeHtml(r.name)}</div>
-            </div>
-        `).join('');
-    } catch(e) {}
-}
+ async function loadRegions() {
+     try {
+         const res = await fetch('/api/regions');
+         const regions = await res.json();
+         // Deduplicate by name to avoid duplicate entries (e.g., Ashanti Region)
+         const unique = [];
+         const seen = new Set();
+         for (const r of regions) {
+             if (!seen.has(r.name)) {
+                 seen.add(r.name);
+                 unique.push(r);
+             }
+         }
+         const container = document.getElementById('regionList');
+         container.innerHTML = unique.slice(0, 6).map(r => `
+             <div class="region-item" onclick="location.href='/app?region=${r.id}'">
+                 <div class="region-icon"><i class="fas fa-map-marker-alt"></i></div>
+                 <div class="region-name">${escapeHtml(r.name)}</div>
+             </div>
+         `).join('');
+     } catch(e) {}
+ }
+         }
+         const container = document.getElementById('regionList');
+         container.innerHTML = unique.slice(0, 6).map(r => `
+             <div class="region-item" onclick="location.href='/app?region=${r.id}'">
+                 <div class="region-icon"><i class="fas fa-map-marker-alt"></i></div>
+                 <div class="region-name">${escapeHtml(r.name)}</div>
+             </div>
+         `).join('');
+     } catch(e) {}
+ }
 
 function setFilter(btn, filter) {
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
