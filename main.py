@@ -1894,6 +1894,17 @@ async def get_posts(
         if author_id:
             posts_query = posts_query.filter(models.Post.author_id == author_id)
 
+        # Only show published posts to non-admins on public pages
+        # (drafts, archived, etc. visible only to admins)
+        if not is_admin and not admin_preview_mode:
+            posts_query = posts_query.filter(
+                or_(
+                    models.Post.status == "published",
+                    models.Post.status == "",
+                    models.Post.status.is_(None),
+                )
+            )
+
         # Only show published posts to non-admins (match get_post behavior)
         if not is_admin and not admin_preview_mode:
             posts_query = posts_query.filter(
@@ -2288,6 +2299,11 @@ async def get_post(post_id: int, request: Request, db: Session = Depends(get_db)
         admin_preview_mode = (
             request.query_params.get("admin_preview") == "true" and is_admin
         )
+
+        # Non-admins can only view published (or empty/null) posts
+        if not is_admin and not admin_preview_mode:
+            if p.status not in ("published", "", None):
+                raise HTTPException(404, "Post not found")
 
         try:
             p.views = (getattr(p, "views", 0) or 0) + 1
