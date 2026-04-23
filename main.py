@@ -1894,6 +1894,26 @@ async def get_posts(
         if author_id:
             posts_query = posts_query.filter(models.Post.author_id == author_id)
 
+        # Only show published posts to non-admins (match get_post behavior)
+        if not is_admin and not admin_preview_mode:
+            posts_query = posts_query.filter(
+                or_(
+                    models.Post.status == "published",
+                    models.Post.status == "",
+                    models.Post.status.is_(None),
+                )
+            )
+
+        # Only show published posts to non-admins (match get_post behavior)
+        if not is_admin and not admin_preview_mode:
+            posts_query = posts_query.filter(
+                or_(
+                    models.Post.status == "published",
+                    models.Post.status == "",
+                    models.Post.status.is_(None),
+                )
+            )
+
         # Execute main query
         posts = (
             posts_query.order_by(models.Post.created_at.desc())
