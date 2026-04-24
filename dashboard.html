@@ -1020,29 +1020,9 @@ function closeStory() {
              if (!seen.has(r.name)) {
                  seen.add(r.name);
                  unique.push(r);
-             }
-         }
-         const container = document.getElementById('regionList');
-         container.innerHTML = unique.slice(0, 6).map(r => `
-             <div class="region-item" onclick="location.href='/app?region=${r.id}'">
-                 <div class="region-icon"><i class="fas fa-map-marker-alt"></i></div>
-                 <div class="region-name">${escapeHtml(r.name)}</div>
-             </div>
-         `).join('');
-     } catch(e) {}
- }
-         }
-         const container = document.getElementById('regionList');
-         container.innerHTML = unique.slice(0, 6).map(r => `
-             <div class="region-item" onclick="location.href='/app?region=${r.id}'">
-                 <div class="region-icon"><i class="fas fa-map-marker-alt"></i></div>
-                 <div class="region-name">${escapeHtml(r.name)}</div>
-             </div>
-         `).join('');
-     } catch(e) {}
- }
+  }
 
-function setFilter(btn, filter) {
+  function setFilter(btn, filter) {
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     currentFilter = filter;
