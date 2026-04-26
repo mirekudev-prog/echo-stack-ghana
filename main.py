@@ -1925,18 +1925,23 @@ async def get_posts(
 
         # Batch load comment counts using a single query with GROUP BY
         post_ids = [p.id for p in posts]
-        comment_counts = {
-            cp.post_id: cp.count
-            for cp in db.query(
-                models.Comment.post_id, func.count(models.Comment.id).label("count")
-            )
-            .filter(
-                models.Comment.post_id.in_(post_ids),
-                models.Comment.content != "__like__",
-            )
-            .group_by(models.Comment.post_id)
-            .all()
-        }
+        try:
+            comment_counts = {
+                cp.post_id: cp.count
+                for cp in db.query(
+                    models.Comment.post_id, func.count(models.Comment.id).label("count")
+                )
+                .filter(
+                    models.Comment.post_id.in_(post_ids),
+                    models.Comment.content != "__like__",
+                )
+                .group_by(models.Comment.post_id)
+                .all()
+            }
+        except Exception as e:
+            # Table may not exist in DB yet; fallback to empty
+            print(f"Comment counts error (non-fatal): {e}")
+            comment_counts = {}
 
         # Batch load follow relationships
         current_user_id = own_id if own_id else None
@@ -1944,15 +1949,20 @@ async def get_posts(
         if current_user_id:
             author_ids = {p.author_id for p in posts if p.author_id}
             if author_ids:
-                follows = (
-                    db.query(models.Follow.following_id)
-                    .filter(
-                        models.Follow.follower_id == current_user_id,
-                        models.Follow.following_id.in_(author_ids),
+                try:
+                    follows = (
+                        db.query(models.Follow.following_id)
+                        .filter(
+                            models.Follow.follower_id == current_user_id,
+                            models.Follow.following_id.in_(author_ids),
+                        )
+                        .all()
                     )
-                    .all()
-                )
-                following_set = {f.following_id for f in follows}
+                    following_set = {f.following_id for f in follows}
+                except Exception as e:
+                    # Follows table may not exist
+                    print(f"Follow query error (non-fatal): {e}")
+                    following_set = set()
 
         # Build result with pre-loaded data
         result = []
