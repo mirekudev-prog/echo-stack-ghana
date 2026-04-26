@@ -130,3 +130,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+/* ── PWA Install Prompt ── */
+let deferredPrompt = null;
+
+function showInstallBanner() {
+    if (document.getElementById('pwa-install-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'pwa-install-banner';
+    banner.innerHTML = \`
+        <div style="
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--surface, #0f1e2d);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 9999;
+            font-family: 'DM Sans', sans-serif;
+            border: 1px solid var(--gold, #C8962E);
+        ">
+            <img src="/echostack-logo.png" alt="EchoStack" style="height: 32px; width: 32px; border-radius: 6px; object-fit: cover;">
+            <div style="font-weight: 600; font-size: 0.95rem;">Install EchoStack</div>
+            <button id="install-accept" style="
+                background: var(--gold, #C8962E); color: #0D1B2A; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 700; cursor: pointer;
+            ">Install</button>
+            <button id="install-dismiss" style="
+                background: transparent; color: rgba(255,255,255,0.6); border: none; padding: 6px 10px; cursor: pointer; font-size: 1.2rem; line-height: 1;
+            ">&times;</button>
+        </div>
+    \`;
+    document.body.appendChild(banner);
+    document.getElementById('install-accept').addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') console.log('Install accepted');
+        deferredPrompt = null;
+        banner.remove();
+    });
+    document.getElementById('install-dismiss').addEventListener('click', () => banner.remove());
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    showInstallBanner();
+});
+

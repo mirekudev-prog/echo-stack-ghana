@@ -1519,6 +1519,9 @@ async def user_login(
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        print(f"GET /api/posts/{post_id} error: {e}")
+        traceback.print_exc()
         raise HTTPException(500, str(e))
 
 
@@ -1543,6 +1546,9 @@ async def verify_email_endpoint(token: str, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        print(f"GET /api/posts/{post_id} error: {e}")
+        traceback.print_exc()
         raise HTTPException(500, str(e))
 
 
@@ -1639,6 +1645,9 @@ async def reset_password(
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        print(f"GET /api/posts/{post_id} error: {e}")
+        traceback.print_exc()
         raise HTTPException(500, str(e))
 
 
@@ -1882,10 +1891,8 @@ async def get_posts(
             request.query_params.get("admin_preview") == "true" and is_admin
         )
 
-        # Build base query with optimized joins
-        posts_query = db.query(models.Post).outerjoin(
-            models.User, models.Post.author_id == models.User.id
-        )
+        # Build base query
+        posts_query = db.query(models.Post)
 
         if content_type:
             posts_query = posts_query.filter(models.Post.content_type == content_type)
@@ -1985,7 +1992,9 @@ async def get_posts(
         return result
 
     except Exception as e:
+        import traceback
         print(f"GET /api/posts error: {e}")
+        traceback.print_exc()
         return []
 
 
@@ -2317,6 +2326,9 @@ async def get_post(post_id: int, request: Request, db: Session = Depends(get_db)
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        print(f"GET /api/posts/{post_id} error: {e}")
+        traceback.print_exc()
         raise HTTPException(500, str(e))
 
 
@@ -3680,6 +3692,9 @@ async def init_payment(
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        print(f"GET /api/posts/{post_id} error: {e}")
+        traceback.print_exc()
         raise HTTPException(500, str(e))
 
 
@@ -4755,6 +4770,9 @@ async def get_collection(collection_id: int, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        print(f"GET /api/posts/{post_id} error: {e}")
+        traceback.print_exc()
         raise HTTPException(500, str(e))
 
 
@@ -5444,6 +5462,9 @@ async def get_share_url(post_id: int, request: Request, db: Session = Depends(ge
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        print(f"GET /api/posts/{post_id} error: {e}")
+        traceback.print_exc()
         raise HTTPException(500, str(e))
 
 
@@ -5522,6 +5543,9 @@ async def get_user_profile(
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        print(f"GET /api/posts/{post_id} error: {e}")
+        traceback.print_exc()
         raise HTTPException(500, str(e))
 
 
