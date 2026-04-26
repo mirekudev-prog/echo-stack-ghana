@@ -1971,7 +1971,7 @@ async def get_posts(
                     "author_username": getattr(p, "author_username", "") or "",
                     "author_role": getattr(p, "role", "user") or "user",
                     "is_verified": bool(getattr(p, "is_verified", False)),
-                    "author_avatar": getattr(p, "avatar_url", "") or "",
+                    "author_avatar": getattr(p, "author_avatar", "") or "",
                     "region_id": getattr(p, "region_id", None),
                     "tags": getattr(p, "tags", "") or "",
                     "views": getattr(p, "views", 0) or 0,
