@@ -192,34 +192,43 @@ input,textarea,select{font-family:inherit;font-size:inherit}
 <body>
 
 <!-- SIDEBAR OVERLAY -->
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <!-- SIDEBAR NAVIGATION -->
 <aside class="sidebar" id="sidebar">
-  <div class="sb-header">
-    <div class="sb-brand">
+  <div class="sidebar-header">
+    <div class="sidebar-user" id="sidebarUser">
+      <div class="sidebar-user-avatar" id="sidebarUserAvatar"><i class="fas fa-user"></i></div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebarUserName">Guest</div>
+        <div class="sidebar-user-role" id="sidebarUserRole">Viewer</div>
+      </div>
+    </div>
+    <div class="sidebar-brand">
       <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
-      <div class="sb-brand-text">
+      <div class="sidebar-brand-text">
         <strong>EchoStack</strong>
         <span>Ghana's Heritage</span>
       </div>
     </div>
   </div>
-  <div class="sb-section">Navigation</div>
-  <a href="/dashboard" class="sb-item"><span class="icon"><i class="fas fa-home"></i></span> Home Feed</a>
-  <a href="/explore" class="sb-item"><span class="icon"><i class="fas fa-compass"></i></span> Explore</a>
-  <a href="/reels.html" class="sb-item"><span class="icon"><i class="fas fa-video"></i></span> Reels</a>
-  <a href="/archive" class="sb-item"><span class="icon"><i class="fas fa-book"></i></span> Archive</a>
-  <a href="/app" class="sb-item"><span class="icon"><i class="fas fa-map"></i></span> Map</a>
-  <div class="sb-section">Create</div>
-  <a href="/creator.html" class="sb-item"><span class="icon"><i class="fas fa-pen"></i></span> New Post</a>
-  <a href="/creator.html?type=story" class="sb-item"><span class="icon"><i class="fas fa-camera"></i></span> Add Story</a>
-  <div class="sb-section">Account</div>
-  <a href="/user_profile.html" class="sb-item active"><span class="icon"><i class="fas fa-user"></i></span> My Profile</a>
-  <a href="/user-settings.html" class="sb-item"><span class="icon"><i class="fas fa-cog"></i></span> Settings</a>
-  <a href="/premium.html" class="sb-item"><span class="icon"><i class="fas fa-crown"></i></span> Go Premium</a>
-  <div class="sb-footer">
-    <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">Navigation</div>
+  <a href="/dashboard" class="sidebar-link"><span class="sidebar-link-icon"><i class="fas fa-home"></i></span> Home Feed</a>
+  <a href="/explore" class="sidebar-link"><span class="sidebar-link-icon"><i class="fas fa-compass"></i></span> Explore</a>
+  <a href="/reels.html" class="sidebar-link"><span class="sidebar-link-icon"><i class="fas fa-video"></i></span> Reels</a>
+  <a href="/archive" class="sidebar-link"><span class="sidebar-link-icon"><i class="fas fa-book"></i></span> Archive</a>
+  <a href="/app" class="sidebar-link"><span class="sidebar-link-icon"><i class="fas fa-map"></i></span> Map</a>
+  <div class="sidebar-section">Create</div>
+  <a href="/creator.html" class="sidebar-link"><span class="sidebar-link-icon"><i class="fas fa-pen"></i></span> New Post</a>
+  <a href="/creator.html?type=story" class="sidebar-link"><span class="sidebar-link-icon"><i class="fas fa-camera"></i></span> Add Story</a>
+  <div class="sidebar-section">Account</div>
+  <a href="/user_profile.html" class="sidebar-link active"><span class="sidebar-link-icon"><i class="fas fa-user"></i></span> My Profile</a>
+  <a href="/user-settings.html" class="sidebar-link"><span class="sidebar-link-icon"><i class="fas fa-cog"></i></span> Settings</a>
+  <a href="/premium.html" class="sidebar-link"><span class="sidebar-link-icon"><i class="fas fa-crown"></i></span> Go Premium</a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="sidebar-logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
 </aside>
 
@@ -297,4 +306,5 @@ input,textarea,select{font-family:inherit;font-size:inherit}
   </script>
 </body>
 </html>
+
 
