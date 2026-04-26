@@ -118,6 +118,7 @@ function setupSidebarAutoClose() {
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof setActiveNavLink !== 'undefined') setActiveNavLink();
     if (typeof setupSidebarAutoClose !== 'undefined') setupSidebarAutoClose();
+        if (typeof initSidebarCollapse !== 'undefined') initSidebarCollapse();
     closeSidebar();
     // Ensure desktop layout has proper spacing if CSS didn't load
     if (window.innerWidth >= 1025) {
@@ -181,5 +182,32 @@ window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
     showInstallBanner();
+});
+
+
+/* ── Sidebar Collapse (icon-only mode) ── */
+function toggleSidebarCollapse() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    sidebar.classList.toggle('collapsed');
+    const isCollapsed = sidebar.classList.contains('collapsed');
+    localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+    // Adjust main margin if needed (handled by CSS)
+}
+
+function initSidebarCollapse() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    const saved = localStorage.getItem('sidebar_collapsed');
+    if (saved === '1') {
+        sidebar.classList.add('collapsed');
+    } else {
+        sidebar.classList.remove('collapsed');
+    }
+}
+
+// Extend DOMContentLoaded to call initSidebarCollapse
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof initSidebarCollapse !== 'undefined') initSidebarCollapse();
 });
 

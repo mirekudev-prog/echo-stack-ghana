@@ -197,13 +197,6 @@ input,textarea,select{font-family:inherit;font-size:inherit}
 <!-- SIDEBAR NAVIGATION -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <div class="sidebar-user" id="sidebarUser">
-      <div class="sidebar-user-avatar" id="sidebarUserAvatar"><i class="fas fa-user"></i></div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name" id="sidebarUserName">Guest</div>
-        <div class="sidebar-user-role" id="sidebarUserRole">Viewer</div>
-      </div>
-    </div>
     <div class="sidebar-brand">
       <img src="/echostack-logo.png" onerror="this.style.display='none'" alt="">
       <div class="sidebar-brand-text">
@@ -211,8 +204,18 @@ input,textarea,select{font-family:inherit;font-size:inherit}
         <span>Ghana's Heritage</span>
       </div>
     </div>
+    <button class="sidebar-toggle" aria-label="Toggle sidebar" onclick="toggleSidebarCollapse()">
+      <i class="fas fa-chevron-left"></i>
+    </button>
   </div>
-  <nav class="sidebar-nav">
+  <div class="sidebar-user" id="sidebarUser">
+    <div class="sidebar-user-avatar" id="sidebarUserAvatar"><i class="fas fa-user"></i></div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name" id="sidebarUserName">Guest</div>
+      <div class="sidebar-user-role" id="sidebarUserRole">Viewer</div>
+    </div>
+  </div>
+<nav class="sidebar-nav">
     <div class="sidebar-section">Navigation</div>
   <a href="/dashboard" class="sidebar-link"><span class="sidebar-link-icon"><i class="fas fa-home"></i></span> Home Feed</a>
   <a href="/explore" class="sidebar-link"><span class="sidebar-link-icon"><i class="fas fa-compass"></i></span> Explore</a>

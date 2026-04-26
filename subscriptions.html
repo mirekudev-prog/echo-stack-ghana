@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta charset="UTF-8">
-<title>Subscriptions Ã¢ÂÂ EchoStack</title>
+<title>Subscriptions ÃÂ¢ÃÂÃÂ EchoStack</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" href="/echostack-logo.png">
 <style>
@@ -83,12 +83,13 @@ tr:hover td{background:#f8fbff;}
       <img src="/echostack-logo.png" alt="EchoStack" onerror="this.style.display='none'">
       <span>EchoStack</span>
     </a>
-    <button class="sidebar-close" onclick="toggleSidebar()">ÃÂ</button>
+    <button class="sidebar-close" onclick="toggleSidebar()">ÃÂÃÂ</button>
+          <button class="sidebar-toggle" aria-label="Toggle sidebar" onclick="toggleSidebarCollapse()"><i class="fas fa-chevron-left"></i></button>
   </div>
   <div class="sidebar-user">
     <div class="sidebar-user-avatar" id="sidebarUserAvatar">?</div>
     <div class="sidebar-user-info">
-      <div class="sidebar-user-name" id="sidebarUserName">LoadingÃ¢ÂÂ¦</div>
+      <div class="sidebar-user-name" id="sidebarUserName">LoadingÃÂ¢ÃÂÃÂ¦</div>
       <div class="sidebar-user-role" id="sidebarUserRole">Free Plan</div>
     </div>
   </div>
@@ -134,13 +135,13 @@ tr:hover td{background:#f8fbff;}
     <div id="subs-container">
       <div class="loading-box">
         <div class="spinner"></div>
-        <p style="margin-top:.75rem;">Loading subscribersÃ¢ÂÂ¦</p>
+        <p style="margin-top:.75rem;">Loading subscribersÃÂ¢ÃÂÃÂ¦</p>
       </div>
     </div>
   </main>
 
   <footer style="background:white;border-top:1px solid var(--border);padding:1rem;text-align:center;font-size:.8rem;color:#888;">
-    ÃÂ© 2026 EchoStack Ã¢ÂÂ Preserving Ghana's Stories
+    ÃÂÃÂ© 2026 EchoStack ÃÂ¢ÃÂÃÂ Preserving Ghana's Stories
   </footer>
 </div>
 
@@ -155,19 +156,9 @@ if (currentUser.username) {
   document.getElementById('sidebarUserAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
   var isCreator = ['creator','admin','superuser'].includes(currentUser.role);
   var isPremium = currentUser.is_premium == 1 || currentUser.plan === 'premium' || isCreator;
-  document.getElementById('sidebarUserRole').textContent = isPremium ? (isCreator ? 'Ã¢ÂÂ¨ Creator' : 'Ã¢Â­Â Premium') : 'Free Plan';
+  document.getElementById('sidebarUserRole').textContent = isPremium ? (isCreator ? 'ÃÂ¢ÃÂÃÂ¨ Creator' : 'ÃÂ¢ÃÂ­ÃÂ Premium') : 'Free Plan';
 }
 
-function openSidebar() {
-  document.getElementById('sidebar').classList.add('open');
-  document.getElementById('overlay').classList.add('show');
-  document.body.style.overflow = 'hidden';
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
-  document.body.style.overflow = '';
-}
 function logout() {
   fetch('/api/users/logout', {method:'POST'}).catch(()=>{});
   localStorage.removeItem('es_user');
@@ -176,7 +167,7 @@ function logout() {
 }
 
 // ============================================================
-// LOAD SUBSCRIBERS Ã¢ÂÂ handles both array (admin) and count object (user)
+// LOAD SUBSCRIBERS ÃÂ¢ÃÂÃÂ handles both array (admin) and count object (user)
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
   // Check if logged in
@@ -201,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (data.length === 0) {
         container.innerHTML = `
           <div class="card empty-state">
-            <div class="icon">Ã°ÂÂÂ§</div>
+            <div class="icon">ÃÂ°ÃÂÃÂÃÂ§</div>
             <h3>No subscribers yet</h3>
             <p>No one has subscribed to the newsletter yet.</p>
           </div>`;
@@ -211,7 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       container.innerHTML = `
         <div class="card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
-            <div style="font-weight:700;font-size:1rem;">Ã°ÂÂÂ§ Newsletter Subscribers <span style="color:#888;font-weight:400;font-size:.85rem;">(${data.length} total)</span></div>
+            <div style="font-weight:700;font-size:1rem;">ÃÂ°ÃÂÃÂÃÂ§ Newsletter Subscribers <span style="color:#888;font-weight:400;font-size:.85rem;">(${data.length} total)</span></div>
           </div>
           <div style="overflow-x:auto;">
             <table>
@@ -227,8 +218,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ${data.map((s, i) => `
                   <tr>
                     <td style="color:#888;font-size:.8rem;">${i + 1}</td>
-                    <td style="font-weight:600;">${s.email || 'Ã¢ÂÂ'}</td>
-                    <td>${s.full_name || 'Ã¢ÂÂ'}</td>
+                    <td style="font-weight:600;">${s.email || 'ÃÂ¢ÃÂÃÂ'}</td>
+                    <td>${s.full_name || 'ÃÂ¢ÃÂÃÂ'}</td>
                     <td style="color:#888;font-size:.82rem;">${formatDate(s.subscribed_at || s.created_at)}</td>
                   </tr>`).join('')}
               </tbody>
@@ -245,7 +236,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div class="label">Total Newsletter Subscribers</div>
         </div>
         <div class="card empty-state">
-          <div class="icon">Ã°ÂÂÂ</div>
+          <div class="icon">ÃÂ°ÃÂÃÂÃÂ</div>
           <h3>Subscriber details are private</h3>
           <p>Only admins can see the full subscriber list. You can see the total count above.</p>
         </div>`;
@@ -253,7 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Unknown response format
       container.innerHTML = `
         <div class="card empty-state">
-          <div class="icon">Ã°ÂÂÂ§</div>
+          <div class="icon">ÃÂ°ÃÂÃÂÃÂ§</div>
           <h3>No subscriber data</h3>
           <p>Could not load subscription information.</p>
         </div>`;
@@ -263,7 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Subscriptions load error:', err);
     container.innerHTML = `
       <div class="card empty-state">
-        <div class="icon" style="font-size:2.5rem;">Ã¢ÂÂ Ã¯Â¸Â</div>
+        <div class="icon" style="font-size:2.5rem;">ÃÂ¢ÃÂÃÂ ÃÂ¯ÃÂ¸ÃÂ</div>
         <h3>Failed to load</h3>
         <p>Please try again later. Error: ${err.message}</p>
         <button onclick="location.reload()" style="margin-top:1rem;padding:.6rem 1.2rem;background:var(--blue);color:white;border:none;border-radius:8px;cursor:pointer;font-size:.88rem;">Try Again</button>
@@ -272,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function formatDate(d) {
-  if (!d) return 'Ã¢ÂÂ';
+  if (!d) return 'ÃÂ¢ÃÂÃÂ';
   try {
     return new Date(d).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
   } catch(e) {

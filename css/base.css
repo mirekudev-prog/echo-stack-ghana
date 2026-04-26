@@ -3703,3 +3703,93 @@ html {
     box-shadow: none;
   }
 }
+
+/* ── COLLAPSED SIDEBAR (ICON-ONLY MODE) ─────────────────────────────── */
+:root {
+  --sidebar-width-collapsed: 80px;
+}
+
+/* Desktop collapsed state */
+@media (min-width: 1025px) {
+  .sidebar.collapsed {
+    width: var(--sidebar-width-collapsed);
+  }
+
+  .sidebar.collapsed ~ .main-wrapper,
+  .sidebar.collapsed ~ .main {
+    margin-left: var(--sidebar-width-collapsed) !important;
+    width: calc(100% - var(--sidebar-width-collapsed)) !important;
+  }
+
+  /* Hide text elements when collapsed */
+  .sidebar.collapsed .sidebar-brand-text,
+  .sidebar.collapsed .sidebar-link span:not(.sidebar-link-icon),
+  .sidebar.collapsed .sidebar-user-info,
+  .sidebar.collapsed .sidebar-section,
+  .sidebar.collapsed .sidebar-footer button span,
+  .sidebar.collapsed .sidebar-toggle i {
+    display: none !important;
+  }
+
+  /* Center icons */
+  .sidebar.collapsed .sidebar-link,
+  .sidebar.collapsed .sidebar-user,
+  .sidebar.collapsed .sidebar-header {
+    justify-content: center;
+  }
+
+  .sidebar.collapsed .sidebar-link-icon {
+    margin: 0;
+  }
+
+  /* Rotate toggle chevron to point right when collapsed */
+  .sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(180deg);
+  }
+
+  .sidebar.collapsed .sidebar-toggle {
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+/* Mobile: sidebar always full width, collapse not applicable */
+@media (max-width: 1024px) {
+  .sidebar.collapsed {
+    width: 280px;
+  }
+}
+
+/* Sidebar collapse toggle button */
+.sidebar-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  z-index: 5;
+}
+.sidebar-toggle:hover {
+  background: rgba(255,255,255,0.2);
+  color: var(--gold);
+}
+.sidebar-toggle:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Also hide logo text on pages using sidebar-logo class */
+.sidebar.collapsed .sidebar-logo span {
+  display: none !important;
+}
