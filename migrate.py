@@ -1,6 +1,10 @@
 """
 migrate.py — Synchronized for EchoStack Models
 """
+import os
+
+print(f"🔍 DATABASE_URL: {os.environ.get('DATABASE_URL', 'NOT SET')[:50] if os.environ.get('DATABASE_URL') else 'NOT SET'}...")
+
 from database import engine, Base
 import models
 from sqlalchemy import text
