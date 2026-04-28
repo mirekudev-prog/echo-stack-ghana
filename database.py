@@ -10,7 +10,25 @@ import os
 # DATABASE URL SETUP
 # ============================================
 # Get DATABASE_URL from environment (Render/Supabase) or fallback to local SQLite
-SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./echostack.db")
+# MUST read from os.environ to get Render environment variables
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+# If not set in environment, try loading from .env file (for local development)
+if not DATABASE_URL:
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+        DATABASE_URL = os.environ.get("DATABASE_URL")
+    except:
+        pass
+
+# Fallback to SQLite if still no DATABASE_URL
+if not DATABASE_URL:
+    DATABASE_URL = "sqlite:///./echostack.db"
+    print(f"⚠️  DATABASE_URL not set! Using local SQLite: {DATABASE_URL}")
+    print("   Set DATABASE_URL environment variable or create .env file")
+
+SQLALCHEMY_DATABASE_URL = DATABASE_URL
 
 # Fix legacy postgres:// protocol (Render/Heroku old format)
 if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
