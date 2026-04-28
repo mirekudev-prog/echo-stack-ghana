@@ -3,7 +3,22 @@ migrate.py — Synchronized for EchoStack Models
 """
 import os
 
-print(f"🔍 DATABASE_URL: {os.environ.get('DATABASE_URL', 'NOT SET')[:50] if os.environ.get('DATABASE_URL') else 'NOT SET'}...")
+# CRITICAL: Force reload environment variables from Render
+DATABASE_URL_FROM_ENV = os.environ.get("DATABASE_URL", "NOT FOUND IN os.environ!")
+print(f"")
+print(f"=" * 60)
+print(f"🔍 DATABASE_URL from os.environ: {DATABASE_URL_FROM_ENV[:80] if DATABASE_URL_FROM_ENV != 'NOT FOUND IN os.environ!' else 'NOT FOUND!'}")
+print(f"=" * 60)
+print(f"")
+
+# If DATABASE_URL is in .env, log that too
+try:
+    with open('.env', 'r') as f:
+        env_content = f.read()
+        if 'DATABASE_URL' in env_content:
+            print(f"📄 .env file has DATABASE_URL (but Render should use env var)")
+except:
+    pass
 
 from database import engine, Base
 import models

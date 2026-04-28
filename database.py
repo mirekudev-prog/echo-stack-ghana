@@ -30,6 +30,13 @@ if not DATABASE_URL:
 
 SQLALCHEMY_DATABASE_URL = DATABASE_URL
 
+# DEBUG: Print the actual URL being used
+print(f"")
+print(f"=" * 60)
+print(f"🔗 SQLALCHEMY DATABASE URL: {SQLALCHEMY_DATABASE_URL[:60]}...")
+print(f"=" * 60)
+print(f"")
+
 # Fix legacy postgres:// protocol (Render/Heroku old format)
 if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
     SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace(
