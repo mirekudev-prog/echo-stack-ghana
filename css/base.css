@@ -2378,6 +2378,8 @@ small, .text-sm {
     height: 100dvh;
     z-index: 100;
     transition: none;
+    background: var(--surface, #0f1e2d);
+    border-right: 1px solid rgba(255,255,255,0.07);
   }
 
   .sidebar.open {
@@ -2385,13 +2387,25 @@ small, .text-sm {
   }
 
   /* Main content always has sidebar offset on desktop */
+  .app {
+    display: flex;
+    min-height: 100vh;
+  }
+  
   .main-wrapper,
   .main,
   .app > .main-wrapper,
-  .page-container {
+  .page-container,
+  main.main-content {
     margin-left: 280px !important;
     width: calc(100% - 280px) !important;
-    transition: margin-left 0.3s ease, width 0.3s ease;
+    flex: 1;
+    transition: none;
+  }
+
+  /* Topbar respects the sidebar margin */
+  .topbar {
+    margin-left: 0;
   }
 
   /* Hide hamburger on desktop */

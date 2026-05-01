@@ -436,14 +436,25 @@ async function loadUser() {
 
 async function loadPost() {
     var match = location.pathname.match(/\/post\/(\d+)/);
+    console.log('[Post] URL match:', match);
     if (!match) {
-        document.getElementById('postContent').innerHTML = '<div class="empty-state"><i class="fas fa-file-alt"></i><h3>Post not found</h3></div>';
+        document.getElementById('postContent').innerHTML = '<div class="empty-state"><i class="fas fa-file-alt"></i><h3>Invalid post URL</h3></div>';
         return;
     }
+    var postId = match[1];
+    console.log('[Post] Fetching post ID:', postId);
     try {
-        var res = await fetch('/api/posts/' + match[1]);
-        if (!res.ok) throw new Error('Not found');
+        var res = await fetch('/api/posts/' + postId, { credentials: 'include' });
+        console.log('[Post] Response status:', res.status);
+        if (!res.ok) {
+            if (res.status === 404) {
+                document.getElementById('postContent').innerHTML = '<div class="empty-state"><i class="fas fa-file-alt"></i><h3>Post not found</h3><p>This post may have been removed or is not available.</p></div>';
+                return;
+            }
+            throw new Error('HTTP ' + res.status);
+        }
         currentPost = await res.json();
+        console.log('[Post] Loaded:', currentPost.title);
         document.getElementById('topbarTitle').textContent = currentPost.title ? currentPost.title.substring(0, 30) + (currentPost.title.length > 30 ? '...' : '') : 'Post';
         document.title = (currentPost.title || 'Post') + ' — EchoStack';
         renderPost();
@@ -643,6 +654,16 @@ async function postReply(commentId) {
         loadComments();
     } catch(e) { showToast('Failed to reply', 'error'); }
 }
+
+// Ensure sidebar is closed on page load
+if (typeof closeSidebar === 'function') {
+    closeSidebar();
+}
+
+// Handle browser back/forward navigation
+window.addEventListener('popstate', function() {
+    if (typeof closeSidebar === 'function') closeSidebar();
+});
 
 loadUser();
 loadPost();

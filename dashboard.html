@@ -971,10 +971,14 @@ function setupUserUI() {
 async function loadPosts() {
     try {
         const url = currentFilter ? `/api/posts?content_type=${currentFilter}` : '/api/posts';
-        const res = await fetch(url);
+        console.log('[Feed] Fetching:', url);
+        const res = await fetch(url, { credentials: 'include' });
+        console.log('[Feed] Response status:', res.status);
         allPosts = await res.json();
+        console.log('[Feed] Posts received:', allPosts.length);
         renderPosts();
     } catch(e) {
+        console.error('[Feed] Error:', e);
         document.getElementById('postsContainer').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Connection error</h3></div>';
     }
 }
