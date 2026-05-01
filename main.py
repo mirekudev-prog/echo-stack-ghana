@@ -1687,12 +1687,20 @@ async def debug_db(db: Session = Depends(get_db)):
         posts_count = db.query(models.Post).count()
         users_count = db.query(models.User).count()
         regions_count = db.query(models.Region).count()
+        
+        # Count posts by status
+        published_count = db.query(models.Post).filter(
+            or_(models.Post.status == "published", models.Post.status == "", models.Post.status.is_(None))
+        ).count()
+        draft_count = db.query(models.Post).filter(models.Post.status == "draft").count()
+        archived_count = db.query(models.Post).filter(models.Post.status == "archived").count()
 
         recent_posts = (
-            db.query(models.Post).order_by(models.Post.created_at.desc()).limit(3).all()
+            db.query(models.Post).order_by(models.Post.created_at.desc()).limit(5).all()
         )
         recent = [
-            {"id": p.id, "title": p.title, "status": p.status} for p in recent_posts
+            {"id": p.id, "title": p.title[:50] if p.title else "", "status": p.status or "published", "author": p.author_username} 
+            for p in recent_posts
         ]
 
         return {
@@ -1700,6 +1708,9 @@ async def debug_db(db: Session = Depends(get_db)):
             "database_url_configured": bool(db_url and db_url != "not set"),
             "database_type": "postgresql" if "postgresql" in db_url else "sqlite",
             "posts_count": posts_count,
+            "published_count": published_count,
+            "draft_count": draft_count,
+            "archived_count": archived_count,
             "users_count": users_count,
             "regions_count": regions_count,
             "recent_posts": recent,
