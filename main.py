@@ -2417,11 +2417,13 @@ async def get_posts(
         # Only show published posts to non-admins on public pages
         # (drafts, archived, etc. visible only to admins)
         if not is_admin and not admin_preview_mode:
+            # Include posts that are: 'published', empty string, or NULL (no status set)
+            from sqlalchemy import or_, and_
             posts_query = posts_query.filter(
                 or_(
                     models.Post.status == "published",
                     models.Post.status == "",
-                    models.Post.status.is_(None),
+                    models.Post.status == None  # noqa - SQLAlchemy handles this
                 )
             )
 
