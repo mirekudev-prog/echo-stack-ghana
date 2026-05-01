@@ -601,7 +601,509 @@ def _serve_error_page(status_code: int) -> FileResponse:
     )
 
 
-# ─── EXCEPTION HANDLERS ──────────────────────────────────────────────────────────
+# ─── API ENDPOINTS FOR SOCIAL MEDIA FEATURES ─────────────────────────────────────
+
+# Stories endpoints (24-hour temporary content)
+@app.post("/api/stories")
+async def create_story(
+    request: Request,
+    media_url: str = Form(...),
+    media_type: str = Form(...),  # image or video
+    caption: str = Form(""),
+    db: Session = Depends(get_db)
+):
+    """Create a new story (temporary content that expires in 24 hours)"""
+    if not _is_admin(request) and not request.cookies.get("user_session"):
+        raise HTTPException(401, "Authentication required")
+    
+    user = _get_user(request, db)
+    if not user:
+        raise HTTPException(401, "User not found")
+    
+    expires_at = datetime.utcnow() + timedelta(hours=24)
+    
+    story = models.Story(
+        user_id=user.id,
+        media_url=media_url,
+        media_type=media_type,
+        caption=caption,
+        expires_at=expires_at,
+        is_approved=True  # Auto-approve for now, could add moderation later
+    )
+    
+    db.add(story)
+    db.commit()
+    db.refresh(story)
+    
+    return {"success": True, "story_id": story.id, "expires_at": expires_at.isoformat()}
+
+
+@app.get("/api/stories")
+async def get_stories(db: Session = Depends(get_db)):
+    """Get all active (non-expired) stories"""
+    now = datetime.utcnow()
+    
+    # Get stories that haven't expired yet
+    active_stories = db.query(models.Story).filter(
+        models.Story.expires_at > now,
+        models.Story.is_approved == True
+    ).order_by(models.Story.created_at.desc()).all()
+    
+    # Format response with user info
+    stories_data = []
+    for story in active_stories:
+        user = db.query(models.User).filter(models.User.id == story.user_id).first()
+        stories_data.append({
+            "id": story.id,
+            "user_id": story.user_id,
+            "username": user.username if user else "Unknown",
+            "avatar_url": user.avatar_url if user else "",
+            "media_url": story.media_url,
+            "media_type": story.media_type,
+            "caption": story.caption,
+            "created_at": story.created_at.isoformat(),
+            "expires_at": story.expires_at.isoformat()
+        })
+    
+    return {"stories": stories_data}
+
+
+@app.delete("/api/stories/{story_id}")
+async def delete_story(
+    story_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Delete a story (only by owner or admin)"""
+    if not _is_admin(request) and not request.cookies.get("user_session"):
+        raise HTTPException(401, "Authentication required")
+    
+    user = _get_user(request, db)
+    if not user:
+        raise HTTPException(401, "User not found")
+    
+    story = db.query(models.Story).filter(models.Story.id == story_id).first()
+    if not story:
+        raise HTTPException(404, "Story not found")
+    
+    # Check if user owns the story or is admin
+    if story.user_id != user.id and not _is_admin(request):
+        raise HTTPException(403, "Not authorized to delete this story")
+    
+    db.delete(story)
+    db.commit()
+    
+    return {"success": True}
+
+
+# Post scheduling endpoints
+@app.post("/api/posts/{post_id}/schedule")
+async def schedule_post(
+    post_id: int,
+    request: Request,
+    scheduled_at: str = Form(...),  # ISO format datetime
+    db: Session = Depends(get_db)
+):
+    """Schedule a post for future publishing"""
+    if not _is_admin(request) and not request.cookies.get("user_session"):
+        raise HTTPException(401, "Authentication required")
+    
+    user = _get_user(request, db)
+    if not user:
+        raise HTTPException(401, "User not found")
+    
+    # Verify post exists and belongs to user (unless admin)
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not post:
+        raise HTTPException(404, "Post not found")
+    
+    if post.author_id != user.id and not _is_admin(request):
+        raise HTTPException(403, "Not authorized to schedule this post")
+    
+    # Parse scheduled time
+    try:
+        scheduled_time = datetime.fromisoformat(scheduled_at.replace('Z', '+00:00'))
+    except ValueError:
+        raise HTTPException(400, "Invalid datetime format")
+    
+    # Check if already scheduled
+    existing_schedule = db.query(models.PostSchedule).filter(
+        models.PostSchedule.post_id == post_id,
+        models.PostSchedule.status == "pending"
+    ).first()
+    
+    if existing_schedule:
+        # Update existing schedule
+        existing_schedule.scheduled_at = scheduled_time
+        existing_schedule.user_id = user.id
+        db.commit()
+        return {"success": True, "message": "Schedule updated"}
+    else:
+        # Create new schedule
+        schedule = models.PostSchedule(
+            user_id=user.id,
+            post_id=post_id,
+            scheduled_at=scheduled_time,
+            status="pending"
+        )
+        
+        db.add(schedule)
+        db.commit()
+        return {"success": True, "schedule_id": schedule.id}
+
+
+@app.get("/api/posts/scheduled")
+async def get_scheduled_posts(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Get scheduled posts for current user"""
+    if not _is_admin(request) and not request.cookies.get("user_session"):
+        raise HTTPException(401, "Authentication required")
+    
+    user = _get_user(request, db)
+    if not user:
+        raise HTTPException(401, "User not found")
+    
+    # Get scheduled posts for user
+    schedules = db.query(models.PostSchedule).filter(
+        models.PostSchedule.user_id == user.id,
+        models.PostSchedule.status == "pending"
+    ).all()
+    
+    scheduled_posts = []
+    for schedule in schedules:
+        post = db.query(models.Post).filter(models.Post.id == schedule.post_id).first()
+        if post:
+            scheduled_posts.append({
+                "id": schedule.id,
+                "post_id": post.id,
+                "title": post.title,
+                "scheduled_at": schedule.scheduled_at.isoformat(),
+                "status": schedule.status,
+                "created_at": schedule.created_at.isoformat()
+            })
+    
+    return {"scheduled_posts": scheduled_posts}
+
+
+# Analytics endpoints
+@app.get("/api/posts/{post_id}/analytics")
+async def get_post_analytics(
+    post_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Get analytics for a specific post"""
+    if not _is_admin(request) and not request.cookies.get("user_session"):
+        raise HTTPException(401, "Authentication required")
+    
+    user = _get_user(request, db)
+    if not user:
+        raise HTTPException(401, "User not found")
+    
+    # Verify post belongs to user (unless admin)
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not post:
+        raise HTTPException(404, "Post not found")
+    
+    if post.author_id != user.id and not _is_admin(request):
+        raise HTTPException(403, "Not authorized to view analytics for this post")
+    
+    # Get analytics records
+    analytics = db.query(models.PostAnalytics).filter(
+        models.PostAnalytics.post_id == post_id
+    ).order_by(models.PostAnalytics.date.desc()).limit(30).all()  # Last 30 days
+    
+    analytics_data = []
+    for record in analytics:
+        analytics_data.append({
+            "date": record.date.isoformat() if isinstance(record.date, datetime) else record.date,
+            "views": record.views,
+            "likes": record.likes,
+            "comments": record.comments,
+            "shares": record.shares,
+            "saves": record.saves,
+            "profile_visits": record.profile_visits,
+            "follower_gain": record.follower_gain,
+            "engagement_rate": record.engagement_rate
+        })
+    
+    return {"analytics": analytics_data}
+
+
+@app.post("/api/posts/{post_id}/analytics")
+async def update_post_analytics(
+    post_id: int,
+    request: Request,
+    views: int = Form(0),
+    likes: int = Form(0),
+    comments: int = Form(0),
+    shares: int = Form(0),
+    saves: int = Form(0),
+    profile_visits: int = Form(0),
+    follower_gain: int = Form(0),
+    engagement_rate: str = Form("0%"),
+    db: Session = Depends(get_db)
+):
+    """Update or create analytics for a post (typically called by automated systems)"""
+    # This endpoint could be protected or open depending on security needs
+    # For now, we'll allow updates but verify the post exists
+    
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not post:
+        raise HTTPException(404, "Post not found")
+    
+    # Create or update today's analytics
+    today = datetime.utcnow().date()
+    
+    analytics_record = db.query(models.PostAnalytics).filter(
+        models.PostAnalytics.post_id == post_id,
+        func.date(models.PostAnalytics.date) == today
+    ).first()
+    
+    if analytics_record:
+        # Update existing record
+        analytics_record.views = views
+        analytics_record.likes = likes
+        analytics_record.comments = comments
+        analytics_record.shares = shares
+        analytics_record.saves = saves
+        analytics_record.profile_visits = profile_visits
+        analytics_record.follower_gain = follower_gain
+        analytics_record.engagement_rate = engagement_rate
+        analytics_record.date = datetime.utcnow()
+    else:
+        # Create new record
+        analytics_record = models.PostAnalytics(
+            post_id=post_id,
+            date=datetime.utcnow(),
+            views=views,
+            likes=likes,
+            comments=comments,
+            shares=shares,
+            saves=saves,
+            profile_visits=profile_visits,
+            follower_gain=follower_gain,
+            engagement_rate=engagement_rate
+        )
+        db.add(analytics_record)
+    
+    db.commit()
+    db.refresh(analytics_record)
+    
+    return {"success": True, "analytics_id": analytics_record.id}
+
+
+# Hashtag endpoints
+@app.get("/api/hashtags")
+async def get_hashtags(
+    limit: int = 20,
+    db: Session = Depends(get_db)
+):
+    """Get trending hashtags"""
+    hashtags = db.query(models.Hashtag).order_by(
+        models.Hashtag.usage_count.desc()
+    ).limit(limit).all()
+    
+    return {"hashtags": [
+        {"id": h.id, "tag": h.tag, "usage_count": h.usage_count}
+        for h in hashtags
+    ]}
+
+
+@app.get("/api/hashtags/search")
+async def search_hashtags(
+    q: str,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    """Search for hashtags by query"""
+    if not q or len(q) < 1:
+        return {"hashtags": []}
+    
+    # Add # if not present
+    if not q.startswith('#'):
+        q = '#' + q
+    
+    hashtags = db.query(models.Hashtag).filter(
+        models.Hashtag.tag.ilike(f"%{q}%")
+    ).order_by(
+        models.Hashtag.usage_count.desc()
+    ).limit(limit).all()
+    
+    return {"hashtags": [
+        {"id": h.id, "tag": h.tag, "usage_count": h.usage_count}
+        for h in hashtags
+    ]}
+
+
+@app.get("/api/posts/hashtag/{hashtag}")
+async def get_posts_by_hashtag(
+    hashtag: str,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    """Get posts associated with a specific hashtag"""
+    # Add # if not present
+    if not hashtag.startswith('#'):
+        hashtag = '#' + hashtag
+    
+    # Find hashtag
+    hashtag_record = db.query(models.Hashtag).filter(
+        models.Hashtag.tag == hashtag
+    ).first()
+    
+    if not hashtag_record:
+        return {"posts": []}
+    
+    # Get posts with this hashtag
+    posts = db.query(models.Post).join(
+        models.PostHashtag, models.Post.id == models.PostHashtag.post_id
+    ).filter(
+        models.PostHashtag.hashtag_id == hashtag_record.id,
+        models.Post.status == "published"
+    ).order_by(
+        models.Post.created_at.desc()
+    ).limit(limit).all()
+    
+    # Format response
+    posts_data = []
+    for post in posts:
+        author = db.query(models.User).filter(models.User.id == post.author_id).first()
+        posts_data.append({
+            "id": post.id,
+            "title": post.title,
+            "slug": post.slug,
+            "content": post.content[:200] + "..." if len(post.content) > 200 else post.content,
+            "media_url": post.media_url,
+            "media_type": post.media_type,
+            "author_username": author.username if author else "Unknown",
+            "author_avatar": author.avatar_url if author else "",
+            "created_at": post.created_at.isoformat(),
+            "views": post.views,
+            "likes_count": post.likes_count
+        })
+    
+    return {"posts": posts_data}
+
+
+# Reactions endpoints (extended likes)
+@app.post("/api/posts/{post_id}/react")
+async def react_to_post(
+    post_id: int,
+    request: Request,
+    reaction_type: str = Form(...),  # like, love, laugh, wow, sad, angry
+    db: Session = Depends(get_db)
+):
+    """Add a reaction to a post"""
+    if not _is_admin(request) and not request.cookies.get("user_session"):
+        raise HTTPException(401, "Authentication required")
+    
+    user = _get_user(request, db)
+    if not user:
+        raise HTTPException(401, "User not found")
+    
+    # Verify post exists
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not post:
+        raise HTTPException(404, "Post not found")
+    
+    # Validate reaction type
+    valid_reactions = ["like", "love", "laugh", "wow", "sad", "angry"]
+    if reaction_type not in valid_reactions:
+        raise HTTPException(400, f"Invalid reaction type. Must be one of: {', '.join(valid_reactions)}")
+    
+    # Check if user already reacted to this post
+    existing_reaction = db.query(models.Reaction).filter(
+        models.Reaction.user_id == user.id,
+        models.Reaction.post_id == post_id
+    ).first()
+    
+    if existing_reaction:
+        # Update existing reaction
+        existing_reaction.reaction_type = reaction_type
+        existing_reaction.created_at = datetime.utcnow()
+    else:
+        # Create new reaction
+        reaction = models.Reaction(
+            user_id=user.id,
+            post_id=post_id,
+            reaction_type=reaction_type
+        )
+        db.add(reaction)
+    
+    db.commit()
+    
+    # Get updated reaction counts for this post
+    reaction_counts = db.query(
+        models.Reaction.reaction_type,
+        func.count(models.Reaction.id).label('count')
+    ).filter(
+        models.Reaction.post_id == post_id
+    ).group_by(
+        models.Reaction.reaction_type
+    ).all()
+    
+    counts_dict = {reaction_type: 0 for reaction_type in valid_reactions}
+    for reaction_type, count in reaction_counts:
+        counts_dict[reaction_type] = count
+    
+    return {
+        "success": True,
+        "reaction_type": reaction_type,
+        "reaction_counts": counts_dict
+    }
+
+
+@app.get("/api/posts/{post_id}/reactions")
+async def get_post_reactions(
+    post_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Get reaction counts for a post"""
+    if not _is_admin(request) and not request.cookies.get("user_session"):
+        raise HTTPException(401, "Authentication required")
+    
+    # Verify post exists
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not post:
+        raise HTTPException(404, "Post not found")
+    
+    # Get reaction counts
+    reaction_counts = db.query(
+        models.Reaction.reaction_type,
+        func.count(models.Reaction.id).label('count')
+    ).filter(
+        models.Reaction.post_id == post_id
+    ).group_by(
+        models.Reaction.reaction_type
+    ).all()
+    
+    # Also check if current user has reacted
+    user = _get_user(request, db)
+    user_reaction = None
+    if user:
+        user_reaction_obj = db.query(models.Reaction).filter(
+            models.Reaction.user_id == user.id,
+            models.Reaction.post_id == post_id
+        ).first()
+        user_reaction = user_reaction_obj.reaction_type if user_reaction_obj else None
+    
+    counts_dict = {reaction_type: 0 for reaction_type in ["like", "love", "laugh", "wow", "sad", "angry"]}
+    for reaction_type, count in reaction_counts:
+        counts_dict[reaction_type] = count
+    
+    return {
+        "reaction_counts": counts_dict,
+        "user_reaction": user_reaction
+    }
+
+
+# ─── API ENDPOINTS ───────────────────────────────────────────────────────────
+# This is a placeholder for where API endpoints would go
+# The actual API endpoints are implemented throughout the file above
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc: HTTPException):
     """Handle 404 - Page or resource not found."""
@@ -1943,6 +2445,23 @@ async def get_posts(
             print(f"Comment counts error (non-fatal): {e}")
             comment_counts = {}
 
+        # Batch load hashtags for all posts
+        post_hashtags = {}
+        try:
+            hashtag_rows = (
+                db.query(models.PostHashtag.post_id, models.Hashtag.name)
+                .join(models.Hashtag, models.PostHashtag.hashtag_id == models.Hashtag.id)
+                .filter(models.PostHashtag.post_id.in_(post_ids))
+                .all()
+            )
+            for ph, h_name in hashtag_rows:
+                if ph not in post_hashtags:
+                    post_hashtags[ph] = []
+                post_hashtags[ph].append(f"#{h_name}")
+        except Exception as e:
+            print(f"Hashtags load error (non-fatal): {e}")
+            post_hashtags = {}
+
         # Batch load follow relationships
         current_user_id = own_id if own_id else None
         following_set = set()
@@ -1994,6 +2513,7 @@ async def get_posts(
                     "media_path": getattr(p, "media_path", "") or "",
                     "created_at": str(getattr(p, "created_at", "")),
                     "comments_count": comment_counts.get(p.id, 0),
+                    "hashtags": post_hashtags.get(p.id, []),
                     "is_following": p.author_id in following_set
                     if p.author_id
                     else False,

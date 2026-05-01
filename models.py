@@ -460,3 +460,89 @@ class Share(Base):
     post_id = Column(Integer, ForeignKey("posts.id"), nullable=True)
     platform = Column(String(50), default="internal")  # internal, twitter, facebook, whatsapp, link
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── STORY (24-hour temporary content) ───────────────────────────────────────
+class Story(Base):
+    __tablename__ = "stories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    media_url = Column(String(500), nullable=False)
+    media_type = Column(String(50), default="image")  # image, video
+    caption = Column(Text, default="")
+    expires_at = Column(DateTime, nullable=False)  # 24 hours from creation
+    is_approved = Column(Boolean, default=True)
+    views = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ─── POST SCHEDULE ───────────────────────────────────────────────────────────
+class PostSchedule(Base):
+    __tablename__ = "post_schedules"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    scheduled_at = Column(DateTime, nullable=False)  # When to publish
+    status = Column(String(20), default="pending")  # pending, published, failed, cancelled
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ─── ANALYTICS ───────────────────────────────────────────────────────────────
+class PostAnalytics(Base):
+    __tablename__ = "post_analytics"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    date = Column(DateTime, nullable=False)  # Date of analytics snapshot
+    views = Column(Integer, default=0)
+    likes = Column(Integer, default=0)
+    comments = Column(Integer, default=0)
+    shares = Column(Integer, default=0)
+    saves = Column(Integer, default=0)
+    profile_visits = Column(Integer, default=0)
+    follower_gain = Column(Integer, default=0)
+    engagement_rate = Column(String(20), default="0%")  # Stored as string for simplicity
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ─── HASHTAG ─────────────────────────────────────────────────────────────────
+class Hashtag(Base):
+    __tablename__ = "hashtags"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tag = Column(String(100), unique=True, nullable=False)  # e.g., #ghana, #kente
+    usage_count = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ─── POST_HASHTAG (junction) ───────────────────────────────────────────────
+class PostHashtag(Base):
+    __tablename__ = "post_hashtags"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    hashtag_id = Column(Integer, ForeignKey("hashtags.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── REACTION (extended likes with emojis) ───────────────────────────────────
+class Reaction(Base):
+    __tablename__ = "reactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    reaction_type = Column(String(20), default="like")  # like, love, laugh, wow, sad, angry
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Ensure user can only react once per post
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'post_id', name='unique_user_post_reaction'),
+    )

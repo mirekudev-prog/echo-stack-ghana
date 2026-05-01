@@ -536,6 +536,89 @@
               hyphens: auto;
           }
 
+          .post-hashtags {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 6px;
+              margin-top: 8px;
+          }
+
+          .post-hashtag {
+              color: var(--gold);
+              font-size: 0.85rem;
+              font-weight: 500;
+              text-decoration: none;
+              transition: color 0.2s;
+          }
+
+          .post-hashtag:hover {
+              color: var(--gold2);
+              text-decoration: underline;
+          }
+
+          .reaction-picker {
+              position: relative;
+              display: inline-block;
+          }
+
+          .reaction-btn {
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              padding: 4px 8px;
+              border-radius: 20px;
+              transition: background 0.2s, transform 0.1s;
+              display: flex;
+              align-items: center;
+              gap: 4px;
+          }
+
+          .reaction-btn:hover {
+              background: rgba(200, 150, 46, 0.1);
+          }
+
+          .reaction-btn.reacted {
+              background: rgba(200, 150, 46, 0.15);
+          }
+
+          .reaction-dropdown {
+              display: none;
+              position: absolute;
+              bottom: 100%;
+              left: 50%;
+              transform: translateX(-50%);
+              background: var(--main-card);
+              border: 1px solid var(--main-border);
+              border-radius: 24px;
+              padding: 8px 12px;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+              z-index: 100;
+              gap: 8px;
+              animation: fadeIn 0.2s ease;
+          }
+
+          .reaction-dropdown.show {
+              display: flex;
+          }
+
+          .reaction-option {
+              font-size: 1.4rem;
+              cursor: pointer;
+              padding: 4px;
+              border-radius: 50%;
+              transition: transform 0.2s, background 0.2s;
+          }
+
+          .reaction-option:hover {
+              transform: scale(1.3);
+              background: rgba(200, 150, 46, 0.1);
+          }
+
+          @keyframes fadeIn {
+              from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+              to { opacity: 1; transform: translateX(-50%) translateY(0); }
+          }
+
          /* ─── RESPONSIVE BREAKPOINTS ───────────────────────────────────────────── */
         @media (max-width: 1024px) {
             .right-panel { display: none; }
@@ -924,12 +1007,18 @@ function renderPosts() {
                     
                     ${mediaHtml}
 
+                    ${post.hashtags ? `<div class="post-hashtags">${(post.hashtags || []).map(h => `<a href="/explore?hashtag=${h.replace('#','')}" class="post-hashtag" onclick="event.stopPropagation()">${h}</a>`).join('')}</div>` : ''}
+
                     <div class="post-actions">
                         <div class="post-action-group">
-                            <button class="post-action" onclick="event.stopPropagation();toggleLike(${post.id}, this)">
-                                <i class="fas fa-heart"></i>
-                                <span>${post.likes || 0}</span>
-                            </button>
+                            <div class="reaction-picker" data-post="${post.id}">
+                                <button class="reaction-btn" onclick="showReactionPicker(${post.id}, this, event)">
+                                    👍<span class="reaction-count">${post.likes || 0}</span>
+                                </button>
+                                <div class="reaction-dropdown">
+                                    ${REACTION_TYPES.map(r => `<span class="reaction-option" onclick="event.stopPropagation();toggleReaction(${post.id}, '${r}', this.parentElement.previousElementSibling)">${REACTION_EMOJIS[r]}</span>`).join('')}
+                                </div>
+                            </div>
                             <button class="post-action" onclick="event.stopPropagation();location.href='/post/${post.id}#comments'">
                                 <i class="fas fa-comment"></i>
                                 <span>${post.comments_count || 0}</span>
@@ -1030,13 +1119,54 @@ function closeStory() {
     loadPosts();
 }
 
-async function toggleLike(postId, btn) {
+const REACTION_EMOJIS = { like: '👍', love: '❤️', laugh: '😂', wow: '😮', sad: '😢', angry: '😡' };
+const REACTION_TYPES = Object.keys(REACTION_EMOJIS);
+
+async function toggleReaction(postId, reactionType, btn) {
     try {
-        const res = await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
+        const res = await fetch(`/api/posts/${postId}/react`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reaction_type: reactionType })
+        });
         const data = await res.json();
-        btn.classList.toggle('liked');
-        btn.querySelector('span').textContent = data.likes || 0;
-    } catch(e) {}
+        
+        const countSpan = btn.parentElement.querySelector('.reaction-count');
+        if (countSpan) countSpan.textContent = data.total || 0;
+        
+        const currentReaction = btn.dataset.reaction;
+        document.querySelectorAll(`[data-post="${postId}"] .reaction-btn`).forEach(b => {
+            b.classList.remove('reacted');
+            b.dataset.reaction = '';
+        });
+        
+        if (currentReaction === reactionType) {
+            btn.classList.remove('reacted');
+            btn.dataset.reaction = '';
+            btn.innerHTML = REACTION_EMOJIS[reactionType];
+        } else {
+            btn.classList.add('reacted');
+            btn.dataset.reaction = reactionType;
+            btn.innerHTML = REACTION_EMOJIS[reactionType];
+        }
+        
+        document.querySelectorAll('.reaction-dropdown').forEach(d => d.classList.remove('show'));
+    } catch(e) { console.error('Reaction error:', e); }
+}
+
+function showReactionPicker(postId, btn, event) {
+    event.stopPropagation();
+    document.querySelectorAll('.reaction-dropdown').forEach(d => d.classList.remove('show'));
+    const picker = btn.parentElement.querySelector('.reaction-dropdown');
+    if (picker) picker.classList.add('show');
+}
+
+async function loadReactions(postId) {
+    try {
+        const res = await fetch(`/api/posts/${postId}/reactions`);
+        const data = await res.json();
+        return data;
+    } catch(e) { return { total: 0, reactions: {} }; }
 }
 
 async function toggleSave(postId, btn) {
@@ -1073,6 +1203,13 @@ function showToast(msg, type = '') {
     t.className = 'toast show ' + type;
     setTimeout(() => t.className = 'toast', 2500);
 }
+
+// Close reaction dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.reaction-picker')) {
+        document.querySelectorAll('.reaction-dropdown').forEach(d => d.classList.remove('show'));
+    }
+});
 
 // ─── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
 if ('serviceWorker' in navigator) {

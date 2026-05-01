@@ -79,7 +79,7 @@ def init_database():
     except Exception as e:
         print(f"⚠️  Post seeding skipped: {e}")
 
-    # Seed Stories
+    # Seed Stories (24-hour temporary content)
     try:
         stories_count = supabase.table("stories").select("id", count="exact").execute()
         if stories_count.count == 0:
@@ -101,6 +101,156 @@ def init_database():
             print(f"ℹ️  {stories_count.count} stories already exist.")
     except Exception as e:
         print(f"⚠️  Story seeding skipped: {e}")
+
+    # Seed Post Schedules
+    try:
+        schedules_count = supabase.table("post_schedules").select("id", count="exact").execute()
+        if schedules_count.count == 0:
+            print("📝 Seeding post schedules...")
+            admin_res = supabase.table("users").select("id").eq("username", "echostack_admin").execute()
+            admin_id = admin_res.data[0]['id'] if admin_res.data else None
+            
+            if admin_id:
+                # Get a post ID to schedule
+                posts_res = supabase.table("posts").select("id").limit(1).execute()
+                if posts_res.data:
+                    post_id = posts_res.data[0]['id']
+                    scheduled_time = (datetime.now() + timedelta(hours=2)).isoformat()  # Schedule for 2 hours from now
+                    
+                    sample_schedules = [
+                        {
+                            "user_id": admin_id,
+                            "post_id": post_id,
+                            "scheduled_at": scheduled_time,
+                            "status": "pending"
+                        }
+                    ]
+                    supabase.table("post_schedules").insert(sample_schedules).execute()
+                    print("✅ Post schedules seeded.")
+                else:
+                    print("⚠️  Could not find posts to schedule.")
+            else:
+                print("⚠️  Could not find admin user to seed schedules.")
+        else:
+            print(f"ℹ️  {schedules_count.count} post schedules already exist.")
+    except Exception as e:
+        print(f"⚠️  Post schedule seeding skipped: {e}")
+
+    # Seed Post Analytics
+    try:
+        analytics_count = supabase.table("post_analytics").select("id", count="exact").execute()
+        if analytics_count.count == 0:
+            print("📝 Seeding post analytics...")
+            posts_res = supabase.table("posts").select("id").limit(3).execute()
+            if posts_res.data:
+                sample_analytics = []
+                for post in posts_res.data:
+                    sample_analytics.append({
+                        "post_id": post['id'],
+                        "date": datetime.now().isoformat(),
+                        "views": 150,
+                        "likes": 25,
+                        "comments": 8,
+                        "shares": 5,
+                        "saves": 3,
+                        "profile_visits": 12,
+                        "follower_gain": 2,
+                        "engagement_rate": "24%"
+                    })
+                
+                if sample_analytics:
+                    supabase.table("post_analytics").insert(sample_analytics).execute()
+                    print("✅ Post analytics seeded.")
+            else:
+                print("⚠️  Could not find posts for analytics.")
+        else:
+            print(f"ℹ️  {analytics_count.count} post analytics already exist.")
+    except Exception as e:
+        print(f"⚠️  Post analytics seeding skipped: {e}")
+
+    # Seed Hashtags
+    try:
+        hashtags_count = supabase.table("hashtags").select("id", count="exact").execute()
+        if hashtags_count.count == 0:
+            print("📝 Seeding hashtags...")
+            sample_hashtags = [
+                {"tag": "#ghana", "usage_count": 45},
+                {"tag": "#kente", "usage_count": 32},
+                {"tag": "#highlife", "usage_count": 28},
+                {"tag": "#adinkra", "usage_count": 22},
+                {"tag": "#ghanaianculture", "usage_count": 38},
+                {"tag": "#ashanti", "usage_count": 31},
+                {"tag": "#ghanamusic", "usage_count": 26},
+                {"tag": "#ghanastories", "usage_count": 19},
+            ]
+            supabase.table("hashtags").insert(sample_hashtags).execute()
+            print("✅ Hashtags seeded.")
+        else:
+            print(f"ℹ️  {hashtags_count.count} hashtags already exist.")
+    except Exception as e:
+        print(f"⚠️  Hashtag seeding skipped: {e}")
+
+    # Seed Post-Hashtag connections
+    try:
+        post_hashtags_count = supabase.table("post_hashtags").select("id", count="exact").execute()
+        if post_hashtags_count.count == 0:
+            print("📝 Seeding post-hashtag connections...")
+            posts_res = supabase.table("posts").select("id").limit(3).execute()
+            hashtags_res = supabase.table("hashtags").select("id").limit(4).execute()
+            
+            if posts_res.data and hashtags_res.data:
+                sample_post_hashtags = []
+                # Connect first 3 posts with first 4 hashtags in a pattern
+                for i, post in enumerate(posts_res.data):
+                    for j, hashtag in enumerate(hashtags_res.data):
+                        if (i + j) % 3 == 0:  # Create some connections
+                            sample_post_hashtags.append({
+                                "post_id": post['id'],
+                                "hashtag_id": hashtag['id']
+                            })
+                
+                if sample_post_hashtags:
+                    supabase.table("post_hashtags").insert(sample_post_hashtags).execute()
+                    print("✅ Post-hashtag connections seeded.")
+            else:
+                print("⚠️  Could not find posts or hashtags for connections.")
+        else:
+            print(f"ℹ️  {post_hashtags_count.count} post-hashtag connections already exist.")
+    except Exception as e:
+        print(f"⚠️  Post-hashtag seeding skipped: {e}")
+
+    # Seed Reactions (extended likes)
+    try:
+        reactions_count = supabase.table("reactions").select("id", count="exact").execute()
+        if reactions_count.count == 0:
+            print("📝 Seeding reactions...")
+            posts_res = supabase.table("posts").select("id").limit(3).execute()
+            users_res = supabase.table("users").select("id").limit(3).execute()
+            
+            if posts_res.data and users_res.data:
+                sample_reactions = []
+                reaction_types = ["like", "love", "laugh", "wow", "sad", "angry"]
+                
+                # Create reactions for posts by different users
+                for i, post in enumerate(posts_res.data):
+                    for j, user in enumerate(users_res.data):
+                        if i != j:  # Users react to others' posts
+                            reaction_type = reaction_types[(i + j) % len(reaction_types)]
+                            sample_reactions.append({
+                                "user_id": user['id'],
+                                "post_id": post['id'],
+                                "reaction_type": reaction_type
+                            })
+                
+                if sample_reactions:
+                    supabase.table("reactions").insert(sample_reactions).execute()
+                    print("✅ Reactions seeded.")
+            else:
+                print("⚠️  Could not find posts or users for reactions.")
+        else:
+            print(f"ℹ️  {reactions_count.count} reactions already exist.")
+    except Exception as e:
+        print(f"⚠️  Reactions seeding skipped: {e}")
 
     print("\n🎉 Database initialization complete! Ready to load data.")
 
