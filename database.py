@@ -13,6 +13,12 @@ import os
 # MUST read from os.environ to get Render environment variables
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
+# Mask DATABASE_URL in logs for security (never expose password!)
+if DATABASE_URL:
+    import re
+    masked = re.sub(r'(://[^:]+:)[^@]+(@)', r'\1****\2', DATABASE_URL)
+    print(f"🔍 DATABASE_URL from os.environ: {masked}")
+
 # If not set in environment, try loading from .env file (for local development)
 if not DATABASE_URL:
     try:
@@ -30,10 +36,16 @@ if not DATABASE_URL:
 
 SQLALCHEMY_DATABASE_URL = DATABASE_URL
 
-# DEBUG: Print the actual URL being used
+# DEBUG: Print masked URL (never expose password in logs!)
 print(f"")
 print(f"=" * 60)
-print(f"🔗 SQLALCHEMY DATABASE URL: {SQLALCHEMY_DATABASE_URL[:60]}...")
+if SQLALCHEMY_DATABASE_URL.startswith("postgresql://"):
+    # Mask the password for security
+    import re
+    masked = re.sub(r'(://[^:]+:)[^@]+(@)', r'\1****\2', SQLALCHEMY_DATABASE_URL)
+    print(f"🔗 SQLALCHEMY DATABASE: {masked}")
+else:
+    print(f"🔗 SQLALCHEMY DATABASE: {SQLALCHEMY_DATABASE_URL}")
 print(f"=" * 60)
 print(f"")
 
@@ -51,11 +63,11 @@ if (
     connector = "&" if "?" in SQLALCHEMY_DATABASE_URL else "?"
     SQLALCHEMY_DATABASE_URL += f"{connector}sslmode=require"
 
-# Log which database we're connecting to
+# Log which database we're connecting to (never expose full URL)
 if SQLALCHEMY_DATABASE_URL.startswith("postgresql://"):
     print(f"✅ Connecting to Supabase PostgreSQL database")
 else:
-    print(f"⚠️  Using local SQLite database: {SQLALCHEMY_DATABASE_URL}")
+    print(f"⚠️  Using local SQLite database")
     print("   Set DATABASE_URL in .env to use Supabase.")
 
 # ============================================

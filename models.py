@@ -463,19 +463,7 @@ class Share(Base):
 
 
 # ─── STORY (24-hour temporary content) ───────────────────────────────────────
-class Story(Base):
-    __tablename__ = "stories"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    media_url = Column(String(500), nullable=False)
-    media_type = Column(String(50), default="image")  # image, video
-    caption = Column(Text, default="")
-    expires_at = Column(DateTime, nullable=False)  # 24 hours from creation
-    is_approved = Column(Boolean, default=True)
-    views = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+# Note: Story class already defined above at line 109
 
 
 # ─── POST SCHEDULE ───────────────────────────────────────────────────────────
