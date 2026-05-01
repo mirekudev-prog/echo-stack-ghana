@@ -1661,6 +1661,19 @@ def logo():
     raise HTTPException(404)
 
 
+@app.get("/favicon.ico")
+def favicon():
+    """Serve favicon - returns 204 No Content if not found to avoid 404 errors"""
+    if os.path.exists("favicon.ico"):
+        return FileResponse("favicon.ico", media_type="image/x-icon")
+    # Return a minimal 1x1 transparent PNG as fallback
+    from fastapi.responses import Response
+    import base64
+    # Minimal 1x1 transparent PNG
+    transparent_png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=")
+    return Response(content=transparent_png, media_type="image/png")
+
+
 @app.get("/test")
 def test():
     return {
