@@ -1,26 +1,77 @@
 /* ===== SHARED CLIENT-SIDE UTILITIES ===== */
 /* Used across all EchoStack pages to reduce duplication and ensure consistency */
 
-/* ── Guard: Prevent redefinition if page already defines these ── */
+const SIDEBAR_BREAKPOINT = 1024;
+
+/* ── Sidebar State Management ── */
+function getSidebarState() {
+    return {
+        isMobile: window.innerWidth < SIDEBAR_BREAKPOINT,
+        sidebar: document.getElementById('sidebar'),
+        overlay: document.getElementById('sidebarOverlay') || document.getElementById('sidebar-overlay'),
+        main: document.querySelector('.main-wrapper, .app, main, .page-container')
+    };
+}
+
 if (typeof toggleSidebar === 'undefined') {
     function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay') || document.getElementById('sidebar-overlay');
-        if (sidebar) sidebar.classList.toggle('open');
-        if (overlay) overlay.classList.toggle('show');
+        const { sidebar, overlay, isMobile } = getSidebarState();
+        if (!sidebar) return;
+        
+        const isOpen = sidebar.classList.toggle('open');
+        
+        if (overlay) {
+            overlay.classList.toggle('show', isOpen);
+        }
+        
+        document.body.classList.toggle('sidebar-open', isOpen);
+        
+        // Adjust main content margin on mobile
+        if (isMobile && document.body.classList.contains('sidebar-open')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
     }
 }
 
 if (typeof closeSidebar === 'undefined') {
     function closeSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay') || document.getElementById('sidebar-overlay');
-        if (sidebar) sidebar.classList.remove('open');
-        if (overlay) overlay.classList.remove('show');
+        const { sidebar, overlay, main } = getSidebarState();
+        
+        if (sidebar) {
+            sidebar.classList.remove('open');
+        }
+        
+        if (overlay) {
+            overlay.classList.remove('show');
+        }
+        
         document.body.classList.remove('sidebar-open');
+        document.body.style.overflow = '';
     }
 }
 
+if (typeof openSidebar === 'undefined') {
+    function openSidebar() {
+        const { sidebar, overlay, isMobile } = getSidebarState();
+        if (!sidebar) return;
+        
+        sidebar.classList.add('open');
+        
+        if (overlay) {
+            overlay.classList.add('show');
+        }
+        
+        document.body.classList.add('sidebar-open');
+        
+        if (isMobile) {
+            document.body.style.overflow = 'hidden';
+        }
+    }
+}
+
+/* ── Toast Notification ── */
 if (typeof showToast === 'undefined') {
     function showToast(msg, type = 'info') {
         const toast = document.getElementById('toast');
@@ -31,6 +82,7 @@ if (typeof showToast === 'undefined') {
     }
 }
 
+/* ── HTML Escape ── */
 if (typeof escapeHtml === 'undefined') {
     function escapeHtml(str) {
         if (!str && str !== 0) return '';
@@ -43,6 +95,7 @@ if (typeof escapeHtml === 'undefined') {
     }
 }
 
+/* ── Time Ago ── */
 if (typeof timeAgo === 'undefined') {
     function timeAgo(dateStr) {
         if (!dateStr) return '';
@@ -56,6 +109,7 @@ if (typeof timeAgo === 'undefined') {
     }
 }
 
+/* ── Logout ── */
 if (typeof logout === 'undefined') {
     async function logout() {
         try {
@@ -67,6 +121,7 @@ if (typeof logout === 'undefined') {
     }
 }
 
+/* ── Format File Size ── */
 if (typeof formatFileSize === 'undefined') {
     function formatFileSize(bytes) {
         if (bytes < 1024) return bytes + ' B';
@@ -76,6 +131,7 @@ if (typeof formatFileSize === 'undefined') {
     }
 }
 
+/* ── Debounce ── */
 if (typeof debounce === 'undefined') {
     function debounce(fn, delay = 300) {
         let timer = null;
@@ -106,41 +162,86 @@ function setActiveNavLink() {
 function setupSidebarAutoClose() {
     const sidebar = document.getElementById('sidebar');
     if (!sidebar) return;
-    // Close sidebar when any link inside it is clicked (event delegation)
+    
+    // Close sidebar when any link inside it is clicked
     sidebar.addEventListener('click', (e) => {
         const link = e.target.closest('a');
-        if (link && link.href && !link.href.startsWith('javascript')) {
-            setTimeout(() => closeSidebar(), 50);
+        if (link && link.href && !link.href.startsWith('javascript') && !link.href.startsWith('#')) {
+            // Small delay to allow navigation to start
+            setTimeout(() => closeSidebar(), 100);
         }
     });
+    
+    // Close sidebar when overlay is clicked
+    const overlay = document.getElementById('sidebarOverlay') || document.getElementById('sidebar-overlay');
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+    }
 }
+
+/* ── Handle browser back/forward navigation ── */
+window.addEventListener('popstate', () => {
+    closeSidebar();
+});
 
 /* ── Auto-close on page unload (when navigating away) ── */
 window.addEventListener('beforeunload', function() {
     closeSidebar();
-    sessionStorage.setItem('sidebarClosing', 'true');
 });
 
-/* ── Initialization on DOM Ready ── */
-document.addEventListener('DOMContentLoaded', () => {
-    // Always close sidebar on page load (auto-collapse when navigating to new page)
+/* ── Initialize Sidebar State on Page Load ── */
+function initSidebar() {
+    const { sidebar, isMobile } = getSidebarState();
+    
+    // Always close sidebar on initial page load
     closeSidebar();
     sessionStorage.removeItem('sidebarClosing');
     
-    if (typeof setActiveNavLink !== 'undefined') setActiveNavLink();
-    if (typeof setupSidebarAutoClose !== 'undefined') setupSidebarAutoClose();
-    if (typeof initSidebarCollapse !== 'undefined') initSidebarCollapse();
-    // Ensure desktop layout has proper spacing if CSS didn't load
-    if (window.innerWidth >= 1025) {
-        const sidebar = document.getElementById('sidebar');
+    // On desktop, sidebar should be visible by default
+    // On mobile, sidebar should be hidden by default
+    if (!isMobile && sidebar) {
+        // Desktop: Keep sidebar visible (no 'open' class means visible in desktop CSS)
+        // But ensure main content has proper margin
         const main = document.querySelector('.main-wrapper, .app, main');
-        if (sidebar && main) {
-            sidebar.style.transform = 'translateX(0)';
+        if (main) {
             main.style.marginLeft = 'var(--sidebar-width, 280px)';
             main.style.width = 'calc(100% - var(--sidebar-width, 280px))';
         }
     }
+    
+    // Set active navigation link
+    if (typeof setActiveNavLink !== 'undefined') setActiveNavLink();
+    
+    // Setup auto-close on navigation
+    if (typeof setupSidebarAutoClose !== 'undefined') setupSidebarAutoClose();
+    
+    // Initialize collapse state
+    if (typeof initSidebarCollapse !== 'undefined') initSidebarCollapse();
+}
+
+/* ── Handle window resize ── */
+let resizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        const { isMobile } = getSidebarState();
+        
+        // On resize to mobile, ensure sidebar is closed
+        if (isMobile) {
+            closeSidebar();
+        } else {
+            // On resize to desktop, ensure proper margins
+            const main = document.querySelector('.main-wrapper, .app, main');
+            if (main) {
+                main.style.marginLeft = 'var(--sidebar-width, 280px)';
+                main.style.width = 'calc(100% - var(--sidebar-width, 280px))';
+            }
+        }
+    }, 250);
 });
+
+/* ── Initialization on DOM Ready ── */
+document.addEventListener('DOMContentLoaded', initSidebar);
 
 /* ── PWA Install Prompt ── */
 let deferredPrompt = null;
@@ -149,7 +250,7 @@ function showInstallBanner() {
     if (document.getElementById('pwa-install-banner')) return;
     const banner = document.createElement('div');
     banner.id = 'pwa-install-banner';
-    banner.innerHTML = \`
+    banner.innerHTML = `
         <div style="
             position: fixed;
             bottom: 20px;
@@ -175,7 +276,7 @@ function showInstallBanner() {
                 background: transparent; color: rgba(255,255,255,0.6); border: none; padding: 6px 10px; cursor: pointer; font-size: 1.2rem; line-height: 1;
             ">&times;</button>
         </div>
-    \`;
+    `;
     document.body.appendChild(banner);
     document.getElementById('install-accept').addEventListener('click', async () => {
         if (!deferredPrompt) return;
@@ -194,7 +295,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
     showInstallBanner();
 });
 
-
 /* ── Sidebar Collapse (icon-only mode) ── */
 function toggleSidebarCollapse() {
     const sidebar = document.getElementById('sidebar');
@@ -202,7 +302,6 @@ function toggleSidebarCollapse() {
     sidebar.classList.toggle('collapsed');
     const isCollapsed = sidebar.classList.contains('collapsed');
     localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
-    // Adjust main margin if needed (handled by CSS)
 }
 
 function initSidebarCollapse() {
@@ -215,9 +314,3 @@ function initSidebarCollapse() {
         sidebar.classList.remove('collapsed');
     }
 }
-
-// Extend DOMContentLoaded to call initSidebarCollapse
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof initSidebarCollapse !== 'undefined') initSidebarCollapse();
-});
-

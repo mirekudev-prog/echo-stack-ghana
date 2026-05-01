@@ -900,6 +900,20 @@ function toggleSidebar() {
     const isOpen = sidebar.classList.toggle('open');
     overlay.classList.toggle('show', isOpen);
     document.body.classList.toggle('sidebar-open', isOpen);
+    
+    // Prevent body scroll on mobile when sidebar is open
+    if (window.innerWidth < 1024) {
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar) sidebar.classList.remove('open');
+    if (overlay) overlay.classList.remove('show');
+    document.body.classList.remove('sidebar-open');
+    document.body.style.overflow = '';
 }
 
 function escapeHtml(str) {
@@ -1252,7 +1266,13 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-    loadUser();
+    // Ensure sidebar is closed on page load
+closeSidebar();
+
+// Handle browser back/forward navigation
+window.addEventListener('popstate', closeSidebar);
+
+loadUser();
 
     // Service Worker Registration
     if ('serviceWorker' in navigator) {

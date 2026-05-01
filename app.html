@@ -719,8 +719,21 @@
             function toggleSidebar() {
                 var sidebar = document.getElementById('sidebar');
                 var overlay = document.getElementById('sidebarOverlay');
-                sidebar.classList.toggle('open');
-                if (overlay) overlay.classList.toggle('show');
+                var isOpen = sidebar.classList.toggle('open');
+                if (overlay) overlay.classList.toggle('show', isOpen);
+                document.body.classList.toggle('sidebar-open', isOpen);
+                if (window.innerWidth < 1024) {
+                    document.body.style.overflow = isOpen ? 'hidden' : '';
+                }
+            }
+            
+            function closeSidebar() {
+                var sidebar = document.getElementById('sidebar');
+                var overlay = document.getElementById('sidebarOverlay');
+                if (sidebar) sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('show');
+                document.body.classList.remove('sidebar-open');
+                document.body.style.overflow = '';
             }
 
             function closeSidebar() {
@@ -1125,6 +1138,12 @@
                     });
             });
         }
+        
+        // Ensure sidebar is closed on page load
+        closeSidebar();
+        
+        // Handle browser back/forward navigation
+        window.addEventListener('popstate', closeSidebar);
     </script>
 </body>
 </html>

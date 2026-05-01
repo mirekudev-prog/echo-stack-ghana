@@ -103,8 +103,23 @@
 let currentUser = null;
 
 function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('show');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const isOpen = sidebar.classList.toggle('open');
+    overlay.classList.toggle('show', isOpen);
+    document.body.classList.toggle('sidebar-open', isOpen);
+    if (window.innerWidth < 1024) {
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar) sidebar.classList.remove('open');
+    if (overlay) overlay.classList.remove('show');
+    document.body.classList.remove('sidebar-open');
+    document.body.style.overflow = '';
 }
 
 async function logout() {
@@ -188,6 +203,14 @@ async function sendMsg() {
         loadChat();
     } catch(e) {}
 }
+
+// Ensure sidebar is closed on page load
+if (typeof closeSidebar === 'function') closeSidebar();
+
+// Handle browser back/forward navigation
+window.addEventListener('popstate', function() {
+    if (typeof closeSidebar === 'function') closeSidebar();
+});
 
 checkAuth();
 </script>
