@@ -17,6 +17,7 @@ if (typeof closeSidebar === 'undefined') {
         const overlay = document.getElementById('sidebarOverlay') || document.getElementById('sidebar-overlay');
         if (sidebar) sidebar.classList.remove('open');
         if (overlay) overlay.classList.remove('show');
+        document.body.classList.remove('sidebar-open');
     }
 }
 
@@ -108,18 +109,27 @@ function setupSidebarAutoClose() {
     // Close sidebar when any link inside it is clicked (event delegation)
     sidebar.addEventListener('click', (e) => {
         const link = e.target.closest('a');
-        if (link && link.href) {
-            closeSidebar();
+        if (link && link.href && !link.href.startsWith('javascript')) {
+            setTimeout(() => closeSidebar(), 50);
         }
     });
 }
 
+/* ── Auto-close on page unload (when navigating away) ── */
+window.addEventListener('beforeunload', function() {
+    closeSidebar();
+    sessionStorage.setItem('sidebarClosing', 'true');
+});
+
 /* ── Initialization on DOM Ready ── */
 document.addEventListener('DOMContentLoaded', () => {
+    // Always close sidebar on page load (auto-collapse when navigating to new page)
+    closeSidebar();
+    sessionStorage.removeItem('sidebarClosing');
+    
     if (typeof setActiveNavLink !== 'undefined') setActiveNavLink();
     if (typeof setupSidebarAutoClose !== 'undefined') setupSidebarAutoClose();
-        if (typeof initSidebarCollapse !== 'undefined') initSidebarCollapse();
-    closeSidebar();
+    if (typeof initSidebarCollapse !== 'undefined') initSidebarCollapse();
     // Ensure desktop layout has proper spacing if CSS didn't load
     if (window.innerWidth >= 1025) {
         const sidebar = document.getElementById('sidebar');

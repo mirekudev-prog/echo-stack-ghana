@@ -3793,3 +3793,152 @@ html {
 .sidebar.collapsed .sidebar-logo span {
   display: none !important;
 }
+
+/* ── MOBILE HAMBURGER MENU ENHANCEMENTS ─────────────────────────────── */
+.hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border-radius: 8px;
+  transition: background 0.2s;
+  z-index: 1000;
+}
+
+.hamburger:active {
+  background: rgba(200, 150, 46, 0.1);
+}
+
+.hamburger i {
+  font-size: 1.5rem;
+  color: var(--ink);
+}
+
+.hamburger.visible {
+  display: flex;
+}
+
+/* Sidebar overlay improvements for mobile */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+  z-index: 998;
+}
+
+.sidebar-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile sidebar improvements */
+@media (max-width: 1024px) {
+  .hamburger {
+    display: flex;
+  }
+  
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 999;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .main-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  
+  .sidebar-overlay {
+    display: block;
+  }
+}
+
+/* Extra small mobile (320px-400px) */
+@media (max-width: 400px) {
+  .hamburger {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .hamburger i {
+    font-size: 1.25rem;
+  }
+  
+  .sidebar {
+    width: 85vw;
+    max-width: 300px;
+  }
+}
+
+/* Touch-friendly sidebar links */
+@media (pointer: coarse) {
+  .sidebar-link {
+    padding: 14px 16px;
+    min-height: 48px;
+  }
+  
+  .sidebar-link:active {
+    background: rgba(200, 150, 46, 0.1);
+  }
+  
+  /* Ensure post actions are touch-friendly */
+  .post-action {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+  
+  /* Filter tabs touch-friendly */
+  .filter-tab {
+    min-height: 40px;
+    padding: 8px 16px;
+  }
+}
+
+/* Ensure proper viewport for mobile browsers */
+@supports (height: 100dvh) {
+  .sidebar {
+    height: 100dvh;
+  }
+}
+
+/* Prevent body scroll when sidebar is open */
+body.sidebar-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* Safe area padding for notched phones */
+@supports (padding: env(safe-area-inset-top)) {
+  .sidebar {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .hamburger {
+    padding-top: env(safe-area-inset-top);
+  }
+}
