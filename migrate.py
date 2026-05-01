@@ -11,9 +11,9 @@ print(f"=" * 60)
 if DATABASE_URL_FROM_ENV:
     # Mask password for security
     masked = re.sub(r'(://[^:]+:)[^@]+(@)', r'\1****\2', DATABASE_URL_FROM_ENV)
-    print(f"🔍 DATABASE_URL: {masked[:60]}...")
+    print(f"DATABASE_URL: {masked[:60]}...")
 else:
-    print(f"🔍 DATABASE_URL: NOT SET")
+    print(f"DATABASE_URL: NOT SET")
 print(f"=" * 60)
 print(f"")
 

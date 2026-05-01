@@ -17,7 +17,7 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 if DATABASE_URL:
     import re
     masked = re.sub(r'(://[^:]+:)[^@]+(@)', r'\1****\2', DATABASE_URL)
-    print(f"🔍 DATABASE_URL from os.environ: {masked}")
+    print(f"DATABASE_URL from os.environ: {masked}")
 
 # If not set in environment, try loading from .env file (for local development)
 if not DATABASE_URL:
@@ -31,8 +31,8 @@ if not DATABASE_URL:
 # Fallback to SQLite if still no DATABASE_URL
 if not DATABASE_URL:
     DATABASE_URL = "sqlite:///./echostack.db"
-    print(f"⚠️  DATABASE_URL not set! Using local SQLite: {DATABASE_URL}")
-    print("   Set DATABASE_URL environment variable or create .env file")
+    print(f"WARNING: DATABASE_URL not set! Using local SQLite")
+    print("Set DATABASE_URL environment variable or create .env file")
 
 SQLALCHEMY_DATABASE_URL = DATABASE_URL
 
@@ -43,9 +43,9 @@ if SQLALCHEMY_DATABASE_URL.startswith("postgresql://"):
     # Mask the password for security
     import re
     masked = re.sub(r'(://[^:]+:)[^@]+(@)', r'\1****\2', SQLALCHEMY_DATABASE_URL)
-    print(f"🔗 SQLALCHEMY DATABASE: {masked}")
+    print(f"SQLALCHEMY DATABASE: {masked}")
 else:
-    print(f"🔗 SQLALCHEMY DATABASE: {SQLALCHEMY_DATABASE_URL}")
+    print(f"SQLALCHEMY DATABASE: {SQLALCHEMY_DATABASE_URL}")
 print(f"=" * 60)
 print(f"")
 
@@ -65,10 +65,10 @@ if (
 
 # Log which database we're connecting to (never expose full URL)
 if SQLALCHEMY_DATABASE_URL.startswith("postgresql://"):
-    print(f"✅ Connecting to Supabase PostgreSQL database")
+    print(f"Connecting to Supabase PostgreSQL database")
 else:
-    print(f"⚠️  Using local SQLite database")
-    print("   Set DATABASE_URL in .env to use Supabase.")
+    print(f"Using local SQLite database")
+    print("Set DATABASE_URL in .env to use Supabase.")
 
 # ============================================
 # ENGINE CONFIGURATION
