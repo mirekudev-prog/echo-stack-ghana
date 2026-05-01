@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, Integer, String, Text, DateTime, Boolean,
-    ForeignKey, BigInteger, func
+    ForeignKey, BigInteger, func, UniqueConstraint
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
@@ -532,5 +532,5 @@ class Reaction(Base):
 
     # Ensure user can only react once per post
     __table_args__ = (
-        db.UniqueConstraint('user_id', 'post_id', name='unique_user_post_reaction'),
+        UniqueConstraint('user_id', 'post_id', name='unique_user_post_reaction'),
     )
