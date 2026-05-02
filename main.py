@@ -2582,7 +2582,7 @@ async def get_reels(
         reels = q.offset(offset).limit(limit).all()
 
         if not reels:
-            return {"total": 0, "offset": offset, "limit": limit, "reels": []}
+            return []
 
         # Batch load comment counts
         post_ids = [p.id for p in reels]
@@ -2653,7 +2653,7 @@ async def get_reels(
         return reel_list
     except Exception as e:
         print(f"GET /api/reels error: {e}")
-        return {"total": 0, "reels": []}
+        return []
 
 
 @app.get("/api/stories")
