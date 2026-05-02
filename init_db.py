@@ -69,6 +69,28 @@ def init_database():
                         "likes_count": 45,
                         "author_username": "echostack_admin"
                     },
+                    {
+                        "author_id": admin_id, 
+                        "title": "Traditional Kente Weaving",
+                        "slug": "traditional-kente-weaving",
+                        "content": "Experience the art of traditional Kente weaving from Ghana. This centuries-old craft represents royalty and cultural heritage.",
+                        "video_url": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+                        "content_type": "reel",
+                        "status": "published",
+                        "likes_count": 89,
+                        "author_username": "echostack_admin"
+                    },
+                    {
+                        "author_id": admin_id, 
+                        "title": "Fufu Making in Ghana",
+                        "slug": "fufu-making-in-ghana",
+                        "content": "Watch the traditional preparation of Fufu, Ghana's national dish. Made from cassava and plantain.",
+                        "video_url": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+                        "content_type": "reel",
+                        "status": "published",
+                        "likes_count": 156,
+                        "author_username": "echostack_admin"
+                    },
                 ]
                 supabase.table("posts").insert(sample_posts).execute()
                 print("✅ Posts seeded.")

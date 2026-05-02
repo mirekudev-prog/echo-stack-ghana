@@ -2847,7 +2847,7 @@ async def get_post(post_id: int, request: Request, db: Session = Depends(get_db)
 
         # Non-admins can only view published (or empty/null) posts
         if not is_admin and not admin_preview_mode:
-            if p.status not in ("published", "", None):
+            if p.status and p.status not in ("published", "", None):
                 raise HTTPException(404, "Post not found")
 
         try:
