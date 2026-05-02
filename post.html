@@ -332,7 +332,7 @@
         </div>
         <nav class="sidebar-nav">
             <div class="sidebar-section">
-                <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i><span>Feed</span></a>
+                <a href="/explore" class="sidebar-link"><i class="fas fa-home"></i><span>Feed</span></a>
                 <a href="/reels" class="sidebar-link"><i class="fas fa-film"></i><span>Reels</span></a>
                 <a href="/explore" class="sidebar-link"><i class="fas fa-compass"></i><span>Explore</span></a>
                 <a href="/archive" class="sidebar-link"><i class="fas fa-archive"></i><span>Archive</span></a>
@@ -367,7 +367,7 @@
             <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
             <div class="topbar-title" id="topbarTitle">Post</div>
             <div class="topbar-actions">
-                <a href="/dashboard" class="topbar-btn"><i class="fas fa-home"></i></a>
+                <a href="/explore" class="topbar-btn"><i class="fas fa-home"></i></a>
             </div>
         </header>
 
@@ -460,7 +460,7 @@ async function loadPost() {
         renderPost();
         loadComments();
     } catch(e) {
-        document.getElementById('postContent').innerHTML = '<div class="empty-state"><i class="fas fa-file-alt"></i><h3>Post not found</h3><p style="color:var(--main-muted);margin-top:8px"><a href="/dashboard" style="color:var(--gold)">Back to feed</a></p></div>';
+        document.getElementById('postContent').innerHTML = '<div class="empty-state"><i class="fas fa-file-alt"></i><h3>Post not found</h3><p style="color:var(--main-muted);margin-top:8px"><a href="/explore" style="color:var(--gold)">Back to feed</a></p></div>';
     }
 }
 
